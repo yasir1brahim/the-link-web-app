@@ -1,0 +1,174 @@
+.header-wrapper{
+    padding: 16px 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    .header-left{
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        .header-back-wrapper{
+            margin: auto 16px 4px 0;
+            .header-back{
+                width: 24px;
+                height: 24px;
+                border: 1px solid #999999;
+                display: flex;
+                transition: all 0.3s ease;
+                align-items: center;
+                border-radius: 4px;
+                justify-content: center;
+                &:hover{
+                    opacity: 0.6;
+                }
+            }
+        }
+        .header-breadcrumb-wrapper{
+            .breadcrumb-content{
+                display: flex;
+                align-items: center;
+                margin-bottom: 8px;
+                justify-content: flex-start;
+                .breadcrumb-text{
+                    font-size: 0.75rem;
+                    line-height: 1rem;
+                    transition: all 0.3s ease;
+                    &:last-of-type{
+                        color: #999999 !important;
+                        cursor: not-allowed !important;
+                    }
+                    &:not(:last-of-type){
+                        position: relative;
+                        margin-right: 24px;
+                        &:hover{
+                            opacity: 0.6;
+                            &:after{
+                                opacity: 1;
+                            }
+                        }
+                        &::after{
+                            top: 0;
+                            width: 5px;
+                            color: #212121;
+                            right: -14px;
+                            height: 100%;
+                            content: '/';
+                            display: inline-block;
+                            position: absolute;
+                        }
+                    }
+                }
+            }
+            .header-content{
+                .page-title{
+                    margin: 0;
+                    line-height: 30px;
+                }
+            }
+        }
+    }
+
+    .header-center{
+        margin-left: auto;
+        .timecard-legends{
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            .timecard-legend{
+                &:not(:last-of-type){
+                    margin-right: 8px;
+                }
+                &.legend-active{
+                    .legend-item{
+                        position: relative;
+                        &:after{
+                            left: 0;
+                            width: 100%;
+                            height: 2px;
+                            bottom: -6px;
+                            content: '';
+                            position: absolute;
+                            background-color: #FF6E40;
+                        }
+                    }
+                }
+                .legend-item{
+                    border: 0;
+                    height: 28px;
+                    display: flex;
+                    padding: 0 16px;
+                    align-items: center;
+                    border-radius: 4px;
+                    justify-content: center;
+                    &.item-all{
+                        border: 1px solid #E2E2E2;
+                        background-color: #fff;
+                        .legend-name{
+                            color: #212121;
+                            &:after{
+                                background: url('../../../../src/assets/images/label-all.svg') no-repeat center;
+                            }
+                        }
+                    }
+                    &.item-open{
+                        background-color: #212121;
+                        .legend-name{
+                            &:after{
+                                background: url('../../../../src/assets/images/label-open.svg') no-repeat center;
+                            }
+                        }
+                    }
+                    &.item-submitted{
+                        background-color: #3498DB;
+                        .legend-name{
+                            &:after{
+                                background: url('../../../../src/assets/images/label-doc.svg') no-repeat center;
+                            }
+                        }
+                    }
+                    &.item-rejected{
+                        background-color: #C0392B;
+                        .legend-name{
+                            &:after{
+                                background: url('../../../../src/assets/images/label-reject.svg') no-repeat center;
+                            }
+                        }
+                    }
+                    &.item-approved{
+                        background-color: #62CB31;
+                        .legend-name{
+                            &:after{
+                                background: url('../../../../src/assets/images/label-approve.svg') no-repeat center;
+                            }
+                        }
+                    }
+                    &.item-exported{
+                        background-color: #81C784;
+                        .legend-name{
+                            &:after{
+                                background: url('../../../../src/assets/images/label-export.svg') no-repeat center;
+                            }
+                        }
+                    }
+                    .legend-name{
+                        color: $white;
+                        position: relative;
+                        font-size: 0.75rem;
+                        padding-left: 18px;
+                        &:after{
+                            top: 50%;
+                            left: 0;
+                            width: 14px; 
+                            height: 14px;
+                            content: '';
+                            position: absolute;
+                            transform: translate(0, -50%);
+                        }   
+                    }
+                }
+            }
+        }
+    }
+}

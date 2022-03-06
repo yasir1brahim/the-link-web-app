@@ -1,0 +1,106 @@
+.navigation-wrapper{
+    top: 0;
+    height: 54px;
+    z-index: 1;
+    position: sticky;
+    box-shadow: 0px 1px 1px 0px rgba($black, 0.1);
+    background-color: rgba($white, 1);
+    .navigation{
+        width: 100%;
+        padding: 0;
+        .navbar-brand{
+            img{
+                height: 31px;
+            }
+        }
+        .company-selection-wrapper{
+            .form-group{
+                margin: 0;
+            }
+        }
+        .navigation-left-side{
+            width: 36px;
+            height: 40px;
+            cursor: pointer;
+            padding: 0;
+            box-shadow: none !important;
+            .left-toggler{
+                top: 50%;
+                left: 0;
+                width: 24px;
+                height: 2px;
+                position: absolute;
+                transform: translate(0, -50%);
+                background-color: #333;
+                &:before, &:after {
+                    left: 0;
+                    height: 2px;
+                    content: "";
+                    position: absolute;
+                    background-color: #333;
+                }
+                &:before{
+                    top: -8px;
+                    width: 20px;
+                }
+                &:after{
+                    top: 8px;
+                    width: 28px;
+                }
+            }
+        }
+        .navbar-nav{
+            .nav-item{
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                &:not(:last-of-type){
+                    margin-right: 30px;
+                }
+                .nav-link{
+                    color: #212121 !important;
+                    padding: 0;
+                    transition: all 0.3s ease-in-out;
+                    &:hover{
+                        opacity: 0.65;
+                    }
+                    &.notification-wrapper{
+                        display: flex;
+                        position: relative;
+                        align-items: center;
+                        justify-content: center;
+                        .notification-count{
+                            top: -3px;
+                            right: -6px;
+                            color: $white;
+                            display: flex;
+                            position: absolute;
+                            font-size: 0.75rem;
+                            align-items: center;
+                            justify-content: center;
+                            background-color: #FF6E40;
+                            @include circle(16px);
+                        }
+                    }
+                    &.user-wrapper{
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        .user-icon{
+                            border: 1px solid #212121;
+                            display: flex;
+                            align-items: center;
+                            margin-right: 8px;
+                            justify-content: center;
+                            @include circle(32px);
+                        }
+                        .user-name{
+                            display: inline-block;
+                            font-size: 0.75rem;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,63 @@
+@import "../../../node_modules/bootstrap/scss/bootstrap.scss";
+@import '../../../node_modules/bootstrap/scss/_functions.scss';
+@import '../../../node_modules/bootstrap/scss/_mixins.scss';
+@import '../../../node_modules/bootstrap/scss/_variables.scss';
+
+@import "./helpers/imports";
+
+@import "./imports";
+
+// Third Party CSS
+@import "react-bootstrap-typeahead/css/Typeahead.css";
+@import "react-datepicker/dist/react-datepicker.css"; 
+
+html, body {
+    font-family: $font-family-base !important;
+    font-size: 1rem !important;
+    color: #212121 !important;
+}
+
+* {
+    // font-family: 'Source Sans Pro';
+    &::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    &::-webkit-scrollbar-track  {
+        background-color: $disabled-bg;
+        border-radius: 5px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: $disabled;
+        border-radius: 5px;
+    }
+}
+ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.text-label-value {
+    .text-label {
+        color: #999999;
+        font-size: 0.75rem;
+        font-weight: 400;
+        line-height: 20px;
+    }
+    .text-value {
+        color: #212121;
+        font-size: 0.875rem;
+    }
+}
+
+
+// Component imports
+@import '../../components/shared/Loader/Loader.scss';
+@import '../../components/shared/NavbarTop/NavbarTop.scss';
+@import '../../components/Authentication/Authentication.scss';
+// @import '../../components/NavbarBottom/NavbarBottom.scss';
+// @import '../../components/shared/Header/Header.scss';
+// @import '../../components/Landing/Landing.scss';
+// @import '../../components/Landing/LandingCards/LandingCards.scss';
+// @import '../../components/Landing/ServiceTickets/ServiceTickets.scss';
+// @import '../../components/Landing/ServiceTickets/ServiceTicketDetails/ServiceTicketDetails.scss';

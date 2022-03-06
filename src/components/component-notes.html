@@ -1,0 +1,33 @@
+Form Field Basic field
+<!-- <div className="form-group">
+    <input type="text" className="form-control" id="lastName" aria-describedby="lastName" placeholder="Jas" required />
+    <label for="lastName">Last Name*</label>
+</div> -->
+
+
+Form Field with type head
+http://ericgio.github.io/react-bootstrap-typeahead/#behaviors
+<!-- <div className="form-group">
+    <div className={`has-typehead ${focused ? 'is-focused':''} ${searchValue.length === 0 ? 'empty' : ''}`}>
+        <Typeahead
+            id="basic-example"
+            onChange={setSelected}
+            onInputChange={setSearchValue}
+            onFocus={() => (focused ? '' : setFocused(true))}
+            onBlur={() => (focused ? setFocused(false) : '')}
+            options={options}
+            placeholder="Choose a state..."
+            selected={selected}
+        />
+        <label className="text-label">Company</label>
+        <i className="has-icon icon-dropdown"></i>
+        {/* <span className="helper-text">Helper Text</span> */}
+        <span className="helper-text has-error">This is error</span>
+    </div>
+</div> -->
+
+
+Loader global
+<!-- <Loader></Loader> -->
+Loader in component and make sure of adding position relative to component
+<!-- <Loader showComponentLoader={true}></Loader> -->

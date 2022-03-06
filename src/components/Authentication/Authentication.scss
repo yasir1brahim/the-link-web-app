@@ -1,0 +1,139 @@
+.authentication-content-wrapper{
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: $white;
+    .ac-left{
+        width: 40%;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: $primary;
+    }
+    .ac-right{
+        width: 60%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        form{
+            width: 100%;
+            margin: 0 auto;
+            max-width: 407px;
+            text-align: center;
+            .iconheading{
+                width: 48px;
+                height: 48px;
+                margin: 0 auto 16px;
+                display: flex;
+                align-items: center;
+                border-radius: 50%;
+                justify-content: center;
+                background-color: rgba($primary, 0.1);
+            }
+            h1{
+                color: $text-base-color;
+                font-size: 2.25rem;
+                margin-bottom: 0.5rem;
+                &.heading-two{
+                    font-size: 1.5rem;
+                    font-weight: $font-weight-bold;
+                }
+            }
+            p{
+                color: #858585;
+                font-size: $font-size-sm;
+                margin-bottom: 2.125rem;
+            }
+            .form-group{
+                margin: 0 auto 1.5rem;
+                max-width: 277px;
+                .text-label {
+                    color: $primary;
+                    padding: 0;
+                    display: block;
+                    position: static;
+                    font-size: 0.75rem;
+                    transform: none;
+                    text-align: left;
+                    font-weight: bold;
+                    margin-bottom: 4px;
+                }
+                .form-control{
+                    height: 40px;
+                    border: 1px solid $border-color !important;
+                    padding: 10px 12px;
+                    border-radius: 4px;
+                    background-color: transparent !important;
+                    &::-webkit-input-placeholder {
+                        color: #999;
+                    }
+                    &:-ms-input-placeholder {
+                        color: #999;
+                    }
+                    &::-ms-input-placeholder {
+                        color: #999;
+                    }
+                    &::placeholder {
+                        color: #999;
+                    }
+                }
+                .iconinput{
+                    right: 12px;
+                    bottom: 9px;
+                    position: absolute;
+                    &.inputuser{
+                        pointer-events: none;
+                    }
+                    svg{
+                        path{
+                            fill: rgba($text-base-color, 0.5);
+                        }
+                    }
+                }
+                .form-error{
+                    color: $danger;
+                    display: block;
+                    position: absolute;
+                    font-size: 0.75rem;
+                }
+                &.forgot-pwd{
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    .custom-control{
+                        .custom-control-input{
+                            height: auto;
+                            + label{
+                                top: revert;
+                                color: #858585;
+                                font-size: $font-size-sm;
+                            }
+                        }
+                    }
+                    .forgot-pwd{
+                        color: $primary;
+                        font-size: $font-size-sm;
+                    }
+                }
+                &.form-btn{
+                    margin-bottom: 0;
+                }
+            }
+            .form-helping-text{
+                margin-top: 12px;
+                svg{
+                    margin-right: 12px;
+                }
+                p{
+                    margin: 0;
+                    a{
+                        font-weight: $font-weight-bold;
+                    }
+                }
+            }
+        }
+    }
+}
