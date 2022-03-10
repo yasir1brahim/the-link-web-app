@@ -1,0 +1,48 @@
+.admin-landing-wrapper{
+    .admin-landing-content{
+        .table-top-content{
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            .table-entries{
+                color: $primary;
+                margin: 0;
+                font-size: 0.875rem;
+                .showing-strong{
+                    font-weight: bold;
+                }
+            }
+            .table-bulk-changes{
+                display: flex;
+                margin-left: auto;
+                align-items: center;
+                justify-content: flex-start;
+                flex-direction: row-reverse;
+            }
+        }
+        .l-table-wrapper{
+            table{
+                tr{
+                    .ticket-checkbox{
+                        width: 36px;
+                        cursor: pointer;
+                        .form-group{
+                            margin: 0;
+                            .custom-control{
+                                &-input{
+                                    width: 20px;
+                                    height: 24px;
+                                }
+                                &-label{
+                                    top: unset;
+                                    padding: 0 !important;
+                                }   
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
