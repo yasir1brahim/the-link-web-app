@@ -10,6 +10,7 @@
 // Third Party CSS
 @import "react-bootstrap-typeahead/css/Typeahead.css";
 @import "react-datepicker/dist/react-datepicker.css"; 
+@import "../../components/shared/Pagination/Pagination.scss";
 
 html, body {
     font-family: $font-family-base !important;
@@ -53,11 +54,7 @@ ul {
 
 // Component imports
 @import '../../components/shared/Loader/Loader.scss';
-@import '../../components/shared/NavbarTop/NavbarTop.scss';
 @import '../../components/Authentication/Authentication.scss';
-// @import '../../components/NavbarBottom/NavbarBottom.scss';
-// @import '../../components/shared/Header/Header.scss';
-// @import '../../components/Landing/Landing.scss';
-// @import '../../components/Landing/LandingCards/LandingCards.scss';
-// @import '../../components/Landing/ServiceTickets/ServiceTickets.scss';
-// @import '../../components/Landing/ServiceTickets/ServiceTicketDetails/ServiceTicketDetails.scss';
+@import '../../components/shared/NavbarTop/NavbarTop.scss';
+@import '../../components/shared/Header/Header.scss';
+@import '../../components/AdminLanding/AdminLanding.scss';

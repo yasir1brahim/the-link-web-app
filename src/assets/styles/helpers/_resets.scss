@@ -207,9 +207,9 @@ select {
       tr {
         border: 0;
         th {
-          background: $table-head-bg;
-          color: $table-head-color !important;
-          font-size: $table-header-fSize !important;
+          background: rgba($primary, 0.8);
+          color: $white !important;
+          font-size: $font-size-sm !important;
           font-weight: $font-weight-bold !important;
           border-bottom-width: 1px;
           border-top: 0;
@@ -223,6 +223,28 @@ select {
           &:not(:last-child) {
             border-right: $table-border-width solid $table-border-color;
           }
+          i{
+            display: none;
+          }
+          .has-sorting{
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            i{
+              display: inline-block;
+              margin-left: 8px;
+              height: 12px;
+              width: 14px;
+              background: url('../../images/sort.svg') no-repeat center;
+              &.sort-d{
+                background: url('../../images/sortd.svg') no-repeat center;
+              }
+              &.sort-i{
+                background: url('../../images/sorti.svg') no-repeat center;
+              }
+            }
+          }
         }
       }
     }
@@ -232,7 +254,7 @@ select {
           color: $table-body-color !important;
           vertical-align: middle;
           border-top: 0;
-          padding: $table-cell-padding-y $table-cell-padding-x-sm !important;
+          padding: $table-cell-padding-x-sm $table-cell-padding-x-sm !important;
           border-right: $table-border-width solid $table-border-color;
           border-bottom: $table-border-width solid $table-border-color;
           &:last-child {
@@ -243,6 +265,9 @@ select {
             font-style: italic;
             color: $table-head-color;
             padding: 5px 0;
+          }
+          button{
+            font-weight: normal;
           }
         }
         &:last-child {
@@ -285,7 +310,7 @@ a {
 .btn {
   font-weight: $font-weight-bold;
   font-size: $font-size-base;
-  line-height: 26px;
+  line-height: 24px;
   display: block;
   align-items: center;
   text-transform: capitalize;
@@ -400,56 +425,8 @@ button {
   }
 }
 
-.case-priority{
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  &.priority-critical{
-    small{
-      color: #8F0000;
-      border-color: #cc0000;
-      background-color: #FAE6E6;
-    }
-  }
-  &.priority-high{
-    small{
-      color: #995C00;
-      border-color: #FF9900;
-      background-color: #FFF5E6;
-    }
-  }
-  &.priority-medium {
-    small{
-      color: #005C7A;
-      border-color: #0099CC;
-      background-color: #E6F5FA;
-    }
-  }
-  &.priority-caseage {
-    small {
-      color: #464646;
-      border-color: #8C8C8C;
-      background-color: #E8E8E8;
-    }
-  }
-  small{
-    color: $white;
-    min-width: 24px;
-    height: 24px;
-    display: flex;
-    font-weight: $font-weight-bold;
-    font-size: .75rem;
-    align-items: center;
-    margin-right: 5px;
-    border-radius: 50%;
-    justify-content: center;
-    border: 1px solid $label-text;
-    background: $gray-150;
-  }
-}
-
 // Card Styles
-.r-card{
+.l-card{
   border: 1px solid $border-color;
   border-radius: 4px;
   &:not(:first-of-type){
@@ -467,32 +444,6 @@ button {
   }
 }
 
-// Status
-.contract-status{
-  display: inline-flex;
-  padding: 2px 8px;
-  font-size: 10px;
-  align-items: center;
-  border-radius: 4px;
-  text-transform: uppercase;
-  justify-content: center;
-  &.status-open{
-    color: #fff;
-    background-color: #000;
-  }
-  &.status-submitted{
-    color: #fff;
-    background-color: #3498DB;
-  }
-  &.status-exported{
-    color: #fff;
-    background-color: #FFB606;
-  }
-  &.status-rejected{
-    color: #fff;
-    background-color: #C0392B;
-  }
-}
 // Action wrapper
 .action-wrapper{
   display: flex;
