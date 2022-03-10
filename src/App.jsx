@@ -13,6 +13,7 @@ import Forgotpwd from './components/Authentication/Forgotpwd';
 import Resetpwd from './components/Authentication/Resetpwd';
 import Resetsuccess from './components/Authentication/Resetsuccess';
 import Checkemail from './components/Authentication/Checkemail';
+import AdminLanding from './components/AdminLanding/AdminLanding';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
       <Router>
         <Switch>
           <Route component={Authentication} />
+          <Route path="/admin-landing" component={AdminLanding} />
         </Switch>
       </Router>
     </div>
