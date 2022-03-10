@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import ologo from "../../../assets/images/logo.png";
-import notification from "../../../assets/images/notification.svg";
-import logout from "../../../assets/images/logout.svg";
+import {ReactComponent as Logo} from "../../../assets/images/logo.svg";
+import {ReactComponent as Down} from "../../../assets/images/chevron-bottom.svg";
+import {ReactComponent as Notification} from "../../../assets/images/notificat.svg";
 import { Navbar, Nav, NavItem, NavLink } from "reactstrap";
 import { Link } from "react-router-dom";
 
 const NavbarTop = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [navDrop, setNavDrop] = useState(false);
+
+  const toggleDrop = () => setNavDrop(!navDrop);
 
   return (
     <section className="navigation-wrapper d-flex align-items-center justify-content-center">
@@ -15,28 +17,29 @@ const NavbarTop = () => {
         expand="sm"
       >
         <a href="/" className="navbar-brand">
-          <img src={ologo} alt="logo" />
+          <Logo />
         </a>
         <Nav className="ml-auto" navbar>
           <NavItem>
             <NavLink className="notification-wrapper" href="#">
-              {/* <Notification/> */}
-              <img src={notification} alt="Notification" />
+              <Notification/>
               <small className="notification-count">3</small>
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink className="user-wrapper" href="#">
+            <NavLink className={'user-wrapper '+ (navDrop?'navdrop-open':'')} href="#" onClick={toggleDrop}>
               <span className="user-icon">
                 <i className="fa fa-user"></i>
               </span>
-              <span className="user-name">John Villy</span>
+              <span className="user-name">Admin</span>
+              <Down />
             </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink className="logout-wrapper d-flex" href="#">
-              <img src={logout} alt="Logout" />
-            </NavLink>
+            {(navDrop ?
+              <div className="nav-dropdown">
+                <a href="javascript:void(0);" className="navlist" onClick={toggleDrop}>View Company Profile</a>
+                <a href="javascript:void(0);" className="navlist list-logout" onClick={toggleDrop}>Logout</a>
+              </div>:''
+            )}
           </NavItem>
         </Nav>
       </Navbar>
