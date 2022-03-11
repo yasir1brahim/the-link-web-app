@@ -24,13 +24,13 @@ function App() {
       {/* <NavbarTop /> */}
       {/* <AdminLanding/> */}
       {/* <CustomerProfile/> */}
-      <CustomerProjects />
-      {/* <Router>
+      {/* <CustomerProjects /> */}
+      <Router>
         <Switch>
           <Route component={Authentication} />
           <Route path="/admin-landing" component={AdminLanding} />
         </Switch>
-      </Router> */}
+      </Router>
     </div>
   );
 }
