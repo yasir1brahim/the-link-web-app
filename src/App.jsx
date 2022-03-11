@@ -14,18 +14,21 @@ import Resetpwd from './components/Authentication/Resetpwd';
 import Resetsuccess from './components/Authentication/Resetsuccess';
 import Checkemail from './components/Authentication/Checkemail';
 import AdminLanding from './components/AdminLanding/AdminLanding';
+import CustomerProfile from './components/CustomerProfile/CustomerProfile';
 
 function App() {
   return (
     <div className="the-link">
       {/* <Authentication /> */}
       {/* <NavbarTop /> */}
-      <Router>
+      {/* <AdminLanding/> */}
+      <CustomerProfile/>
+      {/* <Router>
         <Switch>
           <Route component={Authentication} />
           <Route path="/admin-landing" component={AdminLanding} />
         </Switch>
-      </Router>
+      </Router> */}
     </div>
   );
 }

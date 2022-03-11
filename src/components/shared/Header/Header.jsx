@@ -19,9 +19,12 @@ const Header = ({ ...props }) => {
           </div>
         </div>
       </div>
-      <div className="header-right">
-        <button type="button" className="btn btn-primary">Create New Customer</button>
-      </div>
+      {
+        props.showBtn ?
+        <div className="header-right">
+          <button type="button" className="btn btn-primary">Create New Customer</button>
+        </div> : ''
+      }
     </div>
   );
 };
