@@ -14,7 +14,7 @@ const Adminlanding = () => {
         <div className='page-wrap'>
             <NavbarTop/>
             <div className='page-wrap-content admin-landing-wrapper'>
-                <Header title={"Customers"} showBtn={true}/>
+                <Header title={"Customers"} showBtn={'Create New Customer'}/>
                 
                 <div className='admin-landing-content'>
                     <div className='table-top-content'>

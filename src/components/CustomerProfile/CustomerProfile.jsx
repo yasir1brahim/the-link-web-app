@@ -24,7 +24,7 @@ const CustomerProfile = () => {
         <div className='page-wrap'>
             <NavbarTop/>
             <div className='page-wrap-content customer-profile-wrapper'>
-                <Header title={"Customer Profile"} showBtn={false} />
+                <Header title={"Customer Profile"} />
 
                 <div className='customer-profile-content'>
                     <div className='customer-profile-details d-flex align-items-start justify-content-start flex-wrap'>

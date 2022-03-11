@@ -15,6 +15,7 @@ import Resetsuccess from './components/Authentication/Resetsuccess';
 import Checkemail from './components/Authentication/Checkemail';
 import AdminLanding from './components/AdminLanding/AdminLanding';
 import CustomerProfile from './components/CustomerProfile/CustomerProfile';
+import CustomerProjects from './components/CustomerProjects/CustomerProjects';
 
 function App() {
   return (
@@ -22,7 +23,8 @@ function App() {
       {/* <Authentication /> */}
       {/* <NavbarTop /> */}
       {/* <AdminLanding/> */}
-      <CustomerProfile/>
+      {/* <CustomerProfile/> */}
+      <CustomerProjects />
       {/* <Router>
         <Switch>
           <Route component={Authentication} />

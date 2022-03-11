@@ -14,6 +14,7 @@
                 padding-top: 0;
                 .modal-footer{
                     bottom: 0;
+                    z-index: 1;
                     padding: 24px 0;
                     position: sticky;
                     background-color: #fff;
@@ -708,6 +709,62 @@
                                 width: 100%;
                                 padding-left: 30px;
                             }
+                        }
+                    }
+                }
+            }
+        }
+        // New Project
+        &.new-project{
+            .modal-content{
+                .modal-header{
+                    align-items: center;
+                }
+                .modal-body{
+                    overflow: auto;
+                    max-height: 500px;
+                    padding-bottom: 0;
+                    .create-project-form{
+                        .customer-dp-container{
+                            width: 112px;
+                            height: 112px;
+                            display: flex;
+                            padding: 10px;
+                            background: #F1F1F1;
+                            align-items: center;
+                            margin-right: 16px;
+                            border-radius: 4px;
+                            justify-content: center;
+                            > img{
+                                object-fit: cover;
+                                max-width: 100%;
+                            }
+                        }
+                        .customer-profile{
+                            flex: 1;
+                            .text-label-value{
+                                display: flex;
+                                align-items: flex-start;
+                                justify-content: flex-start;
+                                > * {
+                                    font-size: 0.875rem;
+                                    &.text-label{
+                                        color: $primary;
+                                    }
+                                    &.text-value{
+                                        color: #212121;
+                                        margin-left: 0px;
+                                        font-weight: bold;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .create-project-content{
+                        margin-top: 24px;
+                        .users-section{
+                            border-top: 1px solid $border-color;
+                            padding-top: 24px;
                         }
                     }
                 }

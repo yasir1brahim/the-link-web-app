@@ -22,7 +22,7 @@ const Header = ({ ...props }) => {
       {
         props.showBtn ?
         <div className="header-right">
-          <button type="button" className="btn btn-primary">Create New Customer</button>
+          <button type="button" className="btn btn-primary">{props.showBtn}</button>
         </div> : ''
       }
     </div>
