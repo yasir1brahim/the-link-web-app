@@ -19,15 +19,19 @@ const Header = ({ ...props }) => {
           </div>
         </div>
       </div>
-      <div className="header-right">
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={props.toggleModal}
-        >
-          Create New Customer
-        </button>
-      </div>
+      {props.showBtn ? (
+        <div className="header-right">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={props.toggleModal}
+          >
+            {props.showBtn}
+          </button>
+        </div>
+      ) : (
+        ''
+      )}
     </div>
   );
 };

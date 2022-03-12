@@ -12,6 +12,15 @@
 @import "react-datepicker/dist/react-datepicker.css"; 
 @import "../../components/shared/Pagination/Pagination.scss";
 
+// Component imports
+@import '../../components/shared/Loader/Loader.scss';
+@import '../../components/Authentication/Authentication.scss';
+@import '../../components/shared/NavbarTop/NavbarTop.scss';
+@import '../../components/shared/Header/Header.scss';
+@import '../../components/AdminLanding/AdminLanding.scss';
+@import '../../components/CustomerProfile/CustomerProfile.scss';
+@import '../../components/CustomerProjects/CustomerProjects.scss';
+
 html, body {
     font-family: $font-family-base !important;
     font-size: 1rem !important;
@@ -50,11 +59,3 @@ ul {
         font-size: 0.875rem;
     }
 }
-
-
-// Component imports
-@import '../../components/shared/Loader/Loader.scss';
-@import '../../components/Authentication/Authentication.scss';
-@import '../../components/shared/NavbarTop/NavbarTop.scss';
-@import '../../components/shared/Header/Header.scss';
-@import '../../components/AdminLanding/AdminLanding.scss';
