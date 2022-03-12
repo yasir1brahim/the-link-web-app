@@ -6,11 +6,10 @@ import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const Signin = () => {
+const Signin = (props) => {
   const [showPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState({ value: '', errors: '' });
   const [password, setPassword] = useState({ value: '', errors: '' });
-
   const toggleType = () => setShowPwd(!showPwd);
 
   const validate = () => {
@@ -33,13 +32,14 @@ const Signin = () => {
           method: 'post',
           url: '/login',
           data: {
-            email_address: email,
-            password: password,
+            email_address: email.value,
+            password: password.value,
           },
         });
         if (response.data) {
           localStorage.setItem('token', response.data.access_token);
           console.log(response.data);
+          props.history.push({ pathname: '/admin-landing' });
         }
       } catch (error) {
         toast.error('Incorrect Email or Password.', {
