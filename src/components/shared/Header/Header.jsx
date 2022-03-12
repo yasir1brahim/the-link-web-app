@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 // @ts-ignore
 const Header = ({ ...props }) => {
@@ -20,7 +20,13 @@ const Header = ({ ...props }) => {
         </div>
       </div>
       <div className="header-right">
-        <button type="button" className="btn btn-primary">Create New Customer</button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={props.toggleModal}
+        >
+          Create New Customer
+        </button>
       </div>
     </div>
   );
