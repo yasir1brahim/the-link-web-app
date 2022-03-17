@@ -16,6 +16,8 @@ import Checkemail from './components/Authentication/Checkemail';
 import AdminLanding from './components/AdminLanding/AdminLanding';
 import CustomerProfile from './components/CustomerProfile/CustomerProfile';
 import CustomerProjects from './components/CustomerProjects/CustomerProjects';
+import ProjectsDetails from './components/ProjectDetails/ProjectDetails';
+import Logs from './components/Logs/Logs';
 
 function App() {
   return (
@@ -25,12 +27,14 @@ function App() {
       {/* <AdminLanding/> */}
       {/* <CustomerProfile/> */}
       {/* <CustomerProjects /> */}
-      <Router>
+      {/* <ProjectsDetails /> */}
+      <Logs />
+      {/* <Router>
         <Switch>
           <Route component={Authentication} />
           <Route path="/admin-landing" component={AdminLanding} />
         </Switch>
-      </Router>
+      </Router> */}
     </div>
   );
 }

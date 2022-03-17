@@ -259,7 +259,6 @@
                 }
             }
         }
-
         // Create New Service Ticket
         &.create-new-ticket{
             .modal-content{
@@ -405,7 +404,6 @@
                 }
             }
         }
-
         // New Customer
         &.new-customer{
             .modal-content{
@@ -765,6 +763,146 @@
                         .users-section{
                             border-top: 1px solid $border-color;
                             padding-top: 24px;
+                        }
+                    }
+                }
+            }
+        }
+        // New Project
+        &.upload-doc-popup{
+            .modal-content{
+                .modal-header{
+                    align-items: center;
+                }
+                .modal-body{
+                    overflow: auto;
+                    max-height: 500px;
+                    padding-bottom: 0;
+                    .upload-document-form{
+                        .upload-document-content{
+                            .select-File{
+                                border: 1px dashed $border-color;
+                                input{
+                                    width: 0;
+                                    height: 0;
+                                    padding: 0;
+                                    opacity: 0;
+                                    + label{
+                                        width: 100%;
+                                        height: calc(100% + 29px);
+                                        margin: 0;
+                                        display: flex;
+                                        cursor: pointer;
+                                        align-items: flex-end;
+                                        border-radius: 4px;
+                                        justify-content: center;
+                                        background-color: transparent;
+                                        transition: all 0.3s ease-in-out;
+                                        .upload-text{
+                                            width: 100%;
+                                            height: 194px;
+                                            flex-direction: column;
+                                            background-color: transparent;
+                                            small{
+                                                color: #ED1164;
+                                                font-size: 0.625rem;
+                                                margin-top: 8px;
+                                                font-weight: bold;
+                                                text-transform: uppercase;
+                                            }
+                                            span{
+                                                color: #9d9d9d;
+                                                font-size: 0.75rem;
+                                                margin-top: 8px;
+                                                font-weight: normal;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            .uploaded-file-list{
+                                margin: 48px 0 32px;
+                                .uploaded-file{
+                                    border: 1px solid $border-color;
+                                    padding: 16px;
+                                    border-radius: 8px;
+                                    span{
+                                        color: $primary;
+                                        font-size: 0.75rem;
+                                        line-height: 15px;
+                                    }
+                                    small{
+                                        color: #9d9d9d;
+                                        font-size: 0.75rem;
+                                        line-height: 15px;
+                                    }
+                                    &:not(:first-of-type){
+                                        margin-top: 24px;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .error-upload{
+                        margin: 60px 0;
+                        svg{
+                            margin: 0 0 12px;
+                        }
+                        h5{
+                            color: $primary;
+                            font-size: 1.5rem;
+                            line-height: 29px;
+                        }
+                        p{
+                            color: $text-base-color;
+                            margin: 8px 0 20px;
+                            font-size: 1rem;
+                        }
+                    }
+                    .success-upload{
+                        margin: 32px 0;
+                        svg{
+                            margin: 0 0 12px;
+                        }
+                        h5{
+                            color: $primary;
+                            font-size: 1.5rem;
+                            line-height: 29px;
+                        }
+                        p{
+                            color: $text-base-color;
+                            margin: 8px 0 20px;
+                            font-size: 1rem;
+                        }
+                        .doc-content-table{
+                            width: 100%;
+                            border: 1px solid rgba($primary, 0.1);
+                            display: inline-block;
+                            max-width: 384px;
+                            border-radius: 8px;
+                            margin-bottom: 32px;
+                            li{
+                                color: $text-base-color;
+                                height: 40px;
+                                display: flex;
+                                padding: 0 16px;
+                                align-items: center;
+                                justify-content: flex-start;
+                                > *{
+                                    width: 50%;
+                                    text-align: left;
+                                    &:first-child{
+                                        width: 80%;
+                                    }
+                                }
+                                &:not(:last-of-type){
+                                    border-bottom: 1px solid rgba($primary, 0.1);
+                                }
+                            }
+                            .doc-content-heading{
+                                background-color: rgba($primary, 0.1);
+                                border-radius: 8px 8px 0 0;
+                            }
                         }
                     }
                 }
