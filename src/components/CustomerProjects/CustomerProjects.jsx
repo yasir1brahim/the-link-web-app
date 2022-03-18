@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
 import WhitingTurner from '../../assets/images/whiting-turner.svg';
-import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
-import ProfilePhoto from '../../assets/images/dummy-profile.svg';
-import { ReactComponent as Camera } from '../../assets/images/camera.svg';
+// import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
+// import ProfilePhoto from '../../assets/images/dummy-profile.svg';
+// import { ReactComponent as Camera } from '../../assets/images/camera.svg';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import DateSelector from '../shared/DateSelector/DateSelector';
@@ -17,20 +17,20 @@ const CustomerProjects = (props) => {
   const toggleModal = () => setModal(!modal);
   const [projectData, setProjectData] = useState([]);
   const { state } = useLocation();
-  const customer = state;
+  // const customer = state;
 
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/projects/${customer.customer_id}`,
+        url: `/projects/${state.customer_id}`,
       });
       setProjectData(response.data.message);
       console.log(response.data.message);
     };
 
     fetchData().catch(console.error);
-  }, []);
+  }, [state]);
 
   const handleArchive = () => {};
 

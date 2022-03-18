@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ReactComponent as Mail } from '../../assets/images/mail.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
@@ -63,7 +63,7 @@ const Signin = (props) => {
   return (
     <section className="authentication-content-wrapper">
       <div className="ac-left">
-        <a href="#" className="company-branding">
+        <a href="/" className="company-branding">
           <ReactLogo />
         </a>
       </div>
@@ -110,7 +110,7 @@ const Signin = (props) => {
                 setPassword({ ...password, value: e.target.value });
               }}
             />
-            <a className="iconinput inputpwd" href="#" onClick={toggleType}>
+            <a className="iconinput inputpwd" href="/" onClick={toggleType}>
               {showPwd ? <Eyeshow /> : <Eyehide />}
             </a>
             {password.errors && (

@@ -7,13 +7,12 @@ import Forgotpwd from './Forgotpwd';
 import Checkemail from './Checkemail';
 import Resetpwd from './Resetpwd';
 import Resetsuccess from './Resetsuccess';
-import { withRouter } from 'react-router-dom';
 
 const Authentication = () => {
   return (
     <section className="authentication-content-wrapper">
       <div className="ac-left">
-        <a href="#" className="company-branding">
+        <a href="/" className="company-branding">
           <ReactLogo />
         </a>
       </div>

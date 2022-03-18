@@ -42,7 +42,7 @@ const SignUp = () => {
   return (
     <section className="authentication-content-wrapper">
       <div className="ac-left">
-        <a href="#" className="company-branding">
+        <a href="/" className="company-branding">
           <ReactLogo />
         </a>
       </div>
@@ -127,7 +127,7 @@ const SignUp = () => {
                 setPassword(e.target.value);
               }}
             />
-            <a className="iconinput inputpwd" href="#" onClick={toggleType}>
+            <a className="iconinput inputpwd" href="/" onClick={toggleType}>
               {showPwd ? <Eyeshow /> : <Eyehide />}
             </a>
             {/* <small className='form-error'>Please enter a correct Password</small> */}

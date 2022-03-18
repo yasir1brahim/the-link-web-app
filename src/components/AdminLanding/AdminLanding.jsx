@@ -3,8 +3,6 @@ import axiosInstance from '../../config/axios';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
 import PaginatedItems from '../shared/Pagination/Pagination';
-import { Link } from 'react-router-dom';
-
 import CreateCustomer from './createCustomer';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';

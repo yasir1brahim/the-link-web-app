@@ -1,5 +1,5 @@
 import './App.scss';
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import Authentication from './components/Authentication/Authentication';
 import AdminLanding from './components/AdminLanding/AdminLanding';
 import CustomerProfile from './components/CustomerProfile/CustomerProfile';

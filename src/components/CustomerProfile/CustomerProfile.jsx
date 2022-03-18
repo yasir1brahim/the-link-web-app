@@ -28,14 +28,14 @@ const CustomerProfile = (props) => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/employeeList/${customer.customer_id}`,
+        url: `/employeeList/${state.customer_id}`,
       });
       setEmployeeData(response.data.message);
       console.log(response.data.message);
     };
 
     fetchData().catch(console.error);
-  }, []);
+  }, [state]);
 
   const handleViewEmployee = (employee) => {
     return Navigate({
@@ -160,7 +160,7 @@ const CustomerProfile = (props) => {
                       <div className="image-holder">
                         <img
                           src={ProfilePhoto}
-                          alt="Profile Photo"
+                          alt="Profile"
                           className="dummy-image"
                         />
                         {/* <img src={ProfilePhoto} alt="Profile Photo" className='uploaded-image'/> */}
@@ -282,7 +282,7 @@ const CustomerProfile = (props) => {
                       <div className="col-12">
                         <a
                           onClick={toggleResetPwd}
-                          href="javascript:void(0);"
+                          href="/"
                           className="pwd-link"
                         >
                           Reset Password?
@@ -375,7 +375,7 @@ const CustomerProfile = (props) => {
               <a
                 onClick={toggleModal}
                 className="nouser-wrapper d-flex align-items-center justify-content-center w-100"
-                href="javascript:void(0);"
+                href="/"
               >
                 <span
                   className="d-flex align-items-center justify-content-center"
