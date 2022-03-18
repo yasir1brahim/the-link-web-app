@@ -9,8 +9,9 @@ import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
 import PaginatedItems from '../shared/Pagination/Pagination';
 import CreateEmployee from './createEmployee';
 import axiosInstance from '../../config/axios';
-import { toast } from 'react-toastify';
 import { Navigate, useLocation } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const CustomerProfile = (props) => {
   const [editProfile, setEditProfile] = useState(false);
@@ -34,7 +35,17 @@ const CustomerProfile = (props) => {
       console.log(response.data.message);
     };
 
-    fetchData().catch(console.error);
+    fetchData().catch((error) => {
+      toast.error(error.message, {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    });
   }, [state]);
 
   const handleViewEmployee = (employee) => {
@@ -436,11 +447,12 @@ const CustomerProfile = (props) => {
                               <br />
                               {employee.contact_number}
                             </td>
-                            {/* <td>
-                              625 Adams
+                            <td>
+                              {/* 625 Adams
                               <br />
-                              Gimmy’s hospital
-                            </td> */}
+                              Gimmy’s hospital */}
+                              {employee.projects}
+                            </td>
                             <td>
                               <div className="action-wrapper">
                                 <button
@@ -488,6 +500,17 @@ const CustomerProfile = (props) => {
         modal={modal}
         toggleModal={toggleModal}
         customer={customer}
+      />
+      <ToastContainer
+        position="bottom-center"
+        autoClose={5000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
       />
     </div>
   );
