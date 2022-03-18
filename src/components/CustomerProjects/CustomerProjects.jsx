@@ -5,12 +5,13 @@ import WhitingTurner from '../../assets/images/whiting-turner.svg';
 // import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
 // import ProfilePhoto from '../../assets/images/dummy-profile.svg';
 // import { ReactComponent as Camera } from '../../assets/images/camera.svg';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
-import DateSelector from '../shared/DateSelector/DateSelector';
+// import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+// import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
+// import DateSelector from '../shared/DateSelector/DateSelector';
 import PaginatedItems from '../shared/Pagination/Pagination';
 import axiosInstance from '../../config/axios';
 import { useLocation } from 'react-router-dom';
+import CreateProject from './createProject';
 
 const CustomerProjects = (props) => {
   const [modal, setModal] = useState(false);
@@ -173,219 +174,14 @@ const CustomerProjects = (props) => {
             <div className="table-footer-content">
               <PaginatedItems itemsPerPage={4} />
             </div>
+            <CreateProject
+              modal={modal}
+              toggleModal={toggleModal}
+              customer={state}
+            />
           </div>
         </div>
       </div>
-      <Modal
-        isOpen={modal}
-        fade={false}
-        toggle={toggleModal}
-        className="new-project modal-lg"
-      >
-        <ModalHeader toggle={toggleModal}>Create New Project</ModalHeader>
-        <ModalBody>
-          <form className="create-project-form">
-            <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
-              <div className="customer-dp-container">
-                <img src={WhitingTurner} alt="Company Logo" />
-              </div>
-              <div className="customer-profile">
-                <div className="row">
-                  <div className="col-12">
-                    <div className="text-label-value">
-                      <div className="text-value">Whiting Turner</div>
-                    </div>
-                  </div>
-                  <div className="col-12">
-                    <div className="text-label-value">
-                      <div className="text-label">
-                        Ms Alice Smith Apartment 1c 213,
-                        <br />
-                        Derrick Street, Boston, MA 02130 USA.{' '}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-12">
-                    <div className="text-label-value">
-                      <div className="text-label">
-                        +(425) 555 0100, +(732) 622 4888
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="create-project-content">
-              <div className="row">
-                <div className="col-4">
-                  <div className="form-group">
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="customerProjectName"
-                      aria-describedby="customerProjectName"
-                      placeholder="Enter"
-                      required
-                    />
-                    <label className="text-label" htmlFor="customerProjectName">
-                      Project Name
-                    </label>
-                  </div>
-                </div>
-                <div className="col-4">
-                  <div className="form-group">
-                    <SelectDropdown label={'Lead Contact'} labelKey="name" />
-                  </div>
-                </div>
-                <div className="col-4">
-                  <div className="form-group">
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="projectLeadEmail"
-                      aria-describedby="projectLeadEmail"
-                      placeholder="Enter"
-                      required
-                    />
-                    <label className="text-label" htmlFor="projectLeadEmail">
-                      Email Address(Lead Contact)
-                    </label>
-                  </div>
-                </div>
-                <div className="col-4">
-                  <div className="form-group">
-                    <DateSelector
-                      isClearable={false}
-                      placeholderText="Start Date"
-                      labelText="Start Date"
-                    />
-                  </div>
-                </div>
-                <div className="col-4">
-                  <div className="form-group">
-                    <DateSelector
-                      isClearable={false}
-                      placeholderText="End Date"
-                      labelText="End Date"
-                    />
-                  </div>
-                </div>
-                <div className="col-4">
-                  <div className="form-group">
-                    <SelectDropdown label={'Project Type'} labelKey="name" />
-                  </div>
-                </div>
-                <div className="col-12">
-                  <div className="users-section">
-                    <ul>
-                      <li>
-                        <div className="row">
-                          <div className="col-4">
-                            <div className="form-group">
-                              <SelectDropdown
-                                label={'User Name'}
-                                labelKey="name"
-                              />
-                            </div>
-                          </div>
-                          <div className="col-4">
-                            <div className="form-group">
-                              <input
-                                type="text"
-                                className="form-control"
-                                id="userEmailAddress"
-                                aria-describedby="userEmailAddress"
-                                placeholder="Enter"
-                                required
-                              />
-                              <label
-                                className="text-label"
-                                htmlFor="userEmailAddress"
-                              >
-                                Email Address(user)
-                              </label>
-                            </div>
-                          </div>
-                          <div className="col-4">
-                            <div className="d-flex align-itms-center justify-content-start mt-3">
-                              <button
-                                type="button"
-                                className="btn btn-secondary btn-sm mr-2"
-                              >
-                                Delete
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-primary btn-sm"
-                              >
-                                Add User
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                      <li>
-                        <div className="row">
-                          <div className="col-4">
-                            <div className="form-group">
-                              <SelectDropdown
-                                label={'User Name'}
-                                labelKey="name"
-                              />
-                            </div>
-                          </div>
-                          <div className="col-4">
-                            <div className="form-group">
-                              <input
-                                type="text"
-                                className="form-control"
-                                id="userEmailAddress"
-                                aria-describedby="userEmailAddress"
-                                placeholder="Enter"
-                                required
-                              />
-                              <label
-                                className="text-label"
-                                htmlFor="userEmailAddress"
-                              >
-                                Email Address(user)
-                              </label>
-                            </div>
-                          </div>
-                          <div className="col-4">
-                            <div className="d-flex align-itms-center justify-content-start mt-3">
-                              <button
-                                type="button"
-                                className="btn btn-secondary btn-sm mr-2"
-                              >
-                                Delete
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-primary btn-sm"
-                              >
-                                Add User
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <ModalFooter>
-              <Button color="secondary" onClick={toggleModal}>
-                Cancel
-              </Button>
-              <Button color="primary" onClick={toggleModal}>
-                Create
-              </Button>{' '}
-            </ModalFooter>
-          </form>
-        </ModalBody>
-      </Modal>
     </div>
   );
 };

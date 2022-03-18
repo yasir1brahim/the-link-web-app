@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Adminlanding = (props) => {
   const [modal, setModal] = useState(false);
+  const [isArchived, toggleArchive] = useState(false);
   const [customerData, setCustomerData] = useState([]);
   const toggleModal = () => setModal(!modal);
   const navigate = useNavigate();
@@ -19,7 +20,9 @@ const Adminlanding = (props) => {
         method: 'get',
         url: `/customers/${localStorage.getItem('userId')}`,
       });
-      setCustomerData(response.data.message);
+      setCustomerData(
+        isArchived ? response.data.archived_customers : response.data.message
+      );
       console.log(response.data.message);
     };
 
@@ -34,7 +37,7 @@ const Adminlanding = (props) => {
         progress: undefined,
       });
     });
-  }, []);
+  }, [isArchived]);
 
   const handleViewCustomer = (customer) => {
     navigate('/customer-profile', { state: customer });
@@ -65,9 +68,9 @@ const Adminlanding = (props) => {
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
-                  onClick={toggleModal}
+                  onClick={() => toggleArchive(!isArchived)}
                 >
-                  Archieve
+                  Archieved
                 </button>
               </div>
             </div>
