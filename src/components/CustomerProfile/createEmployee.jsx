@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
-import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
 import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
 
@@ -23,7 +22,7 @@ const CreateEmployee = ({ modal, toggleModal, customer }) => {
     };
 
     fetchData().catch(console.error);
-  }, []);
+  }, [customer]);
 
   const validate = () => {
     let error = false;

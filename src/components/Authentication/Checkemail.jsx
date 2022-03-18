@@ -7,7 +7,7 @@ const Checkemail = () => {
   return (
     <section className="authentication-content-wrapper">
       <div className="ac-left">
-        <a href="#" className="company-branding">
+        <a href="/" className="company-branding">
           <ReactLogo />
         </a>
       </div>

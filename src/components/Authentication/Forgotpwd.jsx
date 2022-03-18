@@ -2,26 +2,23 @@ import React, { useState } from 'react';
 import { ReactComponent as User } from '../../assets/images/user.svg';
 import { ReactComponent as Keys } from '../../assets/images/keys.svg';
 import { ReactComponent as ArrowLeft } from '../../assets/images/arrow-left.svg';
-import axiosInstance from '../../config/axios';
-import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Redirect } from 'react-router-dom';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo.svg';
 import { useNavigate } from 'react-router-dom';
 
 const Forgotpwd = (props) => {
   const [email, setEmail] = useState({ value: '', errors: '' });
   const navigate = useNavigate();
-  const validate = () => {
-    let error = false;
-    if (email.value === '') {
-      setEmail({ ...email, errors: 'Email is required.' });
-      error = true;
-    }
-    return error;
-  };
+  // const validate = () => {
+  //   let error = false;
+  //   if (email.value === '') {
+  //     setEmail({ ...email, errors: 'Email is required.' });
+  //     error = true;
+  //   }
+  //   return error;
+  // };
   const handleSubmit = async () => {
-    let errors = validate();
+    // let errors = validate();
 
     navigate('/check-email');
     // if (!errors) {
@@ -52,7 +49,7 @@ const Forgotpwd = (props) => {
   return (
     <section className="authentication-content-wrapper">
       <div className="ac-left">
-        <a href="#" className="company-branding">
+        <a href="/" className="company-branding">
           <ReactLogo />
         </a>
       </div>

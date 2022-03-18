@@ -15,7 +15,7 @@ const Resetpwd = () => {
   return (
     <section className="authentication-content-wrapper">
       <div className="ac-left">
-        <a href="#" className="company-branding">
+        <a href="/" className="company-branding">
           <ReactLogo />
         </a>
       </div>
@@ -40,7 +40,7 @@ const Resetpwd = () => {
               placeholder="Enter New Password"
               required
             />
-            <a className="iconinput inputpwd" href="#" onClick={toggleNType}>
+            <a className="iconinput inputpwd" href="/" onClick={toggleNType}>
               {showNPwd ? <Eyeshow /> : <Eyehide />}
             </a>
             {/* <small className='form-error'>Please enter a Password</small> */}
@@ -57,7 +57,7 @@ const Resetpwd = () => {
               placeholder="Confirm New Password"
               required
             />
-            <a className="iconinput inputpwd" href="#" onClick={toggleCType}>
+            <a className="iconinput inputpwd" href="/" onClick={toggleCType}>
               {showCPwd ? <Eyeshow /> : <Eyehide />}
             </a>
             {/* <small className='form-error'>Please enter a Password</small> */}

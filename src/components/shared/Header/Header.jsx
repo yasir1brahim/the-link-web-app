@@ -2,8 +2,6 @@ import React from 'react';
 
 // @ts-ignore
 const Header = ({ ...props }) => {
-  const breadcrumbText = [];
-
   return (
     <div className="header-wrapper">
       <div className="header-left">
@@ -12,7 +10,9 @@ const Header = ({ ...props }) => {
             <a href="/admin-landing" className="breadcrumb-text">
               Home
             </a>
-            <a className="breadcrumb-text">{props.breadcrumb}</a>
+            <a href="/" className="breadcrumb-text">
+              {props.breadcrumb}
+            </a>
           </div>
           <div className="header-content">
             <h1 className="page-title">{props.title}</h1>
