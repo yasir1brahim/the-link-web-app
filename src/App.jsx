@@ -1,40 +1,32 @@
 import './App.scss';
-import {
-  BrowserRouter as Router,
-  Route,
-  Switch,
-  Redirect,
-} from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import Authentication from './components/Authentication/Authentication';
-import NavbarTop from './components/shared/NavbarTop/NavbarTop';
+import AdminLanding from './components/AdminLanding/AdminLanding';
+import CustomerProfile from './components/CustomerProfile/CustomerProfile';
+import CustomerProjects from './components/CustomerProjects/CustomerProjects';
 import Signin from './components/Authentication/Signin';
 import SignUp from './components/Authentication/Signup';
 import Forgotpwd from './components/Authentication/Forgotpwd';
 import Resetpwd from './components/Authentication/Resetpwd';
 import Resetsuccess from './components/Authentication/Resetsuccess';
 import Checkemail from './components/Authentication/Checkemail';
-import AdminLanding from './components/AdminLanding/AdminLanding';
-import CustomerProfile from './components/CustomerProfile/CustomerProfile';
-import CustomerProjects from './components/CustomerProjects/CustomerProjects';
-import ProjectsDetails from './components/ProjectDetails/ProjectDetails';
-import Logs from './components/Logs/Logs';
 
 function App() {
   return (
     <div className="the-link">
-      {/* <Authentication /> */}
-      {/* <NavbarTop /> */}
-      {/* <AdminLanding/> */}
-      {/* <CustomerProfile/> */}
-      {/* <CustomerProjects /> */}
-      {/* <ProjectsDetails /> */}
-      <Logs />
-      {/* <Router>
-        <Switch>
-          <Route component={Authentication} />
-          <Route path="/admin-landing" component={AdminLanding} />
-        </Switch>
-      </Router> */}
+      <Routes>
+        <Route element={<Authentication />} />
+        <Route path="/admin-landing" element={<AdminLanding />} />
+        <Route path="/customer-profile" element={<CustomerProfile />} />
+        <Route path="/project-list" element={<CustomerProjects />} />
+        <Route path="/login" element={<Signin />} />
+        <Route path="/sign-up" element={<SignUp />} />
+        <Route path="/forgot-password" element={<Forgotpwd />} />
+        <Route path="/reset-password" element={<Resetpwd />} />
+        <Route path="/reset-success" element={<Resetsuccess />} />
+        <Route path="/check-email" element={<Checkemail />} />
+        <Route exact path="/" element={<Navigate to="/login" />} />
+      </Routes>
     </div>
   );
 }

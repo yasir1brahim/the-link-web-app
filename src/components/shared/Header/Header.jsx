@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 // @ts-ignore
 const Header = ({ ...props }) => {
@@ -9,7 +9,7 @@ const Header = ({ ...props }) => {
       <div className="header-left">
         <div className="header-breadcrumb-wrapper">
           <div className="breadcrumb-content">
-            <a to="/" className="breadcrumb-text">
+            <a href="/admin-landing" className="breadcrumb-text">
               Home
             </a>
             <a className="breadcrumb-text">{props.breadcrumb}</a>
@@ -19,12 +19,19 @@ const Header = ({ ...props }) => {
           </div>
         </div>
       </div>
-      {
-        props.showBtn ?
+      {props.showBtn ? (
         <div className="header-right">
-          <button type="button" className="btn btn-primary">{props.showBtn}</button>
-        </div> : ''
-      }
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={props.toggleModal}
+          >
+            {props.showBtn}
+          </button>
+        </div>
+      ) : (
+        ''
+      )}
     </div>
   );
 };
