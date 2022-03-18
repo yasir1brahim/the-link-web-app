@@ -1,312 +1,206 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axiosInstance from '../../config/axios';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
 import PaginatedItems from '../shared/Pagination/Pagination';
+import { Link } from 'react-router-dom';
 
 import CreateCustomer from './createCustomer';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 
-const Adminlanding = () => {
+const Adminlanding = (props) => {
   const [modal, setModal] = useState(false);
+  const [customerData, setCustomerData] = useState([]);
   const toggleModal = () => setModal(!modal);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axiosInstance({
+        method: 'get',
+        url: `/customers/${localStorage.getItem('userId')}`,
+      });
+      setCustomerData(response.data.message);
+      console.log(response.data.message);
+    };
+
+    fetchData().catch((error) => {
+      toast.error(error.message, {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    });
+  }, []);
+
+  const handleViewCustomer = (customer) => {
+    navigate('/customer-profile', { state: customer });
+  };
+
+  const handleViewProjects = (customer) => {
+    navigate('/project-list', { state: customer });
+  };
 
   return (
-    <div className="page-wrap">
-      <NavbarTop />
-      <div className="page-wrap-content admin-landing-wrapper">
-        <Header title={'Customers'} toggleModal={toggleModal} />
+    <>
+      <div className="page-wrap">
+        <NavbarTop />
+        <div className="page-wrap-content admin-landing-wrapper">
+          <Header
+            title={'Customers'}
+            toggleModal={toggleModal}
+            showBtn={'Create New Customer'}
+          />
 
-        <div className="admin-landing-content">
-          <div className="table-top-content">
-            <label className="table-entries">
-              Showing entries<span className="showing-strong">6 </span>
-              of <span className="showing-strong">90</span>.
-            </label>
-            <div className="table-bulk-changes">
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={toggleModal}
-              >
-                Archieve
-              </button>
+          <div className="admin-landing-content">
+            <div className="table-top-content">
+              <label className="table-entries">
+                Showing entries<span className="showing-strong">6 </span>
+                of <span className="showing-strong">90</span>.
+              </label>
+              <div className="table-bulk-changes">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={toggleModal}
+                >
+                  Archieve
+                </button>
+              </div>
+            </div>
+            <div className="l-table-wrapper">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th className="ticket-checkbox">
+                      <div className="form-group">
+                        <div className="custom-control custom-checkbox">
+                          <input
+                            type="checkbox"
+                            className="custom-control-input"
+                            name="ticketHeading"
+                            id="ticketHeading"
+                          />
+                          <label
+                            className="custom-control-label"
+                            for="ticketHeading"
+                          ></label>
+                        </div>
+                      </div>
+                    </th>
+                    <th>
+                      <span className="has-sorting">
+                        Customers <i className=""></i>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="has-sorting">
+                        Status<i className="sort-d"></i>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="has-sorting">
+                        Projects<i className="sort-i"></i>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="has-sorting">
+                        Users<i className="sort-i"></i>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="has-sorting">
+                        Start Date<i className="sort-d"></i>
+                      </span>
+                    </th>
+                    <th>
+                      <span className="has-sorting">
+                        End Date<i className="sort-d"></i>
+                      </span>
+                    </th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {customerData.map((customer) => {
+                    return (
+                      <tr>
+                        <td className="ticket-checkbox">
+                          <div className="form-group">
+                            <div className="custom-control custom-checkbox">
+                              <input
+                                type="checkbox"
+                                className="custom-control-input"
+                                name="ticketRow1"
+                                id="ticketRow1"
+                              />
+                              {/* @ts-ignore */}
+                              <label
+                                className="custom-control-label"
+                                for="ticketRow1"
+                              ></label>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span
+                            style={{
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                            }}
+                            onClick={() => handleViewCustomer(customer)}
+                          >
+                            {customer.account_owner}
+                          </span>
+                        </td>
+                        <td>{customer.status}</td>
+                        <td>{customer.projects}</td>
+                        <td>{customer.users}</td>
+                        <td>
+                          {customer.start_date ? customer.start_date : '--'}
+                        </td>
+                        <td>--</td>
+                        <td>
+                          <div className="action-wrapper">
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleViewProjects(customer)}
+                            >
+                              View Customer
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="table-footer-content">
+              <PaginatedItems itemsPerPage={4} />
             </div>
           </div>
-          <div className="l-table-wrapper">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th className="ticket-checkbox">
-                    <div className="form-group">
-                      <div className="custom-control custom-checkbox">
-                        <input
-                          type="checkbox"
-                          className="custom-control-input"
-                          name="ticketHeading"
-                          id="ticketHeading"
-                        />
-                        <label
-                          className="custom-control-label"
-                          for="ticketHeading"
-                        ></label>
-                      </div>
-                    </div>
-                  </th>
-                  <th>
-                    <span className="has-sorting">
-                      Customers <i className=""></i>
-                    </span>
-                  </th>
-                  <th>
-                    <span className="has-sorting">
-                      Status<i className="sort-d"></i>
-                    </span>
-                  </th>
-                  <th>
-                    <span className="has-sorting">
-                      Projects<i className="sort-i"></i>
-                    </span>
-                  </th>
-                  <th>
-                    <span className="has-sorting">
-                      Users<i className="sort-i"></i>
-                    </span>
-                  </th>
-                  <th>
-                    <span className="has-sorting">
-                      Start Date<i className="sort-d"></i>
-                    </span>
-                  </th>
-                  <th>
-                    <span className="has-sorting">
-                      End Date<i className="sort-d"></i>
-                    </span>
-                  </th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="ticket-checkbox">
-                    <div className="form-group">
-                      <div className="custom-control custom-checkbox">
-                        <input
-                          type="checkbox"
-                          className="custom-control-input"
-                          name="ticketRow1"
-                          id="ticketRow1"
-                        />
-                        {/* @ts-ignore */}
-                        <label
-                          className="custom-control-label"
-                          for="ticketRow1"
-                        ></label>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Whiting Turner</td>
-                  <td>Active</td>
-                  <td>3</td>
-                  <td>10</td>
-                  <td>01/20/2022</td>
-                  <td>--</td>
-                  <td>
-                    <div className="action-wrapper">
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                      >
-                        View Customer
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="ticket-checkbox">
-                    <div className="form-group">
-                      <div className="custom-control custom-checkbox">
-                        <input
-                          type="checkbox"
-                          checked
-                          className="custom-control-input"
-                          name="ticketRow1"
-                          id="ticketRow1"
-                        />
-                        {/* @ts-ignore */}
-                        <label
-                          className="custom-control-label"
-                          for="ticketRow1"
-                        ></label>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Whiting Turner</td>
-                  <td>Active</td>
-                  <td>3</td>
-                  <td>10</td>
-                  <td>01/20/2022</td>
-                  <td>--</td>
-                  <td>
-                    <div className="action-wrapper">
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                      >
-                        View Customer
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="ticket-checkbox">
-                    <div className="form-group">
-                      <div className="custom-control custom-checkbox">
-                        <input
-                          type="checkbox"
-                          checked
-                          className="custom-control-input"
-                          name="ticketRow1"
-                          id="ticketRow1"
-                        />
-                        {/* @ts-ignore */}
-                        <label
-                          className="custom-control-label"
-                          for="ticketRow1"
-                        ></label>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Whiting Turner</td>
-                  <td>Active</td>
-                  <td>3</td>
-                  <td>10</td>
-                  <td>01/20/2022</td>
-                  <td>--</td>
-                  <td>
-                    <div className="action-wrapper">
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                      >
-                        View Customer
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="ticket-checkbox">
-                    <div className="form-group">
-                      <div className="custom-control custom-checkbox">
-                        <input
-                          type="checkbox"
-                          className="custom-control-input"
-                          name="ticketRow1"
-                          id="ticketRow1"
-                        />
-                        {/* @ts-ignore */}
-                        <label
-                          className="custom-control-label"
-                          for="ticketRow1"
-                        ></label>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Whiting Turner</td>
-                  <td>Active</td>
-                  <td>3</td>
-                  <td>10</td>
-                  <td>01/20/2022</td>
-                  <td>--</td>
-                  <td>
-                    <div className="action-wrapper">
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                      >
-                        View Customer
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="ticket-checkbox">
-                    <div className="form-group">
-                      <div className="custom-control custom-checkbox">
-                        <input
-                          type="checkbox"
-                          className="custom-control-input"
-                          name="ticketRow1"
-                          id="ticketRow1"
-                        />
-                        {/* @ts-ignore */}
-                        <label
-                          className="custom-control-label"
-                          for="ticketRow1"
-                        ></label>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Whiting Turner</td>
-                  <td>Active</td>
-                  <td>3</td>
-                  <td>10</td>
-                  <td>01/20/2022</td>
-                  <td>--</td>
-                  <td>
-                    <div className="action-wrapper">
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                      >
-                        View Customer
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="ticket-checkbox">
-                    <div className="form-group">
-                      <div className="custom-control custom-checkbox">
-                        <input
-                          type="checkbox"
-                          className="custom-control-input"
-                          name="ticketRow1"
-                          id="ticketRow1"
-                        />
-                        {/* @ts-ignore */}
-                        <label
-                          className="custom-control-label"
-                          for="ticketRow1"
-                        ></label>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Whiting Turner</td>
-                  <td>Active</td>
-                  <td>3</td>
-                  <td>10</td>
-                  <td>01/20/2022</td>
-                  <td>--</td>
-                  <td>
-                    <div className="action-wrapper">
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                      >
-                        View Customer
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div className="table-footer-content">
-            <PaginatedItems itemsPerPage={4} />
-          </div>
         </div>
+        <CreateCustomer modal={modal} toggleModal={toggleModal} />
       </div>
-      <CreateCustomer modal={modal} toggleModal={toggleModal} />
-    </div>
+      <ToastContainer
+        position="bottom-center"
+        autoClose={5000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    </>
   );
 };
 

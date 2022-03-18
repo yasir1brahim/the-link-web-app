@@ -9,7 +9,7 @@ const Header = ({ ...props }) => {
       <div className="header-left">
         <div className="header-breadcrumb-wrapper">
           <div className="breadcrumb-content">
-            <a to="/" className="breadcrumb-text">
+            <a href="/admin-landing" className="breadcrumb-text">
               Home
             </a>
             <a className="breadcrumb-text">{props.breadcrumb}</a>

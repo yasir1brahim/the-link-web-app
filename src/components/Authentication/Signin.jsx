@@ -5,12 +5,15 @@ import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
+import { ReactComponent as ReactLogo } from '../../assets/images/logo.svg';
 
 const Signin = (props) => {
   const [showPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState({ value: '', errors: '' });
   const [password, setPassword] = useState({ value: '', errors: '' });
   const toggleType = () => setShowPwd(!showPwd);
+  const history = useNavigate();
 
   const validate = () => {
     let error = false;
@@ -38,8 +41,10 @@ const Signin = (props) => {
         });
         if (response.data) {
           localStorage.setItem('token', response.data.access_token);
+          localStorage.setItem('roleId', response.data.role_id);
+          localStorage.setItem('userId', response.data.user_id);
           console.log(response.data);
-          props.history.push({ pathname: '/admin-landing' });
+          return history({ pathname: '/admin-landing' });
         }
       } catch (error) {
         toast.error('Incorrect Email or Password.', {
@@ -56,86 +61,95 @@ const Signin = (props) => {
   };
 
   return (
-    <>
-      <form className="login-form">
-        <h1 className="form-heading">Hello!</h1>
-        <p className="form-info">
-          Welcome to The Link Log Manager. Please sign in if you have
-          credentials. If not, please see your administrator.
-        </p>
-        <div className="form-group">
-          <label className="text-label">Email</label>
-          <input
-            type="text"
-            className="form-control"
-            id="emailId"
-            aria-describedby="emailId"
-            placeholder="Email Address"
-            required
-            value={email.value}
-            onChange={(e) => {
-              setEmail({ ...email, value: e.target.value });
-            }}
-          />
-          <i className="iconinput inputuser">
-            <Mail />
-          </i>
-          {email.errors && <small className="form-error">{email.errors}</small>}
-        </div>
-
-        <div className="form-group">
-          <label className="text-label">Passsword</label>
-          <input
-            type={showPwd ? 'text' : 'password'}
-            className="form-control"
-            id="passsword"
-            aria-describedby="passsword"
-            placeholder="Password"
-            required
-            value={password.value}
-            onChange={(e) => {
-              setPassword({ ...password, value: e.target.value });
-            }}
-          />
-          <a className="iconinput inputpwd" href="#" onClick={toggleType}>
-            {showPwd ? <Eyeshow /> : <Eyehide />}
-          </a>
-          {password.errors && (
-            <small className="form-error">{password.errors}</small>
-          )}
-        </div>
-        <div className="form-group forgot-pwd">
-          <div className="custom-control custom-checkbox">
-            <input
-              type="checkbox"
-              className="custom-control-input"
-              name="ticketRow1"
-              id="ticketRow1"
-            />
-            <label className="custom-control-label">Remember Me</label>
-          </div>
-          <a className="forgot-pwd" href="/forgot-password">
-            Forgot Password?
-          </a>
-        </div>
-        <div className="form-group form-btn">
-          <button
-            type="button"
-            className="btn btn-primary w-100"
-            onClick={handleSubmit}
-          >
-            Login
-          </button>
-        </div>
-        <div className="form-helping-text">
-          <p>
-            Don’t have credentials?
-            <br />
-            Ask your administrator, or email{' '}
-            <a href="mailto:support@thelink.ai">support@thelink.ai</a>
+    <section className="authentication-content-wrapper">
+      <div className="ac-left">
+        <a href="#" className="company-branding">
+          <ReactLogo />
+        </a>
+      </div>
+      <div className="ac-right">
+        <form className="login-form">
+          <h1 className="form-heading">Hello!</h1>
+          <p className="form-info">
+            Welcome to The Link Log Manager. Please sign in if you have
+            credentials. If not, please see your administrator.
           </p>
-        </div>
-      </form>
+          <div className="form-group">
+            <label className="text-label">Email</label>
+            <input
+              type="text"
+              className="form-control"
+              id="emailId"
+              aria-describedby="emailId"
+              placeholder="Email Address"
+              required
+              value={email.value}
+              onChange={(e) => {
+                setEmail({ ...email, value: e.target.value });
+              }}
+            />
+            <i className="iconinput inputuser">
+              <Mail />
+            </i>
+            {email.errors && (
+              <small className="form-error">{email.errors}</small>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label className="text-label">Passsword</label>
+            <input
+              type={showPwd ? 'text' : 'password'}
+              className="form-control"
+              id="passsword"
+              aria-describedby="passsword"
+              placeholder="Password"
+              required
+              value={password.value}
+              onChange={(e) => {
+                setPassword({ ...password, value: e.target.value });
+              }}
+            />
+            <a className="iconinput inputpwd" href="#" onClick={toggleType}>
+              {showPwd ? <Eyeshow /> : <Eyehide />}
+            </a>
+            {password.errors && (
+              <small className="form-error">{password.errors}</small>
+            )}
+          </div>
+          <div className="form-group forgot-pwd">
+            <div className="custom-control custom-checkbox">
+              <input
+                type="checkbox"
+                className="custom-control-input"
+                name="ticketRow1"
+                id="ticketRow1"
+              />
+              <label className="custom-control-label">Remember Me</label>
+            </div>
+            <a className="forgot-pwd" href="/forgot-password">
+              Forgot Password?
+            </a>
+          </div>
+          <div className="form-group form-btn">
+            <button
+              type="button"
+              className="btn btn-primary w-100"
+              onClick={handleSubmit}
+            >
+              Login
+            </button>
+          </div>
+          <div className="form-helping-text">
+            <p>
+              Don’t have credentials?
+              <br />
+              Ask your administrator, or email{' '}
+              <a href="mailto:support@thelink.ai">support@thelink.ai</a>
+            </p>
+          </div>
+        </form>
+      </div>
       <ToastContainer
         position="bottom-center"
         autoClose={5000}
@@ -147,7 +161,7 @@ const Signin = (props) => {
         draggable
         pauseOnHover
       />
-    </>
+    </section>
   );
 };
 

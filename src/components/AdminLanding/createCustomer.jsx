@@ -13,7 +13,7 @@ const CreateCustomer = ({ modal, toggleModal }) => {
   const [accountOwner, setAccountOwner] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [address, setAddress] = useState({ value: '', errors: '' });
-  const [accountId, setAccountId] = useState({ value: '', errors: '' });
+  // const [accountId, setAccountId] = useState({ value: '', errors: '' });
 
   useEffect(() => {
     setEmail({ value: '', errors: '' });
@@ -47,7 +47,7 @@ const CreateCustomer = ({ modal, toggleModal }) => {
             account_owner: accountOwner.value,
             contact_number: contactNumber.value,
             address: address.value,
-            admin_id: accountOwner.value,
+            admin_id: Number(localStorage.getItem('userId')),
           },
         });
         if (response.data) {
@@ -140,13 +140,14 @@ const CreateCustomer = ({ modal, toggleModal }) => {
                       aria-describedby="accountId"
                       placeholder="Enter"
                       required
-                      value={accountId.value}
-                      onChange={(e) => {
-                        setAccountId({
-                          ...accountId,
-                          value: e.target.value,
-                        });
-                      }}
+                      disabled
+                      value={localStorage.getItem('userId')}
+                      // onChange={(e) => {
+                      //   setAccountId({
+                      //     ...accountId,
+                      //     value: e.target.value,
+                      //   });
+                      // }}
                     />
                     <label className="text-label" htmlFor="accountId">
                       Account Id
