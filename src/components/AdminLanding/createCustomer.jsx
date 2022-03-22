@@ -13,6 +13,7 @@ const CreateCustomer = ({ modal, toggleModal }) => {
   const [accountOwner, setAccountOwner] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [address, setAddress] = useState({ value: '', errors: '' });
+  const [profilePicture, setProfilePicture] = useState('');
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });
 
   useEffect(() => {
@@ -50,10 +51,19 @@ const CreateCustomer = ({ modal, toggleModal }) => {
             admin_id: Number(localStorage.getItem('userId')),
           },
         });
-        if (response.data) {
+
+        if (response.data?.customer_id && profilePicture) {
+          await axiosInstance({
+            method: 'post',
+            url: '/uploadLogo',
+            data: {
+              customer_id: response.data.customer_id,
+              logo: profilePicture,
+            },
+          });
           console.log(response.data);
-          toggleModal();
         }
+        toggleModal();
       } catch (error) {
         console.log(error.message);
         toast.error(error.message, {
@@ -96,8 +106,12 @@ const CreateCustomer = ({ modal, toggleModal }) => {
                     <input
                       className="d-none"
                       type="file"
+                      accept="image/x-png,image/jpeg"
                       name="files[]"
                       id="uploadDocs"
+                      onChange={(e) => {
+                        setProfilePicture(e.target.files[0]);
+                      }}
                     />
                     <label htmlFor="uploadDocs">
                       <div className="upload-text d-flex align-items-center justify-content-center">
