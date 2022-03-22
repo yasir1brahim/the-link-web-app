@@ -65,7 +65,7 @@ const CustomerProjects = (props) => {
                   type="button"
                   className="btn btn-secondary btn-sm"
                 >
-                  Archive
+                  Archieved
                 </button>
               </div>
             </div>
