@@ -8,17 +8,19 @@ import 'react-toastify/dist/ReactToastify.css';
 import WhitingTurner from '../../assets/images/whiting-turner.svg';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import DateSelector from '../shared/DateSelector/DateSelector';
+import { Typeahead } from 'react-bootstrap-typeahead';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 const CreateProject = ({ modal, toggleModal, customer }) => {
   const [email, setEmail] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [projectName, setProjectName] = useState({ value: '', errors: '' });
-  const [leadContact, setLeadContact] = useState({ value: '', errors: '' });
-  const [startDate, setStartDate] = useState({ value: '', errors: '' });
-  const [endDate, setEndDate] = useState({ value: '', errors: '' });
-  const [customerId, setCustomerId] = useState({ value: '', errors: '' });
+  const [leadContact, setLeadContact] = useState({ value: '', label: '' });
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
   const [employeeList, setEmployeeList] = useState([]);
+  const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });
 
   useEffect(() => {
@@ -56,14 +58,15 @@ const CreateProject = ({ modal, toggleModal, customer }) => {
           method: 'post',
           url: '/createProject',
           data: {
-            email_address: email.value,
-            contact_number: contactNumber.value,
             project_name: projectName.value,
-            lead_contact: leadContact.value,
-            start_date: startDate.value,
-            end_date: endDate.value,
-            customer_id: customerId.value,
-            status: projectStatus.value,
+            lead_contact: leadContact[0].value,
+            start_date: startDate,
+            end_date: endDate,
+            customer_id: customer.customer_id,
+            status: customer.status,
+            employee_list: selectedEmployeeList.map(
+              (employee) => employee.value
+            ),
           },
         });
         if (response.data) {
@@ -155,13 +158,16 @@ const CreateProject = ({ modal, toggleModal, customer }) => {
                   <div className="form-group">
                     <SelectDropdown
                       label={'Lead Contact'}
-                      labelKey="name"
-                      // options={employeeList.map((project) => {
-                      //   return {
-                      //     value: project.customer_id,
-                      //     label: project.name,
-                      //   };
-                      // })}
+                      // labelKey="name"
+                      setSelected={setLeadContact}
+                      value={leadContact.label}
+                      selected={leadContact.label}
+                      options={employeeList.map((project) => {
+                        return {
+                          value: project.emp_id,
+                          label: project.name,
+                        };
+                      })}
                     />
                   </div>
                 </div>
@@ -186,6 +192,8 @@ const CreateProject = ({ modal, toggleModal, customer }) => {
                       isClearable={false}
                       placeholderText="Start Date"
                       labelText="Start Date"
+                      onChange={setStartDate}
+                      selected={startDate}
                     />
                   </div>
                 </div>
@@ -195,105 +203,36 @@ const CreateProject = ({ modal, toggleModal, customer }) => {
                       isClearable={false}
                       placeholderText="End Date"
                       labelText="End Date"
+                      onChange={setEndDate}
+                      selected={endDate}
                     />
                   </div>
                 </div>
-                <div className="col-4">
+                {/* <div className="col-4">
                   <div className="form-group">
                     <SelectDropdown label={'Project Type'} labelKey="name" />
                   </div>
-                </div>
+                </div> */}
                 <div className="col-12">
                   <div className="users-section">
                     <ul>
                       <li>
                         <div className="row">
-                          <div className="col-4">
+                          <div className="col-11">
                             <div className="form-group">
-                              <SelectDropdown
-                                label={'User Name'}
-                                labelKey="name"
+                              <Typeahead
+                                multiple
+                                value={selectedEmployeeList}
+                                selected={selectedEmployeeList}
+                                onChange={setSelectedEmployeeList}
+                                options={employeeList.map((project) => {
+                                  return {
+                                    value: project.emp_id,
+                                    label: project.name,
+                                  };
+                                })}
+                                placeholder="Add Employees"
                               />
-                            </div>
-                          </div>
-                          <div className="col-4">
-                            <div className="form-group">
-                              <input
-                                type="text"
-                                className="form-control"
-                                id="userEmailAddress"
-                                aria-describedby="userEmailAddress"
-                                placeholder="Enter"
-                                required
-                              />
-                              <label
-                                className="text-label"
-                                htmlFor="userEmailAddress"
-                              >
-                                Email Address(user)
-                              </label>
-                            </div>
-                          </div>
-                          <div className="col-4">
-                            <div className="d-flex align-itms-center justify-content-start mt-3">
-                              <button
-                                type="button"
-                                className="btn btn-secondary btn-sm mr-2"
-                              >
-                                Delete
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-primary btn-sm"
-                              >
-                                Add User
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                      <li>
-                        <div className="row">
-                          <div className="col-4">
-                            <div className="form-group">
-                              <SelectDropdown
-                                label={'User Name'}
-                                labelKey="name"
-                              />
-                            </div>
-                          </div>
-                          <div className="col-4">
-                            <div className="form-group">
-                              <input
-                                type="text"
-                                className="form-control"
-                                id="userEmailAddress"
-                                aria-describedby="userEmailAddress"
-                                placeholder="Enter"
-                                required
-                              />
-                              <label
-                                className="text-label"
-                                htmlFor="userEmailAddress"
-                              >
-                                Email Address(user)
-                              </label>
-                            </div>
-                          </div>
-                          <div className="col-4">
-                            <div className="d-flex align-itms-center justify-content-start mt-3">
-                              <button
-                                type="button"
-                                className="btn btn-secondary btn-sm mr-2"
-                              >
-                                Delete
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-primary btn-sm"
-                              >
-                                Add User
-                              </button>
                             </div>
                           </div>
                         </div>
@@ -307,7 +246,7 @@ const CreateProject = ({ modal, toggleModal, customer }) => {
               <Button color="secondary" onClick={toggleModal}>
                 Cancel
               </Button>
-              <Button color="primary" onClick={toggleModal}>
+              <Button color="primary" onClick={handleSubmit}>
                 Create
               </Button>{' '}
             </ModalFooter>
