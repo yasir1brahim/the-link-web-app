@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
-import WhitingTurner from '../../assets/images/whiting-turner.svg';
+// import WhitingTurner from '../../assets/images/whiting-turner.svg';
 // import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
 // import ProfilePhoto from '../../assets/images/dummy-profile.svg';
 // import { ReactComponent as Camera } from '../../assets/images/camera.svg';
