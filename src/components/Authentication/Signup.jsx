@@ -4,6 +4,7 @@ import { ReactComponent as Mail } from '../../assets/images/mail.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import axiosInstance from '../../config/axios';
+import { ReactComponent as ReactLogo } from '../../assets/images/logo.svg';
 
 const SignUp = () => {
   const [showPwd, setShowPwd] = useState(false);
@@ -39,106 +40,115 @@ const SignUp = () => {
   };
 
   return (
-    <form className="signup-form">
-      <h1 className="form-heading">Sign Up</h1>
-      <p className="form-info">
-        Welcome to The Link Log Manager. Please sign in if you have credentials.
-        If not, please see your administrator.
-      </p>
-      <div className="form-group">
-        <label className="text-label">Username</label>
-        <input
-          type="text"
-          className="form-control"
-          id="userName"
-          aria-describedby="userName"
-          placeholder="User Name"
-          required
-          value={userName}
-          onChange={(e) => {
-            setUserName(e.target.value);
-          }}
-        />
-        <i className="iconinput inputuser">
-          <User />
-        </i>
-        {/* <small className="form-error">Please enter a Valid Username</small> */}
-      </div>
-      <div className="form-group">
-        <label className="text-label">Full Name</label>
-        <input
-          type="text"
-          className="form-control"
-          id="fullName"
-          aria-describedby="fullName"
-          placeholder="Full Name"
-          required
-          value={fullName}
-          onChange={(e) => {
-            setFullName(e.target.value);
-          }}
-        />
-        <i className="iconinput inputuser">
-          <User />
-        </i>
-        {/* <small className="form-error">Please enter a Valid Fullname</small> */}
-      </div>
-      <div className="form-group">
-        <label className="text-label">Email</label>
-        <input
-          type="text"
-          className="form-control"
-          id="emailId"
-          aria-describedby="emailId"
-          placeholder="Email Address"
-          required
-          value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-          }}
-        />
-        <i className="iconinput inputuser">
-          <Mail />
-        </i>
-        {emailError && (
-          <small className="form-error">Email Id already taken!</small>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label className="text-label">Passsword</label>
-        <input
-          type={showPwd ? 'text' : 'password'}
-          className="form-control"
-          id="passsword"
-          aria-describedby="passsword"
-          placeholder="Password"
-          required
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-          }}
-        />
-        <a className="iconinput inputpwd" href="#" onClick={toggleType}>
-          {showPwd ? <Eyeshow /> : <Eyehide />}
+    <section className="authentication-content-wrapper">
+      <div className="ac-left">
+        <a href="/" className="company-branding">
+          <ReactLogo />
         </a>
-        {/* <small className='form-error'>Please enter a correct Password</small> */}
       </div>
-      <div className="form-group form-btn">
-        <button
-          type="submit"
-          className="btn btn-primary w-100"
-          onSubmit={handleSubmit}
-        >
-          Sign Up
-        </button>
+      <div className="ac-right">
+        <form className="signup-form">
+          <h1 className="form-heading">Sign Up</h1>
+          <p className="form-info">
+            Welcome to The Link Log Manager. Please sign in if you have
+            credentials. If not, please see your administrator.
+          </p>
+          <div className="form-group">
+            <label className="text-label">Username</label>
+            <input
+              type="text"
+              className="form-control"
+              id="userName"
+              aria-describedby="userName"
+              placeholder="User Name"
+              required
+              value={userName}
+              onChange={(e) => {
+                setUserName(e.target.value);
+              }}
+            />
+            <i className="iconinput inputuser">
+              <User />
+            </i>
+            {/* <small className="form-error">Please enter a Valid Username</small> */}
+          </div>
+          <div className="form-group">
+            <label className="text-label">Full Name</label>
+            <input
+              type="text"
+              className="form-control"
+              id="fullName"
+              aria-describedby="fullName"
+              placeholder="Full Name"
+              required
+              value={fullName}
+              onChange={(e) => {
+                setFullName(e.target.value);
+              }}
+            />
+            <i className="iconinput inputuser">
+              <User />
+            </i>
+            {/* <small className="form-error">Please enter a Valid Fullname</small> */}
+          </div>
+          <div className="form-group">
+            <label className="text-label">Email</label>
+            <input
+              type="text"
+              className="form-control"
+              id="emailId"
+              aria-describedby="emailId"
+              placeholder="Email Address"
+              required
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+            />
+            <i className="iconinput inputuser">
+              <Mail />
+            </i>
+            {emailError && (
+              <small className="form-error">Email Id already taken!</small>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label className="text-label">Passsword</label>
+            <input
+              type={showPwd ? 'text' : 'password'}
+              className="form-control"
+              id="passsword"
+              aria-describedby="passsword"
+              placeholder="Password"
+              required
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+            />
+            <a className="iconinput inputpwd" href="/" onClick={toggleType}>
+              {showPwd ? <Eyeshow /> : <Eyehide />}
+            </a>
+            {/* <small className='form-error'>Please enter a correct Password</small> */}
+          </div>
+          <div className="form-group form-btn">
+            <button
+              type="submit"
+              className="btn btn-primary w-100"
+              onSubmit={handleSubmit}
+            >
+              Sign Up
+            </button>
+          </div>
+          <div className="form-helping-text">
+            <p>
+              Already have an account? <a href="/login">Login</a>
+            </p>
+          </div>
+        </form>
       </div>
-      <div className="form-helping-text">
-        <p>
-          Already have an account? <a href="/login">Login</a>
-        </p>
-      </div>
-    </form>
+    </section>
   );
 };
 

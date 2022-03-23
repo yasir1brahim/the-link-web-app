@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import DatePicker from "react-datepicker";
+import React, { useState } from 'react';
+import DatePicker from 'react-datepicker';
 
 const DateSelector = ({ ...props }) => {
   const [focused, setFocused] = useState(false);
 
   return (
     <div
-      className={`has-calendar ${focused ? "is-focused" : ""} ${
-        props.selected === null ? "empty" : ""
+      className={`has-calendar ${focused ? 'is-focused' : ''} ${
+        props.selected === null ? 'empty' : ''
       }`}
     >
       {/* @ts-ignore */}
@@ -18,8 +18,8 @@ const DateSelector = ({ ...props }) => {
         selected={props.selected}
         onChange={(e) => props.onChange(e)}
         isClearable={props.isClearable}
-        onFocus={(e) => (focused === true ? "" : setFocused(true))}
-        onBlur={(e) => (focused === false ? "" : setFocused(false))}
+        onFocus={(e) => (focused === true ? '' : setFocused(true))}
+        onBlur={(e) => (focused === false ? '' : setFocused(false))}
         placeholderText={props.placeholderText}
       />
       <label className="text-label">{props.labelText}</label>
