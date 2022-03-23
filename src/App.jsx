@@ -17,7 +17,7 @@ import AdminLanding from './components/AdminLanding/AdminLanding';
 import CustomerProfile from './components/CustomerProfile/CustomerProfile';
 import CustomerProjects from './components/CustomerProjects/CustomerProjects';
 import ProjectsDetails from './components/ProjectDetails/ProjectDetails';
-import Logs from './components/Logs/Logs';
+import ProjectLogs from './components/ProjectLogs/ProjectLogs';
 
 function App() {
   return (
@@ -28,7 +28,7 @@ function App() {
       {/* <CustomerProfile/> */}
       {/* <CustomerProjects /> */}
       {/* <ProjectsDetails /> */}
-      <Logs />
+      <ProjectLogs />
       {/* <Router>
         <Switch>
           <Route component={Authentication} />
