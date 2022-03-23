@@ -156,7 +156,7 @@ const CreateCustomer = ({ modal, toggleModal }) => {
                         placeholder="Enter"
                         required
                         disabled
-                        value={localStorage.getItem('userId')}
+                        value={localStorage.getItem('account_id')}
                         // onChange={(e) => {
                         //   setAccountId({
                         //     ...accountId,
