@@ -4,7 +4,7 @@ import NavbarTop from '../shared/NavbarTop/NavbarTop';
 import { ReactComponent as Upload } from '../../assets/images/upload.svg';
 import { ReactComponent as FileDocument } from '../../assets/images/file-document.svg';
 import { ReactComponent as Close } from '../../assets/images/close.svg';
-import { ReactComponent as Error } from '../../assets/images/error.svg';
+// import { ReactComponent as Error } from '../../assets/images/error.svg';
 import { ReactComponent as Success } from '../../assets/images/circle-success.svg';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { useLocation } from 'react-router-dom';
@@ -122,22 +122,24 @@ const ProjectsDetails = () => {
                     </thead>
                     <tbody>
                       {projectData.map((project) => {
-                        <tr>
-                          <td>{project.type}</td>
-                          <td>{project.status}</td>
-                          <td>{project.logs_created}</td>
-                          <td>{project.total_logs}</td>
-                          <td>
-                            <div className="action-wrapper">
-                              <button
-                                type="button"
-                                className="btn btn-secondary btn-sm"
-                              >
-                                View Logs
-                              </button>
-                            </div>
-                          </td>
-                        </tr>;
+                        return (
+                          <tr>
+                            <td>{project.type}</td>
+                            <td>{project.status}</td>
+                            <td>{project.logs_created}</td>
+                            <td>{project.total_logs}</td>
+                            <td>
+                              <div className="action-wrapper">
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary btn-sm"
+                                >
+                                  View Logs
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
                       })}
                     </tbody>
                   </table>
