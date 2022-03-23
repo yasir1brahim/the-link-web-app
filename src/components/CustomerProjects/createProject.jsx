@@ -12,19 +12,19 @@ import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 const CreateProject = ({ modal, toggleModal, customer }) => {
-  const [email, setEmail] = useState({ value: '', errors: '' });
-  const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
+  // const [email, setEmail] = useState({ value: '', errors: '' });
+  // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [projectName, setProjectName] = useState({ value: '', errors: '' });
   const [leadContact, setLeadContact] = useState({ value: '', label: '' });
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
+  // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
   const [employeeList, setEmployeeList] = useState([]);
   const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });
 
   useEffect(() => {
-    setEmail({ value: '', errors: '' });
+    // setEmail({ value: '', errors: '' });
   }, []);
 
   useEffect(() => {
