@@ -23,6 +23,7 @@ const Adminlanding = (props) => {
       setCustomerData(
         isArchived ? response.data.archived_customers : response.data.message
       );
+      localStorage.setItem('account_id', response.data.account_id);
       console.log(response.data.message);
     };
 

@@ -14,6 +14,7 @@ import { useLocation } from 'react-router-dom';
 import CreateProject from './createProject';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 
 const CustomerProjects = (props) => {
   const [modal, setModal] = useState(false);
@@ -22,6 +23,7 @@ const CustomerProjects = (props) => {
   const [projectData, setProjectData] = useState([]);
   const { state } = useLocation();
   // const customer = state;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,6 +49,10 @@ const CustomerProjects = (props) => {
       });
     });
   }, [state, isArchived]);
+
+  const handleLaunch = (project) => {
+    navigate('/project-details', { state: project });
+  };
 
   return (
     <>
@@ -167,6 +173,7 @@ const CustomerProjects = (props) => {
                               <button
                                 type="button"
                                 className="btn btn-secondary btn-sm"
+                                onClick={() => handleLaunch(project)}
                               >
                                 Launch
                               </button>

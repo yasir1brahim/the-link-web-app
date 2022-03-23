@@ -16,12 +16,22 @@ import 'react-toastify/dist/ReactToastify.css';
 const CustomerProfile = (props) => {
   const [editProfile, setEditProfile] = useState(false);
   const toggleEditProfile = () => setEditProfile(!editProfile);
-
   const [modal, setModal] = useState(false);
   const toggleModal = () => setModal(!modal);
   const [employeeData, setEmployeeData] = useState([]);
   const [resetPwd, setResetPwd] = useState(false);
   const toggleResetPwd = () => setResetPwd(!resetPwd);
+  const [email, setEmail] = useState({ value: '', errors: '' });
+  const [companyName, setCompanyName] = useState({ value: '', errors: '' });
+  const [accountOwner, setAccountOwner] = useState({ value: '', errors: '' });
+  const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
+  const [address, setAddress] = useState({ value: '', errors: '' });
+  const [password, setPassword] = useState({ value: '', errors: '' });
+  const [confirmPassword, setConfirmPassword] = useState({
+    value: '',
+    errors: '',
+  });
+  const [profilePicture, setProfilePicture] = useState('');
   const { state } = useLocation();
   const customer = state;
 
@@ -58,7 +68,7 @@ const CustomerProfile = (props) => {
   const handleDeleteEmployee = async (id) => {
     try {
       const response = await axiosInstance({
-        method: 'delete',
+        method: 'DELETE',
         url: `/deleteEmployee`,
         data: {
           employee_id: id,
@@ -85,6 +95,73 @@ const CustomerProfile = (props) => {
         draggable: true,
         progress: undefined,
       });
+    }
+  };
+
+  const validate = () => {
+    let error = false;
+
+    if (password.value && password.value !== confirmPassword.value) {
+      setPassword({
+        ...password,
+        errors: 'Password not matched with confirm Passsword.',
+      });
+      error = true;
+    }
+    return error;
+  };
+
+  const handleSubmit = async () => {
+    let errors = validate();
+    if (!errors) {
+      try {
+        const response = await axiosInstance({
+          method: 'put',
+          url: '/updateCustomer',
+          data: {
+            email_address: email.value || customer.email_address,
+            password: password.value || '',
+            customer_name: companyName.value || customer.customer_name,
+            account_owner: accountOwner.value || customer.account_owner,
+            contact_number: contactNumber.value || customer.contact_number,
+            address: address.value || customer.address,
+            status: 'Active',
+          },
+        });
+
+        if (response.data?.customer_id && profilePicture) {
+          await axiosInstance({
+            method: 'post',
+            url: '/uploadLogo',
+            data: {
+              customer_id: response.data.customer_id,
+              logo: profilePicture,
+            },
+          });
+          console.log(response.data);
+        }
+        toggleEditProfile();
+        toast.success('Profile Updated Successfully.', {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      } catch (error) {
+        console.log(error.message);
+        toast.error(error.message, {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
     }
   };
 
@@ -134,7 +211,9 @@ const CustomerProfile = (props) => {
                     <div className="col-6">
                       <div className="text-label-value">
                         <div className="text-label">Email ID: </div>
-                        <div className="text-value">{customer.email_id}</div>
+                        <div className="text-value">
+                          {customer.email_address}
+                        </div>
                       </div>
                     </div>
                     <div className="col-6">
@@ -182,6 +261,9 @@ const CustomerProfile = (props) => {
                           type="file"
                           name="files[]"
                           id="uploadDocs"
+                          onChange={(e) => {
+                            setProfilePicture(e.target.files[0]);
+                          }}
                         />
                         <label htmlFor="uploadDocs">
                           <div className="upload-text d-flex align-items-center justify-content-center">
@@ -203,6 +285,13 @@ const CustomerProfile = (props) => {
                             aria-describedby="companyName"
                             placeholder="Enter"
                             required
+                            defaultValue={customer.customer_name}
+                            onChange={(e) => {
+                              setCompanyName({
+                                ...companyName,
+                                value: e.target.value,
+                              });
+                            }}
                           />
                           <label className="text-label" htmlFor="companyName">
                             Company Name
@@ -218,6 +307,8 @@ const CustomerProfile = (props) => {
                             aria-describedby="accountId"
                             placeholder="Enter"
                             required
+                            disabled
+                            value={localStorage.getItem('account_id')}
                           />
                           <label className="text-label" htmlFor="accountId">
                             Account Id
@@ -233,6 +324,13 @@ const CustomerProfile = (props) => {
                             aria-describedby="accountOwner"
                             placeholder="Enter"
                             required
+                            defaultValue={customer.account_owner}
+                            onChange={(e) => {
+                              setAccountOwner({
+                                ...accountOwner,
+                                value: e.target.value,
+                              });
+                            }}
                           />
                           <label className="text-label" htmlFor="accountOwner">
                             Account Owner
@@ -248,6 +346,13 @@ const CustomerProfile = (props) => {
                             aria-describedby="accountEmail"
                             placeholder="Enter"
                             required
+                            defaultValue={customer.email_address}
+                            onChange={(e) => {
+                              setEmail({
+                                ...email,
+                                value: e.target.value,
+                              });
+                            }}
                           />
                           <label className="text-label" htmlFor="accountEmail">
                             Email Address
@@ -263,6 +368,13 @@ const CustomerProfile = (props) => {
                             aria-describedby="accountContact"
                             placeholder="Enter"
                             required
+                            defaultValue={customer.contact_number}
+                            onChange={(e) => {
+                              setContactNumber({
+                                ...contactNumber,
+                                value: e.target.value,
+                              });
+                            }}
                           />
                           <label
                             className="text-label"
@@ -281,6 +393,13 @@ const CustomerProfile = (props) => {
                             aria-describedby="accountAddress"
                             placeholder="Enter"
                             required
+                            defaultValue={customer.address}
+                            onChange={(e) => {
+                              setAddress({
+                                ...address,
+                                value: e.target.value,
+                              });
+                            }}
                           />
                           <label
                             className="text-label"
@@ -291,16 +410,12 @@ const CustomerProfile = (props) => {
                         </div>
                       </div>
                       <div className="col-12">
-                        <a
-                          onClick={toggleResetPwd}
-                          href="/"
-                          className="pwd-link"
-                        >
+                        <div onClick={toggleResetPwd} className="pwd-link">
                           Reset Password?
-                        </a>
+                        </div>
                         {resetPwd ? (
                           <div className="row">
-                            <div className="col-4">
+                            {/* <div className="col-4">
                               <div className="form-group">
                                 <input
                                   type="password"
@@ -317,7 +432,7 @@ const CustomerProfile = (props) => {
                                   Old Password
                                 </label>
                               </div>
-                            </div>
+                            </div> */}
                             <div className="col-4">
                               <div className="form-group">
                                 <input
@@ -327,6 +442,13 @@ const CustomerProfile = (props) => {
                                   aria-describedby="newPassword"
                                   placeholder="Enter"
                                   required
+                                  value={password.value}
+                                  onChange={(e) => {
+                                    setPassword({
+                                      ...password,
+                                      value: e.target.value,
+                                    });
+                                  }}
                                 />
                                 <label
                                   className="text-label"
@@ -345,6 +467,13 @@ const CustomerProfile = (props) => {
                                   aria-describedby="confirmNewPassword"
                                   placeholder="Enter"
                                   required
+                                  value={confirmPassword.value}
+                                  onChange={(e) => {
+                                    setConfirmPassword({
+                                      ...confirmPassword,
+                                      value: e.target.value,
+                                    });
+                                  }}
                                 />
                                 <label
                                   className="text-label"
@@ -373,7 +502,7 @@ const CustomerProfile = (props) => {
                   <button
                     type="button"
                     className="btn btn-primary"
-                    onClick={toggleEditProfile}
+                    onClick={handleSubmit}
                   >
                     Save
                   </button>
@@ -475,7 +604,7 @@ const CustomerProfile = (props) => {
                                   type="button"
                                   className="btn btn-secondary btn-sm"
                                   onClick={() =>
-                                    handleDeleteEmployee(employee.id)
+                                    handleDeleteEmployee(employee.emp_id)
                                   }
                                 >
                                   Delete

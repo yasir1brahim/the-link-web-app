@@ -10,6 +10,7 @@ import Forgotpwd from './components/Authentication/Forgotpwd';
 import Resetpwd from './components/Authentication/Resetpwd';
 import Resetsuccess from './components/Authentication/Resetsuccess';
 import Checkemail from './components/Authentication/Checkemail';
+import ProjectsDetails from './components/ProjectDetails/ProjectDetails';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/admin-landing" element={<AdminLanding />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
         <Route path="/project-list" element={<CustomerProjects />} />
+        <Route path="/project-details" element={<ProjectsDetails />} />
         <Route path="/login" element={<Signin />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/forgot-password" element={<Forgotpwd />} />
