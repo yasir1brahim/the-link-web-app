@@ -5,7 +5,7 @@ import { ReactComponent as Upload } from '../../assets/images/upload.svg';
 import { ReactComponent as FileDocument } from '../../assets/images/file-document.svg';
 import { ReactComponent as Close } from '../../assets/images/close.svg';
 // import { ReactComponent as Error } from '../../assets/images/error.svg';
-import { ReactComponent as Success } from '../../assets/images/circle-success.svg';
+// import { ReactComponent as Success } from '../../assets/images/circle-success.svg';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
@@ -209,20 +209,20 @@ const ProjectsDetails = () => {
                     </div>
                   </div>
                 )}
-                <button
+                {/* <button
                   type="button"
                   className="btn btn-secondary btn-sm mb-4 ml-auto"
                   onClick={handleSubmit}
                   //   disabled={Object.keys(pdfFile).length === 0}
                 >
                   Upload
-                </button>
+                </button> */}
               </div>
               <ModalFooter>
                 <Button color="secondary" onClick={toggleModal}>
                   Cancel
                 </Button>
-                <Button color="primary" onClick={toggleModal}>
+                <Button color="primary" onClick={handleSubmit}>
                   Proceed
                 </Button>{' '}
               </ModalFooter>
@@ -239,7 +239,7 @@ const ProjectsDetails = () => {
             {/* Error Upload code */}
 
             {/* Success Upload code */}
-            <div className="success-upload text-center">
+            {/* <div className="success-upload text-center">
               <Success />
               <h5>Success</h5>
               <p>Your file has been succesfully parsed.</p>
@@ -281,7 +281,7 @@ const ProjectsDetails = () => {
                   Save
                 </button>
               </div>
-            </div>
+            </div> */}
             {/* Success Upload code */}
           </ModalBody>
         </Modal>
