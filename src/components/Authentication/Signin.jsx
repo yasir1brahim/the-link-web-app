@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ReactComponent as Mail } from '../../assets/images/mail.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo.svg';
 
 const Signin = (props) => {
@@ -15,6 +15,11 @@ const Signin = (props) => {
   const toggleType = () => setShowPwd(!showPwd);
   const history = useNavigate();
 
+  // useEffect(() => {
+  //   if (localStorage.getItem('token') === 'logOut') {
+  //     history('/');
+  //   }
+  // });
   const validate = () => {
     let error = false;
     if (email.value === '') {
@@ -110,9 +115,9 @@ const Signin = (props) => {
                 setPassword({ ...password, value: e.target.value });
               }}
             />
-            <a className="iconinput inputpwd" href="/" onClick={toggleType}>
+            <div className="iconinput inputpwd" onClick={toggleType}>
               {showPwd ? <Eyeshow /> : <Eyehide />}
-            </a>
+            </div>
             {password.errors && (
               <small className="form-error">{password.errors}</small>
             )}

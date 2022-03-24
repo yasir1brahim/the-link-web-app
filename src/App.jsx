@@ -21,6 +21,7 @@ function App() {
         <Route path="/admin-landing" element={<AdminLanding />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
         <Route path="/project-list" element={<CustomerProjects />} />
+        <Route path="/project-logs" element={<ProjectLogs />} />
         <Route path="/project-details" element={<ProjectsDetails />} />
         <Route path="/login" element={<Signin />} />
         <Route path="/sign-up" element={<SignUp />} />

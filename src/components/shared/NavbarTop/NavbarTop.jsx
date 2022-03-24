@@ -20,7 +20,7 @@ const NavbarTop = () => {
         </a>
         <Nav className="ml-auto" navbar>
           <NavItem>
-            <NavLink className="notification-wrapper" href="/">
+            <NavLink className="notification-wrapper" href="/admin-landing">
               <Notification />
               <small className="notification-count">3</small>
             </NavLink>
@@ -28,7 +28,7 @@ const NavbarTop = () => {
           <NavItem>
             <NavLink
               className={'user-wrapper ' + (navDrop ? 'navdrop-open' : '')}
-              href="/"
+              // href="/"
               onClick={toggleDrop}
             >
               <span className="user-icon">
@@ -39,7 +39,11 @@ const NavbarTop = () => {
             </NavLink>
             {navDrop ? (
               <div className="nav-dropdown">
-                <a href="/" className="navlist" onClick={toggleDrop}>
+                <a
+                  href="/admin-landing"
+                  className="navlist"
+                  onClick={toggleDrop}
+                >
                   View Company Profile
                 </a>
                 <a

@@ -9,7 +9,7 @@ import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
 import PaginatedItems from '../shared/Pagination/Pagination';
 import CreateEmployee from './createEmployee';
 import axiosInstance from '../../config/axios';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -34,6 +34,7 @@ const CustomerProfile = (props) => {
   const [profilePicture, setProfilePicture] = useState('');
   const { state } = useLocation();
   const customer = state;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,10 +60,7 @@ const CustomerProfile = (props) => {
   }, [state]);
 
   const handleViewEmployee = (employee) => {
-    return Navigate({
-      to: '/project-list',
-      state: { employee },
-    });
+    navigate('/project-list', { state: employee });
   };
 
   const handleDeleteEmployee = async (id) => {
@@ -512,10 +510,9 @@ const CustomerProfile = (props) => {
           </div>
           <div className="customer-users-details">
             {employeeData.length === 0 ? (
-              <a
+              <div
                 onClick={toggleModal}
                 className="nouser-wrapper d-flex align-items-center justify-content-center w-100"
-                href="/"
               >
                 <span
                   className="d-flex align-items-center justify-content-center"
@@ -523,7 +520,7 @@ const CustomerProfile = (props) => {
                 >
                   <AddUser /> Add User/Employee
                 </span>
-              </a>
+              </div>
             ) : (
               <>
                 <div className="table-top-content">
