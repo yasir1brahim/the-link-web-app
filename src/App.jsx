@@ -11,6 +11,7 @@ import Resetpwd from './components/Authentication/Resetpwd';
 import Resetsuccess from './components/Authentication/Resetsuccess';
 import Checkemail from './components/Authentication/Checkemail';
 import ProjectsDetails from './components/ProjectDetails/ProjectDetails';
+import ProjectLogs from './components/ProjectLogs/ProjectLogs';
 
 function App() {
   return (

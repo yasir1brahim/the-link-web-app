@@ -1,0 +1,99 @@
+.project-logs-wrapper{
+    .project-logs-content{
+        .project-logs{
+            .nologs-wrapper{
+                height: 247px;
+                border: 1px dashed $border-color;
+                border-radius: 8px;
+                margin-top: 24px;
+                span{
+                    color: $primary;
+                    font-size: 0.75rem;
+                    svg{
+                        margin-right: 8px;
+                    }
+                }
+            }
+            .table-top-content{
+                margin: 1rem 0;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                .table-entries{
+                    color: $primary;
+                    margin: 0;
+                    font-size: 0.875rem;
+                    .showing-strong{
+                        font-weight: bold;
+                    }
+                }
+                .table-bulk-changes{
+                    display: flex;
+                    margin-left: auto;
+                    align-items: center;
+                    justify-content: flex-start;
+                    > *{
+                        &:not(:first-child){
+                            margin-left: 1rem;
+                        }
+                    }
+                    .log-search{
+                        .search-icon{
+                            display: inline-block;
+                            background: url('../../assets/images/search.svg') no-repeat 8px center;
+                        }
+                        &-input{
+                            height: 34px;
+                            border: 1px solid $border-color;
+                            outline: none !important;
+                            padding: 8px 8px 8px 34px;
+                            min-width: 240px;
+                            transition: all 0.3s ease;
+                            border-radius: 4px;
+                            &:focus {
+                                border-color: $primary;
+                            }
+                        }
+                    }
+                }
+            }
+            .l-table-wrapper{
+                table{
+                    tr{
+                        .ticket-checkbox{
+                            width: 36px;
+                            cursor: pointer;
+                            .form-group{
+                                margin: 0;
+                                .custom-control{
+                                    &-input{
+                                        width: 20px;
+                                        height: 24px;
+                                    }
+                                    &-label{
+                                        top: unset;
+                                        padding: 0 !important;
+                                    }   
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .table-footer-content{
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                p{
+                    color: #999;
+                    margin: 0;
+                    font-size: 0.75rem;
+                    font-weight: bold;
+                    span{
+                        color: $primary;
+                    }
+                }
+            }
+        }
+    }
+}
