@@ -7,7 +7,7 @@ import { ReactComponent as Close } from '../../assets/images/close.svg';
 import { ReactComponent as Error } from '../../assets/images/error.svg';
 import { ReactComponent as Success } from '../../assets/images/circle-success.svg';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../config/axios';
@@ -21,6 +21,7 @@ const ProjectsDetails = () => {
   const [projectData, setProjectData] = useState([]);
   const [pdfFile, setPdfFile] = useState({});
   const [fileData, setFileData] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,6 +78,12 @@ const ProjectsDetails = () => {
         progress: undefined,
       });
     }
+  };
+
+  const handleViewLog = (project) => {
+    navigate('/project-logs', {
+      state: { project, projectName: state?.project_name },
+    });
   };
 
   return (
@@ -144,6 +151,7 @@ const ProjectsDetails = () => {
                                 <button
                                   type="button"
                                   className="btn btn-secondary btn-sm"
+                                  onClick={() => handleViewLog(project)}
                                 >
                                   View Logs
                                 </button>

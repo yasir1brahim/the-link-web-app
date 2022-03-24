@@ -18,7 +18,6 @@ axiosInstance.interceptors.response.use(
       // localStorage.setItem('token', 'logOut');
       // localStorage.removeItem('userId');
     }
-    console.log('kk', error.message);
     throw error;
   }
 );
