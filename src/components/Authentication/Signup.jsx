@@ -127,9 +127,9 @@ const SignUp = () => {
                 setPassword(e.target.value);
               }}
             />
-            <a className="iconinput inputpwd" href="/" onClick={toggleType}>
+            <div className="iconinput inputpwd" onClick={toggleType}>
               {showPwd ? <Eyeshow /> : <Eyehide />}
-            </a>
+            </div>
             {/* <small className='form-error'>Please enter a correct Password</small> */}
           </div>
           <div className="form-group form-btn">

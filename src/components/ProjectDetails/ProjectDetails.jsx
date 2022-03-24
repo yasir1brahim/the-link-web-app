@@ -4,8 +4,8 @@ import NavbarTop from '../shared/NavbarTop/NavbarTop';
 import { ReactComponent as Upload } from '../../assets/images/upload.svg';
 import { ReactComponent as FileDocument } from '../../assets/images/file-document.svg';
 import { ReactComponent as Close } from '../../assets/images/close.svg';
-// import { ReactComponent as Error } from '../../assets/images/error.svg';
-// import { ReactComponent as Success } from '../../assets/images/circle-success.svg';
+import { ReactComponent as Error } from '../../assets/images/error.svg';
+import { ReactComponent as Success } from '../../assets/images/circle-success.svg';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import { useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
@@ -14,10 +14,13 @@ import axiosInstance from '../../config/axios';
 
 const ProjectsDetails = () => {
   const [modal, setModal] = useState(false);
+  const [errorModal, toggleErrorModal] = useState(false);
+  const [successModal, toggleSuccessModal] = useState(false);
   const toggleModal = () => setModal(!modal);
   const { state } = useLocation();
   const [projectData, setProjectData] = useState([]);
   const [pdfFile, setPdfFile] = useState({});
+  const [fileData, setFileData] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,7 +44,10 @@ const ProjectsDetails = () => {
       });
     });
   }, [state]);
-
+  const backToUpload = () => {
+    toggleErrorModal(false);
+    setModal(true);
+  };
   const handleSubmit = async () => {
     try {
       const data = new FormData();
@@ -54,8 +60,13 @@ const ProjectsDetails = () => {
       });
       if (response.data) {
         console.log(response.data);
+        setFileData(response.data.message);
+        setModal(false);
+        toggleSuccessModal(true);
       }
     } catch (error) {
+      toggleErrorModal(true);
+      setModal(false);
       toast.error(error.message, {
         position: 'bottom-center',
         autoClose: 5000,
@@ -230,16 +241,43 @@ const ProjectsDetails = () => {
             {/* Upload form code */}
 
             {/* Error Upload code */}
-            {/* <div className='error-upload text-center'>
-                        <Error />
-                        <h5>Error</h5>
-                        <p>This file is already there in our data base, try uploading new file.</p>
-                        <button type='button' className='d-inline-block btn btn-primary'>Go back to Upload</button>
-                    </div> */}
+          </ModalBody>
+        </Modal>
+        <Modal
+          isOpen={errorModal}
+          fade={false}
+          toggle={toggleErrorModal}
+          className="upload-doc-popup modal-lg"
+        >
+          <ModalHeader toggle={toggleErrorModal}>Upload Document</ModalHeader>
+          <ModalBody>
             {/* Error Upload code */}
-
+            <div className="error-upload text-center">
+              <Error />
+              <h5>Error</h5>
+              <p>There was some error uploading this file.</p>
+              <button
+                type="button"
+                className="d-inline-block btn btn-primary"
+                onClick={backToUpload}
+              >
+                Go back to Upload
+              </button>
+            </div>
+          </ModalBody>
+        </Modal>
+        <Modal
+          isOpen={successModal}
+          fade={false}
+          toggle={() => toggleSuccessModal(!successModal)}
+          className="upload-doc-popup modal-lg"
+        >
+          <ModalHeader toggle={() => toggleSuccessModal(!successModal)}>
+            Upload Document
+          </ModalHeader>
+          <ModalBody>
             {/* Success Upload code */}
-            {/* <div className="success-upload text-center">
+            <div className="success-upload text-center">
               <Success />
               <h5>Success</h5>
               <p>Your file has been succesfully parsed.</p>
@@ -250,39 +288,38 @@ const ProjectsDetails = () => {
                 </li>
                 <li className="doc-content-list">
                   <span>Submittals</span>
-                  <span>700</span>
+                  <span>{fileData?.submittal}</span>
                 </li>
                 <li className="doc-content-list">
                   <span>Testings</span>
-                  <span>20</span>
+                  <span>{fileData?.testing}</span>
                 </li>
                 <li className="doc-content-list">
                   <span>Meetings</span>
-                  <span>36</span>
+                  <span>{fileData?.meeting}</span>
                 </li>
                 <li className="doc-content-list">
                   <span>Closeouts</span>
-                  <span>121</span>
+                  <span>{fileData?.closeout}</span>
                 </li>
               </ul>
               <div className="text-right">
                 <button
                   type="button"
-                  onClick={toggleModal}
+                  onClick={() => toggleSuccessModal(false)}
                   className="d-inline-block btn btn-secondary mr-3"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
-                  onClick={toggleModal}
+                  onClick={() => toggleSuccessModal(false)}
                   className="d-inline-block btn btn-primary"
                 >
                   Save
                 </button>
               </div>
-            </div> */}
-            {/* Success Upload code */}
+            </div>
           </ModalBody>
         </Modal>
       </div>

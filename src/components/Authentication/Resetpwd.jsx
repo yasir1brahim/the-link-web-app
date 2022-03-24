@@ -40,9 +40,9 @@ const Resetpwd = () => {
               placeholder="Enter New Password"
               required
             />
-            <a className="iconinput inputpwd" href="/" onClick={toggleNType}>
+            <div className="iconinput inputpwd" onClick={toggleNType}>
               {showNPwd ? <Eyeshow /> : <Eyehide />}
-            </a>
+            </div>
             {/* <small className='form-error'>Please enter a Password</small> */}
           </div>
           <div className="form-group">
@@ -57,9 +57,9 @@ const Resetpwd = () => {
               placeholder="Confirm New Password"
               required
             />
-            <a className="iconinput inputpwd" href="/" onClick={toggleCType}>
+            <div className="iconinput inputpwd" onClick={toggleCType}>
               {showCPwd ? <Eyeshow /> : <Eyehide />}
-            </a>
+            </div>
             {/* <small className='form-error'>Please enter a Password</small> */}
           </div>
           <div className="form-group form-btn">
