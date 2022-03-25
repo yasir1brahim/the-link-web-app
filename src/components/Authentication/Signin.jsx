@@ -15,11 +15,6 @@ const Signin = (props) => {
   const toggleType = () => setShowPwd(!showPwd);
   const history = useNavigate();
 
-  // useEffect(() => {
-  //   if (localStorage.getItem('token') === 'logOut') {
-  //     history('/');
-  //   }
-  // });
   const validate = () => {
     let error = false;
     if (email.value === '') {

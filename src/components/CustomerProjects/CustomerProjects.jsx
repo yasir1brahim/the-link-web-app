@@ -15,12 +15,18 @@ import CreateProject from './createProject';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import EditProject from './editProject';
 
 const CustomerProjects = (props) => {
   const [modal, setModal] = useState(false);
+  const [editModal, setEditModal] = useState(false);
   const [isArchived, toggleArchive] = useState(false);
   const toggleModal = () => setModal(!modal);
+  const toggleEditModal = () => setEditModal(!editModal);
   const [projectData, setProjectData] = useState([]);
+  const [project, setProject] = useState({});
+  const [pageRefresh, setPageRefresh] = useState(false);
+
   const { state } = useLocation();
   // const customer = state;
   const navigate = useNavigate();
@@ -38,7 +44,7 @@ const CustomerProjects = (props) => {
     };
 
     fetchData().catch((error) => {
-      toast.error(error.message, {
+      toast.error('Something went wrong!', {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -48,10 +54,14 @@ const CustomerProjects = (props) => {
         progress: undefined,
       });
     });
-  }, [state, isArchived]);
+  }, [state, isArchived, pageRefresh]);
 
   const handleLaunch = (project) => {
     navigate('/project-details', { state: project });
+  };
+  const handleEdit = (project) => {
+    setProject(project);
+    toggleEditModal();
   };
 
   return (
@@ -85,7 +95,7 @@ const CustomerProjects = (props) => {
                     type="button"
                     className="btn btn-secondary btn-sm"
                   >
-                    Archieved
+                    Archived
                   </button>
                 </div>
               </div>
@@ -180,7 +190,7 @@ const CustomerProjects = (props) => {
                               <button
                                 type="button"
                                 className="btn btn-secondary btn-sm"
-                                onClick={toggleModal}
+                                onClick={() => handleEdit(project)}
                               >
                                 Edit
                               </button>
@@ -199,6 +209,16 @@ const CustomerProjects = (props) => {
                 modal={modal}
                 toggleModal={toggleModal}
                 customer={state}
+                pageRefresh={pageRefresh}
+                setPageRefresh={setPageRefresh}
+              />
+              <EditProject
+                modal={editModal}
+                toggleModal={toggleEditModal}
+                customer={state}
+                project={project}
+                pageRefresh={pageRefresh}
+                setPageRefresh={setPageRefresh}
               />
             </div>
           </div>

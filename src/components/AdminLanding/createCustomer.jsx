@@ -6,7 +6,12 @@ import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const CreateCustomer = ({ modal, toggleModal }) => {
+const CreateCustomer = ({
+  modal,
+  toggleModal,
+  setPageRefresh,
+  pageRefresh,
+}) => {
   const [email, setEmail] = useState({ value: '', errors: '' });
   const [password, setPassword] = useState({ value: '', errors: '' });
   const [companyName, setCompanyName] = useState({ value: '', errors: '' });
@@ -51,7 +56,7 @@ const CreateCustomer = ({ modal, toggleModal }) => {
             admin_id: Number(localStorage.getItem('userId')),
           },
         });
-
+        setPageRefresh(!pageRefresh);
         if (response.data?.customer_id && profilePicture) {
           await axiosInstance({
             method: 'post',
@@ -63,10 +68,11 @@ const CreateCustomer = ({ modal, toggleModal }) => {
           });
           console.log(response.data);
         }
+
         toggleModal();
       } catch (error) {
         console.log(error.message);
-        toast.error(error.message, {
+        toast.error('Something went wrong!', {
           position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,

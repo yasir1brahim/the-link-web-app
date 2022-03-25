@@ -2,9 +2,16 @@ import axios from 'axios';
 
 const axiosInstance = axios.create({
   baseURL: process.env.REACT_APP_BASE_URL,
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
-  },
+  // headers: {
+  //   Authorization: `Bearer ${localStorage.getItem('token')}`,
+  // },
+});
+
+axiosInstance.interceptors.request.use(function (config) {
+  // Do something before request is sent
+  let token = localStorage.getItem('token');
+  config.headers['Authorization'] = 'Bearer ' + token;
+  return config;
 });
 
 axiosInstance.interceptors.response.use(
@@ -15,8 +22,6 @@ axiosInstance.interceptors.response.use(
     // return error.response
     if (error?.response?.status === 401 || error.message === 'Network Error') {
       window.location = '/';
-      // localStorage.setItem('token', 'logOut');
-      // localStorage.removeItem('userId');
     }
     throw error;
   }

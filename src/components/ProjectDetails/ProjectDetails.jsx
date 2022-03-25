@@ -34,7 +34,7 @@ const ProjectsDetails = () => {
     };
 
     fetchData().catch((error) => {
-      toast.error(error.message, {
+      toast.error('Something went wrong!', {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -68,7 +68,7 @@ const ProjectsDetails = () => {
     } catch (error) {
       toggleErrorModal(true);
       setModal(false);
-      toast.error(error.message, {
+      toast.error('Something went wrong!', {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -165,13 +165,13 @@ const ProjectsDetails = () => {
                 </div>
               )}
               <div className="table-footer-content">
-                <button
+                {/* <button
                   type="button"
                   onClick={toggleModal}
                   className="btn btn-secondary btn-sm"
                 >
                   View Logs
-                </button>
+                </button> */}
                 <p>
                   Documents Uploaded: <span>05</span>
                 </p>

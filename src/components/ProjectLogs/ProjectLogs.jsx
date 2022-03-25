@@ -11,10 +11,21 @@ import SubmittalTable from './submittalTable';
 import TestingTable from './testingTable';
 import CloseOutTable from './closeOutTable';
 import MeetingTable from './meetingTable';
+import { CSVLink } from 'react-csv';
 
 const ProjectLogs = () => {
   const { state } = useLocation();
   const [logData, setLogData] = useState([]);
+  const headers = [
+    { label: 'Spec Section', key: 'spec_section' },
+    { label: 'Sub Section', key: 'sub_section' },
+    { label: 'Type', key: 'section_name' },
+    { label: 'Description', key: 'description' },
+    // { label: 'Status', key: 'status' },
+    // { label: 'Date Issued', key: 'date_issued' },
+    // { label: 'Date Approved', key: 'date_approved' },
+    // { label: 'Comments', key: 'comments' },
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,7 +42,7 @@ const ProjectLogs = () => {
     };
 
     fetchData().catch((error) => {
-      toast.error(error.message, {
+      toast.error('Something went wrong!', {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -77,9 +88,17 @@ const ProjectLogs = () => {
                         className="search-icon log-search-input"
                       />
                     </div>
-                    <button type="button" className="btn btn-secondary btn-sm">
+                    {/* <button type="button" className="btn btn-secondary btn-sm"> */}
+                    <CSVLink
+                      filename={`${state.project?.type}.csv`}
+                      data={logData}
+                      target="_blank"
+                      className="btn btn-secondary btn-sm"
+                      headers={headers}
+                    >
                       Export CSV
-                    </button>
+                    </CSVLink>
+                    {/* </button> */}
                     <button
                       type="button"
                       className="d-flex btn btn-secondary btn-sm"

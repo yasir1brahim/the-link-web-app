@@ -4,10 +4,11 @@ import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
 import { Typeahead } from 'react-bootstrap-typeahead';
 
-const CreateEmployee = ({
+const EditEmployee = ({
   modal,
   toggleModal,
   customer,
+  employee,
   pageRefresh,
   setPageRefresh,
 }) => {
@@ -27,53 +28,55 @@ const CreateEmployee = ({
       });
       setProjects(response.data.message);
     };
-    console.log(asscProject);
+
     fetchData().catch(console.error);
   }, [customer]);
 
-  const validate = () => {
-    let error = false;
-    if (email.value === '') {
-      setEmail({ ...email, errors: 'Email is required.' });
-      error = true;
-    }
-    return error;
-  };
+  // const validate = () => {
+  //   let error = false;
+  //   if (email.value === '') {
+  //     setEmail({ ...email, errors: 'Email is required.' });
+  //     error = true;
+  //   }
+  //   return error;
+  // };
 
   const handleSubmit = async () => {
-    let errors = validate();
-    if (!errors) {
-      try {
-        const response = await axiosInstance({
-          method: 'post',
-          url: '/createEmployee',
-          data: {
-            email_address: email.value,
-            full_name: `${firstName.value}  ${lastName.value}`,
-            projects: asscProject.map((project) => project.value),
-            contact_number: contactNumber.value,
-            customer_id: customer.customer_id,
-          },
-        });
-        if (response.data) {
-          console.log(response.data);
-          setPageRefresh(!pageRefresh);
-          toggleModal();
-        }
-      } catch (error) {
-        console.log(error.message);
-        toast.error('Something went wrong!', {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+    // let errors = validate();
+    // if (!errors) {
+    try {
+      const response = await axiosInstance({
+        method: 'put',
+        url: '/updateEmployee',
+        data: {
+          email_address: email.value || employee?.emp_email,
+          full_name: `${firstName.value || employee?.name.split(/(\s+)/)[0]}  ${
+            lastName.value || employee?.name.split(/(\s+)/)[0]
+          }`,
+          projects: asscProject.map((project) => project.value),
+          contact_number: contactNumber.value,
+          customer_id: customer.customer_id,
+        },
+      });
+      if (response.data) {
+        console.log(response.data);
+        setPageRefresh(!pageRefresh);
         toggleModal();
       }
+    } catch (error) {
+      console.log(error.message);
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      toggleModal();
     }
+    // }
   };
   return (
     <Modal
@@ -82,7 +85,7 @@ const CreateEmployee = ({
       toggle={toggleModal}
       className="new-user modal-lg"
     >
-      <ModalHeader toggle={toggleModal}>Add User/Employee</ModalHeader>
+      <ModalHeader toggle={toggleModal}>Edit User/Employee</ModalHeader>
       <ModalBody>
         <form className="create-user-form">
           <div className="create-user-content">
@@ -95,8 +98,9 @@ const CreateEmployee = ({
                     id="userFirstName"
                     aria-describedby="userFirstName"
                     placeholder="Enter"
-                    required
-                    value={firstName.value}
+                    defaultValue={
+                      employee?.name ? employee?.name.split(/(\s+)/)[0] : ''
+                    }
                     onChange={(e) => {
                       setFirstName({
                         ...firstName,
@@ -117,8 +121,9 @@ const CreateEmployee = ({
                     id="userLastName"
                     aria-describedby="userLastName"
                     placeholder="Enter"
-                    required
-                    value={lastName.value}
+                    defaultValue={
+                      employee?.name ? employee?.name.split(/(\s+)/)[2] : ''
+                    }
                     onChange={(e) => {
                       setLastName({
                         ...lastName,
@@ -139,8 +144,7 @@ const CreateEmployee = ({
                     id="userEmailAddress"
                     aria-describedby="userEmailAddress"
                     placeholder="Enter"
-                    required
-                    value={email.value}
+                    defaultValue={employee.emp_email}
                     onChange={(e) => {
                       setEmail({
                         ...email,
@@ -161,8 +165,7 @@ const CreateEmployee = ({
                     id="userPhone"
                     aria-describedby="userPhone"
                     placeholder="Enter"
-                    required
-                    value={contactNumber.value}
+                    defaultValue={employee.contact_number}
                     onChange={(e) => {
                       setContactNumber({
                         ...contactNumber,
@@ -208,4 +211,4 @@ const CreateEmployee = ({
   );
 };
 
-export default CreateEmployee;
+export default EditEmployee;
