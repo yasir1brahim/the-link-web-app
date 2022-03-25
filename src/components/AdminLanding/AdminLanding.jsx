@@ -13,32 +13,36 @@ const Adminlanding = (props) => {
   const [isArchived, toggleArchive] = useState(false);
   const [customerData, setCustomerData] = useState([]);
   const toggleModal = () => setModal(!modal);
+  const [pageRefresh, setPageRefresh] = useState(false);
+
   const navigate = useNavigate();
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await axiosInstance({
-        method: 'get',
-        url: `/customers/${localStorage.getItem('userId')}`,
-      });
-      setCustomerData(
-        isArchived ? response.data.archived_customers : response.data.message
-      );
-      localStorage.setItem('account_id', response.data.account_id);
-      console.log(response.data.message);
-    };
+    if (localStorage.getItem('token') !== null) {
+      const fetchData = async () => {
+        const response = await axiosInstance({
+          method: 'get',
+          url: `/customers/${localStorage.getItem('userId')}`,
+        });
+        setCustomerData(
+          isArchived ? response.data.archived_customers : response.data.message
+        );
+        localStorage.setItem('account_id', response.data.account_id);
+        console.log(response.data.message);
+      };
 
-    fetchData().catch((error) => {
-      toast.error(error.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
+      fetchData().catch((error) => {
+        toast.error('Something went wrong!', {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
       });
-    });
-  }, [isArchived]);
+    }
+  }, [isArchived, pageRefresh, localStorage.getItem('token')]);
 
   const handleViewCustomer = (customer) => {
     navigate('/customer-profile', { state: customer });
@@ -71,7 +75,7 @@ const Adminlanding = (props) => {
                   className="btn btn-secondary btn-sm"
                   onClick={() => toggleArchive(!isArchived)}
                 >
-                  Archieved
+                  Archived
                 </button>
               </div>
             </div>
@@ -189,7 +193,12 @@ const Adminlanding = (props) => {
             </div>
           </div>
         </div>
-        <CreateCustomer modal={modal} toggleModal={toggleModal} />
+        <CreateCustomer
+          modal={modal}
+          toggleModal={toggleModal}
+          setPageRefresh={setPageRefresh}
+          pageRefresh={pageRefresh}
+        />
       </div>
       <ToastContainer
         position="bottom-center"

@@ -8,13 +8,15 @@ import 'react-toastify/dist/ReactToastify.css';
 import WhitingTurner from '../../assets/images/whiting-turner.svg';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import DateSelector from '../shared/DateSelector/DateSelector';
-import { Typeahead } from 'react-bootstrap-typeahead';
+// import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
+// import moment from 'moment';
 
-const CreateProject = ({
+const EditProject = ({
   modal,
   toggleModal,
   customer,
+  project,
   pageRefresh,
   setPageRefresh,
 }) => {
@@ -26,7 +28,6 @@ const CreateProject = ({
   const [endDate, setEndDate] = useState('');
   // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
   const [employeeList, setEmployeeList] = useState([]);
-  const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });
 
   useEffect(() => {
@@ -61,18 +62,16 @@ const CreateProject = ({
     if (!errors) {
       try {
         const response = await axiosInstance({
-          method: 'post',
-          url: '/createProject',
+          method: 'put',
+          url: '/updateProject',
           data: {
-            project_name: projectName.value,
-            lead_contact: leadContact[0].value,
-            start_date: startDate,
-            end_date: endDate,
+            project_name: projectName.value || project.project_name,
+            lead_contact: leadContact[0].value || project.lead_contact,
+            start_date: startDate || project.start_date,
+            end_date: endDate || project.end_date,
             customer_id: customer.customer_id,
             status: 'Open',
-            employee_list: selectedEmployeeList.map(
-              (employee) => employee.value
-            ),
+            project_id: project.project_id,
           },
         });
         if (response.data) {
@@ -104,7 +103,7 @@ const CreateProject = ({
         toggle={toggleModal}
         className="new-project modal-lg"
       >
-        <ModalHeader toggle={toggleModal}>Create New Project</ModalHeader>
+        <ModalHeader toggle={toggleModal}>Edit Project</ModalHeader>
         <ModalBody>
           <form className="create-project-form">
             <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
@@ -115,22 +114,18 @@ const CreateProject = ({
                 <div className="row">
                   <div className="col-12">
                     <div className="text-label-value">
-                      <div className="text-value">Whiting Turner</div>
+                      <div className="text-value">{customer.customer_name}</div>
+                    </div>
+                  </div>
+                  <div className="col-12">
+                    <div className="text-label-value">
+                      <div className="text-label">{customer.address}</div>
                     </div>
                   </div>
                   <div className="col-12">
                     <div className="text-label-value">
                       <div className="text-label">
-                        Ms Alice Smith Apartment 1c 213,
-                        <br />
-                        Derrick Street, Boston, MA 02130 USA.{' '}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-12">
-                    <div className="text-label-value">
-                      <div className="text-label">
-                        +(425) 555 0100, +(732) 622 4888
+                        {customer.contact_number}
                       </div>
                     </div>
                   </div>
@@ -147,8 +142,7 @@ const CreateProject = ({
                       id="customerProjectName"
                       aria-describedby="customerProjectName"
                       placeholder="Enter"
-                      required
-                      value={projectName.value}
+                      defaultValue={project.project_name}
                       onChange={(e) => {
                         setProjectName({
                           ...projectName,
@@ -199,6 +193,11 @@ const CreateProject = ({
                       placeholderText="Start Date"
                       labelText="Start Date"
                       onChange={setStartDate}
+                      // selected={
+                      //   project.start_date
+                      //     ? moment(project.start_date, 'DD-MM-YYYY')
+                      //     : null
+                      // }
                       selected={startDate}
                     />
                   </div>
@@ -210,6 +209,11 @@ const CreateProject = ({
                       placeholderText="End Date"
                       labelText="End Date"
                       onChange={setEndDate}
+                      // selected={
+                      //   project.end_date
+                      //     ? moment(project.end_date, 'DD-MM-YYYY')
+                      //     : null
+                      // }
                       selected={endDate}
                     />
                   </div>
@@ -219,7 +223,7 @@ const CreateProject = ({
                     <SelectDropdown label={'Project Type'} labelKey="name" />
                   </div>
                 </div> */}
-                <div className="col-12">
+                {/* <div className="col-12">
                   <div className="users-section">
                     <ul>
                       <li>
@@ -245,7 +249,7 @@ const CreateProject = ({
                       </li>
                     </ul>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
             <ModalFooter>
@@ -274,4 +278,4 @@ const CreateProject = ({
   );
 };
 
-export default CreateProject;
+export default EditProject;

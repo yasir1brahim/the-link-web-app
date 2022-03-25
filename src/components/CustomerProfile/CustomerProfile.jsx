@@ -12,13 +12,18 @@ import axiosInstance from '../../config/axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import EditEmployee from './editEmployee';
 
 const CustomerProfile = (props) => {
   const [editProfile, setEditProfile] = useState(false);
   const toggleEditProfile = () => setEditProfile(!editProfile);
   const [modal, setModal] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+  const [pageRefresh, setPageRefresh] = useState(false);
   const toggleModal = () => setModal(!modal);
+  const toggleEditModal = () => setEditModal(!editModal);
   const [employeeData, setEmployeeData] = useState([]);
+  const [projectData, setProjectData] = useState([]);
   const [resetPwd, setResetPwd] = useState(false);
   const toggleResetPwd = () => setResetPwd(!resetPwd);
   const [email, setEmail] = useState({ value: '', errors: '' });
@@ -27,6 +32,7 @@ const CustomerProfile = (props) => {
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [address, setAddress] = useState({ value: '', errors: '' });
   const [password, setPassword] = useState({ value: '', errors: '' });
+  const [employee, setEmployee] = useState({});
   const [confirmPassword, setConfirmPassword] = useState({
     value: '',
     errors: '',
@@ -45,9 +51,8 @@ const CustomerProfile = (props) => {
       setEmployeeData(response.data.message);
       console.log(response.data.message);
     };
-
     fetchData().catch((error) => {
-      toast.error(error.message, {
+      toast.error('Something went wrong!', {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -57,11 +62,45 @@ const CustomerProfile = (props) => {
         progress: undefined,
       });
     });
+  }, [state, pageRefresh]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axiosInstance({
+        method: 'get',
+        url: `/projects/${state.customer_id}`,
+      });
+      setProjectData(response.data.message);
+      console.log(response.data.message);
+    };
+    fetchData().catch((error) => {
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    });
+  }, [state, pageRefresh]);
+
+  useEffect(async () => {
+    try {
+      const picture = await axiosInstance({
+        method: 'get',
+        url: `/getLogo/${state.customer_id}`,
+      });
+      setProfilePicture(picture.data);
+      console.log(picture);
+    } catch (error) {
+      console.log(error);
+    }
   }, [state]);
 
-  const handleViewEmployee = (employee) => {
-    navigate('/project-list', { state: employee });
-  };
+  // const handleViewEmployee = (employee) => {
+  //   navigate('/project-list', { state: employee });
+  // };
 
   const handleDeleteEmployee = async (id) => {
     try {
@@ -73,6 +112,7 @@ const CustomerProfile = (props) => {
         },
       });
       console.log(response.data);
+      setPageRefresh(!pageRefresh);
       toast.success('Employee Deleted Successfully.', {
         position: 'bottom-center',
         autoClose: 5000,
@@ -84,7 +124,7 @@ const CustomerProfile = (props) => {
       });
     } catch (error) {
       console.log(error.message);
-      toast.error(error.message, {
+      toast.error('Something went wrong!', {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -107,6 +147,11 @@ const CustomerProfile = (props) => {
       error = true;
     }
     return error;
+  };
+  const handleEdit = (employee) => {
+    console.log('first', employee);
+    setEmployee(employee);
+    toggleEditModal();
   };
 
   const handleSubmit = async () => {
@@ -150,7 +195,7 @@ const CustomerProfile = (props) => {
         });
       } catch (error) {
         console.log(error.message);
-        toast.error(error.message, {
+        toast.error('Something went wrong!', {
           position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
@@ -174,7 +219,10 @@ const CustomerProfile = (props) => {
             {!editProfile ? (
               <>
                 <div className="customer-dp-container">
-                  <img src={WhitingTurner} alt="Company Logo" />
+                  <img
+                    src={profilePicture || WhitingTurner}
+                    alt="Company Logo"
+                  />
                 </div>
                 <div className="customer-profile">
                   <div className="row">
@@ -577,11 +625,13 @@ const CustomerProfile = (props) => {
                               {/* 625 Adams
                               <br />
                               Gimmy’s hospital */}
-                              {employee.projects}
+                              {projectData
+                                .map((project) => project.project_name)
+                                .join()}
                             </td>
                             <td>
                               <div className="action-wrapper">
-                                <button
+                                {/* <button
                                   type="button"
                                   className="btn btn-secondary btn-sm"
                                   onClick={() => {
@@ -589,11 +639,11 @@ const CustomerProfile = (props) => {
                                   }}
                                 >
                                   View
-                                </button>
+                                </button> */}
                                 <button
                                   type="button"
                                   className="btn btn-secondary btn-sm"
-                                  onClick={toggleModal}
+                                  onClick={() => handleEdit(employee)}
                                 >
                                   Edit
                                 </button>
@@ -626,6 +676,16 @@ const CustomerProfile = (props) => {
         modal={modal}
         toggleModal={toggleModal}
         customer={customer}
+        pageRefresh={pageRefresh}
+        setPageRefresh={setPageRefresh}
+      />
+      <EditEmployee
+        modal={editModal}
+        toggleModal={toggleEditModal}
+        customer={customer}
+        employee={employee}
+        pageRefresh={pageRefresh}
+        setPageRefresh={setPageRefresh}
       />
       <ToastContainer
         position="bottom-center"
