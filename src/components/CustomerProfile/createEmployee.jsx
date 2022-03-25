@@ -27,7 +27,6 @@ const CreateEmployee = ({
       });
       setProjects(response.data.message);
     };
-    console.log(asscProject);
     fetchData().catch(console.error);
   }, [customer]);
 

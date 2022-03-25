@@ -17,32 +17,30 @@ const Adminlanding = (props) => {
 
   const navigate = useNavigate();
   useEffect(() => {
-    if (localStorage.getItem('token') !== null) {
-      const fetchData = async () => {
-        const response = await axiosInstance({
-          method: 'get',
-          url: `/customers/${localStorage.getItem('userId')}`,
-        });
-        setCustomerData(
-          isArchived ? response.data.archived_customers : response.data.message
-        );
-        localStorage.setItem('account_id', response.data.account_id);
-        console.log(response.data.message);
-      };
-
-      fetchData().catch((error) => {
-        toast.error('Something went wrong!', {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+    const fetchData = async () => {
+      const response = await axiosInstance({
+        method: 'get',
+        url: `/customers/${localStorage.getItem('userId')}`,
       });
-    }
-  }, [isArchived, pageRefresh, localStorage.getItem('token')]);
+      setCustomerData(
+        isArchived ? response.data.archived_customers : response.data.message
+      );
+      localStorage.setItem('account_id', response.data.account_id);
+      console.log(response.data.message);
+    };
+
+    fetchData().catch((error) => {
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    });
+  }, [isArchived, pageRefresh]);
 
   const handleViewCustomer = (customer) => {
     navigate('/customer-profile', { state: customer });

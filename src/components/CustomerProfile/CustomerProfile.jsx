@@ -9,7 +9,7 @@ import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
 import PaginatedItems from '../shared/Pagination/Pagination';
 import CreateEmployee from './createEmployee';
 import axiosInstance from '../../config/axios';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EditEmployee from './editEmployee';
@@ -40,7 +40,7 @@ const CustomerProfile = (props) => {
   const [profilePicture, setProfilePicture] = useState('');
   const { state } = useLocation();
   const customer = state;
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,18 +85,19 @@ const CustomerProfile = (props) => {
     });
   }, [state, pageRefresh]);
 
-  useEffect(async () => {
-    try {
+  useEffect(() => {
+    const fetchData = async () => {
       const picture = await axiosInstance({
         method: 'get',
         url: `/getLogo/${state.customer_id}`,
       });
       setProfilePicture(picture.data);
       console.log(picture);
-    } catch (error) {
+    };
+    fetchData().catch((error) => {
       console.log(error);
-    }
-  }, [state]);
+    });
+  }, [state, pageRefresh]);
 
   // const handleViewEmployee = (employee) => {
   //   navigate('/project-list', { state: employee });
