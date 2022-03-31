@@ -14,6 +14,8 @@ const Adminlanding = (props) => {
   const [customerData, setCustomerData] = useState([]);
   const toggleModal = () => setModal(!modal);
   const [pageRefresh, setPageRefresh] = useState(false);
+  const [currentItems, setCurrentItems] = useState([]);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -64,8 +66,10 @@ const Adminlanding = (props) => {
           <div className="admin-landing-content">
             <div className="table-top-content">
               <label className="table-entries">
-                Showing entries<span className="showing-strong">6 </span>
-                of <span className="showing-strong">90</span>.
+                Showing entries
+                <span className="showing-strong">{currentItems.length}</span>
+                of <span className="showing-strong">{customerData.length}</span>
+                .
               </label>
               <div className="table-bulk-changes">
                 <button
@@ -117,7 +121,7 @@ const Adminlanding = (props) => {
                         Users<i className="sort-i"></i>
                       </span>
                     </th>
-                    <th>
+                    {/* <th>
                       <span className="has-sorting">
                         Start Date<i className="sort-d"></i>
                       </span>
@@ -126,12 +130,12 @@ const Adminlanding = (props) => {
                       <span className="has-sorting">
                         End Date<i className="sort-d"></i>
                       </span>
-                    </th>
+                    </th> */}
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {customerData.map((customer) => {
+                  {currentItems.map((customer) => {
                     return (
                       <tr>
                         <td className="ticket-checkbox">
@@ -159,16 +163,16 @@ const Adminlanding = (props) => {
                             }}
                             onClick={() => handleViewCustomer(customer)}
                           >
-                            {customer.account_owner}
+                            {customer.customer_name}
                           </span>
                         </td>
                         <td>{customer.status}</td>
                         <td>{customer.projects}</td>
                         <td>{customer.users}</td>
-                        <td>
+                        {/* <td>
                           {customer.start_date ? customer.start_date : '--'}
                         </td>
-                        <td>--</td>
+                        <td>--</td> */}
                         <td>
                           <div className="action-wrapper">
                             <button
@@ -187,7 +191,12 @@ const Adminlanding = (props) => {
               </table>
             </div>
             <div className="table-footer-content">
-              <PaginatedItems itemsPerPage={4} />
+              <PaginatedItems
+                items={customerData}
+                setCurrentItems={setCurrentItems}
+                itemsPerPage={itemsPerPage}
+                setItemsPerPage={setItemsPerPage}
+              />
             </div>
           </div>
         </div>

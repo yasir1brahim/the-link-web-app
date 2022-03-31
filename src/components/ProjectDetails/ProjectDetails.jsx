@@ -172,9 +172,9 @@ const ProjectsDetails = () => {
                 >
                   View Logs
                 </button> */}
-                <p>
+                {/* <p>
                   Documents Uploaded: <span>05</span>
-                </p>
+                </p> */}
               </div>
             </div>
           </div>

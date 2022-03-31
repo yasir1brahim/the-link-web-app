@@ -38,6 +38,8 @@ const CustomerProfile = (props) => {
     errors: '',
   });
   const [profilePicture, setProfilePicture] = useState('');
+  const [currentItems, setCurrentItems] = useState([]);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const { state } = useLocation();
   const customer = state;
   // const navigate = useNavigate();
@@ -576,8 +578,15 @@ const CustomerProfile = (props) => {
                   <div className="table-heading">
                     <h5 className="m-0">Employee/User List</h5>
                     <label className="table-entries">
-                      Showing entries <span className="showing-strong">6 </span>
-                      of <span className="showing-strong">90</span>.
+                      Showing entries
+                      <span className="showing-strong">
+                        {currentItems.length}
+                      </span>
+                      of{' '}
+                      <span className="showing-strong">
+                        {employeeData.length}
+                      </span>
+                      .
                     </label>
                   </div>
                   <div className="table-bulk-changes">
@@ -613,7 +622,7 @@ const CustomerProfile = (props) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {employeeData.map((employee) => {
+                      {currentItems.map((employee) => {
                         return (
                           <tr>
                             <td>{employee.name}</td>
@@ -668,7 +677,12 @@ const CustomerProfile = (props) => {
               </>
             )}
             <div className="table-footer-content">
-              <PaginatedItems itemsPerPage={4} />
+              <PaginatedItems
+                items={employeeData}
+                setCurrentItems={setCurrentItems}
+                itemsPerPage={itemsPerPage}
+                setItemsPerPage={setItemsPerPage}
+              />
             </div>
           </div>
         </div>

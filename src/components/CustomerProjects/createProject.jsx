@@ -65,7 +65,7 @@ const CreateProject = ({
           url: '/createProject',
           data: {
             project_name: projectName.value,
-            lead_contact: leadContact[0].value,
+            lead_contact: leadContact[0]?.value,
             start_date: startDate,
             end_date: endDate,
             customer_id: customer.customer_id,
@@ -224,7 +224,7 @@ const CreateProject = ({
                     <ul>
                       <li>
                         <div className="row">
-                          <div className="col-11">
+                          <div className="col-12">
                             <div className="form-group">
                               <Typeahead
                                 multiple
