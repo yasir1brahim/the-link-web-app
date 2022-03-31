@@ -62,3 +62,6 @@ ul {
     font-size: 0.875rem;
   }
 }
+.react-datepicker-popper {
+  z-index: 2 !important;
+}

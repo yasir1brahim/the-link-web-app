@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import ReactPaginate from 'react-paginate';
 
 // Example items, to simulate fetching from another resources.
-const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 // function Items({ currentItems }) {
 //   return (
 //     <>
@@ -16,9 +15,13 @@ const items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 //   );
 // }
 
-function PaginatedItems({ itemsPerPage }) {
+function PaginatedItems({
+  items,
+  setCurrentItems,
+  itemsPerPage,
+  setItemsPerPage,
+}) {
   // We start with an empty list of items.
-  // const [currentItems, setCurrentItems] = useState(null);
   const [pageCount, setPageCount] = useState(0);
   // Here we use item offsets; we could also use page offsets
   // following the API or data you're working with.
@@ -28,13 +31,13 @@ function PaginatedItems({ itemsPerPage }) {
     // Fetch items from another resources.
     const endOffset = itemOffset + itemsPerPage;
     console.log(`Loading items from ${itemOffset} to ${endOffset}`);
-    // setCurrentItems(items.slice(itemOffset, endOffset));
-    setPageCount(Math.ceil(items.length / itemsPerPage));
-  }, [itemOffset, itemsPerPage]);
+    setCurrentItems(items?.slice(itemOffset, endOffset));
+    setPageCount(Math.ceil(items?.length / itemsPerPage));
+  }, [itemOffset, itemsPerPage, items]);
 
   // Invoke when user click to request another page.
   const handlePageClick = (event) => {
-    const newOffset = (event.selected * itemsPerPage) % items.length;
+    const newOffset = (event.selected * itemsPerPage) % items?.length;
     console.log(
       `User requested page number ${event.selected}, which is offset ${newOffset}`
     );
@@ -55,12 +58,15 @@ function PaginatedItems({ itemsPerPage }) {
       />
       <label className="showing-content d-flex align-items-center justify-content-center">
         <span> Show</span>
-        <select className="pagination-select">
-          <option>5</option>
-          <option>10</option>
-          <option>25</option>
-          <option>50</option>
-          <option>100</option>
+        <select
+          className="pagination-select"
+          onChange={(e) => setItemsPerPage(Number(e.target.value))}
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
         </select>
       </label>
     </div>

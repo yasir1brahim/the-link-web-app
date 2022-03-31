@@ -26,7 +26,8 @@ const CustomerProjects = (props) => {
   const [projectData, setProjectData] = useState([]);
   const [project, setProject] = useState({});
   const [pageRefresh, setPageRefresh] = useState(false);
-
+  const [currentItems, setCurrentItems] = useState([]);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const { state } = useLocation();
   // const customer = state;
   const navigate = useNavigate();
@@ -85,8 +86,13 @@ const CustomerProjects = (props) => {
                 <div className="table-heading">
                   <h5 className="m-0">Projects List</h5>
                   <label className="table-entries">
-                    Showing entries <span className="showing-strong">6 </span>
-                    of <span className="showing-strong">90</span>.
+                    Showing entries
+                    <span className="showing-strong">
+                      {currentItems.length}
+                    </span>
+                    of{' '}
+                    <span className="showing-strong">{projectData.length}</span>
+                    .
                   </label>
                 </div>
                 <div className="table-bulk-changes">
@@ -153,7 +159,7 @@ const CustomerProjects = (props) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {projectData.map((project) => {
+                    {currentItems.map((project) => {
                       return (
                         <tr>
                           <td className="ticket-checkbox">
@@ -203,7 +209,12 @@ const CustomerProjects = (props) => {
                 </table>
               </div>
               <div className="table-footer-content">
-                <PaginatedItems itemsPerPage={4} />
+                <PaginatedItems
+                  items={projectData}
+                  setCurrentItems={setCurrentItems}
+                  itemsPerPage={itemsPerPage}
+                  setItemsPerPage={setItemsPerPage}
+                />
               </div>
               <CreateProject
                 modal={modal}
