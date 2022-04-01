@@ -124,12 +124,12 @@ const ProjectLogs = () => {
               </>
             )}
 
-            <div className="table-footer-content">
+            {/* <div className="table-footer-content">
               <button type="button" className="btn btn-secondary btn-sm">
                 Back
               </button>
               <PaginatedItems itemsPerPage={4} />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
