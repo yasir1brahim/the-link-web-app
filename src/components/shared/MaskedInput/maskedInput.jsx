@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Label, FormGroup } from 'reactstrap';
 // import cx from 'classnames';
 // import infoIcon from '../../commons/images/info-button.png';
