@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
-import { Typeahead } from 'react-bootstrap-typeahead';
+// import { Typeahead } from 'react-bootstrap-typeahead';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 
 const EditEmployee = ({
@@ -17,20 +17,21 @@ const EditEmployee = ({
   const [firstName, setFirstName] = useState({ value: '', errors: '' });
   const [lastName, setLastName] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
-  const [projects, setProjects] = useState([]);
+  // const [projects, setProjects] = useState([]);
   const [asscProject, setAsscProject] = useState([]);
 
   useEffect(() => {
     setEmail({ value: '', errors: '' });
-    const fetchData = async () => {
-      const response = await axiosInstance({
-        method: 'get',
-        url: `/projects/${customer.customer_id}`,
-      });
-      setProjects(response.data.message);
-    };
+    setAsscProject([]);
+    // const fetchData = async () => {
+    //   const response = await axiosInstance({
+    //     method: 'get',
+    //     url: `/projects/${customer.customer_id}`,
+    //   });
+    //   setProjects(response.data.message);
+    // };
 
-    fetchData().catch(console.error);
+    // fetchData().catch(console.error);
   }, [customer]);
 
   // const validate = () => {

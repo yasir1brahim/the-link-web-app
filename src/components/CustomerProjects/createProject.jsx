@@ -5,7 +5,7 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import WhitingTurner from '../../assets/images/whiting-turner.svg';
+// import WhitingTurner from '../../assets/images/whiting-turner.svg';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import DateSelector from '../shared/DateSelector/DateSelector';
 import { Typeahead } from 'react-bootstrap-typeahead';

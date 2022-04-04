@@ -18,7 +18,7 @@ export const MaskedInput = (props) => {
     name,
     defaultValue,
   } = props;
-  const [focused, setFocused] = useState(false);
+  // const [focused, setFocused] = useState(false);
   return (
     <>
       <FormGroup className={className}>
@@ -33,8 +33,8 @@ export const MaskedInput = (props) => {
           value={value}
           guide={false}
           onChange={onChange}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
+          // onFocus={() => setFocused(true)}
+          // onBlur={() => setFocused(false)}
           defaultChecked={defaultValue}
         />
         <Label className={labelClass}>{label}</Label>
