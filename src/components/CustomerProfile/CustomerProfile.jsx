@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
-import WhitingTurner from '../../assets/images/whiting-turner.svg';
+// import WhitingTurner from '../../assets/images/whiting-turner.svg';
 import ProfilePhoto from '../../assets/images/dummy-profile.svg';
 import { ReactComponent as Camera } from '../../assets/images/camera.svg';
 import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
@@ -24,7 +24,7 @@ const CustomerProfile = (props) => {
   const toggleModal = () => setModal(!modal);
   const toggleEditModal = () => setEditModal(!editModal);
   const [employeeData, setEmployeeData] = useState([]);
-  const [projectData, setProjectData] = useState([]);
+  // const [projectData, setProjectData] = useState([]);
   const [resetPwd, setResetPwd] = useState(false);
   const toggleResetPwd = () => setResetPwd(!resetPwd);
   const [email, setEmail] = useState({ value: '', errors: '' });
@@ -66,27 +66,27 @@ const CustomerProfile = (props) => {
       });
     });
   }, [state, pageRefresh]);
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await axiosInstance({
-        method: 'get',
-        url: `/projects/${state.customer_id}`,
-      });
-      setProjectData(response.data.message);
-      console.log(response.data.message);
-    };
-    fetchData().catch((error) => {
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    });
-  }, [state, pageRefresh]);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const response = await axiosInstance({
+  //       method: 'get',
+  //       url: `/projects/${state.customer_id}`,
+  //     });
+  //     setProjectData(response.data.message);
+  //     console.log(response.data.message);
+  //   };
+  //   fetchData().catch((error) => {
+  //     toast.error('Something went wrong!', {
+  //       position: 'bottom-center',
+  //       autoClose: 5000,
+  //       hideProgressBar: true,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //     });
+  //   });
+  // }, [state, pageRefresh]);
 
   useEffect(() => {
     const fetchData = async () => {
