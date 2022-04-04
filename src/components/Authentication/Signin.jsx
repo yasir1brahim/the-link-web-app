@@ -27,7 +27,9 @@ const Signin = (props) => {
     }
     return error;
   };
-  const handleSubmit = async () => {
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     let errors = validate();
     if (!errors) {
       try {
@@ -68,7 +70,7 @@ const Signin = (props) => {
         </a>
       </div>
       <div className="ac-right">
-        <form className="login-form">
+        <form className="login-form" onSubmit={handleSubmit}>
           <h1 className="form-heading">Hello!</h1>
           <p className="form-info">
             Welcome to The Link Log Manager. Please sign in if you have
@@ -132,11 +134,7 @@ const Signin = (props) => {
             </a>
           </div>
           <div className="form-group form-btn">
-            <button
-              type="button"
-              className="btn btn-primary w-100"
-              onClick={handleSubmit}
-            >
+            <button type="submit" className="btn btn-primary w-100">
               Login
             </button>
           </div>

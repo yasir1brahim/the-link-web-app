@@ -21,7 +21,11 @@ const CreateProject = ({
   // const [email, setEmail] = useState({ value: '', errors: '' });
   // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [projectName, setProjectName] = useState({ value: '', errors: '' });
-  const [leadContact, setLeadContact] = useState({ value: '', label: '' });
+  const [leadContact, setLeadContact] = useState({
+    value: '',
+    label: '',
+    email: '',
+  });
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
@@ -109,28 +113,24 @@ const CreateProject = ({
           <form className="create-project-form">
             <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
               <div className="customer-dp-container">
-                <img src={WhitingTurner} alt="Company Logo" />
+                {/* <img src={profilePicture} alt="Company Logo" /> */}
               </div>
               <div className="customer-profile">
                 <div className="row">
                   <div className="col-12">
                     <div className="text-label-value">
-                      <div className="text-value">Whiting Turner</div>
+                      <div className="text-value">{customer.customer_name}</div>
+                    </div>
+                  </div>
+                  <div className="col-12">
+                    <div className="text-label-value">
+                      <div className="text-label">{customer.address}</div>
                     </div>
                   </div>
                   <div className="col-12">
                     <div className="text-label-value">
                       <div className="text-label">
-                        Ms Alice Smith Apartment 1c 213,
-                        <br />
-                        Derrick Street, Boston, MA 02130 USA.{' '}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-12">
-                    <div className="text-label-value">
-                      <div className="text-label">
-                        +(425) 555 0100, +(732) 622 4888
+                        {customer.contact_number}
                       </div>
                     </div>
                   </div>
@@ -173,6 +173,7 @@ const CreateProject = ({
                         return {
                           value: project.emp_id,
                           label: project.name,
+                          email: project.email_address,
                         };
                       })}
                     />
@@ -186,6 +187,8 @@ const CreateProject = ({
                       id="projectLeadEmail"
                       aria-describedby="projectLeadEmail"
                       placeholder="Enter"
+                      value={leadContact.email}
+                      disabled
                     />
                     <label className="text-label" htmlFor="projectLeadEmail">
                       Email Address(Lead Contact)

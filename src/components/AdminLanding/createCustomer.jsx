@@ -5,6 +5,7 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 
 const CreateCustomer = ({
   modal,
@@ -27,6 +28,7 @@ const CreateCustomer = ({
   }, []);
 
   const validate = () => {
+    console.log(contactNumber.value.replace(/[^0-9]/g, '').length);
     let error = false;
     if (email.value === '') {
       setEmail({ ...email, errors: 'Email is required.' });
@@ -36,7 +38,34 @@ const CreateCustomer = ({
       setPassword({ ...password, errors: 'Password is reuired.' });
       error = true;
     }
+    if (
+      contactNumber.value.replace(/[^0-9]/g, '').length !== 0 &&
+      contactNumber.value.replace(/[^0-9]/g, '').length < 10
+    ) {
+      setContactNumber({
+        ...contactNumber,
+        errors: 'Contact Number should be of 10 digits.',
+      });
+      error = true;
+    } else if (contactNumber.value.replace(/[^0-9]/g, '').length === 10) {
+      setContactNumber({
+        ...contactNumber,
+        errors: '',
+      });
+      error = false;
+    }
     return error;
+  };
+
+  const handleContactNumberChange = (e) => {
+    let value = contactNumber.value.replace(/[^0-9]/g, '');
+    let regex = /^[0-9]*$/;
+    if (regex.test(value)) {
+      setContactNumber({
+        ...contactNumber,
+        value: e.target.value,
+      });
+    }
   };
 
   const handleSubmit = async () => {
@@ -51,7 +80,7 @@ const CreateCustomer = ({
             password: password.value,
             customer_name: companyName.value,
             account_owner: accountOwner.value,
-            contact_number: contactNumber.value,
+            contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
             address: address.value,
             admin_id: Number(localStorage.getItem('userId')),
           },
@@ -226,7 +255,7 @@ const CreateCustomer = ({
                   </div>
                   <div className="col-4">
                     <div className="form-group">
-                      <input
+                      {/* <input
                         type="text"
                         className="form-control"
                         id="accountContact"
@@ -243,7 +272,31 @@ const CreateCustomer = ({
                       />
                       <label className="text-label" htmlFor="accountContact">
                         Contact Number
-                      </label>
+                      </label> */}
+                      <MaskedInput
+                        value={contactNumber.value}
+                        onChange={(e) => handleContactNumberChange(e)}
+                        name="contactNumber"
+                        error={contactNumber.errors}
+                        mask={[
+                          '(',
+                          /[1-9]/,
+                          /\d/,
+                          /\d/,
+                          ')',
+                          ' ',
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                          '-',
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                        ]}
+                        labelClass={'text-label'}
+                        label={'Contact Number'}
+                      />
                     </div>
                   </div>
                   <div className="col-4">

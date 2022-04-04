@@ -180,7 +180,7 @@ const Adminlanding = (props) => {
                               className="btn btn-secondary btn-sm"
                               onClick={() => handleViewProjects(customer)}
                             >
-                              View Customer
+                              View Projects
                             </button>
                           </div>
                         </td>

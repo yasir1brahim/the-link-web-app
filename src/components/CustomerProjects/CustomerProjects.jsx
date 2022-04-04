@@ -71,7 +71,7 @@ const CustomerProjects = (props) => {
         <NavbarTop />
         <div className="page-wrap-content customer-projects-wrapper">
           <Header
-            title={'Whiting Turner'}
+            title={state?.customer_name}
             showBtn={'Create New Project'}
             toggleModal={toggleModal}
           />

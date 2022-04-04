@@ -13,6 +13,7 @@ import { useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EditEmployee from './editEmployee';
+import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 
 const CustomerProfile = (props) => {
   const [editProfile, setEditProfile] = useState(false);
@@ -41,7 +42,7 @@ const CustomerProfile = (props) => {
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const { state } = useLocation();
-  const customer = state;
+  let customer = state;
   // const navigate = useNavigate();
 
   useEffect(() => {
@@ -149,6 +150,22 @@ const CustomerProfile = (props) => {
       });
       error = true;
     }
+    if (
+      contactNumber.value.replace(/[^0-9]/g, '').length &&
+      contactNumber.value.replace(/[^0-9]/g, '').length < 10
+    ) {
+      setContactNumber({
+        ...contactNumber,
+        errors: 'Contact Number should be of 10 digits.',
+      });
+      error = true;
+    } else if (contactNumber.value.replace(/[^0-9]/g, '').length === 10) {
+      setContactNumber({
+        ...contactNumber,
+        errors: '',
+      });
+      error = false;
+    }
     return error;
   };
   const handleEdit = (employee) => {
@@ -169,11 +186,16 @@ const CustomerProfile = (props) => {
             password: password.value || '',
             customer_name: companyName.value || customer.customer_name,
             account_owner: accountOwner.value || customer.account_owner,
-            contact_number: contactNumber.value || customer.contact_number,
+            contact_number:
+              contactNumber.value.replace(/[^0-9]/g, '') ||
+              customer.contact_number,
             address: address.value || customer.address,
             status: 'Active',
           },
         });
+        if (response.data.message) {
+          customer = response.data.message;
+        }
 
         if (response.data?.customer_id && profilePicture) {
           await axiosInstance({
@@ -210,6 +232,16 @@ const CustomerProfile = (props) => {
       }
     }
   };
+  const handleContactNumberChange = (e) => {
+    let value = contactNumber.value.replace(/[^0-9]/g, '');
+    let regex = /^[0-9]*$/;
+    if (regex.test(value)) {
+      setContactNumber({
+        ...contactNumber,
+        value: e.target.value,
+      });
+    }
+  };
 
   return (
     <div className="page-wrap">
@@ -222,10 +254,7 @@ const CustomerProfile = (props) => {
             {!editProfile ? (
               <>
                 <div className="customer-dp-container">
-                  <img
-                    src={profilePicture || WhitingTurner}
-                    alt="Company Logo"
-                  />
+                  <img src={profilePicture} alt="Company Logo" />
                 </div>
                 <div className="customer-profile">
                   <div className="row">
@@ -410,7 +439,7 @@ const CustomerProfile = (props) => {
                       </div>
                       <div className="col-4">
                         <div className="form-group">
-                          <input
+                          {/* <input
                             type="text"
                             className="form-control"
                             id="accountContact"
@@ -430,7 +459,32 @@ const CustomerProfile = (props) => {
                             htmlFor="accountContact"
                           >
                             Phone
-                          </label>
+                          </label> */}
+                          <MaskedInput
+                            value={contactNumber.value}
+                            // defaultValue={customer.contact_number}
+                            onChange={(e) => handleContactNumberChange(e)}
+                            name="contactNumber"
+                            error={contactNumber.errors}
+                            mask={[
+                              '(',
+                              /[1-9]/,
+                              /\d/,
+                              /\d/,
+                              ')',
+                              ' ',
+                              /\d/,
+                              /\d/,
+                              /\d/,
+                              '-',
+                              /\d/,
+                              /\d/,
+                              /\d/,
+                              /\d/,
+                            ]}
+                            labelClass={'text-label'}
+                            label={'Phone'}
+                          />
                         </div>
                       </div>
                       <div className="col-8">
@@ -569,14 +623,14 @@ const CustomerProfile = (props) => {
                   className="d-flex align-items-center justify-content-center"
                   onClick={toggleModal}
                 >
-                  <AddUser /> Add User/Employee
+                  <AddUser /> Add Employee
                 </span>
               </div>
             ) : (
               <>
                 <div className="table-top-content">
                   <div className="table-heading">
-                    <h5 className="m-0">Employee/User List</h5>
+                    <h5 className="m-0">Employee List</h5>
                     <label className="table-entries">
                       Showing entries
                       <span className="showing-strong">
@@ -595,7 +649,7 @@ const CustomerProfile = (props) => {
                       className="btn btn-secondary btn-sm"
                       onClick={toggleModal}
                     >
-                      + Add User/Employee
+                      + Add Employee
                     </button>
                   </div>
                 </div>
@@ -613,11 +667,11 @@ const CustomerProfile = (props) => {
                             Contact Details<i className="sort-d"></i>
                           </span>
                         </th>
-                        <th>
+                        {/* <th>
                           <span className="has-sorting">
                             Associated Projects<i className="sort-i"></i>
                           </span>
-                        </th>
+                        </th> */}
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -631,14 +685,14 @@ const CustomerProfile = (props) => {
                               <br />
                               {employee.contact_number}
                             </td>
-                            <td>
-                              {/* 625 Adams
+                            {/* <td> */}
+                            {/* 625 Adams
                               <br />
                               Gimmy’s hospital */}
-                              {projectData
+                            {/* {projectData
                                 .map((project) => project.project_name)
                                 .join()}
-                            </td>
+                            </td> */}
                             <td>
                               <div className="action-wrapper">
                                 {/* <button

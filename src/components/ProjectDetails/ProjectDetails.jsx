@@ -22,6 +22,7 @@ const ProjectsDetails = () => {
   const [pdfFile, setPdfFile] = useState({});
   const [fileData, setFileData] = useState({});
   const navigate = useNavigate();
+  const [pageRefresh, setPageRefresh] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,7 +45,7 @@ const ProjectsDetails = () => {
         progress: undefined,
       });
     });
-  }, [state]);
+  }, [state, pageRefresh]);
   const backToUpload = () => {
     toggleErrorModal(false);
     setModal(true);
@@ -64,6 +65,7 @@ const ProjectsDetails = () => {
         setFileData(response.data.message);
         setModal(false);
         toggleSuccessModal(true);
+        setPageRefresh(!pageRefresh);
       }
     } catch (error) {
       toggleErrorModal(true);
@@ -95,21 +97,19 @@ const ProjectsDetails = () => {
             title={`Project Details - ${state?.project_name || ''}`}
             showBtn={'Upload Document'}
             toggleModal={toggleModal}
+            breadcrumb={'View Projects'}
           />
 
           <div className="projects-details-content">
             <div className="project-details">
               {projectData.length === 0 ? (
                 /* when there are Zero Users */
-                <a
-                  className="noprojects-wrapper d-flex align-items-center justify-content-center w-100"
-                  href="/"
-                >
+                <div className="noprojects-wrapper d-flex align-items-center justify-content-center w-100">
                   <span className="d-flex align-items-center justify-content-center">
                     {/* <AddUser /> Create Users/Employees, then Add a Project */}
                     No Project Data Found.
                   </span>
-                </a>
+                </div>
               ) : (
                 <div className="l-table-wrapper">
                   <table className="table">
