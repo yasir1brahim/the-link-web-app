@@ -3,6 +3,7 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
 import { Typeahead } from 'react-bootstrap-typeahead';
+import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 
 const EditEmployee = ({
   modal,
@@ -40,6 +41,16 @@ const EditEmployee = ({
   //   }
   //   return error;
   // };
+  const handleContactNumberChange = (e) => {
+    let value = contactNumber.value.replace(/[^0-9]/g, '');
+    let regex = /^[0-9]*$/;
+    if (regex.test(value)) {
+      setContactNumber({
+        ...contactNumber,
+        value: e.target.value,
+      });
+    }
+  };
 
   const handleSubmit = async () => {
     // let errors = validate();
@@ -54,7 +65,7 @@ const EditEmployee = ({
             lastName.value || employee?.name.split(/(\s+)/)[0]
           }`,
           projects: asscProject.map((project) => project.value),
-          contact_number: contactNumber.value,
+          contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
           customer_id: customer.customer_id,
         },
       });
@@ -62,10 +73,19 @@ const EditEmployee = ({
         console.log(response.data);
         setPageRefresh(!pageRefresh);
         toggleModal();
+        toast.success('Employee edited successfully!', {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
       }
     } catch (error) {
       console.log(error.message);
-      toast.error('Something went wrong!', {
+      toast.error(error.response.data.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -85,7 +105,7 @@ const EditEmployee = ({
       toggle={toggleModal}
       className="new-user modal-lg"
     >
-      <ModalHeader toggle={toggleModal}>Edit User/Employee</ModalHeader>
+      <ModalHeader toggle={toggleModal}>Edit Employee</ModalHeader>
       <ModalBody>
         <form className="create-user-form">
           <div className="create-user-content">
@@ -159,7 +179,7 @@ const EditEmployee = ({
               </div>
               <div className="col-4">
                 <div className="form-group">
-                  <input
+                  {/* <input
                     type="text"
                     className="form-control"
                     id="userPhone"
@@ -175,10 +195,34 @@ const EditEmployee = ({
                   />
                   <label className="text-label" htmlFor="userPhone">
                     Phone
-                  </label>
+                  </label> */}
+                  <MaskedInput
+                    value={contactNumber.value}
+                    onChange={(e) => handleContactNumberChange(e)}
+                    name="contactNumber"
+                    error={contactNumber.errors}
+                    mask={[
+                      '(',
+                      /[1-9]/,
+                      /\d/,
+                      /\d/,
+                      ')',
+                      ' ',
+                      /\d/,
+                      /\d/,
+                      /\d/,
+                      '-',
+                      /\d/,
+                      /\d/,
+                      /\d/,
+                      /\d/,
+                    ]}
+                    labelClass={'text-label'}
+                    label={'Phone'}
+                  />
                 </div>
               </div>
-              <div className="col-4">
+              {/* <div className="col-4">
                 <div className="form-group">
                   <Typeahead
                     multiple
@@ -194,7 +238,7 @@ const EditEmployee = ({
                     placeholder="Projects Associated"
                   />
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
           <ModalFooter>

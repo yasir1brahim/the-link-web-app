@@ -3,6 +3,7 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
 import { Typeahead } from 'react-bootstrap-typeahead';
+import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 
 const CreateEmployee = ({
   modal,
@@ -36,7 +37,34 @@ const CreateEmployee = ({
       setEmail({ ...email, errors: 'Email is required.' });
       error = true;
     }
+    if (
+      contactNumber.value.replace(/[^0-9]/g, '').length !== 0 &&
+      contactNumber.value.replace(/[^0-9]/g, '').length < 10
+    ) {
+      setContactNumber({
+        ...contactNumber,
+        errors: 'Contact Number should be of 10 digits.',
+      });
+      error = true;
+    } else if (contactNumber.value.replace(/[^0-9]/g, '').length === 10) {
+      setContactNumber({
+        ...contactNumber,
+        errors: '',
+      });
+      error = false;
+    }
     return error;
+  };
+
+  const handleContactNumberChange = (e) => {
+    let value = contactNumber.value.replace(/[^0-9]/g, '');
+    let regex = /^[0-9]*$/;
+    if (regex.test(value)) {
+      setContactNumber({
+        ...contactNumber,
+        value: e.target.value,
+      });
+    }
   };
 
   const handleSubmit = async () => {
@@ -50,7 +78,7 @@ const CreateEmployee = ({
             email_address: email.value,
             full_name: `${firstName.value}  ${lastName.value}`,
             projects: asscProject.map((project) => project.value),
-            contact_number: contactNumber.value,
+            contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
             customer_id: customer.customer_id,
           },
         });
@@ -61,7 +89,7 @@ const CreateEmployee = ({
         }
       } catch (error) {
         console.log(error.message);
-        toast.error('Something went wrong!', {
+        toast.error(error.response.data.message, {
           position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
@@ -81,7 +109,7 @@ const CreateEmployee = ({
       toggle={toggleModal}
       className="new-user modal-lg"
     >
-      <ModalHeader toggle={toggleModal}>Add User/Employee</ModalHeader>
+      <ModalHeader toggle={toggleModal}>Add Employee</ModalHeader>
       <ModalBody>
         <form className="create-user-form">
           <div className="create-user-content">
@@ -154,7 +182,7 @@ const CreateEmployee = ({
               </div>
               <div className="col-4">
                 <div className="form-group">
-                  <input
+                  {/* <input
                     type="text"
                     className="form-control"
                     id="userPhone"
@@ -168,10 +196,31 @@ const CreateEmployee = ({
                         value: e.target.value,
                       });
                     }}
+                  /> */}
+                  <MaskedInput
+                    value={contactNumber.value}
+                    onChange={(e) => handleContactNumberChange(e)}
+                    name="contactNumber"
+                    error={contactNumber.errors}
+                    mask={[
+                      '(',
+                      /[1-9]/,
+                      /\d/,
+                      /\d/,
+                      ')',
+                      ' ',
+                      /\d/,
+                      /\d/,
+                      /\d/,
+                      '-',
+                      /\d/,
+                      /\d/,
+                      /\d/,
+                      /\d/,
+                    ]}
+                    labelClass={'text-label'}
+                    label={'Phone'}
                   />
-                  <label className="text-label" htmlFor="userPhone">
-                    Phone
-                  </label>
                 </div>
               </div>
               <div className="col-4">

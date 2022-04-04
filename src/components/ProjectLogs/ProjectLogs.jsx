@@ -60,6 +60,8 @@ const ProjectLogs = () => {
       <div className="page-wrap-content project-logs-wrapper">
         <Header
           title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
+          breadcrumb2={'Project Details'}
+          breadcrumb={'View Projects'}
         />
 
         <div className="project-logs-content">
@@ -74,11 +76,11 @@ const ProjectLogs = () => {
               <>
                 <div className="table-top-content">
                   <div className="table-heading">
-                    <h5 className="m-0">Logs List</h5>
-                    <label className="table-entries">
+                    <h5 className="m-0">{`${state.project?.type} List`} </h5>
+                    {/* <label className="table-entries">
                       Showing entries <span className="showing-strong">6 </span>
                       of <span className="showing-strong">90</span>.
-                    </label>
+                    </label> */}
                   </div>
                   <div className="table-bulk-changes">
                     <div className="log-search">
