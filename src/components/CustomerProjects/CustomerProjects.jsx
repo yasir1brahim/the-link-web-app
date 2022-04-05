@@ -86,10 +86,10 @@ const CustomerProjects = (props) => {
                 <div className="table-heading">
                   <h5 className="m-0">Projects List</h5>
                   <label className="table-entries">
-                    Showing entries
+                    Showing entries{' '}
                     <span className="showing-strong">
                       {currentItems.length}
-                    </span>
+                    </span>{' '}
                     of{' '}
                     <span className="showing-strong">{projectData.length}</span>
                     .

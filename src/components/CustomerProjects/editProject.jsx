@@ -23,7 +23,11 @@ const EditProject = ({
   // const [email, setEmail] = useState({ value: '', errors: '' });
   // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [projectName, setProjectName] = useState({ value: '', errors: '' });
-  const [leadContact, setLeadContact] = useState({ value: '', label: '' });
+  const [leadContact, setLeadContact] = useState({
+    value: '',
+    label: '',
+    email: '',
+  });
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
@@ -31,21 +35,30 @@ const EditProject = ({
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });
 
   useEffect(() => {
-    // setEmail({ value: '', errors: '' });
-  }, []);
+    console.log('e', project);
+    if (!modal) {
+      setProjectName({ value: '', errors: '' });
+      setLeadContact({ value: '', errors: '', email: '' });
+      setStartDate('');
+      setEndDate('');
+      setEmployeeList([]);
+    }
+  }, [modal]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await axiosInstance({
-        method: 'get',
-        url: `/employeeList/${customer.customer_id}`,
-      });
-      setEmployeeList(response.data.message);
-      console.log(response.data.message);
-    };
+    if (modal) {
+      const fetchData = async () => {
+        const response = await axiosInstance({
+          method: 'get',
+          url: `/employeeList/${customer.customer_id}`,
+        });
+        setEmployeeList(response.data.message);
+        console.log(response.data.message);
+      };
 
-    fetchData().catch(console.error);
-  }, [customer]);
+      fetchData().catch(console.error);
+    }
+  }, [customer, modal]);
 
   // const validate = () => {
   //   let error = false;
@@ -161,12 +174,13 @@ const EditProject = ({
                       label={'Lead Contact'}
                       // labelKey="name"
                       setSelected={setLeadContact}
-                      value={leadContact.label}
+                      // value={leadContact.label}
                       selected={leadContact.label}
                       options={employeeList.map((project) => {
                         return {
                           value: project.emp_id,
                           label: project.name,
+                          email: project.emp_email,
                         };
                       })}
                     />
@@ -180,6 +194,12 @@ const EditProject = ({
                       id="projectLeadEmail"
                       aria-describedby="projectLeadEmail"
                       placeholder="Enter"
+                      value={
+                        leadContact[0]
+                          ? leadContact[0].email
+                          : leadContact.email
+                      }
+                      disabled
                     />
                     <label className="text-label" htmlFor="projectLeadEmail">
                       Email Address(Lead Contact)

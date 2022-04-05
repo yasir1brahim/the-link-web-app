@@ -67,9 +67,9 @@ const Adminlanding = (props) => {
             <div className="table-top-content">
               <label className="table-entries">
                 Showing entries
-                <span className="showing-strong">{currentItems.length}</span>
-                of <span className="showing-strong">{customerData.length}</span>
-                .
+                <span className="showing-strong"> {currentItems.length} </span>
+                of{' '}
+                <span className="showing-strong"> {customerData.length}</span>.
               </label>
               <div className="table-bulk-changes">
                 <button

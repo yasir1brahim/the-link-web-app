@@ -18,21 +18,20 @@ const EditEmployee = ({
   const [lastName, setLastName] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   // const [projects, setProjects] = useState([]);
-  const [asscProject, setAsscProject] = useState([]);
+  // const [asscProject, setAsscProject] = useState([]);
 
-  useEffect(() => {
-    setEmail({ value: '', errors: '' });
-    setAsscProject([]);
-    // const fetchData = async () => {
-    //   const response = await axiosInstance({
-    //     method: 'get',
-    //     url: `/projects/${customer.customer_id}`,
-    //   });
-    //   setProjects(response.data.message);
-    // };
+  // useEffect(() => {
+  //   setEmail({ value: '', errors: '' });
+  //   const fetchData = async () => {
+  //     const response = await axiosInstance({
+  //       method: 'get',
+  //       url: `/projects/${customer.customer_id}`,
+  //     });
+  //     setProjects(response.data.message);
+  //   };
 
-    // fetchData().catch(console.error);
-  }, [customer]);
+  //   fetchData().catch(console.error);
+  // }, [customer]);
 
   // const validate = () => {
   //   let error = false;
@@ -65,7 +64,8 @@ const EditEmployee = ({
           full_name: `${firstName.value || employee?.name.split(/(\s+)/)[0]}  ${
             lastName.value || employee?.name.split(/(\s+)/)[0]
           }`,
-          projects: asscProject.map((project) => project.value),
+          // projects: asscProject.map((project) => project.value),
+          projects: [],
           contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
           customer_id: customer.customer_id,
         },
