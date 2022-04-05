@@ -15,7 +15,7 @@ const NavbarTop = () => {
         className="navigation justify-content-center justify-content-md-start"
         expand="sm"
       >
-        <a href="/" className="navbar-brand">
+        <a href="/admin-landing" className="navbar-brand">
           <Logo />
         </a>
         <Nav className="ml-auto" navbar>

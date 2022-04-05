@@ -23,9 +23,16 @@ const CreateCustomer = ({
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });
 
   useEffect(() => {
-    setEmail({ value: '', errors: '' });
-    setPassword({ value: '', errors: '' });
-  }, []);
+    if (!modal) {
+      setEmail({ value: '', errors: '' });
+      setPassword({ value: '', errors: '' });
+      setCompanyName({ value: '', errors: '' });
+      setAccountOwner({ value: '', errors: '' });
+      setContactNumber({ value: '', errors: '' });
+      setAddress({ value: '', errors: '' });
+      setProfilePicture('');
+    }
+  }, [modal]);
 
   const validate = () => {
     console.log(contactNumber.value.replace(/[^0-9]/g, '').length);

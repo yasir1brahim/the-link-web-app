@@ -34,21 +34,30 @@ const CreateProject = ({
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });
 
   useEffect(() => {
-    // setEmail({ value: '', errors: '' });
-  }, []);
+    if (!modal) {
+      setProjectName({ value: '', errors: '' });
+      setLeadContact({ value: '', errors: '', email: '' });
+      setStartDate('');
+      setEndDate('');
+      setEmployeeList([]);
+      setSelectedEmployeeList([]);
+    }
+  }, [modal]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await axiosInstance({
-        method: 'get',
-        url: `/employeeList/${customer.customer_id}`,
-      });
-      setEmployeeList(response.data.message);
-      console.log(response.data.message);
-    };
+    if (modal) {
+      const fetchData = async () => {
+        const response = await axiosInstance({
+          method: 'get',
+          url: `/employeeList/${customer.customer_id}`,
+        });
+        setEmployeeList(response.data.message);
+        console.log(response.data.message);
+      };
 
-    fetchData().catch(console.error);
-  }, [customer]);
+      fetchData().catch(console.error);
+    }
+  }, [customer, modal]);
 
   // const validate = () => {
   //   let error = false;
@@ -173,7 +182,7 @@ const CreateProject = ({
                         return {
                           value: project.emp_id,
                           label: project.name,
-                          email: project.email_address,
+                          email: project.emp_email,
                         };
                       })}
                     />
@@ -187,7 +196,11 @@ const CreateProject = ({
                       id="projectLeadEmail"
                       aria-describedby="projectLeadEmail"
                       placeholder="Enter"
-                      value={leadContact.email}
+                      value={
+                        leadContact[0]
+                          ? leadContact[0].email
+                          : leadContact.email
+                      }
                       disabled
                     />
                     <label className="text-label" htmlFor="projectLeadEmail">

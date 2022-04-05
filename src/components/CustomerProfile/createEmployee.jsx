@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
-import { Typeahead } from 'react-bootstrap-typeahead';
+// import { Typeahead } from 'react-bootstrap-typeahead';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 
 const CreateEmployee = ({
@@ -16,20 +16,28 @@ const CreateEmployee = ({
   const [firstName, setFirstName] = useState({ value: '', errors: '' });
   const [lastName, setLastName] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
-  const [projects, setProjects] = useState([]);
-  const [asscProject, setAsscProject] = useState([]);
+  // const [projects, setProjects] = useState([]);
+  // const [asscProject, setAsscProject] = useState([]);
 
+  // useEffect(() => {
+  //   setEmail({ value: '', errors: '' });
+  //   const fetchData = async () => {
+  //     const response = await axiosInstance({
+  //       method: 'get',
+  //       url: `/projects/${customer.customer_id}`,
+  //     });
+  //     setProjects(response.data.message);
+  //   };
+  //   fetchData().catch(console.error);
+  // }, [customer]);
   useEffect(() => {
-    setEmail({ value: '', errors: '' });
-    const fetchData = async () => {
-      const response = await axiosInstance({
-        method: 'get',
-        url: `/projects/${customer.customer_id}`,
-      });
-      setProjects(response.data.message);
-    };
-    fetchData().catch(console.error);
-  }, [customer]);
+    if (!modal) {
+      setEmail({ value: '', errors: '' });
+      setFirstName({ value: '', errors: '' });
+      setLastName({ value: '', errors: '' });
+      setContactNumber({ value: '', errors: '' });
+    }
+  }, [modal]);
 
   const validate = () => {
     let error = false;
@@ -77,7 +85,8 @@ const CreateEmployee = ({
           data: {
             email_address: email.value,
             full_name: `${firstName.value}  ${lastName.value}`,
-            projects: asscProject.map((project) => project.value),
+            // projects: asscProject.map((project) => project.value),
+            projects: [],
             contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
             customer_id: customer.customer_id,
           },
@@ -223,7 +232,7 @@ const CreateEmployee = ({
                   />
                 </div>
               </div>
-              <div className="col-4">
+              {/* <div className="col-4">
                 <div className="form-group">
                   <Typeahead
                     multiple
@@ -239,7 +248,7 @@ const CreateEmployee = ({
                     placeholder="Projects Associated"
                   />
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
           <ModalFooter>

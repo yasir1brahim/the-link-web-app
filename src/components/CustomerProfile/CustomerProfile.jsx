@@ -632,10 +632,10 @@ const CustomerProfile = (props) => {
                   <div className="table-heading">
                     <h5 className="m-0">Employee List</h5>
                     <label className="table-entries">
-                      Showing entries
+                      Showing entries{' '}
                       <span className="showing-strong">
                         {currentItems.length}
-                      </span>
+                      </span>{' '}
                       of{' '}
                       <span className="showing-strong">
                         {employeeData.length}

@@ -78,8 +78,8 @@ const ProjectLogs = () => {
                   <div className="table-heading">
                     <h5 className="m-0">{`${state.project?.type} List`} </h5>
                     {/* <label className="table-entries">
-                      Showing entries <span className="showing-strong">6 </span>
-                      of <span className="showing-strong">90</span>.
+                      Showing entries <span className="showing-strong"> 6 </span>
+                      of <span className="showing-strong"> 90 </span>.
                     </label> */}
                   </div>
                   <div className="table-bulk-changes">

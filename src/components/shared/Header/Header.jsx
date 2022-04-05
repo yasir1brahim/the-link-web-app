@@ -19,12 +19,17 @@ const Header = ({ ...props }) => {
                   props.breadcrumb2 ? navigate(-2) : navigate(-1)
                 }
                 className="breadcrumb-text"
+                style={{ cursor: 'pointer' }}
               >
                 {props.breadcrumb}
               </div>
             )}
             {props.breadcrumb2 && (
-              <div onClick={() => navigate(-1)} className="breadcrumb-text">
+              <div
+                onClick={() => navigate(-1)}
+                className="breadcrumb-text"
+                style={{ cursor: 'pointer' }}
+              >
                 {props.breadcrumb2}
               </div>
             )}
