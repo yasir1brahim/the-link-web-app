@@ -35,7 +35,6 @@ const EditProject = ({
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });
 
   useEffect(() => {
-    console.log('e', project);
     if (!modal) {
       setProjectName({ value: '', errors: '' });
       setLeadContact({ value: '', errors: '', email: '' });
