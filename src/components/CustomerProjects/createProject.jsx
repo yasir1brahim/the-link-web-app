@@ -10,6 +10,7 @@ import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import DateSelector from '../shared/DateSelector/DateSelector';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
+import moment from 'moment';
 
 const CreateProject = ({
   modal,
@@ -79,8 +80,8 @@ const CreateProject = ({
           data: {
             project_name: projectName.value,
             lead_contact: leadContact[0]?.value,
-            start_date: startDate,
-            end_date: endDate,
+            start_date: moment(startDate).format('YYYY-MM-DD'),
+            end_date: moment(endDate).format('YYYY-MM-DD'),
             customer_id: customer.customer_id,
             status: 'Open',
             employee_list: selectedEmployeeList.map(

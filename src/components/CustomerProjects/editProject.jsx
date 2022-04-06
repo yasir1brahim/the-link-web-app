@@ -5,12 +5,11 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import WhitingTurner from '../../assets/images/whiting-turner.svg';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import DateSelector from '../shared/DateSelector/DateSelector';
 // import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
-// import moment from 'moment';
+import moment from 'moment';
 
 const EditProject = ({
   modal,
@@ -33,7 +32,9 @@ const EditProject = ({
   // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
   const [employeeList, setEmployeeList] = useState([]);
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });
-
+  // const startDateMoment = moment(
+  //   new Date(project?.start_date?.replaceAll('-', '/'))
+  // );
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: '', errors: '' });
@@ -51,7 +52,9 @@ const EditProject = ({
           method: 'get',
           url: `/employeeList/${customer.customer_id}`,
         });
-        setEmployeeList(response.data.message);
+        if (response.data.message) {
+          setEmployeeList(response.data.message);
+        }
         console.log(response.data.message);
       };
 
@@ -79,8 +82,16 @@ const EditProject = ({
           data: {
             project_name: projectName.value || project.project_name,
             lead_contact: leadContact[0].value || project.lead_contact,
-            start_date: startDate || project.start_date,
-            end_date: endDate || project.end_date,
+            start_date: startDate
+              ? moment(startDate).format('YYYY-MM-DD')
+              : moment(
+                  new Date((project?.start_date).replaceAll('-', '/'))
+                ).format('YYYY-MM-DD'),
+            end_date: endDate
+              ? moment(endDate).format('YYYY-MM-DD')
+              : moment(
+                  new Date((project?.end_date).replaceAll('-', '/'))
+                ).format('YYYY-MM-DD'),
             customer_id: customer.customer_id,
             status: 'Open',
             project_id: project.project_id,
@@ -120,7 +131,7 @@ const EditProject = ({
           <form className="create-project-form">
             <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
               <div className="customer-dp-container">
-                <img src={WhitingTurner} alt="Company Logo" />
+                {/* <img src={WhitingTurner} alt="Company Logo" /> */}
               </div>
               <div className="customer-profile">
                 <div className="row">
@@ -196,7 +207,12 @@ const EditProject = ({
                       value={
                         leadContact[0]
                           ? leadContact[0].email
-                          : leadContact.email
+                          : employeeList.length
+                          ? employeeList?.find(
+                              (employee) =>
+                                employee.name === project.lead_contact
+                            ).emp_email
+                          : leadContact.label
                       }
                       disabled
                     />
@@ -217,7 +233,13 @@ const EditProject = ({
                       //     ? moment(project.start_date, 'DD-MM-YYYY')
                       //     : null
                       // }
-                      selected={startDate}
+                      selected={
+                        startDate
+                          ? startDate
+                          : project.start_date
+                          ? new Date((project?.start_date).replaceAll('-', '/'))
+                          : ''
+                      }
                     />
                   </div>
                 </div>
@@ -233,7 +255,13 @@ const EditProject = ({
                       //     ? moment(project.end_date, 'DD-MM-YYYY')
                       //     : null
                       // }
-                      selected={endDate}
+                      selected={
+                        endDate
+                          ? endDate
+                          : project.end_date
+                          ? new Date((project?.end_date).replaceAll('-', '/'))
+                          : ''
+                      }
                     />
                   </div>
                 </div>
