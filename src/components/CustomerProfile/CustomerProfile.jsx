@@ -461,8 +461,11 @@ const CustomerProfile = (props) => {
                             Phone
                           </label> */}
                           <MaskedInput
-                            value={contactNumber.value}
-                            // defaultValue={customer.contact_number}
+                            value={
+                              contactNumber.value
+                                ? contactNumber.value
+                                : customer.contact_number
+                            }
                             onChange={(e) => handleContactNumberChange(e)}
                             name="contactNumber"
                             error={contactNumber.errors}
