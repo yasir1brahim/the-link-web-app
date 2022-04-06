@@ -21,6 +21,7 @@ const DateSelector = ({ ...props }) => {
         onFocus={(e) => (focused === true ? '' : setFocused(true))}
         onBlur={(e) => (focused === false ? '' : setFocused(false))}
         placeholderText={props.placeholderText}
+        minDate={props.minDate}
       />
       <label className="text-label">{props.labelText}</label>
       <i className="has-icon icon-calendar"></i>

@@ -31,6 +31,7 @@ const SelectDropdown = ({ ...props }) => {
         placeholder="Choose a option..."
         selected={props.selected}
         multiple={props.multiple}
+        defaultInputValue={props.defaultInputValue}
       />
       <label className="text-label">{props.label}</label>
       <i className="has-icon icon-dropdown"></i>
