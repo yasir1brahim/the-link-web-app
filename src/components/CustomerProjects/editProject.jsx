@@ -81,7 +81,11 @@ const EditProject = ({
           url: '/updateProject',
           data: {
             project_name: projectName.value || project.project_name,
-            lead_contact: leadContact[0].value || project.lead_contact,
+            lead_contact: leadContact[0]
+              ? leadContact[0].value
+              : employeeList.find(
+                  (employee) => employee.name === project.lead_contact
+                ).emp_id,
             start_date: startDate
               ? moment(startDate).format('YYYY-MM-DD')
               : moment(
