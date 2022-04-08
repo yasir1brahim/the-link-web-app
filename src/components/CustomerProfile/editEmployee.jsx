@@ -68,6 +68,7 @@ const EditEmployee = ({
           projects: [],
           contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
           customer_id: customer.customer_id,
+          employee_id: employee?.emp_id,
         },
       });
       if (response.data) {

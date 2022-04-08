@@ -25,6 +25,11 @@ const ProjectsDetails = () => {
   const [pageRefresh, setPageRefresh] = useState(false);
 
   useEffect(() => {
+    if (!modal) {
+      setPdfFile({});
+    }
+  }, [modal]);
+  useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
@@ -51,10 +56,11 @@ const ProjectsDetails = () => {
     setModal(true);
   };
   const handleSubmit = async () => {
+    console.log(pdfFile);
     try {
       const data = new FormData();
       data.append('project_id', state?.project_id);
-      data.append('files', pdfFile);
+      Object.values(pdfFile)?.forEach((file) => data.append('files', file));
       const response = await axiosInstance({
         method: 'post',
         url: '/upload_file',
@@ -197,8 +203,9 @@ const ProjectsDetails = () => {
                     // name="files[]"
                     id="uploadDocs"
                     accept="application/pdf"
+                    multiple
                     // disabled={Object.keys(pdfFile).length !== 0}
-                    onChange={(e) => setPdfFile(e.target.files[0])}
+                    onChange={(e) => setPdfFile(e.target.files)}
                   />
                   <label htmlFor="uploadDocs">
                     <div className="upload-text d-flex align-items-center justify-content-center">
@@ -214,20 +221,32 @@ const ProjectsDetails = () => {
                     </div>
                   </label>
                 </div>
-                {pdfFile.size && (
+                {Object.values(pdfFile).length ? (
                   <div className="uploaded-file-list">
-                    <div className="uploaded-file d-flex align-items-center justify-content-center">
-                      <FileDocument />
-                      <div className="file-name ml-3 d-flex align-items-start flex-column justify-content-center">
-                        <span>{pdfFile.name}</span>
-                        <small>{`${pdfFile.size * 0.001}KB `}</small>
-                      </div>
-                      <div className="ml-auto">
-                        <Close onClick={() => setPdfFile({})} />
-                      </div>
-                    </div>
+                    {Object.values(pdfFile).map((file) => {
+                      return (
+                        <div className="uploaded-file d-flex align-items-center justify-content-center">
+                          <FileDocument />
+                          <div className="file-name ml-3 d-flex align-items-start flex-column justify-content-center">
+                            <span>{file.name}</span>
+                            <small>{`${file.size * 0.001}KB `}</small>
+                          </div>
+                          <div className="ml-auto">
+                            <Close
+                              onClick={() =>
+                                setPdfFile({
+                                  ...Object.values(pdfFile).filter(
+                                    (pdf) => pdf.name !== file.name
+                                  ),
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
+                ) : null}
                 {/* <button
                   type="button"
                   className="btn btn-secondary btn-sm mb-4 ml-auto"
