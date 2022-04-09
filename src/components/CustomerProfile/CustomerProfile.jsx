@@ -191,6 +191,7 @@ const CustomerProfile = (props) => {
               customer.contact_number,
             address: address.value || customer.address,
             status: 'Active',
+            customer_id: customer.customer_id,
           },
         });
         if (response.data.message) {
