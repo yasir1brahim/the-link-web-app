@@ -74,7 +74,7 @@ const CustomerProfile = (props) => {
         progress: undefined,
       });
     });
-  }, [pageRefresh]);
+  }, [state, pageRefresh]);
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({

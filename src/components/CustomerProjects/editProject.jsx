@@ -36,7 +36,6 @@ const EditProject = ({
   //   new Date(project?.start_date?.replaceAll('-', '/'))
   // );
   useEffect(() => {
-    console.log(project, 'jj');
     if (!modal) {
       setProjectName({ value: '', errors: '' });
       setLeadContact({ value: '', errors: '', email: '' });
