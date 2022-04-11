@@ -14,16 +14,20 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EditEmployee from './editEmployee';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
+import { ConfirmationModal } from './confirmationModal';
 
 const CustomerProfile = (props) => {
   const [editProfile, setEditProfile] = useState(false);
   const toggleEditProfile = () => setEditProfile(!editProfile);
   const [modal, setModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
+  const [confirmationModal, setConfirmModal] = useState(false);
   const [pageRefresh, setPageRefresh] = useState(false);
   const toggleModal = () => setModal(!modal);
   const toggleEditModal = () => setEditModal(!editModal);
+  const toggleConfirmModal = () => setConfirmModal(!confirmationModal);
   const [employeeData, setEmployeeData] = useState([]);
+  const [empId, setEmpId] = useState('');
   // const [projectData, setProjectData] = useState([]);
   const [resetPwd, setResetPwd] = useState(false);
   const toggleResetPwd = () => setResetPwd(!resetPwd);
@@ -34,6 +38,7 @@ const CustomerProfile = (props) => {
   const [address, setAddress] = useState({ value: '', errors: '' });
   const [password, setPassword] = useState({ value: '', errors: '' });
   const [employee, setEmployee] = useState({});
+  const [customerData, setCustomerData] = useState({});
   const [confirmPassword, setConfirmPassword] = useState({
     value: '',
     errors: '',
@@ -44,7 +49,32 @@ const CustomerProfile = (props) => {
   const { state } = useLocation();
   let customer = state;
   // const navigate = useNavigate();
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axiosInstance({
+        method: 'get',
+        url: `/customers/${localStorage.getItem('userId')}`,
+      });
+      setCustomerData(
+        response.data.message.find(
+          (customer) => customer.customer_id === state.customer_id
+        )
+      );
+      console.log(response.data.message);
+    };
 
+    fetchData().catch((error) => {
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    });
+  }, [pageRefresh]);
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
@@ -116,6 +146,7 @@ const CustomerProfile = (props) => {
         },
       });
       console.log(response.data);
+      toggleConfirmModal();
       setPageRefresh(!pageRefresh);
       toast.success('Employee Deleted Successfully.', {
         position: 'bottom-center',
@@ -210,6 +241,8 @@ const CustomerProfile = (props) => {
           console.log(response.data);
         }
         toggleEditProfile();
+        setPageRefresh(!pageRefresh);
+
         toast.success('Profile Updated Successfully.', {
           position: 'bottom-center',
           autoClose: 5000,
@@ -263,21 +296,23 @@ const CustomerProfile = (props) => {
                       <div className="text-label-value">
                         <div className="text-label">Company Name: </div>
                         <div className="text-value">
-                          {customer.customer_name}
+                          {customerData.customer_name}
                         </div>
                       </div>
                     </div>
                     <div className="col-6">
                       <div className="text-label-value">
                         <div className="text-label">Account ID: </div>
-                        <div className="text-value">{customer.account_id}</div>
+                        <div className="text-value">
+                          {customerData.account_id}
+                        </div>
                       </div>
                     </div>
                     <div className="col-6">
                       <div className="text-label-value">
                         <div className="text-label">Account Owner: </div>
                         <div className="text-value">
-                          {customer.account_owner}
+                          {customerData.account_owner}
                         </div>
                       </div>
                     </div>
@@ -291,7 +326,7 @@ const CustomerProfile = (props) => {
                       <div className="text-label-value">
                         <div className="text-label">Email ID: </div>
                         <div className="text-value">
-                          {customer.email_address}
+                          {customerData.email_address}
                         </div>
                       </div>
                     </div>
@@ -299,14 +334,16 @@ const CustomerProfile = (props) => {
                       <div className="text-label-value">
                         <div className="text-label">Phone: </div>
                         <div className="text-value">
-                          {customer.contact_number}
+                          {customerData.contact_number}
                         </div>
                       </div>
                     </div>
                     <div className="col-6">
                       <div className="text-label-value">
                         <div className="text-label">Address: </div>
-                        <div className="text-value">{customer.address} </div>
+                        <div className="text-value">
+                          {customerData.address}{' '}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -462,11 +499,12 @@ const CustomerProfile = (props) => {
                             Phone
                           </label> */}
                           <MaskedInput
-                            value={
-                              contactNumber.value
-                                ? contactNumber.value
-                                : customer.contact_number
-                            }
+                            // value={
+                            //   contactNumber.value
+                            //     ? contactNumber.value
+                            //     : customer.contact_number
+                            // }
+                            defaultValue={customer.contact_number}
                             onChange={(e) => handleContactNumberChange(e)}
                             name="contactNumber"
                             error={contactNumber.errors}
@@ -718,9 +756,13 @@ const CustomerProfile = (props) => {
                                 <button
                                   type="button"
                                   className="btn btn-secondary btn-sm"
-                                  onClick={() =>
-                                    handleDeleteEmployee(employee.emp_id)
-                                  }
+                                  // onClick={() =>
+                                  //   handleDeleteEmployee(employee.emp_id)
+                                  // }
+                                  onClick={() => {
+                                    setEmpId(employee.emp_id);
+                                    toggleConfirmModal();
+                                  }}
                                 >
                                   Delete
                                 </button>
@@ -759,6 +801,12 @@ const CustomerProfile = (props) => {
         employee={employee}
         pageRefresh={pageRefresh}
         setPageRefresh={setPageRefresh}
+      />
+      <ConfirmationModal
+        modal={confirmationModal}
+        toggleModal={toggleConfirmModal}
+        handleDeleteEmployee={handleDeleteEmployee}
+        empId={empId}
       />
       <ToastContainer
         position="bottom-center"

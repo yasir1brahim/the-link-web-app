@@ -35,10 +35,13 @@ const CreateCustomer = ({
   }, [modal]);
 
   const validate = () => {
-    console.log(contactNumber.value.replace(/[^0-9]/g, '').length);
     let error = false;
     if (email.value === '') {
       setEmail({ ...email, errors: 'Email is required.' });
+      error = true;
+    }
+    if (companyName.value === '') {
+      setCompanyName({ ...companyName, errors: 'Company Name is required.' });
       error = true;
     }
     if (password.value === '') {
@@ -186,6 +189,11 @@ const CreateCustomer = ({
                       <label className="text-label" htmlFor="companyName">
                         Company Name
                       </label>
+                      {companyName.errors && (
+                        <small className="form-error" style={{ color: 'red' }}>
+                          {companyName.errors}
+                        </small>
+                      )}
                     </div>
                   </div>
                   <div className="col-4">

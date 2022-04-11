@@ -29,6 +29,7 @@ const CreateProject = ({
   });
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [dateError, setDateError] = useState({ startError: '', endError: '' });
   // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
   const [employeeList, setEmployeeList] = useState([]);
   const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
@@ -60,18 +61,26 @@ const CreateProject = ({
     }
   }, [customer, modal]);
 
-  // const validate = () => {
-  //   let error = false;
-  //   if (email.value === '') {
-  //     setEmail({ ...email, errors: 'Email is required.' });
-  //     error = true;
-  //   }
+  const validate = () => {
+    let error = false;
+    if (projectName.value === '') {
+      setProjectName({ ...projectName, errors: 'Project Name is required.' });
+      error = true;
+    }
+    if (startDate === '') {
+      setDateError({ ...dateError, startError: 'Start Date is required.' });
+      error = true;
+    }
+    if (endDate === '') {
+      setDateError({ ...dateError, endError: 'End Date is required.' });
+      error = true;
+    }
 
-  //   return error;
-  // };
+    return error;
+  };
 
   const handleSubmit = async () => {
-    let errors = false;
+    let errors = validate();
     if (!errors) {
       try {
         const response = await axiosInstance({
@@ -79,9 +88,9 @@ const CreateProject = ({
           url: '/createProject',
           data: {
             project_name: projectName.value,
-            lead_contact: leadContact[0]?.value,
-            start_date: moment(startDate).format('YYYY-MM-DD'),
-            end_date: moment(endDate).format('YYYY-MM-DD'),
+            lead_contact: leadContact[0]?.value || '',
+            start_date: startDate ? moment(startDate).format('YYYY-MM-DD') : '',
+            end_date: endDate ? moment(endDate).format('YYYY-MM-DD') : '',
             customer_id: customer.customer_id,
             status: 'Open',
             employee_list: selectedEmployeeList.map(
@@ -96,7 +105,7 @@ const CreateProject = ({
         }
       } catch (error) {
         console.log(error.message);
-        toast.error('Something went wrong!', {
+        toast.error(error.response.data.message, {
           position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
@@ -169,6 +178,11 @@ const CreateProject = ({
                     <label className="text-label" htmlFor="customerProjectName">
                       Project Name
                     </label>
+                    {projectName.errors && (
+                      <small className="form-error" style={{ color: 'red' }}>
+                        {projectName.errors}
+                      </small>
+                    )}
                   </div>
                 </div>
                 <div className="col-4">
@@ -218,6 +232,11 @@ const CreateProject = ({
                       onChange={setStartDate}
                       selected={startDate}
                     />
+                    {dateError.startError && (
+                      <small className="form-error" style={{ color: 'red' }}>
+                        {dateError.startError}
+                      </small>
+                    )}
                   </div>
                 </div>
                 <div className="col-4">
@@ -229,6 +248,11 @@ const CreateProject = ({
                       onChange={setEndDate}
                       selected={endDate}
                     />
+                    {dateError.endError && (
+                      <small className="form-error" style={{ color: 'red' }}>
+                        {dateError.endError}
+                      </small>
+                    )}
                   </div>
                 </div>
                 {/* <div className="col-4">

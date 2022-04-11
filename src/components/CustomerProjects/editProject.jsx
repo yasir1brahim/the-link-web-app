@@ -24,7 +24,7 @@ const EditProject = ({
   const [projectName, setProjectName] = useState({ value: '', errors: '' });
   const [leadContact, setLeadContact] = useState({
     value: '',
-    label: '',
+    label: project.lead_contact,
     email: '',
   });
   const [startDate, setStartDate] = useState('');
@@ -36,6 +36,7 @@ const EditProject = ({
   //   new Date(project?.start_date?.replaceAll('-', '/'))
   // );
   useEffect(() => {
+    console.log(project, 'jj');
     if (!modal) {
       setProjectName({ value: '', errors: '' });
       setLeadContact({ value: '', errors: '', email: '' });
@@ -308,7 +309,7 @@ const EditProject = ({
                 Cancel
               </Button>
               <Button color="primary" onClick={handleSubmit}>
-                Create
+                Save
               </Button>{' '}
             </ModalFooter>
           </form>

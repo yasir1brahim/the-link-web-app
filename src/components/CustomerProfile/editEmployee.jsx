@@ -68,7 +68,7 @@ const EditEmployee = ({
           projects: [],
           contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
           customer_id: customer.customer_id,
-          employee_id: employee?.emp_id,
+          emp_id: employee?.emp_id,
         },
       });
       if (response.data) {
@@ -199,7 +199,8 @@ const EditEmployee = ({
                     Phone
                   </label> */}
                   <MaskedInput
-                    value={contactNumber.value}
+                    // value={contactNumber.value}
+                    defaultValue={employee.contact_number}
                     onChange={(e) => handleContactNumberChange(e)}
                     name="contactNumber"
                     error={contactNumber.errors}
@@ -248,7 +249,7 @@ const EditEmployee = ({
               Cancel
             </Button>
             <Button color="primary" onClick={handleSubmit}>
-              Create
+              Save
             </Button>{' '}
           </ModalFooter>
         </form>

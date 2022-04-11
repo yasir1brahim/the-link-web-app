@@ -27,6 +27,7 @@ export const MaskedInput = (props) => {
           // className={cx('form-control', {
           //   'field-focus': focused || !!value,
           // })}
+          defaultValue={defaultValue}
           disabled={disabled}
           mask={mask}
           name={name}
