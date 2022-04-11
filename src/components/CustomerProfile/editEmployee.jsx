@@ -66,7 +66,9 @@ const EditEmployee = ({
           }`,
           // projects: asscProject.map((project) => project.value),
           projects: [],
-          contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
+          contact_number:
+            contactNumber.value.replace(/[^0-9]/g, '') ||
+            employee.contact_number,
           customer_id: customer.customer_id,
           emp_id: employee?.emp_id,
         },
