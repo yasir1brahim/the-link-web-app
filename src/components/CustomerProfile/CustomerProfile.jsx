@@ -401,7 +401,7 @@ const CustomerProfile = (props) => {
                             aria-describedby="companyName"
                             placeholder="Enter"
                             required
-                            defaultValue={customer.customer_name}
+                            defaultValue={customerData.customer_name}
                             onChange={(e) => {
                               setCompanyName({
                                 ...companyName,
@@ -440,7 +440,7 @@ const CustomerProfile = (props) => {
                             aria-describedby="accountOwner"
                             placeholder="Enter"
                             required
-                            defaultValue={customer.account_owner}
+                            defaultValue={customerData.account_owner}
                             onChange={(e) => {
                               setAccountOwner({
                                 ...accountOwner,
@@ -462,7 +462,7 @@ const CustomerProfile = (props) => {
                             aria-describedby="accountEmail"
                             placeholder="Enter"
                             required
-                            defaultValue={customer.email_address}
+                            defaultValue={customerData.email_address}
                             onChange={(e) => {
                               setEmail({
                                 ...email,
@@ -484,7 +484,7 @@ const CustomerProfile = (props) => {
                             aria-describedby="accountContact"
                             placeholder="Enter"
                             required
-                            defaultValue={customer.contact_number}
+                            defaultValue={customerData.contact_number}
                             onChange={(e) => {
                               setContactNumber({
                                 ...contactNumber,
@@ -502,9 +502,9 @@ const CustomerProfile = (props) => {
                             // value={
                             //   contactNumber.value
                             //     ? contactNumber.value
-                            //     : customer.contact_number
+                            //     : customerData.contact_number
                             // }
-                            defaultValue={customer.contact_number}
+                            defaultValue={customerData.contact_number}
                             onChange={(e) => handleContactNumberChange(e)}
                             name="contactNumber"
                             error={contactNumber.errors}
@@ -538,7 +538,7 @@ const CustomerProfile = (props) => {
                             aria-describedby="accountAddress"
                             placeholder="Enter"
                             required
-                            defaultValue={customer.address}
+                            defaultValue={customerData.address}
                             onChange={(e) => {
                               setAddress({
                                 ...address,

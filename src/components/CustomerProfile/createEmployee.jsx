@@ -187,6 +187,11 @@ const CreateEmployee = ({
                   <label className="text-label" htmlFor="userEmailAddress">
                     Email Address
                   </label>
+                  {email.errors && (
+                    <small className="form-error" style={{ color: 'red' }}>
+                      {email.errors}
+                    </small>
+                  )}
                 </div>
               </div>
               <div className="col-4">
