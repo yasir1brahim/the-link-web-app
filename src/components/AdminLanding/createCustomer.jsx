@@ -36,18 +36,18 @@ const CreateCustomer = ({
 
   const validate = () => {
     let error = false;
-    if (email.value === '') {
-      setEmail({ ...email, errors: 'Email is required.' });
-      error = true;
-    }
+    // if (email.value === '') {
+    //   setEmail({ ...email, errors: 'Email is required.' });
+    //   error = true;
+    // }
     if (companyName.value === '') {
       setCompanyName({ ...companyName, errors: 'Company Name is required.' });
       error = true;
     }
-    if (password.value === '') {
-      setPassword({ ...password, errors: 'Password is reuired.' });
-      error = true;
-    }
+    // if (password.value === '') {
+    //   setPassword({ ...password, errors: 'Password is reuired.' });
+    //   error = true;
+    // }
     if (
       contactNumber.value.replace(/[^0-9]/g, '').length !== 0 &&
       contactNumber.value.replace(/[^0-9]/g, '').length < 10

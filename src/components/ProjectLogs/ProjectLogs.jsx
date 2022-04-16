@@ -59,6 +59,7 @@ const ProjectLogs = () => {
         },
       });
       setPageRefresh(!pageRefresh);
+      setSelected([]);
       toast.success('Successfully Deleted Logs!', {
         position: 'bottom-center',
         autoClose: 5000,
@@ -70,6 +71,7 @@ const ProjectLogs = () => {
       });
     } catch (error) {
       console.log(error.message);
+      setSelected([]);
       toast.error(error.response.data.message, {
         position: 'bottom-center',
         autoClose: 5000,

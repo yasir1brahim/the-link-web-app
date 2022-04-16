@@ -165,6 +165,7 @@ const ProjectsDetails = () => {
                                   type="button"
                                   className="btn btn-secondary btn-sm"
                                   onClick={() => handleViewLog(project)}
+                                  disabled={project.total_logs === '0'}
                                 >
                                   View Logs
                                 </button>
