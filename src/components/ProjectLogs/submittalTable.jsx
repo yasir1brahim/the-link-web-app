@@ -2,6 +2,7 @@ import React from 'react';
 
 export default function SubmittalTable(props) {
   const logData = props.logData;
+
   return (
     <div className="l-table-wrapper">
       <table className="table">
@@ -15,6 +16,8 @@ export default function SubmittalTable(props) {
                     className="custom-control-input"
                     name="ticketHeading"
                     id="ticketHeading"
+                    onChange={props.handleSelectAll}
+                    checked={props.selected.length === logData.length}
                   />
                   <label
                     className="custom-control-label"
@@ -73,6 +76,8 @@ export default function SubmittalTable(props) {
                         className="custom-control-input"
                         name="ticketRow1"
                         id="ticketRow1"
+                        checked={props.selected.includes(log.id)}
+                        onChange={() => props.handleSelect(log.id)}
                       />
                       <label
                         className="custom-control-label"

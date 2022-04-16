@@ -15,6 +15,8 @@ export default function TestingTable(props) {
                     className="custom-control-input"
                     name="ticketHeading"
                     id="ticketHeading"
+                    onChange={props.handleSelectAll}
+                    checked={props.selected.length === logData.length}
                   />
                   <label
                     className="custom-control-label"
@@ -73,6 +75,8 @@ export default function TestingTable(props) {
                         className="custom-control-input"
                         name="ticketRow1"
                         id="ticketRow1"
+                        checked={props.selected.includes(log.id)}
+                        onChange={() => props.handleSelect(log.id)}
                       />
                       <label
                         className="custom-control-label"

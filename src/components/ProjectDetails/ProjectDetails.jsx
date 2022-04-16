@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../shared/Header/Header';
+import Loader from '../shared/Loader/Loader';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
 import { ReactComponent as Upload } from '../../assets/images/upload.svg';
 import { ReactComponent as FileDocument } from '../../assets/images/file-document.svg';
@@ -23,6 +24,8 @@ const ProjectsDetails = () => {
   const [fileData, setFileData] = useState({});
   const navigate = useNavigate();
   const [pageRefresh, setPageRefresh] = useState(false);
+  const [isLoading, setLoading] = useState(false);
+  const [docParsed, setDocParsed] = useState(0);
 
   useEffect(() => {
     if (!modal) {
@@ -36,6 +39,7 @@ const ProjectsDetails = () => {
         url: `/project_data/${state?.project_id}`,
       });
       setProjectData(response.data.message);
+      setDocParsed(response.data.doc_parsed);
       console.log(response.data.message);
     };
 
@@ -58,6 +62,7 @@ const ProjectsDetails = () => {
   const handleSubmit = async () => {
     console.log(pdfFile);
     try {
+      setLoading(true);
       const data = new FormData();
       data.append('project_id', state?.project_id);
       Object.values(pdfFile)?.forEach((file) => data.append('files', file));
@@ -68,12 +73,14 @@ const ProjectsDetails = () => {
       });
       if (response.data) {
         console.log(response.data);
+        setLoading(false);
         setFileData(response.data.message);
         setModal(false);
         toggleSuccessModal(true);
         setPageRefresh(!pageRefresh);
       }
     } catch (error) {
+      setLoading(false);
       toggleErrorModal(true);
       setModal(false);
       toast.error('Something went wrong!', {
@@ -178,9 +185,9 @@ const ProjectsDetails = () => {
                 >
                   View Logs
                 </button> */}
-                {/* <p>
-                  Documents Uploaded: <span>05</span>
-                </p> */}
+                <p>
+                  Documents Uploaded: <span>{docParsed}</span>
+                </p>
               </div>
             </div>
           </div>
@@ -268,6 +275,7 @@ const ProjectsDetails = () => {
             {/* Upload form code */}
 
             {/* Error Upload code */}
+            <Loader showComponentLoader={isLoading} />
           </ModalBody>
         </Modal>
         <Modal

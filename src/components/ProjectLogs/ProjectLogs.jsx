@@ -16,6 +16,27 @@ import { CSVLink } from 'react-csv';
 const ProjectLogs = () => {
   const { state } = useLocation();
   const [logData, setLogData] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [pageRefresh, setPageRefresh] = useState(false);
+
+  const handleSelectAll = () => {
+    if (selected.length === logData.length) {
+      setSelected([]);
+    } else {
+      let selectedLogs = logData.map((log) => {
+        return log.id;
+      });
+      setSelected(selectedLogs);
+    }
+  };
+  const handleSelect = (id) => {
+    if (selected.includes(id)) {
+      let selectedLogs = selected.filter((logId) => logId !== id);
+      setSelected(selectedLogs);
+    } else {
+      setSelected([...selected, id]);
+    }
+  };
   const headers = [
     { label: 'Spec Section', key: 'spec_section' },
     { label: 'Sub Section', key: 'sub_section' },
@@ -26,7 +47,40 @@ const ProjectLogs = () => {
     // { label: 'Date Approved', key: 'date_approved' },
     // { label: 'Comments', key: 'comments' },
   ];
-
+  const handleDeleteLogs = async () => {
+    try {
+      await axiosInstance({
+        method: 'delete',
+        url: '/delete_logs',
+        data: {
+          project_id: state?.project.project_id,
+          records: selected,
+          type: state.project?.type,
+        },
+      });
+      setPageRefresh(!pageRefresh);
+      toast.success('Successfully Deleted Logs!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (error) {
+      console.log(error.message);
+      toast.error(error.response.data.message, {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
@@ -52,7 +106,7 @@ const ProjectLogs = () => {
         progress: undefined,
       });
     });
-  }, [state]);
+  }, [state, pageRefresh]);
 
   return (
     <div className="page-wrap">
@@ -104,6 +158,7 @@ const ProjectLogs = () => {
                     <button
                       type="button"
                       className="d-flex btn btn-secondary btn-sm"
+                      onClick={handleDeleteLogs}
                     >
                       {' '}
                       <Trash />{' '}
@@ -112,16 +167,36 @@ const ProjectLogs = () => {
                 </div>
 
                 {state.project?.type === 'Submittal' && (
-                  <SubmittalTable logData={logData} />
+                  <SubmittalTable
+                    logData={logData}
+                    selected={selected}
+                    handleSelect={handleSelect}
+                    handleSelectAll={handleSelectAll}
+                  />
                 )}
                 {state.project?.type === 'Testing' && (
-                  <TestingTable logData={logData} />
+                  <TestingTable
+                    logData={logData}
+                    selected={selected}
+                    handleSelect={handleSelect}
+                    handleSelectAll={handleSelectAll}
+                  />
                 )}
                 {state.project?.type === 'Meeting' && (
-                  <MeetingTable logData={logData} />
+                  <MeetingTable
+                    logData={logData}
+                    selected={selected}
+                    handleSelect={handleSelect}
+                    handleSelectAll={handleSelectAll}
+                  />
                 )}
                 {state.project?.type === 'Closeout' && (
-                  <CloseOutTable logData={logData} />
+                  <CloseOutTable
+                    logData={logData}
+                    selected={selected}
+                    handleSelect={handleSelect}
+                    handleSelectAll={handleSelectAll}
+                  />
                 )}
               </>
             )}
