@@ -20,7 +20,7 @@ import EditProject from './editProject';
 const CustomerProjects = (props) => {
   const [modal, setModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [isArchived, toggleArchive] = useState(false);
+  // const [isArchived, toggleArchive] = useState(false);
   const toggleModal = () => setModal(!modal);
   const toggleEditModal = () => setEditModal(!editModal);
   const [projectData, setProjectData] = useState([]);
@@ -38,9 +38,10 @@ const CustomerProjects = (props) => {
         method: 'get',
         url: `/projects/${state.customer_id}`,
       });
-      setProjectData(
-        isArchived ? response.data.archived_projects : response.data.message
-      );
+      setProjectData(response.data.message);
+      // setProjectData(
+      //   isArchived ? response.data.archived_projects : response.data.message
+      // );
       console.log(response.data.message);
     };
 
@@ -55,7 +56,7 @@ const CustomerProjects = (props) => {
         progress: undefined,
       });
     });
-  }, [state, isArchived, pageRefresh]);
+  }, [state, pageRefresh]);
 
   const handleLaunch = (project) => {
     navigate('/project-details', { state: project });
@@ -95,7 +96,7 @@ const CustomerProjects = (props) => {
                     .
                   </label>
                 </div>
-                <div className="table-bulk-changes">
+                {/* <div className="table-bulk-changes">
                   <button
                     onClick={() => toggleArchive(!isArchived)}
                     type="button"
@@ -103,7 +104,7 @@ const CustomerProjects = (props) => {
                   >
                     Archived
                   </button>
-                </div>
+                </div> */}
               </div>
               <div className="l-table-wrapper">
                 <table className="table">

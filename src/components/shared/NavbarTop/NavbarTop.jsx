@@ -19,12 +19,12 @@ const NavbarTop = () => {
           <Logo />
         </a>
         <Nav className="ml-auto" navbar>
-          <NavItem>
+          {/* <NavItem>
             <NavLink className="notification-wrapper">
               <Notification />
               <small className="notification-count">3</small>
             </NavLink>
-          </NavItem>
+          </NavItem> */}
           <NavItem>
             <NavLink
               className={'user-wrapper ' + (navDrop ? 'navdrop-open' : '')}

@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Adminlanding = (props) => {
   const [modal, setModal] = useState(false);
-  const [isArchived, toggleArchive] = useState(false);
+  // const [isArchived, toggleArchive] = useState(false);
   const [customerData, setCustomerData] = useState([]);
   const toggleModal = () => setModal(!modal);
   const [pageRefresh, setPageRefresh] = useState(false);
@@ -24,9 +24,10 @@ const Adminlanding = (props) => {
         method: 'get',
         url: `/customers/${localStorage.getItem('userId')}`,
       });
-      setCustomerData(
-        isArchived ? response.data.archived_customers : response.data.message
-      );
+      setCustomerData(response.data.message);
+      // setCustomerData(
+      //   isArchived ? response.data.archived_customers : response.data.message
+      // );
       localStorage.setItem('account_id', response.data.account_id);
       console.log(response.data.message);
     };
@@ -42,7 +43,7 @@ const Adminlanding = (props) => {
         progress: undefined,
       });
     });
-  }, [isArchived, pageRefresh]);
+  }, [pageRefresh]);
 
   const handleViewCustomer = (customer) => {
     navigate('/customer-profile', { state: customer });
@@ -71,7 +72,7 @@ const Adminlanding = (props) => {
                 of{' '}
                 <span className="showing-strong"> {customerData.length}</span>.
               </label>
-              <div className="table-bulk-changes">
+              {/* <div className="table-bulk-changes">
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
@@ -79,7 +80,7 @@ const Adminlanding = (props) => {
                 >
                   Archived
                 </button>
-              </div>
+              </div> */}
             </div>
             <div className="l-table-wrapper">
               <table className="table">
