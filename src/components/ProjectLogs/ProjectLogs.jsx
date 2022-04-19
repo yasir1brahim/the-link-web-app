@@ -42,10 +42,10 @@ const ProjectLogs = () => {
     { label: 'Sub Section', key: 'sub_section' },
     { label: 'Type', key: 'section_name' },
     { label: 'Description', key: 'description' },
-    // { label: 'Status', key: 'status' },
-    // { label: 'Date Issued', key: 'date_issued' },
-    // { label: 'Date Approved', key: 'date_approved' },
-    // { label: 'Comments', key: 'comments' },
+    { label: 'Status', key: 'status' },
+    { label: 'Date Issued', key: 'date_issued' },
+    { label: 'Date Approved', key: 'date_approved' },
+    { label: 'Comments', key: 'comments' },
   ];
   const handleDeleteLogs = async () => {
     try {

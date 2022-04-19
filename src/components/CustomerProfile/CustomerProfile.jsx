@@ -15,6 +15,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import EditEmployee from './editEmployee';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 import { ConfirmationModal } from './confirmationModal';
+import { Buffer } from 'buffer';
 
 const CustomerProfile = (props) => {
   const [editProfile, setEditProfile] = useState(false);
@@ -124,8 +125,17 @@ const CustomerProfile = (props) => {
         method: 'get',
         url: `/getLogo/${state.customer_id}`,
       });
-      setProfilePicture(picture.data);
-      console.log(picture);
+      if (picture.data) {
+        const b64Response = Buffer.from(picture.data, 'binary').toString(
+          'base64'
+        );
+        // const imageBlob = await picture.blob();
+        // const imageObjectURL = URL.createObjectURL(
+        //   'data:image/png;base64,' + b64Response
+        // );
+        setProfilePicture(b64Response);
+        console.log(profilePicture);
+      }
     };
     fetchData().catch((error) => {
       console.log(error);
@@ -229,14 +239,14 @@ const CustomerProfile = (props) => {
           customer = response.data.message;
         }
 
-        if (response.data?.customer_id && profilePicture) {
+        if (response.data?.message && profilePicture) {
+          const data = new FormData();
+          data.append('customer_id', customer[0].customer_id);
+          data.append('logo', profilePicture);
           await axiosInstance({
             method: 'post',
             url: '/uploadLogo',
-            data: {
-              customer_id: response.data.customer_id,
-              logo: profilePicture,
-            },
+            data,
           });
           console.log(response.data);
         }
@@ -288,7 +298,10 @@ const CustomerProfile = (props) => {
             {!editProfile ? (
               <>
                 <div className="customer-dp-container">
-                  <img src={profilePicture} alt="Company Logo" />
+                  <img
+                    src={`data:image/png;base64,${profilePicture}`}
+                    alt="Company Logo"
+                  />
                 </div>
                 <div className="customer-profile">
                   <div className="row">

@@ -110,7 +110,7 @@ const CustomerProjects = (props) => {
                 <table className="table">
                   <thead>
                     <tr>
-                      <th className="ticket-checkbox">
+                      {/* <th className="ticket-checkbox">
                         <div className="form-group">
                           <div className="custom-control custom-checkbox">
                             <input
@@ -125,7 +125,7 @@ const CustomerProjects = (props) => {
                             ></label>
                           </div>
                         </div>
-                      </th>
+                      </th> */}
                       <th>
                         <span className="has-sorting">
                           Existing Projects <i className=""></i>
@@ -163,7 +163,7 @@ const CustomerProjects = (props) => {
                     {currentItems.map((project) => {
                       return (
                         <tr>
-                          <td className="ticket-checkbox">
+                          {/* <td className="ticket-checkbox">
                             <div className="form-group">
                               <div className="custom-control custom-checkbox">
                                 <input
@@ -178,7 +178,7 @@ const CustomerProjects = (props) => {
                                 ></label>
                               </div>
                             </div>
-                          </td>
+                          </td> */}
                           <td>{project.project_name}</td>
                           <td>{project.status}</td>
                           <td>{project.lead_contact}</td>

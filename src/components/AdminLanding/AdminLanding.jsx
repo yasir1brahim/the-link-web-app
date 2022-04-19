@@ -86,7 +86,7 @@ const Adminlanding = (props) => {
               <table className="table">
                 <thead>
                   <tr>
-                    <th className="ticket-checkbox">
+                    {/* <th className="ticket-checkbox">
                       <div className="form-group">
                         <div className="custom-control custom-checkbox">
                           <input
@@ -101,7 +101,7 @@ const Adminlanding = (props) => {
                           ></label>
                         </div>
                       </div>
-                    </th>
+                    </th> */}
                     <th>
                       <span className="has-sorting">
                         Customers <i className=""></i>
@@ -139,7 +139,7 @@ const Adminlanding = (props) => {
                   {currentItems.map((customer) => {
                     return (
                       <tr>
-                        <td className="ticket-checkbox">
+                        {/* <td className="ticket-checkbox">
                           <div className="form-group">
                             <div className="custom-control custom-checkbox">
                               <input
@@ -147,15 +147,15 @@ const Adminlanding = (props) => {
                                 className="custom-control-input"
                                 name="ticketRow1"
                                 id="ticketRow1"
-                              />
-                              {/* @ts-ignore */}
-                              <label
+                              /> */}
+                        {/* @ts-ignore */}
+                        {/* <label
                                 className="custom-control-label"
                                 for="ticketRow1"
                               ></label>
                             </div>
                           </div>
-                        </td>
+                        </td> */}
                         <td>
                           <span
                             style={{

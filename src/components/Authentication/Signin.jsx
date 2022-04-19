@@ -45,6 +45,7 @@ const Signin = (props) => {
           localStorage.setItem('token', response.data.access_token);
           localStorage.setItem('roleId', response.data.role_id);
           localStorage.setItem('userId', response.data.user_id);
+          localStorage.setItem('fullName', response.data.full_name);
           console.log(response.data);
           return history({ pathname: '/admin-landing' });
         }

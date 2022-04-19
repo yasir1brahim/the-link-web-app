@@ -96,14 +96,14 @@ const CreateCustomer = ({
           },
         });
         setPageRefresh(!pageRefresh);
-        if (response.data?.customer_id && profilePicture) {
+        if (response.data?.message && profilePicture) {
+          const data = new FormData();
+          data.append('customer_id', response.data?.message[0].customer_id);
+          data.append('logo', profilePicture);
           await axiosInstance({
             method: 'post',
             url: '/uploadLogo',
-            data: {
-              customer_id: response.data.customer_id,
-              logo: profilePicture,
-            },
+            data,
           });
           console.log(response.data);
         }
