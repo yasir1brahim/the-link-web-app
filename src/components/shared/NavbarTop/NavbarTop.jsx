@@ -34,7 +34,9 @@ const NavbarTop = () => {
               <span className="user-icon">
                 <i className="fa fa-user"></i>
               </span>
-              <span className="user-name">Admin</span>
+              <span className="user-name">
+                {localStorage.getItem('fullName')}
+              </span>
               <Down />
             </NavLink>
             {navDrop ? (
