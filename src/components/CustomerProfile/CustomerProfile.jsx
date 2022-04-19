@@ -134,7 +134,6 @@ const CustomerProfile = (props) => {
         //   'data:image/png;base64,' + b64Response
         // );
         setProfilePicture(b64Response);
-        console.log(profilePicture);
       }
     };
     fetchData().catch((error) => {
