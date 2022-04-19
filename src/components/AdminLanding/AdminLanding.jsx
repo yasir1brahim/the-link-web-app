@@ -7,6 +7,7 @@ import CreateCustomer from './createCustomer';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../shared/Loader/Loader';
 
 const Adminlanding = (props) => {
   const [modal, setModal] = useState(false);
@@ -54,7 +55,7 @@ const Adminlanding = (props) => {
   };
 
   return (
-    <>
+    <div className="position-relative">
       <div className="page-wrap">
         <NavbarTop />
         <div className="page-wrap-content admin-landing-wrapper">
@@ -219,7 +220,10 @@ const Adminlanding = (props) => {
         draggable
         pauseOnHover
       />
-    </>
+      {/* Example Loader Component */}
+      <Loader showComponentLoader={true} />
+      {/* Example Loader Component */}
+    </div>
   );
 };
 
