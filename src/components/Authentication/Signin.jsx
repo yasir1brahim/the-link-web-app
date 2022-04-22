@@ -48,6 +48,11 @@ const Signin = (props) => {
           localStorage.setItem('fullName', response.data.full_name);
           console.log(response.data);
           return history({ pathname: '/admin-landing' });
+          // return response.data.role_id === 0
+          //   ? history({ pathname: '/admin-landing' })
+          //   : response.data.role_id === 2
+          //   ? history({ pathname: '/project-list' })
+          //   : history({ pathname: '/' });
         }
       } catch (error) {
         toast.error('Incorrect Email or Password.', {
