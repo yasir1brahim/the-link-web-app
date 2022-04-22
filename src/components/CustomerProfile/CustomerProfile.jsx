@@ -126,14 +126,7 @@ const CustomerProfile = (props) => {
         url: `/getLogo/${state.customer_id}`,
       });
       if (picture.data) {
-        const b64Response = Buffer.from(picture.data, 'binary').toString(
-          'base64'
-        );
-        // const imageBlob = await picture.blob();
-        // const imageObjectURL = URL.createObjectURL(
-        //   'data:image/png;base64,' + b64Response
-        // );
-        setProfilePicture(b64Response);
+        setProfilePicture(picture.data.url);
       }
     };
     fetchData().catch((error) => {
@@ -297,10 +290,7 @@ const CustomerProfile = (props) => {
             {!editProfile ? (
               <>
                 <div className="customer-dp-container">
-                  <img
-                    src={`data:image/png;base64,${profilePicture}`}
-                    alt="Company Logo"
-                  />
+                  <img src={profilePicture} alt="Company Logo" />
                 </div>
                 <div className="customer-profile">
                   <div className="row">

@@ -16,13 +16,16 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import EditProject from './editProject';
+import CreateEmployee from '../CustomerProfile/createEmployee';
 
 const CustomerProjects = (props) => {
   const [modal, setModal] = useState(false);
+  const [employeeModal, setEmployeeModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
   // const [isArchived, toggleArchive] = useState(false);
   const toggleModal = () => setModal(!modal);
   const toggleEditModal = () => setEditModal(!editModal);
+  const toggleEmployeeModal = () => setEmployeeModal(!employeeModal);
   const [projectData, setProjectData] = useState([]);
   const [project, setProject] = useState({});
   const [pageRefresh, setPageRefresh] = useState(false);
@@ -95,6 +98,15 @@ const CustomerProjects = (props) => {
                     <span className="showing-strong">{projectData.length}</span>
                     .
                   </label>
+                </div>
+                <div className="table-bulk-changes">
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={toggleEmployeeModal}
+                  >
+                    + Add Employee
+                  </button>
                 </div>
                 {/* <div className="table-bulk-changes">
                   <button
@@ -217,6 +229,13 @@ const CustomerProjects = (props) => {
                   setItemsPerPage={setItemsPerPage}
                 />
               </div>
+              <CreateEmployee
+                modal={employeeModal}
+                toggleModal={toggleEmployeeModal}
+                customer={state}
+                pageRefresh={pageRefresh}
+                setPageRefresh={setPageRefresh}
+              />
               <CreateProject
                 modal={modal}
                 toggleModal={toggleModal}
