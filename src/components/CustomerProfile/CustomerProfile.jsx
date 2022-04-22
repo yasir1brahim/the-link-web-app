@@ -15,7 +15,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import EditEmployee from './editEmployee';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 import { ConfirmationModal } from './confirmationModal';
-import { Buffer } from 'buffer';
 
 const CustomerProfile = (props) => {
   const [editProfile, setEditProfile] = useState(false);
