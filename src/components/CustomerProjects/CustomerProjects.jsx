@@ -31,6 +31,7 @@ const CustomerProjects = (props) => {
   const [pageRefresh, setPageRefresh] = useState(false);
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [customerData, setCustomerData] = useState({});
   const { state } = useLocation();
   // const customer = state;
   const navigate = useNavigate();
@@ -39,7 +40,30 @@ const CustomerProjects = (props) => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/projects/${state.customer_id}`,
+        url: `/customer/${localStorage.getItem('userId')}`,
+      });
+      setCustomerData(response.data.message[0]);
+      console.log(response.data.message);
+    };
+
+    fetchData().catch((error) => {
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    });
+  }, [state, pageRefresh]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axiosInstance({
+        method: 'get',
+        url: `/projects/${localStorage.getItem('userId')}`,
       });
       setProjectData(response.data.message);
       // setProjectData(
@@ -75,7 +99,7 @@ const CustomerProjects = (props) => {
         <NavbarTop />
         <div className="page-wrap-content customer-projects-wrapper">
           <Header
-            title={state?.customer_name}
+            title={state?.customer_name || customerData?.customer_name}
             showBtn={'Create New Project'}
             toggleModal={toggleModal}
           />
@@ -232,21 +256,21 @@ const CustomerProjects = (props) => {
               <CreateEmployee
                 modal={employeeModal}
                 toggleModal={toggleEmployeeModal}
-                customer={state}
+                customer={state || customerData}
                 pageRefresh={pageRefresh}
                 setPageRefresh={setPageRefresh}
               />
               <CreateProject
                 modal={modal}
                 toggleModal={toggleModal}
-                customer={state}
+                customer={state || customerData}
                 pageRefresh={pageRefresh}
                 setPageRefresh={setPageRefresh}
               />
               <EditProject
                 modal={editModal}
                 toggleModal={toggleEditModal}
-                customer={state}
+                customer={state || customerData}
                 project={project}
                 pageRefresh={pageRefresh}
                 setPageRefresh={setPageRefresh}

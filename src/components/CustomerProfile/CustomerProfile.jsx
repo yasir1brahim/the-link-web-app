@@ -53,13 +53,9 @@ const CustomerProfile = (props) => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/customers/${localStorage.getItem('userId')}`,
+        url: `/customer/${localStorage.getItem('userId')}`,
       });
-      setCustomerData(
-        response.data.message.find(
-          (customer) => customer.customer_id === state.customer_id
-        )
-      );
+      setCustomerData(response.data.message[0]);
       console.log(response.data.message);
     };
 
@@ -79,7 +75,7 @@ const CustomerProfile = (props) => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/employeeList/${state.customer_id}`,
+        url: `/employeeList/${localStorage.getItem('userId')}`,
       });
       setEmployeeData(response.data.message);
       console.log(response.data.message);
@@ -214,23 +210,27 @@ const CustomerProfile = (props) => {
           method: 'put',
           url: '/updateCustomer',
           data: {
-            email_address: email.value || customer.email_address,
+            email_address: email.value || customerData?.email_address,
             password: password.value || '',
-            customer_name: companyName.value || customer.customer_name,
-            account_owner: accountOwner.value || customer.account_owner,
+            customer_name: companyName.value || customerData?.customer_name,
+            account_owner: accountOwner.value || customerData?.account_owner,
             contact_number:
               contactNumber.value.replace(/[^0-9]/g, '') ||
-              customer.contact_number,
-            address: address.value || customer.address,
+              customerData?.contact_number,
+            address: address.value || customerData?.address,
             status: 'Active',
-            customer_id: customer.customer_id,
+            customer_id: customerData?.customer_id,
           },
         });
         if (response.data.message) {
           customer = response.data.message;
         }
 
-        if (response.data?.message && profilePicture) {
+        if (
+          response.data?.message &&
+          profilePicture &&
+          !profilePicture.includes('https')
+        ) {
           const data = new FormData();
           data.append('customer_id', customer[0].customer_id);
           data.append('logo', profilePicture);
