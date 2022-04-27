@@ -41,13 +41,13 @@ const NavbarTop = () => {
             </NavLink>
             {navDrop ? (
               <div className="nav-dropdown">
-                {/* <a
-                  href="/admin-landing"
+                <a
+                  href="/customer-profile"
                   className="navlist"
                   onClick={toggleDrop}
-                > */}
-                View Company Profile
-                {/* </a> */}
+                >
+                  View Company Profile
+                </a>
                 <a
                   href="/"
                   className="navlist list-logout"

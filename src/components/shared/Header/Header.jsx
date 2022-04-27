@@ -10,7 +10,14 @@ const Header = ({ ...props }) => {
       <div className="header-left">
         <div className="header-breadcrumb-wrapper">
           <div className="breadcrumb-content">
-            <a href="/admin-landing" className="breadcrumb-text">
+            <a
+              href={
+                localStorage.getItem('roleId') === '0'
+                  ? '/admin-landing'
+                  : '/project-list'
+              }
+              className="breadcrumb-text"
+            >
               Home /
             </a>
             {props.breadcrumb && (
