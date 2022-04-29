@@ -40,7 +40,9 @@ const CustomerProjects = (props) => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/customer/${localStorage.getItem('userId')}`,
+        url: state?.customer_id
+          ? `/customer/${state.customer_id}`
+          : `/customer/${localStorage.getItem('userId')}`,
       });
       setCustomerData(response.data.message[0]);
       console.log(response.data.message);
@@ -63,7 +65,9 @@ const CustomerProjects = (props) => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/projects/${localStorage.getItem('userId')}`,
+        url: state?.customer_id
+          ? `/projects/${state.customer_id}`
+          : `/projects/${localStorage.getItem('userId')}`,
       });
       setProjectData(response.data.message);
       // setProjectData(

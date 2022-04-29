@@ -41,13 +41,15 @@ const NavbarTop = () => {
             </NavLink>
             {navDrop ? (
               <div className="nav-dropdown">
-                <a
-                  href="/customer-profile"
-                  className="navlist"
-                  onClick={toggleDrop}
-                >
-                  View Company Profile
-                </a>
+                {localStorage.getItem('roleId') !== '0' && (
+                  <a
+                    href="/customer-profile"
+                    className="navlist"
+                    onClick={toggleDrop}
+                  >
+                    View Company Profile
+                  </a>
+                )}
                 <a
                   href="/"
                   className="navlist list-logout"
