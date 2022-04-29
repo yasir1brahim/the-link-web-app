@@ -53,7 +53,9 @@ const CustomerProfile = (props) => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/customer/${localStorage.getItem('userId')}`,
+        url: state.customer_id
+          ? `/customer/${state.customer_id}`
+          : `/customer/${localStorage.getItem('userId')}`,
       });
       setCustomerData(response.data.message[0]);
       console.log(response.data.message);
@@ -75,7 +77,9 @@ const CustomerProfile = (props) => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/employeeList/${localStorage.getItem('userId')}`,
+        url: state.customer_id
+          ? `/employeeList/${state.customer_id}`
+          : `/employeeList/${localStorage.getItem('userId')}`,
       });
       setEmployeeData(response.data.message);
       console.log(response.data.message);
