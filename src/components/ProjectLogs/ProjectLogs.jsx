@@ -7,10 +7,10 @@ import { useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../config/axios';
-import SubmittalTable from './submittalTable';
-import TestingTable from './testingTable';
-import CloseOutTable from './closeOutTable';
-import MeetingTable from './meetingTable';
+// import SubmittalTable from './submittalTable';
+// import TestingTable from './testingTable';
+// import CloseOutTable from './closeOutTable';
+// import MeetingTable from './meetingTable';
 import { CSVLink } from 'react-csv';
 import CombinedLogs from './combinedLogs';
 import { debounce } from 'lodash';
@@ -195,6 +195,7 @@ const ProjectLogs = () => {
                   handleSelectAll={handleSelectAll}
                   pageRefresh={pageRefresh}
                   setPageRefresh={setPageRefresh}
+                  customerId={state.customerId}
                 />
                 {/* {state.project?.type === 'Submittal' && (
                  

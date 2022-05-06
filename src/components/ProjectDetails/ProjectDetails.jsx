@@ -36,7 +36,7 @@ const ProjectsDetails = () => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/project_data/${state?.project_id}`,
+        url: `/project_data/${state.project?.project_id}`,
       });
       setProjectData(response.data.message);
       setDocParsed(response.data.doc_parsed);
@@ -54,7 +54,7 @@ const ProjectsDetails = () => {
         progress: undefined,
       });
     });
-  }, [state, pageRefresh]);
+  }, [state.project, pageRefresh]);
   const backToUpload = () => {
     toggleErrorModal(false);
     setModal(true);
@@ -64,7 +64,7 @@ const ProjectsDetails = () => {
     try {
       setLoading(true);
       const data = new FormData();
-      data.append('project_id', state?.project_id);
+      data.append('project_id', state.project?.project_id);
       Object.values(pdfFile)?.forEach((file) => data.append('files', file));
       const response = await axiosInstance({
         method: 'post',
@@ -97,7 +97,11 @@ const ProjectsDetails = () => {
 
   const handleViewLog = (project) => {
     navigate('/project-logs', {
-      state: { project, projectName: state?.project_name },
+      state: {
+        project,
+        projectName: state.project?.project_name,
+        customerId: state.customerId,
+      },
     });
   };
 
@@ -107,7 +111,9 @@ const ProjectsDetails = () => {
         <NavbarTop />
         <div className="page-wrap-content projects-details-wrapper">
           <Header
-            title={`Project Details - ${state?.project_name || ''}`}
+            title={`Project Details - ${
+              state.project.project?.project_name || ''
+            }`}
             showBtn={'Upload Document'}
             toggleModal={toggleModal}
             breadcrumb={'View Projects'}
@@ -182,7 +188,7 @@ const ProjectsDetails = () => {
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
-                  onClick={() => handleViewLog(state)}
+                  onClick={() => handleViewLog(state.project)}
                   disabled={
                     !projectData
                       .map((project) => (project.total_logs > 0 ? true : false))
