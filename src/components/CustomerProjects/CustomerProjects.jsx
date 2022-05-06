@@ -90,7 +90,9 @@ const CustomerProjects = (props) => {
   }, [state, pageRefresh]);
 
   const handleLaunch = (project) => {
-    navigate('/project-details', { state: project });
+    navigate('/project-details', {
+      state: { project, customerId: state.customer_id },
+    });
   };
   const handleEdit = (project) => {
     setProject(project);

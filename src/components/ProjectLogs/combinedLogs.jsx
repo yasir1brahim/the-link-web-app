@@ -37,7 +37,7 @@ export default function CombinedLogs(props) {
         method: 'put',
         url: '/update_logs',
         data: {
-          customer_id: localStorage.getItem('userId'),
+          customer_id: props.customerId,
           comments: rowData.comments,
           id: rowData.id,
           item_desc: rowData.item_desc,
