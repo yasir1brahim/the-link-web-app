@@ -33,6 +33,8 @@ export default function CombinedLogs(props) {
 
   const handleUpdateLog = async () => {
     try {
+      setEditRow('');
+
       await axiosInstance({
         method: 'put',
         url: '/update_logs',
@@ -41,27 +43,29 @@ export default function CombinedLogs(props) {
           comments: rowData.comments,
           id: rowData.id,
           item_desc: rowData.item_desc,
-          package: rowData.package,
+          package: 'Testing',
           para_context: rowData.para_context,
           para_no: rowData.para_no,
           project_id: rowData.project_id,
           spec_section: rowData.spec_section,
           status: statusValue[0]?.value ? statusValue[0].value : '',
           type: rowData.type,
-          date_issued: dateIssued
-            ? dateIssued === rowData.date_issued
-              ? moment(new Date(dateIssued.replaceAll('-', '/'))).format(
-                  'YYYY-MM-DD'
-                )
-              : moment(dateIssued).format('YYYY-MM-DD')
-            : '',
-          date_approved: dateApproved
-            ? dateApproved === rowData.date_approved
-              ? moment(new Date(dateApproved.replaceAll('-', '/'))).format(
-                  'YYYY-MM-DD'
-                )
-              : moment(dateApproved).format('YYYY-MM-DD')
-            : '',
+          // date_issued: dateIssued
+          //   ? dateIssued === rowData.date_issued
+          //     ? moment(new Date(dateIssued.replaceAll('-', '/'))).format(
+          //         'YYYY-MM-DD'
+          //       )
+          //     : moment(dateIssued).format('YYYY-MM-DD')
+          //   : '',
+          // date_approved: dateApproved
+          //   ? dateApproved === rowData.date_approved
+          //     ? moment(new Date(dateApproved.replaceAll('-', '/'))).format(
+          //         'YYYY-MM-DD'
+          //       )
+          //     : moment(dateApproved).format('YYYY-MM-DD')
+          //   : '',
+          date_issued: '',
+          date_approved: '',
         },
       });
       props.setPageRefresh(!props.pageRefresh);
@@ -243,7 +247,7 @@ export default function CombinedLogs(props) {
                       placeholder="Enter"
                       className="form-control"
                       type="text"
-                      value={'hello'}
+                      value={'Testing'}
                       // style={{ border: 'none' }}
                       // onChange={(e) =>
                       //   setRowData({ ...rowData, spec_section: e.target.value })
@@ -309,6 +313,8 @@ export default function CombinedLogs(props) {
                         }
                       />
                     </div>
+                  ) : log.date_issued === '00-00-0000' ? (
+                    ''
                   ) : (
                     log.date_issued
                   )}
@@ -332,6 +338,8 @@ export default function CombinedLogs(props) {
                         }
                       />
                     </div>
+                  ) : log.date_approved === '00-00-0000' ? (
+                    ''
                   ) : (
                     log.date_approved
                   )}
