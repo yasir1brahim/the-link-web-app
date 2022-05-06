@@ -148,7 +148,7 @@ const ProjectsDetails = () => {
                             Total Logs<i className="sort-i"></i>
                           </span>
                         </th>
-                        <th>Action</th>
+                        {/* <th>Action</th> */}
                       </tr>
                     </thead>
                     <tbody>
@@ -159,7 +159,7 @@ const ProjectsDetails = () => {
                             <td>{project.status}</td>
                             <td>{project.logs_created}</td>
                             <td>{project.total_logs}</td>
-                            <td>
+                            {/* <td>
                               <div className="action-wrapper">
                                 <button
                                   type="button"
@@ -170,7 +170,7 @@ const ProjectsDetails = () => {
                                   View Logs
                                 </button>
                               </div>
-                            </td>
+                            </td> */}
                           </tr>
                         );
                       })}
@@ -179,13 +179,18 @@ const ProjectsDetails = () => {
                 </div>
               )}
               <div className="table-footer-content">
-                {/* <button
+                <button
                   type="button"
-                  onClick={toggleModal}
                   className="btn btn-secondary btn-sm"
+                  onClick={() => handleViewLog(state)}
+                  disabled={
+                    !projectData
+                      .map((project) => (project.total_logs > 0 ? true : false))
+                      .filter((value) => value === true).length
+                  }
                 >
                   View Logs
-                </button> */}
+                </button>
                 <p>
                   Documents Uploaded: <span>{docParsed}</span>
                 </p>
