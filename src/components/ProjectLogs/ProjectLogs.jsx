@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
 // import PaginatedItems from '../shared/Pagination/Pagination';
@@ -12,12 +12,20 @@ import TestingTable from './testingTable';
 import CloseOutTable from './closeOutTable';
 import MeetingTable from './meetingTable';
 import { CSVLink } from 'react-csv';
+import CombinedLogs from './combinedLogs';
+import { debounce } from 'lodash';
 
 const ProjectLogs = () => {
   const { state } = useLocation();
   const [logData, setLogData] = useState([]);
   const [selected, setSelected] = useState([]);
   const [pageRefresh, setPageRefresh] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+
+  const handleSearchChange = useCallback(
+    (value) => debounce(setSearchValue(value), 200),
+    []
+  );
 
   const handleSelectAll = () => {
     if (selected.length === logData.length) {
@@ -39,9 +47,11 @@ const ProjectLogs = () => {
   };
   const headers = [
     { label: 'Spec Section', key: 'spec_section' },
-    { label: 'Sub Section', key: 'sub_section' },
-    { label: 'Type', key: 'section_name' },
-    { label: 'Description', key: 'description' },
+    { label: 'Paragraph', key: 'para_no' },
+    { label: 'Submittal Typ', key: 'type' },
+    { label: 'Submittal Item', key: 'item_desc' },
+    { label: 'Grouping', key: 'Grouping' },
+    { label: 'Paragraph Context', key: 'para_context' },
     { label: 'Status', key: 'status' },
     { label: 'Date Issued', key: 'date_issued' },
     { label: 'Date Approved', key: 'date_approved' },
@@ -55,7 +65,7 @@ const ProjectLogs = () => {
         data: {
           project_id: state?.project.project_id,
           records: selected,
-          type: state.project?.type,
+          type: 'Submittal',
         },
       });
       setPageRefresh(!pageRefresh);
@@ -109,13 +119,22 @@ const ProjectLogs = () => {
       });
     });
   }, [state, pageRefresh]);
-
+  let filteredLogData = logData
+    .map((log) => {
+      return Object.values(log)
+        .filter((value) => value)
+        .filter((value) => value.toString().includes(searchValue)).length
+        ? log
+        : null;
+    })
+    .filter((value) => value);
   return (
     <div className="page-wrap">
       <NavbarTop />
       <div className="page-wrap-content project-logs-wrapper">
         <Header
-          title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
+          // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
+          title={`All Logs  - ${state.projectName || ''}`}
           breadcrumb2={'Project Details'}
           breadcrumb={'View Projects'}
         />
@@ -132,7 +151,7 @@ const ProjectLogs = () => {
               <>
                 <div className="table-top-content">
                   <div className="table-heading">
-                    <h5 className="m-0">{`${state.project?.type} List`} </h5>
+                    {/* <h5 className="m-0">{`${state.project?.type} List`} </h5> */}
                     {/* <label className="table-entries">
                       Showing entries <span className="showing-strong"> 6 </span>
                       of <span className="showing-strong"> 90 </span>.
@@ -144,6 +163,8 @@ const ProjectLogs = () => {
                         type="text"
                         placeholder="Find In Log"
                         className="search-icon log-search-input"
+                        value={searchValue}
+                        onChange={(e) => handleSearchChange(e.target.value)}
                       />
                     </div>
                     {/* <button type="button" className="btn btn-secondary btn-sm"> */}
@@ -167,8 +188,16 @@ const ProjectLogs = () => {
                     </button>
                   </div>
                 </div>
-
-                {state.project?.type === 'Submittal' && (
+                <CombinedLogs
+                  logData={filteredLogData}
+                  selected={selected}
+                  handleSelect={handleSelect}
+                  handleSelectAll={handleSelectAll}
+                  pageRefresh={pageRefresh}
+                  setPageRefresh={setPageRefresh}
+                />
+                {/* {state.project?.type === 'Submittal' && (
+                 
                   <SubmittalTable
                     logData={logData}
                     selected={selected}
@@ -199,7 +228,7 @@ const ProjectLogs = () => {
                     handleSelect={handleSelect}
                     handleSelectAll={handleSelectAll}
                   />
-                )}
+                )}{' '} */}
               </>
             )}
 
