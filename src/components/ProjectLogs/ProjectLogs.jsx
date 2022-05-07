@@ -21,10 +21,12 @@ const ProjectLogs = () => {
   const [selected, setSelected] = useState([]);
   const [pageRefresh, setPageRefresh] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  // const [currentItems, setCurrentItems] = useState([]);
+  // const [itemsPerPage, setItemsPerPage] = useState(5);
 
   const handleSearchChange = useCallback(
     (value) => debounce(setSearchValue(value), 200),
-    []
+    [setSearchValue]
   );
 
   const handleSelectAll = () => {
@@ -237,7 +239,12 @@ const ProjectLogs = () => {
               <button type="button" className="btn btn-secondary btn-sm">
                 Back
               </button>
-              <PaginatedItems itemsPerPage={4} />
+              <PaginatedItems
+                items={logData}
+                setCurrentItems={setCurrentItems}
+                itemsPerPage={itemsPerPage}
+                setItemsPerPage={setItemsPerPage}
+              />
             </div> */}
           </div>
         </div>

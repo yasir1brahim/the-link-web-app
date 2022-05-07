@@ -1,8 +1,8 @@
-// import moment from 'moment';
+import moment from 'moment';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../config/axios';
-// import DateSelector from '../shared/DateSelector/DateSelector';
+import DateSelector from '../shared/DateSelector/DateSelector';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 
 export default function CombinedLogs(props) {
@@ -25,10 +25,10 @@ export default function CombinedLogs(props) {
   });
   const handleEditToggle = (log, index) => {
     setRowData(log);
-    setDateIssued(log.date_issued);
-    setDateApproved(log.date_approved);
     setStatus(log.status);
     setEditRow(index);
+    setDateIssued('');
+    setDateApproved('');
   };
 
   const handleUpdateLog = async () => {
@@ -43,31 +43,23 @@ export default function CombinedLogs(props) {
           comments: rowData.comments,
           id: rowData.id,
           item_desc: rowData.item_desc,
-          package: 'Testing',
+          package: null,
           para_context: rowData.para_context,
           para_no: rowData.para_no,
           project_id: rowData.project_id,
           spec_section: rowData.spec_section,
-          status: statusValue[0]?.value ? statusValue[0].value : '',
+          status: statusValue?.length ? statusValue[0].value : '',
           type: rowData.type,
-          // date_issued:
-          //   dateIssued && dateIssued !== '00-00-0000'
-          //     ? dateIssued === rowData.date_issued
-          //       ? moment(new Date(dateIssued.replaceAll('-', '/'))).format(
-          //           'YYYY-MM-DD'
-          //         )
-          //       : moment(dateIssued).format('YYYY-MM-DD')
-          //     : null,
-          // date_approved:
-          //   dateApproved && dateApproved !== '00-00-0000'
-          //     ? dateApproved === rowData.date_approved
-          //       ? moment(new Date(dateApproved.replaceAll('-', '/'))).format(
-          //           'YYYY-MM-DD'
-          //         )
-          //       : moment(dateApproved).format('YYYY-MM-DD')
-          //     : null,
-          date_issued: null,
-          date_approved: null,
+          date_issued: !dateIssued
+            ? moment(
+                new Date((rowData?.date_issued).replaceAll('-', '/'))
+              ).format('YYYY-MM-DD')
+            : moment(dateIssued).format('YYYY-MM-DD'),
+          date_approved: !dateApproved
+            ? moment(
+                new Date((rowData?.date_approved).replaceAll('-', '/'))
+              ).format('YYYY-MM-DD')
+            : moment(dateApproved).format('YYYY-MM-DD'),
         },
       });
       props.setPageRefresh(!props.pageRefresh);
@@ -299,8 +291,7 @@ export default function CombinedLogs(props) {
                   )}
                 </td>
                 <td>
-                  {null}
-                  {/* {editRow === index ? (
+                  {editRow === index ? (
                     <div className="log-datepicker form-group">
                       <DateSelector
                         isClearable={false}
@@ -308,21 +299,21 @@ export default function CombinedLogs(props) {
                         labelText="Date Issued"
                         onChange={setDateIssued}
                         selected={
-                          dateIssued && dateIssued !== '00-00-0000'
-                            ? dateIssued === rowData.date_issued
-                            ? moment(new Date(dateIssued.replaceAll('-', '/')))
+                          !dateIssued
+                            ? log.date_issued &&
+                              log.date_issued !== '00-00-0000'
+                              ? new Date(log.date_issued.replaceAll('-', '/'))
+                              : null
                             : dateIssued
-                          : null,
                         }
                       />
                     </div>
                   ) : log.date_issued === '00-00-0000' ? null : (
                     log.date_issued
-                  )} */}
+                  )}
                 </td>
                 <td>
-                  {dateIssued && dateApproved ? null : null}
-                  {/* {editRow === index ? (
+                  {editRow === index ? (
                     <div className="log-datepicker form-group">
                       <DateSelector
                         isClearable={false}
@@ -330,15 +321,18 @@ export default function CombinedLogs(props) {
                         labelText="Date Approved"
                         onChange={setDateApproved}
                         selected={
-                          dateApproved && dateApproved !== '00-00-0000'
-                            ? new Date(dateApproved.replaceAll('-', '/'))
-                            : null
+                          !dateApproved
+                            ? log.date_approved &&
+                              log.date_approved !== '00-00-0000'
+                              ? new Date(log.date_approved.replaceAll('-', '/'))
+                              : null
+                            : dateApproved
                         }
                       />
                     </div>
                   ) : log.date_approved === '00-00-0000' ? null : (
                     log.date_approved
-                  )} */}
+                  )}
                 </td>
                 <td>
                   {editRow === index ? (
