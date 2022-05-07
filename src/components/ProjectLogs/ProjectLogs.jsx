@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
-import PaginatedItems from '../shared/Pagination/Pagination';
+// import PaginatedItems from '../shared/Pagination/Pagination';
 import { ReactComponent as Trash } from '../../assets/images/trash.svg';
 import { useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
