@@ -147,7 +147,7 @@ export default function CombinedLogs(props) {
                 Date Approved <i className="sort-d"></i>
               </span>
             </th>
-            <th>
+            <th className="log-description">
               <span>Comments</span>
             </th>
             <th className="text-center">Action</th>
