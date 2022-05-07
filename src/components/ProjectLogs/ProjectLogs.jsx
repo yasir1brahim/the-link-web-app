@@ -171,7 +171,7 @@ const ProjectLogs = () => {
                     </div>
                     {/* <button type="button" className="btn btn-secondary btn-sm"> */}
                     <CSVLink
-                      filename={`${state.project?.type}.csv`}
+                      filename={`All-Logs.csv`}
                       data={logData}
                       target="_blank"
                       className="btn btn-secondary btn-sm"

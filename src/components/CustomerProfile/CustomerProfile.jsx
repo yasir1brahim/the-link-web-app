@@ -233,7 +233,8 @@ const CustomerProfile = (props) => {
         if (
           response.data?.message &&
           profilePicture &&
-          !profilePicture.includes('https')
+          // !profilePicture?.includes('https')
+          typeof profilePicture === 'object'
         ) {
           const data = new FormData();
           data.append('customer_id', customer[0].customer_id);
