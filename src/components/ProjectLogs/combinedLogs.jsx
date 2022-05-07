@@ -51,14 +51,18 @@ export default function CombinedLogs(props) {
           status: statusValue?.length ? statusValue[0].value : '',
           type: rowData.type,
           date_issued: !dateIssued
-            ? moment(
-                new Date((rowData?.date_issued).replaceAll('-', '/'))
-              ).format('YYYY-MM-DD')
+            ? rowData?.date_issued
+              ? moment(
+                  new Date((rowData?.date_issued).replaceAll('-', '/'))
+                ).format('YYYY-MM-DD')
+              : null
             : moment(dateIssued).format('YYYY-MM-DD'),
           date_approved: !dateApproved
-            ? moment(
-                new Date((rowData?.date_approved).replaceAll('-', '/'))
-              ).format('YYYY-MM-DD')
+            ? rowData?.date_approved
+              ? moment(
+                  new Date((rowData?.date_approved).replaceAll('-', '/'))
+                ).format('YYYY-MM-DD')
+              : null
             : moment(dateApproved).format('YYYY-MM-DD'),
         },
       });
