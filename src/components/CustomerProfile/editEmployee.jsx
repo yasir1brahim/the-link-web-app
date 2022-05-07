@@ -62,7 +62,7 @@ const EditEmployee = ({
         data: {
           email_address: email.value || employee?.emp_email,
           full_name: `${firstName.value || employee?.name.split(/(\s+)/)[0]}  ${
-            lastName.value || employee?.name.split(/(\s+)/)[0]
+            lastName.value || employee?.name.split(/(\s+)/)[2]
           }`,
           // projects: asscProject.map((project) => project.value),
           projects: [],
