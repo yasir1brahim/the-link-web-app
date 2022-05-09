@@ -85,17 +85,21 @@ const EditProject = ({
               ? leadContact[0].value
               : employeeList.find(
                   (employee) => employee.name === project.lead_contact
-                ).emp_id,
+                )?.emp_id,
             start_date: startDate
               ? moment(startDate).format('YYYY-MM-DD')
-              : moment(
+              : project?.start_date
+              ? moment(
                   new Date((project?.start_date).replaceAll('-', '/'))
-                ).format('YYYY-MM-DD'),
+                ).format('YYYY-MM-DD')
+              : '',
             end_date: endDate
               ? moment(endDate).format('YYYY-MM-DD')
-              : moment(
+              : project?.end_date
+              ? moment(
                   new Date((project?.end_date).replaceAll('-', '/'))
-                ).format('YYYY-MM-DD'),
+                ).format('YYYY-MM-DD')
+              : '',
             customer_id: customer.customer_id,
             status: 'Open',
             project_id: project.project_id,
@@ -214,8 +218,8 @@ const EditProject = ({
                           : employeeList.length
                           ? employeeList?.find(
                               (employee) =>
-                                employee.name === project.lead_contact
-                            ).emp_email
+                                employee.name === project?.lead_contact
+                            )?.emp_email
                           : leadContact.label
                       }
                       disabled
