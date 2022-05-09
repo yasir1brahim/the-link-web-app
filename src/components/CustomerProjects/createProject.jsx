@@ -67,6 +67,7 @@ const CreateProject = ({
       setProjectName({ ...projectName, errors: 'Project Name is required.' });
       error = true;
     }
+    setDateError({ startError: '', endError: '' });
     // if (startDate === '') {
     //   setDateError({ ...dateError, startError: 'Start Date is required.' });
     //   error = true;
