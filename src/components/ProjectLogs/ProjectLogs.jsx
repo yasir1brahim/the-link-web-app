@@ -14,6 +14,7 @@ import axiosInstance from '../../config/axios';
 import { CSVLink } from 'react-csv';
 import CombinedLogs from './combinedLogs';
 import { debounce } from 'lodash';
+import Loader from '../shared/Loader/Loader';
 
 const ProjectLogs = () => {
   const { state } = useLocation();
@@ -23,22 +24,13 @@ const ProjectLogs = () => {
   const [searchValue, setSearchValue] = useState('');
   // const [currentItems, setCurrentItems] = useState([]);
   // const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [isLoading, setLoading] = useState(false);
 
   const handleSearchChange = useCallback(
     (value) => debounce(setSearchValue(value), 200),
     [setSearchValue]
   );
 
-  const handleSelectAll = () => {
-    if (selected.length === logData.length) {
-      setSelected([]);
-    } else {
-      let selectedLogs = logData.map((log) => {
-        return log.id;
-      });
-      setSelected(selectedLogs);
-    }
-  };
   const handleSelect = (id) => {
     if (selected.includes(id)) {
       let selectedLogs = selected.filter((logId) => logId !== id);
@@ -50,7 +42,7 @@ const ProjectLogs = () => {
   const headers = [
     { label: 'Spec Section', key: 'spec_section' },
     { label: 'Paragraph', key: 'para_no' },
-    { label: 'Submittal Typ', key: 'type' },
+    { label: 'Submittal Type', key: 'type' },
     { label: 'Submittal Item', key: 'item_desc' },
     { label: 'Grouping', key: 'Grouping' },
     { label: 'Paragraph Context', key: 'para_context' },
@@ -97,6 +89,7 @@ const ProjectLogs = () => {
   };
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const response = await axiosInstance({
         method: 'post',
         url: '/get_logs',
@@ -106,10 +99,12 @@ const ProjectLogs = () => {
         },
       });
       setLogData(response.data.message);
+      setLoading(false);
       console.log(response.data.message);
     };
 
     fetchData().catch((error) => {
+      setLoading(false);
       toast.error('Something went wrong!', {
         position: 'bottom-center',
         autoClose: 5000,
@@ -130,6 +125,17 @@ const ProjectLogs = () => {
         : null;
     })
     .filter((value) => value);
+
+  const handleSelectAll = () => {
+    if (selected?.length === filteredLogData?.length) {
+      setSelected([]);
+    } else {
+      let selectedLogs = filteredLogData?.map((log) => {
+        return log.id;
+      });
+      setSelected(selectedLogs);
+    }
+  };
   return (
     <div className="page-wrap">
       <NavbarTop />
@@ -260,6 +266,7 @@ const ProjectLogs = () => {
         draggable
         pauseOnHover
       />
+      <Loader showComponentLoader={isLoading} />
     </div>
   );
 };
