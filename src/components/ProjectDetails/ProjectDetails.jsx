@@ -25,6 +25,7 @@ const ProjectsDetails = () => {
   const navigate = useNavigate();
   const [pageRefresh, setPageRefresh] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const [isUploadLoading, setUploadLoading] = useState(false);
   const [docParsed, setDocParsed] = useState(0);
 
   useEffect(() => {
@@ -34,16 +35,19 @@ const ProjectsDetails = () => {
   }, [modal]);
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const response = await axiosInstance({
         method: 'get',
         url: `/project_data/${state.project?.project_id}`,
       });
       setProjectData(response.data.message);
       setDocParsed(response.data.doc_parsed);
+      setLoading(false);
       console.log(response.data.message);
     };
 
     fetchData().catch((error) => {
+      setLoading(false);
       toast.error('Something went wrong!', {
         position: 'bottom-center',
         autoClose: 5000,
@@ -62,7 +66,7 @@ const ProjectsDetails = () => {
   const handleSubmit = async () => {
     console.log(pdfFile);
     try {
-      setLoading(true);
+      setUploadLoading(true);
       const data = new FormData();
       data.append('project_id', state.project?.project_id);
       Object.values(pdfFile)?.forEach((file) => data.append('files', file));
@@ -73,14 +77,14 @@ const ProjectsDetails = () => {
       });
       if (response.data) {
         console.log(response.data);
-        setLoading(false);
+        setUploadLoading(false);
         setFileData(response.data.message);
         setModal(false);
         toggleSuccessModal(true);
         setPageRefresh(!pageRefresh);
       }
     } catch (error) {
-      setLoading(false);
+      setUploadLoading(false);
       toggleErrorModal(true);
       setModal(false);
       toast.error('Something went wrong!', {
@@ -140,17 +144,17 @@ const ProjectsDetails = () => {
                           </span>
                         </th>
                         <th>
-                          <span className="has-sorting">
+                          <span>
                             Status<i className="sort-d"></i>
                           </span>
                         </th>
                         <th>
-                          <span className="has-sorting">
+                          <span>
                             Logs Created<i className="sort-i"></i>
                           </span>
                         </th>
                         <th>
-                          <span className="has-sorting">
+                          <span>
                             Total Logs<i className="sort-i"></i>
                           </span>
                         </th>
@@ -287,7 +291,7 @@ const ProjectsDetails = () => {
             {/* Upload form code */}
 
             {/* Error Upload code */}
-            <Loader showComponentLoader={isLoading} />
+            <Loader showComponentLoader={isUploadLoading} />
           </ModalBody>
         </Modal>
         <Modal
@@ -370,6 +374,7 @@ const ProjectsDetails = () => {
           </ModalBody>
         </Modal>
       </div>
+      <Loader showComponentLoader={isLoading} />
       <ToastContainer
         position="bottom-center"
         autoClose={5000}

@@ -1,7 +1,6 @@
 import React from 'react';
 
-// @ts-ignore
-const Loader = ({ ...props }) => {
+const Loader = (props) => {
   return (
     props.showComponentLoader && (
       <div
@@ -10,16 +9,12 @@ const Loader = ({ ...props }) => {
           (props.showComponentLoader ? 'wrapper-component' : '')
         }
       >
-        <div className="linear-activity">
-          <div className="indeterminate"></div>
+        <div class="dots">
+          <div class="dot1"></div>
+          <div class="dot2"></div>
+          <div class="dot3"></div>
+          <div class="dot4"></div>
         </div>
-        {/* {props.showComponentLoader && 
-            <div className="component-loader">
-                <div className="linear-activity">
-                    <div className="indeterminate"></div>
-                </div>
-            </div>
-            } */}
       </div>
     )
   );
