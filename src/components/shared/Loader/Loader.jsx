@@ -1,27 +1,24 @@
 import React from 'react';
 
-// @ts-ignore
-const Loader = ({ ...props }) => {
+const Loader = (props) => {
   return (
-    props.showComponentLoader && (
-      <div
-        className={
-          'loader-wrapper ' +
-          (props.showComponentLoader ? 'wrapper-component' : '')
-        }
-      >
-        <div className="linear-activity">
-          <div className="indeterminate"></div>
+    <div
+      className={
+        'loader-wrapper ' +
+        (props.showComponentLoader ? 'wrapper-component' : '')
+      }
+    >
+      <div class="dots">
+        <div class="dot1">
         </div>
-        {/* {props.showComponentLoader && 
-            <div className="component-loader">
-                <div className="linear-activity">
-                    <div className="indeterminate"></div>
-                </div>
-            </div>
-            } */}
+        <div class="dot2">
+        </div>
+        <div class="dot3">
+        </div>
+        <div class="dot4">
+        </div>
       </div>
-    )
+    </div>
   );
 };
 
