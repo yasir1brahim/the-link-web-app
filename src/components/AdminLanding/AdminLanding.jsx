@@ -17,10 +17,12 @@ const Adminlanding = (props) => {
   const [pageRefresh, setPageRefresh] = useState(false);
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [isLoading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const response = await axiosInstance({
         method: 'get',
         url: `/customers/${localStorage.getItem('userId')}`,
@@ -30,10 +32,12 @@ const Adminlanding = (props) => {
       //   isArchived ? response.data.archived_customers : response.data.message
       // );
       localStorage.setItem('account_id', response.data.account_id);
+      setLoading(false);
       console.log(response.data.message);
     };
 
     fetchData().catch((error) => {
+      setLoading(false);
       toast.error('Something went wrong!', {
         position: 'bottom-center',
         autoClose: 5000,
@@ -55,7 +59,7 @@ const Adminlanding = (props) => {
   };
 
   return (
-    <div className="position-relative">
+    <div>
       <div className="page-wrap">
         <NavbarTop />
         <div className="page-wrap-content admin-landing-wrapper">
@@ -220,9 +224,7 @@ const Adminlanding = (props) => {
         draggable
         pauseOnHover
       />
-      {/* Example Loader Component */}
-      <Loader showComponentLoader={true} />
-      {/* Example Loader Component */}
+      <Loader showComponentLoader={isLoading} />
     </div>
   );
 };
