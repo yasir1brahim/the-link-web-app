@@ -11,6 +11,9 @@ export default function CombinedLogs(props) {
   const [dateIssued, setDateIssued] = useState('');
   const [dateApproved, setDateApproved] = useState('');
   const [statusValue, setStatus] = useState({});
+  const [groupingValue, setGroupingValue] = useState({});
+  const [searchValue, setSearchValue] = useState('');
+
   const [rowData, setRowData] = useState({
     comments: '',
     id: 1,
@@ -25,7 +28,7 @@ export default function CombinedLogs(props) {
   });
   const handleEditToggle = (log, index) => {
     setRowData(log);
-    setStatus(log.status);
+    setStatus({ label: 'in progress', value: 'in progress' });
     setEditRow(index);
     setDateIssued('');
     setDateApproved('');
@@ -43,7 +46,11 @@ export default function CombinedLogs(props) {
           comments: rowData.comments,
           id: rowData.id,
           item_desc: rowData.item_desc,
-          package: null,
+          package: groupingValue?.length
+            ? groupingValue[0].label
+            : searchValue
+            ? searchValue
+            : rowData.package,
           para_context: rowData.para_context,
           para_no: rowData.para_no,
           project_id: rowData.project_id,
@@ -241,18 +248,24 @@ export default function CombinedLogs(props) {
                 </td>
                 <td>
                   {editRow === index ? (
-                    <input
-                      placeholder="Enter"
-                      className="form-control"
-                      type="text"
-                      value={'Testing'}
-                      // style={{ border: 'none' }}
-                      // onChange={(e) =>
-                      //   setRowData({ ...rowData, spec_section: e.target.value })
-                      // }
-                    />
+                    <div
+                      className="form-group log-datepicker"
+                      style={{ minWidth: '240px' }}
+                    >
+                      <SelectDropdown
+                        label={'Grouping'}
+                        // labelKey="name"
+                        setSelected={setGroupingValue}
+                        // value={leadContact.label}
+                        selected={groupingValue?.label}
+                        options={props.groupingData}
+                        searchValue={searchValue}
+                        setSearchValue={setSearchValue}
+                        // onInputChange={}
+                      />
+                    </div>
                   ) : (
-                    'Grouping'
+                    log.package
                   )}
                 </td>
                 <td>

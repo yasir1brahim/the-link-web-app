@@ -25,6 +25,7 @@ const ProjectLogs = () => {
   // const [currentItems, setCurrentItems] = useState([]);
   // const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setLoading] = useState(false);
+  const [groupingData, setGroupingData] = useState([]);
 
   const handleSearchChange = useCallback(
     (value) => debounce(setSearchValue(value), 200),
@@ -105,6 +106,36 @@ const ProjectLogs = () => {
 
     fetchData().catch((error) => {
       setLoading(false);
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    });
+  }, [state, pageRefresh]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axiosInstance({
+        method: 'get',
+        url: `/getPackages/${state.customerId}`,
+      });
+      setGroupingData(
+        response.data.message.map((packageData) => {
+          return {
+            value: packageData.id,
+            label: packageData.name,
+          };
+        })
+      );
+
+      console.log(response.data.message);
+    };
+
+    fetchData().catch((error) => {
       toast.error('Something went wrong!', {
         position: 'bottom-center',
         autoClose: 5000,
@@ -204,6 +235,7 @@ const ProjectLogs = () => {
                   pageRefresh={pageRefresh}
                   setPageRefresh={setPageRefresh}
                   customerId={state.customerId}
+                  groupingData={groupingData}
                 />
                 {/* {state.project?.type === 'Submittal' && (
                  
