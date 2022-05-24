@@ -115,7 +115,7 @@ const ProjectsDetails = () => {
         <NavbarTop />
         <div className="page-wrap-content projects-details-wrapper">
           <Header
-            title={`Project Details - ${
+            title={`Project Details  ${
               state.project.project?.project_name || ''
             }`}
             showBtn={'Upload Document'}
@@ -140,10 +140,10 @@ const ProjectsDetails = () => {
                       <tr>
                         <th>
                           <span className="has-sorting">
-                            Types <i className=""></i>
+                            Requirement Types <i className=""></i>
                           </span>
                         </th>
-                        <th>
+                        {/* <th>
                           <span>
                             Status<i className="sort-d"></i>
                           </span>
@@ -152,10 +152,10 @@ const ProjectsDetails = () => {
                           <span>
                             Logs Created<i className="sort-i"></i>
                           </span>
-                        </th>
+                        </th> */}
                         <th>
                           <span>
-                            Total Logs<i className="sort-i"></i>
+                            Total Items<i className="sort-i"></i>
                           </span>
                         </th>
                         {/* <th>Action</th> */}
@@ -166,8 +166,8 @@ const ProjectsDetails = () => {
                         return (
                           <tr>
                             <td>{project.type}</td>
-                            <td>{project.status}</td>
-                            <td>{project.logs_created}</td>
+                            {/* <td>{project.status}</td>
+                            <td>{project.logs_created}</td> */}
                             <td>{project.total_logs}</td>
                             {/* <td>
                               <div className="action-wrapper">
@@ -199,7 +199,7 @@ const ProjectsDetails = () => {
                       .filter((value) => value === true).length
                   }
                 >
-                  View Logs
+                  View Submittal Log
                 </button>
                 <p>
                   Documents Uploaded: <span>{docParsed}</span>

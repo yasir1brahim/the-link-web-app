@@ -28,7 +28,6 @@ export default function CombinedLogs(props) {
   });
   const handleEditToggle = (log, index) => {
     setRowData(log);
-    setStatus({ label: 'in progress', value: 'in progress' });
     setEditRow(index);
     setDateIssued('');
     setDateApproved('');
@@ -123,11 +122,11 @@ export default function CombinedLogs(props) {
             </th>
             <th>
               <span>
-                Submittal Type <i className="sort-i"></i>
+                Requirement Type <i className="sort-i"></i>
               </span>
             </th>
             <th>
-              <span>Submittal Item </span>
+              <span> Item </span>
             </th>
             <th>
               <span>
