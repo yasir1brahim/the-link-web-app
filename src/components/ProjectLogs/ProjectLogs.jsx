@@ -43,8 +43,8 @@ const ProjectLogs = () => {
   const headers = [
     { label: 'Spec Section', key: 'spec_section' },
     { label: 'Paragraph', key: 'para_no' },
-    { label: 'Submittal Type', key: 'type' },
-    { label: 'Submittal Item', key: 'item_desc' },
+    { label: 'Requirement Type', key: 'type' },
+    { label: 'Item', key: 'item_desc' },
     { label: 'Grouping', key: 'Grouping' },
     { label: 'Paragraph Context', key: 'para_context' },
     { label: 'Status', key: 'status' },
@@ -96,7 +96,7 @@ const ProjectLogs = () => {
         url: '/get_logs',
         data: {
           project_id: state?.project.project_id,
-          type: state?.project.type,
+          type: 'Classified',
         },
       });
       setLogData(response.data.message);
