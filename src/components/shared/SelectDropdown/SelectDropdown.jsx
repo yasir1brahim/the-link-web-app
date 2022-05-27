@@ -17,19 +17,21 @@ const SelectDropdown = ({ ...props }) => {
         id="basic-example"
         onChange={(e) => {
           props.setSelected(e);
-          props.setSearchValue && props.setSearchValue('');
+          // props.setSearchValue && props.setSearchValue('');
           if (props.onChange) {
             // @ts-ignore
             props.onChange(e[0]);
           }
-          if (props.searchValue === ''){ 
-            // props.setSelected([])
-            props.setSearchValue(e[0])}
+          // if (props.searchValue === ''){ 
+          //   // props.setSelected([])
+          //   props.setSearchValue(e[0])}
         }}
         labelKey={props.labelKey}
         onFocus={(e) => (focused === e ? '' : setFocused(e))}
         onBlur={(e) => (focused !== e ? '' : setFocused(e))}
-        onInputChange={(e) => props.searchValue && props.setSearchValue(e)}
+        onInputChange={(e) => {
+          props.setSelected({})
+          props.setSearchValue && props.setSearchValue(e)}}
         options={props.options}
         placeholder="Choose an option..."
         selected={props.selected}
