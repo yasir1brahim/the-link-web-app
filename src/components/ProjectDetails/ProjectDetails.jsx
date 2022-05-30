@@ -332,7 +332,7 @@ const ProjectsDetails = () => {
               <Success />
               <h5>Success</h5>
               <p>Your file has been succesfully parsed.</p>
-              <ul class="doc-content-table">
+              <ul className="doc-content-table">
                 <li className="doc-content-heading">
                   <span>Type</span>
                   <span>Total Logs</span>

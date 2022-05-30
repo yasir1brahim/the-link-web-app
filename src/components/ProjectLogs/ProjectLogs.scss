@@ -59,8 +59,16 @@
         }
       }
       .l-table-wrapper {
+        max-height: calc(100vh - 250px);
         margin-bottom: 32px;
         table {
+          thead{
+            tr{
+              top: 0;
+              z-index: 2;
+              position: sticky;
+            }
+          }
           tr {
             .ticket-checkbox {
               width: 36px;
@@ -143,6 +151,24 @@
                     opacity: 1;
                   }
                 }
+              }
+            }
+            .log-desc{
+              height: 48px;
+              overflow: hidden;
+              position: relative;
+              &.show-content{
+                height: 100%;
+                overflow: unset;
+              }
+              .showmore-wrap{
+                right: 0;
+                bottom: 0;
+                position: absolute;
+                white-space: nowrap;
+                background-color: $white;
+                display: inline-block;
+                font-weight: bold;
               }
             }
           }

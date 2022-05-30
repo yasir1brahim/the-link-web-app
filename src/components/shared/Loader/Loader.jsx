@@ -9,11 +9,11 @@ const Loader = (props) => {
           (props.showComponentLoader ? 'wrapper-component' : '')
         }
       >
-        <div class="dots">
-          <div class="dot1"></div>
-          <div class="dot2"></div>
-          <div class="dot3"></div>
-          <div class="dot4"></div>
+        <div className="dots">
+          <div className="dot1"></div>
+          <div className="dot2"></div>
+          <div className="dot3"></div>
+          <div className="dot4"></div>
         </div>
       </div>
     )
