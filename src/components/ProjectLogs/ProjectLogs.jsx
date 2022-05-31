@@ -96,7 +96,7 @@ const ProjectLogs = () => {
         url: '/get_logs',
         data: {
           project_id: state?.project.project_id,
-          type: 'Classified',
+          type: state.logType,
         },
       });
       setLogData(response.data.message);

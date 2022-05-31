@@ -99,12 +99,13 @@ const ProjectsDetails = () => {
     }
   };
 
-  const handleViewLog = (project) => {
+  const handleViewLog = (project, logType) => {
     navigate('/project-logs', {
       state: {
         project,
         projectName: state.project?.project_name,
         customerId: state.customerId,
+        logType
       },
     });
   };
@@ -189,18 +190,34 @@ const ProjectsDetails = () => {
                 </div>
               )}
               <div className="table-footer-content">
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => handleViewLog(state.project)}
-                  disabled={
-                    !projectData
-                      .map((project) => (project.total_logs > 0 ? true : false))
-                      .filter((value) => value === true).length
-                  }
-                >
-                  View Submittal Log
-                </button>
+                <div style={{textAlign: 'center'}}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    style={{display: 'inline-block'}}
+                    onClick={() => handleViewLog(state.project, 'Classified')}
+                    disabled={
+                      !projectData
+                        .map((project) => (project.total_logs > 0 ? true : false))
+                        .filter((value) => value === true).length
+                    }
+                  >
+                    View Submittal Log
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    style={{display: 'inline-block', marginLeft: '10px'}}
+                    onClick={() => handleViewLog(state.project, 'Unclassified')}
+                    disabled={
+                      !projectData
+                        .map((project) => (project.total_logs > 0 ? true : false))
+                        .filter((value) => value === true).length
+                    }
+                  >
+                    View Unclassified Log
+                  </button>
+                </div>
                 <p>
                   Documents Uploaded: <span>{docParsed}</span>
                 </p>
