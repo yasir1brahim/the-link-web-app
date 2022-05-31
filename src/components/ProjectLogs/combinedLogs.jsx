@@ -27,8 +27,8 @@ export default function CombinedLogs(props) {
     type: '',
   });
 
-  const [showMore, setModal] = useState(false);
-  const toggleShowMore = () => setModal(!showMore);
+  const [showMore, setModal] = useState(null);
+  // const toggleShowMore = () => setModal(!showMore);
   
   const handleEditToggle = (log, index) => {
     setRowData(log);
@@ -284,9 +284,9 @@ export default function CombinedLogs(props) {
                       }
                     />
                   ) : (
-                    <div className={"log-desc "+(showMore? 'show-content':'')}>
+                    <div className={"log-desc "+(showMore === index? 'show-content':'')}>
                       {log.para_context}
-                      <a className="showmore-wrap" onClick={toggleShowMore}>...{showMore ? 'Show Less':'Show More'}</a>
+                      <span className="showmore-wrap" onClick={()=>setModal(showMore === index ? null : index)}>...{showMore === index? 'Show Less':'Show More'}</span>
                     </div>
                   )}
                 </td>
