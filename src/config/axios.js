@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_BASE_URL,
+  // baseURL: process.env.REACT_APP_BASE_URL,
+  baseURL: 'https://log-manager-api-prod.thelink.ai',
   // headers: {
   //   Authorization: `Bearer ${localStorage.getItem('token')}`,
   // },
