@@ -72,7 +72,7 @@ const CustomerProfile = (props) => {
         progress: undefined,
       });
     });
-  }, [state, pageRefresh]);
+  }, [ pageRefresh, custId]);
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
@@ -93,7 +93,7 @@ const CustomerProfile = (props) => {
         progress: undefined,
       });
     });
-  }, [state, pageRefresh]);
+  }, [custId, pageRefresh]);
   // useEffect(() => {
   //   const fetchData = async () => {
   //     const response = await axiosInstance({
