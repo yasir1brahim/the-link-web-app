@@ -91,7 +91,7 @@ const CustomerProjects = (props) => {
 
   const handleLaunch = (project) => {
     navigate('/project-details', {
-      state: { project, customerId: state.customer_id },
+      state: { project, customerId: localStorage.getItem('roleId') === '0' ? state.customer_id : localStorage.getItem('userId') },
     });
   };
   const handleEdit = (project) => {
