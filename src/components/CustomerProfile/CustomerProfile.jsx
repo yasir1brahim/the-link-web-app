@@ -48,14 +48,14 @@ const CustomerProfile = (props) => {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const { state } = useLocation();
   let customer = state;
+  const custId = localStorage.getItem('roleId') === '0' ? state.customer_id : Number(localStorage.getItem('userId'))
   // const navigate = useNavigate();
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: state.customer_id
-          ? `/customer/${state.customer_id}`
-          : `/customer/${localStorage.getItem('userId')}`,
+        url:
+           `/customer/${custId}`,
       });
       setCustomerData(response.data.message[0]);
       console.log(response.data.message);
@@ -77,9 +77,7 @@ const CustomerProfile = (props) => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: state.customer_id
-          ? `/employeeList/${state.customer_id}`
-          : `/employeeList/${localStorage.getItem('userId')}`,
+        url: `/employeeList/${custId}`,
       });
       setEmployeeData(response.data.message);
       console.log(response.data.message);
@@ -122,7 +120,7 @@ const CustomerProfile = (props) => {
     const fetchData = async () => {
       const picture = await axiosInstance({
         method: 'get',
-        url: `/getLogo/${state.customer_id}`,
+        url: `/getLogo/${localStorage.getItem('roleId') === '0' ? state.customer_id : Number(localStorage.getItem('userId'))}`,
       });
       if (picture.data) {
         setProfilePicture(picture.data.url);
