@@ -114,6 +114,7 @@ export default function CombinedLogs(props) {
                 </div>
               </div>
             </th>
+            <th className="text-center">Action</th>
             <th>
               <span>
                 Spec Section <i className=""></i>
@@ -160,7 +161,6 @@ export default function CombinedLogs(props) {
             <th className="log-description">
               <span>Comments</span>
             </th>
-            <th className="text-center">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -183,6 +183,55 @@ export default function CombinedLogs(props) {
                         for="ticketRow1"
                       ></label>
                     </div>
+                  </div>
+                </td>
+                <td>
+                  <div className="action-items">
+                    {editRow === index ? (
+                      <>
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          onClick={handleUpdateLog}
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => {
+                            setEditRow('');
+                            setRowData({
+                              comments: '',
+                              date_approved: '',
+                              date_issued: '',
+                              id: 1,
+                              item_desc: '',
+                              package: '',
+                              para_context: '',
+                              para_no: '',
+                              project_id: '',
+                              spec_section: '',
+                              status: '',
+                              type: '',
+                            });
+                            setDateApproved('');
+                            setDateIssued('');
+                            setStatus({});
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleEditToggle(log, index)}
+                      >
+                        Edit
+                      </button>
+                    )}
                   </div>
                 </td>
                 <td>
@@ -373,55 +422,7 @@ export default function CombinedLogs(props) {
                     log.comments
                   )}
                 </td>
-                <td>
-                  <div className="action-items">
-                    {editRow === index ? (
-                      <>
-                        <button
-                          type="button"
-                          className="btn btn-primary btn-sm"
-                          onClick={handleUpdateLog}
-                        >
-                          Save
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => {
-                            setEditRow('');
-                            setRowData({
-                              comments: '',
-                              date_approved: '',
-                              date_issued: '',
-                              id: 1,
-                              item_desc: '',
-                              package: '',
-                              para_context: '',
-                              para_no: '',
-                              project_id: '',
-                              spec_section: '',
-                              status: '',
-                              type: '',
-                            });
-                            setDateApproved('');
-                            setDateIssued('');
-                            setStatus({});
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => handleEditToggle(log, index)}
-                      >
-                        Edit
-                      </button>
-                    )}
-                  </div>
-                </td>
+                
               </tr>
             );
           })}
