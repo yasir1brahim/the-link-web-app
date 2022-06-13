@@ -11,7 +11,7 @@ import Loader from '../shared/Loader/Loader';
 
 const Adminlanding = (props) => {
   const [modal, setModal] = useState(false);
-  // const [isArchived, toggleArchive] = useState(false);
+  const [isArchived, toggleArchive] = useState(false);
   const [customerData, setCustomerData] = useState([]);
   const toggleModal = () => setModal(!modal);
   const [pageRefresh, setPageRefresh] = useState(false);
@@ -28,9 +28,9 @@ const Adminlanding = (props) => {
         url: `/customers/${localStorage.getItem('userId')}`,
       });
       setCustomerData(response.data.message);
-      // setCustomerData(
-      //   isArchived ? response.data.archived_customers : response.data.message
-      // );
+      setCustomerData(
+        isArchived ? response.data.archived_customers : response.data.message
+      );
       localStorage.setItem('account_id', response.data.account_id);
       setLoading(false);
       console.log(response.data.message);
@@ -48,10 +48,51 @@ const Adminlanding = (props) => {
         progress: undefined,
       });
     });
-  }, [pageRefresh]);
+  }, [isArchived, pageRefresh]);
 
   const handleViewCustomer = (customer) => {
     navigate('/customer-profile', { state: customer });
+  };
+  const handleArchiveCustomer = async (customer) => {
+    try {
+      await axiosInstance({
+        method: 'put',
+        url: '/updateCustomer',
+        data: {
+          email_address:  customer?.email_address,
+          password: '',
+          customer_name:  customer?.customer_name,
+          account_owner: customer?.account_owner,
+          contact_number: customer?.contact_number,
+          address:  customer?.address,
+          status: isArchived? 'Active' : 'Archived',
+          customer_id: customer?.customer_id,
+        },
+      });
+
+      setPageRefresh(!pageRefresh);
+
+      toast.success('Profile Updated Successfully.', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (error) {
+      console.log(error.message);
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
   };
 
   const handleViewProjects = (customer) => {
@@ -77,15 +118,15 @@ const Adminlanding = (props) => {
                 of{' '}
                 <span className="showing-strong"> {customerData.length}</span>.
               </label>
-              {/* <div className="table-bulk-changes">
+              <div className="table-bulk-changes">
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
                   onClick={() => toggleArchive(!isArchived)}
                 >
-                  Archived
+                  {isArchived ? 'View Active' : 'View Archived' }
                 </button>
-              </div> */}
+              </div>
             </div>
             <div className="l-table-wrapper">
               <table className="table">
@@ -187,6 +228,13 @@ const Adminlanding = (props) => {
                               onClick={() => handleViewProjects(customer)}
                             >
                               View Projects
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleArchiveCustomer(customer)}
+                            >
+                              {!isArchived ? 'Archive' : 'UnArchive'}
                             </button>
                           </div>
                         </td>
