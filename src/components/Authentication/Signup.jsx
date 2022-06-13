@@ -50,7 +50,7 @@ const SignUp = () => {
         <form className="signup-form">
           <h1 className="form-heading">Sign Up</h1>
           <p className="form-info">
-            Welcome to The Link Log Manager. Please sign in if you have
+            Welcome to The Link Requirements Manager. Please sign in if you have
             credentials. If not, please see your administrator.
           </p>
           <div className="form-group">
