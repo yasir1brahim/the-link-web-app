@@ -17,12 +17,13 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import EditProject from './editProject';
 import CreateEmployee from '../CustomerProfile/createEmployee';
+import moment from 'moment';
 
 const CustomerProjects = (props) => {
   const [modal, setModal] = useState(false);
   const [employeeModal, setEmployeeModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  // const [isArchived, toggleArchive] = useState(false);
+  const [isArchived, toggleArchive] = useState(false);
   const toggleModal = () => setModal(!modal);
   const toggleEditModal = () => setEditModal(!editModal);
   const toggleEmployeeModal = () => setEmployeeModal(!employeeModal);
@@ -69,10 +70,10 @@ const CustomerProjects = (props) => {
           ? `/projects/${state.customer_id}`
           : `/projects/${localStorage.getItem('userId')}`,
       });
-      setProjectData(response.data.message);
-      // setProjectData(
-      //   isArchived ? response.data.archived_projects : response.data.message
-      // );
+      // setProjectData(response.data.message);
+      setProjectData(
+        isArchived ? response.data.archived_projects : response.data.message
+      );
       console.log(response.data.message);
     };
 
@@ -87,7 +88,7 @@ const CustomerProjects = (props) => {
         progress: undefined,
       });
     });
-  }, [state, pageRefresh]);
+  }, [state, pageRefresh, isArchived]);
 
   const handleLaunch = (project) => {
     navigate('/project-details', {
@@ -97,6 +98,50 @@ const CustomerProjects = (props) => {
   const handleEdit = (project) => {
     setProject(project);
     toggleEditModal();
+  };
+
+  const handleArchiveProject = async (project) => {
+    let errors = false;
+    if (!errors) {
+      try {
+        const response = await axiosInstance({
+          method: 'put',
+          url: '/updateProject',
+          data: {
+            project_name: project.project_name,
+            lead_contact: project.lead_contact,
+            start_date: project?.start_date
+              ? moment(
+                new Date((project?.start_date).replaceAll('-', '/'))
+              ).format('YYYY-MM-DD')
+              : '',
+            end_date: project?.end_date
+              ? moment(
+                new Date((project?.end_date).replaceAll('-', '/'))
+              ).format('YYYY-MM-DD')
+              : '',
+            customer_id: localStorage.getItem('roleId') === '0' ? state.customer_id : localStorage.getItem('userId'),
+            status: isArchived ? 'Active' : 'Archived',
+            project_id: project.project_id,
+          },
+        });
+        if (response.data) {
+          console.log(response.data);
+          setPageRefresh(!pageRefresh);
+        }
+      } catch (error) {
+        console.log(error.message);
+        toast.error('Something went wrong!', {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    }
   };
 
   return (
@@ -138,15 +183,15 @@ const CustomerProjects = (props) => {
                     + Add Employee
                   </button>
                 </div>
-                {/* <div className="table-bulk-changes">
-                  <button
+                <div style={{marginLeft: '10px'}}>
+                <button
                     onClick={() => toggleArchive(!isArchived)}
                     type="button"
                     className="btn btn-secondary btn-sm"
                   >
-                    Archived
+                    {isArchived ? 'View Active' : 'View Archived'}
                   </button>
-                </div> */}
+                </div>
               </div>
               <div className="l-table-wrapper">
                 <table className="table">
@@ -242,6 +287,14 @@ const CustomerProjects = (props) => {
                                 onClick={() => handleEdit(project)}
                               >
                                 Edit
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleArchiveProject(project)}
+                                disabled={isArchived && localStorage.getItem('roleId') !== '0'}
+                              >
+                                {!isArchived ? 'Archive' : 'UnArchive'}
                               </button>
                             </div>
                           </td>
