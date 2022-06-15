@@ -369,7 +369,7 @@ const CustomerProfile = (props) => {
                     <div className="upload-documents">
                       <div className="image-holder">
                         <img
-                          src={ProfilePhoto}
+                          src={profilePicture ? typeof(profilePicture) === 'string' ? profilePicture : URL.createObjectURL(profilePicture) : ProfilePhoto}
                           alt="Profile"
                           className="dummy-image"
                         />

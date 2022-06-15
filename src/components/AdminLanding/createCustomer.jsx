@@ -124,7 +124,6 @@ const CreateCustomer = ({
       }
     }
   };
-
   return (
     <>
       <Modal
@@ -141,7 +140,7 @@ const CreateCustomer = ({
                 <div className="upload-documents">
                   <div className="image-holder">
                     <img
-                      src={ProfilePhoto}
+                      src={ profilePicture ? URL.createObjectURL(profilePicture) : ProfilePhoto}
                       alt="Profile"
                       className="dummy-image"
                     />
