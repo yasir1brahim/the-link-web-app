@@ -117,12 +117,12 @@ export default function CombinedLogs(props) {
             <th className="text-center">Action</th>
             <th>
               <span>
-                Spec Section <i className=""></i>
+                Spec Sec <i className=""></i>
               </span>
             </th>
             <th>
               <span>
-                Paragraph <i className="sort-d"></i>
+                Para <i className="sort-d"></i>
               </span>
             </th>
             <th>

@@ -41,7 +41,7 @@ const ProjectLogs = () => {
     }
   };
   const headers = [
-    { label: 'Spec Section', key: 'spec_section' },
+    { label: 'Spec Sec', key: 'spec_section' },
     { label: 'Paragraph', key: 'para_no' },
     { label: 'Requirement Type', key: 'type' },
     { label: 'Item', key: 'item_desc' },
