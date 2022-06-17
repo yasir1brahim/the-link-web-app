@@ -234,7 +234,7 @@ const Adminlanding = (props) => {
                               className="btn btn-secondary btn-sm"
                               onClick={() => handleArchiveCustomer(customer)}
                             >
-                              {!isArchived ? 'Archive' : 'UnArchive'}
+                              {!isArchived ? 'Archive' : 'Unarchive'}
                             </button>
                           </div>
                         </td>
