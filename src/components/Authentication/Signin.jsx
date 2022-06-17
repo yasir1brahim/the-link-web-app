@@ -6,8 +6,7 @@ import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo.svg';
-// import Logo from '../../assets/images/logo-white.png'
+import { ReactComponent as ReactLogo } from '../../assets/images/logo-white.svg';
 const Signin = (props) => {
   const [showPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState({ value: '', errors: '' });
@@ -72,7 +71,6 @@ const Signin = (props) => {
       <div className="ac-left">
         <a href="/" className="company-branding">
           <ReactLogo />
-          {/* <img src={Logo}/> */}
         </a>
       </div>
       <div className="ac-right">

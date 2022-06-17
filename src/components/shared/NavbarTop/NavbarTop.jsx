@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { ReactComponent as Logo } from '../../../assets/images/logo.svg';
+import { ReactComponent as Logo } from '../../../assets/images/logo-white.svg';
 import { ReactComponent as Down } from '../../../assets/images/chevron-bottom.svg';
 // import { ReactComponent as Notification } from '../../../assets/images/notificat.svg';
 import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
-// import Logo from '../../../assets/images/logo-white.png';
 const NavbarTop = () => {
   const [navDrop, setNavDrop] = useState(false);
 
@@ -17,7 +16,6 @@ const NavbarTop = () => {
       >
         <a href="/admin-landing" className="navbar-brand">
           <Logo />
-           {/* <img src={Logo}/> */}
         </a>
         <Nav className="ml-auto" navbar>
           {/* <NavItem>
