@@ -294,7 +294,7 @@ const CustomerProjects = (props) => {
                                 onClick={() => handleArchiveProject(project)}
                                 disabled={isArchived && localStorage.getItem('roleId') !== '0'}
                               >
-                                {!isArchived ? 'Archive' : 'UnArchive'}
+                                {!isArchived ? 'Archive' : 'Unarchive'}
                               </button>
                             </div>
                           </td>

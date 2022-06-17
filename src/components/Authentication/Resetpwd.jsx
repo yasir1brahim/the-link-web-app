@@ -3,7 +3,7 @@ import { ReactComponent as Keys } from '../../assets/images/keys.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import { ReactComponent as ArrowLeft } from '../../assets/images/arrow-left.svg';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo.svg';
+import { ReactComponent as ReactLogo } from '../../assets/images/logo-white.svg';
 
 const Resetpwd = () => {
   const [showNPwd, setShowNPwd] = useState(false);
