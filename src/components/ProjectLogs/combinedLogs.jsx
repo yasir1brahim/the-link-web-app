@@ -335,7 +335,7 @@ export default function CombinedLogs(props) {
                   ) : (
                     <div className={"log-desc "+(showMore === index? 'show-content':'')}>
                       {log.para_context}
-                      <span className="showmore-wrap" onClick={()=>setModal(showMore === index ? null : index)}>...{showMore === index? 'Show Less':'Show More'}</span>
+                      {log.para_context.length > 132 && <span className="showmore-wrap" onClick={()=>setModal(showMore === index ? null : index)}>...{showMore === index? 'Show Less':'Show More'}</span>}
                     </div>
                   )}
                 </td>
