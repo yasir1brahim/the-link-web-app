@@ -29,7 +29,7 @@ export default function CombinedLogs(props) {
 
   const [showMore, setModal] = useState(null);
   // const toggleShowMore = () => setModal(!showMore);
-  
+
   const handleEditToggle = (log, index) => {
     setRowData(log);
     setEditRow(index);
@@ -52,8 +52,8 @@ export default function CombinedLogs(props) {
           package: groupingValue?.length
             ? groupingValue[0].label
             : searchValue
-            ? searchValue
-            : rowData.package,
+              ? searchValue
+              : rowData.package,
           para_context: rowData.para_context,
           para_no: rowData.para_no,
           project_id: rowData.project_id,
@@ -63,15 +63,15 @@ export default function CombinedLogs(props) {
           date_issued: !dateIssued
             ? rowData?.date_issued
               ? moment(
-                  new Date((rowData?.date_issued).replaceAll('-', '/'))
-                ).format('YYYY-MM-DD')
+                new Date((rowData?.date_issued).replaceAll('-', '/'))
+              ).format('YYYY-MM-DD')
               : null
             : moment(dateIssued).format('YYYY-MM-DD'),
           date_approved: !dateApproved
             ? rowData?.date_approved
               ? moment(
-                  new Date((rowData?.date_approved).replaceAll('-', '/'))
-                ).format('YYYY-MM-DD')
+                new Date((rowData?.date_approved).replaceAll('-', '/'))
+              ).format('YYYY-MM-DD')
               : null
             : moment(dateApproved).format('YYYY-MM-DD'),
         },
@@ -235,7 +235,7 @@ export default function CombinedLogs(props) {
                   </div>
                 </td>
                 <td>
-                  {editRow === index ? (
+                  {/* {editRow === index ? (
                     <input
                       placeholder="Enter"
                       className="form-control"
@@ -248,10 +248,12 @@ export default function CombinedLogs(props) {
                     />
                   ) : (
                     log.spec_section
-                  )}
+                  )} */}
+                  {log.spec_section}
                 </td>
                 <td>
-                  {editRow === index ? (
+                  {log.para_no}
+                  {/* {editRow === index ? (
                     <input
                       placeholder="Enter"
                       className="form-control"
@@ -264,7 +266,7 @@ export default function CombinedLogs(props) {
                     />
                   ) : (
                     log.para_no
-                  )}
+                  )} */}
                 </td>
                 <td>
                   {editRow === index ? (
@@ -313,7 +315,7 @@ export default function CombinedLogs(props) {
                         options={props.groupingData}
                         searchValue={searchValue}
                         setSearchValue={setSearchValue}
-                        // onInputChange={}
+                      // onInputChange={}
                       />
                     </div>
                   ) : (
@@ -333,9 +335,9 @@ export default function CombinedLogs(props) {
                       }
                     />
                   ) : (
-                    <div className={"log-desc "+(showMore === index? 'show-content':'')}>
+                    <div className={"log-desc " + (showMore === index ? 'show-content' : '')}>
                       {log.para_context}
-                      {log.para_context.length > 132 && <span className="showmore-wrap" onClick={()=>setModal(showMore === index ? null : index)}>...{showMore === index? 'Show Less':'Show More'}</span>}
+                      {log.para_context.length > 132 && <span className="showmore-wrap" onClick={() => setModal(showMore === index ? null : index)}>...{showMore === index ? 'Show Less' : 'Show More'}</span>}
                     </div>
                   )}
                 </td>
@@ -422,7 +424,7 @@ export default function CombinedLogs(props) {
                     log.comments
                   )}
                 </td>
-                
+
               </tr>
             );
           })}
