@@ -41,18 +41,18 @@ const ProjectLogs = () => {
       setSelected([...selected, id]);
     }
   };
-  const headers = [
-    { label: 'Spec Sec', key: 'spec_section' },
-    { label: 'Paragraph', key: 'para_no' },
-    { label: 'Requirement Type', key: 'type' },
-    { label: 'Item', key: 'item_desc' },
-    { label: 'Grouping', key: 'Grouping' },
-    { label: 'Paragraph Context', key: 'para_context' },
-    { label: 'Status', key: 'status' },
-    { label: 'Date Issued', key: 'date_issued' },
-    { label: 'Date Approved', key: 'date_approved' },
-    { label: 'Comments', key: 'comments' },
-  ];
+  // const headers = [
+  //   { label: 'Spec Sec', key: 'spec_section' },
+  //   { label: 'Paragraph', key: 'para_no' },
+  //   { label: 'Requirement Type', key: 'type' },
+  //   { label: 'Item', key: 'item_desc' },
+  //   { label: 'Grouping', key: 'Grouping' },
+  //   { label: 'Paragraph Context', key: 'para_context' },
+  //   { label: 'Status', key: 'status' },
+  //   { label: 'Date Issued', key: 'date_issued' },
+  //   { label: 'Date Approved', key: 'date_approved' },
+  //   { label: 'Comments', key: 'comments' },
+  // ];
   const handleDeleteLogs = async () => {
     try {
       await axiosInstance({
