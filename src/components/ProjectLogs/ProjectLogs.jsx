@@ -11,10 +11,11 @@ import axiosInstance from '../../config/axios';
 // import TestingTable from './testingTable';
 // import CloseOutTable from './closeOutTable';
 // import MeetingTable from './meetingTable';
-import { CSVLink } from 'react-csv';
+// import { CSVLink } from 'react-csv';
 import CombinedLogs from './combinedLogs';
 import { debounce } from 'lodash';
 import Loader from '../shared/Loader/Loader';
+import * as XLSX from 'xlsx';
 
 const ProjectLogs = () => {
   const { state } = useLocation();
@@ -167,6 +168,14 @@ const ProjectLogs = () => {
       setSelected(selectedLogs);
     }
   };
+  const downloadExcel = () => {
+    //Boilerplate format of making an xlsx file from xlsx library
+    //Below header array is specified to maintain the column order in xlsx file same as our table
+    const worksheet = XLSX.utils.json_to_sheet(logData, { header: ['spec_section', 'para_no', 'type', 'item_desc', 'package', 'para_context', 'status', 'date_issued', 'date_approved', 'comments'] });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    XLSX.writeFile(workbook, "All-Logs.xlsx");
+  }
   return (
     <div className="page-wrap">
       <NavbarTop />
@@ -206,8 +215,9 @@ const ProjectLogs = () => {
                         onChange={(e) => handleSearchChange(e.target.value)}
                       />
                     </div>
-                    {/* <button type="button" className="btn btn-secondary btn-sm"> */}
-                    <CSVLink
+                    <button type="button" className="btn btn-secondary btn-sm" onClick={downloadExcel}>
+                      Export Xlsx
+                      {/* <CSVLink
                       filename={`All-Logs.csv`}
                       data={logData}
                       target="_blank"
@@ -215,8 +225,8 @@ const ProjectLogs = () => {
                       headers={headers}
                     >
                       Export CSV
-                    </CSVLink>
-                    {/* </button> */}
+                    </CSVLink> */}
+                    </button>
                     <button
                       type="button"
                       className="d-flex btn btn-secondary btn-sm"
