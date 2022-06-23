@@ -215,8 +215,8 @@ const ProjectLogs = () => {
                         onChange={(e) => handleSearchChange(e.target.value)}
                       />
                     </div>
-                    <button type="button" className="btn btn-secondary btn-sm" onClick={downloadExcel}>
-                      Export Xlsx
+                    <button type="button" className="btn btn-secondary btn-sm" style={{textTransform: 'none'}}onClick={downloadExcel}>
+                      Export .xls
                       {/* <CSVLink
                       filename={`All-Logs.csv`}
                       data={logData}
