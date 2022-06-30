@@ -173,14 +173,14 @@ export default function CombinedLogs(props) {
                       <input
                         type="checkbox"
                         className="custom-control-input"
-                        name="ticketRow1"
-                        id="ticketRow1"
+                        name={`ticketRow-${index}`}
+                        id={`ticketRow-${index}`}
                         checked={props.selected.includes(log.id)}
                         onChange={() => props.handleSelect(log.id)}
                       />
                       <label
                         className="custom-control-label"
-                        for="ticketRow1"
+                        for={`ticketRow-${index}`}
                       ></label>
                     </div>
                   </div>

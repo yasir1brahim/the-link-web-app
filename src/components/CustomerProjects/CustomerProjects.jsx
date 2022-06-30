@@ -183,8 +183,8 @@ const CustomerProjects = (props) => {
                     + Add Employee
                   </button>
                 </div>
-                <div style={{marginLeft: '10px'}}>
-                <button
+                <div style={{ marginLeft: '10px' }}>
+                  <button
                     onClick={() => toggleArchive(!isArchived)}
                     type="button"
                     className="btn btn-secondary btn-sm"
@@ -246,62 +246,70 @@ const CustomerProjects = (props) => {
                       <th>Action</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {currentItems.map((project) => {
-                      return (
-                        <tr>
-                          {/* <td className="ticket-checkbox">
-                            <div className="form-group">
-                              <div className="custom-control custom-checkbox">
-                                <input
-                                  type="checkbox"
-                                  className="custom-control-input"
-                                  name="ticketRow1"
-                                  id="ticketRow1"
-                                />
-                                <label
-                                  className="custom-control-label"
-                                  for="ticketRow1"
-                                ></label>
+                  {project ?
+                    <tbody>
+                      {currentItems.map((project) => {
+                        return (
+                          <tr>
+                            {/* <td className="ticket-checkbox">
+                              <div className="form-group">
+                                <div className="custom-control custom-checkbox">
+                                  <input
+                                    type="checkbox"
+                                    className="custom-control-input"
+                                    name="ticketRow1"
+                                    id="ticketRow1"
+                                  />
+                                  <label
+                                    className="custom-control-label"
+                                    for="ticketRow1"
+                                  ></label>
+                                </div>
                               </div>
-                            </div>
-                          </td> */}
-                          <td>{project.project_name}</td>
-                          <td>{project.status}</td>
-                          <td>{project.lead_contact}</td>
-                          <td>{project.users}</td>
-                          <td>{project.start_date}</td>
-                          <td>{project.end_date}</td>
-                          <td>
-                            <div className="action-wrapper">
-                              <button
-                                type="button"
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => handleLaunch(project)}
-                              >
-                                Launch
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => handleEdit(project)}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => handleArchiveProject(project)}
-                                disabled={isArchived && localStorage.getItem('roleId') !== '0'}
-                              >
-                                {!isArchived ? 'Archive' : 'Unarchive'}
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
+                            </td> */}
+                            <td>{project.project_name}</td>
+                            <td>{project.status}</td>
+                            <td>{project.lead_contact}</td>
+                            <td>{project.users}</td>
+                            <td>{project.start_date}</td>
+                            <td>{project.end_date}</td>
+                            <td>
+                              <div className="action-wrapper">
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => handleLaunch(project)}
+                                >
+                                  Launch
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => handleEdit(project)}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => handleArchiveProject(project)}
+                                  disabled={isArchived && localStorage.getItem('roleId') !== '0'}
+                                >
+                                  {!isArchived ? 'Archive' : 'Unarchive'}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    :
+                    <tbody>
+                      <tr>
+                        <td className='text-center' colSpan={7}>No data</td>
+                      </tr>
+                    </tbody>
+                  }
                 </table>
               </div>
               <div className="table-footer-content">

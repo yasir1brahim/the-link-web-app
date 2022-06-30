@@ -39,6 +39,13 @@
           //     color: #999999 !important;
           //     cursor: not-allowed !important;
           //   }
+          position: relative;
+            &:last-of-type {
+              color: #999999 !important;
+              cursor: not-allowed !important;
+              pointer-events: none;
+              text-decoration: none !important;
+            }
           &:not(:last-of-type) {
             position: relative;
             margin-right: 24px;
