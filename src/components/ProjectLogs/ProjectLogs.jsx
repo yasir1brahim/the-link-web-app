@@ -4,6 +4,7 @@ import NavbarTop from '../shared/NavbarTop/NavbarTop';
 // import PaginatedItems from '../shared/Pagination/Pagination';
 import { ReactComponent as Trash } from '../../assets/images/trash.svg';
 import { useLocation } from 'react-router-dom';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../config/axios';
@@ -18,6 +19,12 @@ import Loader from '../shared/Loader/Loader';
 import * as XLSX from 'xlsx';
 
 const ProjectLogs = () => {
+  const [saveListName, setToggleSaveListNameModal] = useState(false);
+  const toggleSaveListName = () => setToggleSaveListNameModal(!saveListName);
+  const [listName, setListName] = useState({ value: '', errors: '' });
+  const [viewList, setList] = useState([])
+  const [viewSavedList, setToggleViewSavedList] = useState(false);
+  const toggleViewSavedList = () => setToggleViewSavedList(!viewSavedList);
   const { state } = useLocation();
   const [logData, setLogData] = useState([]);
   const [selected, setSelected] = useState([]);
@@ -27,6 +34,7 @@ const ProjectLogs = () => {
   // const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setLoading] = useState(false);
   const [groupingData, setGroupingData] = useState([]);
+  const [selectedLogData, setSelectedLogData] = useState([]);
 
   const handleSearchChange = useCallback(
     (value) => debounce(setSearchValue(value), 200),
@@ -101,6 +109,11 @@ const ProjectLogs = () => {
         },
       });
       setLogData(response.data.message);
+      if(selectedLogData.length) {
+        let logIds = selectedLogData.map((log)=> log.id)
+        let newSelectedData = response.data.message.filter((log) => { return logIds?.includes(log.id) ? log : null })
+        setSelectedLogData(newSelectedData);
+      }
       setLoading(false);
       console.log(response.data.message);
     };
@@ -148,7 +161,9 @@ const ProjectLogs = () => {
       });
     });
   }, [state, pageRefresh]);
-  let filteredLogData = logData
+  // let filteredLogData = selectedLogData.length ? selectedLogData : logData
+  let filterData = selectedLogData.length ? selectedLogData : logData
+  let filteredLogData = filterData
     .map((log) => {
       return Object.values(log)
         .filter((value) => value)
@@ -157,7 +172,6 @@ const ProjectLogs = () => {
         : null;
     })
     .filter((value) => value);
-
   const handleSelectAll = () => {
     if (selected?.length === filteredLogData?.length) {
       setSelected([]);
@@ -168,13 +182,69 @@ const ProjectLogs = () => {
       setSelected(selectedLogs);
     }
   };
-  const downloadExcel = () => {
+  const downloadExcel = (logs, fileName) => {
     //Boilerplate format of making an xlsx file from xlsx library
     //Below header array is specified to maintain the column order in xlsx file same as our table
-    const worksheet = XLSX.utils.json_to_sheet(logData, { header: ['spec_section', 'para_no', 'type', 'item_desc', 'package', 'para_context', 'status', 'date_issued', 'date_approved', 'comments'] });
+    const worksheet = XLSX.utils.json_to_sheet(logs, { header: ['spec_section', 'para_no', 'type', 'item_desc', 'package', 'para_context', 'status', 'date_issued', 'date_approved', 'comments'] });
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "All-Logs.xlsx");
+    XLSX.writeFile(workbook, logs.length === logData.length ? "All-Logs.xlsx" : `${fileName}.xlsx`);
+  }
+  const validate = () => {
+    let error = false;
+    if (listName.value === '') {
+      setListName({ ...listName, errors: 'List Name is required.' });
+      error = true;
+    }
+    return error;
+  };
+  const handleListSubmit = async (e) => {
+    e.preventDefault();
+    let errors = validate();
+    if (!errors) {
+      try {
+        await axiosInstance({
+          method: 'post',
+          url: '/save_list',
+          data: {
+            project_id: state?.project.project_id,
+            records: selected,
+            view_name: listName.value
+          },
+        });
+        setToggleSaveListNameModal(false)
+      } catch (error) {
+        toast.error('Something went wrong!', {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    }
+  }
+  const getList = async () => {
+    try {
+      const response = await axiosInstance({
+        method: 'get',
+        url: `/get_list/${state?.project.project_id}`,
+      });
+      setList(response.data.message)
+      setToggleViewSavedList(true)
+    } catch (error) {
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
   }
   return (
     <div className="page-wrap">
@@ -205,6 +275,9 @@ const ProjectLogs = () => {
                       of <span className="showing-strong"> 90 </span>.
                     </label> */}
                   </div>
+                  {selectedLogData.length ? <button type="button" className='btn btn-primary mr-3' onClick={()=>setSelectedLogData([])}>Clear Selection</button> : null}
+                  {!selectedLogData.length ? <button type="button" className='btn btn-primary mr-3' onClick={toggleSaveListName}>Save Selection</button> : null}
+                  <button type="button" className='btn btn-secondary' onClick={getList}> View Saved Lists </button>
                   <div className="table-bulk-changes">
                     <div className="log-search">
                       <input
@@ -215,7 +288,7 @@ const ProjectLogs = () => {
                         onChange={(e) => handleSearchChange(e.target.value)}
                       />
                     </div>
-                    <button type="button" className="btn btn-secondary btn-sm" style={{textTransform: 'none'}}onClick={downloadExcel}>
+                    <button type="button" className="btn btn-secondary btn-sm" style={{ textTransform: 'none' }} onClick={() => downloadExcel(logData)}>
                       Export .xls
                       {/* <CSVLink
                       filename={`All-Logs.csv`}
@@ -309,6 +382,84 @@ const ProjectLogs = () => {
         pauseOnHover
       />
       <Loader showComponentLoader={isLoading} />
+      <Modal
+        isOpen={saveListName}
+        fade={false}
+        toggle={toggleSaveListName}
+        className="new-customer modal-md"
+      >
+        <ModalHeader toggle={toggleSaveListName}>Save Selection</ModalHeader>
+        <ModalBody>
+          <form className="create-customer-form">
+            <div className="save-list-name">
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="saveSelectionName"
+                      aria-describedby="saveSelectionName"
+                      placeholder="Enter"
+                      required
+                      value={listName.value}
+                      onChange={(e) => {
+                        setListName({ ...listName, value: e.target.value });
+                      }}
+                    />
+                    <label className="text-label" htmlFor="saveSelectionName">
+                      List Name
+                    </label>
+                    {listName.errors && (
+                      <small className="form-error">{listName.errors}</small>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ModalFooter>
+              <Button color="secondary" onClick={toggleSaveListName}>
+                Cancel
+              </Button>
+              <Button color="primary" onClick={handleListSubmit}>
+                Save
+              </Button>{' '}
+            </ModalFooter>
+          </form>
+        </ModalBody>
+      </Modal>
+
+      <Modal
+        isOpen={viewSavedList}
+        fade={false}
+        toggle={toggleViewSavedList}
+        className="new-customer modal-md"
+      >
+        <ModalHeader toggle={toggleViewSavedList}>Saved List</ModalHeader>
+        <ModalBody>
+          <div className="save-list-name">
+            {viewList.length ? viewList.map((list) => {
+              return (
+                <div className="row mb-3">
+                  <div className="col-6">
+                    <h5 className="my-2">{list.view_name}</h5>
+                  </div>
+                  <div className="col-6">
+                    <div className="d-flex align-item-center justify-content-flex-end">
+                      <button type="button" className="btn btn-primary mr-3" onClick={() => { setSelectedLogData(logData.filter((log) => { return list.records.includes(log.id) ? log : null })); setToggleViewSavedList(false) }}>Open</button>
+                      <button type="button" className="btn btn-primary" style={{ textTransform: 'none' }} onClick={() => downloadExcel(logData.filter((log) => { return list.records.includes(log.id) ? log : null }), list.view_name)}>Export .xls</button>
+                    </div>
+                  </div>
+                </div>)
+            }) : null}
+          </div>
+          <ModalFooter>
+            <Button color="secondary" onClick={toggleViewSavedList}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalBody>
+      </Modal>
     </div>
   );
 };

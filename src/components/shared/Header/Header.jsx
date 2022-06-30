@@ -18,10 +18,10 @@ const Header = ({ ...props }) => {
               }
               className="breadcrumb-text"
             >
-              Home /
+              Home 
             </a>
             {props.breadcrumb && (
-              <div
+              <a
                 onClick={() =>
                   props.breadcrumb2 ? navigate(-2) : navigate(-1)
                 }
@@ -29,16 +29,16 @@ const Header = ({ ...props }) => {
                 style={{ cursor: 'pointer' }}
               >
                 {props.breadcrumb}
-              </div>
+              </a>
             )}
             {props.breadcrumb2 && (
-              <div
+              <a
                 onClick={() => navigate(-1)}
                 className="breadcrumb-text"
                 style={{ cursor: 'pointer' }}
               >
                 {props.breadcrumb2}
-              </div>
+              </a>
             )}
             {/* <div className="breadcrumb-text">{props.title}</div> */}
           </div>
