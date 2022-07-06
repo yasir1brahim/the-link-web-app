@@ -130,7 +130,7 @@ const ProjectLogs = () => {
         progress: undefined,
       });
     });
-  }, [state, pageRefresh, selectedLogData]);
+  }, [state, pageRefresh]);
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
