@@ -109,11 +109,7 @@ const ProjectLogs = () => {
         },
       });
       setLogData(response.data.message);
-      if(selectedLogData.length) {
-        let logIds = selectedLogData.map((log)=> log.id)
-        let newSelectedData = response.data.message.filter((log) => { return logIds?.includes(log.id) ? log : null })
-        setSelectedLogData(newSelectedData);
-      }
+      
       setLoading(false);
       console.log(response.data.message);
     };
@@ -131,6 +127,13 @@ const ProjectLogs = () => {
       });
     });
   }, [state, pageRefresh]);
+  // useEffect(()=>{
+  //   if(selectedLogData.length) {
+  //     let logIds = selectedLogData.map((log)=> log.id)
+  //     let newSelectedData = logData.filter((log) => { return logIds?.includes(log.id) ? log : null })
+  //     setSelectedLogData(newSelectedData);
+  //   }
+  // },[logData, selectedLogData])
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
