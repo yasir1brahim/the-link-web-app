@@ -128,6 +128,7 @@ const ProjectLogs = () => {
     });
   }, [state, pageRefresh]);
   // useEffect(()=>{
+  //   Afer edit of a column in the selected view below code updates the value of the field
   //   if(selectedLogData.length) {
   //     let logIds = selectedLogData.map((log)=> log.id)
   //     let newSelectedData = logData.filter((log) => { return logIds?.includes(log.id) ? log : null })

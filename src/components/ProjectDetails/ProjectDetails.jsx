@@ -252,9 +252,9 @@ const ProjectsDetails = () => {
                       <Upload />
                       <small>Select a File</small>
                       <span className="text-center">
-                        Click to browse or drop here to upload. Supported
+                        Click to browse or drop here to upload. Supported Format
                         {/* Formats: Excel, csv, xml. */}
-                        Formats: PDF.
+                        : PDF.
                         <br />
                         Maximum Individual File size: 100 MB
                       </span>
