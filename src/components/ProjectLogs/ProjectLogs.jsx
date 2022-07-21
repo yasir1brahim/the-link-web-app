@@ -101,12 +101,8 @@ const ProjectLogs = () => {
     const fetchData = async () => {
       setLoading(true);
       const response = await axiosInstance({
-        method: 'post',
-        url: '/get_logs',
-        data: {
-          project_id: state?.project.project_id,
-          type: state.logType,
-        },
+        method: 'get',
+        url: `/get_logs/${state?.project.project_id}`,
       });
       setLogData(response.data.message);
       
@@ -323,6 +319,8 @@ const ProjectLogs = () => {
                   setPageRefresh={setPageRefresh}
                   customerId={state.customerId}
                   groupingData={groupingData}
+                  setLogData={setLogData}
+                  projectId={state?.project.project_id}
                 />
                 {/* {state.project?.type === 'Submittal' && (
                  
