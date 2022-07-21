@@ -35,6 +35,7 @@ const ProjectLogs = () => {
   const [isLoading, setLoading] = useState(false);
   const [groupingData, setGroupingData] = useState([]);
   const [selectedLogData, setSelectedLogData] = useState([]);
+  const [listId, setListId] = useState(null);
 
   const handleSearchChange = useCallback(
     (value) => debounce(setSearchValue(value), 200),
@@ -321,6 +322,9 @@ const ProjectLogs = () => {
                   groupingData={groupingData}
                   setLogData={setLogData}
                   projectId={state?.project.project_id}
+                  listId={listId}
+                  selectedLogData={selectedLogData}
+                  setSelectedLogData={setSelectedLogData}
                 />
                 {/* {state.project?.type === 'Submittal' && (
                  
@@ -448,7 +452,7 @@ const ProjectLogs = () => {
                   </div>
                   <div className="col-6">
                     <div className="d-flex align-item-center justify-content-flex-end">
-                      <button type="button" className="btn btn-primary mr-3" onClick={() => { setSelectedLogData(logData.filter((log) => { return list.records.includes(log.id) ? log : null })); setToggleViewSavedList(false) }}>Open</button>
+                      <button type="button" className="btn btn-primary mr-3" onClick={() => { setSelectedLogData(logData.filter((log) => { return list.records.includes(log.id) ? log : null })); setToggleViewSavedList(false); setListId(list.id) }}>Open</button>
                       <button type="button" className="btn btn-primary" style={{ textTransform: 'none' }} onClick={() => downloadExcel(logData.filter((log) => { return list.records.includes(log.id) ? log : null }), list.view_name)}>Export .xls</button>
                     </div>
                   </div>
