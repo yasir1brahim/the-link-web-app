@@ -97,10 +97,16 @@ export default function CombinedLogs(props) {
     try {
       const response = await axiosInstance({
         method: 'get',
-        url: `/sort_logs/${props.projectId}/${columnName}/${sortingOrder === 'desc' ? 'asc' : 'desc'}`,
+        url: props.selectedLogData.length ?
+          `/sort_saved_logs/${props.listId}/${columnName}/${sortingOrder === 'desc' ? 'asc' : 'desc'}` :
+          `/sort_logs/${props.projectId}/${columnName}/${sortingOrder === 'desc' ? 'asc' : 'desc'}`,
 
       });
-      props.setLogData(response.data.message);
+      
+      props.selectedLogData.length ?
+        props.setSelectedLogData(response.data.message) :
+        props.setLogData(response.data.message);
+
       setSorting({ ...sorting, column: columnName, order: sortingOrder === 'desc' ? 'asc' : 'desc' })
     } catch (error) {
       console.log(error.message);
@@ -156,7 +162,7 @@ export default function CombinedLogs(props) {
               </span>
             </th>
             <th>
-              <span className="has-sorting"  onClick={() => handleSorting('item_desc')} >Item
+              <span className="has-sorting" onClick={() => handleSorting('item_desc')} >Item
                 <i className={sorting.column === 'item_desc' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
               </span>
             </th>
