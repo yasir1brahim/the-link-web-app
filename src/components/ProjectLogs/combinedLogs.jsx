@@ -13,6 +13,7 @@ export default function CombinedLogs(props) {
   const [statusValue, setStatus] = useState({});
   const [groupingValue, setGroupingValue] = useState({});
   const [searchValue, setSearchValue] = useState('');
+  const [sorting, setSorting] = useState({ column: '', order: 'desc' });
 
   const [rowData, setRowData] = useState({
     comments: '',
@@ -91,6 +92,30 @@ export default function CombinedLogs(props) {
     }
   };
 
+  const handleSorting = async (columnName) => {
+    let sortingOrder = sorting.column === columnName ? sorting.order : 'desc'
+    try {
+      const response = await axiosInstance({
+        method: 'get',
+        url: `/sort_logs/${props.projectId}/${columnName}/${sortingOrder === 'desc' ? 'asc' : 'desc'}`,
+
+      });
+      props.setLogData(response.data.message);
+      setSorting({ ...sorting, column: columnName, order: sortingOrder === 'desc' ? 'asc' : 'desc' })
+    } catch (error) {
+      console.log(error.message);
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  }
+
   return (
     <div className="l-table-wrapper">
       <table className="table">
@@ -116,46 +141,48 @@ export default function CombinedLogs(props) {
             </th>
             <th className="text-center">Action</th>
             <th>
-              <span>
-                Spec Sec <i className=""></i>
+              <span className="has-sorting" onClick={() => handleSorting('spec_section')}>
+                Spec Sec <i className={sorting.column === 'spec_section' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
               </span>
             </th>
             <th>
-              <span>
-                Para <i className="sort-d"></i>
+              <span >
+                Para
               </span>
             </th>
             <th>
-              <span>
-                Requirement Type <i className="sort-i"></i>
+              <span className="has-sorting" onClick={() => handleSorting('type')}>
+                Requirement Type <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
               </span>
             </th>
             <th>
-              <span> Item </span>
+              <span className="has-sorting"  onClick={() => handleSorting('item_desc')} >Item
+                <i className={sorting.column === 'item_desc' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
+              </span>
             </th>
             <th>
-              <span>
-                Grouping <i className="sort-d"></i>
+              <span className="has-sorting" onClick={() => handleSorting('package')}>
+                Grouping <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
               </span>
             </th>
             <th className="log-description">
-              <span>
-                Paragraph Context <i className="sort-d"></i>
+              <span className='has-sorting' onClick={() => handleSorting("para_context")}>
+                Paragraph Context <i className={sorting.column === "para_context" ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
               </span>
             </th>
             <th>
-              <span>
-                Status <i className="sort-d"></i>
+              <span className="has-sorting" onClick={() => handleSorting('status')}>
+                Status <i className={sorting.column === 'status' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
               </span>
             </th>
             <th>
-              <span>
-                Date Issued <i className="sort-d"></i>
+              <span className="has-sorting" onClick={() => handleSorting('date_issued')}>
+                Date Issued <i className={sorting.column === 'date_issued' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
               </span>
             </th>
             <th>
-              <span>
-                Date Approved <i className="sort-d"></i>
+              <span className="has-sorting" onClick={() => handleSorting('date_approved')}>
+                Date Approved <i className={sorting.column === 'date_approved' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
               </span>
             </th>
             <th className="log-description">
