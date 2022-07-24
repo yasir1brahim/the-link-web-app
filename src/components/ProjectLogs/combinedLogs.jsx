@@ -155,8 +155,8 @@ export default function CombinedLogs(props) {
           data: {
             project_id: props.projectId,
             search: "",
-            // filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
-            filters: a,
+            filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
+            // filters: a,
             order_col: sorting.column || "",
             order: sorting.order || "",
             list_id: props.selectedLogData.length ? props.listId : ''
