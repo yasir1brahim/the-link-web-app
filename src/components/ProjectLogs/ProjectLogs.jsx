@@ -253,7 +253,7 @@ const ProjectLogs = () => {
       <div className="page-wrap-content project-logs-wrapper">
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
-          title={`All Logs  - ${state.projectName || ''}`}
+          title={`All Logs  - ${state?.projectName || ''}`}
           breadcrumb2={'Project Details'}
           breadcrumb={'View Projects'}
         />
