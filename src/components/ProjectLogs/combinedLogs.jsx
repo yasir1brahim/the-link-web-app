@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../config/axios';
 import DateSelector from '../shared/DateSelector/DateSelector';
@@ -155,7 +155,7 @@ export default function CombinedLogs(props) {
           data: {
             project_id: props.projectId,
             search: "",
-            filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
+            // filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
             filters: a,
             order_col: sorting.column || "",
             order: sorting.order || "",
