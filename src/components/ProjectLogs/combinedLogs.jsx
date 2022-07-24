@@ -116,7 +116,7 @@ export default function CombinedLogs(props) {
         data: {
           project_id: props.projectId,
           search: "",
-          filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
+          // filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
           filters: a,
           order_col: columnName || "",
           order: sortingOrder === 'desc' ? 'asc' : 'desc' || "",
@@ -142,9 +142,9 @@ export default function CombinedLogs(props) {
       });
     }
   }
-  useEffect(async () => {
+  const handleOpenFilterModal = async () => {
+    setFilterModal(true)
     try {
-      if (filterModal) {
         let a = {}
         if (Object.values(filterValues).map(value => value.length ? true : false).includes(true)) {
           Object.keys(filterValues).forEach(key => filterValues[key].length ? a = { ...a, [key]: filterValues[key] } : null)
@@ -166,7 +166,6 @@ export default function CombinedLogs(props) {
         props.selectedLogData.length ?
           props.setSelectedLogData(response.data.message) :
           props.setLogData(response.data.message);
-      }
     } catch (error) {
       console.log(error.message);
       toast.error('Something went wrong!', {
@@ -179,7 +178,7 @@ export default function CombinedLogs(props) {
         progress: undefined,
       });
     }
-  }, [filterModal])
+  }
 
   return (
     <div className="l-table-wrapper">
@@ -208,7 +207,7 @@ export default function CombinedLogs(props) {
             <th>
               <span className="has-sorting" onClick={() => handleSorting('spec_section')}>
                 Spec Sec <i className={sorting.column === 'spec_section' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
-                <i className='has-filter' onClick={() => { setFilterModal(true); setFilterColumn('spec_section') }} />
+                <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('spec_section') }} />
               </span>
             </th>
             <th>
