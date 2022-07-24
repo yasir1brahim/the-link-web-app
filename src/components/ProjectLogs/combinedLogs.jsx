@@ -1,10 +1,10 @@
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../config/axios';
 import DateSelector from '../shared/DateSelector/DateSelector';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
-
+import { FilterTable } from './filterTable';
 export default function CombinedLogs(props) {
   const logData = props.logData;
   const [editRow, setEditRow] = useState('');
@@ -14,6 +14,10 @@ export default function CombinedLogs(props) {
   const [groupingValue, setGroupingValue] = useState({});
   const [searchValue, setSearchValue] = useState('');
   const [sorting, setSorting] = useState({ column: '', order: 'desc' });
+  const [filterModal, setFilterModal] = useState(false)
+  const [selectedFilterValue, setSelectedFilterValue] = useState({})
+  const [filterColumn, setFilterColumn] = useState('')
+  const [filterValues, setFilterValues] = useState({ spec_section: [], type: [], item_desc: [] })
 
   const [rowData, setRowData] = useState({
     comments: '',
@@ -94,15 +98,32 @@ export default function CombinedLogs(props) {
 
   const handleSorting = async (columnName) => {
     let sortingOrder = sorting.column === columnName ? sorting.order : 'desc'
+    let a = {}
+    if (Object.values(filterValues).map(value => value.length ? true : false).includes(true)) {
+      Object.keys(filterValues).forEach(key => filterValues[key].length ? a = { ...a, [key]: filterValues[key] } : null)
+    }
     try {
-      const response = await axiosInstance({
-        method: 'get',
-        url: props.selectedLogData.length ?
-          `/sort_saved_logs/${props.listId}/${columnName}/${sortingOrder === 'desc' ? 'asc' : 'desc'}` :
-          `/sort_logs/${props.projectId}/${columnName}/${sortingOrder === 'desc' ? 'asc' : 'desc'}`,
+      // const response = await axiosInstance({
+      //   method: 'get',
+      //   url: props.selectedLogData.length ?
+      //     `/sort_saved_logs/${props.listId}/${columnName}/${sortingOrder === 'desc' ? 'asc' : 'desc'}` :
+      //     `/sort_logs/${props.projectId}/${columnName}/${sortingOrder === 'desc' ? 'asc' : 'desc'}`,
 
+      // });
+      const response = await axiosInstance({
+        method: 'post',
+        url: '/filter_logs',
+        data: {
+          project_id: props.projectId,
+          search: "",
+          filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
+          filters: a,
+          order_col: columnName || "",
+          order: sortingOrder === 'desc' ? 'asc' : 'desc' || "",
+          list_id: props.selectedLogData.length ? props.listId : ''
+        }
       });
-      
+
       props.selectedLogData.length ?
         props.setSelectedLogData(response.data.message) :
         props.setLogData(response.data.message);
@@ -121,6 +142,44 @@ export default function CombinedLogs(props) {
       });
     }
   }
+  useEffect(async () => {
+    try {
+      if (filterModal) {
+        let a = {}
+        if (Object.values(filterValues).map(value => value.length ? true : false).includes(true)) {
+          Object.keys(filterValues).forEach(key => filterValues[key].length ? a = { ...a, [key]: filterValues[key] } : null)
+        }
+        const response = await axiosInstance({
+          method: 'post',
+          url: '/filter_logs',
+          data: {
+            project_id: props.projectId,
+            search: "",
+            filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
+            filters: a,
+            order_col: sorting.column || "",
+            order: sorting.order || "",
+            list_id: props.selectedLogData.length ? props.listId : ''
+          }
+        });
+        setSelectedFilterValue(response.data.sel_filter_vals)
+        props.selectedLogData.length ?
+          props.setSelectedLogData(response.data.message) :
+          props.setLogData(response.data.message);
+      }
+    } catch (error) {
+      console.log(error.message);
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  }, [filterModal])
 
   return (
     <div className="l-table-wrapper">
@@ -149,6 +208,7 @@ export default function CombinedLogs(props) {
             <th>
               <span className="has-sorting" onClick={() => handleSorting('spec_section')}>
                 Spec Sec <i className={sorting.column === 'spec_section' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
+                <i className='has-filter' onClick={() => { setFilterModal(true); setFilterColumn('spec_section') }} />
               </span>
             </th>
             <th>
@@ -159,11 +219,13 @@ export default function CombinedLogs(props) {
             <th>
               <span className="has-sorting" onClick={() => handleSorting('type')}>
                 Requirement Type <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
+                <i className='has-filter' onClick={() => { setFilterModal(true); setFilterColumn('type') }} />
               </span>
             </th>
             <th>
               <span className="has-sorting" onClick={() => handleSorting('item_desc')} >Item
                 <i className={sorting.column === 'item_desc' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
+                <i className='has-filter' onClick={() => { setFilterModal(true); setFilterColumn('item_desc') }} />
               </span>
             </th>
             <th>
@@ -463,6 +525,21 @@ export default function CombinedLogs(props) {
           })}
         </tbody>
       </table>
+      <FilterTable
+        modal={filterModal}
+        setFilterModal={() => setFilterModal(!filterModal)}
+        selectedFilterValue={selectedFilterValue}
+        filterColumn={filterColumn}
+        setFilterValues={setFilterValues}
+        filterValues={filterValues}
+        projectId={props.projectId}
+        setLogData={props.setLogData}
+        orderColumn={sorting.column || ""}
+        order={sorting.order === 'desc' ? 'asc' : 'desc' || ""}
+        selectedLogData={props.selectedLogData}
+        listId={props.listId}
+        setSelectedLogData={props.setSelectedLogData}
+      />
     </div>
   );
 }
