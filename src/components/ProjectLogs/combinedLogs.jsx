@@ -205,8 +205,8 @@ export default function CombinedLogs(props) {
             </th>
             <th className="text-center">Action</th>
             <th>
-              <span className="has-sorting" onClick={() => handleSorting('spec_section')}>
-                Spec Sec <i className={sorting.column === 'spec_section' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
+              <span className="has-sorting" >
+                Spec Sec <i className={sorting.column === 'spec_section' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('spec_section')}></i>
                 <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('spec_section') }} />
               </span>
             </th>
@@ -216,40 +216,40 @@ export default function CombinedLogs(props) {
               </span>
             </th>
             <th>
-              <span className="has-sorting" onClick={() => handleSorting('type')}>
-                Requirement Type <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
+              <span className="has-sorting" >
+                Requirement Type <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('type')}></i>
                 <i className='has-filter' onClick={() => { setFilterModal(true); setFilterColumn('type') }} />
               </span>
             </th>
             <th>
-              <span className="has-sorting" onClick={() => handleSorting('item_desc')} >Item
-                <i className={sorting.column === 'item_desc' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
+              <span className="has-sorting"  >Item
+                <i className={sorting.column === 'item_desc' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('item_desc')}></i>
                 <i className='has-filter' onClick={() => { setFilterModal(true); setFilterColumn('item_desc') }} />
               </span>
             </th>
             <th>
-              <span className="has-sorting" onClick={() => handleSorting('package')}>
-                Grouping <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
+              <span className="has-sorting" >
+                Grouping <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
               </span>
             </th>
             <th className="log-description">
-              <span className='has-sorting' onClick={() => handleSorting("para_context")}>
-                Paragraph Context <i className={sorting.column === "para_context" ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
+              <span className='has-sorting' >
+                Paragraph Context <i className={sorting.column === "para_context" ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting("para_context")}></i>
               </span>
             </th>
             <th>
-              <span className="has-sorting" onClick={() => handleSorting('status')}>
-                Status <i className={sorting.column === 'status' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
+              <span className="has-sorting" >
+                Status <i className={sorting.column === 'status' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('status')}></i>
               </span>
             </th>
             <th>
-              <span className="has-sorting" onClick={() => handleSorting('date_issued')}>
-                Date Issued <i className={sorting.column === 'date_issued' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
+              <span className="has-sorting" >
+                Date Issued <i className={sorting.column === 'date_issued' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('date_issued')}></i>
               </span>
             </th>
             <th>
-              <span className="has-sorting" onClick={() => handleSorting('date_approved')}>
-                Date Approved <i className={sorting.column === 'date_approved' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''}></i>
+              <span className="has-sorting" >
+                Date Approved <i className={sorting.column === 'date_approved' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('date_approved')}></i>
               </span>
             </th>
             <th className="log-description">
