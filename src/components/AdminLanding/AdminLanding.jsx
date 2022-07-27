@@ -149,32 +149,32 @@ const Adminlanding = (props) => {
                       </div>
                     </th> */}
                     <th>
-                      <span className="has-sorting">
+                      <span>
                         Customers <i className=""></i>
                       </span>
                     </th>
                     <th>
-                      <span className="has-sorting">
+                      <span>
                         Status<i className="sort-d"></i>
                       </span>
                     </th>
                     <th>
-                      <span className="has-sorting">
+                      <span>
                         Projects<i className="sort-i"></i>
                       </span>
                     </th>
                     <th>
-                      <span className="has-sorting">
+                      <span>
                         Users<i className="sort-i"></i>
                       </span>
                     </th>
                     {/* <th>
-                      <span className="has-sorting">
+                      <span>
                         Start Date<i className="sort-d"></i>
                       </span>
                     </th>
                     <th>
-                      <span className="has-sorting">
+                      <span>
                         End Date<i className="sort-d"></i>
                       </span>
                     </th> */}

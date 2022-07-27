@@ -704,17 +704,17 @@ const CustomerProfile = (props) => {
                     <thead>
                       <tr>
                         <th>
-                          <span className="has-sorting">
+                          <span>
                             Employee Name <i className=""></i>
                           </span>
                         </th>
                         <th>
-                          <span className="has-sorting">
+                          <span>
                             Contact Details<i className="sort-d"></i>
                           </span>
                         </th>
                         {/* <th>
-                          <span className="has-sorting">
+                          <span>
                             Associated Projects<i className="sort-i"></i>
                           </span>
                         </th> */}

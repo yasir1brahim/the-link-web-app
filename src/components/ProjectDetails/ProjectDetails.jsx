@@ -140,7 +140,7 @@ const ProjectsDetails = () => {
                     <thead>
                       <tr>
                         <th>
-                          <span className="has-sorting">
+                          <span>
                             Requirement Types <i className=""></i>
                           </span>
                         </th>
@@ -156,7 +156,8 @@ const ProjectsDetails = () => {
                         </th> */}
                         <th>
                           <span>
-                            Total Items<i className="sort-i"></i>
+                            Total Items
+                            {/* <i className="sort-i"></i> */}
                           </span>
                         </th>
                         {/* <th>Action</th> */}
