@@ -218,13 +218,13 @@ export default function CombinedLogs(props) {
             <th>
               <span className="has-sorting" >
                 Requirement Type <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('type')}></i>
-                <i className='has-filter' onClick={() => { setFilterModal(true); setFilterColumn('type') }} />
+                <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} />
               </span>
             </th>
             <th>
               <span className="has-sorting"  >Item
                 <i className={sorting.column === 'item_desc' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('item_desc')}></i>
-                <i className='has-filter' onClick={() => { setFilterModal(true); setFilterColumn('item_desc') }} />
+                <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('item_desc') }} />
               </span>
             </th>
             <th>
