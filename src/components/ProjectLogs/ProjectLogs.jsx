@@ -189,7 +189,7 @@ const ProjectLogs = () => {
     const worksheet = XLSX.utils.json_to_sheet(logs, { header: ['spec_section', 'para_no', 'type', 'item_desc', 'package', 'para_context', 'status', 'date_issued', 'date_approved', 'comments'] });
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, logs.length === logData.length ? "All-Logs.xlsx" : `${fileName}.xlsx`);
+    XLSX.writeFile(workbook, logs.length === logData.length ? `${state.projectName||"All-Logs"}.xlsx` : `${fileName}.xlsx`);
   }
   const validate = () => {
     let error = false;
