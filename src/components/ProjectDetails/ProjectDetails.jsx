@@ -116,8 +116,8 @@ const ProjectsDetails = () => {
         <NavbarTop />
         <div className="page-wrap-content projects-details-wrapper">
           <Header
-            title={`Project Details  ${
-              state.project.project?.project_name || ''
+            title={`Project Details/  ${
+              state.project?.project_name || ''
             }`}
             showBtn={'Upload Document'}
             toggleModal={toggleModal}
