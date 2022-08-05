@@ -203,9 +203,9 @@ const ProjectsDetails = () => {
                         .filter((value) => value === true).length
                     }
                   >
-                    View Submittal Log
+                    View Requirement Log
                   </button>
-                  <button
+                  {/* <button
                     type="button"
                     className="btn btn-secondary btn-sm"
                     style={{display: 'inline-block', marginLeft: '10px'}}
@@ -217,7 +217,7 @@ const ProjectsDetails = () => {
                     }
                   >
                     View Unclassified Log
-                  </button>
+                  </button> */}
                 </div>
                 <p>
                   Documents Uploaded: <span>{docParsed}</span>
