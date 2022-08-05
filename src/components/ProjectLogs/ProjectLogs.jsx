@@ -102,14 +102,21 @@ const ProjectLogs = () => {
     const fetchData = async () => {
       setLoading(true);
       const response = await axiosInstance({
-        method: 'get',
-        url: `/get_logs/${state?.project.project_id}`,
+        method: 'post',
+        url: '/filter_logs',
+        data: {
+          project_id: state?.project.project_id,
+          search: "",
+          filters: {},
+          order_col:  "",
+          order:  "",
+        }
       });
       setLogData(response.data.message);
       
       setLoading(false);
       console.log(response.data.message);
-    };
+    }; 
 
     fetchData().catch((error) => {
       setLoading(false);
