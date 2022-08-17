@@ -33,7 +33,7 @@ class ViewSDKClient {
           },
         },
         metaData: {
-          fileName: "Menu.pdf",
+          fileName: url.slice(42), // Taking name of the file from the url
           id: "6d07d124-ac85-43b3-a867-36930f502ac6",
         },
       },
