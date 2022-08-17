@@ -112,6 +112,7 @@ const ProjectLogs = () => {
           order:  "",
         }
       });
+     
       setLogData(response.data.message);
       
       setLoading(false);
