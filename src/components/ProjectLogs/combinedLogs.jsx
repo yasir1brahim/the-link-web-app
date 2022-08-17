@@ -5,7 +5,7 @@ import axiosInstance from '../../config/axios';
 import DateSelector from '../shared/DateSelector/DateSelector';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import { FilterTable } from './filterTable';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export default function CombinedLogs(props) {
   const logData = props.logData;
@@ -20,7 +20,7 @@ export default function CombinedLogs(props) {
   const [selectedFilterValue, setSelectedFilterValue] = useState({})
   const [filterColumn, setFilterColumn] = useState('')
   const [filterValues, setFilterValues] = useState({ spec_section: [], type: [], item_desc: [] })
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [rowData, setRowData] = useState({
     comments: '',
@@ -183,15 +183,15 @@ export default function CombinedLogs(props) {
     }
   }
 
-  const handleViewPdf = (pdfUrl, textLocation) => {
-    navigate('/pdf-view', {
-      state: {
-        url: pdfUrl,
-        textLoc: textLocation
-      },
-      replace: true
-    });
-  };
+  // const handleViewPdf = (pdfUrl, textLocation) => {
+  //   navigate('/pdf-view', {
+  //     state: {
+  //       url: pdfUrl,
+  //       textLoc: textLocation
+  //     },
+  //     replace: true
+  //   });
+  // };
 
   return (
     <div className="l-table-wrapper">
@@ -336,28 +336,25 @@ export default function CombinedLogs(props) {
                           type="button"
                           className="btn btn-secondary btn-sm"
                           onClick={() => handleEditToggle(log, index)}
+                          style={{marginRight: '10px'}}
                         >
                           Edit
                         </button>
                       )}
-                      {/* <Link
-                        to='/pdf-view'
-                        className="btn btn-secondary btn-sm"
-                        target="_blank"
-                        params={{
-                          url: log?.doc_link
-                        }}
-                      > */}
-                        <Link to={{pathname: `/pdf-view`, query: {url:log?.doc_link}}} >
-                        Pdf
-                      </Link>
-                      <button
-                          type="button"
+                        <Link
+                          style={{fontWeight: 'normal'}}
                           className="btn btn-secondary btn-sm"
-                          onClick={() => handleViewPdf(log.doc_link, JSON.parse(log.text_loc.replaceAll("'",'"')))}
-                        >
-                          Pdf
-                        </button>
+                          to={{ pathname: `/pdf-view`, search: `?url=${log?.doc_link}&textLoc=${log.text_loc}` }}
+                          target="_blank" >
+                           Pdf
+                        </Link>
+                      {/* <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleViewPdf(log.doc_link, JSON.parse(log.text_loc.replaceAll("'", '"')))}
+                      >
+                        Pdf
+                      </button> */}
                     </>
                     }
                   </div>
