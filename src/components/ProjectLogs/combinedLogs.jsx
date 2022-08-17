@@ -5,6 +5,8 @@ import axiosInstance from '../../config/axios';
 import DateSelector from '../shared/DateSelector/DateSelector';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import { FilterTable } from './filterTable';
+import { Link, useNavigate } from 'react-router-dom';
+
 export default function CombinedLogs(props) {
   const logData = props.logData;
   const [editRow, setEditRow] = useState('');
@@ -18,6 +20,7 @@ export default function CombinedLogs(props) {
   const [selectedFilterValue, setSelectedFilterValue] = useState({})
   const [filterColumn, setFilterColumn] = useState('')
   const [filterValues, setFilterValues] = useState({ spec_section: [], type: [], item_desc: [] })
+  const navigate = useNavigate();
 
   const [rowData, setRowData] = useState({
     comments: '',
@@ -145,27 +148,27 @@ export default function CombinedLogs(props) {
   const handleOpenFilterModal = async () => {
     setFilterModal(true)
     try {
-        let a = {}
-        if (Object.values(filterValues).map(value => value.length ? true : false).includes(true)) {
-          Object.keys(filterValues).forEach(key => filterValues[key].length ? a = { ...a, [key]: filterValues[key] } : null)
+      let a = {}
+      if (Object.values(filterValues).map(value => value.length ? true : false).includes(true)) {
+        Object.keys(filterValues).forEach(key => filterValues[key].length ? a = { ...a, [key]: filterValues[key] } : null)
+      }
+      const response = await axiosInstance({
+        method: 'post',
+        url: '/filter_logs',
+        data: {
+          project_id: props.projectId,
+          search: "",
+          filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
+          // filters: a,
+          order_col: sorting.column || "",
+          order: sorting.order || "",
+          list_id: props.selectedLogData.length ? props.listId : ''
         }
-        const response = await axiosInstance({
-          method: 'post',
-          url: '/filter_logs',
-          data: {
-            project_id: props.projectId,
-            search: "",
-            filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
-            // filters: a,
-            order_col: sorting.column || "",
-            order: sorting.order || "",
-            list_id: props.selectedLogData.length ? props.listId : ''
-          }
-        });
-        setSelectedFilterValue(response.data.sel_filter_vals)
-        props.selectedLogData.length ?
-          props.setSelectedLogData(response.data.message) :
-          props.setLogData(response.data.message);
+      });
+      setSelectedFilterValue(response.data.sel_filter_vals)
+      props.selectedLogData.length ?
+        props.setSelectedLogData(response.data.message) :
+        props.setLogData(response.data.message);
     } catch (error) {
       console.log(error.message);
       toast.error('Something went wrong!', {
@@ -179,6 +182,16 @@ export default function CombinedLogs(props) {
       });
     }
   }
+
+  const handleViewPdf = (pdfUrl, textLocation) => {
+    navigate('/pdf-view', {
+      state: {
+        url: pdfUrl,
+        textLoc: textLocation
+      },
+      replace: true
+    });
+  };
 
   return (
     <div className="l-table-wrapper">
@@ -281,51 +294,72 @@ export default function CombinedLogs(props) {
                 </td>
                 <td>
                   <div className="action-items">
-                    {editRow === index ? (
-                      <>
-                        <button
-                          type="button"
-                          className="btn btn-primary btn-sm"
-                          onClick={handleUpdateLog}
-                        >
-                          Save
-                        </button>
+                    {<>
+                      {editRow === index ? (
+                        <>
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            onClick={handleUpdateLog}
+                          >
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => {
+                              setEditRow('');
+                              setRowData({
+                                comments: '',
+                                date_approved: '',
+                                date_issued: '',
+                                id: 1,
+                                item_desc: '',
+                                package: '',
+                                para_context: '',
+                                para_no: '',
+                                project_id: '',
+                                spec_section: '',
+                                status: '',
+                                type: '',
+                              });
+                              setDateApproved('');
+                              setDateIssued('');
+                              setStatus({});
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
                         <button
                           type="button"
                           className="btn btn-secondary btn-sm"
-                          onClick={() => {
-                            setEditRow('');
-                            setRowData({
-                              comments: '',
-                              date_approved: '',
-                              date_issued: '',
-                              id: 1,
-                              item_desc: '',
-                              package: '',
-                              para_context: '',
-                              para_no: '',
-                              project_id: '',
-                              spec_section: '',
-                              status: '',
-                              type: '',
-                            });
-                            setDateApproved('');
-                            setDateIssued('');
-                            setStatus({});
-                          }}
+                          onClick={() => handleEditToggle(log, index)}
                         >
-                          Cancel
+                          Edit
                         </button>
-                      </>
-                    ) : (
-                      <button
-                        type="button"
+                      )}
+                      {/* <Link
+                        to='/pdf-view'
                         className="btn btn-secondary btn-sm"
-                        onClick={() => handleEditToggle(log, index)}
-                      >
-                        Edit
-                      </button>
-                    )}
+                        target="_blank"
+                        params={{
+                          url: log?.doc_link
+                        }}
+                      > */}
+                        <Link to={{pathname: `/pdf-view`, query: {url:log?.doc_link}}} >
+                        Pdf
+                      </Link>
+                      <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => handleViewPdf(log.doc_link, JSON.parse(log.text_loc.replaceAll("'",'"')))}
+                        >
+                          Pdf
+                        </button>
+                    </>
+                    }
                   </div>
                 </td>
                 <td>
