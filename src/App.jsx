@@ -12,7 +12,7 @@ import Resetsuccess from './components/Authentication/Resetsuccess';
 import Checkemail from './components/Authentication/Checkemail';
 import ProjectsDetails from './components/ProjectDetails/ProjectDetails';
 import ProjectLogs from './components/ProjectLogs/ProjectLogs';
-import Test from './Test';
+import PdfWrapper from './pdfWrapper';
 
 function App() {
   return (
@@ -30,7 +30,7 @@ function App() {
         <Route path="/reset-password" element={<Resetpwd />} />
         <Route path="/reset-success" element={<Resetsuccess />} />
         <Route path="/check-email" element={<Checkemail />} />
-        <Route path="/pdf-view" element={<Test/>} />
+        <Route path="/pdf-view" element={<PdfWrapper/>} />
         
         <Route exact path="/" element={<Navigate to="/login" />} />
       </Routes>

@@ -1,3 +1,9 @@
+.log-table-width {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  max-width: 100%;
+}
 .project-logs-wrapper {
   .project-logs-content {
     .project-logs {
@@ -64,7 +70,7 @@
         }
       }
       .l-table-wrapper {
-        max-height: calc(100vh - 250px);
+        max-height: calc(100vh - 230px);
         margin-bottom: 32px;
         table {
           thead{
@@ -93,6 +99,7 @@
                 }
               }
             }
+            
             .log-description {
               width: 500px;
               min-width: 500px;
@@ -102,6 +109,7 @@
               align-items: center;
               justify-content: center;
               button {
+                white-space: nowrap;
                 &:not(:first-of-type) {
                   margin-left: 12px;
                 }
@@ -183,6 +191,12 @@
             }
           }
         }
+      }
+      .side-by-side {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        // max-height: calc(100vh - 250px);
+        margin-bottom: 32px;
       }
       .table-footer-content {
         display: flex;

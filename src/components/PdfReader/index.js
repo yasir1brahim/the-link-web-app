@@ -14,7 +14,11 @@ const RenderMenu = ({ url, textLoc }) => {
           showDownloadPDF: false,
           showPrintPDF: false,
           enableAnnotationAPIs: true,
-          includePDFAnnotations: true
+          includePDFAnnotations: true,
+          showFullScreen: true,
+          exitPDFViewerType: 'RETURN'
+
+
         },
         url,
       );
@@ -28,14 +32,12 @@ const RenderMenu = ({ url, textLoc }) => {
     });
   };
   return (
-    <div className="mt-28">
-      <div
-     style = {{height:"100vh"}}
-        id="pdf-div"
-        className="full-window-div border border-gray-100 h-screen"
-        onDocumentLoad={loadPDF()}
-      ></div>
-    </div>
+    <div
+      // style={{ height: "100vh" }}
+      id="pdf-div"
+      className="full-window-div border border-gray-100 h-screen"
+      onDocumentLoad={loadPDF()}
+    ></div>
   );
 };
 export default RenderMenu;

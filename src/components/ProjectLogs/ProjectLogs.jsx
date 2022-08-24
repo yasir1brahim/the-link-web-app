@@ -17,6 +17,7 @@ import CombinedLogs from './combinedLogs';
 import { debounce } from 'lodash';
 import Loader from '../shared/Loader/Loader';
 import * as XLSX from 'xlsx';
+import PdfWrapper from '../../pdfWrapper';
 
 const ProjectLogs = () => {
   const [saveListName, setToggleSaveListNameModal] = useState(false);
@@ -36,6 +37,7 @@ const ProjectLogs = () => {
   const [groupingData, setGroupingData] = useState([]);
   const [selectedLogData, setSelectedLogData] = useState([]);
   const [listId, setListId] = useState(null);
+  const [pdfData, setPdfData] = useState({ url: '', textLoc: {} })
 
   const handleSearchChange = useCallback(
     (value) => debounce(setSearchValue(value), 200),
@@ -108,16 +110,16 @@ const ProjectLogs = () => {
           project_id: state?.project.project_id,
           search: "",
           filters: {},
-          order_col:  "",
-          order:  "",
+          order_col: "",
+          order: "",
         }
       });
-     
+
       setLogData(response.data.message);
-      
+
       setLoading(false);
       console.log(response.data.message);
-    }; 
+    };
 
     fetchData().catch((error) => {
       setLoading(false);
@@ -170,6 +172,7 @@ const ProjectLogs = () => {
       });
     });
   }, [state, pageRefresh]);
+  
   // let filteredLogData = selectedLogData.length ? selectedLogData : logData
   let filterData = selectedLogData.length ? selectedLogData : logData
   let filteredLogData = filterData
@@ -197,7 +200,7 @@ const ProjectLogs = () => {
     const worksheet = XLSX.utils.json_to_sheet(logs, { header: ['spec_section', 'para_no', 'type', 'item_desc', 'package', 'para_context', 'status', 'date_issued', 'date_approved', 'comments'] });
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, logs.length === logData.length ? `${state.projectName||"All-Logs"}.xlsx` : `${fileName}.xlsx`);
+    XLSX.writeFile(workbook, logs.length === logData.length ? `${state.projectName || "All-Logs"}.xlsx` : `${fileName}.xlsx`);
   }
   const validate = () => {
     let error = false;
@@ -258,7 +261,7 @@ const ProjectLogs = () => {
   return (
     <div className="page-wrap">
       <NavbarTop />
-      <div className="page-wrap-content project-logs-wrapper">
+      <div className="project-logs-wrapper log-table-width">
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
           title={`All Logs  - ${state?.projectName || ''}`}
@@ -284,10 +287,11 @@ const ProjectLogs = () => {
                       of <span className="showing-strong"> 90 </span>.
                     </label> */}
                   </div>
-                  {selectedLogData.length ? <button type="button" className='btn btn-primary mr-3' onClick={()=>setSelectedLogData([])}>Clear Selection</button> : null}
+                  {selectedLogData.length ? <button type="button" className='btn btn-primary mr-3' onClick={() => setSelectedLogData([])}>Clear Selection</button> : null}
                   {!selectedLogData.length ? <button type="button" className='btn btn-primary mr-3' onClick={toggleSaveListName}>Save Selection</button> : null}
                   <button type="button" className='btn btn-secondary' onClick={getList}> View Saved Lists </button>
                   <div className="table-bulk-changes">
+                    {/* {pdfData.url && <button type="button" className='btn btn-secondary' onClick={()=>setPdfData({url: '', textLoc: {}})}> Close Pdf </button>} */}
                     <div className="log-search">
                       <input
                         type="text"
@@ -319,21 +323,26 @@ const ProjectLogs = () => {
                     </button>
                   </div>
                 </div>
-                <CombinedLogs
-                  logData={filteredLogData}
-                  selected={selected}
-                  handleSelect={handleSelect}
-                  handleSelectAll={handleSelectAll}
-                  pageRefresh={pageRefresh}
-                  setPageRefresh={setPageRefresh}
-                  customerId={state.customerId}
-                  groupingData={groupingData}
-                  setLogData={setLogData}
-                  projectId={state?.project.project_id}
-                  listId={listId}
-                  selectedLogData={selectedLogData}
-                  setSelectedLogData={setSelectedLogData}
-                />
+                <div className={pdfData.url && 'side-by-side'}>
+                  <CombinedLogs
+                    logData={filteredLogData}
+                    selected={selected}
+                    handleSelect={handleSelect}
+                    handleSelectAll={handleSelectAll}
+                    pageRefresh={pageRefresh}
+                    setPageRefresh={setPageRefresh}
+                    customerId={state.customerId}
+                    groupingData={groupingData}
+                    setLogData={setLogData}
+                    projectId={state?.project.project_id}
+                    listId={listId}
+                    selectedLogData={selectedLogData}
+                    setSelectedLogData={setSelectedLogData}
+                    setPdfData={setPdfData}
+                    pdfData={pdfData}
+                  />
+                    {pdfData.url && <PdfWrapper pdfData={pdfData} setPdfData={setPdfData}/>}
+                </div>
                 {/* {state.project?.type === 'Submittal' && (
                  
                   <SubmittalTable
