@@ -5,7 +5,6 @@ import axiosInstance from '../../config/axios';
 import DateSelector from '../shared/DateSelector/DateSelector';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import { FilterTable } from './filterTable';
-import { Link } from 'react-router-dom';
 
 export default function CombinedLogs(props) {
   const logData = props.logData;
@@ -183,15 +182,13 @@ export default function CombinedLogs(props) {
     }
   }
 
-  // const handleViewPdf = (pdfUrl, textLocation) => {
-  //   navigate('/pdf-view', {
-  //     state: {
-  //       url: pdfUrl,
-  //       textLoc: textLocation
-  //     },
-  //     replace: true
-  //   });
-  // };
+  const handleViewPdf = (pdfUrl, textLocation) => {
+    props.setPdfData({
+      ...props.pdfData, 
+      url: pdfUrl,
+      textLoc: textLocation
+    })
+  };
 
   return (
     <div className="l-table-wrapper">
@@ -336,25 +333,25 @@ export default function CombinedLogs(props) {
                           type="button"
                           className="btn btn-secondary btn-sm"
                           onClick={() => handleEditToggle(log, index)}
-                          style={{marginRight: '10px'}}
+                          // style={{ marginRight: '10px' }}
                         >
                           Edit
                         </button>
                       )}
-                        <Link
-                          style={{fontWeight: 'normal'}}
-                          className="btn btn-secondary btn-sm"
-                          to={{ pathname: `/pdf-view`, search: `?url=${log?.doc_link}&textLoc=${log.text_loc}` }}
-                          target="_blank" >
-                           Pdf
-                        </Link>
-                      {/* <button
+                      {/* <Link
+                        style={{ fontWeight: 'normal' }}
+                        className="btn btn-secondary btn-sm"
+                        to={{ pathname: `/pdf-view`, search: `?url=${log?.doc_link}&textLoc=${log.text_loc}` }}
+                        target="_blank" >
+                        Pdf
+                      </Link> */}
+                      <button
                         type="button"
                         className="btn btn-secondary btn-sm"
                         onClick={() => handleViewPdf(log.doc_link, JSON.parse(log.text_loc.replaceAll("'", '"')))}
                       >
                         Pdf
-                      </button> */}
+                      </button>
                     </>
                     }
                   </div>
@@ -570,6 +567,8 @@ export default function CombinedLogs(props) {
         listId={props.listId}
         setSelectedLogData={props.setSelectedLogData}
       />
+      
     </div>
+
   );
 }
