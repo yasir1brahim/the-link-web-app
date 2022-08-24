@@ -182,11 +182,12 @@ export default function CombinedLogs(props) {
     }
   }
 
-  const handleViewPdf = (pdfUrl, textLocation) => {
+  const handleViewPdf = (pdfUrl, textLocation, rowIndex) => {
     props.setPdfData({
-      ...props.pdfData, 
+      ...props.pdfData,
       url: pdfUrl,
-      textLoc: textLocation
+      textLoc: textLocation,
+      index: rowIndex
     })
   };
 
@@ -333,7 +334,7 @@ export default function CombinedLogs(props) {
                           type="button"
                           className="btn btn-secondary btn-sm"
                           onClick={() => handleEditToggle(log, index)}
-                          // style={{ marginRight: '10px' }}
+                        // style={{ marginRight: '10px' }}
                         >
                           Edit
                         </button>
@@ -345,13 +346,23 @@ export default function CombinedLogs(props) {
                         target="_blank" >
                         Pdf
                       </Link> */}
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => handleViewPdf(log.doc_link, JSON.parse(log.text_loc.replaceAll("'", '"')))}
-                      >
-                        Pdf
-                      </button>
+                      {props.pdfData.index === index ?
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => props.setPdfData({ url: '', textLoc: {}, index: '' })}
+                        >
+                          Close Pdf
+                        </button> :
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => handleViewPdf(log.doc_link, JSON.parse(log.text_loc.replaceAll("'", '"')), index)}
+                        >
+                          Pdf
+                        </button>
+                      }
+
                     </>
                     }
                   </div>
@@ -567,7 +578,7 @@ export default function CombinedLogs(props) {
         listId={props.listId}
         setSelectedLogData={props.setSelectedLogData}
       />
-      
+
     </div>
 
   );
