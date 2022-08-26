@@ -357,7 +357,7 @@ export default function CombinedLogs(props) {
                         <button
                           type="button"
                           className="btn btn-secondary btn-sm"
-                          onClick={() => handleViewPdf(log.doc_link, JSON.parse(log.text_loc.replaceAll("'", '"')), index)}
+                          onClick={() => handleViewPdf(log.doc_link, log.text_loc, index)}
                         >
                           Pdf
                         </button>
