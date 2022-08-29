@@ -39,7 +39,7 @@ const RenderMenu = ({ url, textLoc, docId }) => {
       });
 
     }
-  }, [newAnnotations])
+  }, [newAnnotations, docId])
 
   const loadPDF = () => {
     const viewSDKClient = new ViewSDKClient();
@@ -90,12 +90,6 @@ const RenderMenu = ({ url, textLoc, docId }) => {
         });
       });
     });
-    const saveOptions = {
-      autoSaveFrequency: 0,
-      enableFocusPolling: false,
-      showSaveButton: true
-    }
-    
   };
   return (
     <>
