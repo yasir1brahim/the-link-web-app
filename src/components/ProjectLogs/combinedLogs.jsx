@@ -182,12 +182,13 @@ export default function CombinedLogs(props) {
     }
   }
 
-  const handleViewPdf = (pdfUrl, textLocation, rowIndex) => {
+  const handleViewPdf = (pdfUrl, textLocation, rowIndex, id) => {
     props.setPdfData({
       ...props.pdfData,
       url: pdfUrl,
       textLoc: textLocation,
-      index: rowIndex
+      index: rowIndex,
+      docId: id
     })
   };
 
@@ -350,14 +351,14 @@ export default function CombinedLogs(props) {
                         <button
                           type="button"
                           className="btn btn-secondary btn-sm"
-                          onClick={() => props.setPdfData({ url: '', textLoc: {}, index: '' })}
+                          onClick={() => props.setPdfData({ url: '', textLoc: {}, index: '', docId: null })}
                         >
                           Close Pdf
                         </button> :
                         <button
                           type="button"
                           className="btn btn-secondary btn-sm"
-                          onClick={() => handleViewPdf(log.doc_link, log.text_loc, index)}
+                          onClick={() => handleViewPdf(log.doc_link, log.text_loc, index, log.doc_id)}
                         >
                           Pdf
                         </button>

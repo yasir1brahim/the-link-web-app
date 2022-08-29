@@ -11,16 +11,16 @@ class ViewSDKClient {
     });
     this.adobeDCView = undefined;
   }
+
   ready() {
     return this.readyPromise;
   }
-  previewFile(divId, viewerConfig, url) {
-    const config = {
-      // clientId: "d3c644fbd03e48ea8b592b78c42afe41", //enter local client id here 
-      clientId: "6454c8a765d64f8797872973904d5f2a", //enter dev client id here 
-    };
-    //   d3c644fbd03e48ea8b592b78c42afe41
 
+  previewFile(divId, viewerConfig, url, setNewAnnotations) {
+    const config = {
+      clientId: "d3c644fbd03e48ea8b592b78c42afe41", //enter local client id here 
+      // clientId: "6454c8a765d64f8797872973904d5f2a", //enter dev client id here 
+    };
     if (divId) {
       config.divId = divId;
     }
@@ -39,20 +39,61 @@ class ViewSDKClient {
       },
       viewerConfig
     );
-    // previewFilePromise.then(adobeViewer => {
-    //   adobeViewer.getAPIs().then(apis => {
-    //     apis.gotoLocation(141, 115, 205)
-    //       .then(() => console.log("Success"))
-    //       .catch(error => console.log(error));
-    //   });
-    // })
-    previewFilePromise.then(adobeViewer => {
-      adobeViewer.getAnnotationManager().then(annotationManager => {
-        annotationManager.getAnnotations()
-          .then(result => console.log('annotation:',result))
-          .catch(error => console.log(error));
-      });
-    });
+    const profile = {
+      userProfile: {
+          name: localStorage.getItem('fullName'),
+          // firstName: ,
+          // lastName: ,
+      }
+    };
+    this.adobeDCView.registerCallback(
+      window.AdobeDC.View.Enum.CallbackType.GET_USER_PROFILE_API,
+      function() {
+         return new Promise((resolve, reject) => {
+            resolve({
+               code: window.AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
+               data: profile
+            });
+         });
+      },
+   {});
+    this.adobeDCView.registerCallback(
+      window.AdobeDC.View.Enum.CallbackType.SAVE_API,
+      async function (metaData, content, options) {
+        console.log("inside register callback")
+        try {
+           await previewFilePromise.then(adobeViewer => {
+            adobeViewer.getAnnotationManager().then(annotationManager => {
+              annotationManager.getAnnotations()
+                .then(result => {
+                  setNewAnnotations(result)
+                  console.log('annotation:', result)
+                }
+                )
+                .catch(error => console.log(error));
+            });
+          });
+        } catch (e) {
+          console.log(e)
+        }
+
+
+
+        return new Promise((resolve, reject) => {
+          resolve({
+            code: window.AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
+            data: {
+              metaData: { fileName: url.slice(42) }
+            }
+          });
+        });
+      },
+      {
+        autoSaveFrequency: 0,
+        enableFocusPolling: false,
+        showSaveButton: true
+      }
+    );
     return previewFilePromise;
   }
   previewFileUsingFilePromise(divId, filePromise, fileName) {
@@ -73,6 +114,7 @@ class ViewSDKClient {
       {}
     );
   }
+
   registerSaveApiHandler() {
     const saveApiHandler = (metaData, content, options) => {
       console.log("save", metaData, content, options);
@@ -96,6 +138,7 @@ class ViewSDKClient {
       {}
     );
   }
+
   registerEventsHandler() {
     this.adobeDCView.registerCallback(
       window.AdobeDC.View.Enum.CallbackType.EVENT_LISTENER,

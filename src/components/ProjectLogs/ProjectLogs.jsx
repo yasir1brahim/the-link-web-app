@@ -37,7 +37,7 @@ const ProjectLogs = () => {
   const [groupingData, setGroupingData] = useState([]);
   const [selectedLogData, setSelectedLogData] = useState([]);
   const [listId, setListId] = useState(null);
-  const [pdfData, setPdfData] = useState({ url: '', textLoc: {}, index: '' })
+  const [pdfData, setPdfData] = useState({ url: '', textLoc: {}, index: '', docId: null })
 
   const handleSearchChange = useCallback(
     (value) => debounce(setSearchValue(value), 200),
@@ -342,6 +342,7 @@ const ProjectLogs = () => {
                     pdfData={pdfData}
                   />
                     {pdfData.url && <PdfWrapper pdfData={pdfData}/>}
+                    {/* <Tester/> */}
                 </div>
                 {/* {state.project?.type === 'Submittal' && (
                  
