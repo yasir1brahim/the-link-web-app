@@ -18,8 +18,8 @@ class ViewSDKClient {
 
   previewFile(divId, viewerConfig, url, setNewAnnotations) {
     const config = {
-      clientId: "d3c644fbd03e48ea8b592b78c42afe41", //enter local client id here 
-      // clientId: "6454c8a765d64f8797872973904d5f2a", //enter dev client id here 
+      // clientId: "d3c644fbd03e48ea8b592b78c42afe41", //enter local client id here 
+      clientId: "6454c8a765d64f8797872973904d5f2a", //enter dev client id here 
     };
     if (divId) {
       config.divId = divId;
