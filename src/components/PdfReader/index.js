@@ -20,20 +20,20 @@ const RenderMenu = ({ url, textLoc, docId }) => {
   }, [docId])
 
   useEffect(() => {
-    if(newAnnotations.length) {
+    if (newAnnotations.length) {
       const fetchData = async () => {
         await axiosInstance({
-            method: 'post',
-            url: '/saveMetadata',
-            data: {
-              doc_id: docId,
-              edited_by: localStorage.getItem('userId'),
-              data: newAnnotations
-            }
-          });
-          setAnnotations(newAnnotations)
+          method: 'post',
+          url: '/saveMetadata',
+          data: {
+            doc_id: docId,
+            edited_by: localStorage.getItem('userId'),
+            data: newAnnotations
+          }
+        });
+        setAnnotations(newAnnotations)
       };
-  
+
       fetchData().catch((error) => {
         console.log(error)
       });
@@ -56,20 +56,25 @@ const RenderMenu = ({ url, textLoc, docId }) => {
           enableAnnotationAPIs: true,
           includePDFAnnotations: true,
           showFullScreen: true,
-          exitPDFViewerType: 'RETURN'
+          exitPDFViewerType: 'RETURN',
 
 
         },
         url, setNewAnnotations
       );
-     
+
+
       previewFilePromise.then(adobeViewer => {
-        adobeViewer.getAPIs().then(apis => {
-          apis.gotoLocation(textLoc.page_no, textLoc.x, textLoc.y)
+        adobeViewer.getAnnotationManager().then(annotationManager => {
+          annotationManager.setConfig({
+            showCommentsPanel: false
+          })
             .then(() => console.log("Success"))
             .catch(error => console.log(error));
         });
-      })
+      });
+
+
       previewFilePromise.then(adobeViewer => {
         adobeViewer.getAnnotationManager().then(annotationManager => {
           annotationManager.getAnnotations()
@@ -85,10 +90,25 @@ const RenderMenu = ({ url, textLoc, docId }) => {
       previewFilePromise.then(adobeViewer => {
         adobeViewer.getAnnotationManager().then(annotationManager => {
           annotationManager.addAnnotations(docAnnotations)
-            .then(() => console.log("Success"))
+            .then(
+              () => previewFilePromise.then(adobeViewer => {
+                adobeViewer.getAPIs().then(apis => {
+                  apis.gotoLocation(textLoc.page_no, textLoc.x, textLoc.y)
+                    .then(() => console.log("Success"))
+                    .catch(error => console.log(error));
+                });
+              }))
             .catch(error => console.log(error));
         });
       });
+      previewFilePromise.then(adobeViewer => {
+        adobeViewer.getAPIs().then(apis => {
+          apis.gotoLocation(textLoc.page_no, textLoc.x, textLoc.y)
+            // apis.gotoLocation(2, 104, 407)
+            .then(() => console.log("Success"))
+            .catch(error => console.log(error));
+        });
+      })
     });
   };
   return (
