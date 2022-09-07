@@ -16,8 +16,9 @@ import axiosInstance from '../../config/axios';
 import CombinedLogs from './combinedLogs';
 import { debounce } from 'lodash';
 import Loader from '../shared/Loader/Loader';
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx';
 import PdfWrapper from '../../pdfWrapper';
+import FileDownload from 'js-file-download';
 
 const ProjectLogs = () => {
   const [saveListName, setToggleSaveListNameModal] = useState(false);
@@ -172,7 +173,7 @@ const ProjectLogs = () => {
       });
     });
   }, [state, pageRefresh]);
-  
+
   // let filteredLogData = selectedLogData.length ? selectedLogData : logData
   let filterData = selectedLogData.length ? selectedLogData : logData
   let filteredLogData = filterData
@@ -194,13 +195,38 @@ const ProjectLogs = () => {
       setSelected(selectedLogs);
     }
   };
-  const downloadExcel = (logs, fileName) => {
-    //Boilerplate format of making an xlsx file from xlsx library
-    //Below header array is specified to maintain the column order in xlsx file same as our table
-    const worksheet = XLSX.utils.json_to_sheet(logs, { header: ['spec_section', 'para_no', 'type', 'item_desc', 'package', 'para_context', 'status', 'date_issued', 'date_approved', 'comments'] });
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, logs.length === logData.length ? `${state.projectName || "All-Logs"}.xlsx` : `${fileName}.xlsx`);
+  // const downloadExcel = (logs, fileName) => {
+  //   //Boilerplate format of making an xlsx file from xlsx library
+  //   //Below header array is specified to maintain the column order in xlsx file same as our table
+  //   const worksheet = XLSX.utils.json_to_sheet(logs, { header: ['spec_section', 'para_no', 'type', 'item_desc', 'package', 'para_context', 'status', 'date_issued', 'date_approved', 'comments'] });
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  //   XLSX.writeFile(workbook, logs.length === logData.length ? `${state.projectName || "All-Logs"}.xlsx` : `${fileName}.xlsx`);
+  // }
+  const handleExportExcel = async (recordData, fileName) => {
+    try {
+      const response = await axiosInstance({
+        method: 'post',
+        url: '/exportLogs',
+        responseType: 'arraybuffer',
+        data: {
+          project_id: state?.project.project_id,
+          records: recordData
+        },
+      });
+      let blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      FileDownload(blob, `${state?.project.project_name}_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`)
+    } catch (e) {
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
   }
   const validate = () => {
     let error = false;
@@ -301,7 +327,7 @@ const ProjectLogs = () => {
                         onChange={(e) => handleSearchChange(e.target.value)}
                       />
                     </div>
-                    <button type="button" className="btn btn-secondary btn-sm" style={{ textTransform: 'none' }} onClick={() => downloadExcel(logData)}>
+                    <button type="button" className="btn btn-secondary btn-sm" style={{ textTransform: 'none' }} onClick={() => handleExportExcel("All")}>
                       Export .xls
                       {/* <CSVLink
                       filename={`All-Logs.csv`}
@@ -341,8 +367,8 @@ const ProjectLogs = () => {
                     setPdfData={setPdfData}
                     pdfData={pdfData}
                   />
-                    {pdfData.url && <PdfWrapper pdfData={pdfData}/>}
-                    {/* <Tester/> */}
+                  {pdfData.url && <PdfWrapper pdfData={pdfData} />}
+                  {/* <Tester/> */}
                 </div>
                 {/* {state.project?.type === 'Submittal' && (
                  
@@ -471,7 +497,7 @@ const ProjectLogs = () => {
                   <div className="col-6">
                     <div className="d-flex align-item-center justify-content-flex-end">
                       <button type="button" className="btn btn-primary mr-3" onClick={() => { setSelectedLogData(logData.filter((log) => { return list.records.includes(log.id) ? log : null })); setToggleViewSavedList(false); setListId(list.id) }}>Open</button>
-                      <button type="button" className="btn btn-primary" style={{ textTransform: 'none' }} onClick={() => downloadExcel(logData.filter((log) => { return list.records.includes(log.id) ? log : null }), list.view_name)}>Export .xls</button>
+                      <button type="button" className="btn btn-primary" style={{ textTransform: 'none' }} onClick={() => handleExportExcel(logData.map((log) => { return list.records.includes(log.id) ? log.id : null }).filter(id => id), list.view_name)}>Export .xls</button>
                     </div>
                   </div>
                 </div>)
