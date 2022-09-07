@@ -4,6 +4,7 @@ import ViewSDKClient from "../../ViewSDKClient";
 const RenderMenu = ({ url, textLoc, docId }) => {
   const [docAnnotations, setAnnotations] = useState([])
   const [newAnnotations, setNewAnnotations] = useState([])
+  // let element = document.getElementsByClassName("sdk-HeaderView-header");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,6 +19,11 @@ const RenderMenu = ({ url, textLoc, docId }) => {
       console.log(error)
     });
   }, [docId])
+  // useEffect(()=>{
+  //   if(element[0]) {
+  //     element[0].style.backgroundColor = 'rgba(32, 42, 68, 0.9)';
+  //   }
+  // },[element[0]])
 
   useEffect(() => {
     if (newAnnotations.length) {
@@ -51,18 +57,17 @@ const RenderMenu = ({ url, textLoc, docId }) => {
           showAnnotationTools: true,
           showLeftHandPanel: false,
           showPageControls: true,
-          showDownloadPDF: true,
+          showDownloadPDF: false,
           showPrintPDF: false,
           enableAnnotationAPIs: true,
           includePDFAnnotations: true,
           showFullScreen: true,
-          exitPDFViewerType: 'RETURN',
+          // exitPDFViewerType: 'RETURN',
 
 
         },
         url, setNewAnnotations
       );
-
 
       previewFilePromise.then(adobeViewer => {
         adobeViewer.getAnnotationManager().then(annotationManager => {
