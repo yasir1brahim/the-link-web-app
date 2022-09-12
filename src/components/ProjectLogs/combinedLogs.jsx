@@ -13,7 +13,7 @@ import { ReactComponent as CancelButton } from '../../assets/images/label-reject
 import { Tooltip } from 'reactstrap';
 
 export default function CombinedLogs(props) {
-  const logData = props.logData;
+  const {logData, newRowIndex, setNewRowIndex } = props;
   const [editRow, setEditRow] = useState('');
   const [dateIssued, setDateIssued] = useState('');
   const [dateApproved, setDateApproved] = useState('');
@@ -28,7 +28,6 @@ export default function CombinedLogs(props) {
   const [addRowTooltip, setaddRowTooltip] = useState(null)
   const [editRowTooltip, setEditRowTooltip] = useState(null)
   const [pdfTooltip, setPdfTooltip] = useState(null)
-  const [newRowIndex, setNewRowIndex] = useState(null)
   // const navigate = useNavigate();
 
   const [rowData, setRowData] = useState({
@@ -264,32 +263,9 @@ export default function CombinedLogs(props) {
       });
     }
   }
-
-  useEffect(() => {
-    if(newRowIndex) {
-      setEditRow('');
-      setRowData({
-        comments: '',
-        date_approved: '',
-        date_issued: '',
-        id: 1,
-        item_desc: '',
-        package: '',
-        para_context: '',
-        para_no: '',
-        project_id: '',
-        spec_section: '',
-        status: '',
-        type: '',
-      });
-      setDateApproved('');
-      setDateIssued('');
-      setStatus({});
-      setNewRowIndex(null)
-      props.setLogData(deleteElement(props.logData, newRowIndex))
-    }
-  }, [props.searchValue])
-
+  useEffect(()=>{
+    setEditRow('');
+  },[props.searchValue])
   return (
     <div className="l-table-wrapper">
       <table className="table">
