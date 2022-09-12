@@ -1,10 +1,16 @@
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../config/axios';
 import DateSelector from '../shared/DateSelector/DateSelector';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import { FilterTable } from './filterTable';
+import { ReactComponent as EditButton } from '../../assets/images/edit-button.svg';
+import { ReactComponent as AddButton } from '../../assets/images/circle-add.svg';
+import { ReactComponent as PdfButton } from '../../assets/images/file-pdf.svg';
+import { ReactComponent as SaveButton } from '../../assets/images/label-approve.svg';
+import { ReactComponent as CancelButton } from '../../assets/images/label-reject.svg';
+import { Tooltip } from 'reactstrap';
 
 export default function CombinedLogs(props) {
   const logData = props.logData;
@@ -19,6 +25,10 @@ export default function CombinedLogs(props) {
   const [selectedFilterValue, setSelectedFilterValue] = useState({})
   const [filterColumn, setFilterColumn] = useState('')
   const [filterValues, setFilterValues] = useState({ spec_section: [], type: [], item_desc: [] })
+  const [addRowTooltip, setaddRowTooltip] = useState(null)
+  const [editRowTooltip, setEditRowTooltip] = useState(null)
+  const [pdfTooltip, setPdfTooltip] = useState(null)
+  const [newRowIndex, setNewRowIndex] = useState(null)
   // const navigate = useNavigate();
 
   const [rowData, setRowData] = useState({
@@ -47,42 +57,55 @@ export default function CombinedLogs(props) {
   const handleUpdateLog = async () => {
     try {
       setEditRow('');
+      if (newRowIndex) {
+        await axiosInstance({
+          method: 'post',
+          url: '/addRecord',
+          data: {
+            ...rowData,
+            customer_id: props.customerId,
+            user_id: localStorage.getItem('userId')
+          }
+        });
+      } else {
+        await axiosInstance({
+          method: 'put',
+          url: '/update_logs',
+          data: {
+            customer_id: props.customerId,
+            comments: rowData.comments,
+            id: rowData.id,
+            item_desc: rowData.item_desc,
+            package: groupingValue?.length
+              ? groupingValue[0].label
+              : searchValue
+                ? searchValue
+                : rowData.package,
+            para_context: rowData.para_context,
+            para_no: rowData.para_no,
+            project_id: rowData.project_id,
+            spec_section: rowData.spec_section,
+            status: statusValue?.length ? statusValue[0].value : '',
+            type: rowData.type,
+            date_issued: !dateIssued
+              ? rowData?.date_issued
+                ? moment(
+                  new Date((rowData?.date_issued).replaceAll('-', '/'))
+                ).format('YYYY-MM-DD')
+                : null
+              : moment(dateIssued).format('YYYY-MM-DD'),
+            date_approved: !dateApproved
+              ? rowData?.date_approved
+                ? moment(
+                  new Date((rowData?.date_approved).replaceAll('-', '/'))
+                ).format('YYYY-MM-DD')
+                : null
+              : moment(dateApproved).format('YYYY-MM-DD'),
+          },
+        });
 
-      await axiosInstance({
-        method: 'put',
-        url: '/update_logs',
-        data: {
-          customer_id: props.customerId,
-          comments: rowData.comments,
-          id: rowData.id,
-          item_desc: rowData.item_desc,
-          package: groupingValue?.length
-            ? groupingValue[0].label
-            : searchValue
-              ? searchValue
-              : rowData.package,
-          para_context: rowData.para_context,
-          para_no: rowData.para_no,
-          project_id: rowData.project_id,
-          spec_section: rowData.spec_section,
-          status: statusValue?.length ? statusValue[0].value : '',
-          type: rowData.type,
-          date_issued: !dateIssued
-            ? rowData?.date_issued
-              ? moment(
-                new Date((rowData?.date_issued).replaceAll('-', '/'))
-              ).format('YYYY-MM-DD')
-              : null
-            : moment(dateIssued).format('YYYY-MM-DD'),
-          date_approved: !dateApproved
-            ? rowData?.date_approved
-              ? moment(
-                new Date((rowData?.date_approved).replaceAll('-', '/'))
-              ).format('YYYY-MM-DD')
-              : null
-            : moment(dateApproved).format('YYYY-MM-DD'),
-        },
-      });
+      }
+      setNewRowIndex(null)
       props.setPageRefresh(!props.pageRefresh);
     } catch (error) {
       console.log(error.message);
@@ -191,6 +214,81 @@ export default function CombinedLogs(props) {
       docId: id
     })
   };
+  const insertElement = (arr, index, newItem) => [
+    // part of the array before the specified index
+    ...arr.slice(0, index),
+    // inserted item
+    newItem,
+    // part of the array after the specified index
+    ...arr.slice(index)
+  ]
+  const deleteElement = (arr, index) => [
+    // part of the array before the specified index
+    ...arr.slice(0, index),
+    // part of the array after the specified index
+    ...arr.slice(index + 1)
+  ]
+
+  const handleAddRow = async (log) => {
+    try {
+      let index = props.logData?.findIndex(item => item === log)
+      const dashIndex = log.para_no.search('-')
+      const logObj = {
+        ...log,
+        //Here we are checking if para_no already contains a character after '-'. 
+        // If yes, we are increasing the ascii value of the character by 1 for ex.- if it's a it will make it b. 
+        // If No, it will add '-a' to para_no
+        para_no: dashIndex !== -1 ?
+          log.para_no.slice(0, dashIndex + 1) + String.fromCharCode(log.para_no.codePointAt(dashIndex + 1) + 1) :
+          `${log.para_no}-a`,
+        customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
+      }
+      const result = insertElement(props.logData, index + 1, logObj)
+      props.setFilteredLogData(result)
+
+      setNewRowIndex(index + 1)
+      handleEditToggle(logObj, index + 1)
+      if (props.pdfData.url) {
+        let docElement = document.getElementsByClassName("l-table-wrapper")
+        docElement[0].scrollTo(890, 0)
+      }
+    } catch (e) {
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  }
+
+  useEffect(() => {
+    if(newRowIndex) {
+      setEditRow('');
+      setRowData({
+        comments: '',
+        date_approved: '',
+        date_issued: '',
+        id: 1,
+        item_desc: '',
+        package: '',
+        para_context: '',
+        para_no: '',
+        project_id: '',
+        spec_section: '',
+        status: '',
+        type: '',
+      });
+      setDateApproved('');
+      setDateIssued('');
+      setStatus({});
+      setNewRowIndex(null)
+      props.setLogData(deleteElement(props.logData, newRowIndex))
+    }
+  }, [props.searchValue])
 
   return (
     <div className="l-table-wrapper">
@@ -222,8 +320,8 @@ export default function CombinedLogs(props) {
                 <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('spec_section') }} />
               </span>
             </th>
-            <th>
-              <span >
+            <th className='para-no'>
+              <span>
                 Para
               </span>
             </th>
@@ -272,7 +370,7 @@ export default function CombinedLogs(props) {
         <tbody>
           {logData.map((log, index) => {
             return (
-              <tr>
+              <tr className={log.user_id !== 1 && "highlight-row"}>
                 <td className="ticket-checkbox">
                   <div className="form-group">
                     <div className="custom-control custom-checkbox">
@@ -296,16 +394,9 @@ export default function CombinedLogs(props) {
                     {<>
                       {editRow === index ? (
                         <>
-                          <button
-                            type="button"
-                            className="btn btn-primary btn-sm"
-                            onClick={handleUpdateLog}
-                          >
-                            Save
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-secondary btn-sm"
+                          <SaveButton onClick={handleUpdateLog} style={{ marginRight: '5px' }} />
+                          <CancelButton
+                            style={{ marginRight: '5px' }}
                             onClick={() => {
                               setEditRow('');
                               setRowData({
@@ -325,20 +416,17 @@ export default function CombinedLogs(props) {
                               setDateApproved('');
                               setDateIssued('');
                               setStatus({});
+                              setNewRowIndex(null)
+                              newRowIndex === index && props.setLogData(deleteElement(props.logData, index))
                             }}
-                          >
-                            Cancel
-                          </button>
+                          />
                         </>
                       ) : (
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => handleEditToggle(log, index)}
-                        // style={{ marginRight: '10px' }}
-                        >
-                          Edit
-                        </button>
+                        <>
+                          <EditButton onClick={() => handleEditToggle(log, index)} style={{ marginRight: '5px' }} id={'Edit-Tooltip-' + index + 1} />
+                          <Tooltip placement="left" target={'Edit-Tooltip-' + index + 1} isOpen={editRowTooltip === index + 1} toggle={() => setEditRowTooltip(editRowTooltip ? editRowTooltip === index + 1 ? null : index + 1 : index + 1)}>
+                            Edit Row
+                          </Tooltip></>
                       )}
                       {/* <Link
                         style={{ fontWeight: 'normal' }}
@@ -351,25 +439,35 @@ export default function CombinedLogs(props) {
                         <button
                           type="button"
                           className="btn btn-secondary btn-sm"
+                          style={{ marginRight: '5px' }}
                           onClick={() => props.setPdfData({ url: '', textLoc: {}, index: '', docId: null })}
                         >
                           Close Pdf
                         </button> :
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => handleViewPdf(log.doc_link, log.text_loc, index, log.doc_id)}
-                        >
-                          Pdf
-                        </button>
+                        newRowIndex !== index && log.user_id === 1 &&
+                        <>
+                          <PdfButton onClick={() => handleViewPdf(log.doc_link, log.text_loc, index, log.doc_id)} style={{ marginRight: '5px' }} id={'Pdf-Tooltip-' + index + 1} />
+                          <Tooltip placement="top" target={'Pdf-Tooltip-' + index + 1} isOpen={pdfTooltip === index + 1} toggle={() => setPdfTooltip(pdfTooltip ? pdfTooltip === index + 1 ? null : index + 1 : index + 1)}>
+                            View Pdf
+                          </Tooltip></>
                       }
-
+                      {!props.selectedLogData.length && <><AddButton onClick={() => {
+                        if (!newRowIndex) {
+                          handleAddRow(log)
+                        } else if (newRowIndex === index + 1) {
+                          handleAddRow(log)
+                        }
+                      }} id={'Tooltip-' + index + 1}
+                      />
+                        <Tooltip placement="right" target={'Tooltip-' + index + 1} isOpen={addRowTooltip === index + 1} toggle={() => setaddRowTooltip(addRowTooltip ? addRowTooltip === index + 1 ? null : index + 1 : index + 1)}>
+                          Add Row below
+                        </Tooltip></>}
                     </>
                     }
                   </div>
                 </td>
                 <td>
-                  {/* {editRow === index ? (
+                  {editRow === index && (newRowIndex === index || log.user_id !== 1) ? (
                     <input
                       placeholder="Enter"
                       className="form-control"
@@ -382,8 +480,8 @@ export default function CombinedLogs(props) {
                     />
                   ) : (
                     log.spec_section
-                  )} */}
-                  {log.spec_section}
+                  )}
+                  {/* {log.spec_section} */}
                 </td>
                 <td>
                   {log.para_no}
