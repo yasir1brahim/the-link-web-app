@@ -29,6 +29,7 @@ const ProjectLogs = () => {
   const toggleViewSavedList = () => setToggleViewSavedList(!viewSavedList);
   const { state } = useLocation();
   const [logData, setLogData] = useState([]);
+  const [filteredLogData, setFilteredLogData] = useState([]);
   const [selected, setSelected] = useState([]);
   const [pageRefresh, setPageRefresh] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -174,17 +175,21 @@ const ProjectLogs = () => {
     });
   }, [state, pageRefresh]);
 
+  useEffect(()=>{
+    let filterData = selectedLogData.length ? selectedLogData : logData
+    let filteredLog = filterData
+      .map((log) => {
+        return Object.values(log)
+          .filter((value) => value)
+          .filter((value) => value.toString().includes(searchValue)).length
+          ? log
+          : null;
+      })
+      .filter((value) => value);
+      setFilteredLogData(filteredLog)
+  },[selectedLogData, logData, searchValue, setFilteredLogData])
   // let filteredLogData = selectedLogData.length ? selectedLogData : logData
-  let filterData = selectedLogData.length ? selectedLogData : logData
-  let filteredLogData = filterData
-    .map((log) => {
-      return Object.values(log)
-        .filter((value) => value)
-        .filter((value) => value.toString().includes(searchValue)).length
-        ? log
-        : null;
-    })
-    .filter((value) => value);
+  
   const handleSelectAll = () => {
     if (selected?.length === filteredLogData?.length) {
       setSelected([]);
@@ -352,6 +357,7 @@ const ProjectLogs = () => {
                 <div className={pdfData.url && 'side-by-side'}>
                   <CombinedLogs
                     logData={filteredLogData}
+                    setFilteredLogData={setFilteredLogData}
                     selected={selected}
                     handleSelect={handleSelect}
                     handleSelectAll={handleSelectAll}
@@ -366,6 +372,8 @@ const ProjectLogs = () => {
                     setSelectedLogData={setSelectedLogData}
                     setPdfData={setPdfData}
                     pdfData={pdfData}
+                    completeLogData={logData}
+                    searchValue={searchValue}
                   />
                   {pdfData.url && <PdfWrapper pdfData={pdfData} />}
                   {/* <Tester/> */}
