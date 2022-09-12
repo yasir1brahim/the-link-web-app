@@ -40,10 +40,18 @@ const ProjectLogs = () => {
   const [selectedLogData, setSelectedLogData] = useState([]);
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({ url: '', textLoc: {}, index: '', docId: null })
+  const [newRowIndex, setNewRowIndex] = useState(null)
 
   const handleSearchChange = useCallback(
-    (value) => debounce(setSearchValue(value), 200),
-    [setSearchValue]
+    (value) => debounce(
+      setSearchValue(value),
+      newRowIndex && setLogData([
+        ...logData.slice(0, newRowIndex),
+        ...logData.slice(newRowIndex + 1)
+      ]),
+      setNewRowIndex(null)
+    , 200),
+    [setSearchValue, logData, newRowIndex]
   );
 
   const handleSelect = (id) => {
@@ -373,6 +381,8 @@ const ProjectLogs = () => {
                     setPdfData={setPdfData}
                     pdfData={pdfData}
                     completeLogData={logData}
+                    newRowIndex={newRowIndex}
+                    setNewRowIndex={setNewRowIndex}
                     searchValue={searchValue}
                   />
                   {pdfData.url && <PdfWrapper pdfData={pdfData} />}
