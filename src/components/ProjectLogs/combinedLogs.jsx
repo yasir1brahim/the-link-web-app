@@ -13,7 +13,7 @@ import { ReactComponent as CancelButton } from '../../assets/images/label-reject
 import { Tooltip } from 'reactstrap';
 
 export default function CombinedLogs(props) {
-  const {logData, newRowIndex, setNewRowIndex } = props;
+  const { logData, newRowIndex, setNewRowIndex, completeLogData } = props;
   const [editRow, setEditRow] = useState('');
   const [dateIssued, setDateIssued] = useState('');
   const [dateApproved, setDateApproved] = useState('');
@@ -232,14 +232,18 @@ export default function CombinedLogs(props) {
     try {
       let index = props.logData?.findIndex(item => item === log)
       const dashIndex = log.para_no.search('-')
+      // Below we are making an array of para_nos then filtering them like if log.para_no = 1.04, paraNos will have all entries of 1.04 i.e. 1.04-a, 1.04-b etc.
+      const paraNos = completeLogData?.map(log => log.para_no).filter(paraNo => paraNo.includes(dashIndex !== -1 ? log.para_no.slice(0, dashIndex) : log.para_no))
+      //Now we are making an array containing the ascii character values of elements after '-' in paraNos
+      const charArray = paraNos.map(paraNo => paraNo.search('-') !== -1 ? paraNo.codePointAt(paraNo.search('-') + 1) : 0)
       const logObj = {
         ...log,
         //Here we are checking if para_no already contains a character after '-'. 
         // If yes, we are increasing the ascii value of the character by 1 for ex.- if it's a it will make it b. 
         // If No, it will add '-a' to para_no
         para_no: dashIndex !== -1 ?
-          log.para_no.slice(0, dashIndex + 1) + String.fromCharCode(log.para_no.codePointAt(dashIndex + 1) + 1) :
-          `${log.para_no}-a`,
+          log.para_no.slice(0, dashIndex + 1) + String.fromCharCode(Math.max(...charArray) + 1) :
+          `${log.para_no}-${String.fromCharCode(Math.max(...charArray) + 1)}`,
         customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
       }
       const result = insertElement(props.logData, index + 1, logObj)
@@ -263,9 +267,9 @@ export default function CombinedLogs(props) {
       });
     }
   }
-  useEffect(()=>{
+  useEffect(() => {
     setEditRow('');
-  },[props.searchValue])
+  }, [props.searchValue])
   return (
     <div className="l-table-wrapper">
       <table className="table">
