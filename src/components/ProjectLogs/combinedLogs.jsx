@@ -235,7 +235,7 @@ export default function CombinedLogs(props) {
       // Below we are making an array of para_nos then filtering them like if log.para_no = 1.04, paraNos will have all entries of 1.04 i.e. 1.04-a, 1.04-b etc.
       const paraNos = completeLogData?.map(log => log.para_no).filter(paraNo => paraNo.includes(dashIndex !== -1 ? log.para_no.slice(0, dashIndex) : log.para_no))
       //Now we are making an array containing the ascii character values of elements after '-' in paraNos
-      const charArray = paraNos.map(paraNo => paraNo.search('-') !== -1 ? paraNo.codePointAt(paraNo.search('-') + 1) : 0)
+      const charArray = paraNos.map(paraNo => paraNo.search('-') !== -1 ? paraNo.codePointAt(paraNo.search('-') + 1) : 96)
       const logObj = {
         ...log,
         //Here we are checking if para_no already contains a character after '-'. 
