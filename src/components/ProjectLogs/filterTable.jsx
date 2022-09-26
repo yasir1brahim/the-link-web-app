@@ -16,8 +16,19 @@ export const FilterTable = (props) => {
             props.setFilterValues({ ...props.filterValues, [props?.filterColumn]: newValues });
         }
     };
+    const handleSelectAll = () => {
+        let selectedLogs = props?.selectedFilterValue[props?.filterColumn].filter((value) => value.toString().includes(searchValue))?.map((log) => {
+            return log;
+          });
+          props.setFilterValues({ ...props.filterValues, [props?.filterColumn]: selectedLogs });
+      };
 
-    const handleApplyFilter = async () => {
+    const handleClear = () => {
+        props.setFilterValues({ ...props.filterValues, [props?.filterColumn]: [] });
+        handleApplyFilter(false)
+    }
+
+    const handleApplyFilter = async (toggleFilter) => {
         let a = {}
         Object.keys(props.filterValues).forEach(key => props.filterValues[key].length ? a = { ...a, [key]: props.filterValues[key] } : null)
         try {
@@ -38,7 +49,7 @@ export const FilterTable = (props) => {
             props.selectedLogData.length ?
                 props.setSelectedLogData(response.data.message) :
                 props.setLogData(response.data.message);
-            props.setFilterModal()
+                toggleFilter && props.setFilterModal()
 
         } catch (error) {
             console.log(error.message);
@@ -89,10 +100,14 @@ export const FilterTable = (props) => {
                                         <small className="form-error">{listName.errors}</small>
                                     )} */}
                                 </div>
+                                <div style={{marginBottom:'20px', float: 'right'}}>
+                                    <span style={{textDecoration: 'underline', color:'blue', cursor:'pointer', marginRight: '10px'}} onClick={handleSelectAll}>Select all</span>
+                                    <span style={{textDecoration: 'underline', color:'blue', cursor: 'pointer'}} onClick={handleClear}>Clear</span>
+                                </div>
                                 {Object.values(props.selectedFilterValue).length ? props?.selectedFilterValue[props?.filterColumn].filter((value) => value.toString().includes(searchValue)).map(((filterVal, index) => {
                                     return (
                                         <>
-                                            <input type="checkbox" id={index} value={filterVal} name={filterVal} onChange={() => handleSelect(filterVal)} />
+                                            <input type="checkbox" id={index} value={filterVal} checked={props.filterValues[props?.filterColumn].includes(filterVal)} name={filterVal} onChange={() => handleSelect(filterVal)} />
                                             <label style={{ marginLeft: '10px' }}>{filterVal}</label><br />
 
                                         </>
@@ -109,7 +124,7 @@ export const FilterTable = (props) => {
                         </Button>
                         <Button
                             color="primary"
-                            onClick={() => handleApplyFilter()}
+                            onClick={() => handleApplyFilter(true)}
                         >
                             Apply
                         </Button>{' '}
