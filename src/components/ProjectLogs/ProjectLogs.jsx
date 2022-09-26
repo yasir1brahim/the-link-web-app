@@ -19,8 +19,17 @@ import Loader from '../shared/Loader/Loader';
 // import * as XLSX from 'xlsx';
 import PdfWrapper from '../../pdfWrapper';
 import FileDownload from 'js-file-download';
+import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
 
 const ProjectLogs = () => {
+  const [modal, setModal] = useState(false);
+  const [errorModal, toggleErrorModal] = useState(false);
+  const [successModal, toggleSuccessModal] = useState(false);
+  const toggleModal = () => setModal(!modal);
+  const [pdfFile, setPdfFile] = useState({});
+  const [fileData, setFileData] = useState({});
+  const [isUploadLoading, setUploadLoading] = useState(false);
+
   const [saveListName, setToggleSaveListNameModal] = useState(false);
   const toggleSaveListName = () => setToggleSaveListNameModal(!saveListName);
   const [listName, setListName] = useState({ value: '', errors: '' });
@@ -41,6 +50,53 @@ const ProjectLogs = () => {
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({ url: '', textLoc: {}, index: '', docId: null })
   const [newRowIndex, setNewRowIndex] = useState(null)
+
+  useEffect(() => {
+    if (!modal) {
+      setPdfFile({});
+    }
+  }, [modal]);
+
+  const backToUpload = () => {
+    toggleErrorModal(false);
+    setModal(true);
+  };
+
+  const handleSubmit = async () => {
+    console.log(pdfFile);
+    try {
+      setUploadLoading(true);
+      const data = new FormData();
+      data.append('project_id', state.project?.project_id);
+      Object.values(pdfFile)?.forEach((file) => data.append('files', file));
+      const response = await axiosInstance({
+        method: 'post',
+        url: '/upload_file',
+        data,
+      });
+      if (response.data) {
+        console.log(response.data);
+        setUploadLoading(false);
+        setFileData(response.data.message);
+        setModal(false);
+        toggleSuccessModal(true);
+        setPageRefresh(!pageRefresh);
+      }
+    } catch (error) {
+      setUploadLoading(false);
+      toggleErrorModal(true);
+      setModal(false);
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };
 
   const handleSearchChange = useCallback(
     (value) => debounce(
@@ -306,6 +362,8 @@ const ProjectLogs = () => {
           title={`All Logs  - ${state?.projectName || ''}`}
           breadcrumb2={'Project Details'}
           breadcrumb={'View Projects'}
+          showBtn={'Upload Document'}
+          toggleModal={toggleModal}
         />
 
         <div className="project-logs-content">
@@ -450,6 +508,20 @@ const ProjectLogs = () => {
         pauseOnHover
       />
       <Loader showComponentLoader={isLoading} />
+      <UploadDocuments
+          modal={modal}
+          toggleModal={toggleModal}
+          setPdfFile={setPdfFile}
+          pdfFile={pdfFile}
+          handleSubmit={handleSubmit}
+          isUploadLoading={isUploadLoading}
+          errorModal={errorModal}
+          toggleErrorModal={toggleErrorModal}
+          backToUpload={backToUpload}
+          successModal={successModal}
+          toggleSuccessModal={toggleSuccessModal}
+          fileData={fileData}
+        />
       <Modal
         isOpen={saveListName}
         fade={false}
