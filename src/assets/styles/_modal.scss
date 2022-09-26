@@ -15,7 +15,7 @@
                 .modal-footer{
                     bottom: 0;
                     z-index: 1;
-                    padding: 24px 0;
+                    padding: 24px 0 10px;
                     position: sticky;
                     background-color: #fff;
                     justify-content: flex-end;
@@ -719,7 +719,7 @@
                     align-items: center;
                 }
                 .modal-body{
-                    overflow: auto;
+                    // overflow: auto;
                     max-height: 500px;
                     padding-bottom: 0;
                     .create-project-form{
