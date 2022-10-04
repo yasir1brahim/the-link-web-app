@@ -1,11 +1,12 @@
-.customer-projects-wrapper{
-    .customer-projects-content{
-        .customer-projects-details{
+.customer-projects-wrapper {
+    .customer-projects-content {
+        .customer-projects-details {
             border: 1px solid $border-color;
             padding: 24px;
             margin-top: 20px;
             border-radius: 8px;
-            .customer-dp-container{
+
+            .customer-dp-container {
                 width: 112px;
                 height: 112px;
                 display: flex;
@@ -15,23 +16,29 @@
                 margin-right: 16px;
                 border-radius: 4px;
                 justify-content: center;
-                > img{
+
+                >img {
                     object-fit: cover;
                     max-width: 100%;
                 }
             }
-            .customer-projects{
+
+            .customer-projects {
                 flex: 1;
-                .text-label-value{
+
+                .text-label-value {
                     display: flex;
                     align-items: flex-start;
                     justify-content: flex-start;
-                    > * {
+
+                    >* {
                         font-size: 0.875rem;
-                        &.text-label{
+
+                        &.text-label {
                             color: #999;
                         }
-                        &.text-value{
+
+                        &.text-value {
                             color: #212121;
                             margin-left: 4px;
                             font-weight: bold;
@@ -39,32 +46,39 @@
                     }
                 }
             }
-            .customer-edit-container{
+
+            .customer-edit-container {
                 min-width: 100px;
-                button{
+
+                button {
                     min-width: 100px;
                 }
             }
-            .edit-customer-form{
-                .edit-customer-content{
+
+            .edit-customer-form {
+                .edit-customer-content {
                     display: flex;
                     align-items: flex-start;
                     justify-content: flex-start;
-                    .ec-left{
+
+                    .ec-left {
                         display: flex;
                         align-items: center;
                         justify-content: flex-start;
-                        .upload-documents{
+
+                        .upload-documents {
                             position: relative;
-                            &:hover{
-                                .select-File{
-                                    label{
+
+                            &:hover {
+                                .select-File {
+                                    label {
                                         height: 100%;
-                                        background-color: rgba(0,0,0,0.4);
+                                        background-color: rgba(0, 0, 0, 0.4);
                                     }
                                 }
                             }
-                            .image-holder{
+
+                            .image-holder {
                                 width: 190px;
                                 height: 190px;
                                 display: flex;
@@ -72,19 +86,22 @@
                                 border-radius: 4px;
                                 justify-content: center;
                                 background-color: #c4c4c4;
-                                .dummy-image{
+
+                                .dummy-image {
                                     width: 61px;
                                     height: 61px;
                                     object-fit: contain;
                                     background-color: #c4c4c4;
                                 }
-                                .uploaded-image{
+
+                                .uploaded-image {
                                     width: 190px;
                                     height: 190px;
                                     object-fit: contain;
                                 }
                             }
-                            .select-File{
+
+                            .select-File {
                                 top: 0;
                                 left: 0;
                                 right: 0;
@@ -93,12 +110,14 @@
                                 height: 190px;
                                 position: absolute;
                                 overflow: hidden;
-                                input{
+
+                                input {
                                     width: 0;
                                     height: 0;
                                     padding: 0;
                                     opacity: 0;
-                                    + label{
+
+                                    +label {
                                         width: 100%;
                                         height: calc(100% + 29px);
                                         margin: 0;
@@ -109,11 +128,13 @@
                                         justify-content: center;
                                         background-color: transparent;
                                         transition: all 0.3s ease-in-out;
-                                        .upload-text{
+
+                                        .upload-text {
                                             width: 100%;
                                             height: 29px;
                                             background-color: $primary;
-                                            span{
+
+                                            span {
                                                 color: $white;
                                                 font-size: 0.875rem;
                                                 margin-left: 4px;
@@ -126,13 +147,16 @@
                             }
                         }
                     }
-                    .ec-right{
+
+                    .ec-right {
                         width: 100%;
                         padding-left: 30px;
-                        .pwd-link{
+
+                        .pwd-link {
                             color: $primary;
                             text-decoration: underline;
-                            + .row{
+
+                            +.row {
                                 margin-top: 1rem;
                             }
                         }
@@ -140,34 +164,41 @@
                 }
             }
         }
-        .customer-project-details{
-            .noprojects-wrapper{
+
+        .customer-project-details {
+            .noprojects-wrapper {
                 height: 247px;
                 border: 1px dashed $border-color;
                 border-radius: 8px;
                 margin-top: 24px;
-                span{
+
+                span {
                     color: $primary;
                     font-size: 0.75rem;
-                    svg{
+
+                    svg {
                         margin-right: 8px;
                     }
                 }
             }
-            .table-top-content{
+
+            .table-top-content {
                 margin: 1rem 0;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                .table-entries{
+
+                .table-entries {
                     color: $primary;
                     margin: 0;
                     font-size: 0.875rem;
-                    .showing-strong{
+
+                    .showing-strong {
                         font-weight: bold;
                     }
                 }
-                .table-bulk-changes{
+
+                .table-bulk-changes {
                     display: flex;
                     margin-left: auto;
                     align-items: center;
@@ -175,25 +206,221 @@
                     flex-direction: row-reverse;
                 }
             }
-            .l-table-wrapper{
-                table{
-                    tr{
-                        .ticket-checkbox{
+
+            .l-table-wrapper {
+                table {
+                    tr {
+                        .ticket-checkbox {
                             width: 36px;
                             cursor: pointer;
-                            .form-group{
+
+                            .form-group {
                                 margin: 0;
-                                .custom-control{
-                                    &-input{
+
+                                .custom-control {
+                                    &-input {
                                         width: 20px;
                                         height: 24px;
                                     }
-                                    &-label{
+
+                                    &-label {
                                         top: unset;
                                         padding: 0 !important;
-                                    }   
+                                    }
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            .create-new-lproject {
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                opacity: 0;
+                z-index: 1050;
+                position: fixed;
+                overflow: hidden;
+                transform: translate(0, -100%);
+                transform-origin: top;
+                // transition: all 0.3s linear;
+
+                &.show-lproject-popup {
+                    opacity: 1;
+                    transform: translate(0, 0);
+                    // transition: all 0.3s linear;
+
+                    .lproject-backdrop {
+                        opacity: 1;
+                        // transition: all 0.3s linear;
+                    }
+                }
+
+                .lproject-backdrop {
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    width: 100%;
+                    bottom: 0;
+                    height: 100%;
+                    opacity: 0;
+                    position: absolute;
+                    overflow: hidden;
+                    background-color: rgba($black, 0.6);
+                    // transition: all 0.3s linear;
+                }
+
+                .lproject-content {
+                    margin: 30px auto;
+                    position: relative;
+                    max-width: 800px;
+                    border-radius: 4px;
+                    background-color: $white;
+                }
+
+                .lproject-header {
+                    padding: 24px 24px 0;
+                    display: flex;
+                    align-items: center;
+                    border-bottom: 0;
+                    justify-content: space-between;
+                    border-top-left-radius: 4px;
+                    border-top-right-radius: 4px;
+
+                    h5 {
+                        line-height: 1.5;
+                        font-weight: bold;
+                        margin-bottom: 0;
+                    }
+
+                    span {
+                        cursor: pointer;
+
+                        &:hover {
+                            opacity: 1;
+                        }
+                    }
+                }
+
+                .lproject-body {
+                    padding: 16px 16px 0;
+                    // overflow: auto;
+                    // max-height: 500px;
+
+                    .create-project-form {
+                        .customer-dp-container {
+                            width: 112px;
+                            height: 112px;
+                            display: flex;
+                            padding: 10px;
+                            background: #F1F1F1;
+                            align-items: center;
+                            margin-right: 16px;
+                            border-radius: 4px;
+                            justify-content: center;
+
+                            >img {
+                                object-fit: cover;
+                                max-width: 100%;
+                            }
+                        }
+
+                        .customer-profile {
+                            flex: 1;
+
+                            .text-label-value {
+                                display: flex;
+                                align-items: flex-start;
+                                justify-content: flex-start;
+
+                                >* {
+                                    font-size: 0.875rem;
+
+                                    &.text-label {
+                                        color: $primary;
+                                    }
+
+                                    &.text-value {
+                                        color: #212121;
+                                        margin-left: 0px;
+                                        font-weight: bold;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    .create-project-content {
+                        margin-top: 24px;
+
+                        .users-section {
+                            border-top: 1px solid $border-color;
+                            padding-top: 24px;
+
+                            .rbt {
+                                .rbt-input-multi {
+                                    padding: 0;
+                                    box-shadow: none;
+                                    background-color: #f2f7f6;
+
+                                    .rbt-input-wrapper {
+                                        margin: 0 0 1rem;
+                                        padding: 1rem 1rem 0;
+                                        grid-gap: 1rem;
+                                        max-height: 100px;
+                                        overflow: auto;
+
+                                        >* {
+                                            &.rbt-token {
+                                                color: $white;
+                                                margin: 0;
+                                                background-color: $primary;
+                                            }
+
+                                            &:last-child {
+                                                flex: 1 1 100% !important;
+                                                height: 32px !important;
+                                                bottom: 0;
+                                                position: sticky !important;
+                                            }
+
+                                            .rbt-input-main {
+                                                margin: 0;
+                                                height: auto;
+                                                border-radius: 0;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                .rbt-menu {
+                                    .dropdown-item {
+
+                                        &.active,
+                                        &:active {
+                                            background-color: #f2f7f6;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    .lproject-footer {
+                        bottom: 0;
+                        display: flex;
+                        padding: 16px 0;
+                        position: sticky;
+                        border-top: 1px solid $border-color;
+                        align-items: center;
+                        background-color: #fff;
+                        justify-content: space-between;
+
+                        button {
+                            display: inline-block;
+                            min-width: 108px;
                         }
                     }
                 }

@@ -4,6 +4,7 @@
 .form-group {
 	position: relative;
 	margin-bottom: 1.5rem;
+
 	.text-label {
 		top: 50%;
 		left: 0;
@@ -18,6 +19,7 @@
 		-webkit-transition: .3s all;
 		transition: .3s all;
 	}
+
 	input {
 		width: 100%;
 		color: #212121;
@@ -31,6 +33,7 @@
 		border-width: 0 0 2px 0 !important;
 		border-radius: 4px 4px 0 0;
 		background-color: #F2F7F6 !important;
+
 		&:not(:placeholder-shown) {
 			+ {
 				label {
@@ -39,22 +42,28 @@
 				}
 			}
 		}
+
 		&:focus {
 			outline: none;
 			-webkit-box-shadow: none;
 			box-shadow: none;
+
 			&::-webkit-input-placeholder {
 				color: #999;
 			}
+
 			&:-ms-input-placeholder {
 				color: #999;
 			}
+
 			&::-ms-input-placeholder {
 				color: #999;
 			}
+
 			&::placeholder {
 				color: #999;
 			}
+
 			+ {
 				label {
 					top: 16px;
@@ -63,22 +72,28 @@
 				}
 			}
 		}
+
 		&::-webkit-input-placeholder {
 			color: transparent;
 		}
+
 		&:-ms-input-placeholder {
 			color: transparent;
 		}
+
 		&::-ms-input-placeholder {
 			color: transparent;
 		}
+
 		&::placeholder {
 			color: transparent;
 		}
-		+ input{
+
+		+input {
 			background-color: transparent !important;
 		}
 	}
+
 	textarea {
 		width: 100%;
 		color: #212121;
@@ -92,9 +107,11 @@
 		border-width: 0 0 2px 0 !important;
 		border-radius: 4px 4px 0 0;
 		background-color: #F2F7F6 !important;
-		+ .text-label {
+
+		+.text-label {
 			top: 25px;
 		}
+
 		&:not(:placeholder-shown) {
 			+ {
 				label {
@@ -104,22 +121,28 @@
 				}
 			}
 		}
+
 		&:focus {
 			outline: none;
 			-webkit-box-shadow: none;
 			box-shadow: none;
+
 			&::-webkit-input-placeholder {
 				color: #999;
 			}
+
 			&:-ms-input-placeholder {
 				color: #999;
 			}
+
 			&::-ms-input-placeholder {
 				color: #999;
 			}
+
 			&::placeholder {
 				color: #999;
 			}
+
 			+ {
 				label {
 					top: 12px;
@@ -128,19 +151,24 @@
 				}
 			}
 		}
+
 		&::-webkit-input-placeholder {
 			color: transparent;
 		}
+
 		&:-ms-input-placeholder {
 			color: transparent;
 		}
+
 		&::-ms-input-placeholder {
 			color: transparent;
 		}
+
 		&::placeholder {
 			color: transparent;
 		}
 	}
+
 	&.search {
 		.form-control {
 			background-image: url("#{$assetPath}search.svg");
@@ -150,96 +178,139 @@
 			padding-right: 40px;
 		}
 	}
-	.has-typehead{
-		&.is-focused{
+
+	.has-typehead {
+		&.is-focused {
 			.text-label {
-				color: $primary !important;
+				color: $primary  !important;
 			}
 		}
-		&.empty{
-			.text-label {
-				top: 50%;
-				color: #6e6e6e;
-				font-size: 1rem;
-			}
-		}
-		&.is-focused.empty{
-			.text-label {
-				top: 16px;
-				font-size: 70%;
-			}
-		}
-		.text-label {
-			top: 16px;
-			font-size: 70%;
-			pointer-events: none;
-		}
-		:readonly, [readonly]{
-			cursor: not-allowed;
-			opacity: 0.5;
-		}
-		&.is-disabled{
-			cursor: not-allowed;
-			opacity: 0.5;
-			.rbt{
-				pointer-events: none;
-			}
-			input, [disabled], :disabled, .disabled, :readonly, [readonly]{
-				pointer-events: none;
-			}
-		}
-	}
-	.has-calendar{
-		&.is-focused{
-			.text-label {
-				color: $primary !important;
-			}
-		}
-		&.empty{
+
+		&.empty {
 			.text-label {
 				top: 50%;
 				color: #6e6e6e;
 				font-size: 1rem;
 			}
 		}
-		&.is-focused.empty{
+
+		&.is-focused.empty {
 			.text-label {
 				top: 16px;
 				font-size: 70%;
 			}
 		}
+
 		.text-label {
 			top: 16px;
 			font-size: 70%;
 			pointer-events: none;
 		}
-		:readonly, [readonly]{
+
+		:readonly,
+		[readonly] {
 			cursor: not-allowed;
 			opacity: 0.5;
 		}
-		&.is-disabled{
+
+		&.is-disabled {
 			cursor: not-allowed;
 			opacity: 0.5;
-			.react-datepicker-wrapper{
+
+			.rbt {
 				pointer-events: none;
 			}
-			input, [disabled], :disabled, .disabled, :readonly, [readonly]{
+
+			input,
+			[disabled],
+			:disabled,
+			.disabled,
+			:readonly,
+			[readonly] {
+				pointer-events: none;
+			}
+		}
+
+		.rbt {
+			.rbt-menu {
+				.dropdown-item {
+
+					&.active,
+					&:active {
+						background-color: #f2f7f6;
+					}
+				}
+			}
+		}
+	}
+
+	.has-calendar {
+		&.is-focused {
+			.text-label {
+				color: $primary  !important;
+			}
+		}
+
+		&.empty {
+			.text-label {
+				top: 50%;
+				color: #6e6e6e;
+				font-size: 1rem;
+			}
+		}
+
+		&.is-focused.empty {
+			.text-label {
+				top: 16px;
+				font-size: 70%;
+			}
+		}
+
+		.text-label {
+			top: 16px;
+			font-size: 70%;
+			pointer-events: none;
+		}
+
+		:readonly,
+		[readonly] {
+			cursor: not-allowed;
+			opacity: 0.5;
+		}
+
+		&.is-disabled {
+			cursor: not-allowed;
+			opacity: 0.5;
+
+			.react-datepicker-wrapper {
+				pointer-events: none;
+			}
+
+			input,
+			[disabled],
+			:disabled,
+			.disabled,
+			:readonly,
+			[readonly] {
 				pointer-events: none;
 			}
 		}
 	}
-	.helper-text{
+
+	.helper-text {
 		color: #9e9e9e;
 		padding: 0 16px;
 		position: absolute;
 		font-size: 0.75rem;
 		margin-top: 4px;
 		line-height: 1rem;
-		&.has-error{
+
+		&.has-error {
 			color: #F44336;
 		}
 	}
-	.has-icon{
+
+	.has-icon {
 		top: 50%;
 		right: 16px;
 		z-index: 1;
@@ -247,13 +318,15 @@
 		position: absolute;
 		transform: translate(0, -50%);
 		pointer-events: none;
-		&.icon-dropdown{
+
+		&.icon-dropdown {
 			width: 8px;
 			height: 12px;
 			background: url('#{$assetPath}back.svg') no-repeat center;
 			transform: translate(0, -50%) rotate(-90deg);
 		}
-		&.icon-calendar{
+
+		&.icon-calendar {
 			width: 24px;
 			height: 24px;
 			background: url('#{$assetPath}calendar.svg') no-repeat center;
@@ -384,4 +457,3 @@
 // 	border-bottom-left-radius: 0;
 // 	border-top-left-radius: 0;
 // }
-
