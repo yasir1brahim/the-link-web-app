@@ -55,7 +55,7 @@ const CustomerProfile = (props) => {
       const response = await axiosInstance({
         method: 'get',
         url:
-           `/customer/${custId}`,
+          `/customer/${custId}`,
       });
       setCustomerData(response.data.message[0]);
       console.log(response.data.message);
@@ -72,7 +72,7 @@ const CustomerProfile = (props) => {
         progress: undefined,
       });
     });
-  }, [ pageRefresh, custId]);
+  }, [pageRefresh, custId]);
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
@@ -177,6 +177,13 @@ const CustomerProfile = (props) => {
       setPassword({
         ...password,
         errors: 'Password not matched with confirm Passsword.',
+      });
+      error = true;
+    }
+    if(password.value && !confirmPassword.value || confirmPassword.value && !password.value) {
+      setPassword({
+        ...password,
+        errors: 'Please enter both password and confirm password',
       });
       error = true;
     }
@@ -285,9 +292,9 @@ const CustomerProfile = (props) => {
     <div className="page-wrap">
       <NavbarTop />
       <div className="page-wrap-content customer-profile-wrapper">
-        <Header 
-        title={'Customer Profile'} 
-        breadcrumb={'Customer Details'}
+        <Header
+          title={'Customer Profile'}
+          breadcrumb={'Customer Details'}
         />
 
         <div className="customer-profile-content">
@@ -372,7 +379,7 @@ const CustomerProfile = (props) => {
                     <div className="upload-documents">
                       <div className="image-holder">
                         <img
-                          src={profilePicture ? typeof(profilePicture) === 'string' ? profilePicture : URL.createObjectURL(profilePicture) : ProfilePhoto}
+                          src={profilePicture ? typeof (profilePicture) === 'string' ? profilePicture : URL.createObjectURL(profilePicture) : ProfilePhoto}
                           alt="Profile"
                           className="dummy-image"
                         />
@@ -608,6 +615,9 @@ const CustomerProfile = (props) => {
                                 >
                                   New Password
                                 </label>
+                                {password.errors && (
+                                  <small className="form-error">{password.errors}</small>
+                                )}
                               </div>
                             </div>
                             <div className="col-4">
@@ -633,6 +643,9 @@ const CustomerProfile = (props) => {
                                 >
                                   Confirm New Password
                                 </label>
+                                {password.errors && (
+                                  <small className="form-error">{password.errors}</small>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -644,13 +657,13 @@ const CustomerProfile = (props) => {
                   </div>
                 </div>
                 <div className="ec-footerbtns d-flex align-items-center justify-content-end">
-                  <button
+                  {/* <button
                     type="button"
                     className="btn btn-secondary mr-3"
                     onClick={toggleEditProfile}
                   >
                     Reset
-                  </button>
+                  </button> */}
                   <button
                     type="button"
                     className="btn btn-primary"
