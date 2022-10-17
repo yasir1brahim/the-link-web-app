@@ -153,6 +153,7 @@ const CustomerProjects = (props) => {
             title={state?.customer_name || customerData?.customer_name}
             showBtn={'Create New Project'}
             toggleModal={toggleModal}
+            breadcrumb={'Project Details'}
           />
 
           <div className="customer-projects-content">

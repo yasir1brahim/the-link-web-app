@@ -360,8 +360,9 @@ const ProjectLogs = () => {
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
           title={`All Logs  - ${state?.projectName || ''}`}
-          breadcrumb2={'Project Details'}
-          breadcrumb={'View Projects'}
+          breadcrumb={'Project Details'}
+          breadcrumb2={'View Projects'}
+          breadcrumb3={'Requrement Logs'}
           showBtn={'Upload Document'}
           toggleModal={toggleModal}
         />
