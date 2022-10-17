@@ -28,7 +28,7 @@ export default function SubmittalTable(props) {
             </th>
             <th>
               <span className="has-sorting">
-                Spec Section <i className=""></i>
+                Spec Sec <i className=""></i>
               </span>
             </th>
             <th>

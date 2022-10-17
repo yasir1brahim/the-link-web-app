@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { ReactComponent as Logo } from '../../../assets/images/logo.svg';
+import { ReactComponent as Logo } from '../../../assets/images/logo-white.svg';
 import { ReactComponent as Down } from '../../../assets/images/chevron-bottom.svg';
 // import { ReactComponent as Notification } from '../../../assets/images/notificat.svg';
 import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
-
 const NavbarTop = () => {
   const [navDrop, setNavDrop] = useState(false);
 

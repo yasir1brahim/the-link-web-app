@@ -4,7 +4,7 @@ import { ReactComponent as Mail } from '../../assets/images/mail.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import axiosInstance from '../../config/axios';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo.svg';
+import { ReactComponent as ReactLogo } from '../../assets/images/logo-white.svg';
 
 const SignUp = () => {
   const [showPwd, setShowPwd] = useState(false);
@@ -50,7 +50,7 @@ const SignUp = () => {
         <form className="signup-form">
           <h1 className="form-heading">Sign Up</h1>
           <p className="form-info">
-            Welcome to The Link Log Manager. Please sign in if you have
+            Welcome to The Link Requirements Manager. Please sign in if you have
             credentials. If not, please see your administrator.
           </p>
           <div className="form-group">

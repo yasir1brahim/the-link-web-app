@@ -243,6 +243,9 @@ select {
               &.sort-i{
                 background: url('../../images/sorti.svg') no-repeat center;
               }
+              &.has-filter{
+                background: url('../../images/filter.svg') no-repeat center;
+              }
             }
           }
         }

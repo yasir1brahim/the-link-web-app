@@ -6,8 +6,7 @@ import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo.svg';
-
+import { ReactComponent as ReactLogo } from '../../assets/images/logo-white.svg';
 const Signin = (props) => {
   const [showPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState({ value: '', errors: '' });
@@ -78,7 +77,7 @@ const Signin = (props) => {
         <form className="login-form" onSubmit={handleSubmit}>
           <h1 className="form-heading">Hello!</h1>
           <p className="form-info">
-            Welcome to The Link Log Manager. Please sign in if you have
+            Welcome to The Link Requirements Manager. Please sign in if you have
             credentials. If not, please see your administrator.
           </p>
           <div className="form-group">

@@ -17,12 +17,13 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import EditProject from './editProject';
 import CreateEmployee from '../CustomerProfile/createEmployee';
+import moment from 'moment';
 
 const CustomerProjects = (props) => {
   const [modal, setModal] = useState(false);
   const [employeeModal, setEmployeeModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  // const [isArchived, toggleArchive] = useState(false);
+  const [isArchived, toggleArchive] = useState(false);
   const toggleModal = () => setModal(!modal);
   const toggleEditModal = () => setEditModal(!editModal);
   const toggleEmployeeModal = () => setEmployeeModal(!employeeModal);
@@ -69,10 +70,10 @@ const CustomerProjects = (props) => {
           ? `/projects/${state.customer_id}`
           : `/projects/${localStorage.getItem('userId')}`,
       });
-      setProjectData(response.data.message);
-      // setProjectData(
-      //   isArchived ? response.data.archived_projects : response.data.message
-      // );
+      // setProjectData(response.data.message);
+      setProjectData(
+        isArchived ? response.data.archived_projects : response.data.message
+      );
       console.log(response.data.message);
     };
 
@@ -87,7 +88,7 @@ const CustomerProjects = (props) => {
         progress: undefined,
       });
     });
-  }, [state, pageRefresh]);
+  }, [state, pageRefresh, isArchived]);
 
   const handleLaunch = (project) => {
     navigate('/project-details', {
@@ -99,6 +100,50 @@ const CustomerProjects = (props) => {
     toggleEditModal();
   };
 
+  const handleArchiveProject = async (project) => {
+    let errors = false;
+    if (!errors) {
+      try {
+        const response = await axiosInstance({
+          method: 'put',
+          url: '/updateProject',
+          data: {
+            project_name: project.project_name,
+            lead_contact: project.lead_contact,
+            start_date: project?.start_date
+              ? moment(
+                new Date((project?.start_date).replaceAll('-', '/'))
+              ).format('YYYY-MM-DD')
+              : '',
+            end_date: project?.end_date
+              ? moment(
+                new Date((project?.end_date).replaceAll('-', '/'))
+              ).format('YYYY-MM-DD')
+              : '',
+            customer_id: localStorage.getItem('roleId') === '0' ? state.customer_id : localStorage.getItem('userId'),
+            status: isArchived ? 'Active' : 'Archived',
+            project_id: project.project_id,
+          },
+        });
+        if (response.data) {
+          console.log(response.data);
+          setPageRefresh(!pageRefresh);
+        }
+      } catch (error) {
+        console.log(error.message);
+        toast.error('Something went wrong!', {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    }
+  };
+
   return (
     <>
       <div className="page-wrap">
@@ -108,6 +153,7 @@ const CustomerProjects = (props) => {
             title={state?.customer_name || customerData?.customer_name}
             showBtn={'Create New Project'}
             toggleModal={toggleModal}
+            breadcrumb={'Project Details'}
           />
 
           <div className="customer-projects-content">
@@ -138,15 +184,15 @@ const CustomerProjects = (props) => {
                     + Add Employee
                   </button>
                 </div>
-                {/* <div className="table-bulk-changes">
+                <div style={{ marginLeft: '10px' }}>
                   <button
                     onClick={() => toggleArchive(!isArchived)}
                     type="button"
                     className="btn btn-secondary btn-sm"
                   >
-                    Archived
+                    {isArchived ? 'View Active' : 'View Archived'}
                   </button>
-                </div> */}
+                </div>
               </div>
               <div className="l-table-wrapper">
                 <table className="table">
@@ -169,86 +215,102 @@ const CustomerProjects = (props) => {
                         </div>
                       </th> */}
                       <th>
-                        <span className="has-sorting">
+                        <span>
                           Existing Projects <i className=""></i>
                         </span>
                       </th>
                       <th>
-                        <span className="has-sorting">
+                        <span>
                           Status<i className="sort-d"></i>
                         </span>
                       </th>
                       <th>
-                        <span className="has-sorting">
+                        <span>
                           Lead Contact<i className="sort-i"></i>
                         </span>
                       </th>
                       <th>
-                        <span className="has-sorting">
+                        <span>
                           Users<i className="sort-i"></i>
                         </span>
                       </th>
                       <th>
-                        <span className="has-sorting">
+                        <span>
                           Start Date<i className="sort-d"></i>
                         </span>
                       </th>
                       <th>
-                        <span className="has-sorting">
+                        <span>
                           End Date<i className="sort-d"></i>
                         </span>
                       </th>
                       <th>Action</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {currentItems.map((project) => {
-                      return (
-                        <tr>
-                          {/* <td className="ticket-checkbox">
-                            <div className="form-group">
-                              <div className="custom-control custom-checkbox">
-                                <input
-                                  type="checkbox"
-                                  className="custom-control-input"
-                                  name="ticketRow1"
-                                  id="ticketRow1"
-                                />
-                                <label
-                                  className="custom-control-label"
-                                  for="ticketRow1"
-                                ></label>
+                  {project ?
+                    <tbody>
+                      {currentItems.map((project) => {
+                        return (
+                          <tr>
+                            {/* <td className="ticket-checkbox">
+                              <div className="form-group">
+                                <div className="custom-control custom-checkbox">
+                                  <input
+                                    type="checkbox"
+                                    className="custom-control-input"
+                                    name="ticketRow1"
+                                    id="ticketRow1"
+                                  />
+                                  <label
+                                    className="custom-control-label"
+                                    for="ticketRow1"
+                                  ></label>
+                                </div>
                               </div>
-                            </div>
-                          </td> */}
-                          <td>{project.project_name}</td>
-                          <td>{project.status}</td>
-                          <td>{project.lead_contact}</td>
-                          <td>{project.users}</td>
-                          <td>{project.start_date}</td>
-                          <td>{project.end_date}</td>
-                          <td>
-                            <div className="action-wrapper">
-                              <button
-                                type="button"
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => handleLaunch(project)}
-                              >
-                                Launch
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => handleEdit(project)}
-                              >
-                                Edit
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
+                            </td> */}
+                            <td>{project.project_name}</td>
+                            <td>{project.status}</td>
+                            <td>{project.lead_contact}</td>
+                            <td>{project.users}</td>
+                            <td>{project.start_date}</td>
+                            <td>{project.end_date}</td>
+                            <td>
+                              <div className="action-wrapper">
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => handleLaunch(project)}
+                                >
+                                  Launch
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => handleEdit(project)}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => handleArchiveProject(project)}
+                                  disabled={isArchived && localStorage.getItem('roleId') !== '0'}
+                                >
+                                  {!isArchived ? 'Archive' : 'Unarchive'}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    :
+                    <tbody>
+                      <tr>
+                        <td className='text-center' colSpan={7}>No data</td>
+                      </tr>
+                    </tbody>
+                  }
                 </table>
               </div>
               <div className="table-footer-content">

@@ -18,27 +18,39 @@ const Header = ({ ...props }) => {
               }
               className="breadcrumb-text"
             >
-              Home /
+              Home
             </a>
             {props.breadcrumb && (
-              <div
+              <a
+                href={() => false}
                 onClick={() =>
-                  props.breadcrumb2 ? navigate(-2) : navigate(-1)
+                  props.breadcrumb3 ? navigate(-2) : navigate(-1)
                 }
                 className="breadcrumb-text"
                 style={{ cursor: 'pointer' }}
               >
                 {props.breadcrumb}
-              </div>
+              </a>
             )}
             {props.breadcrumb2 && (
-              <div
+              <a
+                href={() => false}
                 onClick={() => navigate(-1)}
                 className="breadcrumb-text"
                 style={{ cursor: 'pointer' }}
               >
                 {props.breadcrumb2}
-              </div>
+              </a>
+            )}
+             {props.breadcrumb3 && (
+              <a
+                href={() => false}
+                onClick={() => navigate(-1)}
+                className="breadcrumb-text"
+                style={{ cursor: 'pointer' }}
+              >
+                {props.breadcrumb3}
+              </a>
             )}
             {/* <div className="breadcrumb-text">{props.title}</div> */}
           </div>
