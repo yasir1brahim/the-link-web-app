@@ -17,9 +17,11 @@ class ViewSDKClient {
   }
 
   previewFile(divId, viewerConfig, url, setNewAnnotations) {
+    const clientId = window.location.href.includes("app.thelink.ai") ? "f59bde8fafcd4dcba42ebed3acbaa23f" : window.location.href.includes("localhost")? "d3c644fbd03e48ea8b592b78c42afe41": "6454c8a765d64f8797872973904d5f2a"
     const config = {
       // clientId: "d3c644fbd03e48ea8b592b78c42afe41", //enter local client id here 
-      clientId: "6454c8a765d64f8797872973904d5f2a", //enter dev client id here 
+      // clientId: "6454c8a765d64f8797872973904d5f2a", //enter dev client id here ,
+      clientId
     };
     if (divId) {
       config.divId = divId;
@@ -41,28 +43,28 @@ class ViewSDKClient {
     );
     const profile = {
       userProfile: {
-          name: localStorage.getItem('fullName'),
-          // firstName: ,
-          // lastName: ,
+        name: localStorage.getItem('fullName'),
+        // firstName: ,
+        // lastName: ,
       }
     };
     this.adobeDCView.registerCallback(
       window.AdobeDC.View.Enum.CallbackType.GET_USER_PROFILE_API,
-      function() {
-         return new Promise((resolve, reject) => {
-            resolve({
-               code: window.AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
-               data: profile
-            });
-         });
+      function () {
+        return new Promise((resolve, reject) => {
+          resolve({
+            code: window.AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
+            data: profile
+          });
+        });
       },
-   {});
+      {});
     this.adobeDCView.registerCallback(
       window.AdobeDC.View.Enum.CallbackType.SAVE_API,
       async function (metaData, content, options) {
         console.log("inside register callback")
         try {
-           await previewFilePromise.then(adobeViewer => {
+          await previewFilePromise.then(adobeViewer => {
             adobeViewer.getAnnotationManager().then(annotationManager => {
               annotationManager.getAnnotations()
                 .then(result => {
@@ -97,9 +99,11 @@ class ViewSDKClient {
     return previewFilePromise;
   }
   previewFileUsingFilePromise(divId, filePromise, fileName) {
+    const clientId = window.location.href.includes("app.thelink.ai") ? "f59bde8fafcd4dcba42ebed3acbaa23f" : window.location.href.includes("localhost")? "d3c644fbd03e48ea8b592b78c42afe41": "6454c8a765d64f8797872973904d5f2a"
     this.adobeDCView = new window.AdobeDC.View({
       // clientId: "d3c644fbd03e48ea8b592b78c42afe41", //enter local Client id here
-      clientId: "6454c8a765d64f8797872973904d5f2a", //enter dev Client id here
+      // clientId: "6454c8a765d64f8797872973904d5f2a", //enter dev Client id here
+      clientId,
       divId,
     });
     this.adobeDCView.previewFile(
