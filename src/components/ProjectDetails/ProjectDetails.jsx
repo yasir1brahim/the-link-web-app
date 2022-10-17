@@ -116,7 +116,8 @@ const ProjectsDetails = () => {
             }`}
             showBtn={'Upload Document'}
             toggleModal={toggleModal}
-            breadcrumb={'View Projects'}
+            breadcrumb={'Project Details'}
+            breadcrumb2={'View Projects'}
           />
 
           <div className="projects-details-content">
