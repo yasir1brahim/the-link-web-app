@@ -180,7 +180,7 @@ const CustomerProfile = (props) => {
       });
       error = true;
     }
-    if(password.value && !confirmPassword.value || confirmPassword.value && !password.value) {
+    if ((password.value && !confirmPassword.value) || (confirmPassword.value && !password.value)) {
       setPassword({
         ...password,
         errors: 'Please enter both password and confirm password',
