@@ -28,6 +28,7 @@ const CreateProject = ({
   });
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [projectType, setProjectType] = useState('commercial');
   const [dateError, setDateError] = useState({ startError: '', endError: '' });
   // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
   const [employeeList, setEmployeeList] = useState([]);
@@ -96,6 +97,7 @@ const CreateProject = ({
             employee_list: selectedEmployeeList.map(
               (employee) => employee.value
             ),
+            project_type: projectType
           },
         });
         if (response.data) {
@@ -136,17 +138,47 @@ const CreateProject = ({
                 </div>
                 <div className="customer-profile">
                   <div className="row">
-                    <div className="col-12">
+                    <div className="col-6">
                       <div className="text-label-value">
                         <div className="text-value">{customer.customer_name}</div>
                       </div>
                     </div>
-                    <div className="col-12">
+                    <div className="col-6">
+                      <div className="custom-control custom-checkbox">
+                        <input
+                          type="radio"
+                          name="ticketHeading"
+                          id="ticketHeading"
+                          onClick={()=> setProjectType('commercial')}
+                          checked={projectType === 'commercial'}
+                        />
+                        <label
+                          for="ticketHeading"
+                          style={{color: '#212121', marginLeft: '5px'}}
+                        >Commercial Project</label>
+                      </div>
+                    </div>
+                    <div className="col-6">
                       <div className="text-label-value">
                         <div className="text-label">{customer.address}</div>
                       </div>
                     </div>
-                    <div className="col-12">
+                    <div className="col-6">
+                      <div className="custom-control custom-checkbox">
+                        <input
+                          type="radio"
+                          name="ticketHeading"
+                          id="ticketHeading"
+                          onClick={()=> setProjectType('ufgs')}
+                          checked={projectType === 'ufgs'}
+                        />
+                        <label
+                          style={{color: '#212121', marginLeft: '5px'}}
+                          for="ticketHeading"
+                        >Military/Gov Project(UFGS Specs)</label>
+                      </div>
+                    </div>
+                    <div className="col-6">
                       <div className="text-label-value">
                         <div className="text-label">
                           {customer.contact_number}
