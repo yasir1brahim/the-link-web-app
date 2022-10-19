@@ -300,11 +300,26 @@ export default function CombinedLogs(props) {
                 <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('spec_section') }} />
               </span>
             </th>
-            <th className='para-no'>
+            {props.projectType === 'ufgs' && <>
+              <th>
+                <span className="has-sorting" >
+                  Div # <i className={sorting.column === 'div_no' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('div_no')}></i>
+                  <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('div_no') }} />
+                </span>
+              </th>
+              <th>
+                <span className="has-sorting" >
+                  SD # <i className={sorting.column === 'sd_no' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('sd_no')}></i>
+                  <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('sd_no') }} />
+                </span>
+              </th>
+            </>
+            }
+            {props.projectType !== 'ufgs' && <th className='para-no'>
               <span>
                 Para
               </span>
-            </th>
+            </th>}
             <th>
               <span className="has-sorting" >
                 Requirement Type <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('type')}></i>
@@ -317,11 +332,18 @@ export default function CombinedLogs(props) {
                 <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('item_desc') }} />
               </span>
             </th>
-            <th>
+            {props.projectType === 'ufgs' &&
+              <th>
+                <span className="has-sorting" >
+                  Phase <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
+                </span>
+              </th>
+            }
+            {props.projectType !== 'ufgs' && <th>
               <span className="has-sorting" >
                 Grouping <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
               </span>
-            </th>
+            </th>}
             <th className="log-description">
               <span className='has-sorting' >
                 Paragraph Context <i className={sorting.column === "para_context" ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting("para_context")}></i>
@@ -463,7 +485,17 @@ export default function CombinedLogs(props) {
                   )}
                   {/* {log.spec_section} */}
                 </td>
-                <td>
+                {props.projectType === 'ufgs' &&
+                  <>
+                    <td>
+                      {log.div_no}
+                    </td>
+                    <td>
+                      {log.sd_no}
+                    </td>
+                  </>
+                }
+                {props.projectType !== 'ufgs' && <td>
                   {log.para_no}
                   {/* {editRow === index ? (
                     <input
@@ -479,7 +511,7 @@ export default function CombinedLogs(props) {
                   ) : (
                     log.para_no
                   )} */}
-                </td>
+                </td>}
                 <td>
                   {editRow === index ? (
                     <input
@@ -512,7 +544,29 @@ export default function CombinedLogs(props) {
                     log.item_desc
                   )}
                 </td>
-                <td>
+                {props.projectType === 'ufgs' && <td>
+                  {editRow === index ? (
+                    <div
+                      className="form-group log-datepicker"
+                      style={{ minWidth: '240px' }}
+                    >
+                      <SelectDropdown
+                        label={'Phase'}
+                        // labelKey="name"
+                        setSelected={setGroupingValue}
+                        // value={leadContact.label}
+                        selected={groupingValue?.label}
+                        options={props.groupingData}
+                        searchValue={searchValue}
+                        setSearchValue={setSearchValue}
+                      // onInputChange={}
+                      />
+                    </div>
+                  ) : (
+                    log.package
+                  )}
+                </td>}
+                {props.projectType !== 'ufgs' && <td>
                   {editRow === index ? (
                     <div
                       className="form-group log-datepicker"
@@ -533,7 +587,7 @@ export default function CombinedLogs(props) {
                   ) : (
                     log.package
                   )}
-                </td>
+                </td>}
                 <td>
                   {editRow === index ? (
                     <input
@@ -658,7 +712,7 @@ export default function CombinedLogs(props) {
         setSelectedLogData={props.setSelectedLogData}
       />
 
-    </div>
+    </div >
 
   );
 }
