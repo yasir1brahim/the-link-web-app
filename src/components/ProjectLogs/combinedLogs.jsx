@@ -304,13 +304,13 @@ export default function CombinedLogs(props) {
               <th>
                 <span className="has-sorting" >
                   Div # <i className={sorting.column === 'div_no' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('div_no')}></i>
-                  <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('div_no') }} />
+                  {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('div_no') }} /> */}
                 </span>
               </th>
               <th>
                 <span className="has-sorting" >
                   SD # <i className={sorting.column === 'sd_no' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('sd_no')}></i>
-                  <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('sd_no') }} />
+                  {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('sd_no') }} /> */}
                 </span>
               </th>
             </>
