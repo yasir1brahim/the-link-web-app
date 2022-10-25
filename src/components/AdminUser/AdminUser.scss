@@ -1,0 +1,127 @@
+.admin-user-wrapper {
+    .company-search-wrapper {
+        margin-top: 1.5rem;
+
+        .btn {
+            height: 56px;
+            min-width: 120px;
+        }
+    }
+
+    .nav-tabs-wrapper {
+
+        .nav.nav-tabs {
+            padding-left: 24px;
+            border-color: $primary;
+            margin-bottom: 16px;
+
+            .nav-item {
+                &:not(:last-of-type) {
+                    margin-right: 8px;
+                }
+
+                .nav-link {
+                    color: #6e6e6e !important;
+                    padding: 6px 16px;
+                    font-size: 0.875rem;
+                    line-height: 20px;
+                    border-color: #E2E2E2;
+
+                    &:not(.active) {
+                        margin: 0;
+                    }
+
+                    &.active {
+                        color: #fff !important;
+                        border-color: $primary;
+                        background-color: $primary;
+                    }
+                }
+            }
+        }
+    }
+
+    .admin-user-content {
+        .table-top-content {
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            .table-entries {
+                color: $primary;
+                margin: 0;
+                font-size: 0.875rem;
+
+                .showing-strong {
+                    font-weight: bold;
+                }
+            }
+
+            .table-bulk-changes {
+                display: flex;
+                margin-left: auto;
+                align-items: center;
+                justify-content: flex-start;
+                flex-direction: row-reverse;
+            }
+        }
+
+        .l-table-wrapper {
+            table {
+                tr {
+                    a {
+                        text-decoration: underline;
+                    }
+
+                    .item-status {
+                        color: $white;
+                        display: inline-block;
+                        padding: 0.25rem 1rem;
+                        font-size: 0.875rem;
+                        border-radius: 40px;
+                        background-color: #6e6e6e;
+
+                        &-active {
+                            background-color: $primary;
+                        }
+
+                        &-inactive {
+                            background-color: $disabled;
+                        }
+                    }
+
+                    .tags-wrapper {
+                        gap: 0.5rem;
+                        display: flex;
+                        align-items: center;
+                        justify-content: flex-start;
+
+                        .item-tag {
+                            color: $primary;
+                            border: 1px solid $primary;
+                            display: flex;
+                            padding: 0.25rem 0.5rem;
+                            font-size: 0.875rem;
+                            line-height: 1rem;
+                            align-items: center;
+                            border-radius: 4px;
+                            justify-content: flex-start;
+
+                            color: $white;
+                            background-color: rgba(32, 42, 68, 0.4);
+
+                            .icon-close {
+                                width: 12px;
+                                height: 12px;
+                                min-width: 12px;
+                                margin-left: 0.5rem;
+                                background: url('../../assets/images/close.svg') no-repeat center;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
