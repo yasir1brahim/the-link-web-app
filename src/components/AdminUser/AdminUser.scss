@@ -9,6 +9,7 @@
     }
 
     .nav-tabs-wrapper {
+        margin-bottom: 1.5rem;
 
         .nav.nav-tabs {
             padding-left: 24px;
@@ -108,8 +109,9 @@
                             border-radius: 4px;
                             justify-content: flex-start;
 
-                            color: $white;
-                            background-color: rgba(32, 42, 68, 0.4);
+                            // color: $white;
+                            // background-color: rgba(32, 42, 68, 0.4);
+                            background-color: #F2F7F6;
 
                             .icon-close {
                                 width: 12px;

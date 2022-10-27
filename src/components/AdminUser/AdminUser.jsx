@@ -6,14 +6,21 @@ import PaginatedItems from '../shared/Pagination/Pagination';
 import classnames from "classnames";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
+import UpdateListing from './UpdateListing';
+import DetailInfo from './DetailInfo';
 
 const AdminUser = (props) => {
   const [modal, setModal] = useState(false);
   const toggleModal = () => setModal(!modal);
 
+  const [updateListModal, setUpdateListModal] = useState(false);
+  const toggleUpdateList = () => setUpdateListModal(!updateListModal);
+
+  const [detailInfoModal, setDetailInfoModal] = useState(false);
+  const toggleDetailInfo = () => setDetailInfoModal(!detailInfoModal);
+
   // tab functions
   const [activeTab, setActiveTab] = useState('employees');
-
   const toggle = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
   };
@@ -110,7 +117,7 @@ const AdminUser = (props) => {
                       <tbody>
                         <tr>
                           <td>
-                            <a href="javascript:void(0);">
+                            <a href="javascript:void(0);" onClick={toggleDetailInfo}>
                               Stephen poppe
                             </a>
                           </td>
@@ -134,6 +141,7 @@ const AdminUser = (props) => {
                               <button
                                 type="button"
                                 className="btn btn-primary btn-sm"
+                                onClick={toggleUpdateList}
                               >
                                 Add Projects
                               </button>
@@ -169,12 +177,14 @@ const AdminUser = (props) => {
             </TabContent>
           </div>
         </div>
-        {/* <CreateCustomer
-          modal={modal}
-          toggleModal={toggleModal}
-          setPageRefresh={setPageRefresh}
-          pageRefresh={pageRefresh}
-        /> */}
+        <UpdateListing
+          updateListModal={updateListModal}
+          toggleUpdateList={toggleUpdateList}
+        />
+        <DetailInfo
+          detailInfoModal={detailInfoModal}
+          toggleDetailInfo={toggleDetailInfo}
+        />
       </div>
       {/* <ToastContainer
         position="bottom-center"
