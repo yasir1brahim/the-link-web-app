@@ -60,7 +60,7 @@ const EditProject = ({
 
       fetchData().catch(console.error);
     }
-  }, [customer, modal]);
+  }, [customer, modal, project?.customer_id]);
 
   // const validate = () => {
   //   let error = false;
