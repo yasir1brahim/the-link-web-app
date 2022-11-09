@@ -77,17 +77,15 @@ const AdminUser = (props) => {
 
       const employeeResponse = await axiosInstance({
         method: "get",
-        url: `/admin/employees/${
-          custObject[0].customer_id || response.data.message[0].customer_id
-        }`,
+        url: `/admin/employees/${custObject[0].customer_id || response.data.message[0].customer_id
+          }`,
       });
       setEmployeeData(employeeResponse.data.message);
 
       const projectResponse = await axiosInstance({
         method: "get",
-        url: `/admin/projects/${
-          custObject[0].customer_id || response.data.message[0].customer_id
-        }`,
+        url: `/admin/projects/${custObject[0].customer_id || response.data.message[0].customer_id
+          }`,
       });
       setProjectData(projectResponse.data.message);
 
@@ -173,23 +171,23 @@ const AdminUser = (props) => {
   };
 
   const handleUpdateList = async () => {
-    setUpdateListModal(!updateListModal);
     try {
       setLoading(true);
       await axiosInstance({
         method: "put",
-        url: `/${activeTab}/${activeTab === "employees" ? modalData?.id : modalData?.project_id}/${
-          activeTab === "employees" ? "projects" : "employees"
-        }`,
+        url: `/${activeTab}/${activeTab === "employees" ? modalData?.id : modalData?.project_id}/${activeTab === "employees" ? "projects" : "employees"
+          }`,
         data: {
-          [ activeTab === "employees" ? "projects" : "employees"]:
+          [activeTab === "employees" ? "projects" : "employees"]:
             selectedEmployeeList,
         },
       });
       setLoading(false);
       setPageRefresh(!pageRefresh)
+      setUpdateListModal(!updateListModal);
     } catch (e) {
       setLoading(false);
+      setUpdateListModal(!updateListModal);
       toast.error("Something went wrong!", {
         position: "bottom-center",
         autoClose: 5000,
@@ -291,7 +289,7 @@ const AdminUser = (props) => {
           <Header
             title={"Admin Portal"}
             toggleModal={toggleModal}
-            // showBtn={'Create New Customer'}
+          // showBtn={'Create New Customer'}
           />
 
           <div className="company-search-wrapper">
@@ -420,9 +418,9 @@ const AdminUser = (props) => {
                                       toggleUpdateList();
                                       setModalData(employee);
                                       setSelectedEmployeeList(
-                                        employee.projects?.map((project) =>
+                                        employee.projects.length ? employee.projects?.map((project) =>
                                           Number(project.id)
-                                        )
+                                        ) : []
                                       );
                                     }}
                                   >
@@ -509,7 +507,7 @@ const AdminUser = (props) => {
                               <td>
                                 <a
                                   href={() => false}
-                                  onClick={() => {toggleProjectModal(project)}}
+                                  onClick={() => { toggleProjectModal(project) }}
                                 >
                                   {project.project_name}
                                 </a>
@@ -540,22 +538,22 @@ const AdminUser = (props) => {
                                       toggleUpdateList();
                                       setModalData(project);
                                       setSelectedEmployeeList(
-                                        project.employees?.map((emp) =>
+                                        project.employees.length ? project.employees?.map((emp) =>
                                           Number(emp.id)
-                                        )
+                                        ) : []
                                       );
                                     }}
                                   >
                                     Add Employee
                                   </button>
                                   <button
-                                  type="button"
-                                  className="btn btn-secondary btn-sm"
-                                  onClick={() => handleArchiveProject(project)}
-                                  disabled={isArchived && localStorage.getItem('roleId') !== '0'}
-                                >
-                                  {project.status === 'Archived' ? 'Unarchive' : 'Archive'}
-                                </button>
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => handleArchiveProject(project)}
+                                    disabled={isArchived && localStorage.getItem('roleId') !== '0'}
+                                  >
+                                    {project.status === 'Archived' ? 'Unarchive' : 'Archive'}
+                                  </button>
                                 </div>
                               </td>
                             </tr>
