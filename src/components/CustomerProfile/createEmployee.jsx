@@ -88,7 +88,7 @@ const CreateEmployee = ({
             // projects: asscProject.map((project) => project.value),
             projects: [],
             contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
-            customer_id: customer.customer_id,
+            customer_id: customer.customer_id || localStorage.getItem("userId"),
           },
         });
         if (response.data) {

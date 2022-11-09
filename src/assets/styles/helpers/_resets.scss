@@ -452,7 +452,8 @@ button {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  > * {
+  > * { 
+    white-space: nowrap;
     &:not(:last-of-type){
       margin-right: 8px;
     }

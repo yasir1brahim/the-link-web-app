@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 // import ProfilePhoto from '../../assets/images/dummy-profile.svg';
 // import { ReactComponent as Camera } from '../../assets/images/camera.svg';
-import axiosInstance from '../../config/axios';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
-import DateSelector from '../shared/DateSelector/DateSelector';
+import axiosInstance from "../../config/axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
+import DateSelector from "../shared/DateSelector/DateSelector";
 // import { Typeahead } from 'react-bootstrap-typeahead';
-import 'react-bootstrap-typeahead/css/Typeahead.css';
-import moment from 'moment';
+import "react-bootstrap-typeahead/css/Typeahead.css";
+import moment from "moment";
 
 const EditProject = ({
   modal,
@@ -17,17 +17,18 @@ const EditProject = ({
   project,
   pageRefresh,
   setPageRefresh,
+  isAdminUser,
 }) => {
   // const [email, setEmail] = useState({ value: '', errors: '' });
   // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
-  const [projectName, setProjectName] = useState({ value: '', errors: '' });
+  const [projectName, setProjectName] = useState({ value: "", errors: "" });
   const [leadContact, setLeadContact] = useState({
-    value: '',
-    label: project.lead_contact,
-    email: '',
+    value: "",
+    label: project?.lead_contact,
+    email: "",
   });
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
   const [employeeList, setEmployeeList] = useState([]);
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });
@@ -36,10 +37,10 @@ const EditProject = ({
   // );
   useEffect(() => {
     if (!modal) {
-      setProjectName({ value: '', errors: '' });
-      setLeadContact({ value: '', errors: '', email: '' });
-      setStartDate('');
-      setEndDate('');
+      setProjectName({ value: "", errors: "" });
+      setLeadContact({ value: "", errors: "", email: "" });
+      setStartDate("");
+      setEndDate("");
       setEmployeeList([]);
     }
   }, [modal]);
@@ -48,8 +49,8 @@ const EditProject = ({
     if (modal) {
       const fetchData = async () => {
         const response = await axiosInstance({
-          method: 'get',
-          url: `/employeeList/${customer.customer_id}`,
+          method: "get",
+          url: `/employeeList/${customer.customer_id || project?.customer_id}`,
         });
         if (response.data.message) {
           setEmployeeList(response.data.message);
@@ -76,32 +77,33 @@ const EditProject = ({
     if (!errors) {
       try {
         const response = await axiosInstance({
-          method: 'put',
-          url: '/updateProject',
+          method: "put",
+          url: "/updateProject",
           data: {
-            project_name: projectName.value || project.project_name,
+            project_name: projectName.value || project?.project_name,
             lead_contact: leadContact[0]
               ? leadContact[0].value
               : employeeList.find(
-                (employee) => employee.name === project.lead_contact
-              )?.emp_id,
+                  (employee) => employee.name === project?.lead_contact
+                )?.emp_id,
             start_date: startDate
-              ? moment(startDate).format('YYYY-MM-DD')
+              ? moment(startDate).format("YYYY-MM-DD")
               : project?.start_date
-                ? moment(
-                  new Date((project?.start_date).replaceAll('-', '/'))
-                ).format('YYYY-MM-DD')
-                : '',
+              ? moment(
+                  new Date((project?.start_date).replaceAll("-", "/"))
+                ).format("YYYY-MM-DD")
+              : "",
             end_date: endDate
-              ? moment(endDate).format('YYYY-MM-DD')
+              ? moment(endDate).format("YYYY-MM-DD")
               : project?.end_date
-                ? moment(
-                  new Date((project?.end_date).replaceAll('-', '/'))
-                ).format('YYYY-MM-DD')
-                : '',
-            customer_id: customer.customer_id,
-            status: 'Open',
-            project_id: project.project_id,
+              ? moment(
+                  new Date((project?.end_date).replaceAll("-", "/"))
+                ).format("YYYY-MM-DD")
+              : "",
+            customer_id:
+              customer.customer_id || customer?.id || project?.customer_id || customer[0]?.id,
+            status: "Open",
+            project_id: project?.project_id,
           },
         });
         if (response.data) {
@@ -111,8 +113,8 @@ const EditProject = ({
         }
       } catch (error) {
         console.log(error.message);
-        toast.error('Something went wrong!', {
-          position: 'bottom-center',
+        toast.error("Something went wrong!", {
+          position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
@@ -127,40 +129,54 @@ const EditProject = ({
 
   return (
     <>
-      <div className={"create-new-lproject " + (modal ? 'show-lproject-popup' : '')}>
+      <div
+        className={
+          "create-new-lproject" +
+          (modal ? " show-lproject-popup " : "") +
+          (isAdminUser ? " edit-new-lproject " : "")
+        }
+      >
         <div className="lproject-backdrop"></div>
         <div className="lproject-content">
           <div className="lproject-header">
             <h5>Edit Project</h5>
-            <span className="close" onClick={toggleModal}>&times;</span>
+            <span className="close" onClick={toggleModal}>
+              &times;
+            </span>
           </div>
           <div className="lproject-body">
             <form className="create-project-form">
               <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
-                <div className="customer-dp-container">
-                  {/* <img src={WhitingTurner} alt="Company Logo" /> */}
-                </div>
-                <div className="customer-profile">
-                  <div className="row">
-                    <div className="col-12">
-                      <div className="text-label-value">
-                        <div className="text-value">{customer.customer_name}</div>
-                      </div>
+                {!isAdminUser && (
+                  <>
+                    <div className="customer-dp-container">
+                      {/* <img src={WhitingTurner} alt="Company Logo" /> */}
                     </div>
-                    <div className="col-12">
-                      <div className="text-label-value">
-                        <div className="text-label">{customer.address}</div>
-                      </div>
-                    </div>
-                    <div className="col-12">
-                      <div className="text-label-value">
-                        <div className="text-label">
-                          {customer.contact_number}
+                    <div className="customer-profile">
+                      <div className="row">
+                        <div className="col-12">
+                          <div className="text-label-value">
+                            <div className="text-value">
+                              {customer.customer_name}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-12">
+                          <div className="text-label-value">
+                            <div className="text-label">{customer.address}</div>
+                          </div>
+                        </div>
+                        <div className="col-12">
+                          <div className="text-label-value">
+                            <div className="text-label">
+                              {customer.contact_number}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
               <div className="create-project-content">
                 <div className="row">
@@ -172,7 +188,7 @@ const EditProject = ({
                         id="customerProjectName"
                         aria-describedby="customerProjectName"
                         placeholder="Enter"
-                        defaultValue={project.project_name}
+                        defaultValue={project?.project_name}
                         onChange={(e) => {
                           setProjectName({
                             ...projectName,
@@ -180,7 +196,10 @@ const EditProject = ({
                           });
                         }}
                       />
-                      <label className="text-label" htmlFor="customerProjectName">
+                      <label
+                        className="text-label"
+                        htmlFor="customerProjectName"
+                      >
                         Project Name
                       </label>
                     </div>
@@ -188,16 +207,16 @@ const EditProject = ({
                   <div className="col-4">
                     <div className="form-group">
                       <SelectDropdown
-                        label={'Lead Contact'}
+                        label={"Lead Contact"}
                         // labelKey="name"
                         setSelected={setLeadContact}
                         // value={leadContact.label}
                         selected={leadContact.label}
                         options={employeeList.map((project) => {
                           return {
-                            value: project.emp_id,
-                            label: project.name,
-                            email: project.emp_email,
+                            value: project?.emp_id,
+                            label: project?.name,
+                            email: project?.emp_email,
                           };
                         })}
                       />
@@ -215,11 +234,11 @@ const EditProject = ({
                           leadContact[0]
                             ? leadContact[0].email
                             : employeeList.length
-                              ? employeeList?.find(
+                            ? employeeList?.find(
                                 (employee) =>
                                   employee.name === project?.lead_contact
                               )?.emp_email
-                              : leadContact.label
+                            : leadContact.label
                         }
                         disabled
                       />
@@ -243,9 +262,11 @@ const EditProject = ({
                         selected={
                           startDate
                             ? startDate
-                            : project.start_date
-                              ? new Date((project?.start_date).replaceAll('-', '/'))
-                              : ''
+                            : project?.start_date
+                            ? new Date(
+                                (project?.start_date).replaceAll("-", "/")
+                              )
+                            : ""
                         }
                       />
                     </div>
@@ -265,9 +286,9 @@ const EditProject = ({
                         selected={
                           endDate
                             ? endDate
-                            : project.end_date
-                              ? new Date((project?.end_date).replaceAll('-', '/'))
-                              : ''
+                            : project?.end_date
+                            ? new Date((project?.end_date).replaceAll("-", "/"))
+                            : ""
                         }
                       />
                     </div>
@@ -307,12 +328,20 @@ const EditProject = ({
                 </div>
               </div>
               <div className="lproject-footer">
-                <button className="btn btn-secondary" type="button" onClick={toggleModal}>
+                <button
+                  className="btn btn-secondary"
+                  type="button"
+                  onClick={toggleModal}
+                >
                   Cancel
                 </button>
-                <button className="btn btn-primary" type="button" onClick={handleSubmit}>
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  onClick={handleSubmit}
+                >
                   Save
-                </button>{' '}
+                </button>{" "}
               </div>
             </form>
           </div>

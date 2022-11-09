@@ -5,46 +5,48 @@ import { ReactComponent as ArrowLeft } from '../../assets/images/arrow-left.svg'
 import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-white.svg';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../../config/axios';
+import { toast, ToastContainer } from 'react-toastify';
 
 const Forgotpwd = (props) => {
   const [email, setEmail] = useState({ value: '', errors: '' });
   const navigate = useNavigate();
-  // const validate = () => {
-  //   let error = false;
-  //   if (email.value === '') {
-  //     setEmail({ ...email, errors: 'Email is required.' });
-  //     error = true;
-  //   }
-  //   return error;
-  // };
+  const validate = () => {
+    let error = false;
+    if (email.value === '') {
+      setEmail({ ...email, errors: 'Email is required.' });
+      error = true;
+    }
+    return error;
+  };
   const handleSubmit = async () => {
-    // let errors = validate();
+    let errors = validate();
 
-    navigate('/check-email');
-    // if (!errors) {
-    //   try {
-    //     const response = await axiosInstance({
-    //       method: 'post',
-    //       url: '/forgot_password',
-    //       data: {
-    //         email_address: email,
-    //       },
-    //     });
-    //     if (response.data) {
-    //       console.log(response.data);
-    //     }
-    //   } catch (error) {
-    //     toast.error('Incorrect Email.', {
-    //       position: 'bottom-center',
-    //       autoClose: 5000,
-    //       hideProgressBar: true,
-    //       closeOnClick: true,
-    //       pauseOnHover: true,
-    //       draggable: true,
-    //       progress: undefined,
-    //     });
-    //   }
-    // }
+    if (!errors) {
+      try {
+        const response = await axiosInstance({
+          method: 'post',
+          url: '/forgot_password',
+          data: {
+            email: email.value,
+          },
+        });
+        if (response.data) {
+          console.log(response.data);
+        }
+      navigate('/check-email');
+      } catch (error) {
+        toast.error('Incorrect Email.', {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    }
   };
   return (
     <section className="authentication-content-wrapper">
@@ -104,6 +106,17 @@ const Forgotpwd = (props) => {
           </div>
         </form>
       </div>
+      <ToastContainer
+        position="bottom-center"
+        autoClose={5000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </section>
   );
 };

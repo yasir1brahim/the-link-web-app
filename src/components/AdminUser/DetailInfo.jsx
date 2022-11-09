@@ -6,7 +6,7 @@ import {
     ModalFooter
 } from "reactstrap";
 import React from "react";
-import ProfilePhoto from '../../assets/images/dummy-profile.svg';
+// import ProfilePhoto from '../../assets/images/dummy-profile.svg';
 
 const DetailInfo = (props) => {
     return (
@@ -20,16 +20,16 @@ const DetailInfo = (props) => {
             <ModalBody>
                 <div className="detail-info">
                     <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
-                        <div className="customer-dp-container">
+                        {/* <div className="customer-dp-container">
                             <img src={ProfilePhoto} className='uploaded-image' alt="Company Logo" />
-                        </div>
+                        </div> */}
                         <div className="customer-profile">
                             <div className="row">
                                 <div className="col-12">
                                     <div className="text-label-value">
                                         <div className="text-label">First Name: </div>
                                         <div className="text-value">
-                                            Stephen
+                                            {props.modalData?.full_name?.split(" ")[0]}
                                         </div>
                                     </div>
                                 </div>
@@ -37,7 +37,7 @@ const DetailInfo = (props) => {
                                     <div className="text-label-value">
                                         <div className="text-label">Last Name: </div>
                                         <div className="text-value">
-                                            Poppe
+                                        {props.modalData?.full_name?.split(" ")[props.modalData?.full_name.split(" ").length - 1]}
                                         </div>
                                     </div>
                                 </div>
@@ -45,7 +45,7 @@ const DetailInfo = (props) => {
                                     <div className="text-label-value">
                                         <div className="text-label">Email ID: </div>
                                         <div className="text-value">
-                                            stephen_poppe81@gmail.com
+                                            {props.modalData?.email_address}
                                         </div>
                                     </div>
                                 </div>
@@ -53,18 +53,18 @@ const DetailInfo = (props) => {
                                     <div className="text-label-value">
                                         <div className="text-label">Phone: </div>
                                         <div className="text-value">
-                                            +(425) 555 0100, +(732) 622 4888
+                                           {props.modalData?.contact_number}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="col-12">
+                                {/* <div className="col-12">
                                     <div className="text-label-value">
                                         <div className="text-label">Address: </div>
                                         <div className="text-value">
                                             Ms Alice Smith Apartment 1c 213 Derrick Street, Boston, MA 02130 USA
                                         </div>
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>
