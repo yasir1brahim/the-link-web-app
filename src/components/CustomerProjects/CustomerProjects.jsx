@@ -92,7 +92,7 @@ const CustomerProjects = (props) => {
         progress: undefined,
       });
     });
-  }, [state, pageRefresh, isArchived]);
+  }, [state, pageRefresh, isArchived, roleId]);
 
   const handleLaunch = (project) => {
     navigate('/project-details', {
