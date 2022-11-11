@@ -18,15 +18,16 @@ const Checkemail = () => {
           </span>
           <h1 className="form-heading heading-two">Check your email</h1>
           <p className="form-info">
-            We sent a password reset link to
+            We have sent a password reset link to
             <br />
-            <b>mohanrj@designer.com</b>
+            {/* <b>mohanrj@designer.com</b> */}
+            your email address. 
           </p>
-          <div className="form-helping-text">
+          {/* <div className="form-helping-text">
             <p>
               Din’t receive the email? <a href="#;">Click to resend</a>
             </p>
-          </div>
+          </div> */}
           <div className="form-helping-text">
             <a
               className="d-flex align-items-center justify-content-center"

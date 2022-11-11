@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(function (config) {
   // Do something before request is sent
-  let token = localStorage.getItem('token');
+  let token = !window.location.pathname.includes('reset-password') ? localStorage.getItem('token') : new URLSearchParams(window.location.search)?.get("token");
   config.headers['Authorization'] = 'Bearer ' + token;
   return config;
 });

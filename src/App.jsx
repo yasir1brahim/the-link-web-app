@@ -13,6 +13,7 @@ import Checkemail from './components/Authentication/Checkemail';
 import ProjectsDetails from './components/ProjectDetails/ProjectDetails';
 import ProjectLogs from './components/ProjectLogs/ProjectLogs';
 import PdfWrapper from './pdfWrapper';
+import AdminUser from './components/AdminUser/AdminUser';
 
 function App() {
   return (
@@ -30,8 +31,9 @@ function App() {
         <Route path="/reset-password" element={<Resetpwd />} />
         <Route path="/reset-success" element={<Resetsuccess />} />
         <Route path="/check-email" element={<Checkemail />} />
-        <Route path="/pdf-view" element={<PdfWrapper/>} />
-        
+        <Route path="/pdf-view" element={<PdfWrapper />} />
+        <Route path="/admin-user" element={<AdminUser />} />
+
         <Route exact path="/" element={<Navigate to="/login" />} />
       </Routes>
     </div>

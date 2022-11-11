@@ -40,6 +40,15 @@ const NavbarTop = () => {
             </NavLink>
             {navDrop ? (
               <div className="nav-dropdown">
+                {localStorage.getItem('roleId') === '0' && (
+                  <a
+                    href="/admin-user"
+                    className="navlist"
+                    onClick={toggleDrop}
+                  >
+                    View Admin Portal
+                  </a>
+                )}
                 {localStorage.getItem('roleId') !== '0' && (
                   <a
                     href="/customer-profile"

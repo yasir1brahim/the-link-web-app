@@ -27,7 +27,7 @@ const Adminlanding = (props) => {
         method: 'get',
         url: `/customers/${localStorage.getItem('userId')}`,
       });
-      setCustomerData(response.data.message);
+      // setCustomerData(response.data.message);
       setCustomerData(
         isArchived ? response.data.archived_customers : response.data.message
       );

@@ -50,6 +50,7 @@ const ProjectLogs = () => {
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({ url: '', textLoc: {}, index: '', docId: null })
   const [newRowIndex, setNewRowIndex] = useState(null)
+  const projectType = state?.project.project_type
 
   useEffect(() => {
     if (!modal) {
@@ -359,7 +360,7 @@ const ProjectLogs = () => {
       <div className="project-logs-wrapper log-table-width">
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
-          title={`All Logs  - ${state?.projectName || ''}`}
+          title={`All ${projectType === 'ufgs' ? 'UFGS' : 'Commercial'} Logs  - ${state?.projectName || ''}`}
           breadcrumb={'Project Details'}
           breadcrumb2={'View Projects'}
           breadcrumb3={'Requrement Logs'}
@@ -443,6 +444,7 @@ const ProjectLogs = () => {
                     newRowIndex={newRowIndex}
                     setNewRowIndex={setNewRowIndex}
                     searchValue={searchValue}
+                    projectType={projectType}
                   />
                   {pdfData.url && <PdfWrapper pdfData={pdfData} />}
                   {/* <Tester/> */}

@@ -1,53 +1,63 @@
 @import './helpers/variables';
-.modal{
-    .modal-dialog{
-        .modal-content{
-            .modal-header{
+
+.modal {
+    .modal-dialog {
+        .modal-content {
+            .modal-header {
                 padding: 24px;
                 border-bottom: 0;
-                h5{
+
+                h5 {
                     font-weight: bold;
                 }
             }
-            .modal-body{
+
+            .modal-body {
                 padding: 24px;
                 padding-top: 0;
-                .modal-footer{
+
+                .modal-footer {
                     bottom: 0;
                     z-index: 1;
                     padding: 24px 0 10px;
                     position: sticky;
                     background-color: #fff;
                     justify-content: flex-end;
-                    button{
+
+                    button {
                         margin: 0;
                         display: inline-block;
                         min-width: 120px;
-                        &:not(:first-of-type){
+
+                        &:not(:first-of-type) {
                             margin-left: 16px;
                         }
                     }
                 }
             }
         }
+
         // Create New Service Contract
-        &.create-new-contract{
-            .modal-content{
-                .modal-header{
+        &.create-new-contract {
+            .modal-content {
+                .modal-header {
                     align-items: center;
                 }
-                .modal-body{
+
+                .modal-body {
                     overflow: auto;
                     max-height: 500px;
-                    padding-bottom: 0; 
-                    .upload-documents{
-                        .select-File{
-                            input{
+                    padding-bottom: 0;
+
+                    .upload-documents {
+                        .select-File {
+                            input {
                                 width: 0;
                                 height: 0;
                                 padding: 0;
                                 opacity: 0;
-                                + label{
+
+                                +label {
                                     width: 100%;
                                     margin: 0;
                                     display: flex;
@@ -57,11 +67,13 @@
                                     align-items: center;
                                     justify-content: space-between;
                                     background-color: #F2F7F6;
-                                    p{
+
+                                    p {
                                         color: #212121;
                                         font-size: 1rem;
                                         margin-bottom: 8px;
-                                        span{
+
+                                        span {
                                             color: #6e6e6e;
                                             display: block;
                                             font-size: 0.75rem;
@@ -70,14 +82,17 @@
                                 }
                             }
                         }
-                        .uploaded-documents-list{
+
+                        .uploaded-documents-list {
                             margin-top: 8px;
+
                             .uf-list {
                                 display: flex;
                                 flex-wrap: wrap;
                                 align-items: center;
                                 justify-content: flex-start;
-                                .uf-detail{
+
+                                .uf-detail {
                                     height: 36px;
                                     border: 1px solid $border-color;
                                     margin: 0 10px 10px 0;
@@ -87,32 +102,39 @@
                                     border-radius: 2px;
                                     justify-content: flex-start;
                                     background-color: #F2F7F6;
-                                    .uf-image{
+
+                                    .uf-image {
                                         width: 24px;
                                         height: 24px;
                                         display: inline-block;
                                         margin-right: 6px;
                                         background-size: contain !important;
-                                        &-png{
+
+                                        &-png {
                                             background: url('#{$assetPath}file-png.svg') no-repeat center;
                                         }
-                                        &-pdf{
+
+                                        &-pdf {
                                             background: url('#{$assetPath}file-pdf.svg') no-repeat center;
                                         }
-                                        &-jpg{
+
+                                        &-jpg {
                                             background: url('#{$assetPath}file-jpg.svg') no-repeat center;
                                         }
-                                        &-gif{
+
+                                        &-gif {
                                             background: url('#{$assetPath}file-pdf.svg') no-repeat center;
                                         }
                                     }
-                                    .uf-name{
+
+                                    .uf-name {
                                         color: #212121;
                                         font-size: $font-size-sm;
                                         line-height: 1.25rem;
                                         margin-right: 16px;
                                     }
-                                    .uf-close{
+
+                                    .uf-close {
                                         width: 8px;
                                         height: 8px;
                                         cursor: pointer;
@@ -124,29 +146,34 @@
                             }
                         }
                     }
-                    .fields-wrapper{
-                        .fields-addition{
-                            .addition-left{
+
+                    .fields-wrapper {
+                        .fields-addition {
+                            .addition-left {
                                 border: 1px dashed $primary;
                                 padding: 16px;
-                                .al-heading{
+
+                                .al-heading {
                                     display: flex;
                                     align-items: center;
                                     border-bottom: 1px solid $border-color;
                                     margin-bottom: 10px;
                                     padding-bottom: 10px;
                                     justify-content: space-between;
-                                    a{
+
+                                    a {
                                         text-decoration: underline;
                                     }
                                 }
-                                .al-body{
-                                    .add-tag-content{
+
+                                .al-body {
+                                    .add-tag-content {
                                         display: flex;
                                         flex-wrap: wrap;
                                         align-items: center;
                                         justify-content: flex-start;
-                                        .add-tag{
+
+                                        .add-tag {
                                             cursor: pointer;
                                             border: 1px solid $primary;
                                             margin: 0 8px 8px 0;
@@ -155,7 +182,8 @@
                                             border-radius: 4px;
                                             align-items: center;
                                             justify-content: center;
-                                            .icon-add{
+
+                                            .icon-add {
                                                 width: 16px;
                                                 height: 16px;
                                                 background: url('#{$assetPath}plus.svg') no-repeat center;
@@ -163,38 +191,47 @@
                                             }
                                         }
                                     }
-                                    .add-new-tag{
+
+                                    .add-new-tag {
                                         display: flex;
                                         align-items: center;
                                         justify-content: flex-start;
-                                        .add-new-input{
+
+                                        .add-new-input {
                                             display: flex;
                                             align-items: center;
                                             justify-content: space-between;
-                                            input{
+
+                                            input {
                                                 border: 1px solid $border-color !important;
                                                 height: 33px;
                                                 flex: 1;
                                                 padding: 0 16px;
+
                                                 &::placeholder {
                                                     color: #c2c2c2 !important;
                                                 }
                                             }
-                                            .add-new-buttons{	
+
+                                            .add-new-buttons {
                                                 margin-left: 8px;
-                                                button{
+
+                                                button {
                                                     padding: 6px;
-                                                    .new-save{
+
+                                                    .new-save {
                                                         width: 16px;
                                                         height: 16px;
                                                         background: url('#{$assetPath}checkmark.svg') no-repeat center;
                                                     }
-                                                    .new-cancel{
+
+                                                    .new-cancel {
                                                         width: 16px;
                                                         height: 16px;
                                                         background: url('#{$assetPath}close.svg') no-repeat center;
                                                     }
-                                                    &:not(:last-of-type){
+
+                                                    &:not(:last-of-type) {
                                                         margin-right: 8px;
                                                     }
                                                 }
@@ -203,27 +240,32 @@
                                     }
                                 }
                             }
-                            .addition-right{
+
+                            .addition-right {
                                 border: 1px dashed $primary;
                                 padding: 16px;
-                                .al-heading{
+
+                                .al-heading {
                                     display: flex;
                                     align-items: center;
                                     border-bottom: 1px solid $border-color;
                                     margin-bottom: 10px;
                                     padding-bottom: 10px;
                                     justify-content: space-between;
-                                    a{
+
+                                    a {
                                         text-decoration: underline;
                                     }
                                 }
-                                .al-body{
-                                    .add-tag-content{
+
+                                .al-body {
+                                    .add-tag-content {
                                         display: flex;
                                         flex-wrap: wrap;
                                         align-items: center;
                                         justify-content: flex-start;
-                                        .add-tag{
+
+                                        .add-tag {
                                             cursor: pointer;
                                             border: 1px solid $primary;
                                             margin: 0 8px 8px 0;
@@ -233,7 +275,8 @@
                                             border-radius: 4px;
                                             align-items: center;
                                             justify-content: center;
-                                            .icon-remove{
+
+                                            .icon-remove {
                                                 width: 18px;
                                                 height: 18px;
                                                 background: url('#{$assetPath}close.svg') no-repeat center;
@@ -245,13 +288,15 @@
                             }
                         }
                     }
-                    .modal-footer{
+
+                    .modal-footer {
                         bottom: 0;
                         padding: 12px 0;
                         position: sticky;
                         background-color: #fff;
                         justify-content: space-between;
-                        button{
+
+                        button {
                             display: inline-block;
                             min-width: 108px;
                         }
@@ -259,39 +304,46 @@
                 }
             }
         }
+
         // Create New Service Ticket
-        &.create-new-ticket{
-            .modal-content{
-                .modal-header{
+        &.create-new-ticket {
+            .modal-content {
+                .modal-header {
                     align-items: center;
                 }
-                .modal-body{
+
+                .modal-body {
                     overflow: auto;
                     max-height: 500px;
                     padding-bottom: 0;
-                    .fields-wrapper{
-                        .fields-addition{
-                            .addition-left{
+
+                    .fields-wrapper {
+                        .fields-addition {
+                            .addition-left {
                                 border: 1px dashed $primary;
                                 padding: 16px;
-                                .al-heading{
+
+                                .al-heading {
                                     display: flex;
                                     align-items: center;
                                     border-bottom: 1px solid $border-color;
                                     margin-bottom: 10px;
                                     padding-bottom: 10px;
                                     justify-content: space-between;
-                                    a{
+
+                                    a {
                                         text-decoration: underline;
                                     }
                                 }
-                                .al-body{
-                                    .add-tag-content{
+
+                                .al-body {
+                                    .add-tag-content {
                                         display: flex;
                                         flex-wrap: wrap;
                                         align-items: center;
                                         justify-content: flex-start;
-                                        .add-tag{
+
+                                        .add-tag {
                                             cursor: pointer;
                                             border: 1px solid $primary;
                                             margin: 0 8px 8px 0;
@@ -300,7 +352,8 @@
                                             border-radius: 4px;
                                             align-items: center;
                                             justify-content: center;
-                                            .icon-add{
+
+                                            .icon-add {
                                                 width: 16px;
                                                 height: 16px;
                                                 background: url('#{$assetPath}plus.svg') no-repeat center;
@@ -308,38 +361,47 @@
                                             }
                                         }
                                     }
-                                    .add-new-tag{
+
+                                    .add-new-tag {
                                         display: flex;
                                         align-items: center;
                                         justify-content: flex-start;
-                                        .add-new-input{
+
+                                        .add-new-input {
                                             display: flex;
                                             align-items: center;
                                             justify-content: space-between;
-                                            input{
+
+                                            input {
                                                 border: 1px solid $border-color !important;
                                                 height: 33px;
                                                 flex: 1;
                                                 padding: 0 16px;
+
                                                 &::placeholder {
                                                     color: #c2c2c2 !important;
                                                 }
                                             }
-                                            .add-new-buttons{	
+
+                                            .add-new-buttons {
                                                 margin-left: 8px;
-                                                button{
+
+                                                button {
                                                     padding: 6px;
-                                                    .new-save{
+
+                                                    .new-save {
                                                         width: 16px;
                                                         height: 16px;
                                                         background: url('#{$assetPath}checkmark.svg') no-repeat center;
                                                     }
-                                                    .new-cancel{
+
+                                                    .new-cancel {
                                                         width: 16px;
                                                         height: 16px;
                                                         background: url('#{$assetPath}close.svg') no-repeat center;
                                                     }
-                                                    &:not(:last-of-type){
+
+                                                    &:not(:last-of-type) {
                                                         margin-right: 8px;
                                                     }
                                                 }
@@ -348,27 +410,32 @@
                                     }
                                 }
                             }
-                            .addition-right{
+
+                            .addition-right {
                                 border: 1px dashed $primary;
                                 padding: 16px;
-                                .al-heading{
+
+                                .al-heading {
                                     display: flex;
                                     align-items: center;
                                     border-bottom: 1px solid $border-color;
                                     margin-bottom: 10px;
                                     padding-bottom: 10px;
                                     justify-content: space-between;
-                                    a{
+
+                                    a {
                                         text-decoration: underline;
                                     }
                                 }
-                                .al-body{
-                                    .add-tag-content{
+
+                                .al-body {
+                                    .add-tag-content {
                                         display: flex;
                                         flex-wrap: wrap;
                                         align-items: center;
                                         justify-content: flex-start;
-                                        .add-tag{
+
+                                        .add-tag {
                                             cursor: pointer;
                                             border: 1px solid $primary;
                                             margin: 0 8px 8px 0;
@@ -378,7 +445,8 @@
                                             border-radius: 4px;
                                             align-items: center;
                                             justify-content: center;
-                                            .icon-remove{
+
+                                            .icon-remove {
                                                 width: 18px;
                                                 height: 18px;
                                                 background: url('#{$assetPath}close.svg') no-repeat center;
@@ -390,13 +458,15 @@
                             }
                         }
                     }
-                    .modal-footer{
+
+                    .modal-footer {
                         bottom: 0;
                         padding: 12px 0;
                         position: sticky;
                         background-color: #fff;
                         justify-content: space-between;
-                        button{
+
+                        button {
                             display: inline-block;
                             min-width: 108px;
                         }
@@ -404,37 +474,43 @@
                 }
             }
         }
+
         // New Customer
-        &.new-customer{
-            .modal-content{
-                .modal-header{
+        &.new-customer {
+            .modal-content {
+                .modal-header {
                     align-items: center;
                 }
-                .modal-body{
+
+                .modal-body {
                     overflow: auto;
                     max-height: 500px;
                     padding-bottom: 0;
-                    .create-customer-form{
-                        .create-customer-content{
+
+                    .create-customer-form {
+                        .create-customer-content {
                             display: flex;
                             align-items: flex-start;
                             justify-content: flex-start;
-                            .cc-left{
+
+                            .cc-left {
                                 display: flex;
                                 align-items: center;
                                 justify-content: flex-start;
-                                
-                                .upload-documents{
+
+                                .upload-documents {
                                     position: relative;
-                                    &:hover{
-                                        .select-File{
-                                            label{
+
+                                    &:hover {
+                                        .select-File {
+                                            label {
                                                 height: 100%;
-                                                background-color: rgba(0,0,0,0.4);
+                                                background-color: rgba(0, 0, 0, 0.4);
                                             }
                                         }
                                     }
-                                    .image-holder{
+
+                                    .image-holder {
                                         width: 190px;
                                         height: 190px;
                                         display: flex;
@@ -442,19 +518,22 @@
                                         border-radius: 4px;
                                         justify-content: center;
                                         background-color: #c4c4c4;
-                                        .dummy-image{
+
+                                        .dummy-image {
                                             width: 61px;
                                             height: 61px;
                                             object-fit: contain;
                                             background-color: #c4c4c4;
                                         }
-                                        .uploaded-image{
+
+                                        .uploaded-image {
                                             width: 190px;
                                             height: 190px;
                                             object-fit: contain;
                                         }
                                     }
-                                    .select-File{
+
+                                    .select-File {
                                         top: 0;
                                         left: 0;
                                         right: 0;
@@ -463,12 +542,14 @@
                                         height: 190px;
                                         position: absolute;
                                         overflow: hidden;
-                                        input{
+
+                                        input {
                                             width: 0;
                                             height: 0;
                                             padding: 0;
                                             opacity: 0;
-                                            + label{
+
+                                            +label {
                                                 width: 100%;
                                                 height: calc(100% + 29px);
                                                 margin: 0;
@@ -479,11 +560,13 @@
                                                 justify-content: center;
                                                 background-color: transparent;
                                                 transition: all 0.3s ease-in-out;
-                                                .upload-text{
+
+                                                .upload-text {
                                                     width: 100%;
                                                     height: 29px;
                                                     background-color: $primary;
-                                                    span{
+
+                                                    span {
                                                         color: $white;
                                                         font-size: 0.875rem;
                                                         margin-left: 4px;
@@ -494,14 +577,17 @@
                                             }
                                         }
                                     }
-                                    .uploaded-documents-list{
+
+                                    .uploaded-documents-list {
                                         margin-top: 8px;
+
                                         .uf-list {
                                             display: flex;
                                             flex-wrap: wrap;
                                             align-items: center;
                                             justify-content: flex-start;
-                                            .uf-detail{
+
+                                            .uf-detail {
                                                 height: 36px;
                                                 border: 1px solid $border-color;
                                                 margin: 0 10px 10px 0;
@@ -511,32 +597,39 @@
                                                 border-radius: 2px;
                                                 justify-content: flex-start;
                                                 background-color: #F2F7F6;
-                                                .uf-image{
+
+                                                .uf-image {
                                                     width: 24px;
                                                     height: 24px;
                                                     display: inline-block;
                                                     margin-right: 6px;
                                                     background-size: contain !important;
-                                                    &-png{
+
+                                                    &-png {
                                                         background: url('#{$assetPath}file-png.svg') no-repeat center;
                                                     }
-                                                    &-pdf{
+
+                                                    &-pdf {
                                                         background: url('#{$assetPath}file-pdf.svg') no-repeat center;
                                                     }
-                                                    &-jpg{
+
+                                                    &-jpg {
                                                         background: url('#{$assetPath}file-jpg.svg') no-repeat center;
                                                     }
-                                                    &-gif{
+
+                                                    &-gif {
                                                         background: url('#{$assetPath}file-pdf.svg') no-repeat center;
                                                     }
                                                 }
-                                                .uf-name{
+
+                                                .uf-name {
                                                     color: #212121;
                                                     font-size: $font-size-sm;
                                                     line-height: 1.25rem;
                                                     margin-right: 16px;
                                                 }
-                                                .uf-close{
+
+                                                .uf-close {
                                                     width: 8px;
                                                     height: 8px;
                                                     cursor: pointer;
@@ -549,7 +642,8 @@
                                     }
                                 }
                             }
-                            .cc-right{
+
+                            .cc-right {
                                 width: 100%;
                                 padding-left: 30px;
                             }
@@ -558,37 +652,43 @@
                 }
             }
         }
+
         // New User
-        &.new-user{
-            .modal-content{
-                .modal-header{
+        &.new-user {
+            .modal-content {
+                .modal-header {
                     align-items: center;
                 }
-                .modal-body{
+
+                .modal-body {
                     overflow: auto;
                     max-height: 500px;
                     padding-bottom: 0;
-                    .create-customer-form{
-                        .create-customer-content{
+
+                    .create-customer-form {
+                        .create-customer-content {
                             display: flex;
                             align-items: flex-start;
                             justify-content: flex-start;
-                            .cc-left{
+
+                            .cc-left {
                                 display: flex;
                                 align-items: center;
                                 justify-content: flex-start;
-                                
-                                .upload-documents{
+
+                                .upload-documents {
                                     position: relative;
-                                    &:hover{
-                                        .select-File{
-                                            label{
+
+                                    &:hover {
+                                        .select-File {
+                                            label {
                                                 height: 100%;
-                                                background-color: rgba(0,0,0,0.4);
+                                                background-color: rgba(0, 0, 0, 0.4);
                                             }
                                         }
                                     }
-                                    .image-holder{
+
+                                    .image-holder {
                                         width: 190px;
                                         height: 190px;
                                         display: flex;
@@ -596,19 +696,22 @@
                                         border-radius: 4px;
                                         justify-content: center;
                                         background-color: #c4c4c4;
-                                        .dummy-image{
+
+                                        .dummy-image {
                                             width: 61px;
                                             height: 61px;
                                             object-fit: contain;
                                             background-color: #c4c4c4;
                                         }
-                                        .uploaded-image{
+
+                                        .uploaded-image {
                                             width: 190px;
                                             height: 190px;
                                             object-fit: contain;
                                         }
                                     }
-                                    .select-File{
+
+                                    .select-File {
                                         top: 0;
                                         left: 0;
                                         right: 0;
@@ -617,12 +720,14 @@
                                         height: 190px;
                                         position: absolute;
                                         overflow: hidden;
-                                        input{
+
+                                        input {
                                             width: 0;
                                             height: 0;
                                             padding: 0;
                                             opacity: 0;
-                                            + label{
+
+                                            +label {
                                                 width: 100%;
                                                 height: calc(100% + 29px);
                                                 margin: 0;
@@ -633,11 +738,13 @@
                                                 justify-content: center;
                                                 background-color: transparent;
                                                 transition: all 0.3s ease-in-out;
-                                                .upload-text{
+
+                                                .upload-text {
                                                     width: 100%;
                                                     height: 29px;
                                                     background-color: $primary;
-                                                    span{
+
+                                                    span {
                                                         color: $white;
                                                         font-size: 0.875rem;
                                                         margin-left: 4px;
@@ -648,14 +755,17 @@
                                             }
                                         }
                                     }
-                                    .uploaded-documents-list{
+
+                                    .uploaded-documents-list {
                                         margin-top: 8px;
+
                                         .uf-list {
                                             display: flex;
                                             flex-wrap: wrap;
                                             align-items: center;
                                             justify-content: flex-start;
-                                            .uf-detail{
+
+                                            .uf-detail {
                                                 height: 36px;
                                                 border: 1px solid $border-color;
                                                 margin: 0 10px 10px 0;
@@ -665,32 +775,39 @@
                                                 border-radius: 2px;
                                                 justify-content: flex-start;
                                                 background-color: #F2F7F6;
-                                                .uf-image{
+
+                                                .uf-image {
                                                     width: 24px;
                                                     height: 24px;
                                                     display: inline-block;
                                                     margin-right: 6px;
                                                     background-size: contain !important;
-                                                    &-png{
+
+                                                    &-png {
                                                         background: url('#{$assetPath}file-png.svg') no-repeat center;
                                                     }
-                                                    &-pdf{
+
+                                                    &-pdf {
                                                         background: url('#{$assetPath}file-pdf.svg') no-repeat center;
                                                     }
-                                                    &-jpg{
+
+                                                    &-jpg {
                                                         background: url('#{$assetPath}file-jpg.svg') no-repeat center;
                                                     }
-                                                    &-gif{
+
+                                                    &-gif {
                                                         background: url('#{$assetPath}file-pdf.svg') no-repeat center;
                                                     }
                                                 }
-                                                .uf-name{
+
+                                                .uf-name {
                                                     color: #212121;
                                                     font-size: $font-size-sm;
                                                     line-height: 1.25rem;
                                                     margin-right: 16px;
                                                 }
-                                                .uf-close{
+
+                                                .uf-close {
                                                     width: 8px;
                                                     height: 8px;
                                                     cursor: pointer;
@@ -703,7 +820,8 @@
                                     }
                                 }
                             }
-                            .cc-right{
+
+                            .cc-right {
                                 width: 100%;
                                 padding-left: 30px;
                             }
@@ -712,18 +830,21 @@
                 }
             }
         }
+
         // New Project
-        &.new-project{
-            .modal-content{
-                .modal-header{
+        &.new-project {
+            .modal-content {
+                .modal-header {
                     align-items: center;
                 }
-                .modal-body{
+
+                .modal-body {
                     // overflow: auto;
                     max-height: 500px;
                     padding-bottom: 0;
-                    .create-project-form{
-                        .customer-dp-container{
+
+                    .create-project-form {
+                        .customer-dp-container {
                             width: 112px;
                             height: 112px;
                             display: flex;
@@ -733,23 +854,29 @@
                             margin-right: 16px;
                             border-radius: 4px;
                             justify-content: center;
-                            > img{
+
+                            >img {
                                 object-fit: cover;
                                 max-width: 100%;
                             }
                         }
-                        .customer-profile{
+
+                        .customer-profile {
                             flex: 1;
-                            .text-label-value{
+
+                            .text-label-value {
                                 display: flex;
                                 align-items: flex-start;
                                 justify-content: flex-start;
-                                > * {
+
+                                >* {
                                     font-size: 0.875rem;
-                                    &.text-label{
+
+                                    &.text-label {
                                         color: $primary;
                                     }
-                                    &.text-value{
+
+                                    &.text-value {
                                         color: #212121;
                                         margin-left: 0px;
                                         font-weight: bold;
@@ -758,9 +885,11 @@
                             }
                         }
                     }
-                    .create-project-content{
+
+                    .create-project-content {
                         margin-top: 24px;
-                        .users-section{
+
+                        .users-section {
                             border-top: 1px solid $border-color;
                             padding-top: 24px;
                         }
@@ -768,26 +897,31 @@
                 }
             }
         }
+
         // New Project
-        &.upload-doc-popup{
-            .modal-content{
-                .modal-header{
+        &.upload-doc-popup {
+            .modal-content {
+                .modal-header {
                     align-items: center;
                 }
-                .modal-body{
+
+                .modal-body {
                     overflow: auto;
                     max-height: 500px;
                     padding-bottom: 0;
-                    .upload-document-form{
-                        .upload-document-content{
-                            .select-File{
+
+                    .upload-document-form {
+                        .upload-document-content {
+                            .select-File {
                                 border: 1px dashed $border-color;
-                                input{
+
+                                input {
                                     width: 0;
                                     height: 0;
                                     padding: 0;
                                     opacity: 0;
-                                    + label{
+
+                                    +label {
                                         width: 100%;
                                         height: calc(100% + 29px);
                                         margin: 0;
@@ -798,19 +932,22 @@
                                         justify-content: center;
                                         background-color: transparent;
                                         transition: all 0.3s ease-in-out;
-                                        .upload-text{
+
+                                        .upload-text {
                                             width: 100%;
                                             height: 194px;
                                             flex-direction: column;
                                             background-color: transparent;
-                                            small{
+
+                                            small {
                                                 color: #ED1164;
                                                 font-size: 0.625rem;
                                                 margin-top: 8px;
                                                 font-weight: bold;
                                                 text-transform: uppercase;
                                             }
-                                            span{
+
+                                            span {
                                                 color: #9d9d9d;
                                                 font-size: 0.75rem;
                                                 margin-top: 8px;
@@ -820,86 +957,105 @@
                                     }
                                 }
                             }
-                            .uploaded-file-list{
+
+                            .uploaded-file-list {
                                 margin: 48px 0 32px;
-                                .uploaded-file{
+
+                                .uploaded-file {
                                     border: 1px solid $border-color;
                                     padding: 16px;
                                     border-radius: 8px;
-                                    span{
+
+                                    span {
                                         color: $primary;
                                         font-size: 0.75rem;
                                         line-height: 15px;
                                     }
-                                    small{
+
+                                    small {
                                         color: #9d9d9d;
                                         font-size: 0.75rem;
                                         line-height: 15px;
                                     }
-                                    &:not(:first-of-type){
+
+                                    &:not(:first-of-type) {
                                         margin-top: 24px;
                                     }
                                 }
                             }
                         }
                     }
-                    .error-upload{
+
+                    .error-upload {
                         margin: 60px 0;
-                        svg{
+
+                        svg {
                             margin: 0 0 12px;
                         }
-                        h5{
+
+                        h5 {
                             color: $primary;
                             font-size: 1.5rem;
                             line-height: 29px;
                         }
-                        p{
+
+                        p {
                             color: $text-base-color;
                             margin: 8px 0 20px;
                             font-size: 1rem;
                         }
                     }
-                    .success-upload{
+
+                    .success-upload {
                         margin: 32px 0;
-                        svg{
+
+                        svg {
                             margin: 0 0 12px;
                         }
-                        h5{
+
+                        h5 {
                             color: $primary;
                             font-size: 1.5rem;
                             line-height: 29px;
                         }
-                        p{
+
+                        p {
                             color: $text-base-color;
                             margin: 8px 0 20px;
                             font-size: 1rem;
                         }
-                        .doc-content-table{
+
+                        .doc-content-table {
                             width: 100%;
                             border: 1px solid rgba($primary, 0.1);
                             display: inline-block;
                             max-width: 384px;
                             border-radius: 8px;
                             margin-bottom: 32px;
-                            li{
+
+                            li {
                                 color: $text-base-color;
                                 height: 40px;
                                 display: flex;
                                 padding: 0 16px;
                                 align-items: center;
                                 justify-content: flex-start;
-                                > *{
+
+                                >* {
                                     width: 50%;
                                     text-align: left;
-                                    &:first-child{
+
+                                    &:first-child {
                                         width: 80%;
                                     }
                                 }
-                                &:not(:last-of-type){
+
+                                &:not(:last-of-type) {
                                     border-bottom: 1px solid rgba($primary, 0.1);
                                 }
                             }
-                            .doc-content-heading{
+
+                            .doc-content-heading {
                                 background-color: rgba($primary, 0.1);
                                 border-radius: 8px 8px 0 0;
                             }
@@ -908,5 +1064,92 @@
                 }
             }
         }
-    } 
+
+        // Updating List of admin
+        &.updatelist-admin {
+            .modal-content {
+                .modal-header {
+                    align-items: center;
+                }
+
+                .modal-body {
+                    overflow: auto;
+                    max-height: 500px;
+                    padding-bottom: 0;
+
+                    .custom-control {
+                        margin-bottom: 1rem;
+                    }
+
+                    .modal-footer {
+                        padding-bottom: 24px;
+                    }
+                }
+            }
+        }
+
+        // Detailinfo of admin
+        &.detailinfo-admin {
+            .modal-content {
+                .modal-header {
+                    align-items: center;
+                }
+
+                .modal-body {
+                    overflow: auto;
+                    max-height: 500px;
+                    padding-bottom: 0;
+
+                    .customer-profile-details {
+                        margin-bottom: 20px;
+
+                        .customer-dp-container {
+                            width: 112px;
+                            height: 112px;
+                            display: flex;
+                            padding: 10px;
+                            background: #f1f1f1;
+                            align-items: center;
+                            margin-right: 16px;
+                            border-radius: 4px;
+                            justify-content: center;
+
+                            >img {
+                                object-fit: cover;
+                                max-width: 100%;
+                            }
+                        }
+
+                        .customer-profile {
+                            flex: 1;
+
+                            .text-label-value {
+                                display: flex;
+                                align-items: flex-start;
+                                justify-content: flex-start;
+
+                                >* {
+                                    font-size: 0.875rem;
+
+                                    &.text-label {
+                                        color: #999;
+                                    }
+
+                                    &.text-value {
+                                        color: #212121;
+                                        margin-left: 4px;
+                                        font-weight: bold;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    .modal-footer {
+                        padding-bottom: 24px;
+                    }
+                }
+            }
+        }
+    }
 }
