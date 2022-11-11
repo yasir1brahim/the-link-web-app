@@ -50,7 +50,7 @@ const EditProject = ({
       const fetchData = async () => {
         const response = await axiosInstance({
           method: "get",
-          url: `/employeeList/${customer.customer_id || project?.customer_id}`,
+          url: `/employeeList/${customer?.customer_id || project?.customer_id}`,
         });
         if (response.data.message) {
           setEmployeeList(response.data.message);
@@ -101,7 +101,7 @@ const EditProject = ({
                 ).format("YYYY-MM-DD")
               : "",
             customer_id:
-              customer.customer_id || customer?.id || project?.customer_id || customer[0]?.id,
+              customer?.customer_id || customer?.id || project?.customer_id || customer[0]?.id,
             status: "Open",
             project_id: project?.project_id,
           },
@@ -157,19 +157,19 @@ const EditProject = ({
                         <div className="col-12">
                           <div className="text-label-value">
                             <div className="text-value">
-                              {customer.customer_name}
+                              {customer?.customer_name}
                             </div>
                           </div>
                         </div>
                         <div className="col-12">
                           <div className="text-label-value">
-                            <div className="text-label">{customer.address}</div>
+                            <div className="text-label">{customer?.address}</div>
                           </div>
                         </div>
                         <div className="col-12">
                           <div className="text-label-value">
                             <div className="text-label">
-                              {customer.contact_number}
+                              {customer?.contact_number}
                             </div>
                           </div>
                         </div>
