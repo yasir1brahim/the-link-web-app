@@ -300,6 +300,7 @@ const AdminUser = (props) => {
                     <SelectDropdown
                       label={"Select Company"}
                       setSelected={setSelectedCustomer}
+                      defaultSelected={'Test'}
                       value={selectedCustomer.label}
                       selected={selectedCustomer.label}
                       options={customerData.map((customer) => {

@@ -51,7 +51,7 @@ const CreateProject = ({
       const fetchData = async () => {
         const response = await axiosInstance({
           method: 'get',
-          url: `/employeeList/${customer.customer_id}`,
+          url: `/employeeList/${customer?.customer_id}`,
         });
         setEmployeeList(response.data.message);
         console.log(response.data.message);
@@ -92,7 +92,7 @@ const CreateProject = ({
             lead_contact: leadContact[0]?.value || '',
             start_date: startDate ? moment(startDate).format('YYYY-MM-DD') : '',
             end_date: endDate ? moment(endDate).format('YYYY-MM-DD') : '',
-            customer_id: customer.customer_id,
+            customer_id: customer?.customer_id,
             status: 'Open',
             employee_list: selectedEmployeeList.map(
               (employee) => employee.value
@@ -140,7 +140,7 @@ const CreateProject = ({
                   <div className="row">
                     <div className="col-6">
                       <div className="text-label-value">
-                        <div className="text-value">{customer.customer_name}</div>
+                        <div className="text-value">{customer?.customer_name}</div>
                       </div>
                     </div>
                     <div className="col-6">
@@ -160,7 +160,7 @@ const CreateProject = ({
                     </div>
                     <div className="col-6">
                       <div className="text-label-value">
-                        <div className="text-label">{customer.address}</div>
+                        <div className="text-label">{customer?.address}</div>
                       </div>
                     </div>
                     <div className="col-6">
@@ -181,7 +181,7 @@ const CreateProject = ({
                     <div className="col-6">
                       <div className="text-label-value">
                         <div className="text-label">
-                          {customer.contact_number}
+                          {customer?.contact_number}
                         </div>
                       </div>
                     </div>
