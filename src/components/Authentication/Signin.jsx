@@ -53,7 +53,7 @@ const Signin = (props) => {
             : history({ pathname: '/' });
         }
       } catch (error) {
-        toast.error('Incorrect Email or Password.', {
+        toast.error(error?.message || error?.response?.data?.message, {
           position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
