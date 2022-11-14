@@ -14,7 +14,13 @@ const NavbarTop = () => {
         className="navigation justify-content-center justify-content-md-start"
         expand="sm"
       >
-        <a href="/admin-landing" className="navbar-brand">
+        <a
+          href={
+            localStorage.getItem('roleId') === '0'
+              ? '/admin-landing'
+              : '/project-list'
+          }
+          className="navbar-brand">
           <Logo />
         </a>
         <Nav className="ml-auto" navbar>
@@ -49,7 +55,7 @@ const NavbarTop = () => {
                     View Admin Portal
                   </a>
                 )}
-                {localStorage.getItem('roleId') !== '0' && (
+                {localStorage.getItem('roleId') === '2' && (
                   <a
                     href="/customer-profile"
                     className="navlist"
