@@ -53,7 +53,7 @@ const Signin = (props) => {
             : history({ pathname: '/' });
         }
       } catch (error) {
-        toast.error(error?.message || error?.response?.data?.message, {
+        toast.error(error?.response?.data?.message || error?.message, {
           position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
