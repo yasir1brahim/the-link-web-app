@@ -32,7 +32,7 @@ const CustomerProfile = (props) => {
   const [resetPwd, setResetPwd] = useState(false);
   const toggleResetPwd = () => setResetPwd(!resetPwd);
   const [email, setEmail] = useState({ value: '', errors: '' });
-  const [companyName, setCompanyName] = useState({ value: '', errors: '' });
+  const [companyName, setCompanyName] = useState({ value: undefined, errors: '' });
   const [accountOwner, setAccountOwner] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [address, setAddress] = useState({ value: '', errors: '' });
@@ -49,6 +49,7 @@ const CustomerProfile = (props) => {
   const { state } = useLocation();
   let customer = state;
   const custId = localStorage.getItem('roleId') === '0' ? state.customer_id : Number(localStorage.getItem('userId'))
+  
   // const navigate = useNavigate();
   useEffect(() => {
     const fetchData = async () => {
@@ -58,7 +59,7 @@ const CustomerProfile = (props) => {
           `/customer/${custId}`,
       });
       setCustomerData(response.data.message[0]);
-      console.log(response.data.message);
+      console.log('customerData', response.data.message);
     };
 
     fetchData().catch((error) => {
@@ -80,7 +81,7 @@ const CustomerProfile = (props) => {
         url: `/employeeList/${custId}`,
       });
       setEmployeeData(response.data.message);
-      console.log(response.data.message);
+      console.log('employeeData', response.data.message);
     };
     fetchData().catch((error) => {
       toast.error('Something went wrong!', {
@@ -172,7 +173,10 @@ const CustomerProfile = (props) => {
 
   const validate = () => {
     let error = false;
-
+    if( companyName.value === ''){
+      setCompanyName({...companyName, errors:'Company name is required'})
+      error = true
+    }
     if (password.value && password.value !== confirmPassword.value) {
       setPassword({
         ...password,
@@ -222,7 +226,7 @@ const CustomerProfile = (props) => {
             email_address: email.value || customerData?.email_address,
             password: password.value || '',
             customer_name: companyName.value || customerData?.customer_name,
-            account_owner: accountOwner.value || customerData?.account_owner,
+            account_owner: accountOwner?.value || customerData?.account_owner,
             contact_number:
               contactNumber.value.replace(/[^0-9]/g, '') ||
               customerData?.contact_number,
@@ -233,6 +237,7 @@ const CustomerProfile = (props) => {
         });
         if (response.data.message) {
           customer = response.data.message;
+          setCompanyName({...companyName, errors:''})
         }
 
         if (
@@ -426,6 +431,10 @@ const CustomerProfile = (props) => {
                           <label className="text-label" htmlFor="companyName">
                             Company Name
                           </label>
+                          {companyName.errors && (
+                    <small className="form-error" style={{ color: 'red' }}>
+                      {companyName.errors}
+                    </small>)}
                         </div>
                       </div>
                       <div className="col-4">
@@ -438,7 +447,8 @@ const CustomerProfile = (props) => {
                             placeholder="Enter"
                             required
                             disabled
-                            value={localStorage.getItem('account_id')}
+                            // value={localStorage.getItem('account_id')}
+                            value={customerData.account_id}
                           />
                           <label className="text-label" htmlFor="accountId">
                             Account Id
@@ -821,12 +831,14 @@ const CustomerProfile = (props) => {
         employee={employee}
         pageRefresh={pageRefresh}
         setPageRefresh={setPageRefresh}
+        empData= {employeeData}
       />
       <ConfirmationModal
         modal={confirmationModal}
         toggleModal={toggleConfirmModal}
         handleDeleteEmployee={handleDeleteEmployee}
         empId={empId}
+        
       />
       <ToastContainer
         position="bottom-center"
