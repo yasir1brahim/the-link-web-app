@@ -36,6 +36,7 @@ const SelectDropdown = ({ ...props }) => {
         placeholder="Choose an option..."
         selected={props.selected}
         multiple={props.multiple}
+        defaultSelected={props.defaultSelected}
         defaultInputValue={props.defaultInputValue}
       />
       <label className="text-label">{props.label}</label>

@@ -36,6 +36,7 @@ const CustomerProjects = (props) => {
   const { state } = useLocation();
   // const customer = state;
   const navigate = useNavigate();
+  const roleId = localStorage.getItem('roleId')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -63,12 +64,15 @@ const CustomerProjects = (props) => {
   }, [state, pageRefresh]);
 
   useEffect(() => {
+    const url = roleId === '6' ?
+      `/emp/projects/${localStorage.getItem('userId')}` :
+      state?.customer_id
+        ? `/projects/${state.customer_id}`
+        : `/projects/${localStorage.getItem('userId')}`
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: state?.customer_id
-          ? `/projects/${state.customer_id}`
-          : `/projects/${localStorage.getItem('userId')}`,
+        url,
       });
       // setProjectData(response.data.message);
       setProjectData(
@@ -88,7 +92,7 @@ const CustomerProjects = (props) => {
         progress: undefined,
       });
     });
-  }, [state, pageRefresh, isArchived]);
+  }, [state, pageRefresh, isArchived, roleId]);
 
   const handleLaunch = (project) => {
     navigate('/project-details', {
@@ -151,7 +155,7 @@ const CustomerProjects = (props) => {
         <div className="page-wrap-content customer-projects-wrapper">
           <Header
             title={state?.customer_name || customerData?.customer_name}
-            showBtn={'Create New Project'}
+            showBtn={roleId !== '6' && 'Create New Project'}
             toggleModal={toggleModal}
             breadcrumb={'Project Details'}
           />
@@ -176,15 +180,15 @@ const CustomerProjects = (props) => {
                   </label>
                 </div>
                 <div className="table-bulk-changes">
-                  <button
+                  {roleId !== '6' && <button
                     type="button"
                     className="btn btn-secondary btn-sm"
                     onClick={toggleEmployeeModal}
                   >
                     + Add Employee
-                  </button>
+                  </button>}
                 </div>
-                <div style={{ marginLeft: '10px' }}>
+                {roleId !== '6' && <div style={{ marginLeft: '10px' }}>
                   <button
                     onClick={() => toggleArchive(!isArchived)}
                     type="button"
@@ -192,7 +196,7 @@ const CustomerProjects = (props) => {
                   >
                     {isArchived ? 'View Active' : 'View Archived'}
                   </button>
-                </div>
+                </div>}
               </div>
               <div className="l-table-wrapper">
                 <table className="table">
@@ -283,21 +287,21 @@ const CustomerProjects = (props) => {
                                 >
                                   Launch
                                 </button>
-                                <button
+                                {roleId !== '6' && <><button
                                   type="button"
                                   className="btn btn-secondary btn-sm"
                                   onClick={() => handleEdit(project)}
                                 >
                                   Edit
                                 </button>
-                                <button
-                                  type="button"
-                                  className="btn btn-secondary btn-sm"
-                                  onClick={() => handleArchiveProject(project)}
-                                  disabled={isArchived && localStorage.getItem('roleId') !== '0'}
-                                >
-                                  {!isArchived ? 'Archive' : 'Unarchive'}
-                                </button>
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => handleArchiveProject(project)}
+                                    disabled={isArchived && localStorage.getItem('roleId') !== '0'}
+                                  >
+                                    {!isArchived ? 'Archive' : 'Unarchive'}
+                                  </button></>}
                               </div>
                             </td>
                           </tr>

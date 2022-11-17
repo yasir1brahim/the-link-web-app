@@ -1,9 +1,9 @@
-import React, { useState , useRef} from 'react';
+import React, { useState } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
 // import { Typeahead } from 'react-bootstrap-typeahead';
-import { MaskedInput } from '../shared/MaskedInput/maskedInput';
+import { MaskedInput } from "../shared/MaskedInput/maskedInput";
 
 const EditEmployee = ({
   modal,
@@ -14,18 +14,10 @@ const EditEmployee = ({
   setPageRefresh,
   empData
 }) => {
-  const initialEmail = employee.emp_email
-  const [email, setEmail] = useState({ value: employee.emp_email, errors: '' });
+  const [email, setEmail] = useState({ value: '', errors: '' });
   const [firstName, setFirstName] = useState({ value: '', errors: '' });
   const [lastName, setLastName] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
-  // console.log('customer', customer)
-  // console.log('employee', employee)
-  // console.log('modal', modal)
-  // console.log('employeeDta', empData)
-  // console.log('email',  email.value)
-  // const emailRef = useRef()
-  // console.log('emailRef', emailRef.current?.value)
   // const [projects, setProjects] = useState([]);
   // const [asscProject, setAsscProject] = useState([]);
 
@@ -67,7 +59,7 @@ const EditEmployee = ({
     return error;
   };
   const handleContactNumberChange = (e) => {
-    let value = contactNumber.value.replace(/[^0-9]/g, '');
+    let value = contactNumber.value.replace(/[^0-9]/g, "");
     let regex = /^[0-9]*$/;
     if (regex.test(value)) {
       setContactNumber({
@@ -78,34 +70,32 @@ const EditEmployee = ({
   };
 
   const handleSubmit = async () => {
-    // console.log('emailRef', emailRef.current.value)
-    let errors = validate();
-    if (!errors) {
+    // let errors = validate();
+    // if (!errors) {
     try {
       const response = await axiosInstance({
-        method: 'put',
-        url: '/updateEmployee',
+        method: "put",
+        url: "/updateEmployee",
         data: {
           email_address: email.value || employee?.emp_email,
-          // email_address: || employee?.emp_email,
           full_name: `${firstName.value || employee?.name.split(/(\s+)/)[0]}  ${
             lastName.value || employee?.name.split(/(\s+)/)[2]
           }`,
           // projects: asscProject.map((project) => project.value),
           projects: [],
           contact_number:
-            contactNumber.value.replace(/[^0-9]/g, '') ||
-            employee.contact_number,
-          customer_id: customer.customer_id,
-          emp_id: employee?.emp_id,
+            contactNumber.value.replace(/[^0-9]/g, "") ||
+            employee?.contact_number,
+          customer_id: customer?.customer_id || customer?.id || customer[0]?.id,
+          emp_id: employee?.emp_id || employee?.id,
         },
       });
       if (response.data) {
         console.log(response.data);
         setPageRefresh(!pageRefresh);
         toggleModal();
-        toast.success('Employee edited successfully!', {
-          position: 'bottom-center',
+        toast.success("Employee edited successfully!", {
+          position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
@@ -117,7 +107,7 @@ const EditEmployee = ({
     } catch (error) {
       console.log(error.message);
       toast.error(error.response.data.message, {
-        position: 'bottom-center',
+        position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
         closeOnClick: true,
@@ -151,7 +141,11 @@ const EditEmployee = ({
                     aria-describedby="userFirstName"
                     placeholder="Enter"
                     defaultValue={
-                      employee?.name ? employee?.name.split(/(\s+)/)[0] : ''
+                      employee?.name
+                        ? employee?.name.split(/(\s+)/)[0]
+                        : employee?.full_name
+                        ? employee?.full_name.split(/(\s+)/)[0]
+                        : ""
                     }
                     onChange={(e) => {
                       setFirstName({
@@ -174,7 +168,11 @@ const EditEmployee = ({
                     aria-describedby="userLastName"
                     placeholder="Enter"
                     defaultValue={
-                      employee?.name ? employee?.name.split(/(\s+)/)[2] : ''
+                      employee?.name
+                        ? employee?.name.split(/(\s+)/)[2]
+                        : employee?.full_name
+                        ? employee?.full_name.split(/(\s+)/)[2]
+                        : ""
                     }
                     onChange={(e) => {
                       setLastName({
@@ -197,8 +195,6 @@ const EditEmployee = ({
                     aria-describedby="userEmailAddress"
                     placeholder="Enter"
                     defaultValue={employee.emp_email}
-                    // value={email.value}
-                    // ref={emailRef}
                     onChange={(e) => {
                       setEmail({
                         ...email,
@@ -236,28 +232,28 @@ const EditEmployee = ({
                   </label> */}
                   <MaskedInput
                     // value={contactNumber.value}
-                    defaultValue={employee.contact_number}
+                    defaultValue={employee?.contact_number}
                     onChange={(e) => handleContactNumberChange(e)}
                     name="contactNumber"
                     error={contactNumber.errors}
                     mask={[
-                      '(',
+                      "(",
                       /[1-9]/,
                       /\d/,
                       /\d/,
-                      ')',
-                      ' ',
+                      ")",
+                      " ",
                       /\d/,
                       /\d/,
                       /\d/,
-                      '-',
+                      "-",
                       /\d/,
                       /\d/,
                       /\d/,
                       /\d/,
                     ]}
-                    labelClass={'text-label'}
-                    label={'Phone'}
+                    labelClass={"text-label"}
+                    label={"Phone"}
                   />
                 </div>
               </div>
@@ -286,7 +282,7 @@ const EditEmployee = ({
             </Button>
             <Button color="primary" onClick={handleSubmit}>
               Save
-            </Button>{' '}
+            </Button>{" "}
           </ModalFooter>
         {/* </form> */}
       </ModalBody>

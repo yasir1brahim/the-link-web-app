@@ -48,12 +48,12 @@ const Signin = (props) => {
           console.log(response.data);
           return response.data.role_id === 0
             ? history({ pathname: '/admin-landing' })
-            : response.data.role_id === 2
+            : response.data.role_id === 2 || response.data.role_id === 6
             ? history({ pathname: '/project-list' })
             : history({ pathname: '/' });
         }
       } catch (error) {
-        toast.error('Incorrect Email or Password.', {
+        toast.error(error?.response?.data?.message || error?.message, {
           position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
