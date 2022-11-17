@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState , useRef} from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
 // import { Typeahead } from 'react-bootstrap-typeahead';
-import { MaskedInput } from "../shared/MaskedInput/maskedInput";
+import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 
 const EditEmployee = ({
   modal,
@@ -14,10 +14,17 @@ const EditEmployee = ({
   setPageRefresh,
   empData
 }) => {
-  const [email, setEmail] = useState({ value: '', errors: '' });
+  const [email, setEmail] = useState({ value: employee.emp_email, errors: '' });
   const [firstName, setFirstName] = useState({ value: '', errors: '' });
   const [lastName, setLastName] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
+  // console.log('customer', customer)
+  // console.log('employee', employee)
+  // console.log('modal', modal)
+  // console.log('employeeDta', empData)
+  // console.log('email',  email.value)
+  // const emailRef = useRef()
+  // console.log('emailRef', emailRef.current?.value)
   // const [projects, setProjects] = useState([]);
   // const [asscProject, setAsscProject] = useState([]);
 
@@ -70,16 +77,23 @@ const EditEmployee = ({
   };
 
   const handleSubmit = async () => {
-    // let errors = validate();
-    // if (!errors) {
+    // console.log('emailRef', emailRef.current.value)
+    let errors = validate();
+    if (!errors) {
+    const employeeName = employee?.name || employee?.full_name
     try {
       const response = await axiosInstance({
         method: "put",
         url: "/updateEmployee",
         data: {
-          email_address: email.value || employee?.emp_email,
-          full_name: `${firstName.value || employee?.name.split(/(\s+)/)[0]}  ${
-            lastName.value || employee?.name.split(/(\s+)/)[2]
+          email_address:
+            email.value || employee?.emp_email || employee?.email_address,
+          full_name: `${
+            firstName.value ||
+            employeeName?.split(/(\s+)/)[0] 
+          }  ${
+            lastName.value ||
+            employeeName?.split(/(\s+)/)[2] 
           }`,
           // projects: asscProject.map((project) => project.value),
           projects: [],
@@ -194,7 +208,7 @@ const EditEmployee = ({
                     id="userEmailAddress"
                     aria-describedby="userEmailAddress"
                     placeholder="Enter"
-                    defaultValue={employee.emp_email}
+                    defaultValue={employee?.emp_email || employee?.email_address}
                     onChange={(e) => {
                       setEmail({
                         ...email,
