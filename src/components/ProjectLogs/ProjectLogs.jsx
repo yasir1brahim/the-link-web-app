@@ -51,6 +51,7 @@ const ProjectLogs = () => {
   const [pdfData, setPdfData] = useState({ url: '', textLoc: {}, index: '', docId: null })
   const [newRowIndex, setNewRowIndex] = useState(null)
   const projectType = state?.project.project_type
+  console.log('selected', selected)
 
   useEffect(() => {
     if (!modal) {
@@ -132,6 +133,7 @@ const ProjectLogs = () => {
   //   { label: 'Comments', key: 'comments' },
   // ];
   const handleDeleteLogs = async () => {
+    if (selected.length !== 0){
     try {
       await axiosInstance({
         method: 'delete',
@@ -166,6 +168,7 @@ const ProjectLogs = () => {
         progress: undefined,
       });
     }
+  }
   };
   useEffect(() => {
     const fetchData = async () => {
@@ -554,7 +557,7 @@ const ProjectLogs = () => {
                       List Name
                     </label>
                     {listName.errors && (
-                      <small className="form-error">{listName.errors}</small>
+                      <small className="form-error error-red">{listName.errors}</small>
                     )}
                   </div>
                 </div>

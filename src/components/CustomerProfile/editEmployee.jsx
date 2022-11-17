@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
-import axiosInstance from "../../config/axios";
-import { toast } from "react-toastify";
+import React, { useState } from 'react';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import axiosInstance from '../../config/axios';
+import { toast } from 'react-toastify';
 // import { Typeahead } from 'react-bootstrap-typeahead';
-import { MaskedInput } from "../shared/MaskedInput/maskedInput";
+import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 
 const EditEmployee = ({
   modal,
@@ -12,11 +12,19 @@ const EditEmployee = ({
   employee,
   pageRefresh,
   setPageRefresh,
+  empData
 }) => {
-  const [email, setEmail] = useState({ value: "", errors: "" });
-  const [firstName, setFirstName] = useState({ value: "", errors: "" });
-  const [lastName, setLastName] = useState({ value: "", errors: "" });
-  const [contactNumber, setContactNumber] = useState({ value: "", errors: "" });
+  const [email, setEmail] = useState({ value: employee.emp_email, errors: '' });
+  const [firstName, setFirstName] = useState({ value: '', errors: '' });
+  const [lastName, setLastName] = useState({ value: '', errors: '' });
+  const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
+  // console.log('customer', customer)
+  // console.log('employee', employee)
+  // console.log('modal', modal)
+  // console.log('employeeDta', empData)
+  // console.log('email',  email.value)
+  // const emailRef = useRef()
+  // console.log('emailRef', emailRef.current?.value)
   // const [projects, setProjects] = useState([]);
   // const [asscProject, setAsscProject] = useState([]);
 
@@ -41,6 +49,22 @@ const EditEmployee = ({
   //   }
   //   return error;
   // };
+  const validate = () => {
+    let error = false;
+    if (email.value === '') {
+      setEmail({ ...email, errors: 'Email is required.' });
+      error = true;
+    }
+   else if (empData.find(item => item.emp_email === email.value)) {
+      setEmail({ ...email, errors: 'Email already exists' });
+      error = true;
+    }
+    else{
+      setEmail({ ...email, errors: '' });
+      error = false;
+    }
+    return error;
+  };
   const handleContactNumberChange = (e) => {
     let value = contactNumber.value.replace(/[^0-9]/g, "");
     let regex = /^[0-9]*$/;
@@ -53,8 +77,9 @@ const EditEmployee = ({
   };
 
   const handleSubmit = async () => {
-    // let errors = validate();
-    // if (!errors) {
+    // console.log('emailRef', emailRef.current.value)
+    let errors = validate();
+    if (!errors) {
     const employeeName = employee?.name || employee?.full_name
     try {
       const response = await axiosInstance({
@@ -108,6 +133,7 @@ const EditEmployee = ({
     }
     // }
   };
+}
   return (
     <Modal
       isOpen={modal}
@@ -117,7 +143,7 @@ const EditEmployee = ({
     >
       <ModalHeader toggle={toggleModal}>Edit Employee</ModalHeader>
       <ModalBody>
-        <form className="create-user-form">
+        {/* <form className="create-user-form"> */}
           <div className="create-user-content">
             <div className="row">
               <div className="col-4">
@@ -193,6 +219,10 @@ const EditEmployee = ({
                   <label className="text-label" htmlFor="userEmailAddress">
                     Email Address
                   </label>
+                  {email.errors && (
+                    <small className="form-error" style={{ color: 'red' }}>
+                      {email.errors}
+                    </small>)}
                 </div>
               </div>
               <div className="col-4">
@@ -268,7 +298,7 @@ const EditEmployee = ({
               Save
             </Button>{" "}
           </ModalFooter>
-        </form>
+        {/* </form> */}
       </ModalBody>
     </Modal>
   );
