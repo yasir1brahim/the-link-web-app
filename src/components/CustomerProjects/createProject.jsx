@@ -17,6 +17,7 @@ const CreateProject = ({
   customer,
   pageRefresh,
   setPageRefresh,
+  projects
 }) => {
   // const [email, setEmail] = useState({ value: '', errors: '' });
   // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
@@ -33,7 +34,8 @@ const CreateProject = ({
   // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
   const [employeeList, setEmployeeList] = useState([]);
   const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
-  // const [accountId, setAccountId] = useState({ value: '', errors: '' });
+  // const [accountId, setAccountId] = useState({ value: '', errors: '' });\
+  console.log('customer', projects)
 
   useEffect(() => {
     if (!modal) {
@@ -65,6 +67,10 @@ const CreateProject = ({
     let error = false;
     if (projectName.value === '') {
       setProjectName({ ...projectName, errors: 'Project Name is required.' });
+      error = true;
+    }
+    if (projects.find(item => item.project_name === projectName.value)) {
+      setProjectName({ ...projectName, errors: 'Project Name already exists.' });
       error = true;
     }
     setDateError({ startError: '', endError: '' });
