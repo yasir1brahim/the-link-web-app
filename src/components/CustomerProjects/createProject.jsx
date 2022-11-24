@@ -69,7 +69,7 @@ const CreateProject = ({
       setProjectName({ ...projectName, errors: 'Project Name is required.' });
       error = true;
     }
-    if (projects.find(item => item.project_name === projectName.value)) {
+    if (projects?.find(item => item?.project_name === projectName?.value)) {
       setProjectName({ ...projectName, errors: 'Project Name already exists.' });
       error = true;
     }
