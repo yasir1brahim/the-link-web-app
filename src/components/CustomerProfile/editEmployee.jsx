@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
@@ -14,7 +14,7 @@ const EditEmployee = ({
   setPageRefresh,
   empData
 }) => {
-  const [email, setEmail] = useState({ value: employee.emp_email, errors: '' });
+  const [email, setEmail] = useState({ value: employee?.emp_email || employee?.email_address, errors: '' });
   const [firstName, setFirstName] = useState({ value: '', errors: '' });
   const [lastName, setLastName] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
@@ -49,13 +49,18 @@ const EditEmployee = ({
   //   }
   //   return error;
   // };
+  useEffect(()=>{
+    if(!modal) {
+      setEmail({value: '', errors: ''})
+    }
+  },[modal])
   const validate = () => {
     let error = false;
     if (email.value === '') {
       setEmail({ ...email, errors: 'Email is required.' });
       error = true;
     }
-   else if (empData.find(item => item.emp_email === email.value)) {
+   else if (empData?.find(item => item?.emp_email === email?.value)) {
       setEmail({ ...email, errors: 'Email already exists' });
       error = true;
     }
