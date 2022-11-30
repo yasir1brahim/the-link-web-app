@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
+import {Dropdown, DropdownMenu, DropdownToggle, DropdownItem} from 'reactstrap';
 // import PaginatedItems from '../shared/Pagination/Pagination';
 import { ReactComponent as Trash } from '../../assets/images/trash.svg';
 import { useLocation } from 'react-router-dom';
@@ -21,8 +22,11 @@ import PdfWrapper from '../../pdfWrapper';
 import FileDownload from 'js-file-download';
 import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
 import { useSearchParams } from 'react-router-dom';
+import Procore from './procore';
 
 const ProjectLogs = () => {
+  const [procoreModal, setProcoreModal] = useState(false);
+  const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -52,12 +56,16 @@ const ProjectLogs = () => {
   const [pdfData, setPdfData] = useState({ url: '', textLoc: {}, index: '', docId: null })
   const [newRowIndex, setNewRowIndex] = useState(null)
   const projectType = state?.project.project_type
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const toggle = () => setDropdownOpen((prevState) => !prevState);
   
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get('projectId')
   const customerId = searchParams.get('customerId')
   const projectName = searchParams.get('projectName')
   const logType = searchParams.get('logType')
+  const authCode = searchParams.get('code');
 
   console.log('selected', selected)
 
@@ -129,6 +137,44 @@ const ProjectLogs = () => {
       setSelected([...selected, id]);
     }
   };
+
+  // check with the back end team for unauth code 
+  // useEffect(() => {
+  //   if(authCode){
+
+  //     const fetchData = async () => {
+  //       await axiosInstance({
+  //         method: 'post',
+  //         url: 'https://login.procore.com/oauth/token',
+  //         body: {
+  //           grant_type: "authorization_code",
+  //           code: authCode,
+  //           client_secret: '479eb769cc54e8a8ef1185816b20873ea36842f9eadbd61aa16f3a5a7e008aad',
+  //           client_id: 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9',
+  //         redirect_uri: `http://localhost:3000/project-logs?projectId=${projectId}&projectName=${projectName}&customerId=${customerId}&logType=${logType}`
+  //       },
+  //       });
+  //     };
+  
+  //     fetchData().catch((error) => {
+  //       toast.error('Something went wrong!', {
+  //         position: 'bottom-center',
+  //         autoClose: 5000,
+  //         hideProgressBar: true,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //       });
+  //     });
+  //   }
+  // }, [authCode]);
+
+  // workaround for call ( delete )
+  useEffect(()=>{
+    if(authCode){
+      setProcoreModal(true)}},[authCode])
+
   // const headers = [
   //   { label: 'Spec Sec', key: 'spec_section' },
   //   { label: 'Paragraph', key: 'para_no' },
@@ -440,18 +486,13 @@ const ProjectLogs = () => {
                         onChange={(e) => handleSearchChange(e.target.value)}
                       />
                     </div>
-                    {localStorage.getItem('roleId') !== '7' && <button type="button" className="btn btn-secondary btn-sm" style={{ textTransform: 'none' }} onClick={() => handleExportExcel("All")}>
-                      Export .xls
-                      {/* <CSVLink
-                      filename={`All-Logs.csv`}
-                      data={logData}
-                      target="_blank"
-                      className="btn btn-secondary btn-sm"
-                      headers={headers}
-                    >
-                      Export CSV
-                    </CSVLink> */}
-                    </button>}
+                   {localStorage.getItem('roleId') !== '7' && <Dropdown isOpen={dropdownOpen} toggle={toggle} >
+                    <DropdownToggle caret>Export</DropdownToggle>
+                    <DropdownMenu>
+                    <DropdownItem onClick={() => handleExportExcel("All")}>Excel</DropdownItem>
+                    <DropdownItem onClick={handleProcoreExport}>Procore</DropdownItem>
+                    </DropdownMenu>
+                    </Dropdown>}
                     <button
                       type="button"
                       className="d-flex btn btn-secondary btn-sm"
@@ -552,18 +593,22 @@ const ProjectLogs = () => {
       />
       {isLoading && <Loader showComponentLoader={true} />}
       <UploadDocuments
-        modal={modal}
-        toggleModal={toggleModal}
-        setPdfFile={setPdfFile}
-        pdfFile={pdfFile}
-        handleSubmit={handleSubmit}
-        isUploadLoading={isUploadLoading}
-        errorModal={errorModal}
-        toggleErrorModal={toggleErrorModal}
-        backToUpload={backToUpload}
-        successModal={successModal}
-        toggleSuccessModal={toggleSuccessModal}
-        fileData={fileData}
+          modal={modal}
+          toggleModal={toggleModal}
+          setPdfFile={setPdfFile}
+          pdfFile={pdfFile}
+          handleSubmit={handleSubmit}
+          isUploadLoading={isUploadLoading}
+          errorModal={errorModal}
+          toggleErrorModal={toggleErrorModal}
+          backToUpload={backToUpload}
+          successModal={successModal}
+          toggleSuccessModal={toggleSuccessModal}
+          fileData={fileData}
+        />
+        <Procore
+        procoreModal={procoreModal}
+        toggleProcoreModal={toggleProcoreModal}
       />
       <Modal
         isOpen={saveListName}
@@ -630,7 +675,14 @@ const ProjectLogs = () => {
                   <div className="col-6">
                     <div className="d-flex align-item-center justify-content-flex-end">
                       <button type="button" className="btn btn-primary mr-3" onClick={() => { setSelectedLogData(logData.filter((log) => { return list.records.includes(log.id) ? log : null })); setToggleViewSavedList(false); setListId(list.id) }}>Open</button>
-                      <button type="button" className="btn btn-primary" style={{ textTransform: 'none' }} onClick={() => handleExportExcel(logData.map((log) => { return list.records.includes(log.id) ? log.id : null }).filter(id => id), list.view_name)}>Export .xls</button>
+                      <button 
+                        type="button" 
+                        className="btn btn-primary" 
+                        style={{ textTransform: 'none' }} 
+                        onClick={() => handleExportExcel(logData.map((log) => { return list.records.includes(log.id) ? log.id : null }).filter(id => id), list.view_name)}
+                        >
+                      Export .xls
+                      </button>
                     </div>
                   </div>
                 </div>)
@@ -646,5 +698,6 @@ const ProjectLogs = () => {
     </div>
   );
 };
+}
 
 export default ProjectLogs;
