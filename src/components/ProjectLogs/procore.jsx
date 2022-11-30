@@ -210,5 +210,3 @@ const Procore = ({
 };
 
 export default Procore;
-
-export default Procore;
