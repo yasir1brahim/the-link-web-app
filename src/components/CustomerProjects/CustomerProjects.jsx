@@ -95,9 +95,10 @@ const CustomerProjects = (props) => {
   }, [state, pageRefresh, isArchived, roleId]);
 
   const handleLaunch = (project) => {
-    project?.project_type === 'ufgs' ? navigate('/project-logs', {
+    project?.project_type === 'ufgs' ? navigate(`/project-logs?projectId=${project?.project_id}&projectName=${project?.project_name}&customerId=${localStorage.getItem('roleId') === '0' ? state.customer_id : localStorage.getItem('userId')}&logType=Classified`, {
       state: {
         project,
+        projectId: project?.project_id,
         projectName: project?.project_name,
         customerId: localStorage.getItem('roleId') === '0' ? state.customer_id : localStorage.getItem('userId'),
         logType: 'Classified'

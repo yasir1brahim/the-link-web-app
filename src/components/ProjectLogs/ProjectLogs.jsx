@@ -20,6 +20,7 @@ import Loader from '../shared/Loader/Loader';
 import PdfWrapper from '../../pdfWrapper';
 import FileDownload from 'js-file-download';
 import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
+import { useSearchParams } from 'react-router-dom';
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -50,7 +51,14 @@ const ProjectLogs = () => {
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({ url: '', textLoc: {}, index: '', docId: null })
   const [newRowIndex, setNewRowIndex] = useState(null)
-  const projectType = state?.project?.project_type
+  const projectType = state?.project.project_type
+  
+  const [searchParams] = useSearchParams();
+  const projectId = searchParams.get('projectId')
+  const customerId = searchParams.get('customerId')
+  const projectName = searchParams.get('projectName')
+  const logType = searchParams.get('logType')
+
   console.log('selected', selected)
 
   useEffect(() => {
@@ -134,43 +142,43 @@ const ProjectLogs = () => {
   //   { label: 'Comments', key: 'comments' },
   // ];
   const handleDeleteLogs = async () => {
-    if (selected.length !== 0) {
-      try {
-        await axiosInstance({
-          method: 'delete',
-          url: '/delete_logs',
-          data: {
-            project_id: state?.project.project_id,
-            records: selected,
-            type: 'Submittal',
-          },
-        });
-        setPageRefresh(!pageRefresh);
-        setSelected([]);
-        toast.success('Successfully Deleted Logs!', {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      } catch (error) {
-        console.log(error.message);
-        setSelected([]);
-        toast.error(error.response.data.message, {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }
+    if (selected.length !== 0){
+    try {
+      await axiosInstance({
+        method: 'delete',
+        url: '/delete_logs',
+        data: {
+          project_id: state?.projectId || projectId,
+          records: selected,
+          type: 'Submittal',
+        },
+      });
+      setPageRefresh(!pageRefresh);
+      setSelected([]);
+      toast.success('Successfully Deleted Logs!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (error) {
+      console.log(error.message);
+      setSelected([]);
+      toast.error(error.response.data.message, {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
   };
+}
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -178,7 +186,7 @@ const ProjectLogs = () => {
         method: 'post',
         url: '/filter_logs',
         data: {
-          project_id: state?.project.project_id,
+          project_id: state?.projectId || projectId,
           search: "",
           filters: {},
           order_col: "",
@@ -217,7 +225,7 @@ const ProjectLogs = () => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/getPackages/${state.customerId}`,
+        url: `/getPackages/${state?.customerId || customerId}`,
       });
       setGroupingData(
         response.data.message.map((packageData) => {
@@ -284,7 +292,7 @@ const ProjectLogs = () => {
         url: '/exportLogs',
         responseType: 'arraybuffer',
         data: {
-          project_id: state?.project.project_id,
+          project_id: state?.projectId || projectId,
           records: recordData
         },
       });
@@ -319,7 +327,7 @@ const ProjectLogs = () => {
           method: 'post',
           url: '/save_list',
           data: {
-            project_id: state?.project.project_id,
+            project_id: state?.projectId || projectId,
             records: selected,
             view_name: listName.value
           },
@@ -342,11 +350,38 @@ const ProjectLogs = () => {
     try {
       const response = await axiosInstance({
         method: 'get',
-        url: `/get_list/${state?.project.project_id}`,
+        url: `/get_list/${state?.projectId || projectId}`,
       });
       setList(response.data.message)
       setToggleViewSavedList(true)
     } catch (error) {
+      toast.error('Something went wrong!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  }
+
+  const handleProcoreExport = async () => {
+    try {
+      await axiosInstance({
+        method: 'get',
+        url: `https://login-sandbox.procore.com/oauth/authorize`,
+        params: {
+          response_type: 'code',
+          client_id: 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9',
+          redirect_uri: `/project-logs?projectId=${projectId}&projectName=${projectName}&customerId=${customerId}&logType=${logType}`
+        }
+      }).then(res => {window.open(res.request?.responseURL,"_self")});
+      // }).then(res => {let wind = window.open("", "popupWindow", "width=600,height=600,scrollbars=yes");
+      // wind.document.write(res.data);})
+      // }).then(res => {console.log(res.data)})
+    } catch(e) {
       toast.error('Something went wrong!', {
         position: 'bottom-center',
         autoClose: 5000,
@@ -364,7 +399,7 @@ const ProjectLogs = () => {
       <div className="project-logs-wrapper log-table-width">
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
-          title={`All ${projectType === 'ufgs' ? 'UFGS' : 'Commercial'} Logs  - ${state?.projectName || ''}`}
+          title={`All ${projectType === 'ufgs' ? 'UFGS' : 'Commercial'} Logs  - ${state?.projectName || projectName || ''}`}
           breadcrumb={'Project Details'}
           breadcrumb2={'View Projects'}
           breadcrumb3={'Requrement Logs'}
@@ -436,10 +471,10 @@ const ProjectLogs = () => {
                     handleSelectAll={handleSelectAll}
                     pageRefresh={pageRefresh}
                     setPageRefresh={setPageRefresh}
-                    customerId={state.customerId}
+                    customerId={state?.customerId || customerId}
                     groupingData={groupingData}
                     setLogData={setLogData}
-                    projectId={state?.project.project_id}
+                    projectId={state?.projectId || projectId}
                     listId={listId}
                     selectedLogData={selectedLogData}
                     setSelectedLogData={setSelectedLogData}
