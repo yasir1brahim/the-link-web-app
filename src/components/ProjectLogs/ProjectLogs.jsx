@@ -375,7 +375,7 @@ const ProjectLogs = () => {
         params: {
           response_type: 'code',
           client_id: 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9',
-          redirect_uri: `/project-logs?projectId=${projectId}&projectName=${projectName}&customerId=${customerId}&logType=${logType}`
+          redirect_uri: `http://localhost:3000/project-logs?projectId=${projectId}&projectName=${projectName}&customerId=${customerId}&logType=${logType}`
         }
       }).then(res => {window.open(res.request?.responseURL,"_self")});
       // }).then(res => {let wind = window.open("", "popupWindow", "width=600,height=600,scrollbars=yes");
