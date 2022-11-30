@@ -202,41 +202,40 @@ const ProjectLogs = () => {
   //   { label: 'Comments', key: 'comments' },
   // ];
   const handleDeleteLogs = async () => {
-    if (selected.length !== 0) {
-      try {
-        await axiosInstance({
-          method: 'delete',
-          url: '/delete_logs',
-          data: {
-            project_id: state?.project.project_id,
-            records: selected,
-            type: 'Submittal',
-          },
-        });
-        setPageRefresh(!pageRefresh);
-        setSelected([]);
-        toast.success('Successfully Deleted Logs!', {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      } catch (error) {
-        console.log(error.message);
-        setSelected([]);
-        toast.error(error.response.data.message, {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }
+    if (selected.length !== 0){
+    try {
+      await axiosInstance({
+        method: 'delete',
+        url: '/delete_logs',
+        data: {
+          project_id: state?.projectId || projectId,
+          records: selected,
+          type: 'Submittal',
+        },
+      });
+      setPageRefresh(!pageRefresh);
+      setSelected([]);
+      toast.success('Successfully Deleted Logs!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (error) {
+      console.log(error.message);
+      setSelected([]);
+      toast.error(error.response.data.message, {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
   };
 }
