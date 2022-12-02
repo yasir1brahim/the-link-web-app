@@ -64,7 +64,7 @@ const ProjectsDetails = () => {
       setUploadLoading(true);
       const data = new FormData();
       data.append('project_id', state.project?.project_id);
-      data.append('project_type', state.project?.project_type);
+      state?.project?.project_type === 'ufgs' && data.append('project_type', state.project?.project_type);
       Object.values(pdfFile)?.forEach((file) => data.append('files', file));
       const response = await axiosInstance({
         method: 'post',

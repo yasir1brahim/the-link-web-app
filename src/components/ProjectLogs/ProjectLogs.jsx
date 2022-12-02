@@ -50,7 +50,7 @@ const ProjectLogs = () => {
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({ url: '', textLoc: {}, index: '', docId: null })
   const [newRowIndex, setNewRowIndex] = useState(null)
-  const projectType = state?.project.project_type
+  const projectType = state?.project?.project_type
   console.log('selected', selected)
 
   useEffect(() => {
@@ -70,6 +70,7 @@ const ProjectLogs = () => {
       setUploadLoading(true);
       const data = new FormData();
       data.append('project_id', state.project?.project_id);
+      projectType === 'ufgs' && data.append('project_type', projectType);
       Object.values(pdfFile)?.forEach((file) => data.append('files', file));
       const response = await axiosInstance({
         method: 'post',
