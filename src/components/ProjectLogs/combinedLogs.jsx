@@ -41,6 +41,7 @@ export default function CombinedLogs(props) {
     spec_section: '',
     status: '',
     type: '',
+    classification:''
   });
 
   const [showMore, setModal] = useState(null);
@@ -81,6 +82,7 @@ export default function CombinedLogs(props) {
                 ? searchValue
                 : rowData.package,
             para_context: rowData.para_context,
+            classification: rowData?.classification,
             para_no: rowData.para_no,
             project_id: rowData.project_id,
             spec_section: rowData.spec_section,
@@ -332,10 +334,18 @@ export default function CombinedLogs(props) {
                 <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('item_desc') }} />
               </span>
             </th>
-            {props.projectType === 'ufgs' &&
+            {/* {props.projectType === 'ufgs' &&
               <th>
                 <span className="has-sorting" >
                   Phase <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
+                </span>
+              </th>
+            } */}
+            {props.projectType === 'ufgs' &&
+              <th>
+                <span className="has-sorting" >
+                  Classification <i className={sorting.column === 'classification' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('classification')}></i>
+                {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('classification') }} /> */}
                 </span>
               </th>
             }
@@ -545,7 +555,7 @@ export default function CombinedLogs(props) {
                   )}
                 </td>
                 {props.projectType === 'ufgs' && <td>
-                  {editRow === index ? (
+                  {/* {editRow === index ? (
                     <div
                       className="form-group log-datepicker"
                       style={{ minWidth: '240px' }}
@@ -562,9 +572,9 @@ export default function CombinedLogs(props) {
                       // onInputChange={}
                       />
                     </div>
-                  ) : (
-                    log.package
-                  )}
+                  ) : ( */}
+                    {log.classification}
+                  {/* )} */}
                 </td>}
                 {props.projectType !== 'ufgs' && <td>
                   {editRow === index ? (
