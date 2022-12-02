@@ -104,7 +104,7 @@ export const FilterTable = (props) => {
                                     <span style={{textDecoration: 'underline', color:'blue', cursor:'pointer', marginRight: '10px'}} onClick={handleSelectAll}>Select all</span>
                                     <span style={{textDecoration: 'underline', color:'blue', cursor: 'pointer'}} onClick={handleClear}>Clear</span>
                                 </div>
-                                {Object.values(props.selectedFilterValue).length ? props?.selectedFilterValue[props?.filterColumn].filter((value) => value.toString().includes(searchValue)).map(((filterVal, index) => {
+                                {Object.values(props.selectedFilterValue).length ? props?.selectedFilterValue[props?.filterColumn].filter((value) => value?.toString().includes(searchValue)).map(((filterVal, index) => {
                                     return (
                                         <>
                                             <input type="checkbox" id={index} value={filterVal} checked={props.filterValues[props?.filterColumn].includes(filterVal)} name={filterVal} onChange={() => handleSelect(filterVal)} />

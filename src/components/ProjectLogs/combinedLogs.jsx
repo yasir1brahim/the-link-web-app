@@ -24,7 +24,7 @@ export default function CombinedLogs(props) {
   const [filterModal, setFilterModal] = useState(false)
   const [selectedFilterValue, setSelectedFilterValue] = useState({})
   const [filterColumn, setFilterColumn] = useState('')
-  const [filterValues, setFilterValues] = useState({ spec_section: [], type: [], item_desc: [] })
+  const [filterValues, setFilterValues] = useState({ spec_section: [], type: [], item_desc: [], classification: [] })
   const [addRowTooltip, setaddRowTooltip] = useState(null)
   const [editRowTooltip, setEditRowTooltip] = useState(null)
   const [pdfTooltip, setPdfTooltip] = useState(null)
@@ -83,6 +83,9 @@ export default function CombinedLogs(props) {
                 : rowData.package,
             para_context: rowData.para_context,
             classification: rowData?.classification,
+            phase: null,
+            sd_no: rowData?.sd_no,
+            div_no: rowData?.div_no,
             para_no: rowData.para_no,
             project_id: rowData.project_id,
             spec_section: rowData.spec_section,
@@ -345,7 +348,7 @@ export default function CombinedLogs(props) {
               <th>
                 <span className="has-sorting" >
                   Classification <i className={sorting.column === 'classification' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('classification')}></i>
-                {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('classification') }} /> */}
+                <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('classification') }} />
                 </span>
               </th>
             }
