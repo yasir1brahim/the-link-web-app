@@ -23,10 +23,9 @@ import FileDownload from 'js-file-download';
 import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
 import { useSearchParams } from 'react-router-dom';
 import Procore from './procore';
+import axios from 'axios';
 
 const ProjectLogs = () => {
-  const [procoreModal, setProcoreModal] = useState(false);
-  const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -57,6 +56,11 @@ const ProjectLogs = () => {
   const [newRowIndex, setNewRowIndex] = useState(null)
   const projectType = state?.project.project_type
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  //Procore states
+  const [procoreModal, setProcoreModal] = useState(false);
+  const toggleProcoreModal = () => setProcoreModal(!procoreModal);
+  const [companyList, setCompanyList] = useState([]);
 
   const toggle = () => setDropdownOpen((prevState) => !prevState);
   
@@ -139,41 +143,49 @@ const ProjectLogs = () => {
   };
 
   // check with the back end team for unauth code 
-  // useEffect(() => {
-  //   if(authCode){
-
-  //     const fetchData = async () => {
-  //       await axiosInstance({
-  //         method: 'post',
-  //         url: 'https://login.procore.com/oauth/token',
-  //         body: {
-  //           grant_type: "authorization_code",
-  //           code: authCode,
-  //           client_secret: '479eb769cc54e8a8ef1185816b20873ea36842f9eadbd61aa16f3a5a7e008aad',
-  //           client_id: 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9',
-  //         redirect_uri: `http://localhost:3000/project-logs?projectId=${projectId}&projectName=${projectName}&customerId=${customerId}&logType=${logType}`
-  //       },
-  //       });
-  //     };
-  
-  //     fetchData().catch((error) => {
-  //       toast.error('Something went wrong!', {
-  //         position: 'bottom-center',
-  //         autoClose: 5000,
-  //         hideProgressBar: true,
-  //         closeOnClick: true,
-  //         pauseOnHover: true,
-  //         draggable: true,
-  //         progress: undefined,
-  //       });
-  //     });
-  //   }
-  // }, [authCode]);
-
-  // workaround for call ( delete )
-  useEffect(()=>{
+  useEffect(() => {
     if(authCode){
-      setProcoreModal(true)}},[authCode])
+      const fetchData = async () => {
+        const accessTokenData = await axiosInstance({
+          method: 'post',
+          url: '/procore/access_token',
+          data: {
+            code: authCode,
+            redirect_uri: `http://localhost:3000/project-logs?projectId=${projectId}&customerId=${customerId}&logType=${logType}`
+        },
+        });
+        localStorage.setItem('procore_access_token', accessTokenData?.data.data.access_token)
+
+        const projectMappingResponse = await axiosInstance({
+          method: 'get',
+          url: `/procore/project_mapping/${projectId}`,
+        });
+        if(!projectMappingResponse?.data?.project_id) {
+          setProcoreModal(true)
+          const companyResp = await axios({
+            method: 'get',
+            url: 'https://sandbox.procore.com/rest/v1.0/companies?include_free_companies=true',
+            headers:{
+              Authorization: `Bearer ${accessTokenData?.data.data.access_token}`
+            }
+          })
+          setCompanyList(companyResp.data)
+        }
+      };
+  
+      fetchData().catch((error) => {
+        toast.error('Something went wrong!', {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      });
+    }
+  }, [authCode]);
 
   // const headers = [
   //   { label: 'Spec Sec', key: 'spec_section' },
@@ -421,12 +433,9 @@ const ProjectLogs = () => {
         params: {
           response_type: 'code',
           client_id: 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9',
-          redirect_uri: `http://localhost:3000/project-logs?projectId=${projectId}&projectName=${projectName}&customerId=${customerId}&logType=${logType}`
+          redirect_uri: `http://localhost:3000/project-logs?projectId=${projectId}&customerId=${customerId}&logType=${logType}`
         }
       }).then(res => {window.open(res.request?.responseURL,"_self")});
-      // }).then(res => {let wind = window.open("", "popupWindow", "width=600,height=600,scrollbars=yes");
-      // wind.document.write(res.data);})
-      // }).then(res => {console.log(res.data)})
     } catch(e) {
       toast.error('Something went wrong!', {
         position: 'bottom-center',
@@ -609,6 +618,8 @@ const ProjectLogs = () => {
         <Procore
         procoreModal={procoreModal}
         toggleProcoreModal={toggleProcoreModal}
+        companyList={companyList}
+        projectId={projectId}
       />
       <Modal
         isOpen={saveListName}
