@@ -10,6 +10,7 @@ const Loader = (props) => {
         }
       >
         <div className="dots">
+          {props.showProcessing ? <p className='dot-processing'>Processing</p> : ''}
           <div className="dot1"></div>
           <div className="dot2"></div>
           <div className="dot3"></div>

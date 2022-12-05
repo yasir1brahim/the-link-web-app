@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ReactComponent as Logo } from '../../../assets/images/logo-white.svg';
 import { ReactComponent as Down } from '../../../assets/images/chevron-bottom.svg';
 // import { ReactComponent as Notification } from '../../../assets/images/notificat.svg';
@@ -6,7 +6,23 @@ import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
 const NavbarTop = () => {
   const [navDrop, setNavDrop] = useState(false);
 
-  const toggleDrop = () => setNavDrop(!navDrop);
+  const toggleDrop = () => {
+    setNavDrop(!navDrop)
+  };
+
+  // Click Outside code
+  const ref = useRef();
+  const handleClickOutside = e => {
+    if (ref.current.contains !== e.target) {
+      setNavDrop(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  });
+  // Click Outside code
 
   return (
     <section className="navigation-wrapper d-flex align-items-center justify-content-center">
@@ -31,7 +47,7 @@ const NavbarTop = () => {
             </NavLink>
           </NavItem> */}
           <NavItem>
-            <NavLink
+            <NavLink ref={ref}
               className={'user-wrapper ' + (navDrop ? 'navdrop-open' : '')}
               // href="/"
               onClick={toggleDrop}
