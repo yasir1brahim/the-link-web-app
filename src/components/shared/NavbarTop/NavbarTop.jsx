@@ -13,16 +13,16 @@ const NavbarTop = () => {
   // Click Outside code
   const ref = useRef();
   const handleClickOutside = e => {
-    if (ref.current.contains !== e.target) {
+    if (!ref.current?.contains(e.target)) {
       setNavDrop(false);
     }
   };
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
   });
-  // Click Outside code
+  // Click Outside code ends
 
   return (
     <section className="navigation-wrapper d-flex align-items-center justify-content-center">
@@ -47,7 +47,7 @@ const NavbarTop = () => {
             </NavLink>
           </NavItem> */}
           <NavItem>
-            <NavLink ref={ref}
+            <NavLink 
               className={'user-wrapper ' + (navDrop ? 'navdrop-open' : '')}
               // href="/"
               onClick={toggleDrop}
@@ -61,7 +61,7 @@ const NavbarTop = () => {
               <Down />
             </NavLink>
             {navDrop ? (
-              <div className="nav-dropdown">
+              <div className="nav-dropdown" ref={ref}>
                 {localStorage.getItem('roleId') === '0' && (
                   <a
                     href="/admin-user"
