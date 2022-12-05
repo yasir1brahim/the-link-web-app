@@ -34,6 +34,7 @@ const CreateProject = ({
   // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
   const [employeeList, setEmployeeList] = useState([]);
   const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
+  const [profilePicture, setProfilePicture] = useState('');
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });\
   console.log('customer', projects)
 
@@ -57,6 +58,13 @@ const CreateProject = ({
         });
         setEmployeeList(response.data.message);
         console.log(response.data.message);
+        const picture = await axiosInstance({
+          method: 'get',
+          url: `/getLogo/${localStorage.getItem('roleId') === '0' ? customer?.customer_id : Number(localStorage.getItem('userId'))}`,
+        });
+        if (picture.data) {
+          setProfilePicture(picture.data.url);
+        }
       };
 
       fetchData().catch(console.error);
@@ -140,7 +148,7 @@ const CreateProject = ({
             <form className="create-project-form">
               <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
                 <div className="customer-dp-container">
-                  {/* <img src={profilePicture} alt="Company Logo" /> */}
+                  <img src={profilePicture} alt="Company Logo" />
                 </div>
                 <div className="customer-profile">
                   <div className="row">

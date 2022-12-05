@@ -107,7 +107,7 @@ export const UploadDocuments = (props) => {
                     {/* Upload form code */}
 
                     {/* Error Upload code */}
-                    <Loader showComponentLoader={isUploadLoading} />
+                    {isUploadLoading && <Loader showComponentLoader={true} showProcessing={true} />}
                 </ModalBody>
             </Modal>
             <Modal
