@@ -50,7 +50,8 @@ const ProjectLogs = () => {
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({ url: '', textLoc: {}, index: '', docId: null })
   const [newRowIndex, setNewRowIndex] = useState(null)
-  const projectType = state?.project.project_type
+  const projectType = state?.project?.project_type
+  console.log('selected', selected)
 
   useEffect(() => {
     if (!modal) {
@@ -69,6 +70,7 @@ const ProjectLogs = () => {
       setUploadLoading(true);
       const data = new FormData();
       data.append('project_id', state.project?.project_id);
+      projectType === 'ufgs' && data.append('project_type', projectType);
       Object.values(pdfFile)?.forEach((file) => data.append('files', file));
       const response = await axiosInstance({
         method: 'post',
@@ -107,7 +109,7 @@ const ProjectLogs = () => {
         ...logData.slice(newRowIndex + 1)
       ]),
       setNewRowIndex(null)
-    , 200),
+      , 200),
     [setSearchValue, logData, newRowIndex]
   );
 
@@ -132,39 +134,41 @@ const ProjectLogs = () => {
   //   { label: 'Comments', key: 'comments' },
   // ];
   const handleDeleteLogs = async () => {
-    try {
-      await axiosInstance({
-        method: 'delete',
-        url: '/delete_logs',
-        data: {
-          project_id: state?.project.project_id,
-          records: selected,
-          type: 'Submittal',
-        },
-      });
-      setPageRefresh(!pageRefresh);
-      setSelected([]);
-      toast.success('Successfully Deleted Logs!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    } catch (error) {
-      console.log(error.message);
-      setSelected([]);
-      toast.error(error.response.data.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+    if (selected.length !== 0) {
+      try {
+        await axiosInstance({
+          method: 'delete',
+          url: '/delete_logs',
+          data: {
+            project_id: state?.project.project_id,
+            records: selected,
+            type: 'Submittal',
+          },
+        });
+        setPageRefresh(!pageRefresh);
+        setSelected([]);
+        toast.success('Successfully Deleted Logs!', {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      } catch (error) {
+        console.log(error.message);
+        setSelected([]);
+        toast.error(error.response.data.message, {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
     }
   };
   useEffect(() => {
@@ -240,7 +244,7 @@ const ProjectLogs = () => {
     });
   }, [state, pageRefresh]);
 
-  useEffect(()=>{
+  useEffect(() => {
     let filterData = selectedLogData.length ? selectedLogData : logData
     let filteredLog = filterData
       .map((log) => {
@@ -251,10 +255,10 @@ const ProjectLogs = () => {
           : null;
       })
       .filter((value) => value);
-      setFilteredLogData(filteredLog)
-  },[selectedLogData, logData, searchValue, setFilteredLogData])
+    setFilteredLogData(filteredLog)
+  }, [selectedLogData, logData, searchValue, setFilteredLogData])
   // let filteredLogData = selectedLogData.length ? selectedLogData : logData
-  
+
   const handleSelectAll = () => {
     if (selected?.length === filteredLogData?.length) {
       setSelected([]);
@@ -510,21 +514,21 @@ const ProjectLogs = () => {
         draggable
         pauseOnHover
       />
-      <Loader showComponentLoader={isLoading} />
+      {isLoading && <Loader showComponentLoader={true} />}
       <UploadDocuments
-          modal={modal}
-          toggleModal={toggleModal}
-          setPdfFile={setPdfFile}
-          pdfFile={pdfFile}
-          handleSubmit={handleSubmit}
-          isUploadLoading={isUploadLoading}
-          errorModal={errorModal}
-          toggleErrorModal={toggleErrorModal}
-          backToUpload={backToUpload}
-          successModal={successModal}
-          toggleSuccessModal={toggleSuccessModal}
-          fileData={fileData}
-        />
+        modal={modal}
+        toggleModal={toggleModal}
+        setPdfFile={setPdfFile}
+        pdfFile={pdfFile}
+        handleSubmit={handleSubmit}
+        isUploadLoading={isUploadLoading}
+        errorModal={errorModal}
+        toggleErrorModal={toggleErrorModal}
+        backToUpload={backToUpload}
+        successModal={successModal}
+        toggleSuccessModal={toggleSuccessModal}
+        fileData={fileData}
+      />
       <Modal
         isOpen={saveListName}
         fade={false}
@@ -554,7 +558,7 @@ const ProjectLogs = () => {
                       List Name
                     </label>
                     {listName.errors && (
-                      <small className="form-error">{listName.errors}</small>
+                      <small className="form-error error-red">{listName.errors}</small>
                     )}
                   </div>
                 </div>

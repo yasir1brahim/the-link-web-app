@@ -12,11 +12,22 @@ const EditEmployee = ({
   employee,
   pageRefresh,
   setPageRefresh,
+  empData,
 }) => {
-  const [email, setEmail] = useState({ value: "", errors: "" });
+  const [email, setEmail] = useState({
+    value: employee?.emp_email || employee?.email_address,
+    errors: "",
+  });
   const [firstName, setFirstName] = useState({ value: "", errors: "" });
   const [lastName, setLastName] = useState({ value: "", errors: "" });
   const [contactNumber, setContactNumber] = useState({ value: "", errors: "" });
+  // console.log('customer', customer)
+  // console.log('employee', employee)
+  // console.log('modal', modal)
+  // console.log('employeeDta', empData)
+  // console.log('email',  email.value)
+  // const emailRef = useRef()
+  // console.log('emailRef', emailRef.current?.value)
   // const [projects, setProjects] = useState([]);
   // const [asscProject, setAsscProject] = useState([]);
 
@@ -41,6 +52,21 @@ const EditEmployee = ({
   //   }
   //   return error;
   // };
+
+  const validate = () => {
+    let error = false;
+    if (email?.value === "") {
+      setEmail({ ...email, errors: "Email is required." });
+      error = true;
+    } else if (empData?.find((item) => item?.emp_email === email?.value)) {
+      setEmail({ ...email, errors: "Email already exists" });
+      error = true;
+    } else {
+      setEmail({ ...email, errors: "" });
+      error = false;
+    }
+    return error;
+  };
   const handleContactNumberChange = (e) => {
     let value = contactNumber.value.replace(/[^0-9]/g, "");
     let regex = /^[0-9]*$/;
@@ -53,37 +79,47 @@ const EditEmployee = ({
   };
 
   const handleSubmit = async () => {
-    // let errors = validate();
-    // if (!errors) {
-    const employeeName = employee?.name || employee?.full_name
-    try {
-      const response = await axiosInstance({
-        method: "put",
-        url: "/updateEmployee",
-        data: {
-          email_address:
-            email.value || employee?.emp_email || employee?.email_address,
-          full_name: `${
-            firstName.value ||
-            employeeName?.split(/(\s+)/)[0] 
-          }  ${
-            lastName.value ||
-            employeeName?.split(/(\s+)/)[2] 
-          }`,
-          // projects: asscProject.map((project) => project.value),
-          projects: [],
-          contact_number:
-            contactNumber.value.replace(/[^0-9]/g, "") ||
-            employee?.contact_number,
-          customer_id: customer?.customer_id || customer?.id || customer[0]?.id,
-          emp_id: employee?.emp_id || employee?.id,
-        },
-      });
-      if (response.data) {
-        console.log(response.data);
-        setPageRefresh(!pageRefresh);
-        toggleModal();
-        toast.success("Employee edited successfully!", {
+    // console.log('emailRef', emailRef.current.value)
+    let errors = validate();
+    if (!errors) {
+      const employeeName = employee?.name || employee?.full_name;
+      try {
+        const response = await axiosInstance({
+          method: "put",
+          url: "/updateEmployee",
+          data: {
+            email_address:
+              email.value || employee?.emp_email || employee?.email_address,
+            full_name: `${
+              firstName.value || employeeName?.split(/(\s+)/)[0]
+            }  ${lastName.value || employeeName?.split(/(\s+)/)[2]}`,
+            // projects: asscProject.map((project) => project.value),
+            projects: [],
+            contact_number:
+              contactNumber.value.replace(/[^0-9]/g, "") ||
+              employee?.contact_number,
+            customer_id:
+              customer?.customer_id || customer?.id || customer[0]?.id,
+            emp_id: employee?.emp_id || employee?.id,
+          },
+        });
+        if (response.data) {
+          console.log(response.data);
+          setPageRefresh(!pageRefresh);
+          toggleModal();
+          toast.success("Employee edited successfully!", {
+            position: "bottom-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+        }
+      } catch (error) {
+        console.log(error.message);
+        toast.error(error.response.data.message, {
           position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
@@ -92,21 +128,10 @@ const EditEmployee = ({
           draggable: true,
           progress: undefined,
         });
+        toggleModal();
       }
-    } catch (error) {
-      console.log(error.message);
-      toast.error(error.response.data.message, {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      toggleModal();
+      // }
     }
-    // }
   };
   return (
     <Modal
@@ -117,87 +142,92 @@ const EditEmployee = ({
     >
       <ModalHeader toggle={toggleModal}>Edit Employee</ModalHeader>
       <ModalBody>
-        <form className="create-user-form">
-          <div className="create-user-content">
-            <div className="row">
-              <div className="col-4">
-                <div className="form-group">
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="userFirstName"
-                    aria-describedby="userFirstName"
-                    placeholder="Enter"
-                    defaultValue={
-                      employee?.name
-                        ? employee?.name.split(/(\s+)/)[0]
-                        : employee?.full_name
-                        ? employee?.full_name.split(/(\s+)/)[0]
-                        : ""
-                    }
-                    onChange={(e) => {
-                      setFirstName({
-                        ...firstName,
-                        value: e.target.value,
-                      });
-                    }}
-                  />
-                  <label className="text-label" htmlFor="userFirstName">
-                    First Name
-                  </label>
-                </div>
+        {/* <form className="create-user-form"> */}
+        <div className="create-user-content">
+          <div className="row">
+            <div className="col-4">
+              <div className="form-group">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="userFirstName"
+                  aria-describedby="userFirstName"
+                  placeholder="Enter"
+                  defaultValue={
+                    employee?.name
+                      ? employee?.name.split(/(\s+)/)[0]
+                      : employee?.full_name
+                      ? employee?.full_name.split(/(\s+)/)[0]
+                      : ""
+                  }
+                  onChange={(e) => {
+                    setFirstName({
+                      ...firstName,
+                      value: e.target.value,
+                    });
+                  }}
+                />
+                <label className="text-label" htmlFor="userFirstName">
+                  First Name
+                </label>
               </div>
-              <div className="col-4">
-                <div className="form-group">
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="userLastName"
-                    aria-describedby="userLastName"
-                    placeholder="Enter"
-                    defaultValue={
-                      employee?.name
-                        ? employee?.name.split(/(\s+)/)[2]
-                        : employee?.full_name
-                        ? employee?.full_name.split(/(\s+)/)[2]
-                        : ""
-                    }
-                    onChange={(e) => {
-                      setLastName({
-                        ...lastName,
-                        value: e.target.value,
-                      });
-                    }}
-                  />
-                  <label className="text-label" htmlFor="userLastName">
-                    Last Name
-                  </label>
-                </div>
+            </div>
+            <div className="col-4">
+              <div className="form-group">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="userLastName"
+                  aria-describedby="userLastName"
+                  placeholder="Enter"
+                  defaultValue={
+                    employee?.name
+                      ? employee?.name.split(/(\s+)/)[2]
+                      : employee?.full_name
+                      ? employee?.full_name.split(/(\s+)/)[2]
+                      : ""
+                  }
+                  onChange={(e) => {
+                    setLastName({
+                      ...lastName,
+                      value: e.target.value,
+                    });
+                  }}
+                />
+                <label className="text-label" htmlFor="userLastName">
+                  Last Name
+                </label>
               </div>
-              <div className="col-4">
-                <div className="form-group">
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="userEmailAddress"
-                    aria-describedby="userEmailAddress"
-                    placeholder="Enter"
-                    defaultValue={employee?.emp_email || employee?.email_address}
-                    onChange={(e) => {
-                      setEmail({
-                        ...email,
-                        value: e.target.value,
-                      });
-                    }}
-                  />
-                  <label className="text-label" htmlFor="userEmailAddress">
-                    Email Address
-                  </label>
-                </div>
+            </div>
+            <div className="col-4">
+              <div className="form-group">
+                <input
+                  type="email"
+                  className="form-control"
+                  id="userEmailAddress"
+                  aria-describedby="userEmailAddress"
+                  placeholder="Enter"
+                  defaultValue={employee?.emp_email || employee?.email_address}
+                  onChange={(e) => {
+                    setEmail({
+                      ...email,
+                      value: e.target.value,
+                    });
+                  }}
+                />
+                <label className="text-label" htmlFor="userEmailAddress">
+                  Email Address
+                </label>
+                {email.errors && (
+                  <small className="form-error" style={{ color: "red" }}>
+                    {email.errors}
+                  </small>
+                )}
               </div>
-              <div className="col-4">
-                <div className="form-group">
-                  {/* <input
+            </div>
+            <div className="col-4">
+              <div className="form-group">
+                {/* <input
                     type="text"
                     className="form-control"
                     id="userPhone"
@@ -214,34 +244,34 @@ const EditEmployee = ({
                   <label className="text-label" htmlFor="userPhone">
                     Phone
                   </label> */}
-                  <MaskedInput
-                    // value={contactNumber.value}
-                    defaultValue={employee?.contact_number}
-                    onChange={(e) => handleContactNumberChange(e)}
-                    name="contactNumber"
-                    error={contactNumber.errors}
-                    mask={[
-                      "(",
-                      /[1-9]/,
-                      /\d/,
-                      /\d/,
-                      ")",
-                      " ",
-                      /\d/,
-                      /\d/,
-                      /\d/,
-                      "-",
-                      /\d/,
-                      /\d/,
-                      /\d/,
-                      /\d/,
-                    ]}
-                    labelClass={"text-label"}
-                    label={"Phone"}
-                  />
-                </div>
+                <MaskedInput
+                  // value={contactNumber.value}
+                  defaultValue={employee?.contact_number}
+                  onChange={(e) => handleContactNumberChange(e)}
+                  name="contactNumber"
+                  error={contactNumber.errors}
+                  mask={[
+                    "(",
+                    /[1-9]/,
+                    /\d/,
+                    /\d/,
+                    ")",
+                    " ",
+                    /\d/,
+                    /\d/,
+                    /\d/,
+                    "-",
+                    /\d/,
+                    /\d/,
+                    /\d/,
+                    /\d/,
+                  ]}
+                  labelClass={"text-label"}
+                  label={"Phone"}
+                />
               </div>
-              {/* <div className="col-4">
+            </div>
+            {/* <div className="col-4">
                 <div className="form-group">
                   <Typeahead
                     multiple
@@ -258,17 +288,17 @@ const EditEmployee = ({
                   />
                 </div>
               </div> */}
-            </div>
           </div>
-          <ModalFooter>
-            <Button color="secondary" onClick={toggleModal}>
-              Cancel
-            </Button>
-            <Button color="primary" onClick={handleSubmit}>
-              Save
-            </Button>{" "}
-          </ModalFooter>
-        </form>
+        </div>
+        <ModalFooter>
+          <Button color="secondary" onClick={toggleModal}>
+            Cancel
+          </Button>
+          <Button color="primary" onClick={handleSubmit}>
+            Save
+          </Button>{" "}
+        </ModalFooter>
+        {/* </form> */}
       </ModalBody>
     </Modal>
   );

@@ -11,31 +11,48 @@
   // background-color: rgba(255,255,255,0.75); //white Background
   // background-color: rgba(0,0,0,0.75); //black Background
   background-color: rgba(32, 42, 68, 0.75); //theme Background
+
   &.wrapper-component {
     position: absolute;
+
+    .dots {
+      min-height: auto;
+    }
   }
+
+  .dot-processing {
+    color: $white;
+    position: absolute;
+    padding-bottom: 60px;
+  }
+
   .dots {
     min-height: 100vh;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    > * {
+
+    >div {
       // background: $primary; //theme color
       background: $white; //white color
       width: 10px;
       height: 10px;
       border-radius: 50%;
       margin: 3px;
+
       &.dot1 {
         animation: 1s 0.25s infinite ease-in-out both low-high;
       }
+
       &.dot2 {
         animation: 1s 0.5s infinite ease-in-out both low-high;
       }
+
       &.dot3 {
         animation: 1s 0.75s infinite ease-in-out both low-high;
       }
+
       &.dot4 {
         animation: 1s 0.8s infinite ease-in-out both low-high;
       }
@@ -43,10 +60,12 @@
   }
 
   @keyframes low-high {
+
     0%,
     100% {
       transform: scale(0);
     }
+
     50% {
       transform: scale(1);
     }
