@@ -26,8 +26,6 @@ import Procore from './procore';
 import axios from 'axios';
 
 const ProjectLogs = () => {
-  const [procoreModal, setProcoreModal] = useState(false);
-  const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -237,8 +235,7 @@ const ProjectLogs = () => {
         progress: undefined,
       });
     }
-  };
-}
+  };}
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -711,6 +708,5 @@ const ProjectLogs = () => {
     </div>
   );
 };
-}
 
 export default ProjectLogs;
