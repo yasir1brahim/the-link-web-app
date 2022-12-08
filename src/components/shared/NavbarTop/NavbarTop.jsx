@@ -1,26 +1,26 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ReactComponent as Logo } from '../../../assets/images/logo-white.svg';
-import { ReactComponent as Down } from '../../../assets/images/chevron-bottom.svg';
+import React, { useEffect, useRef, useState } from "react";
+import { ReactComponent as Logo } from "../../../assets/images/logo-white.svg";
+import { ReactComponent as Down } from "../../../assets/images/chevron-bottom.svg";
 // import { ReactComponent as Notification } from '../../../assets/images/notificat.svg';
-import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
+import { Navbar, Nav, NavItem, NavLink } from "reactstrap";
 const NavbarTop = () => {
   const [navDrop, setNavDrop] = useState(false);
 
   const toggleDrop = () => {
-    setNavDrop(!navDrop)
+    setNavDrop(!navDrop);
   };
 
   // Click Outside code
   const ref = useRef();
-  const handleClickOutside = e => {
+  const handleClickOutside = (e) => {
     if (!ref.current?.contains(e.target)) {
       setNavDrop(false);
     }
   };
 
   useEffect(() => {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   });
   // Click Outside code ends
 
@@ -32,13 +32,28 @@ const NavbarTop = () => {
       >
         <a
           href={
-            localStorage.getItem('roleId') === '0'
-              ? '/admin-landing'
-              : '/project-list'
+            localStorage.getItem("roleId") === "0"
+              ? "/admin-landing"
+              : "/project-list"
           }
-          className="navbar-brand">
+          className="navbar-brand"
+        >
           <Logo />
         </a>
+        {window.location.href.includes("project-logs") && (
+          <Nav className="ml-auto" navbar>
+            <NavItem>
+              <span
+                style={{
+                  color: "white",
+                  fontSize: "25px",
+                }}
+              >
+                Submittal Log
+              </span>
+            </NavItem>
+          </Nav>
+        )}
         <Nav className="ml-auto" navbar>
           {/* <NavItem>
             <NavLink className="notification-wrapper">
@@ -47,8 +62,8 @@ const NavbarTop = () => {
             </NavLink>
           </NavItem> */}
           <NavItem>
-            <NavLink 
-              className={'user-wrapper ' + (navDrop ? 'navdrop-open' : '')}
+            <NavLink
+              className={"user-wrapper " + (navDrop ? "navdrop-open" : "")}
               // href="/"
               onClick={toggleDrop}
             >
@@ -56,13 +71,13 @@ const NavbarTop = () => {
                 <i className="fa fa-user"></i>
               </span>
               <span className="user-name">
-                {localStorage.getItem('fullName')}
+                {localStorage.getItem("fullName")}
               </span>
               <Down />
             </NavLink>
             {navDrop ? (
               <div className="nav-dropdown" ref={ref}>
-                {localStorage.getItem('roleId') === '0' && (
+                {localStorage.getItem("roleId") === "0" && (
                   <a
                     href="/admin-user"
                     className="navlist"
@@ -71,7 +86,7 @@ const NavbarTop = () => {
                     View Admin Portal
                   </a>
                 )}
-                {localStorage.getItem('roleId') === '2' && (
+                {localStorage.getItem("roleId") === "2" && (
                   <a
                     href="/customer-profile"
                     className="navlist"
@@ -89,7 +104,7 @@ const NavbarTop = () => {
                 </a>
               </div>
             ) : (
-              ''
+              ""
             )}
           </NavItem>
         </Nav>
