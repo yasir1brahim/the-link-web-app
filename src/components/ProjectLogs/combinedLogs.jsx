@@ -2,7 +2,7 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../config/axios';
-import DateSelector from '../shared/DateSelector/DateSelector';
+// import DateSelector from '../shared/DateSelector/DateSelector';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import { FilterTable } from './filterTable';
 import { ReactComponent as EditButton } from '../../assets/images/edit-button.svg';
@@ -325,16 +325,19 @@ export default function CombinedLogs(props) {
                 Para
               </span>
             </th>}
-            <th>
+           <th>
               <span className="has-sorting" >
                 Requirement Type <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('type')}></i>
                 <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} />
               </span>
             </th>
             <th>
-              <span className="has-sorting"  >Item
-                <i className={sorting.column === 'item_desc' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('item_desc')}></i>
-                <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('item_desc') }} />
+              <span className="has-sorting"  >
+                Item
+                <div>
+                  <i className={sorting.column === 'item_desc' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('item_desc')}></i>
+                  <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('item_desc') }} />
+                </div>
               </span>
             </th>
             {/* {props.projectType === 'ufgs' &&
@@ -352,17 +355,22 @@ export default function CombinedLogs(props) {
                 </span>
               </th>
             }
-            {props.projectType !== 'ufgs' && <th>
-              <span className="has-sorting" >
-                Grouping <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
-              </span>
-            </th>}
-            <th className="log-description">
+            {props.projectType !== 'ufgs' && 
+            <>
+              <th>
+                <span className="has-sorting" >
+                  Grouping <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
+                </span>
+              </th>
+              <th className="log-description">
               <span className='has-sorting' >
                 Paragraph Context <i className={sorting.column === "para_context" ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting("para_context")}></i>
               </span>
             </th>
-            <th>
+            </>
+            }
+            
+            {/* <th>
               <span className="has-sorting" >
                 Status <i className={sorting.column === 'status' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('status')}></i>
               </span>
@@ -379,7 +387,7 @@ export default function CombinedLogs(props) {
             </th>
             <th className="log-description">
               <span>Comments</span>
-            </th>
+            </th> */}
           </tr>
         </thead>
         <tbody>
@@ -557,7 +565,7 @@ export default function CombinedLogs(props) {
                     log.item_desc
                   )}
                 </td>
-                {props.projectType === 'ufgs' && <td>
+                {props.projectType === 'ufgs' && <td style={{textAlign: 'center'}}>
                   {/* {editRow === index ? (
                     <div
                       className="form-group log-datepicker"
@@ -579,48 +587,52 @@ export default function CombinedLogs(props) {
                     {log.classification}
                   {/* )} */}
                 </td>}
-                {props.projectType !== 'ufgs' && <td>
-                  {editRow === index ? (
-                    <div
-                      className="form-group log-datepicker"
-                      style={{ minWidth: '240px' }}
-                    >
-                      <SelectDropdown
-                        label={'Grouping'}
-                        // labelKey="name"
-                        setSelected={setGroupingValue}
-                        // value={leadContact.label}
-                        selected={groupingValue?.label}
-                        options={props.groupingData}
-                        searchValue={searchValue}
-                        setSearchValue={setSearchValue}
-                      // onInputChange={}
+                {props.projectType !== 'ufgs' && 
+                <>
+                  <td>
+                    {editRow === index ? (
+                      <div
+                        className="form-group log-datepicker"
+                        style={{ minWidth: '240px' }}
+                      >
+                        <SelectDropdown
+                          label={'Grouping'}
+                          // labelKey="name"
+                          setSelected={setGroupingValue}
+                          // value={leadContact.label}
+                          selected={groupingValue?.label}
+                          options={props.groupingData}
+                          searchValue={searchValue}
+                          setSearchValue={setSearchValue}
+                        // onInputChange={}
+                        />
+                      </div>
+                    ) : (
+                      log.package
+                    )}
+                  </td>
+                  <td>
+                    {editRow === index ? (
+                      <input
+                        placeholder="Enter"
+                        className="form-control"
+                        type="text"
+                        value={rowData.para_context}
+                        // style={{ border: 'none' }}
+                        onChange={(e) =>
+                          setRowData({ ...rowData, para_context: e.target.value })
+                        }
                       />
-                    </div>
-                  ) : (
-                    log.package
-                  )}
-                </td>}
-                <td>
-                  {editRow === index ? (
-                    <input
-                      placeholder="Enter"
-                      className="form-control"
-                      type="text"
-                      value={rowData.para_context}
-                      // style={{ border: 'none' }}
-                      onChange={(e) =>
-                        setRowData({ ...rowData, para_context: e.target.value })
-                      }
-                    />
-                  ) : (
-                    <div className={"log-desc " + (showMore === index ? 'show-content' : '')}>
-                      {log.para_context}
-                      {log.para_context.length > 132 && <span className="showmore-wrap" onClick={() => setModal(showMore === index ? null : index)}>...{showMore === index ? 'Show Less' : 'Show More'}</span>}
-                    </div>
-                  )}
-                </td>
-                <td>
+                    ) : (
+                      <div className={"log-desc " + (showMore === index ? 'show-content' : '')}>
+                        {log.para_context}
+                        {log.para_context.length > 132 && <span className="showmore-wrap" onClick={() => setModal(showMore === index ? null : index)}>...{showMore === index ? 'Show Less' : 'Show More'}</span>}
+                      </div>
+                    )}
+                  </td>
+                </>
+                }
+                {/* <td>
                   {editRow === index ? (
                     <div
                       className="form-group log-datepicker"
@@ -702,7 +714,7 @@ export default function CombinedLogs(props) {
                   ) : (
                     log.comments
                   )}
-                </td>
+                </td> */}
 
               </tr>
             );
