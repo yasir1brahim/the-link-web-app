@@ -47,6 +47,7 @@ const NavbarTop = () => {
                 style={{
                   color: "white",
                   fontSize: "25px",
+                  fontWeight: 600
                 }}
               >
                 Submittal Log
