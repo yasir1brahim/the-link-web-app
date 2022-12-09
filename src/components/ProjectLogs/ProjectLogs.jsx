@@ -24,8 +24,11 @@ import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
 import { useSearchParams } from 'react-router-dom';
 import Procore from './procore';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const ProjectLogs = () => {
+  const navigate = useNavigate();
+  const [navigateToSubmittal, setNavigateToSubmittal] = useState(false);
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -142,7 +145,6 @@ const ProjectLogs = () => {
     }
   };
 
-  // check with the back end team for unauth code 
   useEffect(() => {
     if(authCode){
       const fetchData = async () => {
@@ -160,7 +162,7 @@ const ProjectLogs = () => {
           method: 'get',
           url: `/procore/project_mapping/${projectId}`,
         });
-        if(!projectMappingResponse?.data?.project_id) {
+        if(!projectMappingResponse?.data?.data?.project_id) {
           setProcoreModal(true)
           const companyResp = await axios({
             method: 'get',
@@ -170,6 +172,9 @@ const ProjectLogs = () => {
             }
           })
           setCompanyList(companyResp.data)
+        } else {
+          searchParams.set('code', '')
+          setNavigateToSubmittal(!navigateToSubmittal);
         }
       };
   
@@ -187,18 +192,22 @@ const ProjectLogs = () => {
     }
   }, [authCode]);
 
+  useEffect(()=>{if(navigateToSubmittal){
+    navigate(`/submital-mappings?customerId=${customerId}`);
+  }},[navigateToSubmittal]);
+
   // const headers = [
-  //   { label: 'Spec Sec', key: 'spec_section' },
-  //   { label: 'Paragraph', key: 'para_no' },
-  //   { label: 'Requirement Type', key: 'type' },
-  //   { label: 'Item', key: 'item_desc' },
-  //   { label: 'Grouping', key: 'Grouping' },
-  //   { label: 'Paragraph Context', key: 'para_context' },
-  //   { label: 'Status', key: 'status' },
-  //   { label: 'Date Issued', key: 'date_issued' },
-  //   { label: 'Date Approved', key: 'date_approved' },
-  //   { label: 'Comments', key: 'comments' },
-  // ];
+    //   { label: 'Spec Sec', key: 'spec_section' },
+    //   { label: 'Paragraph', key: 'para_no' },
+    //   { label: 'Requirement Type', key: 'type' },
+    //   { label: 'Item', key: 'item_desc' },
+    //   { label: 'Grouping', key: 'Grouping' },
+    //   { label: 'Paragraph Context', key: 'para_context' },
+    //   { label: 'Status', key: 'status' },
+    //   { label: 'Date Issued', key: 'date_issued' },
+    //   { label: 'Date Approved', key: 'date_approved' },
+    //   { label: 'Comments', key: 'comments' },
+    // ];
   const handleDeleteLogs = async () => {
     if (selected.length !== 0){
     try {
@@ -270,14 +279,15 @@ const ProjectLogs = () => {
       });
     });
   }, [state, pageRefresh]);
+ 
   // useEffect(()=>{
-  //   Afer edit of a column in the selected view below code updates the value of the field
-  //   if(selectedLogData.length) {
-  //     let logIds = selectedLogData.map((log)=> log.id)
-  //     let newSelectedData = logData.filter((log) => { return logIds?.includes(log.id) ? log : null })
-  //     setSelectedLogData(newSelectedData);
-  //   }
-  // },[logData, selectedLogData])
+    //   Afer edit of a column in the selected view below code updates the value of the field
+    //   if(selectedLogData.length) {
+    //     let logIds = selectedLogData.map((log)=> log.id)
+    //     let newSelectedData = logData.filter((log) => { return logIds?.includes(log.id) ? log : null })
+    //     setSelectedLogData(newSelectedData);
+    //   }
+    // },[logData, selectedLogData])
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
@@ -452,7 +462,7 @@ const ProjectLogs = () => {
       <NavbarTop />
       <div className="project-logs-wrapper log-table-width">
         <Header
-          // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
+        // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
           title={`All ${projectType === 'ufgs' ? 'UFGS' : 'Commercial'} Logs  - ${state?.projectName || projectName || ''}`}
           breadcrumb={'Project Details'}
           breadcrumb2={'View Projects'}
@@ -615,6 +625,7 @@ const ProjectLogs = () => {
           fileData={fileData}
         />
         <Procore
+        customerId={customerId}
         procoreModal={procoreModal}
         toggleProcoreModal={toggleProcoreModal}
         companyList={companyList}

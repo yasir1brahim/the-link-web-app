@@ -229,3 +229,17 @@
 .error-red{
   color:red
 }
+
+.submittal-table {
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-evenly;
+  width: 50%;
+  table td 
+  .has-typehead{
+    margin: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

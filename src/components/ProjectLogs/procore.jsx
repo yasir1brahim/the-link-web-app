@@ -5,13 +5,16 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../config/axios";
+import { useNavigate } from 'react-router-dom';
 
 const Procore = ({
+  customerId,
   procoreModal,
   toggleProcoreModal,
   companyList,
   projectId,
 }) => {
+  const navigate = useNavigate();
   const [partnerCompany, setPartnerCompany] = useState([]);
   const [projectName, setProjectName] = useState([]);
   const [submittalManager, setSubmittalManager] = useState([]);
@@ -92,8 +95,8 @@ const Procore = ({
           procore_company_name: partnerCompany[0]?.label,
           procore_submittal_manager_name: submittalManager[0]?.label,
         },
-      });
-      toggleProcoreModal();
+      }).then(()=>{
+        toggleProcoreModal();
       toast.success("Updated project procore info!", {
         position: "bottom-center",
         autoClose: 5000,
@@ -103,6 +106,9 @@ const Procore = ({
         draggable: true,
         progress: undefined,
       });
+      navigate(`/submital-mappings?customerId=${customerId}`);
+      })
+
     } catch (error) {
       toggleProcoreModal();
       toast.error("Something went wrong!", {
