@@ -24,7 +24,7 @@ export default function CombinedLogs(props) {
   const [filterModal, setFilterModal] = useState(false)
   const [selectedFilterValue, setSelectedFilterValue] = useState({})
   const [filterColumn, setFilterColumn] = useState('')
-  const [filterValues, setFilterValues] = useState({ spec_section: [], type: [], item_desc: [], classification: [] })
+  const [filterValues, setFilterValues] = useState({ spec_section: [], type: [], item_desc: [], classification: [], sd_title: [] })
   const [addRowTooltip, setaddRowTooltip] = useState(null)
   const [editRowTooltip, setEditRowTooltip] = useState(null)
   const [pdfTooltip, setPdfTooltip] = useState(null)
@@ -325,12 +325,18 @@ export default function CombinedLogs(props) {
                 Para
               </span>
             </th>}
-           <th>
+           {props.projectType !== 'ufgs' && <th>
               <span className="has-sorting" >
                 Requirement Type <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('type')}></i>
                 <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} />
               </span>
-            </th>
+            </th>}
+            {props.projectType === 'ufgs' && <th>
+              <span className="has-sorting" >
+                SD Title <i className={sorting.column === 'sd_title' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('sd_title')}></i>
+                <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('sd_title') }} />
+              </span>
+            </th>}
             <th>
               <span className="has-sorting"  >
                 Item
@@ -533,7 +539,7 @@ export default function CombinedLogs(props) {
                     log.para_no
                   )} */}
                 </td>}
-                <td>
+                {props.projectType !== 'ufgs' && <td>
                   {editRow === index ? (
                     <input
                       placeholder="Enter"
@@ -548,7 +554,8 @@ export default function CombinedLogs(props) {
                   ) : (
                     log.type
                   )}
-                </td>
+                </td>}
+                {props.projectType === 'ufgs' && <td> {log.sd_title} </td>}
                 <td>
                   {editRow === index ? (
                     <input
