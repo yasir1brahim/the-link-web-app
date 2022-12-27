@@ -15,7 +15,7 @@ import axiosInstance from '../../config/axios';
 // import MeetingTable from './meetingTable';
 // import { CSVLink } from 'react-csv';
 import CombinedLogs from './combinedLogs';
-import { debounce } from 'lodash';
+import { debounce, get } from 'lodash';
 import Loader from '../shared/Loader/Loader';
 // import * as XLSX from 'xlsx';
 import PdfWrapper from '../../pdfWrapper';
@@ -73,8 +73,6 @@ const ProjectLogs = () => {
   const projectName = searchParams.get('projectName')
   const logType = searchParams.get('logType')
   const authCode = searchParams.get('code');
-
-  console.log('selected', selected)
 
   useEffect(() => {
     if (!modal) {
@@ -162,7 +160,13 @@ const ProjectLogs = () => {
           method: 'get',
           url: `/procore/project_mapping/${projectId}`,
         });
-        if(!projectMappingResponse?.data?.data?.project_id) {
+        if(get(projectMappingResponse,'data.data')){
+          localStorage.setItem('companyId', get(projectMappingResponse,'data.data.procore_company_id'));
+          localStorage.setItem('projectId', projectId);
+          localStorage.setItem('logType', logType);
+          localStorage.setItem('customerId', customerId);
+        }
+        if(!projectMappingResponse?.data?.data?.procore_project_id) {
           setProcoreModal(true)
           const companyResp = await axios({
             method: 'get',
@@ -344,6 +348,17 @@ const ProjectLogs = () => {
       setSelected(selectedLogs);
     }
   };
+
+  // add the selected rows in session storage to be used by export procore
+  useEffect(()=>{
+    // do not update the values if navigated from procore page
+    if(document.referrer)
+    {
+      sessionStorage.setItem('selectedRows', JSON.stringify(selected))}
+    },[selected]
+  )
+
+
   // const downloadExcel = (logs, fileName) => {
   //   //Boilerplate format of making an xlsx file from xlsx library
   //   //Below header array is specified to maintain the column order in xlsx file same as our table
