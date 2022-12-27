@@ -53,36 +53,18 @@ const SubmittalMappings = () => {
   }, [customerId]);
 
   // function used to map the procore submittals to link subimttals
-  const onSelectProcoreDropdown = (linkId, procoreId) => {
-    // if the mapping array has some values in it scan and update else just push the mappings
-    if (linkAndProcoreMappingsArray && linkAndProcoreMappingsArray.length > 0) {
-      // search the array for the link id and update it with the new procoreId
-      const indexForLinkId = linkAndProcoreMappingsArray.find(
-        (key) => key[0] === linkId
-      );
-      if (indexForLinkId && procoreId) {
-        setLinkAndProcoreMappingsArray(
-          linkAndProcoreMappingsArray.splice(indexForLinkId, 1, procoreId.id)
-        );
-      } else if (procoreId) {
-        setLinkAndProcoreMappingsArray(
-          linkAndProcoreMappingsArray.push([linkId, procoreId.id])
-        );
-      }
-    } else if (procoreId) {
-      // pusht the values directly in the empty array
-      setLinkAndProcoreMappingsArray([[linkId, procoreId.id]]);
+  const onSelectProcoreDropdown = (linkId, procoreValue) => {
+    if(linkSubMappings && linkSubMappings.length >0){
+      const objectToUpdate = linkSubMappings[linkId];
+      const updatedObject = {...objectToUpdate, procore_type: procoreValue}
+      linkSubMappings.splice(linkId, 1, updatedObject)
+      setLinkSubMappings(linkSubMappings);
     }
   };
 
   const procoreMappings = async () => {
-    const mappingsobject = { mappings: [] };
-    // const mappingsObjectItems = {
-    //     "id" : 0,
-    //     "link_submittal": "",
-    //     "procore_type": ""
-    // };
-    // need to map the mappingsObjectItems and send it in the api
+    const mappingsobject = { mappings: linkSubMappings };
+   
     try {
       await axiosInstance({
         method: "post",
@@ -141,7 +123,7 @@ const SubmittalMappings = () => {
                       <SelectDropDownV2
                         options={procoreSubTypes}
                         onChange={(e) =>
-                          onSelectProcoreDropdown(k, get(e, `[0]`))
+                          onSelectProcoreDropdown(k, get(e, '[0].name'))
                         }
                       />
                     </td>
