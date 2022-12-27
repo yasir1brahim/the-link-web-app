@@ -8,6 +8,9 @@ import NavbarTop from "../shared/NavbarTop/NavbarTop";
 import { Button } from "reactstrap";
 import SelectDropDownV2 from "../shared/SelectDropDownV2/SelectDropDownV2";
 import ExportToProcoreModal from "./exportToProcoreModal";
+import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
+import { ReactComponent as LinkLogo } from "../../assets/images/logo-dark.svg";
+import { ReactComponent as ArrowRight } from "../../assets/images/arrow-right.svg";
 
 const SubmittalMappings = () => {
   const [searchParams] = useSearchParams();
@@ -54,17 +57,17 @@ const SubmittalMappings = () => {
 
   // function used to map the procore submittals to link subimttals
   const onSelectProcoreDropdown = (linkId, procoreValue) => {
-    if(linkSubMappings && linkSubMappings.length >0){
+    if (linkSubMappings && linkSubMappings.length > 0) {
       const objectToUpdate = linkSubMappings[linkId];
-      const updatedObject = {...objectToUpdate, procore_type: procoreValue}
-      linkSubMappings.splice(linkId, 1, updatedObject)
+      const updatedObject = { ...objectToUpdate, procore_type: procoreValue };
+      linkSubMappings.splice(linkId, 1, updatedObject);
       setLinkSubMappings(linkSubMappings);
     }
   };
 
   const procoreMappings = async () => {
     const mappingsobject = { mappings: linkSubMappings };
-   
+
     try {
       await axiosInstance({
         method: "post",
@@ -104,16 +107,25 @@ const SubmittalMappings = () => {
           </Button>
         </div>
       </div>
+      <div style={{width: '350px', display: 'flex', margin: 'auto'}}>
+       <LinkLogo/> <ArrowRight/> <Logo style={{marginLeft: '20px'}}/>
+      </div>
       <div className="project-logs-wrapper log-table-width submittal-table">
         <table>
           <tbody>
-            <tr>
+            <tr style={{ border: "10px solid #202A44", background: '#202A44', color: '#ffffff' }}>
               <th>Submittal Types from Link</th>
               <th>Submittal Types from Procore</th>
             </tr>
             {linkSubMappings.length > 0 &&
               linkSubMappings.map((x, k) => (
-                <tr key={k}>
+                <tr
+                  key={k}
+                  style={{
+                    borderBottom: "1px solid black",
+                    lineHeight: "40px",
+                  }}
+                >
                   {/**link submittal types column 1 */}
                   <td>{get(x, "link_submittal")}</td>
                   {!onEdit && <td>{get(x, "procore_type")}</td>}
@@ -123,8 +135,9 @@ const SubmittalMappings = () => {
                       <SelectDropDownV2
                         options={procoreSubTypes}
                         onChange={(e) =>
-                          onSelectProcoreDropdown(k, get(e, '[0].name'))
+                          onSelectProcoreDropdown(k, get(e, "[0].name"))
                         }
+                        style={{ marginTop: "20px" }}
                       />
                     </td>
                   ) : (

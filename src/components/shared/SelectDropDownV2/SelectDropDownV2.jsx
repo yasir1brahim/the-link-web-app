@@ -1,14 +1,12 @@
-import React, { useState } from 'react';
-import { Hint, Typeahead } from 'react-bootstrap-typeahead';
-import 'react-bootstrap-typeahead/css/Typeahead.css';
+import React from "react";
+import { Typeahead } from "react-bootstrap-typeahead";
+import "react-bootstrap-typeahead/css/Typeahead.css";
 
 const SelectDropDownV2 = ({ ...props }) => {
-
   return (
-    <div
-    >
+    <div style={{ marginTop: "20px" }}>
       <Typeahead
-      labelKey={option => `${option.name}`}
+        labelKey={(option) => `${option.name}`}
         id="basic-example-v2"
         options={props.options}
         onChange={props.onChange}
