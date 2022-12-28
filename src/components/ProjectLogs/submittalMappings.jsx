@@ -10,7 +10,7 @@ import SelectDropDownV2 from "../shared/SelectDropDownV2/SelectDropDownV2";
 import ExportToProcoreModal from "./exportToProcoreModal";
 import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
 import { ReactComponent as LinkLogo } from "../../assets/images/logo-dark.svg";
-import { ReactComponent as ArrowRight } from "../../assets/images/arrow-right.svg";
+import { ReactComponent as ArrowRight } from "../../assets/images/border-arrow.svg";
 
 const SubmittalMappings = () => {
   const [searchParams] = useSearchParams();
@@ -103,12 +103,12 @@ const SubmittalMappings = () => {
           <Button onClick={() => setOnEdit(true)}>Edit</Button>
           <Button onClick={() => procoreMappings()}>
             {" "}
-            Looks Good! Continue
+            Continue
           </Button>
         </div>
       </div>
       <div style={{width: '350px', display: 'flex', margin: 'auto'}}>
-       <LinkLogo/> <ArrowRight/> <Logo style={{marginLeft: '20px'}}/>
+       <LinkLogo/> <ArrowRight/> <Logo style={{marginLeft: '30px'}}/>
       </div>
       <div className="project-logs-wrapper log-table-width submittal-table">
         <table>

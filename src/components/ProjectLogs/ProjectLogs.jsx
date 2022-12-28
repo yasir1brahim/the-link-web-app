@@ -25,6 +25,7 @@ import { useSearchParams } from 'react-router-dom';
 import Procore from './procore';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
 
 const ProjectLogs = () => {
   const navigate = useNavigate();
@@ -451,7 +452,7 @@ const ProjectLogs = () => {
 
   const handleProcoreExport = async () => {
     try {
-      await axiosInstance({
+      await axios({
         method: 'get',
         url: `https://login-sandbox.procore.com/oauth/authorize`,
         params: {
@@ -523,7 +524,7 @@ const ProjectLogs = () => {
                     <DropdownToggle caret>Export</DropdownToggle>
                     <DropdownMenu>
                     <DropdownItem onClick={() => handleExportExcel("All")}>Excel</DropdownItem>
-                    <DropdownItem onClick={handleProcoreExport}>Procore</DropdownItem>
+                    <DropdownItem onClick={handleProcoreExport}><Logo style={{height: '90px'}}/></DropdownItem>
                     </DropdownMenu>
                     </Dropdown>}
                     <button
