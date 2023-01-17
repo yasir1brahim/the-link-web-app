@@ -1,43 +1,39 @@
-import axios from "axios";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../config/axios";
-import { useNavigate } from 'react-router-dom';
+import { get } from "lodash";
+import { useNavigate } from "react-router-dom";
 
 const Procore = ({
+  projectId,
   customerId,
   procoreModal,
   toggleProcoreModal,
-  companyList,
-  projectId,
+  procoreProjectId,
+  procoreCompanyId,
 }) => {
   const navigate = useNavigate();
   const [partnerCompany, setPartnerCompany] = useState([]);
   const [projectName, setProjectName] = useState([]);
   const [submittalManager, setSubmittalManager] = useState([]);
   const [projectList, setProjectList] = useState([]);
-  const [submittalList, setSubmittalList] = useState([]);
+  const [managersList, setManagersList] = useState([]);
+  const [companyList, setCompanyList] = useState([]);
 
-  //Once a user selects a partner company, it's respective project fetching API is called
+  // calling get to fetch list of companies for the dropdown
   useEffect(() => {
-    if (partnerCompany[0]?.value) {
-      const fetchData = async () => {
-        const projectListResp = await axios({
+    const getCompanyList = async () => {
+      try {
+        await axiosInstance({
           method: "get",
-          url: `https://sandbox.procore.com/rest/v1.0/projects?company_id=${partnerCompany[0]?.value}`,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem(
-              "procore_access_token"
-            )}`,
-          },
+          url: `procore/companies`,
+        }).then((res) => {
+          setCompanyList(get(res, "data.data"));
         });
-        setProjectList(projectListResp.data);
-      };
-
-      fetchData().catch((error) => {
+      } catch (error) {
         toast.error("Something went wrong!", {
           position: "bottom-center",
           autoClose: 5000,
@@ -47,27 +43,23 @@ const Procore = ({
           draggable: true,
           progress: undefined,
         });
-      });
-    }
-  }, [partnerCompany]);
+      }
+    };
 
-  //Further after selecting a project it's respective submittall manager API is called
+    getCompanyList();
+  }, []);
+
+  // calling get to fetch list of projects for the dropdown
   useEffect(() => {
-    if (projectName[0]?.label) {
-      const fetchData = async () => {
-        const submittalManagerResp = await axios({
+    const getProjectsList = async () => {
+      try {
+        await axiosInstance({
           method: "get",
-          url: `https://sandbox.procore.com/rest/v1.0/projects/${projectName[0]?.value}/submittals/filter_options/submittal_manager_id`,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem(
-              "procore_access_token"
-            )}`,
-          },
+          url: `procore/projects/${procoreCompanyId}`,
+        }).then((res) => {
+          setProjectList(get(res, "data.data"));
         });
-        setSubmittalList(submittalManagerResp.data);
-      };
-
-      fetchData().catch((error) => {
+      } catch (error) {
         toast.error("Something went wrong!", {
           position: "bottom-center",
           autoClose: 5000,
@@ -77,9 +69,39 @@ const Procore = ({
           draggable: true,
           progress: undefined,
         });
-      });
+      }
+    };
+    if (procoreCompanyId) {
+      getProjectsList();
     }
-  }, [projectName]);
+  }, [procoreCompanyId]);
+
+  // calling get to fetch list of managers for the dropdown
+  useEffect(() => {
+    const getManagersList = async () => {
+      try {
+        await axiosInstance({
+          method: "get",
+          url: `procore/managers/${procoreProjectId}`,
+        }).then((res) => {
+          setManagersList(get(res, "data.data"));
+        });
+      } catch (error) {
+        toast.error("Something went wrong!", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
+    };
+    if (procoreProjectId) {
+      getManagersList();
+    }
+  }, [procoreProjectId]);
 
   const handleProjectMapping = async () => {
     try {
@@ -88,27 +110,26 @@ const Procore = ({
         url: "/procore/project_mapping",
         data: {
           project_id: projectId,
-          procore_company_id: partnerCompany[0]?.value,
-          procore_project_id: projectName[0]?.value,
+          procore_company_id: procoreCompanyId,
+          procore_project_id: procoreProjectId,
           procore_project_name: projectName[0]?.label,
           procore_submittal_manager_id: submittalManager[0]?.value,
           procore_company_name: partnerCompany[0]?.label,
           procore_submittal_manager_name: submittalManager[0]?.label,
         },
-      }).then(()=>{
+      }).then(() => {
         toggleProcoreModal();
-      toast.success("Updated project procore info!", {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
+        toast.success("Updated project procore info!", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        navigate(`/submital-mappings?customerId=${customerId}`);
       });
-      navigate(`/submital-mappings?customerId=${customerId}`);
-      })
-
     } catch (error) {
       toggleProcoreModal();
       toast.error("Something went wrong!", {
@@ -163,8 +184,8 @@ const Procore = ({
                     selected={projectName?.label}
                     options={projectList?.map((project) => {
                       return {
-                        value: project.id,
-                        label: project.display_name,
+                        value: project.key,
+                        label: project.value,
                       };
                     })}
                     className="form-control"
@@ -178,7 +199,7 @@ const Procore = ({
                     setSelected={setSubmittalManager}
                     // value={leadContact.label}
                     selected={submittalManager?.label}
-                    options={submittalList?.map((manager) => {
+                    options={managersList?.map((manager) => {
                       return {
                         value: manager.key,
                         label: manager.value,

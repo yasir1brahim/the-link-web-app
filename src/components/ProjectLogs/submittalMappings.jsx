@@ -19,8 +19,6 @@ const SubmittalMappings = () => {
   const [procoreSubTypes, setProcoreSubTypes] = useState([]);
   //   const [procoreSubDropDownMappings, setProcoreSubDropDownMappings] = useState([]);
   const [onEdit, setOnEdit] = useState(false);
-  const [linkAndProcoreMappingsArray, setLinkAndProcoreMappingsArray] =
-    useState([]);
   const [openExportToProcoreModal, setOpenExportToProcoreModal] =
     useState(false);
   const [allMappings, setAllMappings] = useState({});
