@@ -6,10 +6,12 @@ import axiosInstance from '../../config/axios';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import { FilterTable } from './filterTable';
 import { ReactComponent as EditButton } from '../../assets/images/edit-button.svg';
-import { ReactComponent as AddButton } from '../../assets/images/circle-add.svg';
+// import { ReactComponent as AddButton } from '../../assets/images/circle-add.svg';
 import { ReactComponent as PdfButton } from '../../assets/images/file-pdf.svg';
 import { ReactComponent as SaveButton } from '../../assets/images/label-approve.svg';
 import { ReactComponent as CancelButton } from '../../assets/images/label-reject.svg';
+import { ReactComponent as ExpandButton } from '../../assets/images/down-arrow.svg';
+import { ReactComponent as CollapseButton } from '../../assets/images/up-arrow.svg';
 import { Tooltip } from 'reactstrap';
 
 export default function CombinedLogs(props) {
@@ -396,10 +398,10 @@ export default function CombinedLogs(props) {
             </th> */}
           </tr>
         </thead>
-        <tbody>
+        <tbody style={{fontSize: '12px'}}>
           {logData.map((log, index) => {
             return (
-              <tr className={log.user_id !== 1 && "highlight-row"}>
+              <tr className={log.user_id !== 1 || index%2 !== 0 && "highlight-row"}>
                 <td className="ticket-checkbox">
                   <div className="form-group">
                     <div className="custom-control custom-checkbox">
@@ -480,7 +482,7 @@ export default function CombinedLogs(props) {
                             View Pdf
                           </Tooltip></>
                       }
-                      {!props.selectedLogData.length && <><AddButton onClick={() => {
+                      {/* {!props.selectedLogData.length && <><AddButton onClick={() => {
                         if (!newRowIndex) {
                           handleAddRow(log)
                         } else if (newRowIndex === index + 1) {
@@ -490,7 +492,7 @@ export default function CombinedLogs(props) {
                       />
                         <Tooltip placement="right" target={'Tooltip-' + index + 1} isOpen={addRowTooltip === index + 1} toggle={() => setaddRowTooltip(addRowTooltip ? addRowTooltip === index + 1 ? null : index + 1 : index + 1)}>
                           Add Row below
-                        </Tooltip></>}
+                        </Tooltip></>} */}
                     </>
                     }
                   </div>
@@ -633,7 +635,7 @@ export default function CombinedLogs(props) {
                     ) : (
                       <div className={"log-desc " + (showMore === index ? 'show-content' : '')}>
                         {log.para_context}
-                        {log.para_context.length > 132 && <span className="showmore-wrap" onClick={() => setModal(showMore === index ? null : index)}>...{showMore === index ? 'Show Less' : 'Show More'}</span>}
+                        {log.para_context.length > 59 && <span className="showmore-wrap" onClick={() => setModal(showMore === index ? null : index)}>{showMore === index ? <CollapseButton/> : <ExpandButton/>}</span>}
                       </div>
                     )}
                   </td>
