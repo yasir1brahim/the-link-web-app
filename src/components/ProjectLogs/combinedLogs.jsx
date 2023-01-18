@@ -27,7 +27,7 @@ export default function CombinedLogs(props) {
   const [selectedFilterValue, setSelectedFilterValue] = useState({})
   const [filterColumn, setFilterColumn] = useState('')
   const [filterValues, setFilterValues] = useState({ spec_section: [], type: [], item_desc: [], classification: [], sd_title: [] })
-  const [addRowTooltip, setaddRowTooltip] = useState(null)
+  // const [addRowTooltip, setaddRowTooltip] = useState(null)
   const [editRowTooltip, setEditRowTooltip] = useState(null)
   const [pdfTooltip, setPdfTooltip] = useState(null)
   // const navigate = useNavigate();
@@ -235,45 +235,45 @@ export default function CombinedLogs(props) {
     ...arr.slice(index + 1)
   ]
 
-  const handleAddRow = async (log) => {
-    try {
-      let index = props.logData?.findIndex(item => item === log)
-      const dashIndex = log.para_no.search('-')
-      // Below we are making an array of para_nos then filtering them like if log.para_no = 1.04, paraNos will have all entries of 1.04 i.e. 1.04-a, 1.04-b etc.
-      const paraNos = completeLogData?.map(log => log.para_no).filter(paraNo => paraNo.includes(dashIndex !== -1 ? log.para_no.slice(0, dashIndex) : log.para_no))
-      //Now we are making an array containing the ascii character values of elements after '-' in paraNos
-      const charArray = paraNos.map(paraNo => paraNo.search('-') !== -1 ? paraNo.codePointAt(paraNo.search('-') + 1) : 96)
-      const logObj = {
-        ...log,
-        //Here we are checking if para_no already contains a character after '-'. 
-        // If yes, we are increasing the ascii value of the character by 1 for ex.- if it's a it will make it b. 
-        // If No, it will add '-a' to para_no
-        para_no: dashIndex !== -1 ?
-          log.para_no.slice(0, dashIndex + 1) + String.fromCharCode(Math.max(...charArray) + 1) :
-          `${log.para_no}-${String.fromCharCode(Math.max(...charArray) + 1)}`,
-        customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
-      }
-      const result = insertElement(props.logData, index + 1, logObj)
-      props.setFilteredLogData(result)
+  // const handleAddRow = async (log) => {
+  //   try {
+  //     let index = props.logData?.findIndex(item => item === log)
+  //     const dashIndex = log.para_no.search('-')
+  //     // Below we are making an array of para_nos then filtering them like if log.para_no = 1.04, paraNos will have all entries of 1.04 i.e. 1.04-a, 1.04-b etc.
+  //     const paraNos = completeLogData?.map(log => log.para_no).filter(paraNo => paraNo.includes(dashIndex !== -1 ? log.para_no.slice(0, dashIndex) : log.para_no))
+  //     //Now we are making an array containing the ascii character values of elements after '-' in paraNos
+  //     const charArray = paraNos.map(paraNo => paraNo.search('-') !== -1 ? paraNo.codePointAt(paraNo.search('-') + 1) : 96)
+  //     const logObj = {
+  //       ...log,
+  //       //Here we are checking if para_no already contains a character after '-'. 
+  //       // If yes, we are increasing the ascii value of the character by 1 for ex.- if it's a it will make it b. 
+  //       // If No, it will add '-a' to para_no
+  //       para_no: dashIndex !== -1 ?
+  //         log.para_no.slice(0, dashIndex + 1) + String.fromCharCode(Math.max(...charArray) + 1) :
+  //         `${log.para_no}-${String.fromCharCode(Math.max(...charArray) + 1)}`,
+  //       customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
+  //     }
+  //     const result = insertElement(props.logData, index + 1, logObj)
+  //     props.setFilteredLogData(result)
 
-      setNewRowIndex(index + 1)
-      handleEditToggle(logObj, index + 1)
-      if (props.pdfData.url) {
-        let docElement = document.getElementsByClassName("l-table-wrapper")
-        docElement[0].scrollTo(890, 0)
-      }
-    } catch (e) {
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    }
-  }
+  //     setNewRowIndex(index + 1)
+  //     handleEditToggle(logObj, index + 1)
+  //     if (props.pdfData.url) {
+  //       let docElement = document.getElementsByClassName("l-table-wrapper")
+  //       docElement[0].scrollTo(890, 0)
+  //     }
+  //   } catch (e) {
+  //     toast.error('Something went wrong!', {
+  //       position: 'bottom-center',
+  //       autoClose: 5000,
+  //       hideProgressBar: true,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //     });
+  //   }
+  // }
   useEffect(() => {
     setEditRow('');
   }, [props.searchValue])
@@ -401,7 +401,7 @@ export default function CombinedLogs(props) {
         <tbody style={{fontSize: '12px'}}>
           {logData.map((log, index) => {
             return (
-              <tr className={log.user_id !== 1 || index%2 !== 0 && "highlight-row"}>
+              <tr className={(log.user_id !== 1 || index%2 !== 0) ? "highlight-row" : ""}>
                 <td className="ticket-checkbox">
                   <div className="form-group">
                     <div className="custom-control custom-checkbox">
