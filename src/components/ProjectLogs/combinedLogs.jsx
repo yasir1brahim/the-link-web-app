@@ -1,25 +1,25 @@
-import moment from 'moment';
+// import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../config/axios';
 // import DateSelector from '../shared/DateSelector/DateSelector';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import { FilterTable } from './filterTable';
-import { ReactComponent as EditButton } from '../../assets/images/edit-button.svg';
+// import { ReactComponent as EditButton } from '../../assets/images/edit-button.svg';
 // import { ReactComponent as AddButton } from '../../assets/images/circle-add.svg';
 import { ReactComponent as PdfButton } from '../../assets/images/file-pdf.svg';
-import { ReactComponent as SaveButton } from '../../assets/images/label-approve.svg';
-import { ReactComponent as CancelButton } from '../../assets/images/label-reject.svg';
+// import { ReactComponent as SaveButton } from '../../assets/images/label-approve.svg';
+// import { ReactComponent as CancelButton } from '../../assets/images/label-reject.svg';
 import { ReactComponent as ExpandButton } from '../../assets/images/down-arrow.svg';
 import { ReactComponent as CollapseButton } from '../../assets/images/up-arrow.svg';
 import { Tooltip } from 'reactstrap';
 
 export default function CombinedLogs(props) {
-  const { logData, newRowIndex, setNewRowIndex } = props;
+  const { logData, newRowIndex } = props;
   const [editRow, setEditRow] = useState('');
-  const [dateIssued, setDateIssued] = useState('');
-  const [dateApproved, setDateApproved] = useState('');
-  const [statusValue, setStatus] = useState({});
+  // const [dateIssued, setDateIssued] = useState('');
+  // const [dateApproved, setDateApproved] = useState('');
+  // const [statusValue, setStatus] = useState({});
   const [groupingValue, setGroupingValue] = useState({});
   const [searchValue, setSearchValue] = useState('');
   const [sorting, setSorting] = useState({ column: '', order: 'desc' });
@@ -28,7 +28,7 @@ export default function CombinedLogs(props) {
   const [filterColumn, setFilterColumn] = useState('')
   const [filterValues, setFilterValues] = useState({ spec_section: [], type: [], item_desc: [], classification: [], sd_title: [] })
   // const [addRowTooltip, setaddRowTooltip] = useState(null)
-  const [editRowTooltip, setEditRowTooltip] = useState(null)
+  // const [editRowTooltip, setEditRowTooltip] = useState(null)
   const [pdfTooltip, setPdfTooltip] = useState(null)
   // const navigate = useNavigate();
 
@@ -49,83 +49,83 @@ export default function CombinedLogs(props) {
   const [showMore, setModal] = useState(null);
   // const toggleShowMore = () => setModal(!showMore);
 
-  const handleEditToggle = (log, index) => {
-    setRowData(log);
-    setEditRow(index);
-    setDateIssued('');
-    setDateApproved('');
-  };
+  // const handleEditToggle = (log, index) => {
+  //   setRowData(log);
+  //   setEditRow(index);
+  //   setDateIssued('');
+  //   setDateApproved('');
+  // };
 
-  const handleUpdateLog = async () => {
-    try {
-      setEditRow('');
-      if (newRowIndex) {
-        await axiosInstance({
-          method: 'post',
-          url: '/addRecord',
-          data: {
-            ...rowData,
-            customer_id: props.customerId,
-            user_id: localStorage.getItem('userId')
-          }
-        });
-      } else {
-        await axiosInstance({
-          method: 'put',
-          url: '/update_logs',
-          data: {
-            customer_id: props.customerId,
-            comments: rowData.comments,
-            id: rowData.id,
-            item_desc: rowData.item_desc,
-            package: groupingValue?.length
-              ? groupingValue[0].label
-              : searchValue
-                ? searchValue
-                : rowData.package,
-            para_context: rowData.para_context,
-            classification: rowData?.classification,
-            phase: null,
-            sd_no: rowData?.sd_no,
-            div_no: rowData?.div_no,
-            para_no: rowData.para_no,
-            project_id: rowData.project_id,
-            spec_section: rowData.spec_section,
-            status: statusValue?.length ? statusValue[0].value : '',
-            type: rowData.type,
-            date_issued: !dateIssued
-              ? rowData?.date_issued
-                ? moment(
-                  new Date((rowData?.date_issued).replaceAll('-', '/'))
-                ).format('YYYY-MM-DD')
-                : null
-              : moment(dateIssued).format('YYYY-MM-DD'),
-            date_approved: !dateApproved
-              ? rowData?.date_approved
-                ? moment(
-                  new Date((rowData?.date_approved).replaceAll('-', '/'))
-                ).format('YYYY-MM-DD')
-                : null
-              : moment(dateApproved).format('YYYY-MM-DD'),
-          },
-        });
+  // const handleUpdateLog = async () => {
+  //   try {
+  //     setEditRow('');
+  //     if (newRowIndex) {
+  //       await axiosInstance({
+  //         method: 'post',
+  //         url: '/addRecord',
+  //         data: {
+  //           ...rowData,
+  //           customer_id: props.customerId,
+  //           user_id: localStorage.getItem('userId')
+  //         }
+  //       });
+  //     } else {
+  //       await axiosInstance({
+  //         method: 'put',
+  //         url: '/update_logs',
+  //         data: {
+  //           customer_id: props.customerId,
+  //           comments: rowData.comments,
+  //           id: rowData.id,
+  //           item_desc: rowData.item_desc,
+  //           package: groupingValue?.length
+  //             ? groupingValue[0].label
+  //             : searchValue
+  //               ? searchValue
+  //               : rowData.package,
+  //           para_context: rowData.para_context,
+  //           classification: rowData?.classification,
+  //           phase: null,
+  //           sd_no: rowData?.sd_no,
+  //           div_no: rowData?.div_no,
+  //           para_no: rowData.para_no,
+  //           project_id: rowData.project_id,
+  //           spec_section: rowData.spec_section,
+  //           status: statusValue?.length ? statusValue[0].value : '',
+  //           type: rowData.type,
+  //           date_issued: !dateIssued
+  //             ? rowData?.date_issued
+  //               ? moment(
+  //                 new Date((rowData?.date_issued).replaceAll('-', '/'))
+  //               ).format('YYYY-MM-DD')
+  //               : null
+  //             : moment(dateIssued).format('YYYY-MM-DD'),
+  //           date_approved: !dateApproved
+  //             ? rowData?.date_approved
+  //               ? moment(
+  //                 new Date((rowData?.date_approved).replaceAll('-', '/'))
+  //               ).format('YYYY-MM-DD')
+  //               : null
+  //             : moment(dateApproved).format('YYYY-MM-DD'),
+  //         },
+  //       });
 
-      }
-      setNewRowIndex(null)
-      props.setPageRefresh(!props.pageRefresh);
-    } catch (error) {
-      console.log(error.message);
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    }
-  };
+  //     }
+  //     setNewRowIndex(null)
+  //     props.setPageRefresh(!props.pageRefresh);
+  //   } catch (error) {
+  //     console.log(error.message);
+  //     toast.error('Something went wrong!', {
+  //       position: 'bottom-center',
+  //       autoClose: 5000,
+  //       hideProgressBar: true,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //     });
+  //   }
+  // };
 
   const handleSorting = async (columnName) => {
     let sortingOrder = sorting.column === columnName ? sorting.order : 'desc'
@@ -228,12 +228,12 @@ export default function CombinedLogs(props) {
   //   // part of the array after the specified index
   //   ...arr.slice(index)
   // ]
-  const deleteElement = (arr, index) => [
-    // part of the array before the specified index
-    ...arr.slice(0, index),
-    // part of the array after the specified index
-    ...arr.slice(index + 1)
-  ]
+  // const deleteElement = (arr, index) => [
+  //   // part of the array before the specified index
+  //   ...arr.slice(0, index),
+  //   // part of the array after the specified index
+  //   ...arr.slice(index + 1)
+  // ]
 
   // const handleAddRow = async (log) => {
   //   try {
@@ -282,7 +282,7 @@ export default function CombinedLogs(props) {
       <table className="table">
         <thead>
           <tr>
-            <th className="ticket-checkbox">
+            <th className="ticket-checkbox small-font">
               <div className="form-group">
                 <div className="custom-control custom-checkbox">
                   <input
@@ -300,21 +300,21 @@ export default function CombinedLogs(props) {
                 </div>
               </div>
             </th>
-            <th className="text-center">Action</th>
-            <th>
+            <th className="text-center small-font">Action</th>
+            <th className='small-font'>
               <span className="has-sorting" >
                 Spec Sec <i className={sorting.column === 'spec_section' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('spec_section')}></i>
                 <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('spec_section') }} />
               </span>
             </th>
             {props.projectType === 'ufgs' && <>
-              <th>
+              <th className='small-font'>
                 <span className="has-sorting" >
                   Div # <i className={sorting.column === 'div_no' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('div_no')}></i>
                   {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('div_no') }} /> */}
                 </span>
               </th>
-              <th>
+              <th className='small-font'>
                 <span className="has-sorting" >
                   SD # <i className={sorting.column === 'sd_no' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('sd_no')}></i>
                   {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('sd_no') }} /> */}
@@ -322,24 +322,24 @@ export default function CombinedLogs(props) {
               </th>
             </>
             }
-            {props.projectType !== 'ufgs' && <th className='para-no'>
+            {props.projectType !== 'ufgs' && <th className='para-no small-font'>
               <span>
                 Para
               </span>
             </th>}
-           {props.projectType !== 'ufgs' && <th>
+           {props.projectType !== 'ufgs' && <th className='small-font'>
               <span className="has-sorting" >
                 Requirement Type <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('type')}></i>
                 <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} />
               </span>
             </th>}
-            {props.projectType === 'ufgs' && <th>
+            {props.projectType === 'ufgs' && <th className='small-font'>
               <span className="has-sorting" >
                 SD Title <i className={sorting.column === 'sd_title' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('sd_title')}></i>
                 <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('sd_title') }} />
               </span>
             </th>}
-            <th>
+            <th className='small-font'>
               <span className="has-sorting"  >
                 Item
                 <div>
@@ -356,7 +356,7 @@ export default function CombinedLogs(props) {
               </th>
             } */}
             {props.projectType === 'ufgs' &&
-              <th>
+              <th className='small-font'>
                 <span className="has-sorting" >
                   Classification <i className={sorting.column === 'classification' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('classification')}></i>
                 <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('classification') }} />
@@ -365,12 +365,12 @@ export default function CombinedLogs(props) {
             }
             {props.projectType !== 'ufgs' && 
             <>
-              <th>
+              <th className='small-font'>
                 <span className="has-sorting" >
                   Grouping <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
                 </span>
               </th>
-              <th className="log-description">
+              <th className="log-description small-font">
               <span className='has-sorting' >
                 Paragraph Context <i className={sorting.column === "para_context" ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting("para_context")}></i>
               </span>
@@ -401,8 +401,8 @@ export default function CombinedLogs(props) {
         <tbody style={{fontSize: '12px'}}>
           {logData.map((log, index) => {
             return (
-              <tr className={(log.user_id !== 1 || index%2 !== 0) ? "highlight-row" : ""}>
-                <td className="ticket-checkbox">
+              <tr className={(log.user_id !== 1 || index%2 !== 0) ? "highlight-row" : ""} style={{lineHeight: 1.2}}>
+                <td className="ticket-checkbox reduce-height">
                   <div className="form-group">
                     <div className="custom-control custom-checkbox">
                       <input
@@ -420,10 +420,10 @@ export default function CombinedLogs(props) {
                     </div>
                   </div>
                 </td>
-                <td>
+                <td className="reduce-height">
                   <div className="action-items">
                     {<>
-                      {editRow === index ? (
+                      {/* {editRow === index ? (
                         <>
                           <SaveButton onClick={handleUpdateLog} style={{ marginRight: '5px' }} />
                           <CancelButton
@@ -458,7 +458,7 @@ export default function CombinedLogs(props) {
                           <Tooltip placement="left" target={'Edit-Tooltip-' + index + 1} isOpen={editRowTooltip === index + 1} toggle={() => setEditRowTooltip(editRowTooltip ? editRowTooltip === index + 1 ? null : index + 1 : index + 1)}>
                             Edit Row
                           </Tooltip></>
-                      )}
+                      )} */}
                       {/* <Link
                         style={{ fontWeight: 'normal' }}
                         className="btn btn-secondary btn-sm"
@@ -497,7 +497,7 @@ export default function CombinedLogs(props) {
                     }
                   </div>
                 </td>
-                <td>
+                <td className="reduce-height">
                   {editRow === index && (newRowIndex === index || log.user_id !== 1) ? (
                     <input
                       placeholder="Enter"
@@ -516,15 +516,15 @@ export default function CombinedLogs(props) {
                 </td>
                 {props.projectType === 'ufgs' &&
                   <>
-                    <td>
+                    <td className="reduce-height">
                       {log.div_no}
                     </td>
-                    <td>
+                    <td className="reduce-height">
                       {log.sd_no}
                     </td>
                   </>
                 }
-                {props.projectType !== 'ufgs' && <td>
+                {props.projectType !== 'ufgs' && <td className="reduce-height">
                   {log.para_no}
                   {/* {editRow === index ? (
                     <input
@@ -541,7 +541,7 @@ export default function CombinedLogs(props) {
                     log.para_no
                   )} */}
                 </td>}
-                {props.projectType !== 'ufgs' && <td>
+                {props.projectType !== 'ufgs' && <td className="reduce-height">
                   {editRow === index ? (
                     <input
                       placeholder="Enter"
@@ -557,8 +557,8 @@ export default function CombinedLogs(props) {
                     log.type
                   )}
                 </td>}
-                {props.projectType === 'ufgs' && <td> {log.sd_title} </td>}
-                <td>
+                {props.projectType === 'ufgs' && <td className="reduce-height"> {log.sd_title} </td>}
+                <td className="reduce-height">
                   {editRow === index ? (
                     <input
                       placeholder="Enter"
@@ -598,7 +598,7 @@ export default function CombinedLogs(props) {
                 </td>}
                 {props.projectType !== 'ufgs' && 
                 <>
-                  <td>
+                  <td className="reduce-height">
                     {editRow === index ? (
                       <div
                         className="form-group log-datepicker"
@@ -620,7 +620,7 @@ export default function CombinedLogs(props) {
                       log.package
                     )}
                   </td>
-                  <td>
+                  <td className="reduce-height">
                     {editRow === index ? (
                       <input
                         placeholder="Enter"
@@ -635,13 +635,13 @@ export default function CombinedLogs(props) {
                     ) : (
                       <div className={"log-desc " + (showMore === index ? 'show-content' : '')}>
                         {log.para_context}
-                        {log.para_context.length > 59 && <span className="showmore-wrap" onClick={() => setModal(showMore === index ? null : index)}>{showMore === index ? <CollapseButton/> : <ExpandButton/>}</span>}
+                        {log.para_context.length > 10 && <span className="showmore-wrap" onClick={() => setModal(showMore === index ? null : index)}>{showMore === index ? <CollapseButton/> : <ExpandButton/>}</span>}
                       </div>
                     )}
                   </td>
                 </>
                 }
-                {/* <td>
+                {/* <td className="reduce-height">
                   {editRow === index ? (
                     <div
                       className="form-group log-datepicker"
@@ -664,7 +664,7 @@ export default function CombinedLogs(props) {
                     log.status
                   )}
                 </td>
-                <td>
+                <td className="reduce-height">
                   {editRow === index ? (
                     <div className="log-datepicker form-group">
                       <DateSelector
@@ -686,7 +686,7 @@ export default function CombinedLogs(props) {
                     log.date_issued
                   )}
                 </td>
-                <td>
+                <td className="reduce-height">
                   {editRow === index ? (
                     <div className="log-datepicker form-group">
                       <DateSelector
@@ -708,7 +708,7 @@ export default function CombinedLogs(props) {
                     log.date_approved
                   )}
                 </td>
-                <td>
+                <td className="reduce-height">
                   {editRow === index ? (
                     <input
                       placeholder="Enter"
