@@ -64,7 +64,7 @@ const CustomerProjects = (props) => {
   }, [state, pageRefresh]);
 
   useEffect(() => {
-    const url = roleId === '6' ?
+    const url = roleId === '6' || roleId === '7' ?
       `/emp/projects/${localStorage.getItem('userId')}` :
       state?.customer_id
         ? `/projects/${state.customer_id}`
@@ -163,7 +163,7 @@ const CustomerProjects = (props) => {
         <div className="page-wrap-content customer-projects-wrapper">
           <Header
             title={state?.customer_name || customerData?.customer_name}
-            showBtn={roleId !== '6' && 'Create New Project'}
+            showBtn={roleId !== '6' && roleId !== '7' && 'Create New Project'}
             toggleModal={toggleModal}
             breadcrumb={'Project Details'}
           />
@@ -188,7 +188,7 @@ const CustomerProjects = (props) => {
                   </label>
                 </div>
                 <div className="table-bulk-changes">
-                  {roleId !== '6' && <button
+                  {roleId !== '6' && roleId !== '7' && <button
                     type="button"
                     className="btn btn-secondary btn-sm"
                     onClick={toggleEmployeeModal}
@@ -196,7 +196,7 @@ const CustomerProjects = (props) => {
                     + Add Employee
                   </button>}
                 </div>
-                {roleId !== '6' && <div style={{ marginLeft: '10px' }}>
+                {roleId !== '6' && roleId !== '7' && <div style={{ marginLeft: '10px' }}>
                   <button
                     onClick={() => toggleArchive(!isArchived)}
                     type="button"
@@ -295,7 +295,7 @@ const CustomerProjects = (props) => {
                                 >
                                   Launch
                                 </button>
-                                {roleId !== '6' && <><button
+                                {roleId !== '6' && roleId !== '7' && <><button
                                   type="button"
                                   className="btn btn-secondary btn-sm"
                                   onClick={() => handleEdit(project)}
