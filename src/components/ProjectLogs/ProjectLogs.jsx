@@ -370,6 +370,7 @@ const ProjectLogs = () => {
           breadcrumb3={'Requrement Logs'}
           showBtn={'Upload Document'}
           toggleModal={toggleModal}
+          btnSize={'small'}
         />
 
         <div className="project-logs-content">
@@ -390,9 +391,9 @@ const ProjectLogs = () => {
                       of <span className="showing-strong"> 90 </span>.
                     </label> */}
                   </div>
-                  {selectedLogData.length ? <button type="button" className='btn btn-primary mr-3' onClick={() => setSelectedLogData([])}>Clear Selection</button> : null}
-                  {!selectedLogData.length ? <button type="button" className='btn btn-primary mr-3' onClick={toggleSaveListName}>Save Selection</button> : null}
-                  <button type="button" className='btn btn-secondary' onClick={getList}> View Saved Lists </button>
+                  {selectedLogData.length ? <button type="button" className='btn btn-primary mr-3 btn-small' onClick={() => setSelectedLogData([])}>Clear Selection</button> : null}
+                  {!selectedLogData.length ? <button type="button" className='btn btn-primary mr-3 btn-small' onClick={toggleSaveListName}>Save Selection</button> : null}
+                  <button type="button" className='btn btn-secondary btn-small' onClick={getList}> View Saved Lists </button>
                   <div className="table-bulk-changes">
                     {/* {pdfData.url && <button type="button" className='btn btn-secondary' onClick={()=>setPdfData({url: '', textLoc: {}})}> Close Pdf </button>} */}
                     <div className="log-search">
@@ -404,7 +405,7 @@ const ProjectLogs = () => {
                         onChange={(e) => handleSearchChange(e.target.value)}
                       />
                     </div>
-                    <button type="button" className="btn btn-secondary btn-sm" style={{ textTransform: 'none' }} onClick={() => handleExportExcel("All")}>
+                    {localStorage.getItem('roleId') !== '7' && <button type="button" className="btn btn-secondary btn-sm" style={{ textTransform: 'none' }} onClick={() => handleExportExcel("All")}>
                       Export .xls
                       {/* <CSVLink
                       filename={`All-Logs.csv`}
@@ -415,7 +416,7 @@ const ProjectLogs = () => {
                     >
                       Export CSV
                     </CSVLink> */}
-                    </button>
+                    </button>}
                     <button
                       type="button"
                       className="d-flex btn btn-secondary btn-sm"
