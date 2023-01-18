@@ -15,7 +15,7 @@ import { ReactComponent as CollapseButton } from '../../assets/images/up-arrow.s
 import { Tooltip } from 'reactstrap';
 
 export default function CombinedLogs(props) {
-  const { logData, newRowIndex, setNewRowIndex, completeLogData } = props;
+  const { logData, newRowIndex, setNewRowIndex } = props;
   const [editRow, setEditRow] = useState('');
   const [dateIssued, setDateIssued] = useState('');
   const [dateApproved, setDateApproved] = useState('');
@@ -220,14 +220,14 @@ export default function CombinedLogs(props) {
       docId: id
     })
   };
-  const insertElement = (arr, index, newItem) => [
-    // part of the array before the specified index
-    ...arr.slice(0, index),
-    // inserted item
-    newItem,
-    // part of the array after the specified index
-    ...arr.slice(index)
-  ]
+  // const insertElement = (arr, index, newItem) => [
+  //   // part of the array before the specified index
+  //   ...arr.slice(0, index),
+  //   // inserted item
+  //   newItem,
+  //   // part of the array after the specified index
+  //   ...arr.slice(index)
+  // ]
   const deleteElement = (arr, index) => [
     // part of the array before the specified index
     ...arr.slice(0, index),
