@@ -70,7 +70,7 @@
         }
       }
       .highlight-row{
-        background: rgba($primary, .1);
+        background: rgba($primary, .03);
       }
       .l-table-wrapper {
         max-height: calc(100vh - 230px);
@@ -173,7 +173,7 @@
               }
             }
             .log-desc{
-              height: 48px;
+              height: 18px;
               overflow: hidden;
               position: relative;
               &.show-content{
