@@ -300,7 +300,7 @@ export default function CombinedLogs(props) {
                 </div>
               </div>
             </th>
-            <th className="text-center small-font">Action</th>
+            <th className="text-center small-font">Source</th>
             <th className='small-font'>
               <span className="has-sorting" >
                 Spec Sec <i className={sorting.column === 'spec_section' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('spec_section')}></i>
@@ -329,7 +329,7 @@ export default function CombinedLogs(props) {
             </th>}
            {props.projectType !== 'ufgs' && <th className='small-font'>
               <span className="has-sorting" >
-                Requirement Type <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('type')}></i>
+                Submittal Heading <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('type')}></i>
                 <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} />
               </span>
             </th>}
@@ -341,7 +341,7 @@ export default function CombinedLogs(props) {
             </th>}
             <th className='small-font'>
               <span className="has-sorting"  >
-                Item
+                Submittal Type
                 <div>
                   <i className={sorting.column === 'item_desc' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('item_desc')}></i>
                   <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('item_desc') }} />
@@ -372,7 +372,7 @@ export default function CombinedLogs(props) {
               </th>
               <th className="log-description small-font">
               <span className='has-sorting' >
-                Paragraph Context <i className={sorting.column === "para_context" ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting("para_context")}></i>
+                Submittal Description <i className={sorting.column === "para_context" ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting("para_context")}></i>
               </span>
             </th>
             </>
