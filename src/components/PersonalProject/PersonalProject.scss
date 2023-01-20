@@ -1,0 +1,209 @@
+.page-wrap {
+  .page-wrap-content {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+    max-width: 1350px;
+  }
+}
+
+.personal-projects-wrapper {
+  .personal-projects-content {
+    .grid-top-content {
+      margin: 1rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .table-entries {
+        color: $primary;
+        margin: 0;
+        font-size: 0.875rem;
+
+        .showing-strong {
+          font-weight: bold;
+        }
+      }
+
+      .grid-list-toggle {
+        display: flex;
+        margin-left: auto;
+        align-items: center;
+        justify-content: flex-start;
+
+        .gl-toggle-wrapper {
+          margin: 0 1rem;
+
+          .switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 24px;
+            margin: 0;
+
+            input {
+              opacity: 0;
+              width: 0;
+              height: 0;
+            }
+          }
+
+          .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+
+            &:before {
+              position: absolute;
+              content: "";
+              height: 20px;
+              width: 20px;
+              left: 2px;
+              bottom: 2px;
+              background-color: #fff;
+              -webkit-transition: .4s;
+              transition: .4s;
+            }
+          }
+
+          input {
+            &:checked {
+              + {
+                .slider {
+                  background-color: $primary;
+
+                  &:before {
+                    -webkit-transform: translateX(28px);
+                    -ms-transform: translateX(28px);
+                    transform: translateX(28px);
+                  }
+                }
+              }
+            }
+          }
+
+          .slider.round {
+            border-radius: 24px;
+
+            &:before {
+              border-radius: 50%;
+            }
+          }
+
+        }
+      }
+    }
+
+    .grid-view-content {
+      margin-bottom: 1.5rem;
+
+      > .row{
+        gap: 24px 0;
+      }
+
+      .grid-view {
+        padding: 1.5rem;
+        box-shadow: 0px 4px 9px rgba($primary, 0.25);
+        border-radius: 12px;
+        background-color: $white;
+        &-personal {
+          background-color: rgba($color: #40F040, $alpha: 0.2);
+        }
+        &-contract {
+          background-color: rgba($color: #698CC0, $alpha: 0.2);
+        }
+
+        .gv-heading-content {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          .gv-project-name {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+          }
+
+          .gv-project-type {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+          }
+        }
+
+        .gv-body-content {
+          .gv-project-desc {
+            font-size: 0.875rem;
+            margin-top: 1.5rem;
+          }
+
+          .gv-project-logs {
+            gap: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+
+            >* {
+              width: calc(50% - 12px);
+              font-size: 12px;
+            }
+          }
+
+          .gv-logs-upload {
+            margin-top: 24px;
+
+            .upload-document-form {
+              background-color: $white;
+              .upload-document-content {
+                .select-File {
+                  border: 1px dashed $border-color;
+
+                  input {
+                    width: 0;
+                    height: 0;
+                    padding: 0;
+                    opacity: 0;
+
+                    +label {
+                      width: 100%;
+                      height: calc(100% + 29px);
+                      margin: 0;
+                      display: flex;
+                      cursor: pointer;
+                      align-items: flex-end;
+                      border-radius: 4px;
+                      justify-content: center;
+                      background-color: transparent;
+                      transition: all 0.3s ease-in-out;
+
+                      .upload-text {
+                        width: 100%;
+                        height: 38px;
+                        flex-direction: column;
+                        background-color: transparent;
+
+                        small {
+                          color: $black;
+                          font-size: 1rem;
+                          font-weight: 700;
+                          display: inline-block;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

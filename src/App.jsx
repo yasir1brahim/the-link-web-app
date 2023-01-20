@@ -15,6 +15,7 @@ import ProjectLogs from './components/ProjectLogs/ProjectLogs';
 import PdfWrapper from './pdfWrapper';
 import AdminUser from './components/AdminUser/AdminUser';
 import SubmittalMappings from './components/ProjectLogs/submittalMappings';
+import PersonalProject from './components/PersonalProject/PersonalProject';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/pdf-view" element={<PdfWrapper />} />
         <Route path="/admin-user" element={<AdminUser />} />
         <Route path='/submital-mappings' element={<SubmittalMappings/>}/>
+        <Route path="/personal-project" element={<PersonalProject />} />
 
         <Route exact path="/" element={<Navigate to="/login" />} />
       </Routes>
