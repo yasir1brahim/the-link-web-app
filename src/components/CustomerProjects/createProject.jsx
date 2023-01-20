@@ -10,6 +10,7 @@ import DateSelector from '../shared/DateSelector/DateSelector';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import moment from 'moment';
+import { AddNewEmp } from './addNewEmp';
 
 const CreateProject = ({
   modal,
@@ -35,6 +36,8 @@ const CreateProject = ({
   const [employeeList, setEmployeeList] = useState([]);
   const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
   const [profilePicture, setProfilePicture] = useState('');
+  const [refetchEmp, setRefetchEmp] = useState(false);
+  const [empForm, openEmpForm] = useState(false);
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });\
   console.log('customer', projects)
 
@@ -69,7 +72,7 @@ const CreateProject = ({
 
       fetchData().catch(console.error);
     }
-  }, [customer, modal]);
+  }, [customer, modal, refetchEmp]);
 
   const validate = () => {
     let error = false;
@@ -325,6 +328,18 @@ const CreateProject = ({
                       </div>
                     </div>
                   </div>
+                  {!empForm && <div className="col-4" style={{marginBottom: '10px'}}>
+                    <button className="btn btn-primary" type="button" onClick={() => openEmpForm(true)}>
+                      Add New Employee
+                    </button>
+                  </div>}
+                  {empForm && <>
+                    <AddNewEmp
+                     customer={customer}
+                     openEmpForm={openEmpForm}
+                     setRefetchEmp={setRefetchEmp}
+                    />
+                  </>}
                 </div>
               </div>
               <div className="lproject-footer">
