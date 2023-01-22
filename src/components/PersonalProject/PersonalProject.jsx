@@ -80,7 +80,8 @@ const PersonalProject = () => {
                               />
                               <label htmlFor="uploadDocs">
                                 <div className="upload-text d-flex align-items-center justify-content-center">
-                                  <small>Upload Specs</small>
+                                  <small className="upload-icon"></small>
+                                  <span className="upload-name">Upload Specs</span>
                                 </div>
                               </label>
                             </div>
@@ -94,7 +95,7 @@ const PersonalProject = () => {
                   <div className="grid-view grid-view-contract">
                     <div className="gv-heading-content">
                       <h4 className="gv-project-name">Project Details</h4>
-                      <span className="gv-project-type">Personal</span>
+                      <span className="gv-project-type">Contract</span>
                     </div>
                     <div className="gv-body-content">
                       <p className="gv-project-desc">
@@ -132,7 +133,8 @@ const PersonalProject = () => {
                               />
                               <label htmlFor="uploadDocs">
                                 <div className="upload-text d-flex align-items-center justify-content-center">
-                                  <small>Upload Specs</small>
+                                  <small className="upload-icon"></small>
+                                  <span className="upload-name">Upload Specs</span>
                                 </div>
                               </label>
                             </div>
@@ -146,7 +148,7 @@ const PersonalProject = () => {
                   <div className="grid-view grid-view-contract">
                     <div className="gv-heading-content">
                       <h4 className="gv-project-name">Project Details</h4>
-                      <span className="gv-project-type">Personal</span>
+                      <span className="gv-project-type">Contract</span>
                     </div>
                     <div className="gv-body-content">
                       <p className="gv-project-desc">
@@ -184,7 +186,8 @@ const PersonalProject = () => {
                               />
                               <label htmlFor="uploadDocs">
                                 <div className="upload-text d-flex align-items-center justify-content-center">
-                                  <small>Upload Specs</small>
+                                  <small className="upload-icon"></small>
+                                  <span className="upload-name">Upload Specs</span>
                                 </div>
                               </label>
                             </div>
@@ -236,7 +239,8 @@ const PersonalProject = () => {
                               />
                               <label htmlFor="uploadDocs">
                                 <div className="upload-text d-flex align-items-center justify-content-center">
-                                  <small>Upload Specs</small>
+                                  <small className="upload-icon"></small>
+                                  <span className="upload-name">Upload Specs</span>
                                 </div>
                               </label>
                             </div>
