@@ -64,7 +64,7 @@ const ExportToProcoreModal = () => {
         if(resp.status === 200){
           toast.success('the records are successfully exported');
           toggle();
-          navigate(`/project-logs?projectId=${projectId}&customerId=${customerId}&logType=${logType}`)
+          navigate(`/project-logs?projectDetails=${projectId},${customerId},${logType}`)
         };
         });
     } catch (error) {

@@ -23,6 +23,7 @@ import FileDownload from 'js-file-download';
 import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
 import { useSearchParams } from 'react-router-dom';
 import Procore from './procore';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
 
@@ -59,19 +60,21 @@ const ProjectLogs = () => {
   const [newRowIndex, setNewRowIndex] = useState(null)
   const projectType = state?.project.project_type
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [procoreProjectId, setProcoreProjectId] = useState();
-  const [procoreCompanyId, setProcoreCompanyId] = useState();
 
   //Procore states
   const [procoreModal, setProcoreModal] = useState(false);
   const toggleProcoreModal = () => setProcoreModal(!procoreModal);
+  const [companyList, setCompanyList] = useState([]);
 
   const toggle = () => setDropdownOpen((prevState) => !prevState);
   
   const [searchParams] = useSearchParams();
-  const projectId = searchParams.get('projectId')
-  const customerId = searchParams.get('customerId')
+  const projectDetails = searchParams.get('projectDetails')?.split(',')
+  const projectId = JSON.parse(projectDetails[0])
+  const customerId = JSON.parse(projectDetails[1])
   const projectName = searchParams.get('projectName')
+  const logType = projectDetails[2]
+  const authCode = searchParams.get('code');
 
   useEffect(() => {
     if (!modal) {
@@ -141,6 +144,59 @@ const ProjectLogs = () => {
       setSelected([...selected, id]);
     }
   };
+
+  useEffect(() => {
+    if(authCode){
+      const fetchData = async () => {
+        const accessTokenData = await axiosInstance({
+          method: 'post',
+          url: '/procore/access_token',
+          data: {
+            code: authCode,
+            redirect_uri: `http://localhost:3000/project-logs?projectDetails=${projectId},${customerId},${logType}`
+        },
+        });
+        localStorage.setItem('procore_access_token', accessTokenData?.data.data.access_token)
+
+        const projectMappingResponse = await axiosInstance({
+          method: 'get',
+          url: `/procore/project_mapping/${projectId}`,
+        });
+        if(get(projectMappingResponse,'data.data')){
+          localStorage.setItem('companyId', get(projectMappingResponse,'data.data.procore_company_id'));
+          localStorage.setItem('projectId', projectId);
+          localStorage.setItem('logType', logType);
+          localStorage.setItem('customerId', customerId);
+        }
+        if(!projectMappingResponse?.data?.data?.procore_project_id) {
+          setProcoreModal(true)
+          const companyResp = await axios({
+            method: 'get',
+            url: 'https://sandbox.procore.com/rest/v1.0/companies?include_free_companies=true',
+            headers:{
+              Authorization: `Bearer ${accessTokenData?.data.data.access_token}`
+            }
+          })
+          setCompanyList(companyResp.data)
+        } else {
+          searchParams.set('code', '')
+          setNavigateToSubmittal(!navigateToSubmittal);
+        }
+      };
+
+      fetchData().catch((error) => {
+        toast.error('Something went wrong!', {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      });
+    }
+  }, [authCode]);
 
   useEffect(()=>{if(navigateToSubmittal){
     navigate(`/submital-mappings?customerId=${customerId}`);
@@ -397,20 +453,15 @@ const ProjectLogs = () => {
 
   const handleProcoreExport = async () => {
     try {
-      await axiosInstance({
+      await axios({
         method: 'get',
-        url: `procore/project_mapping/${projectId}`
-      }).then(res => {
-      if(!get(res,'data.data.procore_project_id')){
-        localStorage.setItem('companyId', get(res,'data.data.procore_company_id'));
-        setProcoreCompanyId(get(res,'data.data.procore_company_id'));
-        setProcoreProjectId(get(res, 'data.data.procore_project_id'))
-        localStorage.setItem('customerId', customerId);
-        setProcoreModal(true)
-      } else {
-        setNavigateToSubmittal(!navigateToSubmittal);
-      }
-    });
+        url: `https://login-sandbox.procore.com/oauth/authorize`,
+        params: {
+          response_type: 'code',
+          client_id: 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9',
+          redirect_uri: `http://localhost:3000/project-logs?projectId=${projectId}&customerId=${customerId}&logType=${logType}`
+        }
+      }).then(res => {window.open(res.request?.responseURL,"_self")});
     } catch(e) {
       toast.error('Something went wrong!', {
         position: 'bottom-center',
@@ -474,7 +525,12 @@ const ProjectLogs = () => {
                     <DropdownToggle caret>Export</DropdownToggle>
                     <DropdownMenu>
                     <DropdownItem onClick={() => handleExportExcel("All")}>Excel</DropdownItem>
-                    <DropdownItem onClick={handleProcoreExport}><Logo style={{height: '90px'}}/></DropdownItem>
+                    <DropdownItem><a
+                            href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=http://localhost:3001/project-logs?projectDetails=${projectId},${customerId},${logType}`}
+                            className="breadcrumb-text"
+                          >
+                            <Logo style={{height: '90px'}}/>
+                          </a></DropdownItem>
                     </DropdownMenu>
                     </Dropdown>}
                     <button
@@ -591,12 +647,11 @@ const ProjectLogs = () => {
           fileData={fileData}
         />
         <Procore
-        projectId={projectId}
         customerId={customerId}
         procoreModal={procoreModal}
         toggleProcoreModal={toggleProcoreModal}
-        procoreProjectId={procoreProjectId}
-        procoreCompanyId={procoreCompanyId}
+        companyList={companyList}
+        projectId={projectId}
       />
       <Modal
         isOpen={saveListName}
