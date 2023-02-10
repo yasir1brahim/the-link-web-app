@@ -52,7 +52,7 @@ const ExportToProcoreModal = () => {
         method: "post",
         url: "/procore/create_submittals",
         data: {
-          project_id: projectId,
+          project_id: Number(projectId),
           records: selectedRows && selectedRows.length > 0 ? JSON.parse(selectedRows) : "All", // array of ids
           status_id: get(selectStatus,`${[0]}.value`),
         },
