@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { get } from "lodash";
 import { Button, Modal, ModalHeader, ModalBody } from "reactstrap";
-import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import axiosInstance from "../../config/axios";
@@ -10,7 +9,7 @@ import { useNavigate } from "react-router";
 const ExportToProcoreModal = () => {
   const [openModal, setOpenModal] = useState(true);
   const toggle = () => setOpenModal(!openModal);
-  const accesToken = localStorage.getItem("procore_access_token");
+  // const accesToken = localStorage.getItem("procore_access_token");
   const [selectStatus, setSelectStatus] = useState("");
   const [status, setStatus] = useState([]);
   const navigate = useNavigate();
