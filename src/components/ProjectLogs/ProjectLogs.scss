@@ -29,7 +29,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        .table-heading{
+        .table-heading {
           display: flex;
           align-items: center;
           justify-content: flex-start;
@@ -55,7 +55,7 @@
           .log-search {
             .search-icon {
               display: inline-block;
-              background: url('../../assets/images/search.svg') no-repeat 8px
+              background: url("../../assets/images/search.svg") no-repeat 8px
                 center;
             }
             &-input {
@@ -80,8 +80,8 @@
         max-height: calc(100vh - 230px);
         margin-bottom: 32px;
         table {
-          thead{
-            tr{
+          thead {
+            tr {
               top: 0;
               z-index: 2;
               position: sticky;
@@ -106,7 +106,7 @@
                 }
               }
             }
-            
+
             .log-description {
               width: 500px;
               min-width: 500px;
@@ -180,11 +180,11 @@
               height: 15px;
               overflow: hidden;
               position: relative;
-              &.show-content{
+              &.show-content {
                 height: 100%;
                 overflow: unset;
               }
-              .showmore-wrap{
+              .showmore-wrap {
                 right: 0;
                 bottom: 0;
                 position: absolute;
@@ -192,11 +192,10 @@
                 background-color: $white;
                 display: inline-block;
                 font-weight: bold;
-                cursor:pointer;
-              
+                cursor: pointer;
               }
-              .showmore-wrap:hover{
-                color: rgba(32, 42, 68, 0.6)
+              .showmore-wrap:hover {
+                color: rgba(32, 42, 68, 0.6);
               }
             }
           }
@@ -226,6 +225,40 @@
   }
 }
 
-.error-red{
-  color:red
+.error-red {
+  color: red;
+}
+
+.submittal-table {
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-evenly;
+  width: 60%;
+  table td .has-typehead {
+    margin: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.procore-modal {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  .procore-modal-body {
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+}
+
+.position-button-wrap {
+  position: fixed;
+  .button-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-left: 20px;
+  }
 }

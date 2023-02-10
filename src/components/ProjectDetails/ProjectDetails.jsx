@@ -96,9 +96,10 @@ const ProjectsDetails = () => {
   };
 
   const handleViewLog = (project, logType) => {
-    navigate('/project-logs', {
+    navigate(`/project-logs?projectDetails=${project?.project_id},${state.customerId},${logType}`, {
       state: {
         project,
+        projectId: project?.project_id,
         projectName: state.project?.project_name,
         customerId: state.customerId,
         logType

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
+import {Dropdown, DropdownMenu, DropdownToggle, DropdownItem} from 'reactstrap';
 // import PaginatedItems from '../shared/Pagination/Pagination';
 import { ReactComponent as Trash } from '../../assets/images/trash.svg';
 import { useLocation } from 'react-router-dom';
@@ -14,14 +15,21 @@ import axiosInstance from '../../config/axios';
 // import MeetingTable from './meetingTable';
 // import { CSVLink } from 'react-csv';
 import CombinedLogs from './combinedLogs';
-import { debounce } from 'lodash';
+import { debounce, get } from 'lodash';
 import Loader from '../shared/Loader/Loader';
 // import * as XLSX from 'xlsx';
 import PdfWrapper from '../../pdfWrapper';
 import FileDownload from 'js-file-download';
 import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
+import { useSearchParams } from 'react-router-dom';
+import Procore from './procore';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
 
 const ProjectLogs = () => {
+  const navigate = useNavigate();
+  const [navigateToSubmittal, setNavigateToSubmittal] = useState(false);
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -50,8 +58,23 @@ const ProjectLogs = () => {
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({ url: '', textLoc: {}, index: '', docId: null })
   const [newRowIndex, setNewRowIndex] = useState(null)
-  const projectType = state?.project?.project_type
-  console.log('selected', selected)
+  const projectType = state?.project.project_type
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  //Procore states
+  const [procoreModal, setProcoreModal] = useState(false);
+  const toggleProcoreModal = () => setProcoreModal(!procoreModal);
+  const [companyList, setCompanyList] = useState([]);
+
+  const toggle = () => setDropdownOpen((prevState) => !prevState);
+  
+  const [searchParams] = useSearchParams();
+  const projectDetails = searchParams.get('projectDetails')?.split(',')
+  const projectId = JSON.parse(projectDetails[0])
+  const customerId = JSON.parse(projectDetails[1])
+  const projectName = searchParams.get('projectName')
+  const logType = projectDetails[2]
+  const authCode = searchParams.get('code');
 
   useEffect(() => {
     if (!modal) {
@@ -121,33 +144,45 @@ const ProjectLogs = () => {
       setSelected([...selected, id]);
     }
   };
-  // const headers = [
-  //   { label: 'Spec Sec', key: 'spec_section' },
-  //   { label: 'Paragraph', key: 'para_no' },
-  //   { label: 'Requirement Type', key: 'type' },
-  //   { label: 'Item', key: 'item_desc' },
-  //   { label: 'Grouping', key: 'Grouping' },
-  //   { label: 'Paragraph Context', key: 'para_context' },
-  //   { label: 'Status', key: 'status' },
-  //   { label: 'Date Issued', key: 'date_issued' },
-  //   { label: 'Date Approved', key: 'date_approved' },
-  //   { label: 'Comments', key: 'comments' },
-  // ];
-  const handleDeleteLogs = async () => {
-    if (selected.length !== 0) {
-      try {
-        await axiosInstance({
-          method: 'delete',
-          url: '/delete_logs',
+
+  useEffect(() => {
+    if(authCode){
+      const fetchData = async () => {
+        const accessTokenData = await axiosInstance({
+          method: 'post',
+          url: '/procore/access_token',
           data: {
-            project_id: state?.project.project_id,
-            records: selected,
-            type: 'Submittal',
-          },
+            code: authCode,
+            redirect_uri: `http://d3fy104eoanlsd.cloudfront.net/project-logs?projectDetails=${projectId},${customerId},${logType}`
+        },
         });
-        setPageRefresh(!pageRefresh);
-        setSelected([]);
-        toast.success('Successfully Deleted Logs!', {
+        localStorage.setItem('procore_access_token', accessTokenData?.data.data.access_token)
+
+        const projectMappingResponse = await axiosInstance({
+          method: 'get',
+          url: `/procore/project_mapping/${projectId}`,
+        });
+        if(get(projectMappingResponse,'data.data')){
+          localStorage.setItem('companyId', get(projectMappingResponse,'data.data.procore_company_id'));
+          localStorage.setItem('projectId', projectId);
+          localStorage.setItem('logType', logType);
+          localStorage.setItem('customerId', customerId);
+        }
+        if(!projectMappingResponse?.data?.data?.procore_project_id) {
+          setProcoreModal(true)
+          const companyResp = await axiosInstance({
+            method: 'get',
+            url: '/procore/companies',
+          })
+          setCompanyList(companyResp.data)
+        } else {
+          searchParams.set('code', '')
+          setNavigateToSubmittal(!navigateToSubmittal);
+        }
+      };
+
+      fetchData().catch((error) => {
+        toast.error('Something went wrong!', {
           position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
@@ -156,21 +191,63 @@ const ProjectLogs = () => {
           draggable: true,
           progress: undefined,
         });
-      } catch (error) {
-        console.log(error.message);
-        setSelected([]);
-        toast.error(error.response.data.message, {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }
+      });
     }
-  };
+  }, [authCode]);
+
+  useEffect(()=>{if(navigateToSubmittal){
+    navigate(`/submital-mappings?customerId=${customerId}`);
+  }},[navigateToSubmittal]);
+
+  // const headers = [
+    //   { label: 'Spec Sec', key: 'spec_section' },
+    //   { label: 'Paragraph', key: 'para_no' },
+    //   { label: 'Requirement Type', key: 'type' },
+    //   { label: 'Item', key: 'item_desc' },
+    //   { label: 'Grouping', key: 'Grouping' },
+    //   { label: 'Paragraph Context', key: 'para_context' },
+    //   { label: 'Status', key: 'status' },
+    //   { label: 'Date Issued', key: 'date_issued' },
+    //   { label: 'Date Approved', key: 'date_approved' },
+    //   { label: 'Comments', key: 'comments' },
+    // ];
+  const handleDeleteLogs = async () => {
+    if (selected.length !== 0){
+    try {
+      await axiosInstance({
+        method: 'delete',
+        url: '/delete_logs',
+        data: {
+          project_id: state?.projectId || projectId,
+          records: selected,
+          type: 'Submittal',
+        },
+      });
+      setPageRefresh(!pageRefresh);
+      setSelected([]);
+      toast.success('Successfully Deleted Logs!', {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (error) {
+      console.log(error.message);
+      setSelected([]);
+      toast.error(error.response.data.message, {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };}
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -178,7 +255,7 @@ const ProjectLogs = () => {
         method: 'post',
         url: '/filter_logs',
         data: {
-          project_id: state?.project.project_id,
+          project_id: state?.projectId || projectId,
           search: "",
           filters: {},
           order_col: "",
@@ -205,19 +282,20 @@ const ProjectLogs = () => {
       });
     });
   }, [state, pageRefresh]);
+ 
   // useEffect(()=>{
-  //   Afer edit of a column in the selected view below code updates the value of the field
-  //   if(selectedLogData.length) {
-  //     let logIds = selectedLogData.map((log)=> log.id)
-  //     let newSelectedData = logData.filter((log) => { return logIds?.includes(log.id) ? log : null })
-  //     setSelectedLogData(newSelectedData);
-  //   }
-  // },[logData, selectedLogData])
+    //   Afer edit of a column in the selected view below code updates the value of the field
+    //   if(selectedLogData.length) {
+    //     let logIds = selectedLogData.map((log)=> log.id)
+    //     let newSelectedData = logData.filter((log) => { return logIds?.includes(log.id) ? log : null })
+    //     setSelectedLogData(newSelectedData);
+    //   }
+    // },[logData, selectedLogData])
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/getPackages/${state.customerId}`,
+        url: `/getPackages/${state?.customerId || customerId}`,
       });
       setGroupingData(
         response.data.message.map((packageData) => {
@@ -258,7 +336,7 @@ const ProjectLogs = () => {
     setFilteredLogData(filteredLog)
   }, [selectedLogData, logData, searchValue, setFilteredLogData])
   // let filteredLogData = selectedLogData.length ? selectedLogData : logData
-
+  
   const handleSelectAll = () => {
     if (selected?.length === filteredLogData?.length) {
       setSelected([]);
@@ -269,6 +347,17 @@ const ProjectLogs = () => {
       setSelected(selectedLogs);
     }
   };
+
+  // add the selected rows in session storage to be used by export procore
+  useEffect(()=>{
+    // do not update the values if navigated from procore page
+    if(document.referrer)
+    {
+      sessionStorage.setItem('selectedRows', JSON.stringify(selected))}
+    },[selected]
+  )
+
+
   // const downloadExcel = (logs, fileName) => {
   //   //Boilerplate format of making an xlsx file from xlsx library
   //   //Below header array is specified to maintain the column order in xlsx file same as our table
@@ -284,7 +373,7 @@ const ProjectLogs = () => {
         url: '/exportLogs',
         responseType: 'arraybuffer',
         data: {
-          project_id: state?.project.project_id,
+          project_id: state?.projectId || projectId,
           records: recordData
         },
       });
@@ -319,7 +408,7 @@ const ProjectLogs = () => {
           method: 'post',
           url: '/save_list',
           data: {
-            project_id: state?.project.project_id,
+            project_id: state?.projectId || projectId,
             records: selected,
             view_name: listName.value
           },
@@ -342,7 +431,7 @@ const ProjectLogs = () => {
     try {
       const response = await axiosInstance({
         method: 'get',
-        url: `/get_list/${state?.project.project_id}`,
+        url: `/get_list/${state?.projectId || projectId}`,
       });
       setList(response.data.message)
       setToggleViewSavedList(true)
@@ -358,13 +447,37 @@ const ProjectLogs = () => {
       });
     }
   }
+
+  // const handleProcoreExport = async () => {
+  //   try {
+  //     await axios({
+  //       method: 'get',
+  //       url: `https://login-sandbox.procore.com/oauth/authorize`,
+  //       params: {
+  //         response_type: 'code',
+  //         client_id: 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9',
+  //         redirect_uri: `http://localhost:3000/project-logs?projectId=${projectId}&customerId=${customerId}&logType=${logType}`
+  //       }
+  //     }).then(res => {window.open(res.request?.responseURL,"_self")});
+  //   } catch(e) {
+  //     toast.error('Something went wrong!', {
+  //       position: 'bottom-center',
+  //       autoClose: 5000,
+  //       hideProgressBar: true,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //     });
+  //   }
+  // }
   return (
     <div className="page-wrap">
       <NavbarTop />
       <div className="project-logs-wrapper log-table-width">
         <Header
-          // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
-          title={`All ${projectType === 'ufgs' ? 'UFGS' : 'Commercial'} Logs  - ${state?.projectName || ''}`}
+        // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
+          title={`All ${projectType === 'ufgs' ? 'UFGS' : 'Commercial'} Logs  - ${state?.projectName || projectName || ''}`}
           breadcrumb={'Project Details'}
           breadcrumb2={'View Projects'}
           breadcrumb3={'Requrement Logs'}
@@ -405,18 +518,18 @@ const ProjectLogs = () => {
                         onChange={(e) => handleSearchChange(e.target.value)}
                       />
                     </div>
-                    {localStorage.getItem('roleId') !== '7' && <button type="button" className="btn btn-secondary btn-sm" style={{ textTransform: 'none' }} onClick={() => handleExportExcel("All")}>
-                      Export .xls
-                      {/* <CSVLink
-                      filename={`All-Logs.csv`}
-                      data={logData}
-                      target="_blank"
-                      className="btn btn-secondary btn-sm"
-                      headers={headers}
-                    >
-                      Export CSV
-                    </CSVLink> */}
-                    </button>}
+                   {localStorage.getItem('roleId') !== '7' && <Dropdown isOpen={dropdownOpen} toggle={toggle} >
+                    <DropdownToggle caret>Export</DropdownToggle>
+                    <DropdownMenu>
+                    <DropdownItem onClick={() => handleExportExcel("All")}>Excel</DropdownItem>
+                    <DropdownItem><a
+                            href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=http://d3fy104eoanlsd.cloudfront.net/project-logs?projectDetails=${projectId},${customerId},${logType}`}
+                            className="breadcrumb-text"
+                          >
+                            <Logo style={{height: '90px'}}/>
+                          </a></DropdownItem>
+                    </DropdownMenu>
+                    </Dropdown>}
                     <button
                       type="button"
                       className="d-flex btn btn-secondary btn-sm"
@@ -436,10 +549,10 @@ const ProjectLogs = () => {
                     handleSelectAll={handleSelectAll}
                     pageRefresh={pageRefresh}
                     setPageRefresh={setPageRefresh}
-                    customerId={state.customerId}
+                    customerId={state?.customerId || customerId}
                     groupingData={groupingData}
                     setLogData={setLogData}
-                    projectId={state?.project.project_id}
+                    projectId={state?.projectId || projectId}
                     listId={listId}
                     selectedLogData={selectedLogData}
                     setSelectedLogData={setSelectedLogData}
@@ -517,18 +630,25 @@ const ProjectLogs = () => {
       />
       {isLoading && <Loader showComponentLoader={true} />}
       <UploadDocuments
-        modal={modal}
-        toggleModal={toggleModal}
-        setPdfFile={setPdfFile}
-        pdfFile={pdfFile}
-        handleSubmit={handleSubmit}
-        isUploadLoading={isUploadLoading}
-        errorModal={errorModal}
-        toggleErrorModal={toggleErrorModal}
-        backToUpload={backToUpload}
-        successModal={successModal}
-        toggleSuccessModal={toggleSuccessModal}
-        fileData={fileData}
+          modal={modal}
+          toggleModal={toggleModal}
+          setPdfFile={setPdfFile}
+          pdfFile={pdfFile}
+          handleSubmit={handleSubmit}
+          isUploadLoading={isUploadLoading}
+          errorModal={errorModal}
+          toggleErrorModal={toggleErrorModal}
+          backToUpload={backToUpload}
+          successModal={successModal}
+          toggleSuccessModal={toggleSuccessModal}
+          fileData={fileData}
+        />
+        <Procore
+        customerId={customerId}
+        procoreModal={procoreModal}
+        toggleProcoreModal={toggleProcoreModal}
+        companyList={companyList}
+        projectId={projectId}
       />
       <Modal
         isOpen={saveListName}
@@ -595,7 +715,14 @@ const ProjectLogs = () => {
                   <div className="col-6">
                     <div className="d-flex align-item-center justify-content-flex-end">
                       <button type="button" className="btn btn-primary mr-3" onClick={() => { setSelectedLogData(logData.filter((log) => { return list.records.includes(log.id) ? log : null })); setToggleViewSavedList(false); setListId(list.id) }}>Open</button>
-                      <button type="button" className="btn btn-primary" style={{ textTransform: 'none' }} onClick={() => handleExportExcel(logData.map((log) => { return list.records.includes(log.id) ? log.id : null }).filter(id => id), list.view_name)}>Export .xls</button>
+                      <button 
+                        type="button" 
+                        className="btn btn-primary" 
+                        style={{ textTransform: 'none' }} 
+                        onClick={() => handleExportExcel(logData.map((log) => { return list.records.includes(log.id) ? log.id : null }).filter(id => id), list.view_name)}
+                        >
+                      Export .xls
+                      </button>
                     </div>
                   </div>
                 </div>)
