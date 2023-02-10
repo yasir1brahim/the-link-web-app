@@ -23,7 +23,6 @@ import FileDownload from 'js-file-download';
 import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
 import { useSearchParams } from 'react-router-dom';
 import Procore from './procore';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
 
@@ -193,11 +192,11 @@ const ProjectLogs = () => {
         });
       });
     }
-  }, [authCode]);
+  }, [authCode, customerId, logType, navigateToSubmittal, projectId, searchParams]);
 
   useEffect(()=>{if(navigateToSubmittal){
     navigate(`/submital-mappings?customerId=${customerId}`);
-  }},[navigateToSubmittal]);
+  }},[navigateToSubmittal, navigate, customerId]);
 
   // const headers = [
     //   { label: 'Spec Sec', key: 'spec_section' },
@@ -281,7 +280,7 @@ const ProjectLogs = () => {
         progress: undefined,
       });
     });
-  }, [state, pageRefresh]);
+  }, [state, pageRefresh, projectId]);
  
   // useEffect(()=>{
     //   Afer edit of a column in the selected view below code updates the value of the field
@@ -320,7 +319,7 @@ const ProjectLogs = () => {
         progress: undefined,
       });
     });
-  }, [state, pageRefresh]);
+  }, [state, pageRefresh, customerId]);
 
   useEffect(() => {
     let filterData = selectedLogData.length ? selectedLogData : logData

@@ -5,7 +5,6 @@ import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../config/axios";
 import { useNavigate } from 'react-router-dom';
-import axios from "axios";
 
 const Procore = ({
   customerId,
@@ -43,7 +42,7 @@ const Procore = ({
         });
       })
   }
-}, []);
+}, [partnerCompany]);
 
   // calling get to fetch list of projects for the dropdown
   // useEffect(() => {
