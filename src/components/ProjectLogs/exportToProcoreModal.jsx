@@ -23,12 +23,9 @@ const ExportToProcoreModal = () => {
   useEffect(() => {
     const getProcoreStatus = async () => {
       try {
-        await axios({
+        await axiosInstance({
           method: "get",
-          url: `https://sandbox.procore.com/rest/v1.0/companies/${companyId}/submittal_statuses`,
-          headers: {
-            Authorization: `Bearer ${accesToken}`,
-          },
+          url: `/procore/status/${companyId}`,
         }).then((res) => {
           setStatus(get(res, "data"));
         });

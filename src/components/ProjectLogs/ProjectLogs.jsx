@@ -153,7 +153,7 @@ const ProjectLogs = () => {
           url: '/procore/access_token',
           data: {
             code: authCode,
-            redirect_uri: `http://localhost:3000/project-logs?projectDetails=${projectId},${customerId},${logType}`
+            redirect_uri: `http://d3fy104eoanlsd.cloudfront.net/project-logs?projectDetails=${projectId},${customerId},${logType}`
         },
         });
         localStorage.setItem('procore_access_token', accessTokenData?.data.data.access_token)
@@ -170,12 +170,9 @@ const ProjectLogs = () => {
         }
         if(!projectMappingResponse?.data?.data?.procore_project_id) {
           setProcoreModal(true)
-          const companyResp = await axios({
+          const companyResp = await axiosInstance({
             method: 'get',
-            url: 'https://sandbox.procore.com/rest/v1.0/companies?include_free_companies=true',
-            headers:{
-              Authorization: `Bearer ${accessTokenData?.data.data.access_token}`
-            }
+            url: '/procore/companies',
           })
           setCompanyList(companyResp.data)
         } else {
@@ -451,29 +448,29 @@ const ProjectLogs = () => {
     }
   }
 
-  const handleProcoreExport = async () => {
-    try {
-      await axios({
-        method: 'get',
-        url: `https://login-sandbox.procore.com/oauth/authorize`,
-        params: {
-          response_type: 'code',
-          client_id: 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9',
-          redirect_uri: `http://localhost:3000/project-logs?projectId=${projectId}&customerId=${customerId}&logType=${logType}`
-        }
-      }).then(res => {window.open(res.request?.responseURL,"_self")});
-    } catch(e) {
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    }
-  }
+  // const handleProcoreExport = async () => {
+  //   try {
+  //     await axios({
+  //       method: 'get',
+  //       url: `https://login-sandbox.procore.com/oauth/authorize`,
+  //       params: {
+  //         response_type: 'code',
+  //         client_id: 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9',
+  //         redirect_uri: `http://localhost:3000/project-logs?projectId=${projectId}&customerId=${customerId}&logType=${logType}`
+  //       }
+  //     }).then(res => {window.open(res.request?.responseURL,"_self")});
+  //   } catch(e) {
+  //     toast.error('Something went wrong!', {
+  //       position: 'bottom-center',
+  //       autoClose: 5000,
+  //       hideProgressBar: true,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //     });
+  //   }
+  // }
   return (
     <div className="page-wrap">
       <NavbarTop />
@@ -526,7 +523,7 @@ const ProjectLogs = () => {
                     <DropdownMenu>
                     <DropdownItem onClick={() => handleExportExcel("All")}>Excel</DropdownItem>
                     <DropdownItem><a
-                            href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=http://localhost:3001/project-logs?projectDetails=${projectId},${customerId},${logType}`}
+                            href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=http://d3fy104eoanlsd.cloudfront.net/project-logs?projectDetails=${projectId},${customerId},${logType}`}
                             className="breadcrumb-text"
                           >
                             <Logo style={{height: '90px'}}/>

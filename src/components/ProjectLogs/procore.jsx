@@ -25,14 +25,9 @@ const Procore = ({
   useEffect(() => {
     if (partnerCompany[0]?.value) {
       const fetchData = async () => {
-        const projectListResp = await axios({
+        const projectListResp = await axiosInstance({
           method: "get",
-          url: `https://sandbox.procore.com/rest/v1.0/projects?company_id=${partnerCompany[0]?.value}`,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem(
-              "procore_access_token"
-            )}`,
-          },
+          url: `/procore/projects/${partnerCompany[0]?.value}`,
         });
         setProjectList(projectListResp.data);
       };
@@ -78,14 +73,9 @@ const Procore = ({
   useEffect(() => {
     if (projectName[0]?.label) {
       const fetchData = async () => {
-        const submittalManagerResp = await axios({
+        const submittalManagerResp = await axiosInstance({
           method: "get",
-          url: `https://sandbox.procore.com/rest/v1.0/projects/${projectName[0]?.value}/submittals/filter_options/submittal_manager_id`,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem(
-              "procore_access_token"
-            )}`,
-          },
+          url: `/procore/managers/${projectName[0]?.value}`,
         });
         setSubmittalList(submittalManagerResp.data);
       };
