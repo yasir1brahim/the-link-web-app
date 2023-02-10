@@ -160,13 +160,15 @@ const ProjectLogs = () => {
         const projectMappingResponse = await axiosInstance({
           method: 'get',
           url: `/procore/project_mapping/${projectId}`,
-        });
-        if(get(projectMappingResponse,'data.data')){
-          localStorage.setItem('companyId', get(projectMappingResponse,'data.data.procore_company_id'));
-          localStorage.setItem('projectId', projectId);
-          localStorage.setItem('logType', logType);
-          localStorage.setItem('customerId', customerId);
-        }
+        }).then(res => {
+          if(get(res,'data.data')){
+            localStorage.setItem('companyId', get(res,'data.data.procore_company_id'));
+            localStorage.setItem('projectId', projectId);
+            localStorage.setItem('logType', logType);
+            localStorage.setItem('customerId', customerId);
+          }
+          
+        })
         if(!projectMappingResponse?.data?.data?.procore_project_id) {
           setProcoreModal(true)
           const companyResp = await axiosInstance({
