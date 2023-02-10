@@ -174,8 +174,8 @@ const Procore = ({
                     selected={projectName?.label}
                     options={projectList?.map((project) => {
                       return {
-                        value: project.id,
-                        label: project.display_name,
+                        value: project.key,
+                        label: project.value,
                       };
                     })}
                     className="form-control"
