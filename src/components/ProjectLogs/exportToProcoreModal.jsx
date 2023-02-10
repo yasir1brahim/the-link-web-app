@@ -26,7 +26,7 @@ const ExportToProcoreModal = () => {
           method: "get",
           url: `/procore/status/${companyId}`,
         }).then((res) => {
-          setStatus(get(res, "data"));
+          setStatus(get(res, "data.data"));
         });
       } catch (error) {
         toast.error("Something went wrong!", {

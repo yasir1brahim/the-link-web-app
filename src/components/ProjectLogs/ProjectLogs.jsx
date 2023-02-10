@@ -173,7 +173,7 @@ const ProjectLogs = () => {
             method: 'get',
             url: '/procore/companies',
           })
-          setCompanyList(companyResp.data)
+          setCompanyList(companyResp?.data.data)
         } else {
           searchParams.set('code', '')
           setNavigateToSubmittal(!navigateToSubmittal);

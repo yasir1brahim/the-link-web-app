@@ -28,7 +28,7 @@ const Procore = ({
           method: "get",
           url: `/procore/projects/${partnerCompany[0]?.value}`,
         });
-        setProjectList(projectListResp.data);
+        setProjectList(projectListResp.data.data);
       };
       fetchData().catch((error) => {
         toast.error("Something went wrong!", {
@@ -76,7 +76,7 @@ const Procore = ({
           method: "get",
           url: `/procore/managers/${projectName[0]?.value}`,
         });
-        setSubmittalList(submittalManagerResp.data);
+        setSubmittalList(submittalManagerResp.data.data);
       };
 
       fetchData().catch((error) => {
