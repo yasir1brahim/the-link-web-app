@@ -15,6 +15,7 @@ import { ReactComponent as ArrowRight } from "../../assets/images/border-arrow.s
 const SubmittalMappings = () => {
   const [searchParams] = useSearchParams();
   const customerId = searchParams.get("customerId");
+  const companyId = searchParams.get("companyId");
   const [linkSubMappings, setLinkSubMappings] = useState([]);
   const [procoreSubTypes, setProcoreSubTypes] = useState([]);
   //   const [procoreSubDropDownMappings, setProcoreSubDropDownMappings] = useState([]);
@@ -94,7 +95,7 @@ const SubmittalMappings = () => {
     <div className="page-wrap">
       <NavbarTop />
       {openExportToProcoreModal && allMappings && (
-        <ExportToProcoreModal mappings={allMappings}></ExportToProcoreModal>
+        <ExportToProcoreModal mappings={allMappings} companyId={companyId}></ExportToProcoreModal>
       )}
       <div className="position-button-wrap">
         <div className="button-wrap">

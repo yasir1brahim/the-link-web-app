@@ -118,7 +118,7 @@ const Procore = ({
           draggable: true,
           progress: undefined,
         });
-        navigate(`/submital-mappings?customerId=${customerId}`);
+        navigate(`/submital-mappings?customerId=${customerId}&companyId=${partnerCompany[0]?.value}`);
       });
     } catch (error) {
       toggleProcoreModal();

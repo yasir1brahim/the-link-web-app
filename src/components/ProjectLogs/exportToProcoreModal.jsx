@@ -6,7 +6,7 @@ import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import axiosInstance from "../../config/axios";
 import { useNavigate } from "react-router";
 
-const ExportToProcoreModal = () => {
+const ExportToProcoreModal = (props) => {
   const [openModal, setOpenModal] = useState(true);
   const toggle = () => setOpenModal(!openModal);
   // const accesToken = localStorage.getItem("procore_access_token");
@@ -24,7 +24,7 @@ const ExportToProcoreModal = () => {
       try {
         await axiosInstance({
           method: "get",
-          url: `/procore/status/${companyId}`,
+          url: `/procore/status/${props?.companyId}`,
         }).then((res) => {
           setStatus(get(res, "data.data"));
         });
