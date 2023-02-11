@@ -45,7 +45,7 @@ const ExportToProcoreModal = (props) => {
   }, [props?.companyId]);
 
   const handleExportToProcore = async () => {
-    const selectedRows = sessionStorage.getItem('selectedRows');
+    const selectedRows = localStorage.getItem('selectedRows');
     try {
       await axiosInstance({
         method: "post",
