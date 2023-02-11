@@ -354,7 +354,7 @@ const ProjectLogs = () => {
     // do not update the values if navigated from procore page
     if(document.referrer)
     {
-      sessionStorage.setItem('selectedRows', JSON.stringify(selected))}
+      localStorage.setItem('selectedRows', JSON.stringify(selected))}
     },[selected]
   )
 
