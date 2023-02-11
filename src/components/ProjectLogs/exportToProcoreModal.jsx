@@ -45,14 +45,14 @@ const ExportToProcoreModal = (props) => {
   }, [props?.companyId]);
 
   const handleExportToProcore = async () => {
-    const selectedRows = localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
+    const selectedRows = localStorage.getItem('selectedRows') === '' ? "All" : localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
     try {
       await axiosInstance({
         method: "post",
         url: "/procore/create_submittals",
         data: {
           project_id: Number(projectId),
-          records: selectedRows && selectedRows?.length > 0 ? selectedRows : "All", // array of ids
+          records: selectedRows, // array of ids
           status_id: get(selectStatus,`${[0]}.value`),
         },
       }).then((resp)=>{
