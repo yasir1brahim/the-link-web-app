@@ -14,7 +14,6 @@ const ExportToProcoreModal = (props) => {
   const [status, setStatus] = useState([]);
   const navigate = useNavigate();
 
-  const companyId = localStorage.getItem("companyId");
   const projectId = localStorage.getItem("projectId");
   const customerId = localStorage.getItem('customerId');
   const logType = localStorage.getItem('logType');
@@ -40,10 +39,10 @@ const ExportToProcoreModal = (props) => {
         });
       }
     };
-    if (companyId) {
+    if (props?.companyId) {
       getProcoreStatus();
     }
-  }, [companyId]);
+  }, [props?.companyId]);
 
   const handleExportToProcore = async () => {
     const selectedRows = sessionStorage.getItem('selectedRows');
