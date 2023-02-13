@@ -203,14 +203,7 @@ const ProjectLogs = () => {
         });
       });
     }
-  }, [
-    authCode,
-    customerId,
-    logType,
-    navigateToSubmittal,
-    projectId,
-    searchParams,
-  ]);
+  }, [authCode, customerId, logType, projectId]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -232,14 +225,14 @@ const ProjectLogs = () => {
         progress: undefined,
       });
     });
-    
+
     if (procoreProjectId) {
       fetchData();
     } else {
       searchParams.set("code", "");
       setNavigateToSubmittal(!navigateToSubmittal);
     }
-  }, [procoreProjectId]);
+  }, [procoreProjectId, navigateToSubmittal, searchParams]);
 
   useEffect(() => {
     if (navigateToSubmittal) {
