@@ -78,7 +78,7 @@ const ExportToProcoreModal = (props) => {
   return (
     <div className="procore-modal">
       <Modal isOpen={openModal} toggle={toggle}>
-        <ModalHeader toggle={toggle}>Looks Good !</ModalHeader>
+        <ModalHeader toggle={toggle}>Select status !</ModalHeader>
         <ModalBody className="procore-modal-body">
           {status && status.length > 0 && (
             <SelectDropdown

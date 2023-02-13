@@ -169,7 +169,7 @@ const ProjectLogs = () => {
           }
           
         })
-        if(!projectMappingResponse?.data?.data?.procore_project_id) {
+        if(projectMappingResponse && !projectMappingResponse?.data?.data?.procore_project_id) {
           setProcoreModal(true)
           const companyResp = await axiosInstance({
             method: 'get',
@@ -349,10 +349,15 @@ const ProjectLogs = () => {
     }
   };
 
+  useEffect(() => {
+    const retriveSelected = localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
+    if (retriveSelected) setSelected(retriveSelected);
+  }, []);
+  
   // add the selected rows in session storage to be used by export procore
   useEffect(()=>{
     // do not update the values if navigated from procore page
-    if(document.referrer)
+    if(document.referrer && selected?.length)
     {
       localStorage.setItem('selectedRows', `${selected}`)}
     },[selected]
