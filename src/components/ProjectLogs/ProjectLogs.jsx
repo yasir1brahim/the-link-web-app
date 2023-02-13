@@ -225,14 +225,16 @@ const ProjectLogs = () => {
         progress: undefined,
       });
     });
-
-    if (procoreProjectId) {
-      fetchData();
-    } else {
-      searchParams.set("code", "");
-      setNavigateToSubmittal(!navigateToSubmittal);
+    
+    if(authCode) {
+      if (procoreProjectId) {
+        fetchData();
+      } else {
+        searchParams.set("code", "");
+        setNavigateToSubmittal(!navigateToSubmittal);
+      }
     }
-  }, [procoreProjectId, navigateToSubmittal, searchParams]);
+  }, [procoreProjectId, navigateToSubmittal, searchParams, authCode]);
 
   useEffect(() => {
     if (navigateToSubmittal) {
