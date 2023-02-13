@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../../config/axios";
 import { toast, ToastContainer } from "react-toastify";
-import { useSearchParams } from "react-router-dom";
 import { get } from "lodash";
 import NavbarTop from "../shared/NavbarTop/NavbarTop";
 
@@ -13,9 +12,9 @@ import { ReactComponent as LinkLogo } from "../../assets/images/logo-dark.svg";
 import { ReactComponent as ArrowRight } from "../../assets/images/border-arrow.svg";
 
 const SubmittalMappings = () => {
-  const [searchParams] = useSearchParams();
-  const customerId = searchParams.get("customerId");
-  const companyId = searchParams.get("companyId");
+
+  const customerId = localStorage.getItem("customerId");
+  const companyId = localStorage.getItem("companyId");
   const [linkSubMappings, setLinkSubMappings] = useState([]);
   const [procoreSubTypes, setProcoreSubTypes] = useState([]);
   //   const [procoreSubDropDownMappings, setProcoreSubDropDownMappings] = useState([]);
