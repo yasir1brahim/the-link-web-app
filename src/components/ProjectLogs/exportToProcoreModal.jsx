@@ -60,9 +60,11 @@ const ExportToProcoreModal = (props) => {
           toast.success('the records are successfully exported');
           toggle();
           navigate(`/project-logs?projectDetails=${projectId},${customerId},${logType}`)
+          localStorage.setItem('selectedRows', '')
         };
         });
     } catch (error) {
+      localStorage.setItem('selectedRows', '')
       toast.error("Something went wrong!", {
         position: "bottom-center",
         autoClose: 5000,
