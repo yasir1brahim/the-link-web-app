@@ -225,9 +225,9 @@ const ProjectLogs = () => {
         progress: undefined,
       });
     });
-    
+
     if(authCode) {
-      if (procoreProjectId) {
+      if (!procoreProjectId) {
         fetchData();
       } else {
         searchParams.set("code", "");
