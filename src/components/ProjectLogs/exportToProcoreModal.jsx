@@ -57,12 +57,23 @@ const ExportToProcoreModal = (props) => {
         },
       }).then((resp)=>{
         if(resp.status === 200){
-          toast.success('the records are successfully exported');
+          toast.success("Successfully exported to Procore!", {
+            position: "bottom-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
           toggle();
           navigate(`/project-logs?projectDetails=${projectId},${customerId},${logType}`)
+          localStorage.setItem('selectedRows', '')
         };
         });
     } catch (error) {
+      localStorage.setItem('selectedRows', '')
+      navigate(`/project-logs?projectDetails=${projectId},${customerId},${logType}`)
       toast.error("Something went wrong!", {
         position: "bottom-center",
         autoClose: 5000,
