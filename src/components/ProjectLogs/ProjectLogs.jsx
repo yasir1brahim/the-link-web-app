@@ -349,10 +349,10 @@ const ProjectLogs = () => {
     }
   };
 
-  useEffect(() => {
-    const retriveSelected = localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
-    if (retriveSelected) setSelected(retriveSelected);
-  }, []);
+  // useEffect(() => {
+  //   const retriveSelected = localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
+  //   if (retriveSelected) setSelected(retriveSelected);
+  // }, []);
   
   // add the selected rows in session storage to be used by export procore
   useEffect(()=>{
