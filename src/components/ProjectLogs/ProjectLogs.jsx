@@ -206,29 +206,28 @@ const ProjectLogs = () => {
   }, [authCode, customerId, logType, projectId]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setProcoreModal(true);
-      const companyResp = await axiosInstance({
-        method: "get",
-        url: "/procore/companies",
-      });
-      setCompanyList(companyResp?.data.data);
-    };
-    fetchData().catch((error) => {
-      toast.error("Something went wrong!", {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    });
-
+   
     if(authCode) {
       if (!procoreProjectId) {
-        fetchData();
+        const fetchData = async () => {
+          setProcoreModal(true);
+          const companyResp = await axiosInstance({
+            method: "get",
+            url: "/procore/companies",
+          });
+          setCompanyList(companyResp?.data.data);
+        };
+        fetchData().catch((error) => {
+          toast.error("Something went wrong!", {
+            position: "bottom-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+        });
       } else {
         searchParams.set("code", "");
         setNavigateToSubmittal(!navigateToSubmittal);
