@@ -32,6 +32,7 @@ const Adminlanding = (props) => {
         isArchived ? response.data.archived_customers : response.data.message
       );
       localStorage.setItem('account_id', response.data.account_id);
+      localStorage.setItem('selectedRows', ''); //Clearing selected rows on navigating to home page
       setLoading(false);
       console.log(response.data.message);
     };
