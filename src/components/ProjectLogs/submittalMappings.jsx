@@ -71,6 +71,7 @@ const SubmittalMappings = () => {
     const mappingsobject = { mappings: linkSubMappings };
 
     try {
+      setLoading(true);
       await axiosInstance({
         method: "post",
         url: `procore/submittal_mapping/${customerId}`,
@@ -81,6 +82,7 @@ const SubmittalMappings = () => {
         }
         return res;
       });
+      setLoading(false);
     } catch (error) {
       toast.error("Something went wrong!", {
         position: "bottom-center",

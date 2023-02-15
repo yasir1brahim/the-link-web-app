@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import axiosInstance from "../../config/axios";
 import { useNavigate } from "react-router";
+import Loader from "../shared/Loader/Loader";
 
 const ExportToProcoreModal = (props) => {
   const [openModal, setOpenModal] = useState(true);
@@ -12,6 +13,7 @@ const ExportToProcoreModal = (props) => {
   // const accesToken = localStorage.getItem("procore_access_token");
   const [selectStatus, setSelectStatus] = useState("");
   const [status, setStatus] = useState([]);
+  const [isLoading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const projectId = localStorage.getItem("projectId");
@@ -21,12 +23,14 @@ const ExportToProcoreModal = (props) => {
   useEffect(() => {
     const getProcoreStatus = async () => {
       try {
+        setLoading(true);
         await axiosInstance({
           method: "get",
           url: `/procore/status/${props?.companyId}`,
         }).then((res) => {
           setStatus(get(res, "data.data"));
         });
+        setLoading(false);
       } catch (error) {
         toast.error("Something went wrong!", {
           position: "bottom-center",
@@ -47,6 +51,7 @@ const ExportToProcoreModal = (props) => {
   const handleExportToProcore = async () => {
     const selectedRows = localStorage.getItem('selectedRows') === '' ? "All" : localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
     try {
+      setLoading(true);
       await axiosInstance({
         method: "post",
         url: "/procore/create_submittals",
@@ -71,6 +76,7 @@ const ExportToProcoreModal = (props) => {
           localStorage.setItem('selectedRows', '')
         };
         });
+        setLoading(false);
     } catch (error) {
       localStorage.setItem('selectedRows', '')
       navigate(`/project-logs?projectDetails=${projectId},${customerId},${logType}`)
@@ -123,6 +129,7 @@ const ExportToProcoreModal = (props) => {
         draggable
         pauseOnHover
       />
+      {isLoading && <Loader showComponentLoader={true} />}
     </div>
   );
 };
