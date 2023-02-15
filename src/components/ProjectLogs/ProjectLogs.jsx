@@ -400,7 +400,8 @@ const ProjectLogs = () => {
   useEffect(() => {
     // do not update the values if navigated from procore page
     if (document.referrer && selected?.length) {
-      const rowsSelected = toString(selected)
+      console.log(selected);
+      const rowsSelected = selected.toString()
       console.log(rowsSelected);
       localStorage.setItem("selectedRows", `${rowsSelected}`);
     }
