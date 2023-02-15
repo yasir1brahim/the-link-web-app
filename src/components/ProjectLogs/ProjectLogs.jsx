@@ -85,6 +85,7 @@ const ProjectLogs = () => {
   const projectName = searchParams.get("projectName");
   const logType = projectDetails[2];
   const authCode = searchParams.get("code");
+  const [procoreProjectMappingsAPICalled, setProcoreProjectMappingsAPICalled] = useState(false);
 
   useEffect(() => {
     if (!modal) {
@@ -172,6 +173,7 @@ const ProjectLogs = () => {
         localStorage.setItem("projectId", projectId);
         localStorage.setItem("logType", logType);
         localStorage.setItem("customerId", customerId);
+        setProcoreProjectMappingsAPICalled(true);
         setProcoreProjectId(get(res, "data.data.procore_project_id"));
       }
     });
@@ -212,8 +214,7 @@ const ProjectLogs = () => {
   useEffect(() => {
    
     if(authCode) {
-      handleGetProjectMappings();
-      if (!procoreProjectId) {
+      if (procoreProjectMappingsAPICalled && !procoreProjectId) {
         const fetchData = async () => {
           setProcoreModal(true);
           const companyResp = await axiosInstance({
@@ -233,12 +234,12 @@ const ProjectLogs = () => {
             progress: undefined,
           });
         });
-      } else {
+      } else if(procoreProjectMappingsAPICalled) {
         searchParams.set("code", "");
         setNavigateToSubmittal(!navigateToSubmittal);
       }
     }
-  }, [procoreProjectId, navigateToSubmittal, searchParams, authCode, handleGetProjectMappings]);
+  }, [procoreProjectId, navigateToSubmittal, searchParams, authCode, procoreProjectMappingsAPICalled]);
 
   useEffect(() => {
     if (navigateToSubmittal) {
