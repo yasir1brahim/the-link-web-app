@@ -158,7 +158,8 @@ const ProjectLogs = () => {
     }
   };
 
-  const handleGetProjectMappings = async() =>{
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleGetProjectMappings = useCallback(async() =>{
     await axiosInstance({
       method: "get",
       url: `/procore/project_mapping/${projectId}`,
@@ -174,7 +175,7 @@ const ProjectLogs = () => {
         setProcoreProjectId(get(res, "data.data.procore_project_id"));
       }
     });
-  }
+  })
 
   useEffect(() => {
     if (authCode) {
@@ -237,7 +238,7 @@ const ProjectLogs = () => {
         setNavigateToSubmittal(!navigateToSubmittal);
       }
     }
-  }, [procoreProjectId, navigateToSubmittal, searchParams, authCode]);
+  }, [procoreProjectId, navigateToSubmittal, searchParams, authCode, handleGetProjectMappings]);
 
   useEffect(() => {
     if (navigateToSubmittal) {
