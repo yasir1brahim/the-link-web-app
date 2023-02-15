@@ -243,7 +243,9 @@ const ProjectLogs = () => {
 
   useEffect(() => {
     if (navigateToSubmittal) {
+      setLoading(true);
       navigate(`/submital-mappings?customerId=${customerId}`);
+      setLoading(false);
     }
   }, [navigateToSubmittal, navigate, customerId]);
 
