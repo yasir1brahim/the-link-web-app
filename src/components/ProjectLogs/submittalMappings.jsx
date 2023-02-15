@@ -10,11 +10,13 @@ import ExportToProcoreModal from "./exportToProcoreModal";
 import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
 import { ReactComponent as LinkLogo } from "../../assets/images/logo-dark.svg";
 import { ReactComponent as ArrowRight } from "../../assets/images/border-arrow.svg";
+import Loader from "../shared/Loader/Loader";
 
 const SubmittalMappings = () => {
 
   const customerId = localStorage.getItem("customerId");
   const companyId = localStorage.getItem("companyId");
+  const [isLoading, setLoading] = useState(false);
   const [linkSubMappings, setLinkSubMappings] = useState([]);
   const [procoreSubTypes, setProcoreSubTypes] = useState([]);
   //   const [procoreSubDropDownMappings, setProcoreSubDropDownMappings] = useState([]);
@@ -27,6 +29,7 @@ const SubmittalMappings = () => {
   useEffect(() => {
     const handleSubmittalMappings = async () => {
       try {
+        setLoading(true);
         await axiosInstance({
           method: "get",
           url: `procore/submittal_mapping/${customerId}`,
@@ -35,6 +38,7 @@ const SubmittalMappings = () => {
           setProcoreSubTypes(get(res, "data.data.procore_submittal_types"));
           setAllMappings(get(res, "data.data"));
         });
+        setLoading(false);
       } catch (error) {
         toast.error("Something went wrong!", {
           position: "bottom-center",
@@ -157,6 +161,7 @@ const SubmittalMappings = () => {
           pauseOnHover
         />
       </div>
+      {isLoading && <Loader showComponentLoader={true} />}
     </div>
   );
 };
