@@ -98,7 +98,7 @@ const ProjectLogs = () => {
   };
 
   const handleSubmit = async () => {
-    console.log(pdfFile);
+    // console.log(pdfFile);
     try {
       setUploadLoading(true);
       const data = new FormData();
@@ -111,7 +111,7 @@ const ProjectLogs = () => {
         data,
       });
       if (response.data) {
-        console.log(response.data);
+        // console.log(response.data);
         setUploadLoading(false);
         setFileData(response.data.message);
         setModal(false);
@@ -158,6 +158,24 @@ const ProjectLogs = () => {
     }
   };
 
+  const handleGetProjectMappings = async() =>{
+    await axiosInstance({
+      method: "get",
+      url: `/procore/project_mapping/${projectId}`,
+    }).then((res) => {
+      if (get(res, "data.data")) {
+        localStorage.setItem(
+          "companyId",
+          get(res, "data.data.procore_company_id")
+        );
+        localStorage.setItem("projectId", projectId);
+        localStorage.setItem("logType", logType);
+        localStorage.setItem("customerId", customerId);
+        setProcoreProjectId(get(res, "data.data.procore_project_id"));
+      }
+    });
+  }
+
   useEffect(() => {
     if (authCode) {
       const fetchData = async () => {
@@ -173,22 +191,7 @@ const ProjectLogs = () => {
           "procore_access_token",
           accessTokenData?.data.data.access_token
         );
-
-        await axiosInstance({
-          method: "get",
-          url: `/procore/project_mapping/${projectId}`,
-        }).then((res) => {
-          if (get(res, "data.data")) {
-            localStorage.setItem(
-              "companyId",
-              get(res, "data.data.procore_company_id")
-            );
-            localStorage.setItem("projectId", projectId);
-            localStorage.setItem("logType", logType);
-            localStorage.setItem("customerId", customerId);
-            setProcoreProjectId(get(res, "data.data.procore_project_id"));
-          }
-        });
+        handleGetProjectMappings();
       };
 
       fetchData().catch((error) => {
@@ -203,11 +206,12 @@ const ProjectLogs = () => {
         });
       });
     }
-  }, [authCode, customerId, logType, projectId]);
+  }, [authCode, customerId, logType, projectId, handleGetProjectMappings]);
 
   useEffect(() => {
    
     if(authCode) {
+      handleGetProjectMappings();
       if (!procoreProjectId) {
         const fetchData = async () => {
           setProcoreModal(true);
@@ -277,7 +281,7 @@ const ProjectLogs = () => {
           progress: undefined,
         });
       } catch (error) {
-        console.log(error.message);
+        // console.log(error.message);
         setSelected([]);
         toast.error(error.response.data.message, {
           position: "bottom-center",
@@ -309,7 +313,6 @@ const ProjectLogs = () => {
       setLogData(response.data.message);
 
       setLoading(false);
-      console.log(response.data.message);
     };
 
     fetchData().catch((error) => {
@@ -349,7 +352,7 @@ const ProjectLogs = () => {
         })
       );
 
-      console.log(response.data.message);
+      // console.log(response.data.message);
     };
 
     fetchData().catch((error) => {
@@ -400,10 +403,9 @@ const ProjectLogs = () => {
   useEffect(() => {
     // do not update the values if navigated from procore page
     if (document.referrer && selected?.length) {
-      console.log(selected);
       const rowsSelected = selected.toString()
-      console.log(rowsSelected);
-      localStorage.setItem("selectedRows", `${rowsSelected}`);
+      sessionStorage.setItem("selectedRows", `${rowsSelected}`);
+
     }
   }, [selected]);
 
