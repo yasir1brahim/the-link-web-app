@@ -235,6 +235,11 @@ const CustomerProjects = (props) => {
                       </th>
                       <th>
                         <span>
+                          Project Type <i className=""></i>
+                        </span>
+                      </th>
+                      <th>
+                        <span>
                           Status<i className="sort-d"></i>
                         </span>
                       </th>
@@ -283,6 +288,7 @@ const CustomerProjects = (props) => {
                               </div>
                             </td> */}
                             <td>{project.project_name}</td>
+                            <td>{project.visibility_type}</td>
                             <td>{project.status}</td>
                             <td>{project.lead_contact}</td>
                             <td>{project.users}</td>
