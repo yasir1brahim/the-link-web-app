@@ -29,12 +29,14 @@ const Projects = () => {
     setCreateProjectModal(!createProjectModal);
   const toggleUploadSpecsModal = () => setUploadSpecsModal(!uploadSpecsModal);
 
+  // function related to upload specs
   const backToUpload = () => {
     toggleErrorModal(false);
     setUploadSpecsModal(true);
   };
 
-  const handleSubmit = async () => {
+  // handle to upload specs, submit 
+  const handleUploadSubmit = async () => {
     console.log(pdfFile);
     try {
       setUploadLoading(true);
@@ -71,6 +73,7 @@ const Projects = () => {
     }
   };
 
+  // function used in the project tiles to navigate to project details
   const handleLaunch = (project) => {
     project?.project_type === "ufgs"
       ? navigate("/project-logs", {
@@ -101,7 +104,7 @@ const Projects = () => {
         <NavbarTop />
         <div className="page-wrap-content personal-projects-wrapper">
           <Header
-            toggleModal={slider ? toggleUploadSpecsModal : toggleCreateProjectModal}
+            toggleModal={toggleCreateProjectModal}
             title={state?.customer_name || customerData?.customer_name}
             showBtn={
               slider
@@ -117,6 +120,12 @@ const Projects = () => {
               slider={slider}
               projectData={projectData}
               toggleUploadSpecsModal={toggleUploadSpecsModal}
+              createProjectModal={createProjectModal}
+              toggleCreateProjectModal={toggleCreateProjectModal}
+              state={state}
+              customerData={customerData}
+              pageRefresh={pageRefresh}
+              setPageRefresh={setPageRefresh}
             />
           ) : (
             <CustomerProjects
@@ -139,7 +148,7 @@ const Projects = () => {
           toggleModal={toggleUploadSpecsModal}
           setPdfFile={setPdfFile}
           pdfFile={pdfFile}
-          handleSubmit={handleSubmit}
+          handleSubmit={handleUploadSubmit}
           isUploadLoading={isUploadLoading}
           errorModal={errorModal}
           toggleErrorModal={toggleErrorModal}

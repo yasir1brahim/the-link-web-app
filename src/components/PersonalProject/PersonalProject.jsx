@@ -1,8 +1,22 @@
 import React from "react";
+import CreateProject from "../CustomerProjects/createProject";
 import ContractTile from "./contractTile";
 import PersonalTile from "./personalTile";
 
-const PersonalProject = ({ toggleSlider, slider, projectData, handleLaunch, toggleUploadSpecsModal }) => {
+const PersonalProject = ({
+  toggleSlider,
+  slider,
+  projectData,
+  handleLaunch,
+  toggleUploadSpecsModal,
+  createProjectModal,
+  toggleCreateProjectModal,
+  state,
+  customerData,
+  pageRefresh,
+  setPageRefresh
+
+}) => {
   console.log(projectData);
 
   return (
@@ -36,18 +50,35 @@ const PersonalProject = ({ toggleSlider, slider, projectData, handleLaunch, togg
               if (data.visibility_type === "contract") {
                 return (
                   <div className="col-4">
-                    <ContractTile projectName={data.project_name} handleLaunch={handleLaunch} project={data} toggleUploadSpecsModal={toggleUploadSpecsModal} />
+                    <ContractTile
+                      projectName={data.project_name}
+                      handleLaunch={handleLaunch}
+                      project={data}
+                      toggleUploadSpecsModal={toggleUploadSpecsModal}
+                    />
                   </div>
                 );
               }
               return (
                 <div className="col-4">
-                  <PersonalTile projectName={data.project_name} handleLaunch={handleLaunch} project={data} toggleUploadSpecsModal={toggleUploadSpecsModal}/>
+                  <PersonalTile
+                    projectName={data.project_name}
+                    handleLaunch={handleLaunch}
+                    project={data}
+                    toggleUploadSpecsModal={toggleUploadSpecsModal}
+                  />
                 </div>
               );
             })}
         </div>
       </div>
+      <CreateProject
+        modal={createProjectModal}
+        toggleModal={toggleCreateProjectModal}
+        customer={state || customerData}
+        pageRefresh={pageRefresh}
+        setPageRefresh={setPageRefresh}
+      />
     </div>
   );
 };
