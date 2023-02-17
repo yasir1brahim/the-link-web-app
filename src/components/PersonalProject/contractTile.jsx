@@ -1,4 +1,4 @@
-const ContractTile = ({projectName, handleLaunch, project}) => {
+const ContractTile = ({projectName, handleLaunch, project, toggleUploadSpecsModal}) => {
   return (
     <div className="grid-view grid-view-contract">
       <div className="gv-heading-content">
@@ -24,11 +24,8 @@ const ContractTile = ({projectName, handleLaunch, project}) => {
               <div className="select-File">
                 <input
                   className="d-none"
-                  type="file"
-                  // name="files[]"
                   id="uploadDocs"
-                  accept="application/pdf"
-                  multiple
+                  onClick={toggleUploadSpecsModal}
                 />
                 <label htmlFor="uploadDocs">
                   <div className="upload-text d-flex align-items-center justify-content-center">

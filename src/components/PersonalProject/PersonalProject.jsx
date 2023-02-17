@@ -2,7 +2,7 @@ import React from "react";
 import ContractTile from "./contractTile";
 import PersonalTile from "./personalTile";
 
-const PersonalProject = ({ toggleSlider, slider, projectData, handleLaunch }) => {
+const PersonalProject = ({ toggleSlider, slider, projectData, handleLaunch, toggleUploadSpecsModal }) => {
   console.log(projectData);
 
   return (
@@ -36,13 +36,13 @@ const PersonalProject = ({ toggleSlider, slider, projectData, handleLaunch }) =>
               if (data.visibility_type === "contract") {
                 return (
                   <div className="col-4">
-                    <ContractTile projectName={data.project_name} handleLaunch={handleLaunch} project={data}  />
+                    <ContractTile projectName={data.project_name} handleLaunch={handleLaunch} project={data} toggleUploadSpecsModal={toggleUploadSpecsModal} />
                   </div>
                 );
               }
               return (
                 <div className="col-4">
-                  <PersonalTile projectName={data.project_name} handleLaunch={handleLaunch} project={data}/>
+                  <PersonalTile projectName={data.project_name} handleLaunch={handleLaunch} project={data} toggleUploadSpecsModal={toggleUploadSpecsModal}/>
                 </div>
               );
             })}

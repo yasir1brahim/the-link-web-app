@@ -1,4 +1,4 @@
-const PersonalTile = ({projectName, handleLaunch, project}) => {
+const PersonalTile = ({projectName, handleLaunch, project, toggleUploadSpecsModal}) => {
   return (
     <div className="grid-view grid-view-personal">
       <div className="gv-heading-content">
@@ -24,16 +24,13 @@ const PersonalTile = ({projectName, handleLaunch, project}) => {
               <div className="select-File">
                 <input
                   className="d-none"
-                  type="file"
-                  // name="files[]"
                   id="uploadDocs"
-                  accept="application/pdf"
-                  multiple
+                  onClick={toggleUploadSpecsModal}
                 />
                 <label htmlFor="uploadDocs">
                   <div className="upload-text d-flex align-items-center justify-content-center">
                     <small className="upload-icon"></small>
-                    <span className="upload-name">Upload Specs</span>
+                    <span className="upload-name" >Upload Specs</span>
                   </div>
                 </label>
               </div>
