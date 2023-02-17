@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Header from '../shared/Header/Header';
-import NavbarTop from '../shared/NavbarTop/NavbarTop';
+import Loader from '../shared/Loader/Loader';
 // import WhitingTurner from '../../assets/images/whiting-turner.svg';
 // import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
 // import ProfilePhoto from '../../assets/images/dummy-profile.svg';
@@ -14,38 +13,37 @@ import { useLocation } from 'react-router-dom';
 import CreateProject from './createProject';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
 import EditProject from './editProject';
 import CreateEmployee from '../CustomerProfile/createEmployee';
 import moment from 'moment';
 
-const CustomerProjects = (props) => {
-  const [modal, setModal] = useState(false);
+const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, pageRefresh, setPageRefresh, toggleCreateProjectModal, createProjectModal, projectData ,setProjectData, handleLaunch}) => {
   const [employeeModal, setEmployeeModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [isArchived, toggleArchive] = useState(false);
-  const toggleModal = () => setModal(!modal);
+
   const toggleEditModal = () => setEditModal(!editModal);
   const toggleEmployeeModal = () => setEmployeeModal(!employeeModal);
-  const [projectData, setProjectData] = useState([]);
+
   const [project, setProject] = useState({});
-  const [pageRefresh, setPageRefresh] = useState(false);
+  
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [customerData, setCustomerData] = useState({});
+  const [isLoading, setLoading] = useState(false);
   const { state } = useLocation();
   // const customer = state;
-  const navigate = useNavigate();
   const roleId = localStorage.getItem('roleId')
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const response = await axiosInstance({
         method: 'get',
         url: state?.customer_id
           ? `/customer/${state.customer_id}`
           : `/customer/${localStorage.getItem('userId')}`,
       });
+      setLoading(false);
       setCustomerData(response.data.message[0]);
       console.log(response.data.message);
     };
@@ -94,21 +92,7 @@ const CustomerProjects = (props) => {
     });
   }, [state, pageRefresh, isArchived, roleId]);
 
-  const handleLaunch = (project) => {
-    // project?.project_type === 'ufgs' ? navigate(`/project-logs?projectId=${project?.project_id}&customerId=${localStorage.getItem('roleId') === '0' ? state.customer_id : localStorage.getItem('userId')}&logType=Classified`, {
-    project?.project_type === 'ufgs' ? navigate(`/project-logs?projectDetails=${project?.project_id},${localStorage.getItem('roleId') === '0' ? state.customer_id : localStorage.getItem('userId')},Classified`, {
-      state: {
-        project,
-        projectId: project?.project_id,
-        projectName: project?.project_name,
-        customerId: localStorage.getItem('roleId') === '0' ? state.customer_id : localStorage.getItem('userId'),
-        logType: 'Classified'
-      },
-    }) :
-    navigate('/project-details', {
-      state: { project, customerId: localStorage.getItem('roleId') === '0' ? state.customer_id : localStorage.getItem('userId') },
-    });
-  };
+
   const handleEdit = (project) => {
     setProject(project);
     toggleEditModal();
@@ -160,16 +144,10 @@ const CustomerProjects = (props) => {
 
   return (
     <>
-      <div className="page-wrap">
-        <NavbarTop />
-        <div className="page-wrap-content customer-projects-wrapper">
-          <Header
-            title={state?.customer_name || customerData?.customer_name}
-            showBtn={roleId !== '6' && roleId !== '7' && 'Create New Project'}
-            toggleModal={toggleModal}
-            breadcrumb={'Project Details'}
-          />
-
+     
+        
+       
+     
           <div className="customer-projects-content">
             <div className="customer-project-details">
               {/* when there are Zero Users */}
@@ -178,7 +156,7 @@ const CustomerProjects = (props) => {
                         </a> */}
               <div className="table-top-content">
                 <div className="table-heading">
-                  <h5 className="m-0">Projects List</h5>
+                  
                   <label className="table-entries">
                     Showing entries{' '}
                     <span className="showing-strong">
@@ -198,6 +176,19 @@ const CustomerProjects = (props) => {
                     + Add Employee
                   </button>}
                 </div>
+                
+                  <div className="grid-list-toggle">
+                  <span className="tag-list-view" >List View</span>
+                  <div className="gl-toggle-wrapper">
+                    <label class="switch">
+                      <input type="checkbox" />
+                      <span class="slider round" onClick={()=>toggleSlider(!slider)}></span>
+                    </label>
+                  </div>
+                  <span className="tag-list-view">Grid View</span>
+                </div>
+              
+                
                 {roleId !== '6' && roleId !== '7' && <div style={{ marginLeft: '10px' }}>
                   <button
                     onClick={() => toggleArchive(!isArchived)}
@@ -235,7 +226,7 @@ const CustomerProjects = (props) => {
                       </th>
                       <th>
                         <span>
-                          Project Type <i className=""></i>
+                          Visibility Type <i className=""></i>
                         </span>
                       </th>
                       <th>
@@ -349,8 +340,8 @@ const CustomerProjects = (props) => {
                 setPageRefresh={setPageRefresh}
               />
               <CreateProject
-                modal={modal}
-                toggleModal={toggleModal}
+                modal={createProjectModal}
+                toggleModal={toggleCreateProjectModal}
                 customer={state || customerData}
                 pageRefresh={pageRefresh}
                 setPageRefresh={setPageRefresh}
@@ -365,8 +356,8 @@ const CustomerProjects = (props) => {
               />
             </div>
           </div>
-        </div>
-      </div>
+          <Loader showComponentLoader={isLoading} />
+
       <ToastContainer
         position="bottom-center"
         autoClose={5000}
