@@ -78,6 +78,7 @@ const PersonalProject = ({
         customer={state || customerData}
         pageRefresh={pageRefresh}
         setPageRefresh={setPageRefresh}
+        isPersonalProject={true}
       />
     </div>
   );
