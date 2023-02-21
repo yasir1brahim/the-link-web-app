@@ -59,7 +59,7 @@ const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, p
         progress: undefined,
       });
     });
-  }, [state, pageRefresh]);
+  }, [state, pageRefresh, setCustomerData]);
 
   useEffect(() => {
     const url = roleId === '6' || roleId === '7' ?
@@ -90,7 +90,7 @@ const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, p
         progress: undefined,
       });
     });
-  }, [state, pageRefresh, isArchived, roleId]);
+  }, [state, pageRefresh, isArchived, roleId, setProjectData]);
 
 
   const handleEdit = (project) => {
