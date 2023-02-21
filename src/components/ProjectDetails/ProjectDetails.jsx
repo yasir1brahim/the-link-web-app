@@ -116,7 +116,7 @@ const ProjectsDetails = () => {
             title={`Project Details/  ${
               state?.project?.project_name || ''
             }`}
-            showBtn={'Upload Document'}
+            showBtn={'Upload Specs'}
             toggleModal={toggleModal}
             breadcrumb={'Project Details'}
             breadcrumb2={'View Projects'}

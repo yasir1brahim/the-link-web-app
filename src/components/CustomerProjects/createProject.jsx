@@ -18,7 +18,8 @@ const CreateProject = ({
   customer,
   pageRefresh,
   setPageRefresh,
-  projects
+  projects,
+  isPersonalProject = false
 }) => {
   // const [email, setEmail] = useState({ value: '', errors: '' });
   // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
@@ -200,6 +201,21 @@ const CreateProject = ({
                         <div className="text-label">
                           {customer?.contact_number}
                         </div>
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="custom-control custom-checkbox">
+                        <input
+                          type="radio"
+                          name="ticketHeading"
+                          id="ticketHeading"
+                          onClick={()=> setProjectType('ufgs')}
+                          checked={projectType === 'ufgs' || isPersonalProject}
+                        />
+                        <label
+                          style={{color: 'green', marginLeft: '5px'}}
+                          for="ticketHeading"
+                        >Personal Project</label>
                       </div>
                     </div>
                   </div>

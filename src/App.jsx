@@ -3,7 +3,7 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import Authentication from './components/Authentication/Authentication';
 import AdminLanding from './components/AdminLanding/AdminLanding';
 import CustomerProfile from './components/CustomerProfile/CustomerProfile';
-import CustomerProjects from './components/CustomerProjects/CustomerProjects';
+// import CustomerProjects from './components/CustomerProjects/CustomerProjects';
 import Signin from './components/Authentication/Signin';
 import SignUp from './components/Authentication/Signup';
 import Forgotpwd from './components/Authentication/Forgotpwd';
@@ -15,6 +15,8 @@ import ProjectLogs from './components/ProjectLogs/ProjectLogs';
 import PdfWrapper from './pdfWrapper';
 import AdminUser from './components/AdminUser/AdminUser';
 import SubmittalMappings from './components/ProjectLogs/submittalMappings';
+// import PersonalProject from './components/PersonalProject/PersonalProject';
+import Projects from './components/PersonalProject/projects';
 
 function App() {
   return (
@@ -23,7 +25,7 @@ function App() {
         <Route element={<Authentication />} />
         <Route path="/admin-landing" element={<AdminLanding />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
-        <Route path="/project-list" element={<CustomerProjects />} />
+        <Route path="/project-list" element={<Projects/>} />
         <Route path="/project-logs" element={<ProjectLogs />} />
         <Route path="/project-details" element={<ProjectsDetails />} />
         <Route path="/login" element={<Signin />} />
@@ -35,6 +37,7 @@ function App() {
         <Route path="/pdf-view" element={<PdfWrapper />} />
         <Route path="/admin-user" element={<AdminUser />} />
         <Route path='/submital-mappings' element={<SubmittalMappings/>}/>
+        {/* <Route path="/personal-project" element={<PersonalProject />} /> */}
 
         <Route exact path="/" element={<Navigate to="/login" />} />
       </Routes>
