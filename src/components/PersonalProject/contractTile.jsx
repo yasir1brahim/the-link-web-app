@@ -1,4 +1,9 @@
-const ContractTile = ({projectName, handleLaunch, project, toggleUploadSpecsModal}) => {
+const ContractTile = ({
+  projectName,
+  handleLaunch,
+  project,
+  toggleUploadSpecsModal,
+}) => {
   return (
     <div className="grid-view grid-view-contract">
       <div className="gv-heading-content">
@@ -6,10 +11,12 @@ const ContractTile = ({projectName, handleLaunch, project, toggleUploadSpecsModa
         <span className="gv-project-type">Contract</span>
       </div>
       <div className="gv-body-content">
-        <p className="gv-project-desc">
-        </p>
+        <p className="gv-project-desc"></p>
         <div className="gv-project-logs">
-          <button className="btn btn-primary" onClick={() => handleLaunch(project)}>
+          <button
+            className="btn btn-primary"
+            onClick={() => handleLaunch(project)}
+          >
             Submittal Log
             <span className="log-arrow"></span>
           </button>
@@ -21,19 +28,27 @@ const ContractTile = ({projectName, handleLaunch, project, toggleUploadSpecsModa
         <div className="gv-logs-upload">
           <form className="upload-document-form">
             <div className="upload-document-content">
-              <div className="select-File">
-                <input
+              {/* <div className="select-File"  id="uploadDocs" onClick={toggleUploadSpecsModal}> */}
+              {/* <input
                   className="d-none"
                   id="uploadDocs"
                   onClick={toggleUploadSpecsModal}
-                />
-                <label htmlFor="uploadDocs">
-                  <div className="upload-text d-flex align-items-center justify-content-center">
+                /> */}
+              {/* <label htmlFor="uploadDocs"> */}
+              {/* <div className="upload-text d-flex align-items-center justify-content-center">
                     <small className="upload-icon"></small>
                     <span className="upload-name">Upload Specs</span>
-                  </div>
-                </label>
-              </div>
+                  </div> */}
+              {/* </label> */}
+              {/* </div> */}
+              <button
+                type="button"
+                className={`btn btn-primary`}
+                onClick={toggleUploadSpecsModal}
+                style={{width: `100%`}}
+              >
+                Upload Specs
+              </button>
             </div>
           </form>
         </div>

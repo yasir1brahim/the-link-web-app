@@ -167,21 +167,33 @@ const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, p
                     .
                   </label>
                 </div>
-                <div className="table-bulk-changes">
-                  {roleId !== '6' && roleId !== '7' && <button
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                    onClick={toggleEmployeeModal}
-                  >
-                    + Add Employee
-                  </button>}
-                </div>
                 
-                  <div className="grid-list-toggle">
+                <div className="grid-list-toggle" >
+                  <div className="table-bulk-changes" style={{ marginRight: '30px' }}>
+                    {roleId !== '6' && roleId !== '7' && <div style={{ marginLeft: '10px' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={toggleEmployeeModal}
+                    >
+                      + Add Employee
+                    </button>
+                    </div>}
+
+                    {roleId !== '6' && roleId !== '7' && 
+                      <button
+                        onClick={() => toggleArchive(!isArchived)}
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                      >
+                        {isArchived ? 'View Active' : 'View Archived'}
+                      </button>}
+                  </div>
+
                   <span className="tag-list-view" >List View</span>
                   <div className="gl-toggle-wrapper">
                     <label class="switch">
-                      <input type="checkbox" />
+                      <input type="checkbox" checked={slider}/>
                       <span class="slider round" onClick={()=>toggleSlider(!slider)}></span>
                     </label>
                   </div>
@@ -189,15 +201,7 @@ const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, p
                 </div>
               
                 
-                {roleId !== '6' && roleId !== '7' && <div style={{ marginLeft: '10px' }}>
-                  <button
-                    onClick={() => toggleArchive(!isArchived)}
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                  >
-                    {isArchived ? 'View Active' : 'View Archived'}
-                  </button>
-                </div>}
+                
               </div>
               <div className="l-table-wrapper">
                 <table className="table">

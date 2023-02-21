@@ -21,7 +21,7 @@ const PersonalTile = ({projectName, handleLaunch, project, toggleUploadSpecsModa
         <div className="gv-logs-upload">
           <form className="upload-document-form">
             <div className="upload-document-content">
-              <div className="select-File">
+              {/* <div className="select-File">
                 <input
                   className="d-none"
                   id="uploadDocs"
@@ -33,7 +33,15 @@ const PersonalTile = ({projectName, handleLaunch, project, toggleUploadSpecsModa
                     <span className="upload-name" >Upload Specs</span>
                   </div>
                 </label>
-              </div>
+              </div> */}
+              <button
+                type="button"
+                className={`btn btn-primary`}
+                onClick={toggleUploadSpecsModal}
+                style={{width: `100%`}}
+              >
+                Upload Specs
+              </button>
             </div>
           </form>
         </div>

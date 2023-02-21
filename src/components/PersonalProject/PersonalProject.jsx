@@ -24,14 +24,14 @@ const PersonalProject = ({
       <div className="grid-top-content">
         <label className="table-entries">
           Showing entries
-          <span className="showing-strong"> 04 </span>
-          of <span className="showing-strong"> 04 </span>
+          <span className="showing-strong"> {projectData.length} </span>
+          of <span className="showing-strong"> {projectData.length} </span>
         </label>
         <div className="grid-list-toggle">
           <span className="tag-list-view">List View</span>
           <div className="gl-toggle-wrapper">
             <label class="switch">
-              <input type="checkbox" />
+              <input type="checkbox" checked={slider}/>
               <span
                 class="slider round"
                 onClick={() => toggleSlider(!slider)}
