@@ -63,7 +63,7 @@ const Header = ({ ...props }) => {
         <div className="header-right">
           <button
             type="button"
-            className="btn btn-primary"
+            className={`btn btn-primary ${props.btnSize === 'small' ? 'btn-small' : ''}`}
             onClick={props.toggleModal}
           >
             {props.showBtn}
