@@ -197,6 +197,13 @@ select {
 .ui-table-wrapper {
   border: 1px solid $border-color;
   overflow-x: auto;
+  .reduce-height {
+    padding: 4px 8px !important;
+  }
+  .small-font {
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+  }
   table {
     border-collapse: separate !important;
     border-spacing: 0;

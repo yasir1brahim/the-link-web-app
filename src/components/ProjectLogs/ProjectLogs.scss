@@ -4,6 +4,10 @@
   padding: 0 20px;
   max-width: 100%;
 }
+.btn-small {
+  font-size: 0.8rem;
+  line-height: 22px;
+}
 .project-logs-wrapper {
   .project-logs-content {
     .project-logs {
@@ -70,7 +74,7 @@
         }
       }
       .highlight-row{
-        background: rgba($primary, .1);
+        background: rgba($primary, .03);
       }
       .l-table-wrapper {
         max-height: calc(100vh - 230px);
@@ -173,7 +177,7 @@
               }
             }
             .log-desc{
-              height: 48px;
+              height: 12px;
               overflow: hidden;
               position: relative;
               &.show-content{
