@@ -39,7 +39,7 @@ export const FilterTable = (props) => {
                 data: {
                     project_id: props.projectId,
                     search: "",
-                    filters: a,
+                    filters: {...a, type: ["Submittal"]},
                     // filters:{},
                     order_col: props.orderColumn,
                     order: props.order,
