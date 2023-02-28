@@ -306,7 +306,7 @@ const ProjectLogs = () => {
         data: {
           project_id: state?.projectId || projectId,
           search: "",
-          filters: {},
+          filters: {type: ["Submittal"]},
           order_col: "",
           order: "",
         },

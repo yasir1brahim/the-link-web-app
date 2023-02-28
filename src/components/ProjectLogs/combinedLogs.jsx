@@ -26,7 +26,7 @@ export default function CombinedLogs(props) {
   const [filterModal, setFilterModal] = useState(false)
   const [selectedFilterValue, setSelectedFilterValue] = useState({})
   const [filterColumn, setFilterColumn] = useState('')
-  const [filterValues, setFilterValues] = useState({ spec_section: [], type: [], item_desc: [], classification: [], sd_title: [] })
+  const [filterValues, setFilterValues] = useState({ spec_section: [], type: ["Submittal"], item_desc: [], classification: [], sd_title: [] })
   // const [addRowTooltip, setaddRowTooltip] = useState(null)
   // const [editRowTooltip, setEditRowTooltip] = useState(null)
   const [pdfTooltip, setPdfTooltip] = useState(null)
@@ -148,7 +148,7 @@ export default function CombinedLogs(props) {
           project_id: props.projectId,
           search: "",
           // filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
-          filters: a,
+          filters: {...a, type: ["Submittal"]},
           order_col: columnName || "",
           order: sortingOrder === 'desc' ? 'asc' : 'desc' || "",
           list_id: props.selectedLogData.length ? props.listId : ''
@@ -186,7 +186,7 @@ export default function CombinedLogs(props) {
         data: {
           project_id: props.projectId,
           search: "",
-          filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
+          filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? {...a, type: ["Submittal"]} : {type: ["Submittal"]},
           // filters: a,
           order_col: sorting.column || "",
           order: sorting.order || "",
@@ -330,7 +330,7 @@ export default function CombinedLogs(props) {
            {props.projectType !== 'ufgs' && <th className='small-font'>
               <span className="has-sorting" >
                 Submittal Heading <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('type')}></i>
-                <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} />
+                {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} /> */}
               </span>
             </th>}
             {props.projectType === 'ufgs' && <th className='small-font'>
