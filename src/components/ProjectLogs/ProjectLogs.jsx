@@ -123,7 +123,7 @@ const ProjectLogs = () => {
       setUploadLoading(false);
       toggleErrorModal(true);
       setModal(false);
-      toast.error("Something went wrong!", {
+      toast.error(error?.response?.data?.message || error?.message , {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
@@ -198,7 +198,7 @@ const ProjectLogs = () => {
       };
 
       fetchData().catch((error) => {
-        toast.error("Something went wrong!", {
+        toast.error(error?.response?.data?.message || error?.message, {
           position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
@@ -224,7 +224,7 @@ const ProjectLogs = () => {
           setCompanyList(companyResp?.data.data);
         };
         fetchData().catch((error) => {
-          toast.error("Something went wrong!", {
+          toast.error(error?.response?.data?.message || error?.message, {
             position: "bottom-center",
             autoClose: 5000,
             hideProgressBar: true,
@@ -319,7 +319,7 @@ const ProjectLogs = () => {
 
     fetchData().catch((error) => {
       setLoading(false);
-      toast.error("Something went wrong!", {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
@@ -358,7 +358,7 @@ const ProjectLogs = () => {
     };
 
     fetchData().catch((error) => {
-      toast.error("Something went wrong!", {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
@@ -439,8 +439,8 @@ const ProjectLogs = () => {
           state?.project.project_name
         }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`
       );
-    } catch (e) {
-      toast.error("Something went wrong!", {
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
@@ -475,7 +475,7 @@ const ProjectLogs = () => {
         });
         setToggleSaveListNameModal(false);
       } catch (error) {
-        toast.error("Something went wrong!", {
+        toast.error(error?.response?.data?.message || error?.message, {
           position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
@@ -496,7 +496,7 @@ const ProjectLogs = () => {
       setList(response.data.message);
       setToggleViewSavedList(true);
     } catch (error) {
-      toast.error("Something went wrong!", {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
@@ -519,8 +519,8 @@ const ProjectLogs = () => {
   //         redirect_uri: `http://localhost:3000/project-logs?projectId=${projectId}&customerId=${customerId}&logType=${logType}`
   //       }
   //     }).then(res => {window.open(res.request?.responseURL,"_self")});
-  //   } catch(e) {
-  //     toast.error('Something went wrong!', {
+  //   } catch (error) {
+  //     toast.error(error?.response?.data?.message || error?.message, {
   //       position: 'bottom-center',
   //       autoClose: 5000,
   //       hideProgressBar: true,

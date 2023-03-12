@@ -39,7 +39,7 @@ const Adminlanding = (props) => {
 
     fetchData().catch((error) => {
       setLoading(false);
-      toast.error('Something went wrong!', {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -84,7 +84,7 @@ const Adminlanding = (props) => {
       });
     } catch (error) {
       console.log(error.message);
-      toast.error('Something went wrong!', {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,

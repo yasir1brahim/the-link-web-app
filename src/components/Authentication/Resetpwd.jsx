@@ -61,8 +61,8 @@ const validate = () => {
         progress: undefined,
       });
       window.location = '/';
-    }catch(e) {
-      toast.error('Something went wrong.', {
+    }catch (error) {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,

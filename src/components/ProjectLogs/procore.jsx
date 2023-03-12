@@ -31,7 +31,7 @@ const Procore = ({
         setProjectList(projectListResp.data.data);
       };
       fetchData().catch((error) => {
-        toast.error("Something went wrong!", {
+        toast.error(error?.response?.data?.message || error?.message, {
           position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
@@ -55,7 +55,7 @@ const Procore = ({
   //         setProjectList(get(res, "data.data"));
   //       });
   //     } catch (error) {
-  //       toast.error("Something went wrong!", {
+  //       toast.error(error?.response?.data?.message || error?.message, {
   //         position: "bottom-center",
   //         autoClose: 5000,
   //         hideProgressBar: true,
@@ -80,7 +80,7 @@ const Procore = ({
       };
 
       fetchData().catch((error) => {
-        toast.error("Something went wrong!", {
+        toast.error(error?.response?.data?.message || error?.message , {
           position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
@@ -122,7 +122,7 @@ const Procore = ({
       });
     } catch (error) {
       toggleProcoreModal();
-      toast.error("Something went wrong!", {
+      toast.error(error?.response?.data?.message || error?.message , {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
