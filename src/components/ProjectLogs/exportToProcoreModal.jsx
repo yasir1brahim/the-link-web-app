@@ -32,7 +32,7 @@ const ExportToProcoreModal = (props) => {
         });
         setLoading(false);
       } catch (error) {
-        toast.error("Something went wrong!", {
+        toast.error(error?.response?.data?.message || error?.message , {
           position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
@@ -80,7 +80,7 @@ const ExportToProcoreModal = (props) => {
     } catch (error) {
       localStorage.setItem('selectedRows', '')
       navigate(`/project-logs?projectDetails=${projectId},${customerId},${logType}`)
-      toast.error("Something went wrong!", {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,

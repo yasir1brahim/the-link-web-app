@@ -43,7 +43,7 @@ const ProjectsDetails = () => {
 
     fetchData().catch((error) => {
       setLoading(false);
-      toast.error('Something went wrong!', {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -83,7 +83,7 @@ const ProjectsDetails = () => {
       setUploadLoading(false);
       toggleErrorModal(true);
       setModal(false);
-      toast.error('Something went wrong!', {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,

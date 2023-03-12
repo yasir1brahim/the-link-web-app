@@ -112,7 +112,7 @@ const AdminUser = (props) => {
 
     fetchData().catch((error) => {
       setLoading(false);
-      toast.error("Something went wrong!", {
+      toast.error(error?.response?.data?.message || error?.message , {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
@@ -153,7 +153,7 @@ const AdminUser = (props) => {
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      toast.error("Something went wrong!", {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
@@ -174,7 +174,7 @@ const AdminUser = (props) => {
       setPageRefresh(!pageRefresh);
     } catch (error) {
       setLoading(false);
-      toast.error("Something went wrong!", {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
@@ -217,10 +217,10 @@ const AdminUser = (props) => {
       setLoading(false);
       setPageRefresh(!pageRefresh);
       setUpdateListModal(!updateListModal);
-    } catch (e) {
+    } catch (error) {
       setLoading(false);
       setUpdateListModal(!updateListModal);
-      toast.error("Something went wrong!", {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
@@ -256,7 +256,7 @@ const AdminUser = (props) => {
       setPageRefresh(!pageRefresh);
     } catch (error) {
       setLoading(false);
-      toast.error("Something went wrong!", {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
@@ -300,7 +300,7 @@ const AdminUser = (props) => {
         toggleArchive(!isArchived);
       } catch (error) {
         console.log(error.message);
-        toast.error("Something went wrong!", {
+        toast.error(error?.response?.data?.message || error?.message, {
           position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,

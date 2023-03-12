@@ -49,7 +49,7 @@ const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, p
     };
 
     fetchData().catch((error) => {
-      toast.error('Something went wrong!', {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -80,7 +80,7 @@ const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, p
     };
 
     fetchData().catch((error) => {
-      toast.error('Something went wrong!', {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -129,7 +129,7 @@ const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, p
         }
       } catch (error) {
         console.log(error.message);
-        toast.error('Something went wrong!', {
+        toast.error(error?.response?.data?.message || error?.message, {
           position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,

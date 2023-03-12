@@ -61,7 +61,7 @@ const Projects = () => {
       setUploadLoading(false);
       toggleErrorModal(true);
       setUploadSpecsModal(false);
-      toast.error('Something went wrong!', {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,

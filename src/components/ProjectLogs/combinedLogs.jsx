@@ -115,7 +115,7 @@ export default function CombinedLogs(props) {
   //     props.setPageRefresh(!props.pageRefresh);
   //   } catch (error) {
   //     console.log(error.message);
-  //     toast.error('Something went wrong!', {
+  //     toast.error(error?.response?.data?.message || error?.message, {
   //       position: 'bottom-center',
   //       autoClose: 5000,
   //       hideProgressBar: true,
@@ -162,7 +162,7 @@ export default function CombinedLogs(props) {
       setSorting({ ...sorting, column: columnName, order: sortingOrder === 'desc' ? 'asc' : 'desc' })
     } catch (error) {
       console.log(error.message);
-      toast.error('Something went wrong!', {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -199,7 +199,7 @@ export default function CombinedLogs(props) {
         props.setLogData(response.data.message);
     } catch (error) {
       console.log(error.message);
-      toast.error('Something went wrong!', {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -262,8 +262,8 @@ export default function CombinedLogs(props) {
   //       let docElement = document.getElementsByClassName("l-table-wrapper")
   //       docElement[0].scrollTo(890, 0)
   //     }
-  //   } catch (e) {
-  //     toast.error('Something went wrong!', {
+  //   } catch (error) {
+  //     toast.error(error?.response?.data?.message || error?.message, {
   //       position: 'bottom-center',
   //       autoClose: 5000,
   //       hideProgressBar: true,

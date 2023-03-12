@@ -63,7 +63,7 @@ const CustomerProfile = (props) => {
     };
 
     fetchData().catch((error) => {
-      toast.error('Something went wrong!', {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -84,7 +84,7 @@ const CustomerProfile = (props) => {
       console.log('employeeData', response.data.message);
     };
     fetchData().catch((error) => {
-      toast.error('Something went wrong!', {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -105,7 +105,7 @@ const CustomerProfile = (props) => {
   //     console.log(response.data.message);
   //   };
   //   fetchData().catch((error) => {
-  //     toast.error('Something went wrong!', {
+  //     toast.error(error?.response?.data?.message || error?.message, {
   //       position: 'bottom-center',
   //       autoClose: 5000,
   //       hideProgressBar: true,
@@ -159,7 +159,7 @@ const CustomerProfile = (props) => {
       });
     } catch (error) {
       console.log(error.message);
-      toast.error('Something went wrong!', {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
         autoClose: 5000,
         hideProgressBar: true,
@@ -270,7 +270,7 @@ const CustomerProfile = (props) => {
         });
       } catch (error) {
         console.log(error.message);
-        toast.error('Something went wrong!', {
+        toast.error(error?.response?.data?.message || error?.message, {
           position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,

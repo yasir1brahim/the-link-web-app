@@ -40,7 +40,7 @@ const SubmittalMappings = () => {
         });
         setLoading(false);
       } catch (error) {
-        toast.error("Something went wrong!", {
+        toast.error(error?.response?.data?.message || error?.message, {
           position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
@@ -84,7 +84,7 @@ const SubmittalMappings = () => {
       });
       setLoading(false);
     } catch (error) {
-      toast.error("Something went wrong!", {
+      toast.error(error?.response?.data?.message || error?.message, {
         position: "bottom-center",
         autoClose: 5000,
         hideProgressBar: true,
