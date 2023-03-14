@@ -8,6 +8,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../shared/Loader/Loader';
+import handleError from '../../config/errorHandler';
 
 const Adminlanding = (props) => {
   const [modal, setModal] = useState(false);
@@ -39,15 +40,7 @@ const Adminlanding = (props) => {
 
     fetchData().catch((error) => {
       setLoading(false);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
   }, [isArchived, pageRefresh]);
 
@@ -84,15 +77,7 @@ const Adminlanding = (props) => {
       });
     } catch (error) {
       console.log(error.message);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 

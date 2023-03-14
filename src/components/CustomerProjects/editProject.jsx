@@ -9,6 +9,7 @@ import DateSelector from "../shared/DateSelector/DateSelector";
 // import { Typeahead } from 'react-bootstrap-typeahead';
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import moment from "moment";
+import handleError from "../../config/errorHandler";
 
 const EditProject = ({
   modal,
@@ -112,15 +113,7 @@ const EditProject = ({
           toggleModal();
         }
       } catch (error) {
-        toast.error(error?.response?.data?.message || error?.message , {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
         toggleModal();
       }
     }

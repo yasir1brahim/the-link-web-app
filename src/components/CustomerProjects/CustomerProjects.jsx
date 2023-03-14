@@ -16,6 +16,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import EditProject from './editProject';
 import CreateEmployee from '../CustomerProfile/createEmployee';
 import moment from 'moment';
+import handleError from '../../config/errorHandler';
 
 const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, pageRefresh, setPageRefresh, toggleCreateProjectModal, createProjectModal, projectData ,setProjectData, handleLaunch}) => {
   const [employeeModal, setEmployeeModal] = useState(false);
@@ -49,15 +50,7 @@ const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, p
     };
 
     fetchData().catch((error) => {
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
   }, [state, pageRefresh, setCustomerData]);
 
@@ -80,15 +73,7 @@ const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, p
     };
 
     fetchData().catch((error) => {
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
   }, [state, pageRefresh, isArchived, roleId, setProjectData]);
 
@@ -129,15 +114,7 @@ const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, p
         }
       } catch (error) {
         console.log(error.message);
-        toast.error(error?.response?.data?.message || error?.message, {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
       }
     }
   };

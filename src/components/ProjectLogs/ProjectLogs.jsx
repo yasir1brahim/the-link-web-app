@@ -30,6 +30,7 @@ import { useSearchParams } from "react-router-dom";
 import Procore from "./procore";
 import { useNavigate } from "react-router-dom";
 import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
+import handleError from "../../config/errorHandler";
 
 const ProjectLogs = () => {
   const navigate = useNavigate();
@@ -123,15 +124,7 @@ const ProjectLogs = () => {
       setUploadLoading(false);
       toggleErrorModal(true);
       setModal(false);
-      toast.error(error?.response?.data?.message || error?.message , {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 
@@ -198,15 +191,7 @@ const ProjectLogs = () => {
       };
 
       fetchData().catch((error) => {
-        toast.error(error?.response?.data?.message || error?.message, {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
       });
     }
   }, [authCode, customerId, logType, projectId, handleGetProjectMappings]);
@@ -224,15 +209,7 @@ const ProjectLogs = () => {
           setCompanyList(companyResp?.data.data);
         };
         fetchData().catch((error) => {
-          toast.error(error?.response?.data?.message || error?.message, {
-            position: "bottom-center",
-            autoClose: 5000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
+          handleError(error)
         });
       } else if(procoreProjectMappingsAPICalled) {
         searchParams.set("code", "");
@@ -319,15 +296,7 @@ const ProjectLogs = () => {
 
     fetchData().catch((error) => {
       setLoading(false);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
   }, [state, pageRefresh, projectId]);
 
@@ -358,15 +327,7 @@ const ProjectLogs = () => {
     };
 
     fetchData().catch((error) => {
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
   }, [state, pageRefresh, customerId]);
 
@@ -440,15 +401,7 @@ const ProjectLogs = () => {
         }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`
       );
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
   const validate = () => {
@@ -475,15 +428,7 @@ const ProjectLogs = () => {
         });
         setToggleSaveListNameModal(false);
       } catch (error) {
-        toast.error(error?.response?.data?.message || error?.message, {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
       }
     }
   };
@@ -496,15 +441,7 @@ const ProjectLogs = () => {
       setList(response.data.message);
       setToggleViewSavedList(true);
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 
