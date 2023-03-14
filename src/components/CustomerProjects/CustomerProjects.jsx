@@ -11,7 +11,7 @@ import PaginatedItems from '../shared/Pagination/Pagination';
 import axiosInstance from '../../config/axios';
 import { useLocation } from 'react-router-dom';
 import CreateProject from './createProject';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EditProject from './editProject';
 import CreateEmployee from '../CustomerProfile/createEmployee';

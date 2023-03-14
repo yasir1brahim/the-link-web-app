@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Modal, ModalHeader, ModalFooter, ModalBody } from 'reactstrap';
 import axiosInstance from '../../config/axios';
-import { toast } from 'react-toastify';
 import handleError from '../../config/errorHandler';
 
 

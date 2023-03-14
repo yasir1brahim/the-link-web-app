@@ -3,7 +3,7 @@ import Header from '../shared/Header/Header';
 import Loader from '../shared/Loader/Loader';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../config/axios';
 import { UploadDocuments } from './UploadDocuments';
