@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 // import ProfilePhoto from '../../assets/images/dummy-profile.svg';
 // import { ReactComponent as Camera } from '../../assets/images/camera.svg';
 import axiosInstance from "../../config/axios";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import DateSelector from "../shared/DateSelector/DateSelector";

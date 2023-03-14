@@ -7,7 +7,6 @@ import PersonalProject from "./PersonalProject";
 import { useNavigate } from "react-router-dom";
 import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
 import axiosInstance from "../../config/axios";
-import { toast } from "react-toastify";
 import handleError from "../../config/errorHandler";
 
 const Projects = () => {
