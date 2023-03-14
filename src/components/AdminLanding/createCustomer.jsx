@@ -6,6 +6,7 @@ import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
+import handleError from '../../config/errorHandler';
 
 const CreateCustomer = ({
   modal,
@@ -111,15 +112,7 @@ const CreateCustomer = ({
         toggleModal();
       } catch (error) {
         console.log(error.message);
-        toast.error(error?.response?.data?.message || error?.message, {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
         toggleModal();
       }
     }

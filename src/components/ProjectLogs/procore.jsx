@@ -5,6 +5,7 @@ import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../config/axios";
 import { useNavigate } from 'react-router-dom';
+import handleError from "../../config/errorHandler";
 
 const Procore = ({
   customerId,
@@ -31,15 +32,7 @@ const Procore = ({
         setProjectList(projectListResp.data.data);
       };
       fetchData().catch((error) => {
-        toast.error(error?.response?.data?.message || error?.message, {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
       })
   }
 }, [partnerCompany]);
@@ -80,15 +73,7 @@ const Procore = ({
       };
 
       fetchData().catch((error) => {
-        toast.error(error?.response?.data?.message || error?.message , {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
       })
     }
   }, [projectName]);
@@ -122,15 +107,7 @@ const Procore = ({
       });
     } catch (error) {
       toggleProcoreModal();
-      toast.error(error?.response?.data?.message || error?.message , {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 

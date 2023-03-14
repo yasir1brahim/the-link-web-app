@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
 import axiosInstance from "../../config/axios";
 import { toast } from "react-toastify";
+import handleError from "../../config/errorHandler";
 
 const Projects = () => {
   const navigate = useNavigate();
@@ -61,15 +62,7 @@ const Projects = () => {
       setUploadLoading(false);
       toggleErrorModal(true);
       setUploadSpecsModal(false);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 

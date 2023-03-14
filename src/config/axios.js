@@ -21,7 +21,7 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     // return error.response
-    if (error?.response?.status === 401 || error.message === 'Network Error') {
+    if (error?.response?.status === 401) {
       window.location = '/';
     }
     throw error;

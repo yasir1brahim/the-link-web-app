@@ -11,6 +11,7 @@ import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.
 import { ReactComponent as LinkLogo } from "../../assets/images/logo-dark.svg";
 import { ReactComponent as ArrowRight } from "../../assets/images/border-arrow.svg";
 import Loader from "../shared/Loader/Loader";
+import handleError from "../../config/errorHandler";
 
 const SubmittalMappings = () => {
 
@@ -40,15 +41,7 @@ const SubmittalMappings = () => {
         });
         setLoading(false);
       } catch (error) {
-        toast.error(error?.response?.data?.message || error?.message, {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
       }
     };
 
@@ -84,15 +77,7 @@ const SubmittalMappings = () => {
       });
       setLoading(false);
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 

@@ -13,6 +13,7 @@ import EditEmployee from "../CustomerProfile/editEmployee";
 import EditProject from "../CustomerProjects/editProject";
 import moment from "moment";
 import { ExternalUsers } from "./externalUsers";
+import handleError from "../../config/errorHandler";
 
 const AdminUser = (props) => {
   const [modal, setModal] = useState(false);
@@ -112,15 +113,7 @@ const AdminUser = (props) => {
 
     fetchData().catch((error) => {
       setLoading(false);
-      toast.error(error?.response?.data?.message || error?.message , {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
   }, [pageRefresh]);
 
@@ -153,15 +146,7 @@ const AdminUser = (props) => {
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 
@@ -174,15 +159,7 @@ const AdminUser = (props) => {
       setPageRefresh(!pageRefresh);
     } catch (error) {
       setLoading(false);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 
@@ -220,15 +197,7 @@ const AdminUser = (props) => {
     } catch (error) {
       setLoading(false);
       setUpdateListModal(!updateListModal);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 
@@ -256,15 +225,7 @@ const AdminUser = (props) => {
       setPageRefresh(!pageRefresh);
     } catch (error) {
       setLoading(false);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 
@@ -300,15 +261,7 @@ const AdminUser = (props) => {
         toggleArchive(!isArchived);
       } catch (error) {
         console.log(error.message);
-        toast.error(error?.response?.data?.message || error?.message, {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
       }
     }
   };

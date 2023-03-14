@@ -6,6 +6,7 @@ import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import axiosInstance from "../../config/axios";
 import { useNavigate } from "react-router";
 import Loader from "../shared/Loader/Loader";
+import handleError from "../../config/errorHandler";
 
 const ExportToProcoreModal = (props) => {
   const [openModal, setOpenModal] = useState(true);
@@ -32,15 +33,7 @@ const ExportToProcoreModal = (props) => {
         });
         setLoading(false);
       } catch (error) {
-        toast.error(error?.response?.data?.message || error?.message , {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
       }
     };
     if (props?.companyId) {
@@ -80,15 +73,7 @@ const ExportToProcoreModal = (props) => {
     } catch (error) {
       localStorage.setItem('selectedRows', '')
       navigate(`/project-logs?projectDetails=${projectId},${customerId},${logType}`)
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 

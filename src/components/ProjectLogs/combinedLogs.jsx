@@ -13,6 +13,7 @@ import { ReactComponent as PdfButton } from '../../assets/images/file-pdf.svg';
 import { ReactComponent as ExpandButton } from '../../assets/images/down-arrow.svg';
 import { ReactComponent as CollapseButton } from '../../assets/images/up-arrow.svg';
 import { Tooltip } from 'reactstrap';
+import handleError from '../../config/errorHandler';
 
 export default function CombinedLogs(props) {
   const { logData, newRowIndex } = props;
@@ -162,15 +163,7 @@ export default function CombinedLogs(props) {
       setSorting({ ...sorting, column: columnName, order: sortingOrder === 'desc' ? 'asc' : 'desc' })
     } catch (error) {
       console.log(error.message);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   }
   const handleOpenFilterModal = async () => {
@@ -199,15 +192,7 @@ export default function CombinedLogs(props) {
         props.setLogData(response.data.message);
     } catch (error) {
       console.log(error.message);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   }
 

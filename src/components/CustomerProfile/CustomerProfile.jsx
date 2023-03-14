@@ -15,6 +15,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import EditEmployee from './editEmployee';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 import { ConfirmationModal } from './confirmationModal';
+import handleError from '../../config/errorHandler';
 
 const CustomerProfile = (props) => {
   const [editProfile, setEditProfile] = useState(false);
@@ -63,15 +64,7 @@ const CustomerProfile = (props) => {
     };
 
     fetchData().catch((error) => {
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
   }, [pageRefresh, custId]);
   useEffect(() => {
@@ -84,15 +77,7 @@ const CustomerProfile = (props) => {
       console.log('employeeData', response.data.message);
     };
     fetchData().catch((error) => {
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
   }, [custId, pageRefresh]);
   // useEffect(() => {
@@ -159,15 +144,7 @@ const CustomerProfile = (props) => {
       });
     } catch (error) {
       console.log(error.message);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 
@@ -270,15 +247,7 @@ const CustomerProfile = (props) => {
         });
       } catch (error) {
         console.log(error.message);
-        toast.error(error?.response?.data?.message || error?.message, {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
       }
     }
   };

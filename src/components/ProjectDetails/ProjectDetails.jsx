@@ -7,6 +7,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../config/axios';
 import { UploadDocuments } from './UploadDocuments';
+import handleError from '../../config/errorHandler';
 
 const ProjectsDetails = () => {
   const [modal, setModal] = useState(false);
@@ -43,15 +44,7 @@ const ProjectsDetails = () => {
 
     fetchData().catch((error) => {
       setLoading(false);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
   }, [state?.project, pageRefresh]);
   const backToUpload = () => {
@@ -83,15 +76,7 @@ const ProjectsDetails = () => {
       setUploadLoading(false);
       toggleErrorModal(true);
       setModal(false);
-      toast.error(error?.response?.data?.message || error?.message, {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 
