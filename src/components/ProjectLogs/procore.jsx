@@ -6,7 +6,6 @@ import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../config/axios";
 import { useNavigate } from 'react-router-dom';
 import handleError from "../../config/errorHandler";
-import {get} from 'lodash';
 
 const Procore = ({
   customerId,
@@ -22,7 +21,7 @@ const Procore = ({
   const [submittalManager, setSubmittalManager] = useState([]);
   const [projectList, setProjectList] = useState([]);
   const [submittalList, setSubmittalList] = useState([]);
-  const [status, setStatus] = useState([]);
+
 
   // Once a user selects a partner company, it's respective project fetching API is called
   useEffect(() => {
@@ -81,64 +80,6 @@ const Procore = ({
     }
   }, [projectName]);
 
-  // handler for getting the status, default to Open
-  useEffect(() => {
-    const getProcoreStatus = async () => {
-      try {
-        // setLoading(true);
-        await axiosInstance({
-          method: "get",
-          url: `/procore/status/${partnerCompany[0]?.value}`,
-        }).then((res) => {
-          setStatus(get(res, "data.data"));
-        });
-        // setLoading(false);
-      } catch (error) {
-        handleError(error)
-      }
-    };
-    if (partnerCompany[0]?.value) {
-      getProcoreStatus();
-    }
-  }, [partnerCompany]); 
-
-  // handler for export to procore 
-  const handleExportToProcore = async () => {
-    const selectedRows = localStorage.getItem('selectedRows') === '' ? "All" : localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
-    try {
-      // setLoading(true);
-      await axiosInstance({
-        method: "post",
-        url: "/procore/create_submittals",
-        data: {
-          project_id: Number(projectId),
-          records: selectedRows, // array of ids
-          status_id: status.find(sts => sts.name === 'Open').id,
-        },
-      }).then((resp)=>{
-        if(resp.status === 200){
-          toast.success("Successfully exported to Procore!", {
-            position: "bottom-center",
-            autoClose: 5000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
-          // toggle();
-          navigate(`/project-logs?projectDetails=${projectId},${customerId},${logType}`)
-          localStorage.setItem('selectedRows', '')
-        };
-        });
-        // setLoading(false);
-    } catch (error) {
-      localStorage.setItem('selectedRows', '')
-      navigate(`/project-logs?projectDetails=${projectId},${customerId},${logType}`)
-      handleError(error)
-    }
-  };
-
   const handleProjectMapping = async () => {
     try {
       await axiosInstance({
@@ -164,9 +105,7 @@ const Procore = ({
           draggable: true,
           progress: undefined,
         });
-        // instead of navigating to the submittal-mappings screen we will directly export 
-        // navigate(`/submital-mappings?customerId=${customerId}&companyId=${partnerCompany[0]?.value}`);
-        handleExportToProcore();
+        navigate(`/submital-mappings?customerId=${customerId}&companyId=${partnerCompany[0]?.value}`);
       });
     } catch (error) {
       toggleProcoreModal();

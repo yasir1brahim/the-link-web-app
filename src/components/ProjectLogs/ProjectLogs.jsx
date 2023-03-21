@@ -28,13 +28,15 @@ import FileDownload from "js-file-download";
 import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
 import { useSearchParams } from "react-router-dom";
 import Procore from "./procore";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
+import { useNavigate } from "react-router-dom";
 import handleError from "../../config/errorHandler";
 
 const ProjectLogs = () => {
+  // const navigate = useNavigate();
+  // const [navigateToSubmittal, setNavigateToSubmittal] = useState(false);
   const navigate = useNavigate();
-  const [navigateToSubmittal, setNavigateToSubmittal] = useState(false);
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -75,6 +77,8 @@ const ProjectLogs = () => {
   const [procoreModal, setProcoreModal] = useState(false);
   const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [companyList, setCompanyList] = useState([]);
+  const [status, setStatus] = useState([]);
+  const [companyId, setCompanyId] = useState();
 
   const toggle = () => setDropdownOpen((prevState) => !prevState);
 
@@ -85,8 +89,10 @@ const ProjectLogs = () => {
   const projectName = searchParams.get("projectName");
   const logType = projectDetails[2];
   const authCode = searchParams.get("code");
-  const [procoreProjectMappingsAPICalled, setProcoreProjectMappingsAPICalled] = useState(false);
-  const [projectMappingNoContent, setProjectMappingsNoContent] = useState(false);
+  const [procoreProjectMappingsAPICalled, setProcoreProjectMappingsAPICalled] =
+    useState(false);
+  const [projectMappingNoContent, setProjectMappingsNoContent] =
+    useState(false);
 
   useEffect(() => {
     if (!modal) {
@@ -124,7 +130,7 @@ const ProjectLogs = () => {
       setUploadLoading(false);
       toggleErrorModal(true);
       setModal(false);
-      handleError(error)
+      handleError(error);
     }
   };
 
@@ -153,12 +159,13 @@ const ProjectLogs = () => {
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleGetProjectMappings = useCallback(async() =>{
+  const handleGetProjectMappings = useCallback(async () => {
     await axiosInstance({
       method: "get",
       url: `/procore/project_mapping/${projectId}`,
     }).then((res) => {
       if (get(res, "data.data")) {
+        setCompanyId(get(res, "data.data.procore_company_id"));
         localStorage.setItem(
           "companyId",
           get(res, "data.data.procore_company_id")
@@ -166,13 +173,60 @@ const ProjectLogs = () => {
         localStorage.setItem("projectId", projectId);
         localStorage.setItem("logType", logType);
         localStorage.setItem("customerId", customerId);
-      } 
-      if(get(res, 'status') === 204){
+      }
+      if (get(res, "status") === 204) {
         setProjectMappingsNoContent(true);
       }
       setProcoreProjectMappingsAPICalled(true);
     });
-  })
+  });
+
+  // handler for export to procore
+  const handleExportToProcore = async () => {
+    const selectedRows =
+      localStorage.getItem("selectedRows") === ""
+        ? "All"
+        : localStorage
+            .getItem("selectedRows")
+            ?.split(",")
+            ?.map((row) => JSON.parse(row));
+    try {
+      // setLoading(true);
+      await axiosInstance({
+        method: "post",
+        url: "/procore/create_submittals",
+        data: {
+          project_id: Number(projectId),
+          records: selectedRows, // array of ids
+          status_id: status.find((sts) => sts.name === "Open").id,
+        },
+      }).then((resp) => {
+        if (resp.status === 200) {
+          toast.success("Successfully exported to Procore!", {
+            position: "bottom-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          // toggle();
+          navigate(
+            `/project-logs?projectDetails=${projectId},${customerId},${logType}`
+          );
+          localStorage.setItem("selectedRows", "");
+        }
+      });
+      // setLoading(false);
+    } catch (error) {
+      localStorage.setItem("selectedRows", "");
+      navigate(
+        `/project-logs?projectDetails=${projectId},${customerId},${logType}`
+      );
+      handleError(error);
+    }
+  };
 
   useEffect(() => {
     if (authCode) {
@@ -193,14 +247,34 @@ const ProjectLogs = () => {
       };
 
       fetchData().catch((error) => {
-        handleError(error)
+        handleError(error);
       });
     }
   }, [authCode, customerId, logType, projectId, handleGetProjectMappings]);
 
+  // handler for getting the status, default to Open
   useEffect(() => {
-   
-    if(authCode) {
+    const getProcoreStatus = async () => {
+      try {
+        // setLoading(true);
+        await axiosInstance({
+          method: "get",
+          url: `/procore/status/${companyId}`,
+        }).then((res) => {
+          setStatus(get(res, "data.data"));
+        });
+        // setLoading(false);
+      } catch (error) {
+        handleError(error);
+      }
+    };
+    if (companyId) {
+      getProcoreStatus();
+    }
+  }, [companyId]);
+
+  useEffect(() => {
+    if (authCode) {
       if (procoreProjectMappingsAPICalled && projectMappingNoContent) {
         const fetchData = async () => {
           setProcoreModal(true);
@@ -211,20 +285,28 @@ const ProjectLogs = () => {
           setCompanyList(companyResp?.data.data);
         };
         fetchData().catch((error) => {
-          handleError(error)
+          handleError(error);
         });
-      } else if(procoreProjectMappingsAPICalled) {
+      } else if (procoreProjectMappingsAPICalled) {
         searchParams.set("code", "");
-        setNavigateToSubmittal(!navigateToSubmittal);
+        // setNavigateToSubmittal(!navigateToSubmittal);
+        handleExportToProcore();
       }
     }
-  }, [projectMappingNoContent, navigateToSubmittal, searchParams, authCode, procoreProjectMappingsAPICalled]);
+  }, [handleExportToProcore,
+    projectMappingNoContent,
+    searchParams,
+    authCode,
+    procoreProjectMappingsAPICalled,
+  ]);
 
-  useEffect(() => {
-    if (navigateToSubmittal) {
-      navigate(`/submital-mappings?customerId=${customerId}`);
-    }
-  }, [navigateToSubmittal, navigate, customerId]);
+  // v-4 changes, not navigating to submittal
+
+  // useEffect(() => {
+  //   if (navigateToSubmittal) {
+  //     navigate(`/submital-mappings?customerId=${customerId}`);
+  //   }
+  // }, [navigateToSubmittal, navigate, customerId]);
 
   // const headers = [
   //   { label: 'Spec Sec', key: 'spec_section' },
@@ -285,7 +367,7 @@ const ProjectLogs = () => {
         data: {
           project_id: state?.projectId || projectId,
           search: "",
-          filters: {type: ["Submittal"]},
+          filters: { type: ["Submittal"] },
           order_col: "",
           order: "",
         },
@@ -298,7 +380,7 @@ const ProjectLogs = () => {
 
     fetchData().catch((error) => {
       setLoading(false);
-      handleError(error)
+      handleError(error);
     });
   }, [state, pageRefresh, projectId]);
 
@@ -329,7 +411,7 @@ const ProjectLogs = () => {
     };
 
     fetchData().catch((error) => {
-      handleError(error)
+      handleError(error);
     });
   }, [state, pageRefresh, customerId]);
 
@@ -368,9 +450,8 @@ const ProjectLogs = () => {
   useEffect(() => {
     // do not update the values if navigated from procore page
     if (document.referrer && selected?.length) {
-      const rowsSelected = selected.toString()
+      const rowsSelected = selected.toString();
       sessionStorage.setItem("selectedRows", `${rowsSelected}`);
-
     }
   }, [selected]);
 
@@ -403,7 +484,7 @@ const ProjectLogs = () => {
         }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`
       );
     } catch (error) {
-      handleError(error)
+      handleError(error);
     }
   };
   const validate = () => {
@@ -430,7 +511,7 @@ const ProjectLogs = () => {
         });
         setToggleSaveListNameModal(false);
       } catch (error) {
-        handleError(error)
+        handleError(error);
       }
     }
   };
@@ -443,7 +524,7 @@ const ProjectLogs = () => {
       setList(response.data.message);
       setToggleViewSavedList(true);
     } catch (error) {
-      handleError(error)
+      handleError(error);
     }
   };
 
