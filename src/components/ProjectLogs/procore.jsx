@@ -4,7 +4,7 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../config/axios";
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import handleError from "../../config/errorHandler";
 
 const Procore = ({
@@ -15,7 +15,7 @@ const Procore = ({
   projectId,
   logType
 }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [partnerCompany, setPartnerCompany] = useState([]);
   const [projectName, setProjectName] = useState([]);
   const [submittalManager, setSubmittalManager] = useState([]);
