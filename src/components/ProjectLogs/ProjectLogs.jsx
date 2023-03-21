@@ -232,7 +232,7 @@ const ProjectLogs = () => {
                 data: {
                     project_id: Number(projectId),
                     records: selectedRows, // array of ids
-                    status_id: statusResp?.data?.find((sts) => sts.name === 'Open').id
+                    status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
                 }
             });
             if (resp.status === 200) {
