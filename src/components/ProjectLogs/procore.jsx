@@ -105,7 +105,8 @@ const Procore = ({
           draggable: true,
           progress: undefined,
         });
-        navigate(`/submital-mappings?customerId=${customerId}&companyId=${partnerCompany[0]?.value}`);
+        // navigate(`/submital-mappings?customerId=${customerId}&companyId=${partnerCompany[0]?.value}`);
+        toggleProcoreModal();
       });
     } catch (error) {
       toggleProcoreModal();
