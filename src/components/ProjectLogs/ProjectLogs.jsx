@@ -70,7 +70,6 @@ const ProjectLogs = () => {
   const [newRowIndex, setNewRowIndex] = useState(null);
   const projectType = state?.project.project_type;
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [procoreProjectId, setProcoreProjectId] = useState(null);
 
   //Procore states
   const [procoreModal, setProcoreModal] = useState(false);
@@ -87,6 +86,7 @@ const ProjectLogs = () => {
   const logType = projectDetails[2];
   const authCode = searchParams.get("code");
   const [procoreProjectMappingsAPICalled, setProcoreProjectMappingsAPICalled] = useState(false);
+  const [projectMappingNoContent, setProjectMappingsNoContent] = useState(false);
 
   useEffect(() => {
     if (!modal) {
@@ -167,7 +167,9 @@ const ProjectLogs = () => {
         localStorage.setItem("logType", logType);
         localStorage.setItem("customerId", customerId);
         setProcoreProjectMappingsAPICalled(true);
-        setProcoreProjectId(get(res, "data.data.procore_project_id"));
+      } 
+      if(get(res, 'status') === 204){
+        setProjectMappingsNoContent(true);
       }
     });
   })
@@ -199,7 +201,7 @@ const ProjectLogs = () => {
   useEffect(() => {
    
     if(authCode) {
-      if (procoreProjectMappingsAPICalled && !procoreProjectId) {
+      if (procoreProjectMappingsAPICalled && projectMappingNoContent) {
         const fetchData = async () => {
           setProcoreModal(true);
           const companyResp = await axiosInstance({
@@ -216,7 +218,7 @@ const ProjectLogs = () => {
         setNavigateToSubmittal(!navigateToSubmittal);
       }
     }
-  }, [procoreProjectId, navigateToSubmittal, searchParams, authCode, procoreProjectMappingsAPICalled]);
+  }, [projectMappingNoContent, navigateToSubmittal, searchParams, authCode, procoreProjectMappingsAPICalled]);
 
   useEffect(() => {
     if (navigateToSubmittal) {
