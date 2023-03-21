@@ -170,6 +170,7 @@ const ProjectLogs = () => {
       } 
       if(get(res, 'status') === 204){
         setProjectMappingsNoContent(true);
+        setProcoreProjectMappingsAPICalled(true);
       }
     });
   })
