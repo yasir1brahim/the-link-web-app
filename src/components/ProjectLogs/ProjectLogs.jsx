@@ -181,52 +181,6 @@ const ProjectLogs = () => {
     });
   });
 
-  // handler for export to procore
-  const handleExportToProcore = async () => {
-    const selectedRows =
-      localStorage.getItem("selectedRows") === ""
-        ? "All"
-        : localStorage
-            .getItem("selectedRows")
-            ?.split(",")
-            ?.map((row) => JSON.parse(row));
-    try {
-      // setLoading(true);
-      await axiosInstance({
-        method: "post",
-        url: "/procore/create_submittals",
-        data: {
-          project_id: Number(projectId),
-          records: selectedRows, // array of ids
-          status_id: status.find((sts) => sts.name === "Open").id,
-        },
-      }).then((resp) => {
-        if (resp.status === 200) {
-          toast.success("Successfully exported to Procore!", {
-            position: "bottom-center",
-            autoClose: 5000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
-          // toggle();
-          navigate(
-            `/project-logs?projectDetails=${projectId},${customerId},${logType}`
-          );
-          localStorage.setItem("selectedRows", "");
-        }
-      });
-      // setLoading(false);
-    } catch (error) {
-      localStorage.setItem("selectedRows", "");
-      navigate(
-        `/project-logs?projectDetails=${projectId},${customerId},${logType}`
-      );
-      handleError(error);
-    }
-  };
 
   useEffect(() => {
     if (authCode) {
@@ -274,6 +228,54 @@ const ProjectLogs = () => {
   }, [companyId]);
 
   useEffect(() => {
+
+      // handler for export to procore
+  const handleExportToProcore = async () => {
+    const selectedRows =
+      localStorage.getItem("selectedRows") === ""
+        ? "All"
+        : localStorage
+            .getItem("selectedRows")
+            ?.split(",")
+            ?.map((row) => JSON.parse(row));
+    try {
+      // setLoading(true);
+      await axiosInstance({
+        method: "post",
+        url: "/procore/create_submittals",
+        data: {
+          project_id: Number(projectId),
+          records: selectedRows, // array of ids
+          status_id: status.find((sts) => sts.name === "Open").id,
+        },
+      }).then((resp) => {
+        if (resp.status === 200) {
+          toast.success("Successfully exported to Procore!", {
+            position: "bottom-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          // toggle();
+          navigate(
+            `/project-logs?projectDetails=${projectId},${customerId},${logType}`
+          );
+          localStorage.setItem("selectedRows", "");
+        }
+      });
+      // setLoading(false);
+    } catch (error) {
+      localStorage.setItem("selectedRows", "");
+      navigate(
+        `/project-logs?projectDetails=${projectId},${customerId},${logType}`
+      );
+      handleError(error);
+    }
+  };
+
     if (authCode) {
       if (procoreProjectMappingsAPICalled && projectMappingNoContent) {
         const fetchData = async () => {
@@ -293,12 +295,7 @@ const ProjectLogs = () => {
         handleExportToProcore();
       }
     }
-  }, [handleExportToProcore,
-    projectMappingNoContent,
-    searchParams,
-    authCode,
-    procoreProjectMappingsAPICalled,
-  ]);
+  }, [projectMappingNoContent, searchParams, authCode, procoreProjectMappingsAPICalled, projectId, status, navigate, customerId, logType]);
 
   // v-4 changes, not navigating to submittal
 
