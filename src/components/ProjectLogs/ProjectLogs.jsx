@@ -227,12 +227,14 @@ const ProjectLogs = () => {
   }, [companyId]);
 
   const selectedRows =
-        localStorage.getItem("selectedRows") === ""
+        localStorage?.getItem("selectedRows") === ""
           ? "All"
           : localStorage
-              .getItem("selectedRows")
+              ?.getItem("selectedRows")
               ?.split(",")
               ?.map((row) => JSON.parse(row));
+
+  console.log('selecteedRows',selectedRows);
 
   useEffect(() => {
     // handler for export to procore
