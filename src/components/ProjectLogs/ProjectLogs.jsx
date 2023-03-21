@@ -166,12 +166,11 @@ const ProjectLogs = () => {
         localStorage.setItem("projectId", projectId);
         localStorage.setItem("logType", logType);
         localStorage.setItem("customerId", customerId);
-        setProcoreProjectMappingsAPICalled(true);
       } 
       if(get(res, 'status') === 204){
         setProjectMappingsNoContent(true);
-        setProcoreProjectMappingsAPICalled(true);
       }
+      setProcoreProjectMappingsAPICalled(true);
     });
   })
 
@@ -682,6 +681,7 @@ const ProjectLogs = () => {
         toggleProcoreModal={toggleProcoreModal}
         companyList={companyList}
         projectId={projectId}
+        logType={logType}
       />
       <Modal
         isOpen={saveListName}
