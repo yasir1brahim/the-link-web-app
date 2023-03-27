@@ -26,7 +26,7 @@ const Procore = ({
     try {
       const statusResp = await axiosInstance({
         method: "get",
-        url: `/procore/status/${get(partnerCompany, `${[0]}.value`)}`,
+        url: `/procore/status/${get(partnerCompany, `[0].value`)}`,
       });
       console.log(statusResp, "statusREsponse");
       // setStatus(get(statusResp, 'data.data'));
