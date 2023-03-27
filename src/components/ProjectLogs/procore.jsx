@@ -4,13 +4,14 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../config/axios";
-import get from "lodash";
 // import { useNavigate } from 'react-router-dom';
 import handleError from "../../config/errorHandler";
 
 const Procore = ({
+  companyId,
   companyList,
   procoreModal,
+  setLoading,
   projectId,
   selectedRows,
   toggleProcoreModal,
@@ -24,9 +25,10 @@ const Procore = ({
 
   const handleExportToProcore = async () => {
     try {
+      setLoading(true);
       const statusResp = await axiosInstance({
         method: "get",
-        url: `/procore/status/${get(partnerCompany, `[0].value`)}`,
+        url: `/procore/status/${companyId}`,
       });
       console.log(statusResp, "statusREsponse");
       // setStatus(get(statusResp, 'data.data'));
@@ -41,6 +43,7 @@ const Procore = ({
         },
       });
       if (resp.status === 200) {
+        setLoading(false);
         toast.success("Successfully exported to Procore!", {
           position: "bottom-center",
           autoClose: 5000,
@@ -54,6 +57,7 @@ const Procore = ({
       }
       // setLoading(false);
     } catch (error) {
+      setLoading(false)
       console.log("error", error);
       localStorage.setItem("selectedRows", "");
       handleError(error);
