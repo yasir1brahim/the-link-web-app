@@ -196,7 +196,7 @@ const ProjectLogs = () => {
           "procore_access_token",
           accessTokenData?.data.data.access_token
         );
-        handleGetProjectMappings(); 
+        handleGetProjectMappings();
       };
 
       fetchData().catch((error) => {
@@ -205,61 +205,59 @@ const ProjectLogs = () => {
     }
   }, [authCode, customerId, logType, projectId, handleGetProjectMappings]);
 
-
   const selectedRows =
-        localStorage?.getItem("selectedRows") === ""
-          ? "All"
-          : localStorage
-              ?.getItem("selectedRows")
-              ?.split(",")
-              ?.map((row) => JSON.parse(row));
+    localStorage?.getItem("selectedRows") === ""
+      ? "All"
+      : localStorage
+          ?.getItem("selectedRows")
+          ?.split(",")
+          ?.map((row) => JSON.parse(row));
 
-  console.log('selecteedRows',selectedRows);
+  console.log("selecteedRows", selectedRows);
 
-     
   useEffect(() => {
-     // handler for export to procore
-  //    const handleExportToProcore = async () => {
-  //     try {
-  //         const statusResp = await axiosInstance({
-  //             method: 'get',
-  //             url: `/procore/status/${companyId}`
-  //         });
-  //         console.log(statusResp,'statusREsponse')
-  //         // setStatus(get(statusResp, 'data.data'));
-  //         const resp = await axiosInstance({
-  //             method: 'post',
-  //             url: '/procore/create_submittals',
-  //             data: {
-  //                 project_id: Number(projectId),
-  //                 records: selectedRows, // array of ids
-  //                 status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
-  //             }
-  //         });
-  //         if (resp.status === 200) {
-  //             toast.success('Successfully exported to Procore!', {
-  //                 position: 'bottom-center',
-  //                 autoClose: 5000,
-  //                 hideProgressBar: true,
-  //                 closeOnClick: true,
-  //                 pauseOnHover: true,
-  //                 draggable: true,
-  //                 progress: undefined
-  //             });
-  //             localStorage.setItem('selectedRows', '');
-  //         }
-  //         // setLoading(false);
-  //     } catch (error) {
-  //         console.log('error', error);
-  //         localStorage.setItem('selectedRows', '');
-  //         handleError(error);
-  //     }
-  // };
-  
+    // handler for export to procore
+    const handleExportToProcore = async () => {
+      try {
+        const statusResp = await axiosInstance({
+          method: "get",
+          url: `/procore/status/${companyId}`,
+        });
+        console.log(statusResp, "statusREsponse");
+        // setStatus(get(statusResp, 'data.data'));
+        const resp = await axiosInstance({
+          method: "post",
+          url: "/procore/create_submittals",
+          data: {
+            project_id: Number(projectId),
+            records: selectedRows, // array of ids
+            status_id:
+              statusResp?.data?.data?.find((sts) => sts.name === "Open").id ||
+              1,
+          },
+        });
+        if (resp.status === 200) {
+          toast.success("Successfully exported to Procore!", {
+            position: "bottom-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          localStorage.setItem("selectedRows", "");
+        }
+        // setLoading(false);
+      } catch (error) {
+        console.log("error", error);
+        localStorage.setItem("selectedRows", "");
+        handleError(error);
+      }
+    };
+
     if (authCode) {
-      if (procoreProjectMappingsAPICalled
-        //  && projectMappingNoContent
-         ) {
+      if (procoreProjectMappingsAPICalled && projectMappingNoContent) {
         const fetchData = async () => {
           setProcoreModal(true);
           const companyResp = await axiosInstance({
@@ -271,14 +269,24 @@ const ProjectLogs = () => {
         fetchData().catch((error) => {
           handleError(error);
         });
-      } 
-      // else if (procoreProjectMappingsAPICalled) {
-      //   searchParams.set("code", "");
-      //   // setNavigateToSubmittal(!navigateToSubmittal);
-      //   handleExportToProcore();
-      // }
+      } else if (procoreProjectMappingsAPICalled) {
+        searchParams.set("code", "");
+        // setNavigateToSubmittal(!navigateToSubmittal);
+        handleExportToProcore();
+      }
     }
-  }, [projectMappingNoContent, searchParams, authCode, procoreProjectMappingsAPICalled, projectId, navigate, customerId, logType, selectedRows, companyId]);
+  }, [
+    projectMappingNoContent,
+    searchParams,
+    authCode,
+    procoreProjectMappingsAPICalled,
+    projectId,
+    navigate,
+    customerId,
+    logType,
+    selectedRows,
+    companyId,
+  ]);
 
   // v-4 changes, not navigating to submittal
 
@@ -737,12 +745,11 @@ const ProjectLogs = () => {
         fileData={fileData}
       />
       <Procore
-        customerId={customerId}
-        procoreModal={procoreModal}
-        toggleProcoreModal={toggleProcoreModal}
         companyList={companyList}
+        procoreModal={procoreModal}
         projectId={projectId}
-        logType={logType}
+        selectedRows={selectedRows}
+        toggleProcoreModal={toggleProcoreModal}
       />
       <Modal
         isOpen={saveListName}

@@ -4,16 +4,16 @@ import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import { toast, ToastContainer } from "react-toastify";
 import axiosInstance from "../../config/axios";
+import get from "lodash";
 // import { useNavigate } from 'react-router-dom';
 import handleError from "../../config/errorHandler";
 
 const Procore = ({
-  customerId,
-  procoreModal,
-  toggleProcoreModal,
   companyList,
+  procoreModal,
   projectId,
-  logType
+  selectedRows,
+  toggleProcoreModal,
 }) => {
   // const navigate = useNavigate();
   const [partnerCompany, setPartnerCompany] = useState([]);
@@ -22,6 +22,43 @@ const Procore = ({
   const [projectList, setProjectList] = useState([]);
   const [submittalList, setSubmittalList] = useState([]);
 
+  const handleExportToProcore = async () => {
+    try {
+      const statusResp = await axiosInstance({
+        method: "get",
+        url: `/procore/status/${get(partnerCompany, `${[0]}.value`)}`,
+      });
+      console.log(statusResp, "statusREsponse");
+      // setStatus(get(statusResp, 'data.data'));
+      const resp = await axiosInstance({
+        method: "post",
+        url: "/procore/create_submittals",
+        data: {
+          project_id: Number(projectId),
+          records: selectedRows, // array of ids
+          status_id:
+            statusResp?.data?.data?.find((sts) => sts.name === "Open").id || 1,
+        },
+      });
+      if (resp.status === 200) {
+        toast.success("Successfully exported to Procore!", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        localStorage.setItem("selectedRows", "");
+      }
+      // setLoading(false);
+    } catch (error) {
+      console.log("error", error);
+      localStorage.setItem("selectedRows", "");
+      handleError(error);
+    }
+  };
 
   // Once a user selects a partner company, it's respective project fetching API is called
   useEffect(() => {
@@ -34,34 +71,10 @@ const Procore = ({
         setProjectList(projectListResp.data.data);
       };
       fetchData().catch((error) => {
-        handleError(error)
-      })
-  }
-}, [partnerCompany]);
-
-  // calling get to fetch list of projects for the dropdown
-  // useEffect(() => {
-  //   const getProjectsList = async () => {
-  //     try {
-  //       await axiosInstance({
-  //         method: "get",
-  //         url: `procore/projects/${procoreCompanyId}`,
-  //       }).then((res) => {
-  //         setProjectList(get(res, "data.data"));
-  //       });
-  //     } catch (error) {
-  //       toast.error(error?.response?.data?.message || error?.message, {
-  //         position: "bottom-center",
-  //         autoClose: 5000,
-  //         hideProgressBar: true,
-  //         closeOnClick: true,
-  //         pauseOnHover: true,
-  //         draggable: true,
-  //         progress: undefined,
-  //       });
-  //     }
-  //   };
-  // }, [partnerCompany]);
+        handleError(error);
+      });
+    }
+  }, [partnerCompany]);
 
   // Further after selecting a project it's respective submittall manager API is called
   useEffect(() => {
@@ -75,8 +88,8 @@ const Procore = ({
       };
 
       fetchData().catch((error) => {
-        handleError(error)
-      })
+        handleError(error);
+      });
     }
   }, [projectName]);
 
@@ -105,12 +118,13 @@ const Procore = ({
           draggable: true,
           progress: undefined,
         });
+        handleExportToProcore();
         // navigate(`/submital-mappings?customerId=${customerId}&companyId=${partnerCompany[0]?.value}`);
-        toggleProcoreModal();
+        // toggleProcoreModal();
       });
     } catch (error) {
       toggleProcoreModal();
-      handleError(error)
+      handleError(error);
     }
   };
 
@@ -205,5 +219,5 @@ const Procore = ({
     </>
   );
 };
-  
+
 export default Procore;
