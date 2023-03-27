@@ -743,9 +743,11 @@ const ProjectLogs = () => {
         fileData={fileData}
       />
       <Procore
+        companyId={companyId}
         companyList={companyList}
         procoreModal={procoreModal}
         projectId={projectId}
+        setLoading={setLoading}
         selectedRows={selectedRows}
         toggleProcoreModal={toggleProcoreModal}
       />
