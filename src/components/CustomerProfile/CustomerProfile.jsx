@@ -64,7 +64,7 @@ const CustomerProfile = (props) => {
           url: "/procore/access_token",
           data: {
             code: authCode,
-            redirect_uri: `http://d3fy104eoanlsd.cloudfront.net/project-logs`,
+            redirect_uri: `http://d3fy104eoanlsd.cloudfront.net/customer-profile?id=${customerId}`,
           },
         });
         localStorage.setItem(
