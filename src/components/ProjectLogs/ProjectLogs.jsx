@@ -196,7 +196,7 @@ const ProjectLogs = () => {
           "procore_access_token",
           accessTokenData?.data.data.access_token
         );
-        handleGetProjectMappings(); 
+        handleGetProjectMappings();
       };
 
       fetchData().catch((error) => {
@@ -205,18 +205,16 @@ const ProjectLogs = () => {
     }
   }, [authCode, customerId, logType, projectId, handleGetProjectMappings]);
 
-
   const selectedRows =
-        localStorage?.getItem("selectedRows") === ""
-          ? "All"
-          : localStorage
-              ?.getItem("selectedRows")
-              ?.split(",")
-              ?.map((row) => JSON.parse(row));
+    localStorage?.getItem("selectedRows") === ""
+      ? "All"
+      : localStorage
+          ?.getItem("selectedRows")
+          ?.split(",")
+          ?.map((row) => JSON.parse(row));
 
-  console.log('selecteedRows',selectedRows);
+  console.log("selecteedRows", selectedRows);
 
-     
   useEffect(() => {
      // handler for export to procore
      const handleExportToProcore = async () => {
@@ -275,7 +273,18 @@ const ProjectLogs = () => {
         handleExportToProcore();
       }
     }
-  }, [projectMappingNoContent, searchParams, authCode, procoreProjectMappingsAPICalled, projectId, navigate, customerId, logType, selectedRows, companyId]);
+  }, [
+    projectMappingNoContent,
+    searchParams,
+    authCode,
+    procoreProjectMappingsAPICalled,
+    projectId,
+    navigate,
+    customerId,
+    logType,
+    selectedRows,
+    companyId,
+  ]);
 
   // v-4 changes, not navigating to submittal
 
@@ -734,12 +743,11 @@ const ProjectLogs = () => {
         fileData={fileData}
       />
       <Procore
-        customerId={customerId}
-        procoreModal={procoreModal}
-        toggleProcoreModal={toggleProcoreModal}
         companyList={companyList}
+        procoreModal={procoreModal}
         projectId={projectId}
-        logType={logType}
+        selectedRows={selectedRows}
+        toggleProcoreModal={toggleProcoreModal}
       />
       <Modal
         isOpen={saveListName}
