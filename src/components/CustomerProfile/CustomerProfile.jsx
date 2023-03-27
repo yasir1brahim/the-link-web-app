@@ -71,14 +71,14 @@ const CustomerProfile = (props) => {
           "procore_access_token",
           accessTokenData?.data.data.access_token
         );
-        navigate(`/submital-mappings?customerId=${customerId || custId}`)
+        navigate(`/submital-mappings?customerId=${customerId}`)
       };
 
       fetchData().catch((error) => {
         handleError(error);
       });
     }
-  }, [authCode, customerId]);
+  }, [authCode, customerId, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
