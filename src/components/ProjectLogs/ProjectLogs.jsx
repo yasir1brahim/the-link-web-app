@@ -257,9 +257,7 @@ const ProjectLogs = () => {
   };
   
     if (authCode) {
-      if (procoreProjectMappingsAPICalled
-        //  && projectMappingNoContent
-         ) {
+      if (procoreProjectMappingsAPICalled && projectMappingNoContent) {
         const fetchData = async () => {
           setProcoreModal(true);
           const companyResp = await axiosInstance({
@@ -271,12 +269,11 @@ const ProjectLogs = () => {
         fetchData().catch((error) => {
           handleError(error);
         });
-      } 
-      // else if (procoreProjectMappingsAPICalled) {
-      //   searchParams.set("code", "");
-      //   // setNavigateToSubmittal(!navigateToSubmittal);
-      //   handleExportToProcore();
-      // }
+      } else if (procoreProjectMappingsAPICalled) {
+        searchParams.set("code", "");
+        // setNavigateToSubmittal(!navigateToSubmittal);
+        handleExportToProcore();
+      }
     }
   }, [projectMappingNoContent, searchParams, authCode, procoreProjectMappingsAPICalled, projectId, navigate, customerId, logType, selectedRows, companyId]);
 
