@@ -6,25 +6,26 @@ import NavbarTop from "../shared/NavbarTop/NavbarTop";
 
 import { Button } from "reactstrap";
 import SelectDropDownV2 from "../shared/SelectDropDownV2/SelectDropDownV2";
-import ExportToProcoreModal from "./exportToProcoreModal";
+// import ExportToProcoreModal from "./exportToProcoreModal";
 import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
 import { ReactComponent as LinkLogo } from "../../assets/images/logo-dark.svg";
 import { ReactComponent as ArrowRight } from "../../assets/images/border-arrow.svg";
 import Loader from "../shared/Loader/Loader";
 import handleError from "../../config/errorHandler";
+import { useSearchParams } from "react-router-dom";
 
 const SubmittalMappings = () => {
 
-  const customerId = localStorage.getItem("customerId");
-  const companyId = localStorage.getItem("companyId");
+  const [searchParams] = useSearchParams();
+  const customerId = searchParams.get("customerId");
   const [isLoading, setLoading] = useState(false);
   const [linkSubMappings, setLinkSubMappings] = useState([]);
   const [procoreSubTypes, setProcoreSubTypes] = useState([]);
   //   const [procoreSubDropDownMappings, setProcoreSubDropDownMappings] = useState([]);
   const [onEdit, setOnEdit] = useState(false);
-  const [openExportToProcoreModal, setOpenExportToProcoreModal] =
-    useState(false);
-  const [allMappings, setAllMappings] = useState({});
+  // const [openExportToProcoreModal, setOpenExportToProcoreModal] =
+  //   useState(false);
+  // const [allMappings, setAllMappings] = useState({});
   //   const [selectedProcoreSubmittal, setSelectedProcoreSubmittal] = useState();
 
   useEffect(() => {
@@ -37,10 +38,11 @@ const SubmittalMappings = () => {
         }).then((res) => {
           setLinkSubMappings(get(res, "data.data.link_sub_mapping"));
           setProcoreSubTypes(get(res, "data.data.procore_submittal_types"));
-          setAllMappings(get(res, "data.data"));
+          // setAllMappings(get(res, "data.data"));
         });
         setLoading(false);
       } catch (error) {
+        setLoading(false)
         handleError(error)
       }
     };
@@ -70,9 +72,9 @@ const SubmittalMappings = () => {
         url: `procore/submittal_mapping/${customerId}`,
         data: mappingsobject,
       }).then((res) => {
-        if (get(res, "status") === 200) {
-          setOpenExportToProcoreModal(true);
-        }
+        // if (get(res, "status") === 200) {
+        //   setOpenExportToProcoreModal(true);
+        // }
         return res;
       });
       setLoading(false);
@@ -84,15 +86,15 @@ const SubmittalMappings = () => {
   return (
     <div className="page-wrap">
       <NavbarTop />
-      {openExportToProcoreModal && allMappings && (
+      {/* {openExportToProcoreModal && allMappings && (
         <ExportToProcoreModal mappings={allMappings} companyId={companyId}></ExportToProcoreModal>
-      )}
+      )} */}
       <div className="position-button-wrap">
         <div className="button-wrap">
           <Button onClick={() => setOnEdit(true)}>Edit</Button>
           <Button onClick={() => procoreMappings()}>
             {" "}
-            Continue
+            Save Mapping
           </Button>
         </div>
       </div>

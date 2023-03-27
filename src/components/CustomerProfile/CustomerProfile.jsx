@@ -9,7 +9,7 @@ import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
 import PaginatedItems from '../shared/Pagination/Pagination';
 import CreateEmployee from './createEmployee';
 import axiosInstance from '../../config/axios';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EditEmployee from './editEmployee';
@@ -47,11 +47,39 @@ const CustomerProfile = (props) => {
   const [profilePicture, setProfilePicture] = useState('');
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [searchParams] = useSearchParams();
   const { state } = useLocation();
+  const customerId = searchParams.get('id')
+  const authCode = searchParams.get("code");
+
   let customer = state;
-  const custId = localStorage.getItem('roleId') === '0' ? state.customer_id : Number(localStorage.getItem('userId'))
+  const custId = localStorage.getItem('roleId') === '0' ? customerId || state?.customer_id : Number(localStorage.getItem('userId'))
   
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (authCode && !localStorage.getItem('procore_access_token')) {
+      const fetchData = async () => {
+        const accessTokenData = await axiosInstance({
+          method: "post",
+          url: "/procore/access_token",
+          data: {
+            code: authCode,
+            redirect_uri: `http://d3fy104eoanlsd.cloudfront.net/project-logs`,
+          },
+        });
+        localStorage.setItem(
+          "procore_access_token",
+          accessTokenData?.data.data.access_token
+        );
+        navigate(`/submital-mappings?customerId=${customerId || custId}`)
+      };
+
+      fetchData().catch((error) => {
+        handleError(error);
+      });
+    }
+  }, [authCode, customerId]);
+
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
@@ -266,10 +294,7 @@ const CustomerProfile = (props) => {
     <div className="page-wrap">
       <NavbarTop />
       <div className="page-wrap-content customer-profile-wrapper">
-        <Header
-          title={'Customer Profile'}
-          breadcrumb={'Customer Details'}
-        />
+        <Header title={"Customer Profile"} breadcrumb={"Customer Details"} />
 
         <div className="customer-profile-content">
           <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
@@ -330,7 +355,7 @@ const CustomerProfile = (props) => {
                       <div className="text-label-value">
                         <div className="text-label">Address: </div>
                         <div className="text-value">
-                          {customerData.address}{' '}
+                          {customerData.address}{" "}
                         </div>
                       </div>
                     </div>
@@ -353,7 +378,13 @@ const CustomerProfile = (props) => {
                     <div className="upload-documents">
                       <div className="image-holder">
                         <img
-                          src={profilePicture ? typeof (profilePicture) === 'string' ? profilePicture : URL.createObjectURL(profilePicture) : ProfilePhoto}
+                          src={
+                            profilePicture
+                              ? typeof profilePicture === "string"
+                                ? profilePicture
+                                : URL.createObjectURL(profilePicture)
+                              : ProfilePhoto
+                          }
                           alt="Profile"
                           className="dummy-image"
                         />
@@ -401,9 +432,13 @@ const CustomerProfile = (props) => {
                             Company Name
                           </label>
                           {companyName.errors && (
-                    <small className="form-error" style={{ color: 'red' }}>
-                      {companyName.errors}
-                    </small>)}
+                            <small
+                              className="form-error"
+                              style={{ color: "red" }}
+                            >
+                              {companyName.errors}
+                            </small>
+                          )}
                         </div>
                       </div>
                       <div className="col-4">
@@ -502,23 +537,23 @@ const CustomerProfile = (props) => {
                             name="contactNumber"
                             error={contactNumber.errors}
                             mask={[
-                              '(',
+                              "(",
                               /[1-9]/,
                               /\d/,
                               /\d/,
-                              ')',
-                              ' ',
+                              ")",
+                              " ",
                               /\d/,
                               /\d/,
                               /\d/,
-                              '-',
+                              "-",
                               /\d/,
                               /\d/,
                               /\d/,
                               /\d/,
                             ]}
-                            labelClass={'text-label'}
-                            label={'Phone'}
+                            labelClass={"text-label"}
+                            label={"Phone"}
                           />
                         </div>
                       </div>
@@ -595,7 +630,9 @@ const CustomerProfile = (props) => {
                                   New Password
                                 </label>
                                 {password.errors && (
-                                  <small className="form-error">{password.errors}</small>
+                                  <small className="form-error">
+                                    {password.errors}
+                                  </small>
                                 )}
                               </div>
                             </div>
@@ -623,13 +660,15 @@ const CustomerProfile = (props) => {
                                   Confirm New Password
                                 </label>
                                 {password.errors && (
-                                  <small className="form-error">{password.errors}</small>
+                                  <small className="form-error">
+                                    {password.errors}
+                                  </small>
                                 )}
                               </div>
                             </div>
                           </div>
                         ) : (
-                          ''
+                          ""
                         )}
                       </div>
                     </div>
@@ -673,11 +712,11 @@ const CustomerProfile = (props) => {
                   <div className="table-heading">
                     <h5 className="m-0">Employee List</h5>
                     <label className="table-entries">
-                      Showing entries{' '}
+                      Showing entries{" "}
                       <span className="showing-strong">
                         {currentItems.length}
-                      </span>{' '}
-                      of{' '}
+                      </span>{" "}
+                      of{" "}
                       <span className="showing-strong">
                         {employeeData.length}
                       </span>
@@ -685,9 +724,38 @@ const CustomerProfile = (props) => {
                     </label>
                   </div>
                   <div className="table-bulk-changes">
+                    {localStorage.getItem("procore_access_token") ? (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() =>
+                          navigate(
+                            `/submital-mappings?customerId=${
+                              customerId || custId
+                            }`
+                          )
+                        }
+                      >
+                        Submittal Mappings
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                      >
+                        <a
+                          href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=http://d3fy104eoanlsd.cloudfront.net/customer-profile?id=${
+                            customerId || custId
+                          }`}
+                          className="breadcrumb-text"
+                        >
+                          Submittal Mappings
+                        </a>
+                      </button>
+                    )}
                     <button
                       type="button"
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-secondary btn-sm btn-gap"
                       onClick={toggleModal}
                     >
                       + Add Employee
@@ -800,14 +868,13 @@ const CustomerProfile = (props) => {
         employee={employee}
         pageRefresh={pageRefresh}
         setPageRefresh={setPageRefresh}
-        empData= {employeeData}
+        empData={employeeData}
       />
       <ConfirmationModal
         modal={confirmationModal}
         toggleModal={toggleConfirmModal}
         handleDeleteEmployee={handleDeleteEmployee}
         empId={empId}
-        
       />
       <ToastContainer
         position="bottom-center"
