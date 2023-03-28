@@ -83,10 +83,10 @@ const ProjectLogs = () => {
 
   const [searchParams] = useSearchParams();
   const projectDetails = searchParams.get("projectDetails")?.split(",");
-  const projectId = JSON.parse(projectDetails[0]);
-  const customerId = JSON.parse(projectDetails[1]);
+  const projectId = projectDetails?.length ? JSON.parse(projectDetails[0]) : null;
+  const customerId = projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
   const projectName = searchParams.get("projectName");
-  const logType = projectDetails[2];
+  const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
   const authCode = searchParams.get("code");
   const [procoreProjectMappingsAPICalled, setProcoreProjectMappingsAPICalled] =
     useState(false);

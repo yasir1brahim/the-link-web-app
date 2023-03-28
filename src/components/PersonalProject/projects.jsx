@@ -67,8 +67,11 @@ const Projects = () => {
 
   // function used in the project tiles to navigate to project details
   const handleLaunch = (project) => {
+    const custId = localStorage.getItem("roleId") === "0"
+    ? state.customer_id
+    : localStorage.getItem("userId")
     project?.project_type === "ufgs"
-      ? navigate("/project-logs", {
+      ? navigate(`/project-logs?projectDetails=${project?.project_id},${custId},Classified`, {
           state: {
             project,
             projectName: project?.project_name,
