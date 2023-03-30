@@ -1,4 +1,4 @@
-const PersonalTile = ({projectName, handleLaunch, project, toggleUploadSpecsModal}) => {
+const PersonalTile = ({projectData, projectName, handleLaunch, project, toggleUploadSpecsModal}) => {
   return (
     <div className="grid-view grid-view-personal">
       <div className="gv-heading-content">
@@ -9,7 +9,7 @@ const PersonalTile = ({projectName, handleLaunch, project, toggleUploadSpecsModa
         <p className="gv-project-desc">
         </p>
         <div className="gv-project-logs">
-          <button className="btn btn-primary" onClick={() => handleLaunch(project)}>
+          <button className="btn btn-primary" disabled={!projectData?.ifSpecsUploaded} onClick={() => handleLaunch(project)}>
             Submittal Log
             <span className="log-arrow"></span>
           </button>
