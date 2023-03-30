@@ -100,7 +100,7 @@ export const UploadDocuments = (props) => {
                                 Cancel
                             </Button>
                             <Button color="primary" onClick={handleSubmit}>
-                                Proceed
+                                Get Log
                             </Button>{' '}
                         </ModalFooter>
                     </form>
