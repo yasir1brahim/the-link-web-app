@@ -68,9 +68,9 @@ const NavbarTop = () => {
               // href="/"
               onClick={toggleDrop}
             >
-              <span className="user-icon">
+              {/*<span className="user-icon">
                 <i className="fa fa-user"></i>
-              </span>
+        </span>*/}
               <span className="user-name">
                 {localStorage.getItem("fullName")}
               </span>

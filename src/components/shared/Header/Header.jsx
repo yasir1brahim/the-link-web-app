@@ -56,9 +56,13 @@ const Header = ({ ...props }) => {
           </div>
           <div className="header-content">
             <h1 className="page-title">{props.title}</h1>
+            
           </div>
         </div>
       </div>
+      {props.centerText ? <div className='header-center'>
+      <h1>{props.centerText}</h1>
+      </div> : ''}
       {props.showBtn ? (
         <div className="header-right">
           <button
