@@ -51,6 +51,7 @@ const PersonalProject = ({
                 return (
                   <div className="col-4">
                     <ContractTile
+                      projectData={projectData}
                       projectName={data.project_name}
                       handleLaunch={handleLaunch}
                       project={data}
@@ -62,6 +63,7 @@ const PersonalProject = ({
               return (
                 <div className="col-4">
                   <PersonalTile
+                    projectData={projectData}
                     projectName={data.project_name}
                     handleLaunch={handleLaunch}
                     project={data}
