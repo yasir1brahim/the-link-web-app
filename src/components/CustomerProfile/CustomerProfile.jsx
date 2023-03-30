@@ -57,7 +57,7 @@ const CustomerProfile = (props) => {
   
   const navigate = useNavigate();
   useEffect(() => {
-    if (authCode && !localStorage.getItem('procore_access_token')) {
+    if (authCode) {
       const fetchData = async () => {
         const accessTokenData = await axiosInstance({
           method: "post",
@@ -695,17 +695,31 @@ const CustomerProfile = (props) => {
           </div>
           <div className="customer-users-details">
             {employeeData.length === 0 ? (
-              <div
-                onClick={toggleModal}
-                className="nouser-wrapper d-flex align-items-center justify-content-center w-100"
-              >
-                <span
-                  className="d-flex align-items-center justify-content-center"
+              <>
+                <div className="table-bulk-changes">
+                  <button type="button" className="btn btn-secondary btn-sm" style={{marginBottom:'10px', float: 'right'}}>
+                    <a
+                      href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=http://d3fy104eoanlsd.cloudfront.net/customer-profile?id=${
+                        customerId || custId
+                      }`}
+                      className="breadcrumb-text"
+                    >
+                      Submittal Mappings
+                    </a>
+                  </button>
+                </div>
+                <div
                   onClick={toggleModal}
+                  className="nouser-wrapper d-flex align-items-center justify-content-center w-100"
                 >
-                  <AddUser /> Add Employee
-                </span>
-              </div>
+                  <span
+                    className="d-flex align-items-center justify-content-center"
+                    onClick={toggleModal}
+                  >
+                    <AddUser /> Add Employee
+                  </span>
+                </div>
+              </>
             ) : (
               <>
                 <div className="table-top-content">
@@ -724,35 +738,16 @@ const CustomerProfile = (props) => {
                     </label>
                   </div>
                   <div className="table-bulk-changes">
-                    {localStorage.getItem("procore_access_token") ? (
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        onClick={() =>
-                          navigate(
-                            `/submital-mappings?customerId=${
-                              customerId || custId
-                            }`
-                          )
-                        }
+                    <button type="button" className="btn btn-secondary btn-sm">
+                      <a
+                        href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=http://d3fy104eoanlsd.cloudfront.net/customer-profile?id=${
+                          customerId || custId
+                        }`}
+                        className="breadcrumb-text"
                       >
                         Submittal Mappings
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                      >
-                        <a
-                          href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=http://d3fy104eoanlsd.cloudfront.net/customer-profile?id=${
-                            customerId || custId
-                          }`}
-                          className="breadcrumb-text"
-                        >
-                          Submittal Mappings
-                        </a>
-                      </button>
-                    )}
+                      </a>
+                    </button>
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm btn-gap"
