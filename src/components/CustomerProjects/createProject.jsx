@@ -39,6 +39,7 @@ const CreateProject = ({
   const [profilePicture, setProfilePicture] = useState('');
   const [refetchEmp, setRefetchEmp] = useState(false);
   const [empForm, openEmpForm] = useState(false);
+  const [visibilityType, setVisibilityType] = useState('Contract')
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });\
   console.log('customer', projects)
 
@@ -115,7 +116,8 @@ const CreateProject = ({
             employee_list: selectedEmployeeList.map(
               (employee) => employee.value
             ),
-            project_type: projectType
+            project_type: projectType,
+            visibility_type: visibilityType
           },
         });
         if (response.data) {
@@ -206,11 +208,17 @@ const CreateProject = ({
                     <div className="col-6">
                       <div className="custom-control custom-checkbox">
                         <input
-                          type="radio"
+                          type="checkbox"
                           name="ticketHeading"
                           id="ticketHeading"
-                          onClick={()=> setProjectType('ufgs')}
-                          checked={projectType === 'ufgs' || isPersonalProject}
+                          onClick={()=> 
+                            {
+                              if(visibilityType === "Personal")
+                              { setVisibilityType("Contract") } else {
+                                setVisibilityType("Personal")
+                              }
+                            }}
+                          checked={visibilityType === "Personal"}
                         />
                         <label
                           style={{color: 'green', marginLeft: '5px'}}
