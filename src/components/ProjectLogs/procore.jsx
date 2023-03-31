@@ -26,11 +26,11 @@ const Procore = ({
   const handleExportToProcore = async () => {
     try {
       setLoading(true);
-      const statusResp = await axiosInstance({
-        method: "get",
-        url: `/procore/status/${companyId}`,
-      });
-      console.log(statusResp, "statusREsponse");
+      // const statusResp = await axiosInstance({
+      //   method: "get",
+      //   url: `/procore/status/${companyId}`,
+      // });
+      // console.log(statusResp, "statusREsponse");
       // setStatus(get(statusResp, 'data.data'));
       const resp = await axiosInstance({
         method: "post",
@@ -38,8 +38,8 @@ const Procore = ({
         data: {
           project_id: Number(projectId),
           records: selectedRows, // array of ids
-          status_id:
-            statusResp?.data?.data?.find((sts) => sts.name === "Open").id || 1,
+          // status_id:
+          //   statusResp?.data?.data?.find((sts) => sts.name === "Open").id || 1,
         },
       });
       if (resp.status === 200) {
