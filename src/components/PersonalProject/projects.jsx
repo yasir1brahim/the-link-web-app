@@ -22,6 +22,7 @@ const Projects = () => {
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
   const [fileData, setFileData] = useState({});
+  const [specUploadProject, setSpecUploadProject] = useState({});
   const roleId = localStorage.getItem("roleId");
   const { state } = useLocation();
   const toggleSlider = () => setSlider(!slider);
@@ -37,12 +38,11 @@ const Projects = () => {
 
   // handle to upload specs, submit 
   const handleUploadSubmit = async () => {
-    console.log(pdfFile);
     try {
       setUploadLoading(true);
       const data = new FormData();
-      data.append('project_id', state.project?.project_id);
-      state?.project?.project_type === 'ufgs' && data.append('project_type', state.project?.project_type);
+      data.append('project_id', specUploadProject?.project_id);
+      specUploadProject?.project_type === 'ufgs' && data.append('project_type', specUploadProject?.project_type);
       Object.values(pdfFile)?.forEach((file) => data.append('files', file));
       const response = await axiosInstance({
         method: 'post',
@@ -121,6 +121,7 @@ const Projects = () => {
               customerData={customerData}
               pageRefresh={pageRefresh}
               setPageRefresh={setPageRefresh}
+              setSpecUploadProject={setSpecUploadProject}
             />
           ) : (
             <CustomerProjects
