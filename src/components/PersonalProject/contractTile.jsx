@@ -4,6 +4,7 @@ const ContractTile = ({
   handleLaunch,
   project,
   toggleUploadSpecsModal,
+  setSpecUploadProject
 }) => {
   return (
     <div className="grid-view grid-view-contract">
@@ -46,7 +47,7 @@ const ContractTile = ({
               <button
                 type="button"
                 className={`btn btn-primary`}
-                onClick={toggleUploadSpecsModal}
+                onClick={()=>{toggleUploadSpecsModal(); setSpecUploadProject(project)}}
                 style={{width: `100%`}}
               >
                 Upload Specs

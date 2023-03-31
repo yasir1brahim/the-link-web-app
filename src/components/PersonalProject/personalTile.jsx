@@ -1,4 +1,4 @@
-const PersonalTile = ({ifSpecsUploaded, projectName, handleLaunch, project, toggleUploadSpecsModal}) => {
+const PersonalTile = ({setSpecUploadProject, ifSpecsUploaded, projectName, handleLaunch, project, toggleUploadSpecsModal}) => {
   return (
     <div className="grid-view grid-view-personal">
       <div className="gv-heading-content">
@@ -37,7 +37,7 @@ const PersonalTile = ({ifSpecsUploaded, projectName, handleLaunch, project, togg
               <button
                 type="button"
                 className={`btn btn-primary`}
-                onClick={toggleUploadSpecsModal}
+                onClick={()=>{toggleUploadSpecsModal(); setSpecUploadProject(project)}}
                 style={{width: `100%`}}
               >
                 Upload Specs

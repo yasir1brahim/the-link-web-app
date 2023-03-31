@@ -14,8 +14,8 @@ const PersonalProject = ({
   state,
   customerData,
   pageRefresh,
-  setPageRefresh
-
+  setPageRefresh,
+  setSpecUploadProject
 }) => {
   console.log(projectData);
 
@@ -56,6 +56,7 @@ const PersonalProject = ({
                       handleLaunch={handleLaunch}
                       project={data}
                       toggleUploadSpecsModal={toggleUploadSpecsModal}
+                      setSpecUploadProject={setSpecUploadProject}
                     />
                   </div>
                 );
@@ -68,6 +69,7 @@ const PersonalProject = ({
                     handleLaunch={handleLaunch}
                     project={data}
                     toggleUploadSpecsModal={toggleUploadSpecsModal}
+                    setSpecUploadProject={setSpecUploadProject}
                   />
                 </div>
               );
