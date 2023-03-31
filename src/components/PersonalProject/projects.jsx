@@ -50,7 +50,7 @@ const Projects = () => {
         data,
       });
       if (response.data) {
-        console.log(response.data);
+        // console.log(response.data);
         setUploadLoading(false);
         setFileData(response.data.message);
         setUploadSpecsModal(false);
