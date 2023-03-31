@@ -23,7 +23,8 @@ const handleError = (error) => {
       draggable: true,
       progress: undefined,
     });
-  // } else {
+  } 
+  // else {
   //   // anything else
   //   return toast.error("Something went wrong", {
   //     position: "bottom-center",
