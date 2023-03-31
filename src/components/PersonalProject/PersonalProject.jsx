@@ -51,7 +51,7 @@ const PersonalProject = ({
                 return (
                   <div className="col-4">
                     <ContractTile
-                      projectData={projectData}
+                      ifSpecsUploaded={data?.ifSpecsUploaded}
                       projectName={data.project_name}
                       handleLaunch={handleLaunch}
                       project={data}
@@ -63,7 +63,7 @@ const PersonalProject = ({
               return (
                 <div className="col-4">
                   <PersonalTile
-                    projectData={projectData}
+                    ifSpecsUploaded={data?.ifSpecsUploaded}
                     projectName={data.project_name}
                     handleLaunch={handleLaunch}
                     project={data}

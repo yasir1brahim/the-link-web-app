@@ -207,11 +207,6 @@ const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, p
                       </th>
                       <th>
                         <span>
-                          Visibility Type <i className=""></i>
-                        </span>
-                      </th>
-                      <th>
-                        <span>
                           Status<i className="sort-d"></i>
                         </span>
                       </th>
@@ -260,7 +255,6 @@ const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, p
                               </div>
                             </td> */}
                             <td>{project.project_name}</td>
-                            <td>{project.visibility_type}</td>
                             <td>{project.status}</td>
                             <td>{project.lead_contact}</td>
                             <td>{project.users}</td>

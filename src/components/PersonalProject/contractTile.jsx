@@ -1,5 +1,5 @@
 const ContractTile = ({
-  projectData,
+  ifSpecsUploaded,
   projectName,
   handleLaunch,
   project,
@@ -17,7 +17,7 @@ const ContractTile = ({
           <button
             className="btn btn-primary"
             onClick={() => handleLaunch(project)}
-            disabled={!projectData?.ifSpecsUploaded}
+            disabled={!ifSpecsUploaded}
           >
             Submittal Log
             <span className="log-arrow"></span>
