@@ -78,7 +78,7 @@ const ProjectLogs = () => {
   const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [companyList, setCompanyList] = useState([]);
   const [companyId, setCompanyId] = useState();
-
+  const [docParsed, setDocParsed] = useState(0);
   const toggle = () => setDropdownOpen((prevState) => !prevState);
 
   const [searchParams] = useSearchParams();
@@ -92,6 +92,31 @@ const ProjectLogs = () => {
     useState(false);
   const [projectMappingNoContent, setProjectMappingsNoContent] =
     useState(false);
+
+    useEffect(() => {
+      if (!modal) {
+        setPdfFile({});
+      }
+    }, [modal]);
+
+    // get the number of documents uploaded
+    useEffect(() => {
+      const fetchData = async () => {
+        setLoading(true);
+        const response = await axiosInstance({
+          method: 'get',
+          url: `/project_data/${state.project?.project_id}`,
+        });
+        setDocParsed(response.data.doc_parsed);
+        setLoading(false);
+        console.log(response.data.message);
+      };
+  
+      fetchData().catch((error) => {
+        setLoading(false);
+        handleError(error)
+      });
+    }, [state?.project, pageRefresh]);
 
   useEffect(() => {
     if (!modal) {
@@ -547,9 +572,10 @@ const ProjectLogs = () => {
             projectType === "ufgs" ? "UFGS" : "Commercial"
           }`}
           centerText={`${state?.projectName || projectName || ""}`}
-          breadcrumb={"Project Details"}
-          breadcrumb2={"View Projects"}
-          breadcrumb3={"Requrement Logs"}
+          docParsed={docParsed}
+          // breadcrumb={"Project Details"}
+          breadcrumb={"View Projects"}
+          breadcrumb2={"Requrement Logs"}
           showBtn={"Upload Additional"}
           toggleModal={toggleModal}
           btnSize={"small"}

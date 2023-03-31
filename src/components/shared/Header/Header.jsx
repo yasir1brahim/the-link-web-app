@@ -56,7 +56,6 @@ const Header = ({ ...props }) => {
           </div>
           <div className="header-content">
             <h1 className="page-title">{props.title}</h1>
-            
           </div>
         </div>
       </div>
@@ -65,6 +64,7 @@ const Header = ({ ...props }) => {
       </div> : ''}
       {props.showBtn ? (
         <div className="header-right">
+        {props?.docParsed ? <div className='header-docs-uploaded'>Docs. uploaded : {props?.docParsed}</div> : ''}
           <button
             type="button"
             className={`btn btn-primary ${props.btnSize === 'small' ? 'btn-small' : ''}`}
