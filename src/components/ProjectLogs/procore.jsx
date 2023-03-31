@@ -15,6 +15,7 @@ const Procore = ({
   projectId,
   selectedRows,
   toggleProcoreModal,
+  setProcoreModal
 }) => {
   // const navigate = useNavigate();
   const [partnerCompany, setPartnerCompany] = useState([]);
@@ -112,7 +113,7 @@ const Procore = ({
           procore_submittal_manager_name: submittalManager[0]?.label,
         },
       }).then(() => {
-        toggleProcoreModal();
+        setProcoreModal(false)
         toast.success("Updated project procore info!", {
           position: "bottom-center",
           autoClose: 5000,
@@ -127,7 +128,7 @@ const Procore = ({
         // toggleProcoreModal();
       });
     } catch (error) {
-      toggleProcoreModal();
+      setProcoreModal(false)
       handleError(error);
     }
   };

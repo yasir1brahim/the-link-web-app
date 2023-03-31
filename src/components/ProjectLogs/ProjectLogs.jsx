@@ -746,6 +746,7 @@ const ProjectLogs = () => {
         setLoading={setLoading}
         selectedRows={selectedRows}
         toggleProcoreModal={toggleProcoreModal}
+        setProcoreModal={setProcoreModal}
       />
       <Modal
         isOpen={saveListName}
