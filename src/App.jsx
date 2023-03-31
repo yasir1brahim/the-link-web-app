@@ -10,7 +10,7 @@ import Forgotpwd from './components/Authentication/Forgotpwd';
 import Resetpwd from './components/Authentication/Resetpwd';
 import Resetsuccess from './components/Authentication/Resetsuccess';
 import Checkemail from './components/Authentication/Checkemail';
-import ProjectsDetails from './components/ProjectDetails/ProjectDetails';
+// import ProjectsDetails from './components/ProjectDetails/ProjectDetails';
 import ProjectLogs from './components/ProjectLogs/ProjectLogs';
 import PdfWrapper from './pdfWrapper';
 import AdminUser from './components/AdminUser/AdminUser';
@@ -27,7 +27,7 @@ function App() {
         <Route path="/customer-profile" element={<CustomerProfile />} />
         <Route path="/project-list" element={<Projects/>} />
         <Route path="/project-logs" element={<ProjectLogs />} />
-        <Route path="/project-details" element={<ProjectsDetails />} />
+       {/*<Route path="/project-details" element={<ProjectsDetails />} />*/}
         <Route path="/login" element={<Signin />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/forgot-password" element={<Forgotpwd />} />

@@ -70,8 +70,9 @@ const Projects = () => {
     const custId = localStorage.getItem("roleId") === "0"
     ? state.customer_id
     : localStorage.getItem("userId")
-    project?.project_type === "ufgs"
-      ? navigate(`/project-logs?projectDetails=${project?.project_id},${custId},Classified`, {
+    // project?.project_type === "ufgs"
+      // ?
+       navigate(`/project-logs?projectDetails=${project?.project_id},${custId},Classified`, {
           state: {
             project,
             projectName: project?.project_name,
@@ -82,15 +83,15 @@ const Projects = () => {
             logType: "Classified",
           },
         })
-      : navigate("/project-details", {
-          state: {
-            project,
-            customerId:
-              localStorage.getItem("roleId") === "0"
-                ? state.customer_id
-                : localStorage.getItem("userId"),
-          },
-        });
+      // : navigate("/project-details", {
+      //     state: {
+      //       project,
+      //       customerId:
+      //         localStorage.getItem("roleId") === "0"
+      //           ? state.customer_id
+      //           : localStorage.getItem("userId"),
+      //     },
+      //   });
   };
 
   return (
@@ -106,7 +107,7 @@ const Projects = () => {
                 ? "Add Personal Project"
                 : roleId !== "6" && roleId !== "7" && "Create New Project"
             }
-            breadcrumb={"Project Details"}
+            breadcrumb={"View Projects"}
           />
           {slider ? (
             <PersonalProject

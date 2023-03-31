@@ -81,7 +81,7 @@
     }
   }
   .header-center{
-    width: 50%;
+    width: 45%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -89,7 +89,10 @@
   }
 
   .header-right {
-    width: 20%;
+    .header-docs-uploaded{
+      margin: 0px 10px 0px 0px;
+    }
+    width: 30%;
     display: flex;
     align-items: center;
     justify-content: flex-end;
