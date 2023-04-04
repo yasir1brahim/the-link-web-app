@@ -59,8 +59,12 @@ const Header = ({ ...props }) => {
           </div>
         </div>
       </div>
+      {props.centerText ? <div className='header-center header-content'>
+      <h1 className="page-title">{props.centerText?.toUpperCase()}</h1>
+      </div> : ''}
       {props.showBtn ? (
         <div className="header-right">
+          {props?.docParsed ? <div className='header-docs-uploaded breadcrumb-text'>Docs uploaded : {props?.docParsed}</div> : ''}
           <button
             type="button"
             className={`btn btn-primary ${props.btnSize === 'small' ? 'btn-small' : ''}`}

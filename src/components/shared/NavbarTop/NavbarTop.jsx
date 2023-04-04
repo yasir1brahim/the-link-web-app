@@ -47,7 +47,7 @@ const NavbarTop = () => {
                 style={{
                   color: "white",
                   fontSize: "25px",
-                  fontWeight: 600
+                  fontWeight: 600,
                 }}
               >
                 Submittal Log
@@ -69,7 +69,9 @@ const NavbarTop = () => {
               onClick={toggleDrop}
             >
               <span className="user-icon">
-                <i className="fa fa-user"></i>
+                {localStorage.getItem("fullName")?.charAt(0) || (
+                  <i className="fa fa-user"></i>
+                )}
               </span>
               <span className="user-name">
                 {localStorage.getItem("fullName")}

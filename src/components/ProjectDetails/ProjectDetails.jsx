@@ -101,7 +101,8 @@ const ProjectsDetails = () => {
         project,
         projectName: state.project?.project_name,
         customerId: state.customerId,
-        logType
+        logType,
+        docParsed
       },
     });
   };
