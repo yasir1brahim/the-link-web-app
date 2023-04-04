@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import axiosInstance from '../../config/axios';
 // import DateSelector from '../shared/DateSelector/DateSelector';
-import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
+// import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import { FilterTable } from './filterTable';
 // import { ReactComponent as EditButton } from '../../assets/images/edit-button.svg';
 // import { ReactComponent as AddButton } from '../../assets/images/circle-add.svg';
@@ -20,8 +20,8 @@ export default function CombinedLogs(props) {
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
   // const [statusValue, setStatus] = useState({});
-  const [groupingValue, setGroupingValue] = useState({});
-  const [searchValue, setSearchValue] = useState('');
+  // const [groupingValue, setGroupingValue] = useState({});
+  // const [searchValue, setSearchValue] = useState('');
   const [sorting, setSorting] = useState({ column: '', order: 'desc' });
   const [filterModal, setFilterModal] = useState(false)
   const [selectedFilterValue, setSelectedFilterValue] = useState({})
