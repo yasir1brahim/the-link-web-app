@@ -634,7 +634,6 @@ const ProjectLogs = () => {
           breadcrumb2={"Requrement Logs"}
           showBtn={"Upload Additional"}
           toggleModal={toggleModal}
-          btnSize={"small"}
         />
 
         <div className="project-logs-content">
