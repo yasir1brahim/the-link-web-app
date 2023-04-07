@@ -235,33 +235,6 @@ const CreateCustomer = ({
                   </div>
                   <div className="col-4">
                     <div className="form-group">
-                      <input
-                        type="email"
-                        className="form-control"
-                        id="accountEmail"
-                        aria-describedby="accountEmail"
-                        placeholder="Enter"
-                        required
-                        value={email.value}
-                        onChange={(e) => {
-                          setEmail({
-                            ...email,
-                            value: e.target.value,
-                          });
-                        }}
-                      />
-                      <label className="text-label" htmlFor="accountEmail">
-                        Email Address
-                      </label>
-                      {email.errors && (
-                        <small className="form-error" style={{ color: 'red' }}>
-                          {email.errors}
-                        </small>
-                      )}
-                    </div>
-                  </div>
-                  <div className="col-4">
-                    <div className="form-group">
                       {/* <input
                         type="text"
                         className="form-control"
@@ -306,6 +279,34 @@ const CreateCustomer = ({
                       />
                     </div>
                   </div>
+                  <div className="col-4">
+                    <div className="form-group">
+                      <input
+                        type="email"
+                        className="form-control"
+                        id="accountEmail"
+                        aria-describedby="accountEmail"
+                        placeholder="Enter"
+                        required
+                        value={email.value}
+                        onChange={(e) => {
+                          setEmail({
+                            ...email,
+                            value: e.target.value,
+                          });
+                        }}
+                      />
+                      <label className="text-label" htmlFor="accountEmail">
+                        Email Address
+                      </label>
+                      {email.errors && (
+                        <small className="form-error" style={{ color: 'red' }}>
+                          {email.errors}
+                        </small>
+                      )}
+                    </div>
+                  </div>
+                  
                   <div className="col-4">
                     <div className="form-group">
                       <input

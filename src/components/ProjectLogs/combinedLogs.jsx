@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../config/axios';
 // import DateSelector from '../shared/DateSelector/DateSelector';
-import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
+// import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import { FilterTable } from './filterTable';
 // import { ReactComponent as EditButton } from '../../assets/images/edit-button.svg';
 // import { ReactComponent as AddButton } from '../../assets/images/circle-add.svg';
@@ -20,8 +20,8 @@ export default function CombinedLogs(props) {
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
   // const [statusValue, setStatus] = useState({});
-  const [groupingValue, setGroupingValue] = useState({});
-  const [searchValue, setSearchValue] = useState('');
+  // const [groupingValue, setGroupingValue] = useState({});
+  // const [searchValue, setSearchValue] = useState('');
   const [sorting, setSorting] = useState({ column: '', order: 'desc' });
   const [filterModal, setFilterModal] = useState(false)
   const [selectedFilterValue, setSelectedFilterValue] = useState({})
@@ -349,11 +349,11 @@ export default function CombinedLogs(props) {
             }
             {props.projectType !== 'ufgs' && 
             <>
-              <th className='small-font'>
+              {/* <th className='small-font'>
                 <span className="has-sorting" >
                   Grouping <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
                 </span>
-              </th>
+              </th> */}
               <th className="log-description small-font">
               <span className='has-sorting' >
                 Submittal Description <i className={sorting.column === "para_context" ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting("para_context")}></i>
@@ -582,7 +582,7 @@ export default function CombinedLogs(props) {
                 </td>}
                 {props.projectType !== 'ufgs' && 
                 <>
-                  <td className="reduce-height">
+                  {/* <td>
                     {editRow === index ? (
                       <div
                         className="form-group log-datepicker"
@@ -603,7 +603,7 @@ export default function CombinedLogs(props) {
                     ) : (
                       log.package
                     )}
-                  </td>
+                  </td> */}
                   <td className="reduce-height">
                     {editRow === index ? (
                       <input
