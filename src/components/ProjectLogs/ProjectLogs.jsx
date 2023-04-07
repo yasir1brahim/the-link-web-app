@@ -256,6 +256,7 @@ const ProjectLogs = () => {
               }
           });
           if (resp.status === 200) {
+              setProjectMappingsNoContent(false)
               toast.success('Successfully exported to Procore!', {
                   position: 'bottom-center',
                   autoClose: 5000,
