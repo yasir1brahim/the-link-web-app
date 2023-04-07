@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Header from '../shared/Header/Header';
-import NavbarTop from '../shared/NavbarTop/NavbarTop';
+import Loader from '../shared/Loader/Loader';
 // import WhitingTurner from '../../assets/images/whiting-turner.svg';
 // import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
 // import ProfilePhoto from '../../assets/images/dummy-profile.svg';
@@ -12,59 +11,51 @@ import PaginatedItems from '../shared/Pagination/Pagination';
 import axiosInstance from '../../config/axios';
 import { useLocation } from 'react-router-dom';
 import CreateProject from './createProject';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
 import EditProject from './editProject';
 import CreateEmployee from '../CustomerProfile/createEmployee';
 import moment from 'moment';
+import handleError from '../../config/errorHandler';
 
-const CustomerProjects = (props) => {
-  const [modal, setModal] = useState(false);
+const CustomerProjects = ({toggleSlider, slider, customerData,setCustomerData, pageRefresh, setPageRefresh, toggleCreateProjectModal, createProjectModal, projectData ,setProjectData, handleLaunch}) => {
   const [employeeModal, setEmployeeModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [isArchived, toggleArchive] = useState(false);
-  const toggleModal = () => setModal(!modal);
+
   const toggleEditModal = () => setEditModal(!editModal);
   const toggleEmployeeModal = () => setEmployeeModal(!employeeModal);
-  const [projectData, setProjectData] = useState([]);
+
   const [project, setProject] = useState({});
-  const [pageRefresh, setPageRefresh] = useState(false);
+  
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [customerData, setCustomerData] = useState({});
+  const [isLoading, setLoading] = useState(false);
   const { state } = useLocation();
   // const customer = state;
-  const navigate = useNavigate();
   const roleId = localStorage.getItem('roleId')
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const response = await axiosInstance({
         method: 'get',
         url: state?.customer_id
           ? `/customer/${state.customer_id}`
           : `/customer/${localStorage.getItem('userId')}`,
       });
+      setLoading(false);
       setCustomerData(response.data.message[0]);
       console.log(response.data.message);
     };
 
     fetchData().catch((error) => {
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
-  }, [state, pageRefresh]);
+  }, [state, pageRefresh, setCustomerData]);
 
   useEffect(() => {
-    const url = roleId === '6' ?
+    const url = roleId === '6' || roleId === '7' ?
       `/emp/projects/${localStorage.getItem('userId')}` :
       state?.customer_id
         ? `/projects/${state.customer_id}`
@@ -82,31 +73,11 @@ const CustomerProjects = (props) => {
     };
 
     fetchData().catch((error) => {
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
-  }, [state, pageRefresh, isArchived, roleId]);
+  }, [state, pageRefresh, isArchived, roleId, setProjectData]);
 
-  const handleLaunch = (project) => {
-    project?.project_type === 'ufgs' ? navigate('/project-logs', {
-      state: {
-        project,
-        projectName: project?.project_name,
-        customerId: localStorage.getItem('roleId') === '0' ? state.customer_id : localStorage.getItem('userId'),
-        logType: 'Classified'
-      },
-    }) :
-    navigate('/project-details', {
-      state: { project, customerId: localStorage.getItem('roleId') === '0' ? state.customer_id : localStorage.getItem('userId') },
-    });
-  };
+
   const handleEdit = (project) => {
     setProject(project);
     toggleEditModal();
@@ -143,31 +114,17 @@ const CustomerProjects = (props) => {
         }
       } catch (error) {
         console.log(error.message);
-        toast.error('Something went wrong!', {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
       }
     }
   };
 
   return (
     <>
-      <div className="page-wrap">
-        <NavbarTop />
-        <div className="page-wrap-content customer-projects-wrapper">
-          <Header
-            title={state?.customer_name || customerData?.customer_name}
-            showBtn={roleId !== '6' && 'Create New Project'}
-            toggleModal={toggleModal}
-            breadcrumb={'Project Details'}
-          />
-
+     
+        
+       
+     
           <div className="customer-projects-content">
             <div className="customer-project-details">
               {/* when there are Zero Users */}
@@ -176,7 +133,7 @@ const CustomerProjects = (props) => {
                         </a> */}
               <div className="table-top-content">
                 <div className="table-heading">
-                  <h5 className="m-0">Projects List</h5>
+                  
                   <label className="table-entries">
                     Showing entries{' '}
                     <span className="showing-strong">
@@ -187,24 +144,41 @@ const CustomerProjects = (props) => {
                     .
                   </label>
                 </div>
-                <div className="table-bulk-changes">
-                  {roleId !== '6' && <button
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                    onClick={toggleEmployeeModal}
-                  >
-                    + Add Employee
-                  </button>}
+                
+                <div className="grid-list-toggle" >
+                  <div className="table-bulk-changes" style={{ marginRight: '30px' }}>
+                    {roleId !== '6' && roleId !== '7' && <div style={{ marginLeft: '10px' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={toggleEmployeeModal}
+                    >
+                      + Add Employee
+                    </button>
+                    </div>}
+
+                    {roleId !== '6' && roleId !== '7' && 
+                      <button
+                        onClick={() => toggleArchive(!isArchived)}
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                      >
+                        {isArchived ? 'View Active' : 'View Archived'}
+                      </button>}
+                  </div>
+
+                  <span className="tag-list-view" >List View</span>
+                  <div className="gl-toggle-wrapper">
+                    <label class="switch">
+                      <input type="checkbox" checked={slider}/>
+                      <span class="slider round" onClick={()=>toggleSlider(!slider)}></span>
+                    </label>
+                  </div>
+                  <span className="tag-list-view">Grid View</span>
                 </div>
-                {roleId !== '6' && <div style={{ marginLeft: '10px' }}>
-                  <button
-                    onClick={() => toggleArchive(!isArchived)}
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                  >
-                    {isArchived ? 'View Active' : 'View Archived'}
-                  </button>
-                </div>}
+              
+                
+                
               </div>
               <div className="l-table-wrapper">
                 <table className="table">
@@ -295,7 +269,7 @@ const CustomerProjects = (props) => {
                                 >
                                   Launch
                                 </button>
-                                {roleId !== '6' && <><button
+                                {roleId !== '6' && roleId !== '7' && <><button
                                   type="button"
                                   className="btn btn-secondary btn-sm"
                                   onClick={() => handleEdit(project)}
@@ -341,8 +315,8 @@ const CustomerProjects = (props) => {
                 setPageRefresh={setPageRefresh}
               />
               <CreateProject
-                modal={modal}
-                toggleModal={toggleModal}
+                modal={createProjectModal}
+                toggleModal={toggleCreateProjectModal}
                 customer={state || customerData}
                 pageRefresh={pageRefresh}
                 setPageRefresh={setPageRefresh}
@@ -357,8 +331,8 @@ const CustomerProjects = (props) => {
               />
             </div>
           </div>
-        </div>
-      </div>
+          <Loader showComponentLoader={isLoading} />
+
       <ToastContainer
         position="bottom-center"
         autoClose={5000}

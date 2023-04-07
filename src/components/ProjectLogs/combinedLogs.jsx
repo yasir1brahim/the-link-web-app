@@ -1,6 +1,5 @@
 // import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
 import axiosInstance from '../../config/axios';
 // import DateSelector from '../shared/DateSelector/DateSelector';
 // import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
@@ -13,6 +12,7 @@ import { ReactComponent as PdfButton } from '../../assets/images/file-pdf.svg';
 import { ReactComponent as ExpandButton } from '../../assets/images/down-arrow.svg';
 import { ReactComponent as CollapseButton } from '../../assets/images/up-arrow.svg';
 import { Tooltip } from 'reactstrap';
+import handleError from '../../config/errorHandler';
 
 export default function CombinedLogs(props) {
   const { logData, newRowIndex } = props;
@@ -26,7 +26,7 @@ export default function CombinedLogs(props) {
   const [filterModal, setFilterModal] = useState(false)
   const [selectedFilterValue, setSelectedFilterValue] = useState({})
   const [filterColumn, setFilterColumn] = useState('')
-  const [filterValues, setFilterValues] = useState({ spec_section: [], type: [], item_desc: [], classification: [], sd_title: [] })
+  const [filterValues, setFilterValues] = useState({ spec_section: [], type: ["Submittal"], item_desc: [], classification: [], sd_title: [] })
   // const [addRowTooltip, setaddRowTooltip] = useState(null)
   // const [editRowTooltip, setEditRowTooltip] = useState(null)
   const [pdfTooltip, setPdfTooltip] = useState(null)
@@ -115,7 +115,7 @@ export default function CombinedLogs(props) {
   //     props.setPageRefresh(!props.pageRefresh);
   //   } catch (error) {
   //     console.log(error.message);
-  //     toast.error('Something went wrong!', {
+  //     toast.error(error?.response?.data?.message || error?.message, {
   //       position: 'bottom-center',
   //       autoClose: 5000,
   //       hideProgressBar: true,
@@ -148,7 +148,7 @@ export default function CombinedLogs(props) {
           project_id: props.projectId,
           search: "",
           // filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
-          filters: a,
+          filters: {...a, type: ["Submittal"]},
           order_col: columnName || "",
           order: sortingOrder === 'desc' ? 'asc' : 'desc' || "",
           list_id: props.selectedLogData.length ? props.listId : ''
@@ -162,15 +162,7 @@ export default function CombinedLogs(props) {
       setSorting({ ...sorting, column: columnName, order: sortingOrder === 'desc' ? 'asc' : 'desc' })
     } catch (error) {
       console.log(error.message);
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   }
   const handleOpenFilterModal = async () => {
@@ -186,7 +178,7 @@ export default function CombinedLogs(props) {
         data: {
           project_id: props.projectId,
           search: "",
-          filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
+          filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? {...a, type: ["Submittal"]} : {type: ["Submittal"]},
           // filters: a,
           order_col: sorting.column || "",
           order: sorting.order || "",
@@ -199,15 +191,7 @@ export default function CombinedLogs(props) {
         props.setLogData(response.data.message);
     } catch (error) {
       console.log(error.message);
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   }
 
@@ -262,8 +246,8 @@ export default function CombinedLogs(props) {
   //       let docElement = document.getElementsByClassName("l-table-wrapper")
   //       docElement[0].scrollTo(890, 0)
   //     }
-  //   } catch (e) {
-  //     toast.error('Something went wrong!', {
+  //   } catch (error) {
+  //     toast.error(error?.response?.data?.message || error?.message, {
   //       position: 'bottom-center',
   //       autoClose: 5000,
   //       hideProgressBar: true,
@@ -330,7 +314,7 @@ export default function CombinedLogs(props) {
            {props.projectType !== 'ufgs' && <th className='small-font'>
               <span className="has-sorting" >
                 Submittal Heading <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('type')}></i>
-                <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} />
+                {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} /> */}
               </span>
             </th>}
             {props.projectType === 'ufgs' && <th className='small-font'>
@@ -641,7 +625,7 @@ export default function CombinedLogs(props) {
                   </td>
                 </>
                 }
-                {/* <td>
+                {/* <td className="reduce-height">
                   {editRow === index ? (
                     <div
                       className="form-group log-datepicker"
@@ -664,7 +648,7 @@ export default function CombinedLogs(props) {
                     log.status
                   )}
                 </td>
-                <td>
+                <td className="reduce-height">
                   {editRow === index ? (
                     <div className="log-datepicker form-group">
                       <DateSelector
@@ -686,7 +670,7 @@ export default function CombinedLogs(props) {
                     log.date_issued
                   )}
                 </td>
-                <td>
+                <td className="reduce-height">
                   {editRow === index ? (
                     <div className="log-datepicker form-group">
                       <DateSelector
@@ -708,7 +692,7 @@ export default function CombinedLogs(props) {
                     log.date_approved
                   )}
                 </td>
-                <td>
+                <td className="reduce-height">
                   {editRow === index ? (
                     <input
                       placeholder="Enter"

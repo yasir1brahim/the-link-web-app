@@ -11,7 +11,9 @@ import axiosInstance from "../../config/axios";
 import { toast, ToastContainer } from "react-toastify";
 import EditEmployee from "../CustomerProfile/editEmployee";
 import EditProject from "../CustomerProjects/editProject";
-import moment from 'moment';
+import moment from "moment";
+import { ExternalUsers } from "./externalUsers";
+import handleError from "../../config/errorHandler";
 
 const AdminUser = (props) => {
   const [modal, setModal] = useState(false);
@@ -21,7 +23,7 @@ const AdminUser = (props) => {
   const [updateListModal, setUpdateListModal] = useState(false);
   const toggleUpdateList = async () => {
     setUpdateListModal(!updateListModal);
-  }
+  };
 
   const [detailInfoModal, setDetailInfoModal] = useState(false);
   const [modalData, setModalData] = useState({});
@@ -44,6 +46,7 @@ const AdminUser = (props) => {
   const [pageRefresh, setPageRefresh] = useState(false);
   const [employeeData, setEmployeeData] = useState([]);
   const [projectData, setProjectData] = useState([]);
+  const [externalUserData, setExternalData] = useState([]);
 
   // const [employeeModal, setEmployeeModal] = useState(false);
   // const toggleEmployeeModal = () => setEmployeeModal(!employeeModal);
@@ -68,26 +71,40 @@ const AdminUser = (props) => {
       });
       const custObject = response.data.message.filter(
         (customer) =>
-          customer.customer_id === preferredCustomer.data.message.preferred_customer_id
+          customer.customer_id ===
+          preferredCustomer.data.message.preferred_customer_id
       );
       setSelectedCustomer({
         id: custObject[0].customer_id || response.data.message[0].customer_id,
-        label: custObject[0].customer_name || response.data.message[0].customer_name,
+        label:
+          custObject[0].customer_name || response.data.message[0].customer_name,
       });
 
       const employeeResponse = await axiosInstance({
         method: "get",
-        url: `/admin/employees/${custObject[0].customer_id || response.data.message[0].customer_id
-          }`,
+        url: `/admin/employees/${
+          custObject[0].customer_id || response.data.message[0].customer_id
+        }`,
       });
       setEmployeeData(employeeResponse.data.message);
 
       const projectResponse = await axiosInstance({
         method: "get",
-        url: `/admin/projects/${custObject[0].customer_id || response.data.message[0].customer_id
-          }`,
+        url: `/admin/projects/${
+          custObject[0].customer_id || response.data.message[0].customer_id
+        }`,
       });
       setProjectData(projectResponse.data.message);
+
+      const externalResponse = await axiosInstance({
+        method: "get",
+        url: `/admin/external_users`,
+        params: {
+          customer_id:
+            custObject[0].customer_id || response.data.message[0].customer_id,
+        },
+      });
+      setExternalData(externalResponse.data.data);
 
       localStorage.setItem("account_id", response.data.account_id);
       setLoading(false);
@@ -96,15 +113,7 @@ const AdminUser = (props) => {
 
     fetchData().catch((error) => {
       setLoading(false);
-      toast.error("Something went wrong!", {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
   }, [pageRefresh]);
 
@@ -131,21 +140,13 @@ const AdminUser = (props) => {
         method: "put",
         url: `/admin/${localStorage.getItem("userId")}/preferred_customer`,
         data: {
-          preferred_customer_id: selectedCustomer[0].id
-        }
+          preferred_customer_id: selectedCustomer[0].id,
+        },
       });
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      toast.error("Something went wrong!", {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 
@@ -158,45 +159,45 @@ const AdminUser = (props) => {
       setPageRefresh(!pageRefresh);
     } catch (error) {
       setLoading(false);
-      toast.error("Something went wrong!", {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 
   const handleUpdateList = async () => {
     try {
+      console.log('hero', externalUserData, {
+        user_id: externalUserData[0]?.id,
+        projects: selectedEmployeeList,
+      })
+      const url =
+        activeTab === "external"
+          ? `/admin/add_extuser_to_projects`
+          : `/${activeTab}/${
+              activeTab === "employees" ? modalData?.id : modalData?.project_id
+            }/${activeTab === "employees" ? "projects" : "employees"}`;
+      const data =
+        activeTab === "external"
+          ? {
+              user_id: externalUserData[0]?.id,
+              projects: selectedEmployeeList,
+            }
+          : {
+              [activeTab === "employees" ? "projects" : "employees"]:
+                selectedEmployeeList,
+            };
       setLoading(true);
       await axiosInstance({
-        method: "put",
-        url: `/${activeTab}/${activeTab === "employees" ? modalData?.id : modalData?.project_id}/${activeTab === "employees" ? "projects" : "employees"
-          }`,
-        data: {
-          [activeTab === "employees" ? "projects" : "employees"]:
-            selectedEmployeeList,
-        },
+        method: activeTab === "external" ? "post" : "put",
+        url,
+        data,
       });
       setLoading(false);
-      setPageRefresh(!pageRefresh)
+      setPageRefresh(!pageRefresh);
       setUpdateListModal(!updateListModal);
-    } catch (e) {
+    } catch (error) {
       setLoading(false);
       setUpdateListModal(!updateListModal);
-      toast.error("Something went wrong!", {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 
@@ -224,15 +225,7 @@ const AdminUser = (props) => {
       setPageRefresh(!pageRefresh);
     } catch (error) {
       setLoading(false);
-      toast.error("Something went wrong!", {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 
@@ -241,23 +234,23 @@ const AdminUser = (props) => {
     if (!errors) {
       try {
         const response = await axiosInstance({
-          method: 'put',
-          url: '/updateProject',
+          method: "put",
+          url: "/updateProject",
           data: {
             project_name: project.project_name,
             lead_contact: project.lead_contact,
             start_date: project?.start_date
               ? moment(
-                new Date((project?.start_date).replaceAll('-', '/'))
-              ).format('YYYY-MM-DD')
-              : '',
+                  new Date((project?.start_date).replaceAll("-", "/"))
+                ).format("YYYY-MM-DD")
+              : "",
             end_date: project?.end_date
               ? moment(
-                new Date((project?.end_date).replaceAll('-', '/'))
-              ).format('YYYY-MM-DD')
-              : '',
+                  new Date((project?.end_date).replaceAll("-", "/"))
+                ).format("YYYY-MM-DD")
+              : "",
             customer_id: project?.customer_id,
-            status: project.status === 'Archived' ? 'Active' : 'Archived',
+            status: project.status === "Archived" ? "Active" : "Archived",
             project_id: project.project_id,
           },
         });
@@ -265,18 +258,10 @@ const AdminUser = (props) => {
           console.log(response.data);
           setPageRefresh(!pageRefresh);
         }
-        toggleArchive(!isArchived)
+        toggleArchive(!isArchived);
       } catch (error) {
         console.log(error.message);
-        toast.error('Something went wrong!', {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
       }
     }
   };
@@ -289,7 +274,7 @@ const AdminUser = (props) => {
           <Header
             title={"Admin Portal"}
             toggleModal={toggleModal}
-          // showBtn={'Create New Customer'}
+            // showBtn={'Create New Customer'}
           />
 
           <div className="company-search-wrapper">
@@ -300,7 +285,7 @@ const AdminUser = (props) => {
                     <SelectDropdown
                       label={"Select Company"}
                       setSelected={setSelectedCustomer}
-                      defaultSelected={'Test'}
+                      defaultSelected={"Test"}
                       value={selectedCustomer.label}
                       selected={selectedCustomer.label}
                       options={customerData.map((customer) => {
@@ -334,7 +319,7 @@ const AdminUser = (props) => {
                     toggle("employees");
                   }}
                 >
-                  Employees({employeeData.length})
+                  Employees({employeeData?.length})
                 </NavLink>
               </NavItem>
               <NavItem>
@@ -344,7 +329,17 @@ const AdminUser = (props) => {
                     toggle("projects");
                   }}
                 >
-                  Projects({projectData.length})
+                  Projects({projectData?.length})
+                </NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink
+                  className={classnames({ active: activeTab === "external" })}
+                  onClick={() => {
+                    toggle("external");
+                  }}
+                >
+                  External Users({externalUserData?.length})
                 </NavLink>
               </NavItem>
             </Nav>
@@ -419,9 +414,11 @@ const AdminUser = (props) => {
                                       toggleUpdateList();
                                       setModalData(employee);
                                       setSelectedEmployeeList(
-                                        employee.projects.length ? employee.projects?.map((project) =>
-                                          Number(project.id)
-                                        ) : []
+                                        employee.projects.length
+                                          ? employee.projects?.map((project) =>
+                                              Number(project.id)
+                                            )
+                                          : []
                                       );
                                     }}
                                   >
@@ -508,7 +505,9 @@ const AdminUser = (props) => {
                               <td>
                                 <a
                                   href={() => false}
-                                  onClick={() => { toggleProjectModal(project) }}
+                                  onClick={() => {
+                                    toggleProjectModal(project);
+                                  }}
                                 >
                                   {project.project_name}
                                 </a>
@@ -539,9 +538,11 @@ const AdminUser = (props) => {
                                       toggleUpdateList();
                                       setModalData(project);
                                       setSelectedEmployeeList(
-                                        project.employees.length ? project.employees?.map((emp) =>
-                                          Number(emp.id)
-                                        ) : []
+                                        project.employees.length
+                                          ? project.employees?.map((emp) =>
+                                              Number(emp.id)
+                                            )
+                                          : []
                                       );
                                     }}
                                   >
@@ -550,10 +551,17 @@ const AdminUser = (props) => {
                                   <button
                                     type="button"
                                     className="btn btn-secondary btn-sm"
-                                    onClick={() => handleArchiveProject(project)}
-                                    disabled={isArchived && localStorage.getItem('roleId') !== '0'}
+                                    onClick={() =>
+                                      handleArchiveProject(project)
+                                    }
+                                    disabled={
+                                      isArchived &&
+                                      localStorage.getItem("roleId") !== "0"
+                                    }
                                   >
-                                    {project.status === 'Archived' ? 'Unarchive' : 'Archive'}
+                                    {project.status === "Archived"
+                                      ? "Unarchive"
+                                      : "Archive"}
                                   </button>
                                 </div>
                               </td>
@@ -570,6 +578,19 @@ const AdminUser = (props) => {
                     />
                   </div> */}
                 </div>
+              </TabPane>
+              <TabPane tabId={"external"} style={{ display: "grid" }}>
+                {activeTab === "external" && (
+                  <ExternalUsers
+                    customer={selectedCustomer}
+                    externalUserData={externalUserData}
+                    pageRefresh={pageRefresh}
+                    setPageRefresh={setPageRefresh}
+                    toggleUpdateList={toggleUpdateList}
+                    setModalData={setModalData}
+                    setSelectedEmployeeList={selectedEmployeeList}
+                  />
+                )}
               </TabPane>
             </TabContent>
           </div>
@@ -602,7 +623,9 @@ const AdminUser = (props) => {
       <EditProject
         modal={projectModal}
         toggleModal={toggleProjectModal}
-        customer={customerData.filter(cust => cust?.customer_id === modalData?.customer_id)}
+        customer={customerData.filter(
+          (cust) => cust?.customer_id === modalData?.customer_id
+        )}
         // project={modalData}
         project={modalData}
         pageRefresh={pageRefresh}

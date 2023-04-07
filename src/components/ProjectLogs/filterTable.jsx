@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Modal, ModalHeader, ModalFooter, ModalBody } from 'reactstrap';
 import axiosInstance from '../../config/axios';
-import { toast } from 'react-toastify';
+import handleError from '../../config/errorHandler';
 
 
 export const FilterTable = (props) => {
@@ -39,7 +39,7 @@ export const FilterTable = (props) => {
                 data: {
                     project_id: props.projectId,
                     search: "",
-                    filters: a,
+                    filters: {...a, type: ["Submittal"]},
                     // filters:{},
                     order_col: props.orderColumn,
                     order: props.order,
@@ -53,15 +53,7 @@ export const FilterTable = (props) => {
 
         } catch (error) {
             console.log(error.message);
-            toast.error('Something went wrong!', {
-                position: 'bottom-center',
-                autoClose: 5000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
+            handleError(error)
         }
     }
     return (

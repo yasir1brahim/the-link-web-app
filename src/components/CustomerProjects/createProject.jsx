@@ -10,6 +10,7 @@ import DateSelector from '../shared/DateSelector/DateSelector';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import moment from 'moment';
+import { AddNewEmp } from './addNewEmp';
 
 const CreateProject = ({
   modal,
@@ -17,7 +18,8 @@ const CreateProject = ({
   customer,
   pageRefresh,
   setPageRefresh,
-  projects
+  projects,
+  isPersonalProject = false
 }) => {
   // const [email, setEmail] = useState({ value: '', errors: '' });
   // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
@@ -35,6 +37,9 @@ const CreateProject = ({
   const [employeeList, setEmployeeList] = useState([]);
   const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
   const [profilePicture, setProfilePicture] = useState('');
+  const [refetchEmp, setRefetchEmp] = useState(false);
+  const [empForm, openEmpForm] = useState(false);
+  const [visibilityType, setVisibilityType] = useState('Contract')
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });\
   console.log('customer', projects)
 
@@ -69,7 +74,7 @@ const CreateProject = ({
 
       fetchData().catch(console.error);
     }
-  }, [customer, modal]);
+  }, [customer, modal, refetchEmp]);
 
   const validate = () => {
     let error = false;
@@ -111,7 +116,8 @@ const CreateProject = ({
             employee_list: selectedEmployeeList.map(
               (employee) => employee.value
             ),
-            project_type: projectType
+            project_type: projectType,
+            visibility_type: visibilityType
           },
         });
         if (response.data) {
@@ -197,6 +203,27 @@ const CreateProject = ({
                         <div className="text-label">
                           {customer?.contact_number}
                         </div>
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="custom-control custom-checkbox">
+                        <input
+                          type="checkbox"
+                          name="ticketHeading"
+                          id="ticketHeading"
+                          onClick={()=> 
+                            {
+                              if(visibilityType === "Personal")
+                              { setVisibilityType("Contract") } else {
+                                setVisibilityType("Personal")
+                              }
+                            }}
+                          checked={visibilityType === "Personal"}
+                        />
+                        <label
+                          style={{color: 'green', marginLeft: '5px'}}
+                          for="ticketHeading"
+                        >Personal Project</label>
                       </div>
                     </div>
                   </div>
@@ -325,6 +352,18 @@ const CreateProject = ({
                       </div>
                     </div>
                   </div>
+                  {!empForm && <div className="col-4" style={{marginBottom: '10px'}}>
+                    <button className="btn btn-primary" type="button" onClick={() => openEmpForm(true)}>
+                      Add New Employee
+                    </button>
+                  </div>}
+                  {empForm && <>
+                    <AddNewEmp
+                     customer={customer}
+                     openEmpForm={openEmpForm}
+                     setRefetchEmp={setRefetchEmp}
+                    />
+                  </>}
                 </div>
               </div>
               <div className="lproject-footer">

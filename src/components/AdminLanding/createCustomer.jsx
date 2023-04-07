@@ -3,9 +3,10 @@ import ProfilePhoto from '../../assets/images/dummy-profile.svg';
 import { ReactComponent as Camera } from '../../assets/images/camera.svg';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
+import handleError from '../../config/errorHandler';
 
 const CreateCustomer = ({
   modal,
@@ -111,15 +112,7 @@ const CreateCustomer = ({
         toggleModal();
       } catch (error) {
         console.log(error.message);
-        toast.error('Something went wrong!', {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
         toggleModal();
       }
     }

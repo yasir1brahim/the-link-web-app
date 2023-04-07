@@ -4,9 +4,10 @@ import { ReactComponent as Mail } from '../../assets/images/mail.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import axiosInstance from '../../config/axios';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-white.svg';
+import handleError from '../../config/errorHandler';
 const Signin = (props) => {
   const [showPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState({ value: '', errors: '' });
@@ -48,20 +49,12 @@ const Signin = (props) => {
           console.log(response.data);
           return response.data.role_id === 0
             ? history({ pathname: '/admin-landing' })
-            : response.data.role_id === 2 || response.data.role_id === 6
+            : response.data.role_id === 2 || response.data.role_id === 6 || response.data.role_id === 7
             ? history({ pathname: '/project-list' })
             : history({ pathname: '/' });
         }
       } catch (error) {
-        toast.error(error?.response?.data?.message || error?.message, {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+       handleError(error)
       }
     }
   };

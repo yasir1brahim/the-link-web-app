@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 // import ProfilePhoto from '../../assets/images/dummy-profile.svg';
 // import { ReactComponent as Camera } from '../../assets/images/camera.svg';
 import axiosInstance from "../../config/axios";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import DateSelector from "../shared/DateSelector/DateSelector";
 // import { Typeahead } from 'react-bootstrap-typeahead';
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import moment from "moment";
+import handleError from "../../config/errorHandler";
 
 const EditProject = ({
   modal,
@@ -112,16 +113,7 @@ const EditProject = ({
           toggleModal();
         }
       } catch (error) {
-        console.log(error.message);
-        toast.error("Something went wrong!", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error)
         toggleModal();
       }
     }

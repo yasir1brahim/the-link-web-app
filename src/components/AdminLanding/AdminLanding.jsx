@@ -8,6 +8,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../shared/Loader/Loader';
+import handleError from '../../config/errorHandler';
 
 const Adminlanding = (props) => {
   const [modal, setModal] = useState(false);
@@ -32,26 +33,19 @@ const Adminlanding = (props) => {
         isArchived ? response.data.archived_customers : response.data.message
       );
       localStorage.setItem('account_id', response.data.account_id);
+      localStorage.setItem('selectedRows', ''); //Clearing selected rows on navigating to home page
       setLoading(false);
       console.log(response.data.message);
     };
 
     fetchData().catch((error) => {
       setLoading(false);
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     });
   }, [isArchived, pageRefresh]);
 
   const handleViewCustomer = (customer) => {
-    navigate('/customer-profile', { state: customer });
+    navigate(`/customer-profile?id=${customer?.customer_id}`, { state: customer });
   };
   const handleArchiveCustomer = async (customer) => {
     try {
@@ -83,15 +77,7 @@ const Adminlanding = (props) => {
       });
     } catch (error) {
       console.log(error.message);
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error)
     }
   };
 

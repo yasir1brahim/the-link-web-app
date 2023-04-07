@@ -7,6 +7,7 @@ import { ReactComponent as ReactLogo } from '../../assets/images/logo-white.svg'
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../config/axios';
+import handleError from '../../config/errorHandler';
 
 const Resetpwd = () => {
   const [showNPwd, setShowNPwd] = useState(false);
@@ -61,16 +62,8 @@ const validate = () => {
         progress: undefined,
       });
       window.location = '/';
-    }catch(e) {
-      toast.error('Something went wrong.', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+    }catch (error) {
+      handleError(error)
     }
   }
   }

@@ -75,8 +75,8 @@ class ViewSDKClient {
                 .catch(error => console.log(error));
             });
           });
-        } catch (e) {
-          console.log(e)
+        } catch (error) {
+          console.log(error)
         }
 
 

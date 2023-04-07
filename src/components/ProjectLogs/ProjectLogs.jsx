@@ -1,27 +1,42 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import Header from '../shared/Header/Header';
-import NavbarTop from '../shared/NavbarTop/NavbarTop';
+import React, { useState, useEffect, useCallback } from "react";
+import Header from "../shared/Header/Header";
+import NavbarTop from "../shared/NavbarTop/NavbarTop";
+import {
+  Dropdown,
+  DropdownMenu,
+  DropdownToggle,
+  DropdownItem,
+} from "reactstrap";
 // import PaginatedItems from '../shared/Pagination/Pagination';
-import { ReactComponent as Trash } from '../../assets/images/trash.svg';
-import { useLocation } from 'react-router-dom';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import axiosInstance from '../../config/axios';
+import { ReactComponent as Trash } from "../../assets/images/trash.svg";
+import { useLocation } from "react-router-dom";
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axiosInstance from "../../config/axios";
 // import SubmittalTable from './submittalTable';
 // import TestingTable from './testingTable';
 // import CloseOutTable from './closeOutTable';
 // import MeetingTable from './meetingTable';
 // import { CSVLink } from 'react-csv';
-import CombinedLogs from './combinedLogs';
-import { debounce } from 'lodash';
-import Loader from '../shared/Loader/Loader';
+import CombinedLogs from "./combinedLogs";
+import { debounce, get } from "lodash";
+import Loader from "../shared/Loader/Loader";
 // import * as XLSX from 'xlsx';
-import PdfWrapper from '../../pdfWrapper';
-import FileDownload from 'js-file-download';
-import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
+import PdfWrapper from "../../pdfWrapper";
+import FileDownload from "js-file-download";
+import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
+import { useSearchParams } from "react-router-dom";
+import Procore from "./procore";
+// import { useNavigate } from "react-router-dom";
+import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
+// import { useNavigate } from "react-router-dom";
+import handleError from "../../config/errorHandler";
 
 const ProjectLogs = () => {
+  // const navigate = useNavigate();
+  // const [navigateToSubmittal, setNavigateToSubmittal] = useState(false);
+  // const navigate = useNavigate();
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -32,8 +47,8 @@ const ProjectLogs = () => {
 
   const [saveListName, setToggleSaveListNameModal] = useState(false);
   const toggleSaveListName = () => setToggleSaveListNameModal(!saveListName);
-  const [listName, setListName] = useState({ value: '', errors: '' });
-  const [viewList, setList] = useState([])
+  const [listName, setListName] = useState({ value: "", errors: "" });
+  const [viewList, setList] = useState([]);
   const [viewSavedList, setToggleViewSavedList] = useState(false);
   const toggleViewSavedList = () => setToggleViewSavedList(!viewSavedList);
   const { state } = useLocation();
@@ -41,17 +56,67 @@ const ProjectLogs = () => {
   const [filteredLogData, setFilteredLogData] = useState([]);
   const [selected, setSelected] = useState([]);
   const [pageRefresh, setPageRefresh] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
   // const [currentItems, setCurrentItems] = useState([]);
   // const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setLoading] = useState(false);
   const [groupingData, setGroupingData] = useState([]);
   const [selectedLogData, setSelectedLogData] = useState([]);
   const [listId, setListId] = useState(null);
-  const [pdfData, setPdfData] = useState({ url: '', textLoc: {}, index: '', docId: null })
-  const [newRowIndex, setNewRowIndex] = useState(null)
-  const projectType = state?.project?.project_type
-  console.log('selected', selected)
+  const [pdfData, setPdfData] = useState({
+    url: "",
+    textLoc: {},
+    index: "",
+    docId: null,
+  });
+  const [newRowIndex, setNewRowIndex] = useState(null);
+  const projectType = state?.project.project_type;
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  //Procore states
+  const [procoreModal, setProcoreModal] = useState(false);
+  const toggleProcoreModal = () => setProcoreModal(!procoreModal);
+  const [companyList, setCompanyList] = useState([]);
+  const [companyId, setCompanyId] = useState();
+  const [docParsed, setDocParsed] = useState(0);
+  const toggle = () => setDropdownOpen((prevState) => !prevState);
+
+  const [searchParams] = useSearchParams();
+  const projectDetails = searchParams.get("projectDetails")?.split(",");
+  const projectId = projectDetails?.length ? JSON.parse(projectDetails[0]) : null;
+  const customerId = projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
+  const projectName = searchParams.get("projectName");
+  const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
+  const authCode = searchParams.get("code");
+  // const [procoreProjectMappingsAPICalled, setProcoreProjectMappingsAPICalled] =
+  //   useState(false);
+  // const [projectMappingNoContent, setProjectMappingsNoContent] =
+  //   useState(false);
+
+    useEffect(() => {
+      if (!modal) {
+        setPdfFile({});
+      }
+    }, [modal]);
+
+    // get the number of documents uploaded
+    useEffect(() => {
+      const fetchData = async () => {
+        setLoading(true);
+        const response = await axiosInstance({
+          method: 'get',
+          url: `/project_data/${state.project?.project_id}`,
+        });
+        setDocParsed(response.data.doc_parsed);
+        setLoading(false);
+        console.log(response.data.message);
+      };
+  
+      fetchData().catch((error) => {
+        setLoading(false);
+        handleError(error)
+      });
+    }, [state?.project, pageRefresh]);
 
   useEffect(() => {
     if (!modal) {
@@ -65,20 +130,20 @@ const ProjectLogs = () => {
   };
 
   const handleSubmit = async () => {
-    console.log(pdfFile);
+    // console.log(pdfFile);
     try {
       setUploadLoading(true);
       const data = new FormData();
-      data.append('project_id', state.project?.project_id);
-      projectType === 'ufgs' && data.append('project_type', projectType);
-      Object.values(pdfFile)?.forEach((file) => data.append('files', file));
+      data.append("project_id", state.project?.project_id);
+      projectType === "ufgs" && data.append("project_type", projectType);
+      Object.values(pdfFile)?.forEach((file) => data.append("files", file));
       const response = await axiosInstance({
-        method: 'post',
-        url: '/upload_file',
+        method: "post",
+        url: "/upload_file",
         data,
       });
       if (response.data) {
-        console.log(response.data);
+        // console.log(response.data);
         setUploadLoading(false);
         setFileData(response.data.message);
         setModal(false);
@@ -89,27 +154,22 @@ const ProjectLogs = () => {
       setUploadLoading(false);
       toggleErrorModal(true);
       setModal(false);
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error);
     }
   };
 
   const handleSearchChange = useCallback(
-    (value) => debounce(
-      setSearchValue(value),
-      newRowIndex && setLogData([
-        ...logData.slice(0, newRowIndex),
-        ...logData.slice(newRowIndex + 1)
-      ]),
-      setNewRowIndex(null)
-      , 200),
+    (value) =>
+      debounce(
+        setSearchValue(value),
+        newRowIndex &&
+          setLogData([
+            ...logData.slice(0, newRowIndex),
+            ...logData.slice(newRowIndex + 1),
+          ]),
+        setNewRowIndex(null),
+        200
+      ),
     [setSearchValue, logData, newRowIndex]
   );
 
@@ -121,6 +181,200 @@ const ProjectLogs = () => {
       setSelected([...selected, id]);
     }
   };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // const handleGetProjectMappings = useCallback(async () => {
+  //   await axiosInstance({
+  //     method: "get",
+  //     url: `/procore/project_mapping/${projectId}`,
+  //   }).then((res) => {
+  //     if (get(res, "data.data")) {
+  //       setCompanyId(get(res, "data.data.procore_company_id"));
+  //       localStorage.setItem(
+  //         "companyId",
+  //         get(res, "data.data.procore_company_id")
+  //       );
+  //       localStorage.setItem("projectId", projectId);
+  //       localStorage.setItem("logType", logType);
+  //       localStorage.setItem("customerId", customerId);
+  //     }
+  //     if (get(res, "status") === 204) {
+  //       setProjectMappingsNoContent(true);
+  //     }
+  //     setProcoreProjectMappingsAPICalled(true);
+  //   });
+  // });
+  const selectedRows =
+  localStorage?.getItem("selectedRows") === ""
+    ? "All"
+    : localStorage
+        ?.getItem("selectedRows")
+        ?.split(",")
+        ?.map((row) => JSON.parse(row));
+
+  // onClick export Procore, we redirect to the same page and POST access token // gets called first
+  useEffect(() => {
+    const handleExportToProcore = async () => {
+      try {
+        
+          // setStatus(get(statusResp, 'data.data'));
+          const resp = await axiosInstance({
+              method: 'post',
+              url: '/procore/create_submittals',
+              data: {
+                  project_id: Number(projectId),
+                  records: selectedRows, // array of ids
+                  // status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
+              }
+          });
+          if (resp.status === 200) {
+              // setProjectMappingsNoContent(false)
+              toast.success('Successfully exported to Procore!', {
+                  position: 'bottom-center',
+                  autoClose: 5000,
+                  hideProgressBar: true,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined
+              });
+              localStorage.setItem('selectedRows', '');
+          }
+          // setLoading(false);
+      } catch (error) {
+          console.log('error', error);
+          localStorage.setItem('selectedRows', '');
+          handleError(error);
+      }
+  };
+    if (authCode) {
+      const fetchData = async () => {
+        const accessTokenData = await axiosInstance({
+          method: "post",
+          url: "/procore/access_token",
+          data: {
+            code: authCode,
+            redirect_uri: `http://d3fy104eoanlsd.cloudfront.net/project-logs?projectDetails=${projectId},${customerId},${logType}`,
+          },
+        });
+        localStorage.setItem(
+          "procore_access_token",
+          accessTokenData?.data.data.access_token
+        );
+        // handleGetProjectMappings();
+        const res = await axiosInstance({
+          method: "get",
+          url: `/procore/project_mapping/${projectId}`,
+        })
+        if (get(res, "data.data")) {
+          setCompanyId(get(res, "data.data.procore_company_id"));
+          localStorage.setItem(
+            "companyId",
+            get(res, "data.data.procore_company_id")
+          );
+          localStorage.setItem("projectId", projectId);
+          localStorage.setItem("logType", logType);
+          localStorage.setItem("customerId", customerId);
+          searchParams.set("code", "");
+        // setNavigateToSubmittal(!navigateToSubmittal);
+          handleExportToProcore();
+        }
+        if (get(res, "status") === 204) {
+          setProcoreModal(true);
+          const companyResp = await axiosInstance({
+            method: "get",
+            url: "/procore/companies",
+          });
+          setCompanyList(companyResp?.data.data);
+        }
+        // setProcoreProjectMappingsAPICalled(true);
+      };
+
+      fetchData().catch((error) => {
+        handleError(error);
+      });
+    }
+  }, [authCode, customerId, logType, projectId, selectedRows, searchParams]);
+
+  
+  console.log("selecteedRows", selectedRows);
+
+  // useEffect(() => {
+  //    // handler for export to procore
+  //    const handleExportToProcore = async () => {
+  //     try {
+        
+  //         // setStatus(get(statusResp, 'data.data'));
+  //         const resp = await axiosInstance({
+  //             method: 'post',
+  //             url: '/procore/create_submittals',
+  //             data: {
+  //                 project_id: Number(projectId),
+  //                 records: selectedRows, // array of ids
+  //                 // status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
+  //             }
+  //         });
+  //         if (resp.status === 200) {
+  //             setProjectMappingsNoContent(false)
+  //             toast.success('Successfully exported to Procore!', {
+  //                 position: 'bottom-center',
+  //                 autoClose: 5000,
+  //                 hideProgressBar: true,
+  //                 closeOnClick: true,
+  //                 pauseOnHover: true,
+  //                 draggable: true,
+  //                 progress: undefined
+  //             });
+  //             localStorage.setItem('selectedRows', '');
+  //         }
+  //         // setLoading(false);
+  //     } catch (error) {
+  //         console.log('error', error);
+  //         localStorage.setItem('selectedRows', '');
+  //         handleError(error);
+  //     }
+  // };
+  
+  //   if (authCode) {
+  //     if (procoreProjectMappingsAPICalled && projectMappingNoContent) {
+  //       const fetchData = async () => {
+  //         setProcoreModal(true);
+  //         const companyResp = await axiosInstance({
+  //           method: "get",
+  //           url: "/procore/companies",
+  //         });
+  //         setCompanyList(companyResp?.data.data);
+  //       };
+  //       fetchData().catch((error) => {
+  //         handleError(error);
+  //       });
+  //     } else if (procoreProjectMappingsAPICalled && !projectMappingNoContent) {
+  //       searchParams.set("code", "");
+  //       // setNavigateToSubmittal(!navigateToSubmittal);
+  //       handleExportToProcore();
+  //     }
+  //   }
+  // }, [
+  //   projectMappingNoContent,
+  //   searchParams,
+  //   authCode,
+  //   procoreProjectMappingsAPICalled,
+  //   projectId,
+  //   navigate,
+  //   customerId,
+  //   logType,
+  //   selectedRows,
+  //   companyId,
+  // ]);
+
+  // v-4 changes, not navigating to submittal
+
+  // useEffect(() => {
+  //   if (navigateToSubmittal) {
+  //     navigate(`/submital-mappings?customerId=${customerId}`);
+  //   }
+  // }, [navigateToSubmittal, navigate, customerId]);
+
   // const headers = [
   //   { label: 'Spec Sec', key: 'spec_section' },
   //   { label: 'Paragraph', key: 'para_no' },
@@ -137,18 +391,18 @@ const ProjectLogs = () => {
     if (selected.length !== 0) {
       try {
         await axiosInstance({
-          method: 'delete',
-          url: '/delete_logs',
+          method: "delete",
+          url: "/delete_logs",
           data: {
-            project_id: state?.project.project_id,
+            project_id: state?.projectId || projectId,
             records: selected,
-            type: 'Submittal',
+            type: "Submittal",
           },
         });
         setPageRefresh(!pageRefresh);
         setSelected([]);
-        toast.success('Successfully Deleted Logs!', {
-          position: 'bottom-center',
+        toast.success("Successfully Deleted Logs!", {
+          position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
@@ -157,10 +411,10 @@ const ProjectLogs = () => {
           progress: undefined,
         });
       } catch (error) {
-        console.log(error.message);
+        // console.log(error.message);
         setSelected([]);
         toast.error(error.response.data.message, {
-          position: 'bottom-center',
+          position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
@@ -175,36 +429,28 @@ const ProjectLogs = () => {
     const fetchData = async () => {
       setLoading(true);
       const response = await axiosInstance({
-        method: 'post',
-        url: '/filter_logs',
+        method: "post",
+        url: "/filter_logs",
         data: {
-          project_id: state?.project.project_id,
+          project_id: state?.projectId || projectId,
           search: "",
-          filters: {},
+          filters: { type: ["Submittal"] },
           order_col: "",
           order: "",
-        }
+        },
       });
 
       setLogData(response.data.message);
 
       setLoading(false);
-      console.log(response.data.message);
     };
 
     fetchData().catch((error) => {
       setLoading(false);
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error);
     });
-  }, [state, pageRefresh]);
+  }, [state, pageRefresh, projectId]);
+
   // useEffect(()=>{
   //   Afer edit of a column in the selected view below code updates the value of the field
   //   if(selectedLogData.length) {
@@ -216,8 +462,8 @@ const ProjectLogs = () => {
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
-        method: 'get',
-        url: `/getPackages/${state.customerId}`,
+        method: "get",
+        url: `/getPackages/${state?.customerId || customerId}`,
       });
       setGroupingData(
         response.data.message.map((packageData) => {
@@ -228,24 +474,16 @@ const ProjectLogs = () => {
         })
       );
 
-      console.log(response.data.message);
+      // console.log(response.data.message);
     };
 
     fetchData().catch((error) => {
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error);
     });
-  }, [state, pageRefresh]);
+  }, [state, pageRefresh, customerId]);
 
   useEffect(() => {
-    let filterData = selectedLogData.length ? selectedLogData : logData
+    let filterData = selectedLogData.length ? selectedLogData : logData;
     let filteredLog = filterData
       .map((log) => {
         return Object.values(log)
@@ -255,8 +493,8 @@ const ProjectLogs = () => {
           : null;
       })
       .filter((value) => value);
-    setFilteredLogData(filteredLog)
-  }, [selectedLogData, logData, searchValue, setFilteredLogData])
+    setFilteredLogData(filteredLog);
+  }, [selectedLogData, logData, searchValue, setFilteredLogData]);
   // let filteredLogData = selectedLogData.length ? selectedLogData : logData
 
   const handleSelectAll = () => {
@@ -269,6 +507,21 @@ const ProjectLogs = () => {
       setSelected(selectedLogs);
     }
   };
+
+  // useEffect(() => {
+  //   const retriveSelected = localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
+  //   if (retriveSelected) setSelected(retriveSelected);
+  // }, []);
+
+  // add the selected rows in session storage to be used by export procore
+  useEffect(() => {
+    // do not update the values if navigated from procore page
+    if (document.referrer && selected?.length) {
+      const rowsSelected = selected.toString();
+      sessionStorage.setItem("selectedRows", `${rowsSelected}`);
+    }
+  }, [selected]);
+
   // const downloadExcel = (logs, fileName) => {
   //   //Boilerplate format of making an xlsx file from xlsx library
   //   //Below header array is specified to maintain the column order in xlsx file same as our table
@@ -280,32 +533,31 @@ const ProjectLogs = () => {
   const handleExportExcel = async (recordData, fileName) => {
     try {
       const response = await axiosInstance({
-        method: 'post',
-        url: '/exportLogs',
-        responseType: 'arraybuffer',
+        method: "post",
+        url: "/exportLogs",
+        responseType: "arraybuffer",
         data: {
-          project_id: state?.project.project_id,
-          records: recordData
+          project_id: state?.projectId || projectId,
+          records: recordData,
         },
       });
-      let blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      FileDownload(blob, `${state?.project.project_name}_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`)
-    } catch (e) {
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
+      let blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
+      FileDownload(
+        blob,
+        `${
+          state?.project.project_name
+        }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`
+      );
+    } catch (error) {
+      handleError(error);
     }
-  }
+  };
   const validate = () => {
     let error = false;
-    if (listName.value === '') {
-      setListName({ ...listName, errors: 'List Name is required.' });
+    if (listName.value === "") {
+      setListName({ ...listName, errors: "List Name is required." });
       error = true;
     }
     return error;
@@ -316,48 +568,56 @@ const ProjectLogs = () => {
     if (!errors) {
       try {
         await axiosInstance({
-          method: 'post',
-          url: '/save_list',
+          method: "post",
+          url: "/save_list",
           data: {
-            project_id: state?.project.project_id,
+            project_id: state?.projectId || projectId,
             records: selected,
-            view_name: listName.value
+            view_name: listName.value,
           },
         });
-        setToggleSaveListNameModal(false)
+        setToggleSaveListNameModal(false);
       } catch (error) {
-        toast.error('Something went wrong!', {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        handleError(error);
       }
     }
-  }
+  };
   const getList = async () => {
     try {
       const response = await axiosInstance({
-        method: 'get',
-        url: `/get_list/${state?.project.project_id}`,
+        method: "get",
+        url: `/get_list/${state?.projectId || projectId}`,
       });
-      setList(response.data.message)
-      setToggleViewSavedList(true)
+      setList(response.data.message);
+      setToggleViewSavedList(true);
     } catch (error) {
-      toast.error('Something went wrong!', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      handleError(error);
     }
-  }
+  };
+
+  // const handleProcoreExport = async () => {
+  //   try {
+  //     await axios({
+  //       method: 'get',
+  //       url: `https://login-sandbox.procore.com/oauth/authorize`,
+  //       params: {
+  //         response_type: 'code',
+  //         client_id: 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9',
+  //         redirect_uri: `http://localhost:3000/project-logs?projectId=${projectId}&customerId=${customerId}&logType=${logType}`
+  //       }
+  //     }).then(res => {window.open(res.request?.responseURL,"_self")});
+  //   } catch (error) {
+  //     toast.error(error?.response?.data?.message || error?.message, {
+  //       position: 'bottom-center',
+  //       autoClose: 5000,
+  //       hideProgressBar: true,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //     });
+  //   }
+  // }
   return (
     <div className="page-wrap">
       <NavbarTop />
@@ -393,9 +653,32 @@ const ProjectLogs = () => {
                       of <span className="showing-strong"> 90 </span>.
                     </label> */}
                   </div>
-                  {selectedLogData.length ? <button type="button" className='btn btn-primary mr-3 btn-small' onClick={() => setSelectedLogData([])}>Clear Selection</button> : null}
-                  {!selectedLogData.length ? <button type="button" className='btn btn-primary mr-3 btn-small' onClick={toggleSaveListName}>Save Selection</button> : null}
-                  <button type="button" className='btn btn-secondary btn-small' onClick={getList}> View Saved Lists </button>
+                  {selectedLogData.length ? (
+                    <button
+                      type="button"
+                      className="btn btn-primary mr-3 btn-small"
+                      onClick={() => setSelectedLogData([])}
+                    >
+                      Clear Selection
+                    </button>
+                  ) : null}
+                  {!selectedLogData.length ? (
+                    <button
+                      type="button"
+                      className="btn btn-primary mr-3 btn-small"
+                      onClick={toggleSaveListName}
+                    >
+                      Save Selection
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-small"
+                    onClick={getList}
+                  >
+                    {" "}
+                    View Saved Lists{" "}
+                  </button>
                   <div className="table-bulk-changes">
                     {/* {pdfData.url && <button type="button" className='btn btn-secondary' onClick={()=>setPdfData({url: '', textLoc: {}})}> Close Pdf </button>} */}
                     <div className="log-search">
@@ -407,29 +690,37 @@ const ProjectLogs = () => {
                         onChange={(e) => handleSearchChange(e.target.value)}
                       />
                     </div>
-                    <button type="button" className="btn btn-secondary btn-sm" style={{ textTransform: 'none' }} onClick={() => handleExportExcel("All")}>
-                      Export .xls
-                      {/* <CSVLink
-                      filename={`All-Logs.csv`}
-                      data={logData}
-                      target="_blank"
-                      className="btn btn-secondary btn-sm"
-                      headers={headers}
-                    >
-                      Export CSV
-                    </CSVLink> */}
-                    </button>
+                    {localStorage.getItem("roleId") !== "7" && (
+                      <Dropdown isOpen={dropdownOpen} toggle={toggle}>
+                        <DropdownToggle caret>Export</DropdownToggle>
+                        <DropdownMenu>
+                          <DropdownItem
+                            onClick={() => handleExportExcel("All")}
+                          >
+                            Excel
+                          </DropdownItem>
+                          <DropdownItem>
+                            <a
+                              href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=http://d3fy104eoanlsd.cloudfront.net/project-logs?projectDetails=${projectId},${customerId},${logType}`}
+                              className="breadcrumb-text"
+                            >
+                              <Logo style={{ height: "90px" }} />
+                            </a>
+                          </DropdownItem>
+                        </DropdownMenu>
+                      </Dropdown>
+                    )}
                     <button
                       type="button"
                       className="d-flex btn btn-secondary btn-sm"
                       onClick={handleDeleteLogs}
                     >
-                      {' '}
-                      <Trash />{' '}
+                      {" "}
+                      <Trash />{" "}
                     </button>
                   </div>
                 </div>
-                <div className={pdfData.url && 'side-by-side'}>
+                <div className={pdfData.url && "side-by-side"}>
                   <CombinedLogs
                     logData={filteredLogData}
                     setFilteredLogData={setFilteredLogData}
@@ -438,10 +729,10 @@ const ProjectLogs = () => {
                     handleSelectAll={handleSelectAll}
                     pageRefresh={pageRefresh}
                     setPageRefresh={setPageRefresh}
-                    customerId={state.customerId}
+                    customerId={state?.customerId || customerId}
                     groupingData={groupingData}
                     setLogData={setLogData}
-                    projectId={state?.project.project_id}
+                    projectId={state?.projectId || projectId}
                     listId={listId}
                     selectedLogData={selectedLogData}
                     setSelectedLogData={setSelectedLogData}
@@ -532,6 +823,16 @@ const ProjectLogs = () => {
         toggleSuccessModal={toggleSuccessModal}
         fileData={fileData}
       />
+      <Procore
+        companyId={companyId}
+        companyList={companyList}
+        procoreModal={procoreModal}
+        projectId={projectId}
+        setLoading={setLoading}
+        selectedRows={selectedRows}
+        toggleProcoreModal={toggleProcoreModal}
+        setProcoreModal={setProcoreModal}
+      />
       <Modal
         isOpen={saveListName}
         fade={false}
@@ -561,7 +862,9 @@ const ProjectLogs = () => {
                       List Name
                     </label>
                     {listName.errors && (
-                      <small className="form-error error-red">{listName.errors}</small>
+                      <small className="form-error error-red">
+                        {listName.errors}
+                      </small>
                     )}
                   </div>
                 </div>
@@ -573,7 +876,7 @@ const ProjectLogs = () => {
               </Button>
               <Button color="primary" onClick={handleListSubmit}>
                 Save
-              </Button>{' '}
+              </Button>{" "}
             </ModalFooter>
           </form>
         </ModalBody>
@@ -588,20 +891,57 @@ const ProjectLogs = () => {
         <ModalHeader toggle={toggleViewSavedList}>Saved List</ModalHeader>
         <ModalBody>
           <div className="save-list-name">
-            {viewList.length ? viewList.map((list) => {
-              return (
-                <div className="row mb-3">
-                  <div className="col-6">
-                    <h5 className="my-2">{list.view_name}</h5>
-                  </div>
-                  <div className="col-6">
-                    <div className="d-flex align-item-center justify-content-flex-end">
-                      <button type="button" className="btn btn-primary mr-3" onClick={() => { setSelectedLogData(logData.filter((log) => { return list.records.includes(log.id) ? log : null })); setToggleViewSavedList(false); setListId(list.id) }}>Open</button>
-                      <button type="button" className="btn btn-primary" style={{ textTransform: 'none' }} onClick={() => handleExportExcel(logData.map((log) => { return list.records.includes(log.id) ? log.id : null }).filter(id => id), list.view_name)}>Export .xls</button>
+            {viewList.length
+              ? viewList.map((list) => {
+                  return (
+                    <div className="row mb-3">
+                      <div className="col-6">
+                        <h5 className="my-2">{list.view_name}</h5>
+                      </div>
+                      <div className="col-6">
+                        <div className="d-flex align-item-center justify-content-flex-end">
+                          <button
+                            type="button"
+                            className="btn btn-primary mr-3"
+                            onClick={() => {
+                              setSelectedLogData(
+                                logData.filter((log) => {
+                                  return list.records.includes(log.id)
+                                    ? log
+                                    : null;
+                                })
+                              );
+                              setToggleViewSavedList(false);
+                              setListId(list.id);
+                            }}
+                          >
+                            Open
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-primary"
+                            style={{ textTransform: "none" }}
+                            onClick={() =>
+                              handleExportExcel(
+                                logData
+                                  .map((log) => {
+                                    return list.records.includes(log.id)
+                                      ? log.id
+                                      : null;
+                                  })
+                                  .filter((id) => id),
+                                list.view_name
+                              )
+                            }
+                          >
+                            Export .xls
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>)
-            }) : null}
+                  );
+                })
+              : null}
           </div>
           <ModalFooter>
             <Button color="secondary" onClick={toggleViewSavedList}>
