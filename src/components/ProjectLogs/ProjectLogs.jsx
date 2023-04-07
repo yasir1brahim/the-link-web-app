@@ -30,13 +30,13 @@ import { useSearchParams } from "react-router-dom";
 import Procore from "./procore";
 // import { useNavigate } from "react-router-dom";
 import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import handleError from "../../config/errorHandler";
 
 const ProjectLogs = () => {
   // const navigate = useNavigate();
   // const [navigateToSubmittal, setNavigateToSubmittal] = useState(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -158,27 +158,27 @@ const ProjectLogs = () => {
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleGetProjectMappings = useCallback(async () => {
-    await axiosInstance({
-      method: "get",
-      url: `/procore/project_mapping/${projectId}`,
-    }).then((res) => {
-      if (get(res, "data.data")) {
-        setCompanyId(get(res, "data.data.procore_company_id"));
-        localStorage.setItem(
-          "companyId",
-          get(res, "data.data.procore_company_id")
-        );
-        localStorage.setItem("projectId", projectId);
-        localStorage.setItem("logType", logType);
-        localStorage.setItem("customerId", customerId);
-      }
-      if (get(res, "status") === 204) {
-        setProjectMappingsNoContent(true);
-      }
-      setProcoreProjectMappingsAPICalled(true);
-    });
-  });
+  // const handleGetProjectMappings = useCallback(async () => {
+  //   await axiosInstance({
+  //     method: "get",
+  //     url: `/procore/project_mapping/${projectId}`,
+  //   }).then((res) => {
+  //     if (get(res, "data.data")) {
+  //       setCompanyId(get(res, "data.data.procore_company_id"));
+  //       localStorage.setItem(
+  //         "companyId",
+  //         get(res, "data.data.procore_company_id")
+  //       );
+  //       localStorage.setItem("projectId", projectId);
+  //       localStorage.setItem("logType", logType);
+  //       localStorage.setItem("customerId", customerId);
+  //     }
+  //     if (get(res, "status") === 204) {
+  //       setProjectMappingsNoContent(true);
+  //     }
+  //     setProcoreProjectMappingsAPICalled(true);
+  //   });
+  // });
 
   // onClick export Procore, we redirect to the same page and POST access token // gets called first
   useEffect(() => {
@@ -255,14 +255,14 @@ const ProjectLogs = () => {
           });
           setCompanyList(companyResp?.data.data);
         }
-        setProcoreProjectMappingsAPICalled(true);
+        // setProcoreProjectMappingsAPICalled(true);
       };
 
       fetchData().catch((error) => {
         handleError(error);
       });
     }
-  }, [authCode, customerId, logType, projectId, handleGetProjectMappings]);
+  }, [authCode, customerId, logType, projectId, handleGetProjectMappings, selectedRows, searchParams]);
 
   const selectedRows =
     localStorage?.getItem("selectedRows") === ""
