@@ -264,7 +264,7 @@ const ProjectLogs = () => {
         fetchData().catch((error) => {
           handleError(error);
         });
-      } else if (procoreProjectMappingsAPICalled) {
+      } else if (procoreProjectMappingsAPICalled && !projectMappingNoContent) {
         searchParams.set("code", "");
         // setNavigateToSubmittal(!navigateToSubmittal);
         handleExportToProcore();
