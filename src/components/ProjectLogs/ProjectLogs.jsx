@@ -287,7 +287,7 @@ const ProjectLogs = () => {
         handleError(error);
       });
     }
-  }, [authCode, customerId, logType, projectId, handleGetProjectMappings, selectedRows, searchParams]);
+  }, [authCode, customerId, logType, projectId, selectedRows, searchParams]);
 
   const selectedRows =
     localStorage?.getItem("selectedRows") === ""
