@@ -182,42 +182,7 @@ const ProjectLogs = () => {
 
   // onClick export Procore, we redirect to the same page and POST access token // gets called first
   useEffect(() => {
-    if (authCode) {
-      const fetchData = async () => {
-        const accessTokenData = await axiosInstance({
-          method: "post",
-          url: "/procore/access_token",
-          data: {
-            code: authCode,
-            redirect_uri: `http://d3fy104eoanlsd.cloudfront.net/project-logs?projectDetails=${projectId},${customerId},${logType}`,
-          },
-        });
-        localStorage.setItem(
-          "procore_access_token",
-          accessTokenData?.data.data.access_token
-        );
-        handleGetProjectMappings();
-      };
-
-      fetchData().catch((error) => {
-        handleError(error);
-      });
-    }
-  }, [authCode, customerId, logType, projectId, handleGetProjectMappings]);
-
-  const selectedRows =
-    localStorage?.getItem("selectedRows") === ""
-      ? "All"
-      : localStorage
-          ?.getItem("selectedRows")
-          ?.split(",")
-          ?.map((row) => JSON.parse(row));
-
-  console.log("selecteedRows", selectedRows);
-
-  useEffect(() => {
-     // handler for export to procore
-     const handleExportToProcore = async () => {
+    const handleExportToProcore = async () => {
       try {
         
           // setStatus(get(statusResp, 'data.data'));
@@ -250,38 +215,132 @@ const ProjectLogs = () => {
           handleError(error);
       }
   };
-  
     if (authCode) {
-      if (procoreProjectMappingsAPICalled && projectMappingNoContent) {
-        const fetchData = async () => {
+      const fetchData = async () => {
+        const accessTokenData = await axiosInstance({
+          method: "post",
+          url: "/procore/access_token",
+          data: {
+            code: authCode,
+            redirect_uri: `http://d3fy104eoanlsd.cloudfront.net/project-logs?projectDetails=${projectId},${customerId},${logType}`,
+          },
+        });
+        localStorage.setItem(
+          "procore_access_token",
+          accessTokenData?.data.data.access_token
+        );
+        // handleGetProjectMappings();
+        const res = await axiosInstance({
+          method: "get",
+          url: `/procore/project_mapping/${projectId}`,
+        })
+        if (get(res, "data.data")) {
+          setCompanyId(get(res, "data.data.procore_company_id"));
+          localStorage.setItem(
+            "companyId",
+            get(res, "data.data.procore_company_id")
+          );
+          localStorage.setItem("projectId", projectId);
+          localStorage.setItem("logType", logType);
+          localStorage.setItem("customerId", customerId);
+          searchParams.set("code", "");
+        // setNavigateToSubmittal(!navigateToSubmittal);
+          handleExportToProcore();
+        }
+        if (get(res, "status") === 204) {
           setProcoreModal(true);
           const companyResp = await axiosInstance({
             method: "get",
             url: "/procore/companies",
           });
           setCompanyList(companyResp?.data.data);
-        };
-        fetchData().catch((error) => {
-          handleError(error);
-        });
-      } else if (procoreProjectMappingsAPICalled && !projectMappingNoContent) {
-        searchParams.set("code", "");
-        // setNavigateToSubmittal(!navigateToSubmittal);
-        handleExportToProcore();
-      }
+        }
+        setProcoreProjectMappingsAPICalled(true);
+      };
+
+      fetchData().catch((error) => {
+        handleError(error);
+      });
     }
-  }, [
-    projectMappingNoContent,
-    searchParams,
-    authCode,
-    procoreProjectMappingsAPICalled,
-    projectId,
-    navigate,
-    customerId,
-    logType,
-    selectedRows,
-    companyId,
-  ]);
+  }, [authCode, customerId, logType, projectId, handleGetProjectMappings]);
+
+  const selectedRows =
+    localStorage?.getItem("selectedRows") === ""
+      ? "All"
+      : localStorage
+          ?.getItem("selectedRows")
+          ?.split(",")
+          ?.map((row) => JSON.parse(row));
+
+  console.log("selecteedRows", selectedRows);
+
+  // useEffect(() => {
+  //    // handler for export to procore
+  //    const handleExportToProcore = async () => {
+  //     try {
+        
+  //         // setStatus(get(statusResp, 'data.data'));
+  //         const resp = await axiosInstance({
+  //             method: 'post',
+  //             url: '/procore/create_submittals',
+  //             data: {
+  //                 project_id: Number(projectId),
+  //                 records: selectedRows, // array of ids
+  //                 // status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
+  //             }
+  //         });
+  //         if (resp.status === 200) {
+  //             setProjectMappingsNoContent(false)
+  //             toast.success('Successfully exported to Procore!', {
+  //                 position: 'bottom-center',
+  //                 autoClose: 5000,
+  //                 hideProgressBar: true,
+  //                 closeOnClick: true,
+  //                 pauseOnHover: true,
+  //                 draggable: true,
+  //                 progress: undefined
+  //             });
+  //             localStorage.setItem('selectedRows', '');
+  //         }
+  //         // setLoading(false);
+  //     } catch (error) {
+  //         console.log('error', error);
+  //         localStorage.setItem('selectedRows', '');
+  //         handleError(error);
+  //     }
+  // };
+  
+  //   if (authCode) {
+  //     if (procoreProjectMappingsAPICalled && projectMappingNoContent) {
+  //       const fetchData = async () => {
+  //         setProcoreModal(true);
+  //         const companyResp = await axiosInstance({
+  //           method: "get",
+  //           url: "/procore/companies",
+  //         });
+  //         setCompanyList(companyResp?.data.data);
+  //       };
+  //       fetchData().catch((error) => {
+  //         handleError(error);
+  //       });
+  //     } else if (procoreProjectMappingsAPICalled && !projectMappingNoContent) {
+  //       searchParams.set("code", "");
+  //       // setNavigateToSubmittal(!navigateToSubmittal);
+  //       handleExportToProcore();
+  //     }
+  //   }
+  // }, [
+  //   projectMappingNoContent,
+  //   searchParams,
+  //   authCode,
+  //   procoreProjectMappingsAPICalled,
+  //   projectId,
+  //   navigate,
+  //   customerId,
+  //   logType,
+  //   selectedRows,
+  //   companyId,
+  // ]);
 
   // v-4 changes, not navigating to submittal
 
