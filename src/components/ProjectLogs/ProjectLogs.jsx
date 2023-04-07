@@ -631,8 +631,8 @@ const ProjectLogs = () => {
           showBtn={'Upload Additional'}
           toggleModal={toggleModal}
           btnSize={'small'}
-          centerText={state?.projectName || ''}
-          docParsed={state?.docParsed}
+          centerText={state?.projectName || projectName || ''}
+          docParsed={docParsed}
         />
 
         <div className="project-logs-content">
