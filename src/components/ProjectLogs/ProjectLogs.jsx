@@ -88,10 +88,10 @@ const ProjectLogs = () => {
   const projectName = searchParams.get("projectName");
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
   const authCode = searchParams.get("code");
-  const [procoreProjectMappingsAPICalled, setProcoreProjectMappingsAPICalled] =
-    useState(false);
-  const [projectMappingNoContent, setProjectMappingsNoContent] =
-    useState(false);
+  // const [procoreProjectMappingsAPICalled, setProcoreProjectMappingsAPICalled] =
+  //   useState(false);
+  // const [projectMappingNoContent, setProjectMappingsNoContent] =
+  //   useState(false);
 
     useEffect(() => {
       if (!modal) {
@@ -204,6 +204,13 @@ const ProjectLogs = () => {
   //     setProcoreProjectMappingsAPICalled(true);
   //   });
   // });
+  const selectedRows =
+  localStorage?.getItem("selectedRows") === ""
+    ? "All"
+    : localStorage
+        ?.getItem("selectedRows")
+        ?.split(",")
+        ?.map((row) => JSON.parse(row));
 
   // onClick export Procore, we redirect to the same page and POST access token // gets called first
   useEffect(() => {
@@ -221,7 +228,7 @@ const ProjectLogs = () => {
               }
           });
           if (resp.status === 200) {
-              setProjectMappingsNoContent(false)
+              // setProjectMappingsNoContent(false)
               toast.success('Successfully exported to Procore!', {
                   position: 'bottom-center',
                   autoClose: 5000,
@@ -289,14 +296,7 @@ const ProjectLogs = () => {
     }
   }, [authCode, customerId, logType, projectId, selectedRows, searchParams]);
 
-  const selectedRows =
-    localStorage?.getItem("selectedRows") === ""
-      ? "All"
-      : localStorage
-          ?.getItem("selectedRows")
-          ?.split(",")
-          ?.map((row) => JSON.parse(row));
-
+  
   console.log("selecteedRows", selectedRows);
 
   // useEffect(() => {
