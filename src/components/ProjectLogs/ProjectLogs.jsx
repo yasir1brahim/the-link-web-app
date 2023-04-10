@@ -624,14 +624,14 @@ const ProjectLogs = () => {
       <div className="project-logs-wrapper log-table-width">
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
-          title={`${projectType === 'ufgs' ? 'UFGS' : 'Commercial'}`}
+          centerText={`${projectType === 'ufgs' ? 'UFGS' : 'Commercial'}`}
           breadcrumb={'Project Details'}
           breadcrumb2={'View Projects'}
           breadcrumb3={'Requrement Logs'}
           showBtn={'Upload Additional'}
           toggleModal={toggleModal}
           btnSize={'small'}
-          centerText={state?.projectName || projectName || ''}
+          title={state?.projectName || projectName || ''}
           docParsed={docParsed}
         />
 
