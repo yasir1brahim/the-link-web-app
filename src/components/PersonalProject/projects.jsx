@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import CustomerProjects from "../CustomerProjects/CustomerProjects";
 import Header from "../shared/Header/Header";
@@ -12,7 +12,7 @@ import handleError from "../../config/errorHandler";
 const Projects = () => {
   const navigate = useNavigate();
   const [uploadSpecsModal, setUploadSpecsModal] = useState(false);
-  const [slider, setSlider] = useState(false);
+  const [slider, setSlider] = useState(true);
   const [customerData, setCustomerData] = useState({});
   const [createProjectModal, setCreateProjectModal] = useState(false);
   const [pageRefresh, setPageRefresh] = useState(false);
@@ -26,6 +26,7 @@ const Projects = () => {
   const roleId = localStorage.getItem("roleId");
   const { state } = useLocation();
   const toggleSlider = () => setSlider(!slider);
+  const [isArchived, toggleArchive] = useState(false);
   const toggleCreateProjectModal = () =>
     setCreateProjectModal(!createProjectModal);
   const toggleUploadSpecsModal = () => setUploadSpecsModal(!uploadSpecsModal);
@@ -94,6 +95,29 @@ const Projects = () => {
       //   });
   };
 
+  useEffect(() => {
+    const url = roleId === '6' || roleId === '7' ?
+      `/emp/projects/${localStorage.getItem('userId')}` :
+      state?.customer_id
+        ? `/projects/${state.customer_id}`
+        : `/projects/${localStorage.getItem('userId')}`
+    const fetchData = async () => {
+      const response = await axiosInstance({
+        method: 'get',
+        url,
+      });
+      // setProjectData(response.data.message);
+      setProjectData(
+        isArchived ? response.data.archived_projects : response.data.message
+      );
+      console.log(response.data.message);
+    };
+
+    fetchData().catch((error) => {
+      handleError(error)
+    });
+  }, [state, pageRefresh, isArchived, roleId, setProjectData]);
+
   return (
     <>
       <div className="page-wrap">
@@ -102,11 +126,12 @@ const Projects = () => {
           <Header
             toggleModal={toggleCreateProjectModal}
             title={state?.customer_name || customerData?.customer_name}
-            showBtn={
-              slider
-                ? "Add Personal Project"
-                : roleId !== "6" && roleId !== "7" && "Create New Project"
-            }
+            // showBtn={
+            //   slider
+            //     ? "Add Personal Project"
+            //     : roleId !== "6" && roleId !== "7" && "Create New Project"
+            // }
+            showBtn={"Create New Project"}
             breadcrumb={"View Projects"}
           />
           {slider ? (
@@ -137,6 +162,8 @@ const Projects = () => {
               projectData={projectData}
               setProjectData={setProjectData}
               handleLaunch={handleLaunch}
+              isArchived={isArchived}
+              toggleArchive={toggleArchive}
             />
           )}
         </div>

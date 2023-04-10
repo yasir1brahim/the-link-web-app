@@ -59,11 +59,12 @@ const Header = ({ ...props }) => {
           </div>
         </div>
       </div>
-      {props.centerText ? <div className='header-center header-content'>
+      {/* {props.centerText ? <div className='header-center header-content'>
       <h1 className="page-title">{props.centerText?.toUpperCase()}</h1>
-      </div> : ''}
+      </div> : ''} */}
       {props.showBtn ? (
         <div className="header-right">
+          {props?.centerText ? <div className='header-docs-uploaded breadcrumb-text project-type'>{props?.centerText}</div> : ''}
           {props?.docParsed ? <div className='header-docs-uploaded breadcrumb-text'>Docs uploaded : {props?.docParsed}</div> : ''}
           <button
             type="button"

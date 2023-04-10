@@ -51,6 +51,7 @@ const CreateProject = ({
       setEndDate('');
       setEmployeeList([]);
       setSelectedEmployeeList([]);
+      setVisibilityType('Contract')
     }
   }, [modal]);
 
@@ -205,7 +206,7 @@ const CreateProject = ({
                         </div>
                       </div>
                     </div>
-                    <div className="col-6">
+                    {/* <div className="col-6">
                       <div className="custom-control custom-checkbox">
                         <input
                           type="checkbox"
@@ -225,7 +226,7 @@ const CreateProject = ({
                           for="ticketHeading"
                         >Personal Project</label>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>
