@@ -588,7 +588,7 @@ const AdminUser = (props) => {
                     setPageRefresh={setPageRefresh}
                     toggleUpdateList={toggleUpdateList}
                     setModalData={setModalData}
-                    setSelectedEmployeeList={selectedEmployeeList}
+                    setSelectedEmployeeList={setSelectedEmployeeList}
                   />
                 )}
               </TabPane>
