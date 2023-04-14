@@ -67,7 +67,7 @@ const Projects = () => {
   };
 
   // function used in the project tiles to navigate to project details
-  const handleLaunch = (project) => {
+  const handleLaunch = (project, qaDashboard) => {
     const custId = localStorage.getItem("roleId") === "0"
     ? state.customer_id
     : localStorage.getItem("userId")
@@ -82,6 +82,7 @@ const Projects = () => {
                 ? state.customer_id
                 : localStorage.getItem("userId"),
             logType: "Classified",
+            qaDashboard
           },
         })
       // : navigate("/project-details", {

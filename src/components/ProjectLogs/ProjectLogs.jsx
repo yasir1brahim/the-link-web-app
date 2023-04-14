@@ -430,7 +430,7 @@ const ProjectLogs = () => {
       setLoading(true);
       const response = await axiosInstance({
         method: "post",
-        url: "/filter_logs",
+        url: state?.qaDashboard ? `/qa_dashboard_logs` : `/filter_logs`,
         data: {
           project_id: state?.projectId || projectId,
           search: "",
@@ -620,7 +620,7 @@ const ProjectLogs = () => {
   // }
   return (
     <div className="page-wrap">
-      <NavbarTop />
+      <NavbarTop qaDashboard={state?.qaDashboard}/>
       <div className="project-logs-wrapper log-table-width">
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
@@ -633,6 +633,7 @@ const ProjectLogs = () => {
           btnSize={'small'}
           title={state?.projectName || projectName || ''}
           docParsed={docParsed}
+          qaDashboard={state?.qaDashboard}
         />
 
         <div className="project-logs-content">
@@ -645,7 +646,7 @@ const ProjectLogs = () => {
               </div>
             ) : (
               <>
-                <div className="table-top-content">
+                {!state?.qaDashboard && <div className="table-top-content">
                   <div className="table-heading">
                     {/* <h5 className="m-0">{`${state.project?.type} List`} </h5> */}
                     {/* <label className="table-entries">
@@ -719,7 +720,7 @@ const ProjectLogs = () => {
                       <Trash />{" "}
                     </button>
                   </div>
-                </div>
+                </div>}
                 <div className={pdfData.url && "side-by-side"}>
                   <CombinedLogs
                     logData={filteredLogData}
@@ -743,6 +744,7 @@ const ProjectLogs = () => {
                     setNewRowIndex={setNewRowIndex}
                     searchValue={searchValue}
                     projectType={projectType}
+                    qaDashboard={state?.qaDashboard}
                   />
                   {pdfData.url && <PdfWrapper pdfData={pdfData} />}
                   {/* <Tester/> */}
