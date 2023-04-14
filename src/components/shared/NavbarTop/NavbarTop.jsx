@@ -3,7 +3,7 @@ import { ReactComponent as Logo } from "../../../assets/images/logo-white.svg";
 import { ReactComponent as Down } from "../../../assets/images/chevron-bottom.svg";
 // import { ReactComponent as Notification } from '../../../assets/images/notificat.svg';
 import { Navbar, Nav, NavItem, NavLink } from "reactstrap";
-const NavbarTop = () => {
+const NavbarTop = (props) => {
   const [navDrop, setNavDrop] = useState(false);
 
   const toggleDrop = () => {
@@ -50,7 +50,7 @@ const NavbarTop = () => {
                   fontWeight: 600,
                 }}
               >
-                Submittal Log
+                {props?.qaDashboard ? 'QA Dashboard' : 'Submittal Log'}
               </span>
             </NavItem>
           </Nav>

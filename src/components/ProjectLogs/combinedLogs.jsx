@@ -26,7 +26,7 @@ export default function CombinedLogs(props) {
   const [filterModal, setFilterModal] = useState(false)
   const [selectedFilterValue, setSelectedFilterValue] = useState({})
   const [filterColumn, setFilterColumn] = useState('')
-  const [filterValues, setFilterValues] = useState({ spec_section: [], type: ["Submittal"], item_desc: [], classification: [], sd_title: [] })
+  const [filterValues, setFilterValues] = useState({ spec_section: [], type: ["Submittal"], item_desc: [], classification: [], sd_title: [], owner_contractor: [] })
   // const [addRowTooltip, setaddRowTooltip] = useState(null)
   // const [editRowTooltip, setEditRowTooltip] = useState(null)
   const [pdfTooltip, setPdfTooltip] = useState(null)
@@ -317,6 +317,12 @@ export default function CombinedLogs(props) {
                 {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} /> */}
               </span>
             </th>}
+           {props.qaDashboard && <th className='small-font'>
+              <span className="has-sorting" >
+                Owner/Contractor <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('owner_contractor')}></i>
+                {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('owner_contractor') }} /> */}
+              </span>
+            </th>}
             {props.projectType === 'ufgs' && <th className='small-font'>
               <span className="has-sorting" >
                 SD Title <i className={sorting.column === 'sd_title' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('sd_title')}></i>
@@ -541,6 +547,7 @@ export default function CombinedLogs(props) {
                     log.type
                   )}
                 </td>}
+                {props.qaDashboard  && <td className="reduce-height"> {log?.owner_contractor} </td>}
                 {props.projectType === 'ufgs' && <td className="reduce-height"> {log.sd_title} </td>}
                 <td className="reduce-height">
                   {editRow === index ? (
