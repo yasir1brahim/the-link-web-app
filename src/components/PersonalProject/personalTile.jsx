@@ -13,8 +13,10 @@ const PersonalTile = ({setSpecUploadProject, ifSpecsUploaded, projectName, handl
             Submittal Log
             <span className="log-arrow"></span>
           </button>
-          <button className="btn btn-primary" disabled>
-            Dashboard
+          <button className="btn btn-primary" 
+           onClick={() => handleLaunch(project, true)}
+          >
+            QA Dashboard
             <span className="log-arrow"></span>
           </button>
         </div>

@@ -31,6 +31,12 @@ const Projects = () => {
     setCreateProjectModal(!createProjectModal);
   const toggleUploadSpecsModal = () => setUploadSpecsModal(!uploadSpecsModal);
 
+  useEffect(() => {
+    if (!uploadSpecsModal) {
+      setPdfFile({});
+    }
+  }, [uploadSpecsModal]);
+
   // function related to upload specs
   const backToUpload = () => {
     toggleErrorModal(false);
@@ -67,10 +73,10 @@ const Projects = () => {
   };
 
   // function used in the project tiles to navigate to project details
-  const handleLaunch = (project) => {
-    const custId = localStorage.getItem("roleId") === "0"
-    ? state.customer_id
-    : localStorage.getItem("userId")
+  const custId = localStorage.getItem("roleId") === "0"
+  ? state.customer_id
+  : localStorage.getItem("userId")
+  const handleLaunch = (project, qaDashboard) => {
     // project?.project_type === "ufgs"
       // ?
        navigate(`/project-logs?projectDetails=${project?.project_id},${custId},Classified`, {
@@ -82,6 +88,7 @@ const Projects = () => {
                 ? state.customer_id
                 : localStorage.getItem("userId"),
             logType: "Classified",
+            qaDashboard
           },
         })
       // : navigate("/project-details", {
@@ -180,6 +187,8 @@ const Projects = () => {
           successModal={successModal}
           toggleSuccessModal={toggleSuccessModal}
           fileData={fileData}
+          logScreenUrl={`/project-logs?projectDetails=${specUploadProject?.project_id},${custId},Classified`}
+          project={specUploadProject}
         />
       </div>
     </>
