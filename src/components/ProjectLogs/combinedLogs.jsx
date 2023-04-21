@@ -148,7 +148,7 @@ export default function CombinedLogs(props) {
           project_id: props.projectId,
           search: "",
           // filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
-          filters: {...a, type: ["Submittal"]},
+          filters: a,
           order_col: columnName || "",
           order: sortingOrder === 'desc' ? 'asc' : 'desc' || "",
           list_id: props.selectedLogData.length ? props.listId : ''
@@ -178,14 +178,14 @@ export default function CombinedLogs(props) {
         data: {
           project_id: props.projectId,
           search: "",
-          filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? {...a, type: ["Submittal"]} : {type: ["Submittal"]},
+          filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
           // filters: a,
           order_col: sorting.column || "",
           order: sorting.order || "",
           list_id: props.selectedLogData.length ? props.listId : ''
         }
       });
-      setSelectedFilterValue(response.data.sel_filter_vals)
+      setSelectedFilterValue(response.data.all_filter_vals)
       props.selectedLogData.length ?
         props.setSelectedLogData(response.data.message) :
         props.setLogData(response.data.message);
@@ -314,7 +314,7 @@ export default function CombinedLogs(props) {
            {props.projectType !== 'ufgs' && <th className='small-font'>
               <span className="has-sorting" >
                 Submittal Heading <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('type')}></i>
-                {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} /> */}
+                <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} />
               </span>
             </th>}
            {props.qaDashboard && <th className='small-font'>

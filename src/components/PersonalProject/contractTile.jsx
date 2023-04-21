@@ -4,7 +4,7 @@ const ContractTile = ({
   handleLaunch,
   project,
   toggleUploadSpecsModal,
-  setSpecUploadProject
+  setSpecUploadProject,
 }) => {
   return (
     <div className="grid-view grid-view-contract">
