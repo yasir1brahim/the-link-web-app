@@ -6,7 +6,6 @@ import { ReactComponent as Error } from '../../assets/images/error.svg';
 import { ReactComponent as Success } from '../../assets/images/circle-success.svg';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
 import Loader from '../shared/Loader/Loader';
-import { useNavigate } from 'react-router';
 
 export const UploadDocuments = (props) => {
     const {
@@ -21,11 +20,8 @@ export const UploadDocuments = (props) => {
         backToUpload,
         successModal,
         toggleSuccessModal,
-        fileData,
-        logScreenUrl,
-        project
+        fileData
     } = props
-    const navigate = useNavigate();
     return (
         <>
             <Modal
@@ -184,7 +180,7 @@ export const UploadDocuments = (props) => {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => {toggleSuccessModal(false); navigate(logScreenUrl, { state: { project, projectName: project?.project_name } })}}
+                                onClick={() => toggleSuccessModal(false)}
                                 className="d-inline-block btn btn-primary"
                             >
                                 Save

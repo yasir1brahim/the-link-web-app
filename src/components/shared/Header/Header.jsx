@@ -66,13 +66,13 @@ const Header = ({ ...props }) => {
         <div className="header-right">
           {props?.centerText ? <div className='header-docs-uploaded breadcrumb-text project-type'>{props?.centerText}</div> : ''}
           {props?.docParsed ? <div className='header-docs-uploaded breadcrumb-text'>Docs uploaded : {props?.docParsed}</div> : ''}
-          {!props?.qaDashboard && <button
+          <button
             type="button"
             className={`btn btn-primary ${props.btnSize === 'small' ? 'btn-small' : ''}`}
             onClick={props.toggleModal}
           >
             {props.showBtn}
-          </button>}
+          </button>
         </div>
       ) : (
         ''
