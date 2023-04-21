@@ -15,7 +15,7 @@ const PersonalProject = ({
   customerData,
   pageRefresh,
   setPageRefresh,
-  setSpecUploadProject,
+  setSpecUploadProject
 }) => {
   console.log(projectData);
 
