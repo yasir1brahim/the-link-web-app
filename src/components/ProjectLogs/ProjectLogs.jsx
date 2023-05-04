@@ -30,6 +30,7 @@ import { useSearchParams } from "react-router-dom";
 import Procore from "./procore";
 // import { useNavigate } from "react-router-dom";
 import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
+import { ReactComponent as ExcelLogo } from "../../assets/images/excel.svg";
 // import { useNavigate } from "react-router-dom";
 import handleError from "../../config/errorHandler";
 
@@ -697,7 +698,7 @@ const ProjectLogs = () => {
                           <DropdownItem
                             onClick={() => handleExportExcel("All")}
                           >
-                            Excel
+                            <ExcelLogo style={{ height: "90px" }} />
                           </DropdownItem>
                           <DropdownItem>
                             <a
