@@ -3,7 +3,7 @@ import { ReactComponent as User } from '../../assets/images/user.svg';
 import { ReactComponent as Keys } from '../../assets/images/keys.svg';
 import { ReactComponent as ArrowLeft } from '../../assets/images/arrow-left.svg';
 import 'react-toastify/dist/ReactToastify.css';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo-white.svg';
+import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark 1.svg';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';

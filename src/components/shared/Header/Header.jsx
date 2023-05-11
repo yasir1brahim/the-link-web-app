@@ -68,7 +68,7 @@ const Header = ({ ...props }) => {
           {props?.docParsed ? <div className='header-docs-uploaded breadcrumb-text'>Docs uploaded : {props?.docParsed}</div> : ''}
           <button
             type="button"
-            className={`btn btn-primary ${props.btnSize === 'small' ? 'btn-small' : ''}`}
+            className={`btn btn-primary ${props.btnSize === 'small' ? 'btn-small' : ''} accent-btn`}
             onClick={props.toggleModal}
           >
             {props.showBtn}
