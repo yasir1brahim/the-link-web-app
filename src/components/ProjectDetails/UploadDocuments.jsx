@@ -99,7 +99,7 @@ export const UploadDocuments = (props) => {
                             <Button color="secondary" onClick={toggleModal}>
                                 Cancel
                             </Button>
-                            <Button color="primary" onClick={handleSubmit}>
+                            <Button color="primary" onClick={handleSubmit} className='submit-accent'>
                                 Get Log
                             </Button>{' '}
                         </ModalFooter>

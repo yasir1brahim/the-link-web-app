@@ -6,7 +6,7 @@ import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import axiosInstance from '../../config/axios';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo-white.svg';
+import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark 1.svg';
 import handleError from '../../config/errorHandler';
 const Signin = (props) => {
   const [showPwd, setShowPwd] = useState(false);

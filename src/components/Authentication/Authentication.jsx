@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo-white.svg';
+import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark 1.svg';
 import Signin from './Signin';
 import SignUp from './Signup';
 import Forgotpwd from './Forgotpwd';
