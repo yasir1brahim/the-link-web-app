@@ -80,7 +80,7 @@ const CustomerProfile = (props) => {
         handleError(error);
       });
     }
-  }, [authCode, customerId, navigate]);
+  }, [authCode, customerId, navigate, redirectUri]);
 
   useEffect(() => {
     const fetchData = async () => {

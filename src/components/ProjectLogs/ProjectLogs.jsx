@@ -297,7 +297,7 @@ const ProjectLogs = () => {
         handleError(error);
       });
     }
-  }, [authCode, customerId, logType, projectId, selectedRows, searchParams]);
+  }, [authCode, customerId, logType, projectId, selectedRows, searchParams, baseUrl]);
 
   
   console.log("selecteedRows", selectedRows);
