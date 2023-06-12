@@ -91,6 +91,9 @@ const ProjectLogs = () => {
   const projectName = searchParams.get("projectName");
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
   const authCode = searchParams.get("code");
+  const clientId = window.location.href.includes("app.thelink.ai")
+    ? "974cb8bfa7aaadc4759a6d60a2d8427387d32db0c4fa4dfbe1da15b5ce3abfc5"
+    : "ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9";
   // const [procoreProjectMappingsAPICalled, setProcoreProjectMappingsAPICalled] =
   //   useState(false);
   // const [projectMappingNoContent, setProjectMappingsNoContent] =
@@ -704,7 +707,7 @@ const ProjectLogs = () => {
                           </DropdownItem>
                           <DropdownItem>
                             <a
-                              href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType}`}
+                              href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType}`}
                               className="breadcrumb-text"
                             >
                               <Logo style={{ height: "90px" }} />
