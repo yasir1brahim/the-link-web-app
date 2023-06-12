@@ -16,6 +16,9 @@ import EditEmployee from './editEmployee';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 import { ConfirmationModal } from './confirmationModal';
 import handleError from '../../config/errorHandler';
+import { get } from "lodash";
+import Procore from "../ProjectLogs/procore";
+import Loader from "../shared/Loader/Loader";
 
 const CustomerProfile = (props) => {
   const [editProfile, setEditProfile] = useState(false);
@@ -47,6 +50,10 @@ const CustomerProfile = (props) => {
   const [profilePicture, setProfilePicture] = useState('');
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [isLoading, setLoading] = useState(false);
+  const [procoreModal, setProcoreModal] = useState(false);
+  const [companyList, setCompanyList] = useState([]);
+  const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [searchParams] = useSearchParams();
   const { state } = useLocation();
   const customerId = searchParams.get('id')
@@ -73,7 +80,24 @@ const CustomerProfile = (props) => {
           "procore_access_token",
           accessTokenData?.data.data.access_token
         );
-        navigate(`/submital-mappings?customerId=${customerId}`)
+        const res = await axiosInstance({
+          method: "get",
+          url: `/procore/company_mapping/${customerId}`,
+        })
+
+        if (get(res, "status") === 200) {
+          navigate(`/submital-mappings?customerId=${customerId}`)
+        }
+
+        if (get(res, "status") === 204) {
+          setProcoreModal(true);
+          const companyResp = await axiosInstance({
+            method: "get",
+            url: "/procore/companies",
+          });
+          setCompanyList(companyResp?.data.data);
+        }
+
       };
 
       fetchData().catch((error) => {
@@ -879,6 +903,16 @@ const CustomerProfile = (props) => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
+      />
+      {isLoading && <Loader showComponentLoader={true} />}
+      <Procore
+        companyId={customerId}
+        companyList={companyList}
+        procoreModal={procoreModal}
+        setLoading={setLoading}
+        toggleProcoreModal={toggleProcoreModal}
+        setProcoreModal={setProcoreModal}
+        isFromCustomerScreen={true}
       />
     </div>
   );

@@ -13,9 +13,10 @@ const Procore = ({
   procoreModal,
   setLoading,
   projectId,
-  selectedRows,
+  selectedRows = "All",
   toggleProcoreModal,
-  setProcoreModal
+  setProcoreModal,
+  isFromCustomerScreen = false
 }) => {
   // const navigate = useNavigate();
   const [partnerCompany, setPartnerCompany] = useState([]);
@@ -64,6 +65,36 @@ const Procore = ({
       handleError(error);
     }
   };
+
+  const handleCompanyMappings = async () => {
+    try{
+      await axiosInstance({
+        method: "post",
+        url : "/procore/company_mapping",
+        data : {
+          "link_company_id": companyId,
+          "procore_company_id": partnerCompany[0]?.value,
+          "procore_company_name": partnerCompany[0]?.label
+        }
+      }).then(() => {
+        setProcoreModal(false)
+        toast.success("Updated project procore info!", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        handleExportToProcore();
+      });
+    }
+    catch (error) {
+      setProcoreModal(false)
+      handleError(error);
+    }
+  }
 
   // Once a user selects a partner company, it's respective project fetching API is called
   useEffect(() => {
@@ -123,7 +154,6 @@ const Procore = ({
           draggable: true,
           progress: undefined,
         });
-        handleExportToProcore();
         // navigate(`/submital-mappings?customerId=${customerId}&companyId=${partnerCompany[0]?.value}`);
         // toggleProcoreModal();
       });
@@ -164,7 +194,7 @@ const Procore = ({
                   />
                 </div>
               </div>
-              <div className="col-12">
+              {isFromCustomerScreen ? <></> : <div className="col-12">
                 <div className="form-group">
                   <SelectDropdown
                     label={"Select Project Name"}
@@ -180,8 +210,8 @@ const Procore = ({
                     className="form-control"
                   />
                 </div>
-              </div>
-              <div className="col-12">
+              </div>}
+              {isFromCustomerScreen ? <></> : <div className="col-12">
                 <div className="form-group log-datepicker">
                   <SelectDropdown
                     label={"Select  Submittal Manager"}
@@ -197,14 +227,14 @@ const Procore = ({
                     className="form-control"
                   />
                 </div>
-              </div>
+              </div>}
             </div>
           </div>
           <ModalFooter>
             <Button color="secondary" onClick={toggleProcoreModal}>
               Cancel
             </Button>
-            <Button color="primary" onClick={handleProjectMapping}>
+            <Button color="primary" onClick={isFromCustomerScreen ? handleCompanyMappings : handleProjectMapping}>
               Save
             </Button>{" "}
           </ModalFooter>
