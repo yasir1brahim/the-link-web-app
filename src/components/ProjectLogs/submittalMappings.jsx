@@ -13,6 +13,7 @@ import { ReactComponent as ArrowRight } from "../../assets/images/border-arrow.s
 import Loader from "../shared/Loader/Loader";
 import handleError from "../../config/errorHandler";
 import { useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const SubmittalMappings = () => {
 
@@ -27,6 +28,7 @@ const SubmittalMappings = () => {
   //   useState(false);
   // const [allMappings, setAllMappings] = useState({});
   //   const [selectedProcoreSubmittal, setSelectedProcoreSubmittal] = useState();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleSubmittalMappings = async () => {
@@ -78,6 +80,7 @@ const SubmittalMappings = () => {
         return res;
       });
       setLoading(false);
+      navigate(`/customer-profile?id=$${localStorage.getItem('userId')}`);
     } catch (error) {
       handleError(error)
     }
