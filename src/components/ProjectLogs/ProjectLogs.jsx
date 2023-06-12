@@ -73,7 +73,9 @@ const ProjectLogs = () => {
   const [newRowIndex, setNewRowIndex] = useState(null);
   const projectType = state?.project.project_type;
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
+  const baseUrl = window.location.href.includes("app.thelink.ai")
+    ? `https://app.thelink.ai/`
+    : `http://d3fy104eoanlsd.cloudfront.net/`;
   //Procore states
   const [procoreModal, setProcoreModal] = useState(false);
   const toggleProcoreModal = () => setProcoreModal(!procoreModal);
@@ -255,7 +257,7 @@ const ProjectLogs = () => {
           url: "/procore/access_token",
           data: {
             code: authCode,
-            redirect_uri: `http://d3fy104eoanlsd.cloudfront.net/project-logs?projectDetails=${projectId},${customerId},${logType}`,
+            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType}`,
           },
         });
         localStorage.setItem(
@@ -702,7 +704,7 @@ const ProjectLogs = () => {
                           </DropdownItem>
                           <DropdownItem>
                             <a
-                              href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=http://d3fy104eoanlsd.cloudfront.net/project-logs?projectDetails=${projectId},${customerId},${logType}`}
+                              href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType}`}
                               className="breadcrumb-text"
                             >
                               <Logo style={{ height: "90px" }} />

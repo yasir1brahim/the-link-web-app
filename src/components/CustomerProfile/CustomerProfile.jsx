@@ -54,7 +54,9 @@ const CustomerProfile = (props) => {
 
   let customer = state;
   const custId = localStorage.getItem('roleId') === '0' ? customerId || state?.customer_id : Number(localStorage.getItem('userId'))
-  
+  const redirectUri = window.location.href.includes("app.thelink.ai")
+    ? `https://app.thelink.ai/customer-profile?id=${customerId || custId}`
+    : `http://d3fy104eoanlsd.cloudfront.net/customer-profile?id=${customerId || custId}`;
   const navigate = useNavigate();
   useEffect(() => {
     if (authCode) {
@@ -64,7 +66,7 @@ const CustomerProfile = (props) => {
           url: "/procore/access_token",
           data: {
             code: authCode,
-            redirect_uri: `http://d3fy104eoanlsd.cloudfront.net/customer-profile?id=${customerId}`,
+            redirect_uri: redirectUri,
           },
         });
         localStorage.setItem(
@@ -699,9 +701,7 @@ const CustomerProfile = (props) => {
                 <div className="table-bulk-changes">
                   <button type="button" className="btn btn-secondary btn-sm" style={{marginBottom:'10px', float: 'right'}}>
                     <a
-                      href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=http://d3fy104eoanlsd.cloudfront.net/customer-profile?id=${
-                        customerId || custId
-                      }`}
+                      href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=${redirectUri}`}
                       className="breadcrumb-text"
                     >
                       Submittal Mappings
@@ -740,9 +740,7 @@ const CustomerProfile = (props) => {
                   <div className="table-bulk-changes">
                     <button type="button" className="btn btn-secondary btn-sm">
                       <a
-                        href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=http://d3fy104eoanlsd.cloudfront.net/customer-profile?id=${
-                          customerId || custId
-                        }`}
+                        href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9&redirect_uri=${redirectUri}`}
                         className="breadcrumb-text"
                       >
                         Submittal Mappings
