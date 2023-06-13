@@ -66,36 +66,6 @@ const Procore = ({
     }
   };
 
-  const handleCompanyMappings = async () => {
-    try{
-      await axiosInstance({
-        method: "post",
-        url : "/procore/company_mapping",
-        data : {
-          "link_company_id": companyId,
-          "procore_company_id": partnerCompany[0]?.value,
-          "procore_company_name": partnerCompany[0]?.label
-        }
-      }).then(() => {
-        setProcoreModal(false)
-        toast.success("Updated project procore info!", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        handleExportToProcore();
-      });
-    }
-    catch (error) {
-      setProcoreModal(false)
-      handleError(error);
-    }
-  }
-
   // Once a user selects a partner company, it's respective project fetching API is called
   useEffect(() => {
     if (partnerCompany[0]?.value) {
@@ -154,14 +124,42 @@ const Procore = ({
           draggable: true,
           progress: undefined,
         });
-        // navigate(`/submital-mappings?customerId=${customerId}&companyId=${partnerCompany[0]?.value}`);
-        // toggleProcoreModal();
+          handleExportToProcore();
       });
     } catch (error) {
       setProcoreModal(false)
       handleError(error);
     }
   };
+
+  const handleCompanyMappings = async () => {
+    try{
+      await axiosInstance({
+        method: "post",
+        url : "/procore/company_mapping",
+        data : {
+          "link_company_id": companyId,
+          "procore_company_id": partnerCompany[0]?.value,
+          "procore_company_name": partnerCompany[0]?.label
+        }
+      }).then(() => {
+        setProcoreModal(false)
+        toast.success("Updated project procore info!", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      });
+    }
+    catch (error) {
+      setProcoreModal(false)
+      handleError(error);
+    }
+  }
 
   return (
     <>
