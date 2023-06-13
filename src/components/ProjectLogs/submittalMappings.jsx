@@ -80,7 +80,7 @@ const SubmittalMappings = () => {
         return res;
       });
       setLoading(false);
-      navigate(`/customer-profile?id=$${localStorage.getItem('userId')}`);
+      navigate(`/customer-profile?id=${customerId}`);
     } catch (error) {
       handleError(error)
     }
