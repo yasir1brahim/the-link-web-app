@@ -524,7 +524,7 @@ const ProjectLogs = () => {
     // do not update the values if navigated from procore page
     // if (document.referrer && selected?.length) {
       const rowsSelected = JSON.stringify(selected);
-      sessionStorage.setItem("selectedRows", `${rowsSelected}`);
+      localStorage.setItem("selectedRows", `${rowsSelected}`);
     // }
   }, [selected]);
 
