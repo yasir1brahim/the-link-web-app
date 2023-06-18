@@ -517,10 +517,10 @@ const ProjectLogs = () => {
   // add the selected rows in session storage to be used by export procore
   useEffect(() => {
     // do not update the values if navigated from procore page
-    // if (document.referrer && selected?.length) {
+    if (document.referrer && selected?.length) {
       const rowsSelected = JSON.stringify(selected);
       localStorage.setItem("selectedRows", `${rowsSelected}`);
-    // }
+    }
   }, [selected]);
 
   // const downloadExcel = (logs, fileName) => {
