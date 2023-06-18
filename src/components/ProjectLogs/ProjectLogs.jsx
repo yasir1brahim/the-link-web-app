@@ -523,7 +523,7 @@ const ProjectLogs = () => {
   useEffect(() => {
     // do not update the values if navigated from procore page
     // if (document.referrer && selected?.length) {
-      const rowsSelected = selected.toString();
+      const rowsSelected = JSON.stringify(selected);
       sessionStorage.setItem("selectedRows", `${rowsSelected}`);
     // }
   }, [selected]);
