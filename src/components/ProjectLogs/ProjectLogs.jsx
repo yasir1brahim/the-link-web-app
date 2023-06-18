@@ -213,10 +213,8 @@ const ProjectLogs = () => {
   const selectedRows =
   localStorage?.getItem("selectedRows") === ""
     ? "All"
-    : localStorage
-        ?.getItem("selectedRows")
-        ?.split(",")
-        ?.map((row) => JSON.parse(row));
+    : JSON.parse(localStorage
+        ?.getItem("selectedRows"));
 
   // onClick export Procore, we redirect to the same page and POST access token // gets called first
   useEffect(() => {
