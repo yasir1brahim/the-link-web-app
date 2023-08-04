@@ -64,6 +64,13 @@ const SubmittalMappings = () => {
     }
   };
 
+  const showDefaultInputValue = (procoreType) => {
+    if( procoreSubTypes && procoreSubTypes.length > 0){
+      const valueToShow = procoreSubTypes.find(type => type.name === procoreType);
+      return valueToShow?.name
+    }
+  };
+
   const procoreMappings = async () => {
     const mappingsobject = { mappings: linkSubMappings };
 
@@ -132,6 +139,7 @@ const SubmittalMappings = () => {
                           onSelectProcoreDropdown(k, get(e, "[0].name"))
                         }
                         style={{ marginTop: "20px" }}
+                        defaultInputValue={showDefaultInputValue(get(x, "procore_type"))}
                       />
                     </td>
                   ) : (
