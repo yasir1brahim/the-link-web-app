@@ -11,6 +11,7 @@ const SelectDropDownV2 = ({ ...props }) => {
         options={props.options}
         onChange={props.onChange}
         placeholder="Choose an option..."
+        defaultInputValue={props.defaultInputValue}
       />
 
       <label className="text-label">{props.label}</label>
