@@ -60,7 +60,7 @@ const CreateProject = ({
       const fetchData = async () => {
         const response = await axiosInstance({
           method: 'get',
-          url: `/employeeList/${customer?.customer_id}`,
+          url: `/employeeList/${customer?.customer_id || localStorage.getItem('userId')}`,
         });
         setEmployeeList(response.data.message);
         console.log(response.data.message);
