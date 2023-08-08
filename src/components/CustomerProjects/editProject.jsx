@@ -51,7 +51,7 @@ const EditProject = ({
       const fetchData = async () => {
         const response = await axiosInstance({
           method: "get",
-          url: `/employeeList/${customer?.customer_id || project?.customer_id}`,
+          url: `/employeeList/${customer?.customer_id || project?.customer_id || localStorage.getItem('userId')}`,
         });
         if (response.data.message) {
           setEmployeeList(response.data.message);
