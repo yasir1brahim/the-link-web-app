@@ -102,7 +102,11 @@ const EditProject = ({
                 ).format("YYYY-MM-DD")
               : "",
             customer_id:
-              customer?.customer_id || customer?.id || project?.customer_id || customer[0]?.id,
+              customer?.customer_id ||
+              customer?.id ||
+              project?.customer_id ||
+              customer[0]?.id ||
+              localStorage.getItem("userId"),
             status: "Open",
             project_id: project?.project_id,
           },
