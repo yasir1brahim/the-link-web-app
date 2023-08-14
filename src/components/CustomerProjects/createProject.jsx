@@ -112,7 +112,7 @@ const CreateProject = ({
             lead_contact: leadContact[0]?.value || '',
             start_date: startDate ? moment(startDate).format('YYYY-MM-DD') : '',
             end_date: endDate ? moment(endDate).format('YYYY-MM-DD') : '',
-            customer_id: customer?.customer_id,
+            customer_id: customer?.customer_id || localStorage.getItem('userId'),
             status: 'Open',
             employee_list: selectedEmployeeList.map(
               (employee) => employee.value
