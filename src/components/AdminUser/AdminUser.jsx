@@ -143,6 +143,14 @@ const AdminUser = (props) => {
           preferred_customer_id: selectedCustomer[0].id,
         },
       });
+      const externalResponse = await axiosInstance({
+        method: "get",
+        url: `/admin/external_users`,
+        params: {
+          customer_id: selectedCustomer[0].id,
+        },
+      });
+      setExternalData(externalResponse.data.data);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -178,7 +186,7 @@ const AdminUser = (props) => {
       const data =
         activeTab === "external"
           ? {
-              user_id: externalUserData[0]?.id,
+              user_id: modalData?.id,
               projects: selectedEmployeeList,
             }
           : {

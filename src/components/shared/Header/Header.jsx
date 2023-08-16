@@ -62,7 +62,7 @@ const Header = ({ ...props }) => {
       {/* {props.centerText ? <div className='header-center header-content'>
       <h1 className="page-title">{props.centerText?.toUpperCase()}</h1>
       </div> : ''} */}
-      {props.showBtn ? (
+      {props.showBtn && localStorage.getItem("roleId") !== "7" ? (
         <div className="header-right">
           {props?.centerText ? <div className='header-docs-uploaded breadcrumb-text project-type'>{props?.centerText}</div> : ''}
           {props?.docParsed ? <div className='header-docs-uploaded breadcrumb-text'>Docs uploaded : {props?.docParsed}</div> : ''}
