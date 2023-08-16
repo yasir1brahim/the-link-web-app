@@ -96,11 +96,14 @@ const Projects = () => {
   };
 
   useEffect(() => {
-    const url = roleId === '6' || roleId === '7' ?
-      `/emp/projects/${localStorage.getItem('userId')}` :
-      state?.customer_id
-        ? `/projects/${state.customer_id}`
-        : `/projects/${localStorage.getItem('userId')}`
+    const url =
+      roleId === "6"
+        ? `/emp/projects/${localStorage.getItem("userId")}`
+        : roleId === "7"
+        ? `/admin/get_projects_by_extuser?userId=${localStorage.getItem(
+            "userId"
+          )}`
+        : `/projects/${state?.customer_id || localStorage.getItem("userId")}`;
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
