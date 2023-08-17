@@ -37,17 +37,18 @@ const Projects = () => {
     setUploadSpecsModal(true);
   };
 
-  // handle to upload specs, submit 
+  // handle to upload specs, submit
   const handleUploadSubmit = async () => {
     try {
       setUploadLoading(true);
       const data = new FormData();
-      data.append('project_id', specUploadProject?.project_id);
-      specUploadProject?.project_type === 'ufgs' && data.append('project_type', specUploadProject?.project_type);
-      Object.values(pdfFile)?.forEach((file) => data.append('files', file));
+      data.append("project_id", specUploadProject?.project_id);
+      specUploadProject?.project_type === "ufgs" &&
+        data.append("project_type", specUploadProject?.project_type);
+      Object.values(pdfFile)?.forEach((file) => data.append("files", file));
       const response = await axiosInstance({
-        method: 'post',
-        url: '/upload_file',
+        method: "post",
+        url: "/upload_file",
         data,
       });
       if (response.data) {
@@ -62,51 +63,53 @@ const Projects = () => {
       setUploadLoading(false);
       toggleErrorModal(true);
       setUploadSpecsModal(false);
-      handleError(error)
+      handleError(error);
     }
   };
 
   // function used in the project tiles to navigate to project details
   const handleLaunch = (project) => {
-    const custId = localStorage.getItem("roleId") === "0"
-    ? state.customer_id
-    : localStorage.getItem("userId")
+    const custId =
+      localStorage.getItem("roleId") === "0"
+        ? state.customer_id
+        : localStorage.getItem("userId");
     // project?.project_type === "ufgs"
-      // ?
-       navigate(`/project-logs?projectDetails=${project?.project_id},${custId},Classified`, {
-          state: {
-            project,
-            projectName: project?.project_name,
-            customerId:
-              localStorage.getItem("roleId") === "0"
-                ? state.customer_id
-                : localStorage.getItem("userId"),
-            logType: "Classified",
-          },
-        })
-      // : navigate("/project-details", {
-      //     state: {
-      //       project,
-      //       customerId:
-      //         localStorage.getItem("roleId") === "0"
-      //           ? state.customer_id
-      //           : localStorage.getItem("userId"),
-      //     },
-      //   });
+    // ?
+    navigate(
+      `/project-logs?projectDetails=${project?.project_id},${custId},Classified`,
+      {
+        state: {
+          project,
+          projectName: project?.project_name,
+          customerId:
+            localStorage.getItem("roleId") === "0"
+              ? state.customer_id
+              : localStorage.getItem("userId"),
+          logType: "Classified",
+        },
+      }
+    );
+    // : navigate("/project-details", {
+    //     state: {
+    //       project,
+    //       customerId:
+    //         localStorage.getItem("roleId") === "0"
+    //           ? state.customer_id
+    //           : localStorage.getItem("userId"),
+    //     },
+    //   });
   };
 
   useEffect(() => {
     const url =
-      roleId === "6"
-        ? `/emp/projects/${localStorage.getItem("userId")}`
-        : roleId === "7"
-        ? `/admin/get_projects_by_extuser?userId=${localStorage.getItem(
-            "userId"
-          )}`
-        : `/projects/${state?.customer_id || localStorage.getItem("userId")}`;
+      roleId === "6" || roleId === "7"
+        ? `/projects/${localStorage.getItem("userId")}`
+        : state?.customer_id
+        ? `/projects/${state.customer_id}`
+        : `/projects/${localStorage.getItem("userId")}`;
     const fetchData = async () => {
       const response = await axiosInstance({
-        method: 'get',
+        method: "get",
         url,
       });
       // setProjectData(response.data.message);
@@ -117,7 +120,7 @@ const Projects = () => {
     };
 
     fetchData().catch((error) => {
-      handleError(error)
+      handleError(error);
     });
   }, [state, pageRefresh, isArchived, roleId, setProjectData]);
 
