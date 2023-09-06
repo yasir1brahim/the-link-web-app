@@ -224,6 +224,8 @@ const Projects = () => {
           successModal={successModal}
           toggleSuccessModal={toggleSuccessModal}
           fileData={fileData}
+          project={specUploadProject}
+          logScreenUrl={`/project-logs?projectDetails=${specUploadProject?.project_id},${custId},Classified`}
         />
       </div>
     </>
