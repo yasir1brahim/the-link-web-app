@@ -4,6 +4,7 @@
 
 const fs = require('fs-extra');
 const path = require('path');
+var chmodr = require('chmodr');
 
 const src = path.join(
   __dirname,
@@ -17,4 +18,11 @@ fs.copy(src, dest, function (err) {
     return console.error(err);
   }
   console.log('Copy completed!');
+  chmodr(dest, 0o700, (err) => {
+    if (err) {
+      console.log('Failed to execute chmod', err);
+    } else {
+      console.log('Successfully executed chmod  + 700');
+    }
+  });
 });
