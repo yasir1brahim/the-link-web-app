@@ -8,6 +8,15 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
+### `npm install`
+
+Installs all the dependencies for the project.
+
+### `npm run move-static`
+
+Moves the static files from node_modules to the public folder. This is necessary for the app to run properly.
+This is a required step before running the app for the first time and should be done after every `npm install`.
+
 ### `npm start`
 
 Runs the app in the development mode.\
@@ -28,6 +37,8 @@ It correctly bundles React in production mode and optimizes the build for the be
 
 The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
+
+In addition to the build, this script also **copies the static files from node_modules** to the build folder. This is necessary for the app to run properly. It intern calls `npm run move-static`.
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
