@@ -33,7 +33,7 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "move-static": "cp -a ./node_modules/@pdftron/webviewer/public/. ./public/webviewer",
+    "move-static": "node ./src/config/moveStatic.js",
     "start": "react-scripts start",
     "build": "react-scripts build && npm run move-static",
     "test": "react-scripts test",
