@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from "react";
-import Header from "../shared/Header/Header";
-import NavbarTop from "../shared/NavbarTop/NavbarTop";
-import Loader from "../shared/Loader/Loader";
+import React, { useState, useEffect } from 'react';
+import Header from '../shared/Header/Header';
+import NavbarTop from '../shared/NavbarTop/NavbarTop';
+import Loader from '../shared/Loader/Loader';
 // import PaginatedItems from "../shared/Pagination/Pagination";
-import classnames from "classnames";
-import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
-import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
-import UpdateListing from "./UpdateListing";
-import axiosInstance from "../../config/axios";
-import { toast, ToastContainer } from "react-toastify";
-import EditEmployee from "../CustomerProfile/editEmployee";
-import EditProject from "../CustomerProjects/editProject";
-import moment from "moment";
-import { ExternalUsers } from "./externalUsers";
-import handleError from "../../config/errorHandler";
+import classnames from 'classnames';
+import { TabContent, TabPane, Nav, NavItem, NavLink } from 'reactstrap';
+import UpdateListing from './UpdateListing';
+import axiosInstance from '../../config/axios';
+import { toast, ToastContainer } from 'react-toastify';
+import EditEmployee from '../CustomerProfile/editEmployee';
+import EditProject from '../CustomerProjects/editProject';
+import moment from 'moment';
+import { ExternalUsers } from './externalUsers';
+import handleError from '../../config/errorHandler';
+import { Typeahead } from 'react-bootstrap-typeahead';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 
 const AdminUser = (props) => {
   const [modal, setModal] = useState(false);
@@ -35,7 +36,7 @@ const AdminUser = (props) => {
   const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
 
   // tab functions
-  const [activeTab, setActiveTab] = useState("employees");
+  const [activeTab, setActiveTab] = useState('employees');
   const toggle = (tab) => {
     if (activeTab !== tab) setActiveTab(tab);
   };
@@ -60,14 +61,14 @@ const AdminUser = (props) => {
     const fetchData = async () => {
       setLoading(true);
       const response = await axiosInstance({
-        method: "get",
-        url: `/customers/${localStorage.getItem("userId")}`,
+        method: 'get',
+        url: `/customers/${localStorage.getItem('userId')}`
       });
       setCustomerData(response.data.message);
 
       const preferredCustomer = await axiosInstance({
-        method: "get",
-        url: `/admin/${localStorage.getItem("userId")}/preferred_customer`,
+        method: 'get',
+        url: `/admin/${localStorage.getItem('userId')}/preferred_customer`
       });
       const custObject = response.data.message.filter(
         (customer) =>
@@ -77,43 +78,43 @@ const AdminUser = (props) => {
       setSelectedCustomer({
         id: custObject[0].customer_id || response.data.message[0].customer_id,
         label:
-          custObject[0].customer_name || response.data.message[0].customer_name,
+          custObject[0].customer_name || response.data.message[0].customer_name
       });
 
       const employeeResponse = await axiosInstance({
-        method: "get",
+        method: 'get',
         url: `/admin/employees/${
           custObject[0].customer_id || response.data.message[0].customer_id
-        }`,
+        }`
       });
       setEmployeeData(employeeResponse.data.message);
 
       const projectResponse = await axiosInstance({
-        method: "get",
+        method: 'get',
         url: `/admin/projects/${
           custObject[0].customer_id || response.data.message[0].customer_id
-        }`,
+        }`
       });
       setProjectData(projectResponse.data.message);
 
       const externalResponse = await axiosInstance({
-        method: "get",
+        method: 'get',
         url: `/admin/external_users`,
         params: {
           customer_id:
-            custObject[0].customer_id || response.data.message[0].customer_id,
-        },
+            custObject[0].customer_id || response.data.message[0].customer_id
+        }
       });
       setExternalData(externalResponse.data.data);
 
-      localStorage.setItem("account_id", response.data.account_id);
+      localStorage.setItem('account_id', response.data.account_id);
       setLoading(false);
       console.log(response.data.message);
     };
 
     fetchData().catch((error) => {
       setLoading(false);
-      handleError(error)
+      handleError(error);
     });
   }, [pageRefresh]);
 
@@ -127,47 +128,47 @@ const AdminUser = (props) => {
     try {
       setLoading(true);
       const response = await axiosInstance({
-        method: "get",
-        url: `/admin/employees/${selectedCustomer[0].id}`,
+        method: 'get',
+        url: `/admin/employees/${selectedCustomer[0].id}`
       });
       setEmployeeData(response.data.message);
       const projectResponse = await axiosInstance({
-        method: "get",
-        url: `/admin/projects/${selectedCustomer[0].id}`,
+        method: 'get',
+        url: `/admin/projects/${selectedCustomer[0].id}`
       });
       setProjectData(projectResponse.data.message);
       await axiosInstance({
-        method: "put",
-        url: `/admin/${localStorage.getItem("userId")}/preferred_customer`,
+        method: 'put',
+        url: `/admin/${localStorage.getItem('userId')}/preferred_customer`,
         data: {
-          preferred_customer_id: selectedCustomer[0].id,
-        },
+          preferred_customer_id: selectedCustomer[0].id
+        }
       });
       const externalResponse = await axiosInstance({
-        method: "get",
+        method: 'get',
         url: `/admin/external_users`,
         params: {
-          customer_id: selectedCustomer[0].id,
-        },
+          customer_id: selectedCustomer[0].id
+        }
       });
       setExternalData(externalResponse.data.data);
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      handleError(error)
+      handleError(error);
     }
   };
 
   const handleStatus = async (id, status) => {
     try {
       await axiosInstance({
-        method: "put",
-        url: `/employees/${id}/${status}`,
+        method: 'put',
+        url: `/employees/${id}/${status}`
       });
       setPageRefresh(!pageRefresh);
     } catch (error) {
       setLoading(false);
-      handleError(error)
+      handleError(error);
     }
   };
 
@@ -175,29 +176,29 @@ const AdminUser = (props) => {
     try {
       console.log('hero', externalUserData, {
         user_id: externalUserData[0]?.id,
-        projects: selectedEmployeeList,
-      })
+        projects: selectedEmployeeList
+      });
       const url =
-        activeTab === "external"
+        activeTab === 'external'
           ? `/admin/add_extuser_to_projects`
           : `/${activeTab}/${
-              activeTab === "employees" ? modalData?.id : modalData?.project_id
-            }/${activeTab === "employees" ? "projects" : "employees"}`;
+              activeTab === 'employees' ? modalData?.id : modalData?.project_id
+            }/${activeTab === 'employees' ? 'projects' : 'employees'}`;
       const data =
-        activeTab === "external"
+        activeTab === 'external'
           ? {
               user_id: modalData?.id,
-              projects: selectedEmployeeList,
+              projects: selectedEmployeeList
             }
           : {
-              [activeTab === "employees" ? "projects" : "employees"]:
-                selectedEmployeeList,
+              [activeTab === 'employees' ? 'projects' : 'employees']:
+                selectedEmployeeList
             };
       setLoading(true);
       await axiosInstance({
-        method: activeTab === "external" ? "post" : "put",
+        method: activeTab === 'external' ? 'post' : 'put',
         url,
-        data,
+        data
       });
       setLoading(false);
       setPageRefresh(!pageRefresh);
@@ -205,35 +206,35 @@ const AdminUser = (props) => {
     } catch (error) {
       setLoading(false);
       setUpdateListModal(!updateListModal);
-      handleError(error)
+      handleError(error);
     }
   };
 
   const handleResetPassword = async (employee) => {
     try {
       await axiosInstance({
-        method: "post",
+        method: 'post',
         url: `/forgot_password`,
         data: {
-          email: employee.email_address,
-        },
+          email: employee.email_address
+        }
       });
       toast.success(
         `A reset password link has been sent to your email address. Kindly click on the link and reset the password.`,
         {
-          position: "bottom-center",
+          position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
+          progress: undefined
         }
       );
       setPageRefresh(!pageRefresh);
     } catch (error) {
       setLoading(false);
-      handleError(error)
+      handleError(error);
     }
   };
 
@@ -242,25 +243,25 @@ const AdminUser = (props) => {
     if (!errors) {
       try {
         const response = await axiosInstance({
-          method: "put",
-          url: "/updateProject",
+          method: 'put',
+          url: '/updateProject',
           data: {
             project_name: project.project_name,
             lead_contact: project.lead_contact,
             start_date: project?.start_date
               ? moment(
-                  new Date((project?.start_date).replaceAll("-", "/"))
-                ).format("YYYY-MM-DD")
-              : "",
+                  new Date((project?.start_date).replaceAll('-', '/'))
+                ).format('YYYY-MM-DD')
+              : '',
             end_date: project?.end_date
               ? moment(
-                  new Date((project?.end_date).replaceAll("-", "/"))
-                ).format("YYYY-MM-DD")
-              : "",
+                  new Date((project?.end_date).replaceAll('-', '/'))
+                ).format('YYYY-MM-DD')
+              : '',
             customer_id: project?.customer_id,
-            status: project.status === "Archived" ? "Active" : "Archived",
-            project_id: project.project_id,
-          },
+            status: project.status === 'Archived' ? 'Active' : 'Archived',
+            project_id: project.project_id
+          }
         });
         if (response.data) {
           console.log(response.data);
@@ -269,7 +270,7 @@ const AdminUser = (props) => {
         toggleArchive(!isArchived);
       } catch (error) {
         console.log(error.message);
-        handleError(error)
+        handleError(error);
       }
     }
   };
@@ -280,9 +281,10 @@ const AdminUser = (props) => {
         <NavbarTop />
         <div className="page-wrap-content admin-user-wrapper">
           <Header
-            title={"Admin Portal"}
+            title={'Admin Portal'}
             toggleModal={toggleModal}
             // showBtn={'Create New Customer'}
+            goBack={true}
           />
 
           <div className="company-search-wrapper">
@@ -290,19 +292,26 @@ const AdminUser = (props) => {
               <div className="row">
                 <div className="col-4">
                   <div className="form-group">
-                    <SelectDropdown
-                      label={"Select Company"}
-                      setSelected={setSelectedCustomer}
-                      defaultSelected={"Test"}
-                      value={selectedCustomer.label}
-                      selected={selectedCustomer.label}
-                      options={customerData.map((customer) => {
-                        return {
-                          id: customer.customer_id,
-                          label: customer.customer_name,
-                        };
-                      })}
-                    />
+                    <div className={`has-typehead`}>
+                      <Typeahead
+                        id="basic-example-v2"
+                        options={customerData.map((customer) => {
+                          return {
+                            id: customer.customer_id,
+                            label: customer.customer_name
+                          };
+                        })}
+                        onChange={(e) => setSelectedCustomer(e)}
+                      />
+
+                      <label className="text-label">{'Select Company'}</label>
+                      <i className="has-icon icon-dropdown"></i>
+                    </div>
+                    {selectedCustomer.label ? (
+                      <label className="text-label typehead-label">
+                        {selectedCustomer.label}
+                      </label>
+                    ) : null}
                   </div>
                 </div>
                 <div className="col-4">
@@ -322,9 +331,9 @@ const AdminUser = (props) => {
             <Nav tabs>
               <NavItem>
                 <NavLink
-                  className={classnames({ active: activeTab === "employees" })}
+                  className={classnames({ active: activeTab === 'employees' })}
                   onClick={() => {
-                    toggle("employees");
+                    toggle('employees');
                   }}
                 >
                   Employees({employeeData?.length})
@@ -332,9 +341,9 @@ const AdminUser = (props) => {
               </NavItem>
               <NavItem>
                 <NavLink
-                  className={classnames({ active: activeTab === "projects" })}
+                  className={classnames({ active: activeTab === 'projects' })}
                   onClick={() => {
-                    toggle("projects");
+                    toggle('projects');
                   }}
                 >
                   Projects({projectData?.length})
@@ -342,9 +351,9 @@ const AdminUser = (props) => {
               </NavItem>
               <NavItem>
                 <NavLink
-                  className={classnames({ active: activeTab === "external" })}
+                  className={classnames({ active: activeTab === 'external' })}
                   onClick={() => {
-                    toggle("external");
+                    toggle('external');
                   }}
                 >
                   External Users({externalUserData?.length})
@@ -352,7 +361,7 @@ const AdminUser = (props) => {
               </NavItem>
             </Nav>
             <TabContent activeTab={activeTab}>
-              <TabPane tabId={"employees"}>
+              <TabPane tabId={'employees'}>
                 <div className="admin-user-content">
                   {/* <div className="table-top-content">
                     <label className="table-entries">
@@ -447,15 +456,15 @@ const AdminUser = (props) => {
                                     onClick={() =>
                                       handleStatus(
                                         employee.id,
-                                        employee.employee_status === "active"
-                                          ? "deactivate"
-                                          : "activate"
+                                        employee.employee_status === 'active'
+                                          ? 'deactivate'
+                                          : 'activate'
                                       )
                                     }
                                   >
-                                    {employee.employee_status === "active"
-                                      ? "Deactivate"
-                                      : "Activate"}
+                                    {employee.employee_status === 'active'
+                                      ? 'Deactivate'
+                                      : 'Activate'}
                                   </button>
                                 </div>
                               </td>
@@ -473,7 +482,7 @@ const AdminUser = (props) => {
                   </div> */}
                 </div>
               </TabPane>
-              <TabPane tabId={"projects"}>
+              <TabPane tabId={'projects'}>
                 <div className="admin-user-content">
                   {/* <div className="table-top-content">
                     <label className="table-entries">
@@ -499,7 +508,7 @@ const AdminUser = (props) => {
                           </th>
                           <th>
                             <span>
-                              Associated Employee Names{" "}
+                              Associated Employee Names{' '}
                               <i className="sort-i"></i>
                             </span>
                           </th>
@@ -564,12 +573,12 @@ const AdminUser = (props) => {
                                     }
                                     disabled={
                                       isArchived &&
-                                      localStorage.getItem("roleId") !== "0"
+                                      localStorage.getItem('roleId') !== '0'
                                     }
                                   >
-                                    {project.status === "Archived"
-                                      ? "Unarchive"
-                                      : "Archive"}
+                                    {project.status === 'Archived'
+                                      ? 'Unarchive'
+                                      : 'Archive'}
                                   </button>
                                 </div>
                               </td>
@@ -587,8 +596,8 @@ const AdminUser = (props) => {
                   </div> */}
                 </div>
               </TabPane>
-              <TabPane tabId={"external"} style={{ display: "grid" }}>
-                {activeTab === "external" && (
+              <TabPane tabId={'external'} style={{ display: 'grid' }}>
+                {activeTab === 'external' && (
                   <ExternalUsers
                     customer={selectedCustomer}
                     externalUserData={externalUserData}

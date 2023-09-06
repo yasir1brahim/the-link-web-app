@@ -1,79 +1,48 @@
-import React, { useState } from "react";
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
-import axiosInstance from "../../config/axios";
-import { toast } from "react-toastify";
+import React, { useState } from 'react';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import axiosInstance from '../../config/axios';
+import { toast } from 'react-toastify';
 // import { Typeahead } from 'react-bootstrap-typeahead';
-import { MaskedInput } from "../shared/MaskedInput/maskedInput";
+import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 
 const EditEmployee = ({
   modal,
   toggleModal,
-  customer,
+  customerID,
   employee,
   pageRefresh,
   setPageRefresh,
-  empData,
+  empData
 }) => {
   const [email, setEmail] = useState({
     value: employee?.emp_email || employee?.email_address,
-    errors: "",
+    errors: ''
   });
-  const [firstName, setFirstName] = useState({ value: "", errors: "" });
-  const [lastName, setLastName] = useState({ value: "", errors: "" });
-  const [contactNumber, setContactNumber] = useState({ value: "", errors: "" });
-  // console.log('customer', customer)
-  // console.log('employee', employee)
-  // console.log('modal', modal)
-  // console.log('employeeDta', empData)
-  // console.log('email',  email.value)
-  // const emailRef = useRef()
-  // console.log('emailRef', emailRef.current?.value)
-  // const [projects, setProjects] = useState([]);
-  // const [asscProject, setAsscProject] = useState([]);
-
-  // useEffect(() => {
-  //   setEmail({ value: '', errors: '' });
-  //   const fetchData = async () => {
-  //     const response = await axiosInstance({
-  //       method: 'get',
-  //       url: `/projects/${customer.customer_id}`,
-  //     });
-  //     setProjects(response.data.message);
-  //   };
-
-  //   fetchData().catch(console.error);
-  // }, [customer]);
-
-  // const validate = () => {
-  //   let error = false;
-  //   if (email.value === '') {
-  //     setEmail({ ...email, errors: 'Email is required.' });
-  //     error = true;
-  //   }
-  //   return error;
-  // };
+  const [firstName, setFirstName] = useState({ value: '', errors: '' });
+  const [lastName, setLastName] = useState({ value: '', errors: '' });
+  const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
 
   const validate = () => {
     let error = false;
-    if (email?.value === "") {
-      setEmail({ ...email, errors: "Email is required." });
+    if (email?.value === '') {
+      setEmail({ ...email, errors: 'Email is required.' });
       error = true;
     } else if (empData?.find((item) => item?.emp_email === email?.value)) {
-      setEmail({ ...email, errors: "Email already exists" });
+      setEmail({ ...email, errors: 'Email already exists' });
       error = true;
     } else {
-      setEmail({ ...email, errors: "" });
+      setEmail({ ...email, errors: '' });
       error = false;
     }
     return error;
   };
   const handleContactNumberChange = (e) => {
-    let value = contactNumber.value.replace(/[^0-9]/g, "");
+    let value = contactNumber.value.replace(/[^0-9]/g, '');
     let regex = /^[0-9]*$/;
     if (regex.test(value)) {
       setContactNumber({
         ...contactNumber,
-        value: e.target.value,
+        value: e.target.value
       });
     }
   };
@@ -85,8 +54,8 @@ const EditEmployee = ({
       const employeeName = employee?.name || employee?.full_name;
       try {
         const response = await axiosInstance({
-          method: "put",
-          url: "/updateEmployee",
+          method: 'put',
+          url: '/updateEmployee',
           data: {
             email_address:
               email.value || employee?.emp_email || employee?.email_address,
@@ -96,37 +65,36 @@ const EditEmployee = ({
             // projects: asscProject.map((project) => project.value),
             projects: [],
             contact_number:
-              contactNumber.value.replace(/[^0-9]/g, "") ||
+              contactNumber.value.replace(/[^0-9]/g, '') ||
               employee?.contact_number,
-            customer_id:
-              customer?.customer_id || customer?.id || customer[0]?.id,
-            emp_id: employee?.emp_id || employee?.id,
-          },
+            customer_id: customerID,
+            emp_id: employee?.emp_id || employee?.id
+          }
         });
         if (response.data) {
           console.log(response.data);
           setPageRefresh(!pageRefresh);
           toggleModal();
-          toast.success("Employee edited successfully!", {
-            position: "bottom-center",
+          toast.success('Employee edited successfully!', {
+            position: 'bottom-center',
             autoClose: 5000,
             hideProgressBar: true,
             closeOnClick: true,
             pauseOnHover: true,
             draggable: true,
-            progress: undefined,
+            progress: undefined
           });
         }
       } catch (error) {
         console.log(error.message);
         toast.error(error.response.data.message, {
-          position: "bottom-center",
+          position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
+          progress: undefined
         });
         toggleModal();
       }
@@ -158,12 +126,12 @@ const EditEmployee = ({
                       ? employee?.name.split(/(\s+)/)[0]
                       : employee?.full_name
                       ? employee?.full_name.split(/(\s+)/)[0]
-                      : ""
+                      : ''
                   }
                   onChange={(e) => {
                     setFirstName({
                       ...firstName,
-                      value: e.target.value,
+                      value: e.target.value
                     });
                   }}
                 />
@@ -185,12 +153,12 @@ const EditEmployee = ({
                       ? employee?.name.split(/(\s+)/)[2]
                       : employee?.full_name
                       ? employee?.full_name.split(/(\s+)/)[2]
-                      : ""
+                      : ''
                   }
                   onChange={(e) => {
                     setLastName({
                       ...lastName,
-                      value: e.target.value,
+                      value: e.target.value
                     });
                   }}
                 />
@@ -211,7 +179,7 @@ const EditEmployee = ({
                   onChange={(e) => {
                     setEmail({
                       ...email,
-                      value: e.target.value,
+                      value: e.target.value
                     });
                   }}
                 />
@@ -219,7 +187,7 @@ const EditEmployee = ({
                   Email Address
                 </label>
                 {email.errors && (
-                  <small className="form-error" style={{ color: "red" }}>
+                  <small className="form-error" style={{ color: 'red' }}>
                     {email.errors}
                   </small>
                 )}
@@ -251,23 +219,23 @@ const EditEmployee = ({
                   name="contactNumber"
                   error={contactNumber.errors}
                   mask={[
-                    "(",
+                    '(',
                     /[1-9]/,
                     /\d/,
                     /\d/,
-                    ")",
-                    " ",
+                    ')',
+                    ' ',
                     /\d/,
                     /\d/,
                     /\d/,
-                    "-",
+                    '-',
                     /\d/,
                     /\d/,
                     /\d/,
-                    /\d/,
+                    /\d/
                   ]}
-                  labelClass={"text-label"}
-                  label={"Phone"}
+                  labelClass={'text-label'}
+                  label={'Phone'}
                 />
               </div>
             </div>
@@ -296,7 +264,7 @@ const EditEmployee = ({
           </Button>
           <Button color="primary" onClick={handleSubmit}>
             Save
-          </Button>{" "}
+          </Button>{' '}
         </ModalFooter>
         {/* </form> */}
       </ModalBody>

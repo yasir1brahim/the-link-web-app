@@ -1,16 +1,16 @@
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
-import React, { useState } from "react";
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import React, { useState } from 'react';
 // import { Typeahead } from "react-bootstrap-typeahead";
 
 const UpdateListing = (props) => {
   const isEmpExtTab =
-    props.activeTab === "employees" || props.activeTab === "external";
+    props.activeTab === 'employees' || props.activeTab === 'external';
   const modalData = isEmpExtTab ? props.projectData : props.employeeData;
 
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
 
   const handleSelectEmp = (id) => {
-    console.log("selectedEmp", props.selectedEmployeeList, id);
+    console.log('selectedEmp', props.selectedEmployeeList, id);
     if (props.selectedEmployeeList?.includes(id)) {
       let selectedEmp = props.selectedEmployeeList.filter(
         (empId) => empId !== id
@@ -29,7 +29,7 @@ const UpdateListing = (props) => {
       className="updatelist-admin modal-md"
     >
       <ModalHeader toggle={props.toggleUpdateList}>
-        {isEmpExtTab ? "Projects" : "Employees"}
+        {isEmpExtTab ? 'Projects' : 'Employees'}
       </ModalHeader>
       <ModalBody>
         <form className="update-list-form">
@@ -48,10 +48,10 @@ const UpdateListing = (props) => {
             />
             <label
               className="text-label"
-              style={{ textTransform: "capitalize" }}
+              style={{ textTransform: 'capitalize' }}
               htmlFor="saveSelectionName"
             >
-              {`Search ${isEmpExtTab ? "Project" : "Employee"} Values`}
+              {`Search ${isEmpExtTab ? 'Project' : 'Employee'} Values`}
             </label>
           </div>
           <div className="row">
@@ -114,7 +114,7 @@ const UpdateListing = (props) => {
               onClick={props.handleUpdateList}
             >
               Save
-            </Button>{" "}
+            </Button>{' '}
           </ModalFooter>
         </form>
       </ModalBody>

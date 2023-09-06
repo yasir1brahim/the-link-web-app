@@ -1,4 +1,12 @@
-const PersonalTile = ({setSpecUploadProject, ifSpecsUploaded, projectName, handleLaunch, project, toggleUploadSpecsModal}) => {
+const PersonalTile = ({
+  setSpecUploadProject,
+  ifSpecsUploaded,
+  projectName,
+  handleLaunch,
+  project,
+  toggleUploadSpecsModal
+  // handleCollaborationLaunch,
+}) => {
   return (
     <div className="grid-view grid-view-personal">
       <div className="gv-heading-content">
@@ -6,17 +14,23 @@ const PersonalTile = ({setSpecUploadProject, ifSpecsUploaded, projectName, handl
         <span className="gv-project-type">Personal</span>
       </div>
       <div className="gv-body-content">
-        <p className="gv-project-desc">
-        </p>
+        <p className="gv-project-desc"></p>
         <div className="gv-project-logs">
-          <button className="btn btn-primary" disabled={!ifSpecsUploaded} onClick={() => handleLaunch(project)}>
-            Submittal Log
+          <button
+            className="btn btn-primary full-btn"
+            disabled={!ifSpecsUploaded}
+            onClick={() => handleLaunch(project)}
+          >
+            Launch Project
             <span className="log-arrow"></span>
           </button>
-          <button className="btn btn-primary" disabled>
-            Dashboard
+          {/* <button
+            className="btn btn-primary"
+            onClick={() => handleCollaborationLaunch(project)}
+          >
+            Collaboration Hub
             <span className="log-arrow"></span>
-          </button>
+          </button> */}
         </div>
         <div className="gv-logs-upload">
           <form className="upload-document-form">
@@ -36,9 +50,11 @@ const PersonalTile = ({setSpecUploadProject, ifSpecsUploaded, projectName, handl
               </div> */}
               <button
                 type="button"
-                className={`btn btn-primary`}
-                onClick={()=>{toggleUploadSpecsModal(); setSpecUploadProject(project)}}
-                style={{width: `100%`}}
+                className={`btn btn-primary full-btn small-text`}
+                onClick={() => {
+                  toggleUploadSpecsModal();
+                  setSpecUploadProject(project);
+                }}
               >
                 Upload Specs
               </button>

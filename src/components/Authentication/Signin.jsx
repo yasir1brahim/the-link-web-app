@@ -38,8 +38,8 @@ const Signin = (props) => {
           url: '/login',
           data: {
             email_address: email.value,
-            password: password.value,
-          },
+            password: password.value
+          }
         });
         if (response.data) {
           localStorage.setItem('token', response.data.access_token);
@@ -49,12 +49,14 @@ const Signin = (props) => {
           console.log(response.data);
           return response.data.role_id === 0
             ? history({ pathname: '/admin-landing' })
-            : response.data.role_id === 2 || response.data.role_id === 6 || response.data.role_id === 7
+            : response.data.role_id === 2 ||
+              response.data.role_id === 6 ||
+              response.data.role_id === 7
             ? history({ pathname: '/project-list' })
             : history({ pathname: '/' });
         }
       } catch (error) {
-       handleError(error)
+        handleError(error);
       }
     }
   };

@@ -172,6 +172,7 @@
             font-weight: bold;
           }
         }
+
         .table-bulk-changes {
           display: flex;
           margin-left: auto;
@@ -203,6 +204,9 @@
           }
         }
       }
+    }
+    .information-message {
+      font-size: 14px;
     }
   }
 }

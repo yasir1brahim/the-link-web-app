@@ -1,63 +1,61 @@
-import {
-    Button,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    ModalFooter
-} from "reactstrap";
-import React from "react";
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import React from 'react';
 // import ProfilePhoto from '../../assets/images/dummy-profile.svg';
 
 const DetailInfo = (props) => {
-    return (
-        <Modal
-            isOpen={props.detailInfoModal}
-            fade={false}
-            toggle={props.toggleDetailInfo}
-            className="detailinfo-admin modal-md"
-        >
-            <ModalHeader toggle={props.toggleDetailInfo}>User Details</ModalHeader>
-            <ModalBody>
-                <div className="detail-info">
-                    <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
-                        {/* <div className="customer-dp-container">
+  return (
+    <Modal
+      isOpen={props.detailInfoModal}
+      fade={false}
+      toggle={props.toggleDetailInfo}
+      className="detailinfo-admin modal-md"
+    >
+      <ModalHeader toggle={props.toggleDetailInfo}>User Details</ModalHeader>
+      <ModalBody>
+        <div className="detail-info">
+          <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
+            {/* <div className="customer-dp-container">
                             <img src={ProfilePhoto} className='uploaded-image' alt="Company Logo" />
                         </div> */}
-                        <div className="customer-profile">
-                            <div className="row">
-                                <div className="col-12">
-                                    <div className="text-label-value">
-                                        <div className="text-label">First Name: </div>
-                                        <div className="text-value">
-                                            {props.modalData?.full_name?.split(" ")[0]}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-12">
-                                    <div className="text-label-value">
-                                        <div className="text-label">Last Name: </div>
-                                        <div className="text-value">
-                                        {props.modalData?.full_name?.split(" ")[props.modalData?.full_name.split(" ").length - 1]}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-12">
-                                    <div className="text-label-value">
-                                        <div className="text-label">Email ID: </div>
-                                        <div className="text-value">
-                                            {props.modalData?.email_address}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-12">
-                                    <div className="text-label-value">
-                                        <div className="text-label">Phone: </div>
-                                        <div className="text-value">
-                                           {props.modalData?.contact_number}
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* <div className="col-12">
+            <div className="customer-profile">
+              <div className="row">
+                <div className="col-12">
+                  <div className="text-label-value">
+                    <div className="text-label">First Name: </div>
+                    <div className="text-value">
+                      {props.modalData?.full_name?.split(' ')[0]}
+                    </div>
+                  </div>
+                </div>
+                <div className="col-12">
+                  <div className="text-label-value">
+                    <div className="text-label">Last Name: </div>
+                    <div className="text-value">
+                      {
+                        props.modalData?.full_name?.split(' ')[
+                          props.modalData?.full_name.split(' ').length - 1
+                        ]
+                      }
+                    </div>
+                  </div>
+                </div>
+                <div className="col-12">
+                  <div className="text-label-value">
+                    <div className="text-label">Email ID: </div>
+                    <div className="text-value">
+                      {props.modalData?.email_address}
+                    </div>
+                  </div>
+                </div>
+                <div className="col-12">
+                  <div className="text-label-value">
+                    <div className="text-label">Phone: </div>
+                    <div className="text-value">
+                      {props.modalData?.contact_number}
+                    </div>
+                  </div>
+                </div>
+                {/* <div className="col-12">
                                     <div className="text-label-value">
                                         <div className="text-label">Address: </div>
                                         <div className="text-value">
@@ -65,21 +63,25 @@ const DetailInfo = (props) => {
                                         </div>
                                     </div>
                                 </div> */}
-                            </div>
-                        </div>
-                    </div>
-                    <ModalFooter>
-                        <Button color="secondary" onClick={props.toggleDetailInfo}>
-                            Cancel
-                        </Button>
-                        <Button color="primary" type="button" onClick={props.toggleDetailInfo}>
-                            Save
-                        </Button>{" "}
-                    </ModalFooter>
-                </div>
-            </ModalBody>
-        </Modal>
-    )
-}
+              </div>
+            </div>
+          </div>
+          <ModalFooter>
+            <Button color="secondary" onClick={props.toggleDetailInfo}>
+              Cancel
+            </Button>
+            <Button
+              color="primary"
+              type="button"
+              onClick={props.toggleDetailInfo}
+            >
+              Save
+            </Button>{' '}
+          </ModalFooter>
+        </div>
+      </ModalBody>
+    </Modal>
+  );
+};
 
 export default DetailInfo;

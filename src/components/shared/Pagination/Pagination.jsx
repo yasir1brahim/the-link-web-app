@@ -19,7 +19,7 @@ function PaginatedItems({
   items,
   setCurrentItems,
   itemsPerPage,
-  setItemsPerPage,
+  setItemsPerPage
 }) {
   // We start with an empty list of items.
   const [pageCount, setPageCount] = useState(0);

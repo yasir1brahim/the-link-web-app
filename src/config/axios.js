@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: window.location.href.includes("app.thelink.ai") ? 'https://log-manager-api-prod.thelink.ai' : 'http://3.238.248.53:5000/',
+  baseURL: window.location.href.includes('app.thelink.ai')
+    ? 'https://log-manager-api-prod.thelink.ai'
+    : 'http://3.238.248.53:5000/'
   // baseURL: 'https://log-manager-api-prod.thelink.ai',
   // headers: {
   //   Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -10,7 +12,9 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(function (config) {
   // Do something before request is sent
-  let token = !window.location.pathname.includes('reset-password') ? localStorage.getItem('token') : new URLSearchParams(window.location.search)?.get("token");
+  let token = !window.location.pathname.includes('reset-password')
+    ? localStorage.getItem('token')
+    : new URLSearchParams(window.location.search)?.get('token');
   config.headers['Authorization'] = 'Bearer ' + token;
   return config;
 });

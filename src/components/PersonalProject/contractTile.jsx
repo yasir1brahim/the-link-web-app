@@ -4,7 +4,9 @@ const ContractTile = ({
   handleLaunch,
   project,
   toggleUploadSpecsModal,
-  setSpecUploadProject
+  setSpecUploadProject,
+  // handleCollaborationLaunch,
+  toggleUploadSpecsButton
 }) => {
   return (
     <div className="grid-view grid-view-contract">
@@ -16,17 +18,20 @@ const ContractTile = ({
         <p className="gv-project-desc"></p>
         <div className="gv-project-logs">
           <button
-            className="btn btn-primary"
+            className="btn btn-primary full-btn"
             onClick={() => handleLaunch(project)}
             disabled={!ifSpecsUploaded}
           >
-            Submittal Log
+            Launch Project
             <span className="log-arrow"></span>
           </button>
-          <button className="btn btn-primary" disabled>
-            Dashboard
+          {/* <button
+            className="btn btn-primary"
+            onClick={() => handleCollaborationLaunch(project)}
+          >
+            Collaboration Hub
             <span className="log-arrow"></span>
-          </button>
+          </button> */}
         </div>
         <div className="gv-logs-upload">
           <form className="upload-document-form">
@@ -44,14 +49,18 @@ const ContractTile = ({
                   </div> */}
               {/* </label> */}
               {/* </div> */}
-              <button
-                type="button"
-                className={`btn btn-primary`}
-                onClick={()=>{toggleUploadSpecsModal(); setSpecUploadProject(project)}}
-                style={{width: `100%`}}
-              >
-                Upload Specs
-              </button>
+              {toggleUploadSpecsButton ? (
+                <button
+                  type="button"
+                  className={`btn btn-primary full-btn small-text`}
+                  onClick={() => {
+                    toggleUploadSpecsModal();
+                    setSpecUploadProject(project);
+                  }}
+                >
+                  Upload Specs
+                </button>
+              ) : null}
             </div>
           </form>
         </div>

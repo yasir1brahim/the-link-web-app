@@ -8,9 +8,9 @@ import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 const CreateEmployee = ({
   modal,
   toggleModal,
-  customer,
+  customerID,
   pageRefresh,
-  setPageRefresh,
+  setPageRefresh
 }) => {
   const [email, setEmail] = useState({ value: '', errors: '' });
   const [firstName, setFirstName] = useState({ value: '', errors: '' });
@@ -51,13 +51,13 @@ const CreateEmployee = ({
     ) {
       setContactNumber({
         ...contactNumber,
-        errors: 'Contact Number should be of 10 digits.',
+        errors: 'Contact Number should be of 10 digits.'
       });
       error = true;
     } else if (contactNumber.value.replace(/[^0-9]/g, '').length === 10) {
       setContactNumber({
         ...contactNumber,
-        errors: '',
+        errors: ''
       });
       error = false;
     }
@@ -70,7 +70,7 @@ const CreateEmployee = ({
     if (regex.test(value)) {
       setContactNumber({
         ...contactNumber,
-        value: e.target.value,
+        value: e.target.value
       });
     }
   };
@@ -87,14 +87,17 @@ const CreateEmployee = ({
             full_name: `${firstName.value}  ${lastName.value}`,
             // projects: asscProject.map((project) => project.value),
             projects: [],
-            contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
-            customer_id: customer.customer_id || localStorage.getItem("userId"),
-          },
+            contact_number: contactNumber.value?.replace(/[^0-9]/g, ''),
+            customer_id: customerID
+          }
         });
-        if (response.data) {
-          console.log(response.data);
+        if (response?.data) {
+          console.log(response?.data);
           setPageRefresh(!pageRefresh);
           toggleModal();
+          toast.success('Employee created successfully!', {
+            position: 'bottom-center'
+          });
         }
       } catch (error) {
         console.log(error.message);
@@ -105,7 +108,7 @@ const CreateEmployee = ({
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
+          progress: undefined
         });
         toggleModal();
       }
@@ -136,7 +139,7 @@ const CreateEmployee = ({
                     onChange={(e) => {
                       setFirstName({
                         ...firstName,
-                        value: e.target.value,
+                        value: e.target.value
                       });
                     }}
                   />
@@ -158,7 +161,7 @@ const CreateEmployee = ({
                     onChange={(e) => {
                       setLastName({
                         ...lastName,
-                        value: e.target.value,
+                        value: e.target.value
                       });
                     }}
                   />
@@ -180,7 +183,7 @@ const CreateEmployee = ({
                     onChange={(e) => {
                       setEmail({
                         ...email,
-                        value: e.target.value,
+                        value: e.target.value
                       });
                     }}
                   />
@@ -230,7 +233,7 @@ const CreateEmployee = ({
                       /\d/,
                       /\d/,
                       /\d/,
-                      /\d/,
+                      /\d/
                     ]}
                     labelClass={'text-label'}
                     label={'Phone'}

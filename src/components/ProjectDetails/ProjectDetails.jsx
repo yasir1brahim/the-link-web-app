@@ -49,8 +49,6 @@
 //     });
 //   }, [state?.project, pageRefresh]);
 
-
-
 //   const backToUpload = () => {
 //     toggleErrorModal(false);
 //     setModal(true);

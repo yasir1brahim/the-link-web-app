@@ -1,24 +1,27 @@
-import React, { useEffect, useState } from "react";
-import axiosInstance from "../../config/axios";
-import ViewSDKClient from "../../ViewSDKClient";
+import React, { useEffect, useState } from 'react';
+import axiosInstance from '../../config/axios';
+import ViewSDKClient from '../../ViewSDKClient';
 const RenderMenu = ({ url, textLoc, docId }) => {
-  const [docAnnotations, setAnnotations] = useState([])
-  const [newAnnotations, setNewAnnotations] = useState([])
+  const [docAnnotations, setAnnotations] = useState([]);
+  const [newAnnotations, setNewAnnotations] = useState([]);
   // let element = document.getElementsByClassName("sdk-HeaderView-header");
 
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
-        method: 'get',
-        url: `/getMetadata/${docId}`,
+        method: 'post',
+        url: `/pdf/v2/getMetadata`,
+        data: {
+          doc_id: docId
+        }
       });
       setAnnotations(response.data.data);
     };
 
     fetchData().catch((error) => {
-      console.log(error)
+      console.log(error);
     });
-  }, [docId])
+  }, [docId]);
   // useEffect(()=>{
   //   if(element[0]) {
   //     element[0].style.backgroundColor = 'rgba(32, 42, 68, 0.9)';
@@ -37,23 +40,22 @@ const RenderMenu = ({ url, textLoc, docId }) => {
             data: newAnnotations
           }
         });
-        setAnnotations(newAnnotations)
+        setAnnotations(newAnnotations);
       };
 
       fetchData().catch((error) => {
-        console.log(error)
+        console.log(error);
       });
-
     }
-  }, [newAnnotations, docId])
+  }, [newAnnotations, docId]);
 
   const loadPDF = () => {
     const viewSDKClient = new ViewSDKClient();
     viewSDKClient.ready().then(() => {
       const previewFilePromise = viewSDKClient.previewFile(
-        "pdf-div",
+        'pdf-div',
         {
-          defaultViewMode: "FIT_WIDTH",
+          defaultViewMode: 'FIT_WIDTH',
           showAnnotationTools: true,
           showLeftHandPanel: false,
           showPageControls: true,
@@ -61,59 +63,62 @@ const RenderMenu = ({ url, textLoc, docId }) => {
           showPrintPDF: false,
           enableAnnotationAPIs: true,
           includePDFAnnotations: true,
-          showFullScreen: true,
+          showFullScreen: true
           // exitPDFViewerType: 'RETURN',
-
-
         },
-        url, setNewAnnotations
+        url,
+        setNewAnnotations
       );
 
-      previewFilePromise.then(adobeViewer => {
-        adobeViewer.getAnnotationManager().then(annotationManager => {
-          annotationManager.setConfig({
-            showCommentsPanel: false
-          })
-            .then(() => console.log("Success"))
-            .catch(error => console.log(error));
+      previewFilePromise.then((adobeViewer) => {
+        adobeViewer.getAnnotationManager().then((annotationManager) => {
+          annotationManager
+            .setConfig({
+              showCommentsPanel: false
+            })
+            .then(() => console.log('Success'))
+            .catch((error) => console.log(error));
         });
       });
 
-
-      previewFilePromise.then(adobeViewer => {
-        adobeViewer.getAnnotationManager().then(annotationManager => {
-          annotationManager.getAnnotations()
-            .then(result => {
-              result.length && setNewAnnotations(result)
-              console.log('annotation:', result)
-            }
-            )
-            .catch(error => console.log(error));
+      previewFilePromise.then((adobeViewer) => {
+        adobeViewer.getAnnotationManager().then((annotationManager) => {
+          annotationManager
+            .getAnnotations()
+            .then((result) => {
+              result.length && setNewAnnotations(result);
+              console.log('annotation:', result);
+            })
+            .catch((error) => console.log(error));
         });
       });
 
-      previewFilePromise.then(adobeViewer => {
-        adobeViewer.getAnnotationManager().then(annotationManager => {
-          annotationManager.addAnnotations(docAnnotations)
-            .then(
-              () => previewFilePromise.then(adobeViewer => {
-                adobeViewer.getAPIs().then(apis => {
-                  apis.gotoLocation(textLoc.page_no, textLoc.x, textLoc.y)
-                    .then(() => console.log("Success"))
-                    .catch(error => console.log(error));
+      previewFilePromise.then((adobeViewer) => {
+        adobeViewer.getAnnotationManager().then((annotationManager) => {
+          annotationManager
+            .addAnnotations(docAnnotations)
+            .then(() =>
+              previewFilePromise.then((adobeViewer) => {
+                adobeViewer.getAPIs().then((apis) => {
+                  apis
+                    .gotoLocation(textLoc.page_no, textLoc.x, textLoc.y)
+                    .then(() => console.log('Success'))
+                    .catch((error) => console.log(error));
                 });
-              }))
-            .catch(error => console.log(error));
+              })
+            )
+            .catch((error) => console.log(error));
         });
       });
-      previewFilePromise.then(adobeViewer => {
-        adobeViewer.getAPIs().then(apis => {
-          apis.gotoLocation(textLoc.page_no, textLoc.x, textLoc.y)
+      previewFilePromise.then((adobeViewer) => {
+        adobeViewer.getAPIs().then((apis) => {
+          apis
+            .gotoLocation(textLoc.page_no, textLoc.x, textLoc.y)
             // apis.gotoLocation(2, 104, 407)
-            .then(() => console.log("Success"))
-            .catch(error => console.log(error));
+            .then(() => console.log('Success'))
+            .catch((error) => console.log(error));
         });
-      })
+      });
     });
   };
   return (
@@ -125,7 +130,6 @@ const RenderMenu = ({ url, textLoc, docId }) => {
         onDocumentLoad={loadPDF()}
       ></div>
     </>
-
   );
 };
 export default RenderMenu;

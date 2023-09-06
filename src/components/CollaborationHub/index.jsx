@@ -1,0 +1,166 @@
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
+import Header from '../shared/Header/Header';
+import NavbarTop from '../shared/NavbarTop/NavbarTop';
+// import PersonalProject from "./PersonalProject";
+import { useSearchParams } from 'react-router-dom';
+// import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
+import axiosInstance from '../../config/axios';
+import handleError from '../../config/errorHandler';
+import CollaborationPdfReader from '../PdfReader/collaborationPdfReader';
+import Switch from 'react-switch';
+import CollaborationPdfVersionControl from '../PdfReader/collaborationPdfVersionControl';
+
+const CollaborationHub = () => {
+  const { state } = useLocation();
+  const [searchParams] = useSearchParams();
+  const [toggleState, setToggleState] = useState(false);
+  const [userList, setUserList] = useState([]);
+  const projectDetails = searchParams.get('projectDetails')?.split(',');
+  const projectId = projectDetails?.length
+    ? JSON.parse(projectDetails[0])
+    : null;
+  // const projectType = state?.project.project_type;
+  const projectName = searchParams.get('projectName');
+  // const [modal, setModal] = useState(false);
+  // const toggleModal = () => setModal(!modal);
+  // const [pdfFile, setPdfFile] = useState({});
+  const [docParsed, setDocParsed] = useState(0);
+  const [collabDocs, setCollabDocs] = useState([]);
+
+  // useEffect(() => {
+  //   if (!modal) {
+  //     setPdfFile({});
+  //   }
+  // }, [modal]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axiosInstance({
+        method: 'get',
+        url: `/collab/get_spec_index`,
+        params: {
+          project_id: state?.project?.project_id || projectId
+        }
+      });
+      setCollabDocs(response.data?.indexes);
+    };
+
+    fetchData().catch((error) => {
+      handleError(error);
+    });
+  }, [state?.project?.project_id, projectId]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await axiosInstance({
+        method: 'get',
+        url: `/project_data/${state.project?.project_id || projectId}`
+      });
+      setDocParsed(response.data.doc_parsed);
+    };
+
+    fetchData().catch((error) => {
+      handleError(error);
+    });
+  }, [state?.project, projectId]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const userListResp = await axiosInstance({
+        method: 'get',
+        url: `/collab/get_project_users`,
+        params: {
+          project_id: state.project?.project_id || projectId
+        }
+      });
+      setUserList(userListResp.data.data);
+    };
+
+    fetchData().catch((error) => {
+      handleError(error);
+    });
+  }, [state?.project, projectId]);
+
+  useEffect(() => {
+    if (toggleState) {
+      const div = document.getElementById('chub-item-container');
+      div.innerHTML = '';
+    }
+  }, [toggleState]);
+
+  return (
+    <>
+      <div className="page-wrap">
+        <NavbarTop />
+        <div className="page-wrap-content personal-projects-wrapper">
+          <Header
+            // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
+            // centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
+            breadcrumb={projectName || 'Project'}
+            breadcrumb2={'Collab Hub'}
+            btnSize={'small'}
+            title={state?.projectName || projectName || ''}
+            // docParsed={docParsed}
+            showBtn={'Upload Additional'}
+            navBtn={'collab'}
+
+            // toggleModal={toggleModal}
+          />
+          <div class="version-control-toggle">
+            Compare Versions &nbsp;
+            <Switch
+              height={15}
+              onColor={'#d5e83e'}
+              onChange={() => setToggleState(!toggleState)}
+              checked={toggleState}
+            />
+          </div>
+        </div>
+        <div className="collaboration-wrapper-sidenav">
+          <div className="collabHub-sideNav-contents">
+            <div className="side-nav-collab-hub-heading">Spec Sections</div>
+            {docParsed ? (
+              <div className="side-nav-collab-hub-heading collab-hub-sub-heading">
+                {`Uploaded: ${docParsed}`}
+              </div>
+            ) : null}
+            <div className="side-nav-collab-hub" id="chub-item-container" />
+          </div>
+          <div className="ss-pdf-wrraper collaboration-wrapper">
+            {toggleState ? (
+              <CollaborationPdfVersionControl
+                projectName={state?.projectName || projectName || ''}
+              />
+            ) : (
+              collabDocs &&
+              collabDocs.length > 0 && (
+                <CollaborationPdfReader
+                  collabDocs={collabDocs}
+                  projectName={state?.projectName || projectName || ''}
+                  userList={userList}
+                />
+              )
+            )}
+          </div>
+        </div>
+      </div>
+      {/* <UploadDocuments
+        modal={modal}
+        toggleModal={toggleModal}
+        setPdfFile={setPdfFile}
+        pdfFile={pdfFile}
+        handleSubmit={handleSubmit}
+        isUploadLoading={isUploadLoading}
+        errorModal={errorModal}
+        toggleErrorModal={toggleErrorModal}
+        backToUpload={backToUpload}
+        successModal={successModal}
+        toggleSuccessModal={toggleSuccessModal}
+        fileData={fileData}
+      /> */}
+    </>
+  );
+};
+
+export default CollaborationHub;

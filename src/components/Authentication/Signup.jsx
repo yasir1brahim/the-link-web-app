@@ -24,8 +24,8 @@ const SignUp = () => {
           username: userName,
           full_name: fullName,
           email_address: email,
-          password: password,
-        },
+          password: password
+        }
       });
       if (response.data) {
         if (response.data.message === 'Account already exists !') {

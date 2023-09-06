@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
-import { ReactComponent as Logo } from "../../../assets/images/logo-dark 1.svg";
-import { ReactComponent as Down } from "../../../assets/images/chevron-bottom.svg";
+import React, { useEffect, useRef, useState } from 'react';
+import { ReactComponent as Logo } from '../../../assets/images/logo-dark 1.svg';
+import { ReactComponent as Down } from '../../../assets/images/chevron-bottom.svg';
 // import { ReactComponent as Notification } from '../../../assets/images/notificat.svg';
-import { Navbar, Nav, NavItem, NavLink } from "reactstrap";
+import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
 const NavbarTop = () => {
   const [navDrop, setNavDrop] = useState(false);
 
@@ -19,8 +19,8 @@ const NavbarTop = () => {
   };
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   });
   // Click Outside code ends
 
@@ -32,29 +32,14 @@ const NavbarTop = () => {
       >
         <a
           href={
-            localStorage.getItem("roleId") === "0"
-              ? "/admin-landing"
-              : "/project-list"
+            localStorage.getItem('roleId') === '0'
+              ? '/admin-landing'
+              : '/project-list'
           }
           className="navbar-brand"
         >
           <Logo />
         </a>
-        {window.location.href.includes("project-logs") && (
-          <Nav className="ml-auto" navbar>
-            <NavItem>
-              <span
-                style={{
-                  color: "white",
-                  fontSize: "25px",
-                  fontWeight: 600,
-                }}
-              >
-                Submittal Log
-              </span>
-            </NavItem>
-          </Nav>
-        )}
         <Nav className="ml-auto" navbar>
           {/* <NavItem>
             <NavLink className="notification-wrapper">
@@ -64,32 +49,33 @@ const NavbarTop = () => {
           </NavItem> */}
           <NavItem>
             <NavLink
-              className={"user-wrapper " + (navDrop ? "navdrop-open" : "")}
+              className={'user-wrapper ' + (navDrop ? 'navdrop-open' : '')}
               // href="/"
               onClick={toggleDrop}
             >
               <span className="user-icon">
-                {localStorage.getItem("fullName")?.charAt(0) || (
+                {localStorage.getItem('fullName')?.charAt(0) || (
                   <i className="fa fa-user"></i>
                 )}
               </span>
               <span className="user-name">
-                {localStorage.getItem("fullName")}
+                {localStorage.getItem('fullName')}
               </span>
               <Down />
             </NavLink>
             {navDrop ? (
               <div className="nav-dropdown" ref={ref}>
-                {localStorage.getItem("roleId") === "0" && !window.location.pathname.includes('admin-user') && (
-                  <a
-                    href="/admin-user"
-                    className="navlist"
-                    onClick={toggleDrop}
-                  >
-                    View Admin Portal
-                  </a>
-                )}
-                {localStorage.getItem("roleId") === "2" && (
+                {localStorage.getItem('roleId') === '0' &&
+                  !window.location.pathname.includes('admin-user') && (
+                    <a
+                      href="/admin-user"
+                      className="navlist"
+                      onClick={toggleDrop}
+                    >
+                      View Admin Portal
+                    </a>
+                  )}
+                {localStorage.getItem('roleId') === '2' && (
                   <a
                     href="/customer-profile"
                     className="navlist"
@@ -107,7 +93,7 @@ const NavbarTop = () => {
                 </a>
               </div>
             ) : (
-              ""
+              ''
             )}
           </NavItem>
         </Nav>

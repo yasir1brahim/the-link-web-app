@@ -16,7 +16,7 @@ export const MaskedInput = (props) => {
     labelClass,
     mask,
     name,
-    defaultValue,
+    defaultValue
   } = props;
   // const [focused, setFocused] = useState(false);
   return (

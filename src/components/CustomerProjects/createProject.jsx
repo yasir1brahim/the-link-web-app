@@ -27,7 +27,7 @@ const CreateProject = ({
   const [leadContact, setLeadContact] = useState({
     value: '',
     label: '',
-    email: '',
+    email: ''
   });
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -39,9 +39,9 @@ const CreateProject = ({
   const [profilePicture, setProfilePicture] = useState('');
   const [refetchEmp, setRefetchEmp] = useState(false);
   const [empForm, openEmpForm] = useState(false);
-  const [visibilityType, setVisibilityType] = useState('Contract')
+  const [visibilityType, setVisibilityType] = useState('Contract');
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });\
-  console.log('customer', projects)
+  console.log('customer', projects);
 
   useEffect(() => {
     if (!modal) {
@@ -51,7 +51,7 @@ const CreateProject = ({
       setEndDate('');
       setEmployeeList([]);
       setSelectedEmployeeList([]);
-      setVisibilityType('Contract')
+      setVisibilityType('Contract');
     }
   }, [modal]);
 
@@ -60,13 +60,19 @@ const CreateProject = ({
       const fetchData = async () => {
         const response = await axiosInstance({
           method: 'get',
-          url: `/employeeList/${customer?.customer_id || localStorage.getItem('userId')}`,
+          url: `/employeeList/${
+            customer?.customer_id || localStorage.getItem('userId')
+          }`
         });
         setEmployeeList(response.data.message);
         console.log(response.data.message);
         const picture = await axiosInstance({
           method: 'get',
-          url: `/getLogo/${localStorage.getItem('roleId') === '0' ? customer?.customer_id : Number(localStorage.getItem('userId'))}`,
+          url: `/getLogo/${
+            localStorage.getItem('roleId') === '0'
+              ? customer?.customer_id
+              : Number(localStorage.getItem('userId'))
+          }`
         });
         if (picture.data) {
           setProfilePicture(picture.data.url);
@@ -83,8 +89,11 @@ const CreateProject = ({
       setProjectName({ ...projectName, errors: 'Project Name is required.' });
       error = true;
     }
-    if (projects?.find(item => item?.project_name === projectName?.value)) {
-      setProjectName({ ...projectName, errors: 'Project Name already exists.' });
+    if (projects?.find((item) => item?.project_name === projectName?.value)) {
+      setProjectName({
+        ...projectName,
+        errors: 'Project Name already exists.'
+      });
       error = true;
     }
     setDateError({ startError: '', endError: '' });
@@ -112,14 +121,15 @@ const CreateProject = ({
             lead_contact: leadContact[0]?.value || '',
             start_date: startDate ? moment(startDate).format('YYYY-MM-DD') : '',
             end_date: endDate ? moment(endDate).format('YYYY-MM-DD') : '',
-            customer_id: customer?.customer_id || localStorage.getItem('userId'),
+            customer_id:
+              customer?.customer_id || localStorage.getItem('userId'),
             status: 'Open',
             employee_list: selectedEmployeeList.map(
               (employee) => employee.value
             ),
             project_type: projectType,
             visibility_type: visibilityType
-          },
+          }
         });
         if (response.data) {
           console.log(response.data);
@@ -135,7 +145,7 @@ const CreateProject = ({
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
+          progress: undefined
         });
         toggleModal();
       }
@@ -144,12 +154,18 @@ const CreateProject = ({
 
   return (
     <>
-      <div className={"create-new-lproject " + (modal ? 'show-lproject-popup' : '')}>
+      <div
+        className={
+          'create-new-lproject ' + (modal ? 'show-lproject-popup' : '')
+        }
+      >
         <div className="lproject-backdrop"></div>
         <div className="lproject-content">
           <div className="lproject-header">
             <h5>Create New Project</h5>
-            <span className="close" onClick={toggleModal}>&times;</span>
+            <span className="close" onClick={toggleModal}>
+              &times;
+            </span>
           </div>
           <div className="lproject-body">
             <form className="create-project-form">
@@ -161,7 +177,9 @@ const CreateProject = ({
                   <div className="row">
                     <div className="col-6">
                       <div className="text-label-value">
-                        <div className="text-value">{customer?.customer_name}</div>
+                        <div className="text-value">
+                          {customer?.customer_name}
+                        </div>
                       </div>
                     </div>
                     <div className="col-6">
@@ -170,13 +188,15 @@ const CreateProject = ({
                           type="radio"
                           name="ticketHeading"
                           id="ticketHeading"
-                          onClick={()=> setProjectType('commercial')}
+                          onClick={() => setProjectType('commercial')}
                           checked={projectType === 'commercial'}
                         />
                         <label
                           for="ticketHeading"
-                          style={{color: '#212121', marginLeft: '5px'}}
-                        >Commercial Project</label>
+                          style={{ color: '#212121', marginLeft: '5px' }}
+                        >
+                          Commercial Project
+                        </label>
                       </div>
                     </div>
                     <div className="col-6">
@@ -190,13 +210,15 @@ const CreateProject = ({
                           type="radio"
                           name="ticketHeading"
                           id="ticketHeading"
-                          onClick={()=> setProjectType('ufgs')}
+                          onClick={() => setProjectType('ufgs')}
                           checked={projectType === 'ufgs'}
                         />
                         <label
-                          style={{color: '#212121', marginLeft: '5px'}}
+                          style={{ color: '#212121', marginLeft: '5px' }}
                           for="ticketHeading"
-                        >Military/Gov Project(UFGS Specs)</label>
+                        >
+                          Military/Gov Project(UFGS Specs)
+                        </label>
                       </div>
                     </div>
                     <div className="col-6">
@@ -245,11 +267,14 @@ const CreateProject = ({
                         onChange={(e) => {
                           setProjectName({
                             ...projectName,
-                            value: e.target.value,
+                            value: e.target.value
                           });
                         }}
                       />
-                      <label className="text-label" htmlFor="customerProjectName">
+                      <label
+                        className="text-label"
+                        htmlFor="customerProjectName"
+                      >
                         Project Name
                       </label>
                       {projectName.errors && (
@@ -271,7 +296,7 @@ const CreateProject = ({
                           return {
                             value: project.emp_id,
                             label: project.name,
-                            email: project.emp_email,
+                            email: project.emp_email
                           };
                         })}
                       />
@@ -345,7 +370,7 @@ const CreateProject = ({
                           options={employeeList.map((project) => {
                             return {
                               value: project.emp_id,
-                              label: project.name,
+                              label: project.name
                             };
                           })}
                           placeholder="Add Employees"
@@ -353,25 +378,41 @@ const CreateProject = ({
                       </div>
                     </div>
                   </div>
-                  {!empForm && <div className="col-4" style={{marginBottom: '10px'}}>
-                    <button className="btn btn-primary" type="button" onClick={() => openEmpForm(true)}>
-                      Add New Employee
-                    </button>
-                  </div>}
-                  {empForm && <>
-                    <AddNewEmp
-                     customer={customer}
-                     openEmpForm={openEmpForm}
-                     setRefetchEmp={setRefetchEmp}
-                    />
-                  </>}
+                  {!empForm && (
+                    <div className="col-4" style={{ marginBottom: '10px' }}>
+                      <button
+                        className="btn btn-primary"
+                        type="button"
+                        onClick={() => openEmpForm(true)}
+                      >
+                        Add New Employee
+                      </button>
+                    </div>
+                  )}
+                  {empForm && (
+                    <>
+                      <AddNewEmp
+                        customer={customer}
+                        openEmpForm={openEmpForm}
+                        setRefetchEmp={setRefetchEmp}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
               <div className="lproject-footer">
-                <button className="btn btn-secondary" type="button" onClick={toggleModal}>
+                <button
+                  className="btn btn-secondary"
+                  type="button"
+                  onClick={toggleModal}
+                >
                   Cancel
                 </button>
-                <button className="btn btn-primary" type="button" onClick={handleSubmit}>
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  onClick={handleSubmit}
+                >
                   Create
                 </button>{' '}
               </div>

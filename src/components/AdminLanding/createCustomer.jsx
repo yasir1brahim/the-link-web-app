@@ -12,7 +12,7 @@ const CreateCustomer = ({
   modal,
   toggleModal,
   setPageRefresh,
-  pageRefresh,
+  pageRefresh
 }) => {
   const [email, setEmail] = useState({ value: '', errors: '' });
   const [password, setPassword] = useState({ value: '', errors: '' });
@@ -55,13 +55,13 @@ const CreateCustomer = ({
     ) {
       setContactNumber({
         ...contactNumber,
-        errors: 'Contact Number should be of 10 digits.',
+        errors: 'Contact Number should be of 10 digits.'
       });
       error = true;
     } else if (contactNumber.value.replace(/[^0-9]/g, '').length === 10) {
       setContactNumber({
         ...contactNumber,
-        errors: '',
+        errors: ''
       });
       error = false;
     }
@@ -74,7 +74,7 @@ const CreateCustomer = ({
     if (regex.test(value)) {
       setContactNumber({
         ...contactNumber,
-        value: e.target.value,
+        value: e.target.value
       });
     }
   };
@@ -93,18 +93,22 @@ const CreateCustomer = ({
             account_owner: accountOwner.value,
             contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
             address: address.value,
-            admin_id: Number(localStorage.getItem('userId')),
-          },
+            admin_id: Number(localStorage.getItem('userId'))
+          }
         });
         setPageRefresh(!pageRefresh);
         if (response.data?.message && profilePicture) {
           const data = new FormData();
-          data.append('customer_id', response.data?.message[0].customer_id);
+          data.append(
+            'customer_id',
+            response.data?.message[0].customer_id ||
+              Number(localStorage.getItem('userId'))
+          );
           data.append('logo', profilePicture);
           await axiosInstance({
             method: 'post',
             url: '/uploadLogo',
-            data,
+            data
           });
           console.log(response.data);
         }
@@ -112,7 +116,7 @@ const CreateCustomer = ({
         toggleModal();
       } catch (error) {
         console.log(error.message);
-        handleError(error)
+        handleError(error);
         toggleModal();
       }
     }
@@ -133,7 +137,11 @@ const CreateCustomer = ({
                 <div className="upload-documents">
                   <div className="image-holder">
                     <img
-                      src={ profilePicture ? URL.createObjectURL(profilePicture) : ProfilePhoto}
+                      src={
+                        profilePicture
+                          ? URL.createObjectURL(profilePicture)
+                          : ProfilePhoto
+                      }
                       alt="Profile"
                       className="dummy-image"
                     />
@@ -174,7 +182,7 @@ const CreateCustomer = ({
                         onChange={(e) => {
                           setCompanyName({
                             ...companyName,
-                            value: e.target.value,
+                            value: e.target.value
                           });
                         }}
                       />
@@ -224,7 +232,7 @@ const CreateCustomer = ({
                         onChange={(e) => {
                           setAccountOwner({
                             ...accountOwner,
-                            value: e.target.value,
+                            value: e.target.value
                           });
                         }}
                       />
@@ -272,7 +280,7 @@ const CreateCustomer = ({
                           /\d/,
                           /\d/,
                           /\d/,
-                          /\d/,
+                          /\d/
                         ]}
                         labelClass={'text-label'}
                         label={'Contact Number'}
@@ -292,7 +300,7 @@ const CreateCustomer = ({
                         onChange={(e) => {
                           setEmail({
                             ...email,
-                            value: e.target.value,
+                            value: e.target.value
                           });
                         }}
                       />
@@ -306,7 +314,7 @@ const CreateCustomer = ({
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="col-4">
                     <div className="form-group">
                       <input
@@ -320,7 +328,7 @@ const CreateCustomer = ({
                         onChange={(e) => {
                           setPassword({
                             ...password,
-                            value: e.target.value,
+                            value: e.target.value
                           });
                         }}
                       />
@@ -347,7 +355,7 @@ const CreateCustomer = ({
                         onChange={(e) => {
                           setAddress({
                             ...address,
-                            value: e.target.value,
+                            value: e.target.value
                           });
                         }}
                       />

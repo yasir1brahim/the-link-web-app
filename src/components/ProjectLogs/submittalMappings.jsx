@@ -1,24 +1,23 @@
-import React, { useEffect, useState } from "react";
-import axiosInstance from "../../config/axios";
-import { ToastContainer } from "react-toastify";
-import { get } from "lodash";
-import NavbarTop from "../shared/NavbarTop/NavbarTop";
+import React, { useEffect, useState } from 'react';
+import axiosInstance from '../../config/axios';
+import { ToastContainer } from 'react-toastify';
+import { get } from 'lodash';
+import NavbarTop from '../shared/NavbarTop/NavbarTop';
 
-import { Button } from "reactstrap";
-import SelectDropDownV2 from "../shared/SelectDropDownV2/SelectDropDownV2";
+import { Button } from 'reactstrap';
+import SelectDropDownV2 from '../shared/SelectDropDownV2/SelectDropDownV2';
 // import ExportToProcoreModal from "./exportToProcoreModal";
-import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
-import { ReactComponent as LinkLogo } from "../../assets/images/logo-dark.svg";
-import { ReactComponent as ArrowRight } from "../../assets/images/border-arrow.svg";
-import Loader from "../shared/Loader/Loader";
-import handleError from "../../config/errorHandler";
-import { useSearchParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { ReactComponent as Logo } from '../../assets/images/procore-vector-logo.svg';
+import { ReactComponent as LinkLogo } from '../../assets/images/logo-dark.svg';
+import { ReactComponent as ArrowRight } from '../../assets/images/border-arrow.svg';
+import Loader from '../shared/Loader/Loader';
+import handleError from '../../config/errorHandler';
+import { useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const SubmittalMappings = () => {
-
   const [searchParams] = useSearchParams();
-  const customerId = searchParams.get("customerId");
+  const customerId = searchParams.get('customerId');
   const [isLoading, setLoading] = useState(false);
   const [linkSubMappings, setLinkSubMappings] = useState([]);
   const [procoreSubTypes, setProcoreSubTypes] = useState([]);
@@ -35,17 +34,17 @@ const SubmittalMappings = () => {
       try {
         setLoading(true);
         await axiosInstance({
-          method: "get",
-          url: `procore/submittal_mapping/${customerId}`,
+          method: 'get',
+          url: `procore/submittal_mapping/${customerId}`
         }).then((res) => {
-          setLinkSubMappings(get(res, "data.data.link_sub_mapping"));
-          setProcoreSubTypes(get(res, "data.data.procore_submittal_types"));
+          setLinkSubMappings(get(res, 'data.data.link_sub_mapping'));
+          setProcoreSubTypes(get(res, 'data.data.procore_submittal_types'));
           // setAllMappings(get(res, "data.data"));
         });
         setLoading(false);
       } catch (error) {
-        setLoading(false)
-        handleError(error)
+        setLoading(false);
+        handleError(error);
       }
     };
 
@@ -64,10 +63,12 @@ const SubmittalMappings = () => {
     }
   };
 
-  const showDefaultInputValue = (procoreType) => {
-    if( procoreSubTypes && procoreSubTypes.length > 0){
-      const valueToShow = procoreSubTypes.find(type => type.name === procoreType);
-      return valueToShow?.name
+  const showDefaultPlacholder = (procoreType) => {
+    if (procoreSubTypes && procoreSubTypes.length > 0) {
+      const valueToShow = procoreSubTypes.find(
+        (type) => type.name === procoreType
+      );
+      return valueToShow?.name;
     }
   };
 
@@ -77,9 +78,9 @@ const SubmittalMappings = () => {
     try {
       setLoading(true);
       await axiosInstance({
-        method: "post",
+        method: 'post',
         url: `procore/submittal_mapping/${customerId}`,
-        data: mappingsobject,
+        data: mappingsobject
       }).then((res) => {
         // if (get(res, "status") === 200) {
         //   setOpenExportToProcoreModal(true);
@@ -89,7 +90,7 @@ const SubmittalMappings = () => {
       setLoading(false);
       navigate(`/customer-profile?id=${customerId}`);
     } catch (error) {
-      handleError(error)
+      handleError(error);
     }
   };
 
@@ -99,22 +100,24 @@ const SubmittalMappings = () => {
       {/* {openExportToProcoreModal && allMappings && (
         <ExportToProcoreModal mappings={allMappings} companyId={companyId}></ExportToProcoreModal>
       )} */}
-      <div className="position-button-wrap">
         <div className="button-wrap">
           <Button onClick={() => setOnEdit(true)}>Edit</Button>
-          <Button onClick={() => procoreMappings()}>
-            {" "}
-            Save Mapping
-          </Button>
+          <Button onClick={() => procoreMappings()} style={{marginLeft: '5px'}}> Save Mapping</Button>
         </div>
-      </div>
-      <div style={{width: '350px', display: 'flex', margin: 'auto'}}>
-       <LinkLogo/> <ArrowRight/> <Logo style={{marginLeft: '30px'}}/>
+        <span style={{marginLeft: '20px'}}><b>*</b> Use “Edit” to change nomenclature if necessary. Then click “Save Mapping” to finalize Procore integration</span>
+      <div style={{ width: '350px', display: 'flex', margin: 'auto' }}>
+        <LinkLogo /> <ArrowRight /> <Logo style={{ marginLeft: '30px' }} />
       </div>
       <div className="project-logs-wrapper log-table-width submittal-table">
         <table>
           <tbody>
-            <tr style={{ border: "10px solid #202A44", background: '#202A44', color: '#ffffff' }}>
+            <tr
+              style={{
+                border: '10px solid #202A44',
+                background: '#202A44',
+                color: '#ffffff'
+              }}
+            >
               <th>Submittal Types from Link</th>
               <th>Submittal Types from Procore</th>
             </tr>
@@ -123,23 +126,28 @@ const SubmittalMappings = () => {
                 <tr
                   key={k}
                   style={{
-                    borderBottom: "1px solid black",
-                    lineHeight: "40px",
+                    borderBottom: '1px solid black',
+                    lineHeight: '40px'
                   }}
                 >
                   {/**link submittal types column 1 */}
-                  <td>{get(x, "link_submittal")}</td>
-                  {!onEdit && <td>{get(x, "procore_type")}</td>}
+                  <td>{get(x, 'link_submittal')}</td>
+                  {!onEdit && <td>{get(x, 'procore_type')}</td>}
                   {/**procore submittal types column 2 */}
                   {procoreSubTypes && procoreSubTypes.length > 0 && onEdit ? (
                     <td>
                       <SelectDropDownV2
                         options={procoreSubTypes}
                         onChange={(e) =>
-                          onSelectProcoreDropdown(k, get(e, "[0].name"))
+                          onSelectProcoreDropdown(k, get(e, '[0].name'))
                         }
-                        style={{ marginTop: "20px" }}
-                        defaultInputValue={showDefaultInputValue(get(x, "procore_type"))}
+                        style={{ marginTop: '20px' }}
+                        placeholder={showDefaultPlacholder(
+                          get(x, 'procore_type')
+                        )}
+                        defaultInputValue={showDefaultPlacholder(
+                          get(x, 'procore_type')
+                        )}
                       />
                     </td>
                   ) : (

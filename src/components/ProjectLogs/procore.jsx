@@ -1,11 +1,10 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
-import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
-import { toast, ToastContainer } from "react-toastify";
-import axiosInstance from "../../config/axios";
-// import { useNavigate } from 'react-router-dom';
-import handleError from "../../config/errorHandler";
+import React, { useState } from 'react';
+import { useEffect } from 'react';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
+import { toast, ToastContainer } from 'react-toastify';
+import axiosInstance from '../../config/axios';
+import handleError from '../../config/errorHandler';
 
 const Procore = ({
   companyId,
@@ -13,12 +12,11 @@ const Procore = ({
   procoreModal,
   setLoading,
   projectId,
-  selectedRows = "All",
+  selectedRows = 'All',
   toggleProcoreModal,
   setProcoreModal,
   isFromCustomerScreen = false
 }) => {
-  // const navigate = useNavigate();
   const [partnerCompany, setPartnerCompany] = useState([]);
   const [projectName, setProjectName] = useState([]);
   const [submittalManager, setSubmittalManager] = useState([]);
@@ -28,40 +26,32 @@ const Procore = ({
   const handleExportToProcore = async () => {
     try {
       setLoading(true);
-      // const statusResp = await axiosInstance({
-      //   method: "get",
-      //   url: `/procore/status/${companyId}`,
-      // });
-      // console.log(statusResp, "statusREsponse");
-      // setStatus(get(statusResp, 'data.data'));
       const resp = await axiosInstance({
-        method: "post",
-        url: "/procore/create_submittals",
+        method: 'post',
+        url: '/procore/create_submittals',
         data: {
           project_id: Number(projectId),
-          records: selectedRows, // array of ids
-          // status_id:
-          //   statusResp?.data?.data?.find((sts) => sts.name === "Open").id || 1,
-        },
+          records: selectedRows // array of ids
+        }
       });
       if (resp.status === 200) {
         setLoading(false);
-        toast.success("Successfully exported to Procore!", {
-          position: "bottom-center",
+        toast.success('Successfully exported to Procore!', {
+          position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
+          progress: undefined
         });
-        localStorage.setItem("selectedRows", "");
+        localStorage.setItem('selectedRows', '');
       }
       // setLoading(false);
     } catch (error) {
-      setLoading(false)
-      console.log("error", error);
-      localStorage.setItem("selectedRows", "");
+      setLoading(false);
+      console.log('error', error);
+      localStorage.setItem('selectedRows', '');
       handleError(error);
     }
   };
@@ -71,8 +61,8 @@ const Procore = ({
     if (partnerCompany[0]?.value) {
       const fetchData = async () => {
         const projectListResp = await axiosInstance({
-          method: "get",
-          url: `/procore/projects/${partnerCompany[0]?.value}`,
+          method: 'get',
+          url: `/procore/projects/${partnerCompany[0]?.value}`
         });
         setProjectList(projectListResp.data.data);
       };
@@ -87,10 +77,10 @@ const Procore = ({
     if (projectName[0]?.label) {
       const fetchData = async () => {
         const submittalManagerResp = await axiosInstance({
-          method: "get",
-          url: `/procore/managers/${projectName[0]?.value}`,
+          method: 'get',
+          url: `/procore/managers/${projectName[0]?.value}`
         });
-        setSubmittalList(submittalManagerResp.data.data);
+        setSubmittalList(submittalManagerResp?.data?.data);
       };
 
       fetchData().catch((error) => {
@@ -102,8 +92,8 @@ const Procore = ({
   const handleProjectMapping = async () => {
     try {
       await axiosInstance({
-        method: "post",
-        url: "/procore/project_mapping",
+        method: 'post',
+        url: '/procore/project_mapping',
         data: {
           project_id: projectId,
           procore_company_id: partnerCompany[0]?.value,
@@ -111,55 +101,54 @@ const Procore = ({
           procore_project_name: projectName[0]?.label,
           procore_submittal_manager_id: submittalManager[0]?.value,
           procore_company_name: partnerCompany[0]?.label,
-          procore_submittal_manager_name: submittalManager[0]?.label,
-        },
+          procore_submittal_manager_name: submittalManager[0]?.label
+        }
       }).then(() => {
-        setProcoreModal(false)
-        toast.success("Updated project procore info!", {
-          position: "bottom-center",
+        setProcoreModal(false);
+        toast.success('Updated project procore info!', {
+          position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
+          progress: undefined
         });
-          handleExportToProcore();
+        handleExportToProcore();
       });
     } catch (error) {
-      setProcoreModal(false)
+      setProcoreModal(false);
       handleError(error);
     }
   };
 
   const handleCompanyMappings = async () => {
-    try{
+    try {
       await axiosInstance({
-        method: "post",
-        url : "/procore/company_mapping",
-        data : {
-          "link_company_id": companyId,
-          "procore_company_id": partnerCompany[0]?.value,
-          "procore_company_name": partnerCompany[0]?.label
+        method: 'post',
+        url: '/procore/company_mapping',
+        data: {
+          link_company_id: companyId,
+          procore_company_id: partnerCompany[0]?.value,
+          procore_company_name: partnerCompany[0]?.label
         }
       }).then(() => {
-        setProcoreModal(false)
-        toast.success("Updated project procore info!", {
-          position: "bottom-center",
+        setProcoreModal(false);
+        toast.success('Updated project procore info!', {
+          position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
+          progress: undefined
         });
       });
-    }
-    catch (error) {
-      setProcoreModal(false)
+    } catch (error) {
+      setProcoreModal(false);
       handleError(error);
     }
-  }
+  };
 
   return (
     <>
@@ -178,63 +167,75 @@ const Procore = ({
               <div className="col-12">
                 <div className="form-group">
                   <SelectDropdown
-                    label={"Select Partner Company"}
+                    label={'Select Partner Company'}
                     setSelected={setPartnerCompany}
-                    // value={partnerCompany.label}
                     selected={partnerCompany?.label}
                     options={companyList?.map((company) => {
                       return {
                         label: company.name,
-                        value: company.id,
+                        value: company.id
                       };
                     })}
                     className="form-control"
                   />
                 </div>
               </div>
-              {isFromCustomerScreen ? <></> : <div className="col-12">
-                <div className="form-group">
-                  <SelectDropdown
-                    label={"Select Project Name"}
-                    setSelected={setProjectName}
-                    // value={leadContact.label}
-                    selected={projectName?.label}
-                    options={projectList?.map((project) => {
-                      return {
-                        value: project.key,
-                        label: project.value,
-                      };
-                    })}
-                    className="form-control"
-                  />
+              {isFromCustomerScreen ? (
+                <></>
+              ) : (
+                <div className="col-12">
+                  <div className="form-group">
+                    <SelectDropdown
+                      label={'Select Project Name'}
+                      setSelected={setProjectName}
+                      selected={projectName?.label}
+                      options={projectList?.map((project) => {
+                        return {
+                          value: project.key,
+                          label: project.value
+                        };
+                      })}
+                      className="form-control"
+                    />
+                  </div>
                 </div>
-              </div>}
-              {isFromCustomerScreen ? <></> : <div className="col-12">
-                <div className="form-group log-datepicker">
-                  <SelectDropdown
-                    label={"Select  Submittal Manager"}
-                    setSelected={setSubmittalManager}
-                    // value={leadContact.label}
-                    selected={submittalManager?.label}
-                    options={submittalList?.map((manager) => {
-                      return {
-                        value: manager.key,
-                        label: manager.value,
-                      };
-                    })}
-                    className="form-control"
-                  />
+              )}
+              {isFromCustomerScreen ? (
+                <></>
+              ) : (
+                <div className="col-12">
+                  <div className="form-group log-datepicker">
+                    <SelectDropdown
+                      label={'Select  Submittal Manager'}
+                      setSelected={setSubmittalManager}
+                      selected={submittalManager?.label}
+                      options={submittalList?.map((manager) => {
+                        return {
+                          value: manager.key,
+                          label: manager.value
+                        };
+                      })}
+                      className="form-control"
+                    />
+                  </div>
                 </div>
-              </div>}
+              )}
             </div>
           </div>
           <ModalFooter>
             <Button color="secondary" onClick={toggleProcoreModal}>
               Cancel
             </Button>
-            <Button color="primary" onClick={isFromCustomerScreen ? handleCompanyMappings : handleProjectMapping}>
+            <Button
+              color="primary"
+              onClick={
+                isFromCustomerScreen
+                  ? handleCompanyMappings
+                  : handleProjectMapping
+              }
+            >
               Save
-            </Button>{" "}
+            </Button>{' '}
           </ModalFooter>
         </ModalBody>
       </Modal>

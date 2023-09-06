@@ -178,7 +178,9 @@
 			padding-right: 40px;
 		}
 	}
-
+	.typehead-label {
+		margin: 4px;
+	}
 	.has-typehead {
 		&.is-focused {
 			.text-label {

@@ -14,59 +14,62 @@ const Resetpwd = () => {
   const [showCPwd, setShowCPwd] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
-  const [error, setError] = useState('')
+  const [error, setError] = useState('');
 
   const toggleNType = () => setShowNPwd(!showNPwd);
   const toggleCType = () => setShowCPwd(!showCPwd);
 
-const validate = () => {
+  const validate = () => {
     let error = false;
 
     if (newPassword && newPassword !== confirmedPassword) {
       setError('Password not matched with confirm Passsword.');
       error = true;
     }
-    if(newPassword === '') {
+    if (newPassword === '') {
       setError('Password is required.');
       error = true;
     }
-    if(confirmedPassword === '') {
+    if (confirmedPassword === '') {
       setError('Password is required.');
       error = true;
     }
-    if ((newPassword && !confirmedPassword) || (confirmedPassword && !newPassword)) {
+    if (
+      (newPassword && !confirmedPassword) ||
+      (confirmedPassword && !newPassword)
+    ) {
       setError('Enter both password and confirm password.');
       error = true;
     }
     return error;
   };
-  const handleResetPassword = async(e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
     let errors = validate();
     if (!errors) {
-    try {
-    await axiosInstance({
-        method: 'post',
-        url: `/reset_password`,
-        data: {
-          password: newPassword
-        },
-      });
-      toast.success('Password changed successfully.', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      window.location = '/';
-    }catch (error) {
-      handleError(error)
+      try {
+        await axiosInstance({
+          method: 'post',
+          url: `/reset_password`,
+          data: {
+            password: newPassword
+          }
+        });
+        toast.success('Password changed successfully.', {
+          position: 'bottom-center',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined
+        });
+        window.location = '/';
+      } catch (error) {
+        handleError(error);
+      }
     }
-  }
-  }
+  };
   return (
     <section className="authentication-content-wrapper">
       <div className="ac-left">
@@ -126,10 +129,16 @@ const validate = () => {
             {/* <small className='form-error'>Please enter a Password</small> */}
           </div>
           {error && (
-              <small className="form-error" style={{color: 'red'}}>{error}</small>
-            )}
+            <small className="form-error" style={{ color: 'red' }}>
+              {error}
+            </small>
+          )}
           <div className="form-group form-btn">
-            <button type="button" className="btn btn-primary w-100" onClick={handleResetPassword}>
+            <button
+              type="button"
+              className="btn btn-primary w-100"
+              onClick={handleResetPassword}
+            >
               Reset Password
             </button>
           </div>

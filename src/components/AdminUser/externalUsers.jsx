@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
-import axiosInstance from "../../config/axios";
-import { toast } from "react-toastify";
+import React, { useEffect, useState } from 'react';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import axiosInstance from '../../config/axios';
+import { toast } from 'react-toastify';
 import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 
 export const ExternalUsers = ({
@@ -11,11 +11,11 @@ export const ExternalUsers = ({
   externalUserData,
   toggleUpdateList,
   setModalData,
-  setSelectedEmployeeList,
+  setSelectedEmployeeList
 }) => {
-  const [email, setEmail] = useState({ value: "", errors: "" });
-  const [firstName, setFirstName] = useState({ value: "", errors: "" });
-  const [lastName, setLastName] = useState({ value: "", errors: "" });
+  const [email, setEmail] = useState({ value: '', errors: '' });
+  const [firstName, setFirstName] = useState({ value: '', errors: '' });
+  const [lastName, setLastName] = useState({ value: '', errors: '' });
   const [extUser, setExtUser] = useState([]);
   const [extError, setExtError] = useState({});
   const [modal, setModal] = useState(false);
@@ -24,25 +24,25 @@ export const ExternalUsers = ({
   };
   const extUserValues = [
     // { value: "owner", label: "Owner" },
-    { value: "architect", label: "Architect" },
-    { value: "subcontractor", label: "Sub Contractor" },
+    { value: 'architect', label: 'Architect' },
+    { value: 'subcontractor', label: 'Sub Contractor' }
     // { value: "other", label: "Other" },
   ];
   useEffect(() => {
     if (!modal) {
-      setFirstName({ value: "", errors: "" });
-      setLastName({ value: "", errors: "" });
+      setFirstName({ value: '', errors: '' });
+      setLastName({ value: '', errors: '' });
       setExtUser([]);
     }
   }, [modal]);
   const validate = () => {
     let error = false;
     if (!extUser.length) {
-      setExtError({ ...extError, errors: "Type is required." });
+      setExtError({ ...extError, errors: 'Type is required.' });
       error = true;
     }
     if (!email.value) {
-      setEmail({ ...email, errors: "Email is required." });
+      setEmail({ ...email, errors: 'Email is required.' });
       error = true;
     }
     // if (
@@ -68,8 +68,8 @@ export const ExternalUsers = ({
     if (!errors) {
       try {
         const response = await axiosInstance({
-          method: "post",
-          url: "/admin/external_users",
+          method: 'post',
+          url: '/admin/external_users',
           data: {
             email_address: email.value,
             full_name: `${firstName.value}  ${lastName.value}`,
@@ -78,8 +78,8 @@ export const ExternalUsers = ({
             type: extUser[0]?.value,
             // contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
             customer_id:
-              Number(customer?.id) || Number(localStorage.getItem("userId")),
-          },
+              Number(customer?.id) || Number(localStorage.getItem('userId'))
+          }
         });
         if (response.data) {
           setPageRefresh(!pageRefresh);
@@ -89,13 +89,13 @@ export const ExternalUsers = ({
       } catch (error) {
         console.log(error.message);
         toast.error(error.response.data.message, {
-          position: "bottom-center",
+          position: 'bottom-center',
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
+          progress: undefined
         });
         toggleModal();
       }
@@ -107,7 +107,7 @@ export const ExternalUsers = ({
         <Button
           color="primary"
           onClick={() => setModal(true)}
-          style={{ float: "right", marginBottom: "10px" }}
+          style={{ float: 'right', marginBottom: '10px' }}
         >
           Add External User
         </Button>
@@ -136,7 +136,7 @@ export const ExternalUsers = ({
                       onChange={(e) => {
                         setFirstName({
                           ...firstName,
-                          value: e.target.value,
+                          value: e.target.value
                         });
                       }}
                     />
@@ -158,7 +158,7 @@ export const ExternalUsers = ({
                       onChange={(e) => {
                         setLastName({
                           ...lastName,
-                          value: e.target.value,
+                          value: e.target.value
                         });
                       }}
                     />
@@ -180,7 +180,7 @@ export const ExternalUsers = ({
                       onChange={(e) => {
                         setEmail({
                           ...email,
-                          value: e.target.value,
+                          value: e.target.value
                         });
                       }}
                     />
@@ -188,7 +188,7 @@ export const ExternalUsers = ({
                       Email Address
                     </label>
                     {email.errors && (
-                      <small className="form-error" style={{ color: "red" }}>
+                      <small className="form-error" style={{ color: 'red' }}>
                         {email.errors}
                       </small>
                     )}
@@ -197,14 +197,14 @@ export const ExternalUsers = ({
                 <div className="col-4">
                   <div className="form-group">
                     <SelectDropdown
-                        label={'Set User Type'}
-                        setSelected={setExtUser}
-                        value={extUser.label}
-                        selected={extUser.label}
-                        options={extUserValues}
-                      />
+                      label={'Set User Type'}
+                      setSelected={setExtUser}
+                      value={extUser.label}
+                      selected={extUser.label}
+                      options={extUserValues}
+                    />
                     {extError.errors && (
-                      <small className="form-error" style={{ color: "red" }}>
+                      <small className="form-error" style={{ color: 'red' }}>
                         {extError.errors}
                       </small>
                     )}
@@ -218,7 +218,7 @@ export const ExternalUsers = ({
               </Button>
               <Button color="primary" onClick={handleSubmit}>
                 Create
-              </Button>{" "}
+              </Button>{' '}
             </ModalFooter>
           </form>
         </ModalBody>
@@ -308,7 +308,7 @@ export const ExternalUsers = ({
               })}
             </tbody>
           </table>
-        </div>{" "}
+        </div>{' '}
       </div>
     </>
   );

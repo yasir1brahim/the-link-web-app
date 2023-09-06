@@ -31,7 +31,7 @@ const CustomerProjects = ({
   setProjectData,
   handleLaunch,
   isArchived,
-  toggleArchive,
+  toggleArchive
 }) => {
   const [employeeModal, setEmployeeModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
@@ -45,26 +45,28 @@ const CustomerProjects = ({
   const [isLoading, setLoading] = useState(false);
   const { state } = useLocation();
   // const customer = state;
-  const roleId = localStorage.getItem("roleId");
+  const roleId = localStorage.getItem('roleId');
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const response = await axiosInstance({
-        method: "get",
-        url: state?.customer_id
-          ? `/customer/${state.customer_id}`
-          : `/customer/${localStorage.getItem("userId")}`,
-      });
-      setLoading(false);
-      setCustomerData(response.data.message[0]);
-      console.log(response.data.message);
-    };
+    if (roleId !== '6' && roleId !== '7') {
+      const fetchData = async () => {
+        setLoading(true);
+        const response = await axiosInstance({
+          method: 'get',
+          url: state?.customer_id
+            ? `/customer/${state.customer_id}`
+            : `/customer/${localStorage.getItem('userId')}`
+        });
+        setLoading(false);
+        setCustomerData(response.data.message[0]);
+        console.log(response.data.message);
+      };
 
-    fetchData().catch((error) => {
-      handleError(error);
-    });
-  }, [state, pageRefresh, setCustomerData]);
+      fetchData().catch((error) => {
+        handleError(error);
+      });
+    }
+  }, [state, pageRefresh, setCustomerData, roleId]);
 
   const handleEdit = (project) => {
     setProject(project);
@@ -76,28 +78,28 @@ const CustomerProjects = ({
     if (!errors) {
       try {
         const response = await axiosInstance({
-          method: "put",
-          url: "/updateProject",
+          method: 'put',
+          url: '/updateProject',
           data: {
             project_name: project.project_name,
             lead_contact: project.lead_contact,
             start_date: project?.start_date
               ? moment(
-                  new Date((project?.start_date).replaceAll("-", "/"))
-                ).format("YYYY-MM-DD")
-              : "",
+                  new Date((project?.start_date).replaceAll('-', '/'))
+                ).format('YYYY-MM-DD')
+              : '',
             end_date: project?.end_date
               ? moment(
-                  new Date((project?.end_date).replaceAll("-", "/"))
-                ).format("YYYY-MM-DD")
-              : "",
+                  new Date((project?.end_date).replaceAll('-', '/'))
+                ).format('YYYY-MM-DD')
+              : '',
             customer_id:
-              localStorage.getItem("roleId") === "0"
+              localStorage.getItem('roleId') === '0'
                 ? state.customer_id
-                : localStorage.getItem("userId"),
-            status: isArchived ? "Active" : "Archived",
-            project_id: project.project_id,
-          },
+                : localStorage.getItem('userId'),
+            status: isArchived ? 'Active' : 'Archived',
+            project_id: project.project_id
+          }
         });
         if (response.data) {
           console.log(response.data);
@@ -121,8 +123,8 @@ const CustomerProjects = ({
           <div className="table-top-content">
             <div className="table-heading">
               <label className="table-entries">
-                Showing entries{" "}
-                <span className="showing-strong">{currentItems.length}</span> of{" "}
+                Showing entries{' '}
+                <span className="showing-strong">{currentItems.length}</span> of{' '}
                 <span className="showing-strong">{projectData.length}</span>.
               </label>
             </div>
@@ -130,10 +132,10 @@ const CustomerProjects = ({
             <div className="grid-list-toggle">
               <div
                 className="table-bulk-changes"
-                style={{ marginRight: "30px" }}
+                style={{ marginRight: '30px' }}
               >
-                {roleId !== "6" && roleId !== "7" && (
-                  <div style={{ marginLeft: "10px" }}>
+                {roleId !== '6' && roleId !== '7' && (
+                  <div style={{ marginLeft: '10px' }}>
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -144,13 +146,13 @@ const CustomerProjects = ({
                   </div>
                 )}
 
-                {roleId !== "6" && roleId !== "7" && (
+                {roleId !== '6' && roleId !== '7' && (
                   <button
                     onClick={() => toggleArchive(!isArchived)}
                     type="button"
                     className="btn btn-secondary btn-sm"
                   >
-                    {isArchived ? "View Active" : "View Archived"}
+                    {isArchived ? 'View Active' : 'View Archived'}
                   </button>
                 )}
               </div>
@@ -257,7 +259,7 @@ const CustomerProjects = ({
                             >
                               Launch
                             </button>
-                            {roleId !== "6" && roleId !== "7" && (
+                            {roleId !== '6' && roleId !== '7' && (
                               <>
                                 <button
                                   type="button"
@@ -272,10 +274,10 @@ const CustomerProjects = ({
                                   onClick={() => handleArchiveProject(project)}
                                   disabled={
                                     isArchived &&
-                                    localStorage.getItem("roleId") !== "0"
+                                    localStorage.getItem('roleId') !== '0'
                                   }
                                 >
-                                  {!isArchived ? "Archive" : "Unarchive"}
+                                  {!isArchived ? 'Archive' : 'Unarchive'}
                                 </button>
                               </>
                             )}

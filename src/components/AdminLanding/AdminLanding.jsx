@@ -26,7 +26,7 @@ const Adminlanding = (props) => {
       setLoading(true);
       const response = await axiosInstance({
         method: 'get',
-        url: `/customers/${localStorage.getItem('userId')}`,
+        url: `/customers/${localStorage.getItem('userId')}`
       });
       // setCustomerData(response.data.message);
       setCustomerData(
@@ -40,12 +40,14 @@ const Adminlanding = (props) => {
 
     fetchData().catch((error) => {
       setLoading(false);
-      handleError(error)
+      handleError(error);
     });
   }, [isArchived, pageRefresh]);
 
   const handleViewCustomer = (customer) => {
-    navigate(`/customer-profile?id=${customer?.customer_id}`, { state: customer });
+    navigate(`/customer-profile?id=${customer?.customer_id}`, {
+      state: customer
+    });
   };
   const handleArchiveCustomer = async (customer) => {
     try {
@@ -53,15 +55,15 @@ const Adminlanding = (props) => {
         method: 'put',
         url: '/updateCustomer',
         data: {
-          email_address:  customer?.email_address,
+          email_address: customer?.email_address,
           password: '',
-          customer_name:  customer?.customer_name,
+          customer_name: customer?.customer_name,
           account_owner: customer?.account_owner,
           contact_number: customer?.contact_number,
-          address:  customer?.address,
-          status: isArchived? 'Active' : 'Archived',
-          customer_id: customer?.customer_id,
-        },
+          address: customer?.address,
+          status: isArchived ? 'Active' : 'Archived',
+          customer_id: customer?.customer_id
+        }
       });
 
       setPageRefresh(!pageRefresh);
@@ -73,11 +75,11 @@ const Adminlanding = (props) => {
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-        progress: undefined,
+        progress: undefined
       });
     } catch (error) {
       console.log(error.message);
-      handleError(error)
+      handleError(error);
     }
   };
 
@@ -110,7 +112,7 @@ const Adminlanding = (props) => {
                   className="btn btn-secondary btn-sm"
                   onClick={() => toggleArchive(!isArchived)}
                 >
-                  {isArchived ? 'View Active' : 'View Archived' }
+                  {isArchived ? 'View Active' : 'View Archived'}
                 </button>
               </div>
             </div>
@@ -192,7 +194,7 @@ const Adminlanding = (props) => {
                           <span
                             style={{
                               cursor: 'pointer',
-                              textDecoration: 'underline',
+                              textDecoration: 'underline'
                             }}
                             onClick={() => handleViewCustomer(customer)}
                           >

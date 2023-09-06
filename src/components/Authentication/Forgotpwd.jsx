@@ -28,13 +28,13 @@ const Forgotpwd = (props) => {
           method: 'post',
           url: '/forgot_password',
           data: {
-            email: email.value,
-          },
+            email: email.value
+          }
         });
         if (response.data) {
           console.log(response.data);
         }
-      navigate('/check-email');
+        navigate('/check-email');
       } catch (error) {
         toast.error('Incorrect Email.', {
           position: 'bottom-center',
@@ -43,7 +43,7 @@ const Forgotpwd = (props) => {
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
+          progress: undefined
         });
       }
     }

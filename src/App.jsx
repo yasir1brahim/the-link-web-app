@@ -17,6 +17,7 @@ import AdminUser from './components/AdminUser/AdminUser';
 import SubmittalMappings from './components/ProjectLogs/submittalMappings';
 // import PersonalProject from './components/PersonalProject/PersonalProject';
 import Projects from './components/PersonalProject/projects';
+import CollaborationHub from './components/CollaborationHub';
 
 function App() {
   return (
@@ -25,9 +26,9 @@ function App() {
         <Route element={<Authentication />} />
         <Route path="/admin-landing" element={<AdminLanding />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
-        <Route path="/project-list" element={<Projects/>} />
+        <Route path="/project-list" element={<Projects />} />
         <Route path="/project-logs" element={<ProjectLogs />} />
-       {/*<Route path="/project-details" element={<ProjectsDetails />} />*/}
+        {/*<Route path="/project-details" element={<ProjectsDetails />} />*/}
         <Route path="/login" element={<Signin />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/forgot-password" element={<Forgotpwd />} />
@@ -36,7 +37,8 @@ function App() {
         <Route path="/check-email" element={<Checkemail />} />
         <Route path="/pdf-view" element={<PdfWrapper />} />
         <Route path="/admin-user" element={<AdminUser />} />
-        <Route path='/submital-mappings' element={<SubmittalMappings/>}/>
+        <Route path="/submital-mappings" element={<SubmittalMappings />} />
+        <Route path="/collaboration-hub" element={<CollaborationHub />} />
         {/* <Route path="/personal-project" element={<PersonalProject />} /> */}
 
         <Route exact path="/" element={<Navigate to="/login" />} />

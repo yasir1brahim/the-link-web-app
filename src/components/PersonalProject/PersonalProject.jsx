@@ -1,7 +1,7 @@
-import React from "react";
-import CreateProject from "../CustomerProjects/createProject";
-import ContractTile from "./contractTile";
-import PersonalTile from "./personalTile";
+import React from 'react';
+import CreateProject from '../CustomerProjects/createProject';
+import ContractTile from './contractTile';
+import PersonalTile from './personalTile';
 
 const PersonalProject = ({
   toggleSlider,
@@ -15,7 +15,9 @@ const PersonalProject = ({
   customerData,
   pageRefresh,
   setPageRefresh,
-  setSpecUploadProject
+  setSpecUploadProject,
+  toggleUploadSpecsButton,
+  handleCollaborationLaunch
 }) => {
   console.log(projectData);
 
@@ -31,7 +33,7 @@ const PersonalProject = ({
           <span className="tag-list-view">List View</span>
           <div className="gl-toggle-wrapper">
             <label class="switch">
-              <input type="checkbox" checked={slider}/>
+              <input type="checkbox" checked={slider} />
               <span
                 class="slider round"
                 onClick={() => toggleSlider(!slider)}
@@ -47,7 +49,7 @@ const PersonalProject = ({
           {projectData &&
             projectData.length > 0 &&
             projectData.map((data, index) => {
-              if (data.visibility_type === "contract") {
+              if (data.visibility_type === 'contract') {
                 return (
                   <div className="col-4">
                     <ContractTile
@@ -56,7 +58,9 @@ const PersonalProject = ({
                       handleLaunch={handleLaunch}
                       project={data}
                       toggleUploadSpecsModal={toggleUploadSpecsModal}
+                      toggleUploadSpecsButton={toggleUploadSpecsButton}
                       setSpecUploadProject={setSpecUploadProject}
+                      handleCollaborationLaunch={handleCollaborationLaunch}
                     />
                   </div>
                 );
@@ -70,6 +74,7 @@ const PersonalProject = ({
                     project={data}
                     toggleUploadSpecsModal={toggleUploadSpecsModal}
                     setSpecUploadProject={setSpecUploadProject}
+                    handleCollaborationLaunch={handleCollaborationLaunch}
                   />
                 </div>
               );

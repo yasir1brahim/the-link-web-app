@@ -21,7 +21,7 @@ const Checkemail = () => {
             We have sent a password reset link to
             <br />
             {/* <b>mohanrj@designer.com</b> */}
-            your email address. 
+            your email address.
           </p>
           {/* <div className="form-helping-text">
             <p>

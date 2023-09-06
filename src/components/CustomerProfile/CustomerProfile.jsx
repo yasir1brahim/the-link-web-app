@@ -16,9 +16,9 @@ import EditEmployee from './editEmployee';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 import { ConfirmationModal } from './confirmationModal';
 import handleError from '../../config/errorHandler';
-import { get } from "lodash";
-import Procore from "../ProjectLogs/procore";
-import Loader from "../shared/Loader/Loader";
+import { get } from 'lodash';
+import Procore from '../ProjectLogs/procore';
+import Loader from '../shared/Loader/Loader';
 
 const CustomerProfile = (props) => {
   const [editProfile, setEditProfile] = useState(false);
@@ -36,7 +36,10 @@ const CustomerProfile = (props) => {
   const [resetPwd, setResetPwd] = useState(false);
   const toggleResetPwd = () => setResetPwd(!resetPwd);
   const [email, setEmail] = useState({ value: '', errors: '' });
-  const [companyName, setCompanyName] = useState({ value: undefined, errors: '' });
+  const [companyName, setCompanyName] = useState({
+    value: undefined,
+    errors: ''
+  });
   const [accountOwner, setAccountOwner] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [address, setAddress] = useState({ value: '', errors: '' });
@@ -45,7 +48,7 @@ const CustomerProfile = (props) => {
   const [customerData, setCustomerData] = useState({});
   const [confirmPassword, setConfirmPassword] = useState({
     value: '',
-    errors: '',
+    errors: ''
   });
   const [profilePicture, setProfilePicture] = useState('');
   const [currentItems, setCurrentItems] = useState([]);
@@ -56,51 +59,56 @@ const CustomerProfile = (props) => {
   const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [searchParams] = useSearchParams();
   const { state } = useLocation();
-  const customerId = searchParams.get('id')
-  const authCode = searchParams.get("code");
+  const customerId = searchParams.get('id');
+  const authCode = searchParams.get('code');
 
   let customer = state;
-  const custId = localStorage.getItem('roleId') === '0' ? customerId || state?.customer_id : Number(localStorage.getItem('userId'))
-  const redirectUri = window.location.href.includes("app.thelink.ai")
-    ? `https://app.thelink.ai/customer-profile?id=${customerId || custId}`
-    : `http://d3fy104eoanlsd.cloudfront.net/customer-profile?id=${customerId || custId}`;
-  const clientId = window.location.href.includes("app.thelink.ai")
-    ? "ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9"
-    : "ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9";
+  const customerID =
+    localStorage.getItem('roleId') === '0'
+      ? customerId || state?.customer_id || customer?.id || customer[0]?.id
+      : Number(localStorage.getItem('userId'));
+  const redirectUri = window.location.href.includes('app.thelink.ai')
+    ? `https://app.thelink.ai/customer-profile?id=${customerId || customerID}`
+    : `http://d3fy104eoanlsd.cloudfront.net/customer-profile?id=${
+        customerId || customerID
+      }`;
+  const clientId = window.location.href.includes('app.thelink.ai')
+    ? 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9'
+    : 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9';
+
   const navigate = useNavigate();
   useEffect(() => {
     if (authCode) {
       const fetchData = async () => {
         const accessTokenData = await axiosInstance({
-          method: "post",
-          url: "/procore/access_token",
+          method: 'post',
+          url: '/procore/access_token',
           data: {
             code: authCode,
-            redirect_uri: redirectUri,
-          },
+            redirect_uri: redirectUri
+          }
         });
         localStorage.setItem(
-          "procore_access_token",
+          'procore_access_token',
           accessTokenData?.data.data.access_token
         );
         const res = await axiosInstance({
-          method: "get",
-          url: `/procore/company_mapping/${customerId}`,
-        })
+          method: 'get',
+          url: `/procore/company_mapping/${customerId}`
+        });
 
-        if (get(res, "status") === 200) {
-          navigate(`/submital-mappings?customerId=${customerId}`)
+        if (get(res, 'status') === 200) {
+          navigate(`/submital-mappings?customerId=${customerId}`);
         }
 
-        if (get(res, "status") === 204) {
+        if (get(res, 'status') === 204) {
           setProcoreModal(true);
           const companyResp = await axiosInstance({
-            method: "get",
-            url: "/procore/companies",
+            method: 'get',
+            url: '/procore/companies'
           });
           setCompanyList(companyResp?.data.data);
         }
-
       };
 
       fetchData().catch((error) => {
@@ -113,30 +121,29 @@ const CustomerProfile = (props) => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url:
-          `/customer/${custId}`,
+        url: `/customer/${customerID}`
       });
       setCustomerData(response.data.message[0]);
       console.log('customerData', response.data.message);
     };
 
     fetchData().catch((error) => {
-      handleError(error)
+      handleError(error);
     });
-  }, [pageRefresh, custId]);
+  }, [pageRefresh, customerID]);
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
         method: 'get',
-        url: `/employeeList/${custId}`,
+        url: `/employeeList/${customerID}`
       });
       setEmployeeData(response.data.message);
       console.log('employeeData', response.data.message);
     };
     fetchData().catch((error) => {
-      handleError(error)
+      handleError(error);
     });
-  }, [custId, pageRefresh]);
+  }, [customerID, pageRefresh]);
   // useEffect(() => {
   //   const fetchData = async () => {
   //     const response = await axiosInstance({
@@ -163,7 +170,11 @@ const CustomerProfile = (props) => {
     const fetchData = async () => {
       const picture = await axiosInstance({
         method: 'get',
-        url: `/getLogo/${localStorage.getItem('roleId') === '0' ? state.customer_id : Number(localStorage.getItem('userId'))}`,
+        url: `/getLogo/${
+          localStorage.getItem('roleId') === '0'
+            ? state.customer_id
+            : Number(localStorage.getItem('userId'))
+        }`
       });
       if (picture.data) {
         setProfilePicture(picture.data.url);
@@ -184,8 +195,8 @@ const CustomerProfile = (props) => {
         method: 'DELETE',
         url: `/deleteEmployee`,
         data: {
-          employee_id: id,
-        },
+          employee_id: id
+        }
       });
       console.log(response.data);
       toggleConfirmModal();
@@ -197,31 +208,34 @@ const CustomerProfile = (props) => {
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-        progress: undefined,
+        progress: undefined
       });
     } catch (error) {
       console.log(error.message);
-      handleError(error)
+      handleError(error);
     }
   };
 
   const validate = () => {
     let error = false;
-    if( companyName.value === ''){
-      setCompanyName({...companyName, errors:'Company name is required'})
-      error = true
+    if (companyName.value === '') {
+      setCompanyName({ ...companyName, errors: 'Company name is required' });
+      error = true;
     }
     if (password.value && password.value !== confirmPassword.value) {
       setPassword({
         ...password,
-        errors: 'Password not matched with confirm Passsword.',
+        errors: 'Password not matched with confirm Passsword.'
       });
       error = true;
     }
-    if ((password.value && !confirmPassword.value) || (confirmPassword.value && !password.value)) {
+    if (
+      (password.value && !confirmPassword.value) ||
+      (confirmPassword.value && !password.value)
+    ) {
       setPassword({
         ...password,
-        errors: 'Please enter both password and confirm password',
+        errors: 'Please enter both password and confirm password'
       });
       error = true;
     }
@@ -231,13 +245,13 @@ const CustomerProfile = (props) => {
     ) {
       setContactNumber({
         ...contactNumber,
-        errors: 'Contact Number should be of 10 digits.',
+        errors: 'Contact Number should be of 10 digits.'
       });
       error = true;
     } else if (contactNumber.value.replace(/[^0-9]/g, '').length === 10) {
       setContactNumber({
         ...contactNumber,
-        errors: '',
+        errors: ''
       });
       error = false;
     }
@@ -266,12 +280,12 @@ const CustomerProfile = (props) => {
               customerData?.contact_number,
             address: address.value || customerData?.address,
             status: 'Active',
-            customer_id: customerData?.customer_id,
-          },
+            customer_id: customerData?.customer_id
+          }
         });
         if (response.data.message) {
           customer = response.data.message;
-          setCompanyName({...companyName, errors:''})
+          setCompanyName({ ...companyName, errors: '' });
         }
 
         if (
@@ -281,12 +295,12 @@ const CustomerProfile = (props) => {
           typeof profilePicture === 'object'
         ) {
           const data = new FormData();
-          data.append('customer_id', customer[0].customer_id);
+          data.append('customer_id', customer[0]?.customer_id || customerID);
           data.append('logo', profilePicture);
           await axiosInstance({
             method: 'post',
             url: '/uploadLogo',
-            data,
+            data
           });
           console.log(response.data);
         }
@@ -300,11 +314,11 @@ const CustomerProfile = (props) => {
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
+          progress: undefined
         });
       } catch (error) {
         console.log(error.message);
-        handleError(error)
+        handleError(error);
       }
     }
   };
@@ -314,7 +328,7 @@ const CustomerProfile = (props) => {
     if (regex.test(value)) {
       setContactNumber({
         ...contactNumber,
-        value: e.target.value,
+        value: e.target.value
       });
     }
   };
@@ -323,7 +337,7 @@ const CustomerProfile = (props) => {
     <div className="page-wrap">
       <NavbarTop />
       <div className="page-wrap-content customer-profile-wrapper">
-        <Header title={"Customer Profile"} breadcrumb={"Customer Details"} />
+        <Header title={'Customer Profile'} breadcrumb={'Customer Details'} />
 
         <div className="customer-profile-content">
           <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
@@ -384,7 +398,7 @@ const CustomerProfile = (props) => {
                       <div className="text-label-value">
                         <div className="text-label">Address: </div>
                         <div className="text-value">
-                          {customerData.address}{" "}
+                          {customerData.address}{' '}
                         </div>
                       </div>
                     </div>
@@ -409,7 +423,7 @@ const CustomerProfile = (props) => {
                         <img
                           src={
                             profilePicture
-                              ? typeof profilePicture === "string"
+                              ? typeof profilePicture === 'string'
                                 ? profilePicture
                                 : URL.createObjectURL(profilePicture)
                               : ProfilePhoto
@@ -453,7 +467,7 @@ const CustomerProfile = (props) => {
                             onChange={(e) => {
                               setCompanyName({
                                 ...companyName,
-                                value: e.target.value,
+                                value: e.target.value
                               });
                             }}
                           />
@@ -463,7 +477,7 @@ const CustomerProfile = (props) => {
                           {companyName.errors && (
                             <small
                               className="form-error"
-                              style={{ color: "red" }}
+                              style={{ color: 'red' }}
                             >
                               {companyName.errors}
                             </small>
@@ -501,7 +515,7 @@ const CustomerProfile = (props) => {
                             onChange={(e) => {
                               setAccountOwner({
                                 ...accountOwner,
-                                value: e.target.value,
+                                value: e.target.value
                               });
                             }}
                           />
@@ -523,7 +537,7 @@ const CustomerProfile = (props) => {
                             onChange={(e) => {
                               setEmail({
                                 ...email,
-                                value: e.target.value,
+                                value: e.target.value
                               });
                             }}
                           />
@@ -566,23 +580,23 @@ const CustomerProfile = (props) => {
                             name="contactNumber"
                             error={contactNumber.errors}
                             mask={[
-                              "(",
+                              '(',
                               /[1-9]/,
                               /\d/,
                               /\d/,
-                              ")",
-                              " ",
+                              ')',
+                              ' ',
                               /\d/,
                               /\d/,
                               /\d/,
-                              "-",
+                              '-',
                               /\d/,
                               /\d/,
                               /\d/,
-                              /\d/,
+                              /\d/
                             ]}
-                            labelClass={"text-label"}
-                            label={"Phone"}
+                            labelClass={'text-label'}
+                            label={'Phone'}
                           />
                         </div>
                       </div>
@@ -599,7 +613,7 @@ const CustomerProfile = (props) => {
                             onChange={(e) => {
                               setAddress({
                                 ...address,
-                                value: e.target.value,
+                                value: e.target.value
                               });
                             }}
                           />
@@ -648,7 +662,7 @@ const CustomerProfile = (props) => {
                                   onChange={(e) => {
                                     setPassword({
                                       ...password,
-                                      value: e.target.value,
+                                      value: e.target.value
                                     });
                                   }}
                                 />
@@ -678,7 +692,7 @@ const CustomerProfile = (props) => {
                                   onChange={(e) => {
                                     setConfirmPassword({
                                       ...confirmPassword,
-                                      value: e.target.value,
+                                      value: e.target.value
                                     });
                                   }}
                                 />
@@ -697,7 +711,7 @@ const CustomerProfile = (props) => {
                             </div>
                           </div>
                         ) : (
-                          ""
+                          ''
                         )}
                       </div>
                     </div>
@@ -725,15 +739,25 @@ const CustomerProfile = (props) => {
           <div className="customer-users-details">
             {employeeData.length === 0 ? (
               <>
-                <div className="table-bulk-changes">
-                  <button type="button" className="btn btn-secondary btn-sm" style={{marginBottom:'10px', float: 'right'}}>
-                    <a
-                      href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`}
-                      className="breadcrumb-text"
+                <div style={{ float: 'right' }}>
+                  <div className="table-bulk-changes">
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      style={{ marginBottom: '2px', float: 'right' }}
                     >
-                      Submittal Mappings
-                    </a>
-                  </button>
+                      <a
+                        href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`}
+                        className="breadcrumb-text"
+                      >
+                        Procore Submittal Mappings
+                      </a>
+                    </button>
+                  </div>
+                  <label className="information-message">
+                    <b>Procore users </b>: be sure to click the Procore
+                    submittal mappings button.
+                  </label>
                 </div>
                 <div
                   onClick={toggleModal}
@@ -752,34 +776,46 @@ const CustomerProfile = (props) => {
                 <div className="table-top-content">
                   <div className="table-heading">
                     <h5 className="m-0">Employee List</h5>
-                    <label className="table-entries">
-                      Showing entries{" "}
+                    <label
+                      className="table-entries"
+                      style={{ paddingTop: '5px' }}
+                    >
+                      Showing entries{' '}
                       <span className="showing-strong">
                         {currentItems.length}
-                      </span>{" "}
-                      of{" "}
+                      </span>{' '}
+                      of{' '}
                       <span className="showing-strong">
                         {employeeData.length}
                       </span>
                       .
                     </label>
                   </div>
-                  <div className="table-bulk-changes">
-                    <button type="button" className="btn btn-secondary btn-sm">
-                      <a
-                        href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`}
-                        className="breadcrumb-text"
+                  <div>
+                    <div className="table-bulk-changes">
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
                       >
-                        Submittal Mappings
-                      </a>
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm btn-gap"
-                      onClick={toggleModal}
-                    >
-                      + Add Employee
-                    </button>
+                        <a
+                          href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`}
+                          className="breadcrumb-text"
+                        >
+                          Procore Submittal Mappings
+                        </a>
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm btn-gap"
+                        onClick={toggleModal}
+                      >
+                        + Add Employee
+                      </button>
+                    </div>
+                    <label className="table-entries">
+                      <b>Procore users </b>: be sure to click the Procore
+                      submittal mappings button.
+                    </label>
                   </div>
                 </div>
                 <div className="l-table-wrapper">
@@ -877,18 +913,18 @@ const CustomerProfile = (props) => {
       <CreateEmployee
         modal={modal}
         toggleModal={toggleModal}
-        customer={customer}
         pageRefresh={pageRefresh}
         setPageRefresh={setPageRefresh}
+        customerID={customerID}
       />
       <EditEmployee
         modal={editModal}
         toggleModal={toggleEditModal}
-        customer={customer}
         employee={employee}
         pageRefresh={pageRefresh}
         setPageRefresh={setPageRefresh}
         empData={employeeData}
+        customerID={customerID}
       />
       <ConfirmationModal
         modal={confirmationModal}

@@ -23,13 +23,18 @@ export default function CombinedLogs(props) {
   // const [groupingValue, setGroupingValue] = useState({});
   // const [searchValue, setSearchValue] = useState('');
   const [sorting, setSorting] = useState({ column: '', order: 'desc' });
-  const [filterModal, setFilterModal] = useState(false)
-  const [selectedFilterValue, setSelectedFilterValue] = useState({})
-  const [filterColumn, setFilterColumn] = useState('')
-  const [filterValues, setFilterValues] = useState({ spec_section: [], type: ["Submittal"], item_desc: [], classification: [], sd_title: [] })
+  const [filterModal, setFilterModal] = useState(false);
+  const [filterColumn, setFilterColumn] = useState('');
+  const [filterValues, setFilterValues] = useState({
+    spec_section: [],
+    type: ['Submittal'],
+    item_desc: [],
+    classification: [],
+    sd_title: []
+  });
   // const [addRowTooltip, setaddRowTooltip] = useState(null)
   // const [editRowTooltip, setEditRowTooltip] = useState(null)
-  const [pdfTooltip, setPdfTooltip] = useState(null)
+  const [pdfTooltip, setPdfTooltip] = useState(null);
   // const navigate = useNavigate();
 
   const [rowData, setRowData] = useState({
@@ -43,7 +48,7 @@ export default function CombinedLogs(props) {
     spec_section: '',
     status: '',
     type: '',
-    classification:''
+    classification: ''
   });
 
   const [showMore, setModal] = useState(null);
@@ -128,10 +133,18 @@ export default function CombinedLogs(props) {
   // };
 
   const handleSorting = async (columnName) => {
-    let sortingOrder = sorting.column === columnName ? sorting.order : 'desc'
-    let a = {}
-    if (Object.values(filterValues).map(value => value.length ? true : false).includes(true)) {
-      Object.keys(filterValues).forEach(key => filterValues[key].length ? a = { ...a, [key]: filterValues[key] } : null)
+    let sortingOrder = sorting.column === columnName ? sorting.order : 'desc';
+    let a = {};
+    if (
+      Object.values(filterValues)
+        .map((value) => (value.length ? true : false))
+        .includes(true)
+    ) {
+      Object.keys(filterValues).forEach((key) =>
+        filterValues[key].length
+          ? (a = { ...a, [key]: filterValues[key] })
+          : null
+      );
     }
     try {
       // const response = await axiosInstance({
@@ -143,57 +156,35 @@ export default function CombinedLogs(props) {
       // });
       const response = await axiosInstance({
         method: 'post',
-        url: '/filter_logs',
+        url: props.qaDashboard ? 'qa_dashboard_logs' : '/filter_logs',
         data: {
           project_id: props.projectId,
-          search: "",
+          search: '',
           // filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
-          filters: {...a, type: ["Submittal"]},
-          order_col: columnName || "",
-          order: sortingOrder === 'desc' ? 'asc' : 'desc' || "",
+          filters: { ...a, type: ['Submittal'] },
+          order_col: columnName || '',
+          order: sortingOrder === 'desc' ? 'asc' : 'desc' || '',
           list_id: props.selectedLogData.length ? props.listId : ''
         }
       });
+      localStorage.setItem(
+        'filteredIds',
+        response.data?.message?.map((item) => item?.id)
+      );
+      props.selectedLogData.length
+        ? props.setSelectedLogData(response.data.message)
+        : props.setLogData(response.data.message);
 
-      props.selectedLogData.length ?
-        props.setSelectedLogData(response.data.message) :
-        props.setLogData(response.data.message);
-
-      setSorting({ ...sorting, column: columnName, order: sortingOrder === 'desc' ? 'asc' : 'desc' })
-    } catch (error) {
-      console.log(error.message);
-      handleError(error)
-    }
-  }
-  const handleOpenFilterModal = async () => {
-    setFilterModal(true)
-    try {
-      let a = {}
-      if (Object.values(filterValues).map(value => value.length ? true : false).includes(true)) {
-        Object.keys(filterValues).forEach(key => filterValues[key].length ? a = { ...a, [key]: filterValues[key] } : null)
-      }
-      const response = await axiosInstance({
-        method: 'post',
-        url: '/filter_logs',
-        data: {
-          project_id: props.projectId,
-          search: "",
-          filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? {...a, type: ["Submittal"]} : {type: ["Submittal"]},
-          // filters: a,
-          order_col: sorting.column || "",
-          order: sorting.order || "",
-          list_id: props.selectedLogData.length ? props.listId : ''
-        }
+      setSorting({
+        ...sorting,
+        column: columnName,
+        order: sortingOrder === 'desc' ? 'asc' : 'desc'
       });
-      setSelectedFilterValue(response.data.sel_filter_vals)
-      props.selectedLogData.length ?
-        props.setSelectedLogData(response.data.message) :
-        props.setLogData(response.data.message);
     } catch (error) {
       console.log(error.message);
-      handleError(error)
+      handleError(error);
     }
-  }
+  };
 
   const handleViewPdf = (pdfUrl, textLocation, rowIndex, id) => {
     props.setPdfData({
@@ -202,7 +193,7 @@ export default function CombinedLogs(props) {
       textLoc: textLocation,
       index: rowIndex,
       docId: id
-    })
+    });
   };
   // const insertElement = (arr, index, newItem) => [
   //   // part of the array before the specified index
@@ -229,8 +220,8 @@ export default function CombinedLogs(props) {
   //     const charArray = paraNos.map(paraNo => paraNo.search('-') !== -1 ? paraNo.codePointAt(paraNo.search('-') + 1) : 96)
   //     const logObj = {
   //       ...log,
-  //       //Here we are checking if para_no already contains a character after '-'. 
-  //       // If yes, we are increasing the ascii value of the character by 1 for ex.- if it's a it will make it b. 
+  //       //Here we are checking if para_no already contains a character after '-'.
+  //       // If yes, we are increasing the ascii value of the character by 1 for ex.- if it's a it will make it b.
   //       // If No, it will add '-a' to para_no
   //       para_no: dashIndex !== -1 ?
   //         log.para_no.slice(0, dashIndex + 1) + String.fromCharCode(Math.max(...charArray) + 1) :
@@ -260,7 +251,7 @@ export default function CombinedLogs(props) {
   // }
   useEffect(() => {
     setEditRow('');
-  }, [props.searchValue])
+  }, [props.searchValue]);
   return (
     <div className="l-table-wrapper">
       <table className="table">
@@ -285,50 +276,162 @@ export default function CombinedLogs(props) {
               </div>
             </th>
             <th className="text-center small-font">Source</th>
-            <th className='small-font'>
-              <span className="has-sorting" >
-                Spec Sec <i className={sorting.column === 'spec_section' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('spec_section')}></i>
-                <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('spec_section') }} />
+            <th className="small-font">
+              <span className="has-sorting">
+                Spec Sec{' '}
+                <i
+                  className={
+                    sorting.column === 'spec_section'
+                      ? sorting.order === 'asc'
+                        ? 'sort-i'
+                        : 'sort-d'
+                      : ''
+                  }
+                  onClick={() => handleSorting('spec_section')}
+                ></i>
+                <i
+                  className="has-filter"
+                  onClick={() => {
+                    setFilterModal(true);
+                    setFilterColumn('spec_section');
+                  }}
+                />
               </span>
             </th>
-            {props.projectType === 'ufgs' && <>
-              <th className='small-font'>
-                <span className="has-sorting" >
-                  Div # <i className={sorting.column === 'div_no' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('div_no')}></i>
-                  {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('div_no') }} /> */}
+            {props.projectType === 'ufgs' && (
+              <>
+                <th className="small-font">
+                  <span className="has-sorting">
+                    Div #{' '}
+                    <i
+                      className={
+                        sorting.column === 'div_no'
+                          ? sorting.order === 'asc'
+                            ? 'sort-i'
+                            : 'sort-d'
+                          : ''
+                      }
+                      onClick={() => handleSorting('div_no')}
+                    ></i>
+                    {/* <i className='has-filter' onClick={() => { setFilterModal(true); setFilterColumn('div_no') }} /> */}
+                  </span>
+                </th>
+                <th className="small-font">
+                  <span className="has-sorting">
+                    SD #{' '}
+                    <i
+                      className={
+                        sorting.column === 'sd_no'
+                          ? sorting.order === 'asc'
+                            ? 'sort-i'
+                            : 'sort-d'
+                          : ''
+                      }
+                      onClick={() => handleSorting('sd_no')}
+                    ></i>
+                    {/* <i className='has-filter' onClick={() => { setFilterModal(true); setFilterColumn('sd_no') }} /> */}
+                  </span>
+                </th>
+              </>
+            )}
+            {props.projectType !== 'ufgs' && (
+              <th className="para-no small-font">
+                <span>Para</span>
+              </th>
+            )}
+            {props.projectType !== 'ufgs' && (
+              <th className="small-font">
+                <span className="has-sorting">
+                  Submittal Heading{' '}
+                  <i
+                    className={
+                      sorting.column === 'type'
+                        ? sorting.order === 'asc'
+                          ? 'sort-i'
+                          : 'sort-d'
+                        : ''
+                    }
+                    onClick={() => handleSorting('type')}
+                  ></i>
+                  <i
+                    className="has-filter"
+                    onClick={() => {
+                      setFilterModal(true);
+                      setFilterColumn('type');
+                    }}
+                  />
                 </span>
               </th>
-              <th className='small-font'>
-                <span className="has-sorting" >
-                  SD # <i className={sorting.column === 'sd_no' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('sd_no')}></i>
-                  {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('sd_no') }} /> */}
+            )}
+            {props.qaDashboard && (
+              <th className="small-font">
+                <span className="has-sorting">
+                  Owner/Contractor{' '}
+                  <i
+                    className={
+                      sorting.column === 'type'
+                        ? sorting.order === 'asc'
+                          ? 'sort-i'
+                          : 'sort-d'
+                        : ''
+                    }
+                    onClick={() => handleSorting('owner_contractor')}
+                  ></i>
+                  <i
+                    className="has-filter"
+                    onClick={() => {
+                      setFilterModal(true);
+                      setFilterColumn('owner_contractor');
+                    }}
+                  />
                 </span>
               </th>
-            </>
-            }
-            {props.projectType !== 'ufgs' && <th className='para-no small-font'>
-              <span>
-                Para
-              </span>
-            </th>}
-           {props.projectType !== 'ufgs' && <th className='small-font'>
-              <span className="has-sorting" >
-                Submittal Heading <i className={sorting.column === 'type' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('type')}></i>
-                {/* <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('type') }} /> */}
-              </span>
-            </th>}
-            {props.projectType === 'ufgs' && <th className='small-font'>
-              <span className="has-sorting" >
-                SD Title <i className={sorting.column === 'sd_title' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('sd_title')}></i>
-                <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('sd_title') }} />
-              </span>
-            </th>}
-            <th className='small-font'>
-              <span className="has-sorting"  >
+            )}
+            {props.projectType === 'ufgs' && (
+              <th className="small-font">
+                <span className="has-sorting">
+                  SD Title{' '}
+                  <i
+                    className={
+                      sorting.column === 'sd_title'
+                        ? sorting.order === 'asc'
+                          ? 'sort-i'
+                          : 'sort-d'
+                        : ''
+                    }
+                    onClick={() => handleSorting('sd_title')}
+                  ></i>
+                  <i
+                    className="has-filter"
+                    onClick={() => {
+                      setFilterModal(true);
+                      setFilterColumn('sd_title');
+                    }}
+                  />
+                </span>
+              </th>
+            )}
+            <th className="small-font">
+              <span className="has-sorting">
                 Submittal Type
                 <div>
-                  <i className={sorting.column === 'item_desc' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('item_desc')}></i>
-                  <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('item_desc') }} />
+                  <i
+                    className={
+                      sorting.column === 'item_desc'
+                        ? sorting.order === 'asc'
+                          ? 'sort-i'
+                          : 'sort-d'
+                        : ''
+                    }
+                    onClick={() => handleSorting('item_desc')}
+                  ></i>
+                  <i
+                    className="has-filter"
+                    onClick={() => {
+                      setFilterModal(true);
+                      setFilterColumn('item_desc');
+                    }}
+                  />
                 </div>
               </span>
             </th>
@@ -339,29 +442,55 @@ export default function CombinedLogs(props) {
                 </span>
               </th>
             } */}
-            {props.projectType === 'ufgs' &&
-              <th className='small-font'>
-                <span className="has-sorting" >
-                  Classification <i className={sorting.column === 'classification' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('classification')}></i>
-                <i className='has-filter' onClick={() => { handleOpenFilterModal(); setFilterColumn('classification') }} />
+            {props.projectType === 'ufgs' && (
+              <th className="small-font">
+                <span className="has-sorting">
+                  Classification{' '}
+                  <i
+                    className={
+                      sorting.column === 'classification'
+                        ? sorting.order === 'asc'
+                          ? 'sort-i'
+                          : 'sort-d'
+                        : ''
+                    }
+                    onClick={() => handleSorting('classification')}
+                  ></i>
+                  <i
+                    className="has-filter"
+                    onClick={() => {
+                      setFilterModal(true);
+                      setFilterColumn('classification');
+                    }}
+                  />
                 </span>
               </th>
-            }
-            {props.projectType !== 'ufgs' && 
-            <>
-              {/* <th className='small-font'>
+            )}
+            {props.projectType !== 'ufgs' && (
+              <>
+                {/* <th className='small-font'>
                 <span className="has-sorting" >
                   Grouping <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
                 </span>
               </th> */}
-              <th className="log-description small-font">
-              <span className='has-sorting' >
-                Submittal Description <i className={sorting.column === "para_context" ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting("para_context")}></i>
-              </span>
-            </th>
-            </>
-            }
-            
+                <th className="log-description small-font">
+                  <span className="has-sorting">
+                    Submittal Description{' '}
+                    <i
+                      className={
+                        sorting.column === 'para_context'
+                          ? sorting.order === 'asc'
+                            ? 'sort-i'
+                            : 'sort-d'
+                          : ''
+                      }
+                      onClick={() => handleSorting('para_context')}
+                    ></i>
+                  </span>
+                </th>
+              </>
+            )}
+
             {/* <th>
               <span className="has-sorting" >
                 Status <i className={sorting.column === 'status' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('status')}></i>
@@ -382,10 +511,15 @@ export default function CombinedLogs(props) {
             </th> */}
           </tr>
         </thead>
-        <tbody style={{fontSize: '12px'}}>
+        <tbody style={{ fontSize: '12px' }}>
           {logData.map((log, index) => {
             return (
-              <tr className={(log.user_id !== 1 || index%2 !== 0) ? "highlight-row" : ""} style={{lineHeight: 1.2}}>
+              <tr
+                className={
+                  log.user_id !== 1 || index % 2 !== 0 ? 'highlight-row' : ''
+                }
+                style={{ lineHeight: 1.2 }}
+              >
                 <td className="ticket-checkbox reduce-height">
                   <div className="form-group">
                     <div className="custom-control custom-checkbox">
@@ -406,8 +540,9 @@ export default function CombinedLogs(props) {
                 </td>
                 <td className="reduce-height">
                   <div className="action-items">
-                    {<>
-                      {/* {editRow === index ? (
+                    {
+                      <>
+                        {/* {editRow === index ? (
                         <>
                           <SaveButton onClick={handleUpdateLog} style={{ marginRight: '5px' }} />
                           <CancelButton
@@ -443,30 +578,65 @@ export default function CombinedLogs(props) {
                             Edit Row
                           </Tooltip></>
                       )} */}
-                      {/* <Link
+                        {/* <Link
                         style={{ fontWeight: 'normal' }}
                         className="btn btn-secondary btn-sm"
                         to={{ pathname: `/pdf-view`, search: `?url=${log?.doc_link}&textLoc=${log.text_loc}` }}
                         target="_blank" >
                         Pdf
                       </Link> */}
-                      {props.pdfData.index === index ?
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          style={{ marginRight: '5px' }}
-                          onClick={() => props.setPdfData({ url: '', textLoc: {}, index: '', docId: null })}
-                        >
-                          Close Pdf
-                        </button> :
-                        newRowIndex !== index && log.user_id === 1 &&
-                        <>
-                          <PdfButton onClick={() => handleViewPdf(log.doc_link, log.text_loc, index, log.doc_id)} style={{ marginRight: '5px' }} id={'Pdf-Tooltip-' + index + 1} />
-                          <Tooltip placement="top" target={'Pdf-Tooltip-' + index + 1} isOpen={pdfTooltip === index + 1} toggle={() => setPdfTooltip(pdfTooltip ? pdfTooltip === index + 1 ? null : index + 1 : index + 1)}>
-                            View Pdf
-                          </Tooltip></>
-                      }
-                      {/* {!props.selectedLogData.length && <><AddButton onClick={() => {
+                        {props.pdfData.index === index ? (
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            style={{ marginRight: '5px' }}
+                            onClick={() =>
+                              props.setPdfData({
+                                url: '',
+                                textLoc: {},
+                                index: '',
+                                docId: null
+                              })
+                            }
+                          >
+                            Close Pdf
+                          </button>
+                        ) : (
+                          newRowIndex !== index &&
+                          log.user_id === 1 && (
+                            <>
+                              <PdfButton
+                                onClick={() =>
+                                  handleViewPdf(
+                                    log.doc_link,
+                                    log.text_loc,
+                                    index,
+                                    log.doc_id
+                                  )
+                                }
+                                style={{ marginRight: '5px' }}
+                                id={'Pdf-Tooltip-' + index + 1}
+                              />
+                              <Tooltip
+                                placement="top"
+                                target={'Pdf-Tooltip-' + index + 1}
+                                isOpen={pdfTooltip === index + 1}
+                                toggle={() =>
+                                  setPdfTooltip(
+                                    pdfTooltip
+                                      ? pdfTooltip === index + 1
+                                        ? null
+                                        : index + 1
+                                      : index + 1
+                                  )
+                                }
+                              >
+                                View Pdf
+                              </Tooltip>
+                            </>
+                          )
+                        )}
+                        {/* {!props.selectedLogData.length && <><AddButton onClick={() => {
                         if (!newRowIndex) {
                           handleAddRow(log)
                         } else if (newRowIndex === index + 1) {
@@ -477,12 +647,13 @@ export default function CombinedLogs(props) {
                         <Tooltip placement="right" target={'Tooltip-' + index + 1} isOpen={addRowTooltip === index + 1} toggle={() => setaddRowTooltip(addRowTooltip ? addRowTooltip === index + 1 ? null : index + 1 : index + 1)}>
                           Add Row below
                         </Tooltip></>} */}
-                    </>
+                      </>
                     }
                   </div>
                 </td>
                 <td className="reduce-height">
-                  {editRow === index && (newRowIndex === index || log.user_id !== 1) ? (
+                  {editRow === index &&
+                  (newRowIndex === index || log.user_id !== 1) ? (
                     <input
                       placeholder="Enter"
                       className="form-control"
@@ -498,19 +669,16 @@ export default function CombinedLogs(props) {
                   )}
                   {/* {log.spec_section} */}
                 </td>
-                {props.projectType === 'ufgs' &&
+                {props.projectType === 'ufgs' && (
                   <>
-                    <td className="reduce-height">
-                      {log.div_no}
-                    </td>
-                    <td className="reduce-height">
-                      {log.sd_no}
-                    </td>
+                    <td className="reduce-height">{log.div_no}</td>
+                    <td className="reduce-height">{log.sd_no}</td>
                   </>
-                }
-                {props.projectType !== 'ufgs' && <td className="reduce-height">
-                  {log.para_no}
-                  {/* {editRow === index ? (
+                )}
+                {props.projectType !== 'ufgs' && (
+                  <td className="reduce-height">
+                    {log.para_no}
+                    {/* {editRow === index ? (
                     <input
                       placeholder="Enter"
                       className="form-control"
@@ -524,24 +692,29 @@ export default function CombinedLogs(props) {
                   ) : (
                     log.para_no
                   )} */}
-                </td>}
-                {props.projectType !== 'ufgs' && <td className="reduce-height">
-                  {editRow === index ? (
-                    <input
-                      placeholder="Enter"
-                      className="form-control"
-                      type="text"
-                      value={rowData.type}
-                      // style={{ border: 'none' }}
-                      onChange={(e) =>
-                        setRowData({ ...rowData, type: e.target.value })
-                      }
-                    />
-                  ) : (
-                    log.type
-                  )}
-                </td>}
-                {props.projectType === 'ufgs' && <td className="reduce-height"> {log.sd_title} </td>}
+                  </td>
+                )}
+                {props.projectType !== 'ufgs' && (
+                  <td className="reduce-height">
+                    {editRow === index ? (
+                      <input
+                        placeholder="Enter"
+                        className="form-control"
+                        type="text"
+                        value={rowData.type}
+                        // style={{ border: 'none' }}
+                        onChange={(e) =>
+                          setRowData({ ...rowData, type: e.target.value })
+                        }
+                      />
+                    ) : (
+                      log.type
+                    )}
+                  </td>
+                )}
+                {props.projectType === 'ufgs' && (
+                  <td className="reduce-height"> {log.sd_title} </td>
+                )}
                 <td className="reduce-height">
                   {editRow === index ? (
                     <input
@@ -558,8 +731,9 @@ export default function CombinedLogs(props) {
                     log.item_desc
                   )}
                 </td>
-                {props.projectType === 'ufgs' && <td style={{textAlign: 'center'}}>
-                  {/* {editRow === index ? (
+                {props.projectType === 'ufgs' && (
+                  <td style={{ textAlign: 'center' }}>
+                    {/* {editRow === index ? (
                     <div
                       className="form-group log-datepicker"
                       style={{ minWidth: '240px' }}
@@ -578,11 +752,12 @@ export default function CombinedLogs(props) {
                     </div>
                   ) : ( */}
                     {log.classification}
-                  {/* )} */}
-                </td>}
-                {props.projectType !== 'ufgs' && 
-                <>
-                  {/* <td>
+                    {/* )} */}
+                  </td>
+                )}
+                {props.projectType !== 'ufgs' && (
+                  <>
+                    {/* <td>
                     {editRow === index ? (
                       <div
                         className="form-group log-datepicker"
@@ -604,27 +779,48 @@ export default function CombinedLogs(props) {
                       log.package
                     )}
                   </td> */}
-                  <td className="reduce-height">
-                    {editRow === index ? (
-                      <input
-                        placeholder="Enter"
-                        className="form-control"
-                        type="text"
-                        value={rowData.para_context}
-                        // style={{ border: 'none' }}
-                        onChange={(e) =>
-                          setRowData({ ...rowData, para_context: e.target.value })
-                        }
-                      />
-                    ) : (
-                      <div className={"log-desc " + (showMore === index ? 'show-content' : '')}>
-                        {log.para_context}
-                        {log.para_context.length > 10 && <span className="showmore-wrap" onClick={() => setModal(showMore === index ? null : index)}>{showMore === index ? <CollapseButton/> : <ExpandButton/>}</span>}
-                      </div>
-                    )}
-                  </td>
-                </>
-                }
+                    <td className="reduce-height">
+                      {editRow === index ? (
+                        <input
+                          placeholder="Enter"
+                          className="form-control"
+                          type="text"
+                          value={rowData.para_context}
+                          // style={{ border: 'none' }}
+                          onChange={(e) =>
+                            setRowData({
+                              ...rowData,
+                              para_context: e.target.value
+                            })
+                          }
+                        />
+                      ) : (
+                        <div
+                          className={
+                            'log-desc ' +
+                            (showMore === index ? 'show-content' : '')
+                          }
+                        >
+                          {log.para_context}
+                          {log.para_context.length > 10 && (
+                            <span
+                              className="showmore-wrap"
+                              onClick={() =>
+                                setModal(showMore === index ? null : index)
+                              }
+                            >
+                              {showMore === index ? (
+                                <CollapseButton />
+                              ) : (
+                                <ExpandButton />
+                              )}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </>
+                )}
                 {/* <td className="reduce-height">
                   {editRow === index ? (
                     <div
@@ -708,7 +904,6 @@ export default function CombinedLogs(props) {
                     log.comments
                   )}
                 </td> */}
-
               </tr>
             );
           })}
@@ -717,20 +912,19 @@ export default function CombinedLogs(props) {
       <FilterTable
         modal={filterModal}
         setFilterModal={() => setFilterModal(!filterModal)}
-        selectedFilterValue={selectedFilterValue}
+        selectedFilterValue={props?.selectedFilterValue}
         filterColumn={filterColumn}
         setFilterValues={setFilterValues}
         filterValues={filterValues}
         projectId={props.projectId}
         setLogData={props.setLogData}
-        orderColumn={sorting.column || ""}
-        order={sorting.order === 'desc' ? 'asc' : 'desc' || ""}
+        orderColumn={sorting.column || ''}
+        order={sorting.order === 'desc' ? 'asc' : 'desc' || ''}
         selectedLogData={props.selectedLogData}
         listId={props.listId}
         setSelectedLogData={props.setSelectedLogData}
+        qaDashboard={props?.qaDashboard}
       />
-
-    </div >
-
+    </div>
   );
 }

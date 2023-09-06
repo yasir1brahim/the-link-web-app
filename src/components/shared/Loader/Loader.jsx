@@ -10,7 +10,11 @@ const Loader = (props) => {
         }
       >
         <div className="dots">
-          {props.showProcessing ? <p className='dot-processing'>Processing</p> : ''}
+          {props.showProcessing ? (
+            <p className="dot-processing">Processing, this might take upto 5 minutes.</p>
+          ) : (
+            ''
+          )}
           <div className="dot1"></div>
           <div className="dot2"></div>
           <div className="dot3"></div>

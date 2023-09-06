@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router";
-import CustomerProjects from "../CustomerProjects/CustomerProjects";
-import Header from "../shared/Header/Header";
-import NavbarTop from "../shared/NavbarTop/NavbarTop";
-import PersonalProject from "./PersonalProject";
-import { useNavigate } from "react-router-dom";
-import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
-import axiosInstance from "../../config/axios";
-import handleError from "../../config/errorHandler";
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
+import CustomerProjects from '../CustomerProjects/CustomerProjects';
+import Header from '../shared/Header/Header';
+import NavbarTop from '../shared/NavbarTop/NavbarTop';
+import PersonalProject from './PersonalProject';
+import { useNavigate } from 'react-router-dom';
+import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
+import axiosInstance from '../../config/axios';
+import handleError from '../../config/errorHandler';
 
 const Projects = () => {
   const navigate = useNavigate();
@@ -23,13 +23,23 @@ const Projects = () => {
   const [successModal, toggleSuccessModal] = useState(false);
   const [fileData, setFileData] = useState({});
   const [specUploadProject, setSpecUploadProject] = useState({});
-  const roleId = localStorage.getItem("roleId");
+  const roleId = localStorage.getItem('roleId');
   const { state } = useLocation();
   const toggleSlider = () => setSlider(!slider);
   const [isArchived, toggleArchive] = useState(false);
   const toggleCreateProjectModal = () =>
     setCreateProjectModal(!createProjectModal);
   const toggleUploadSpecsModal = () => setUploadSpecsModal(!uploadSpecsModal);
+  const [toggleUploadSpecsButton, setToggleUploadSpecsButton] = useState(true);
+
+  useEffect(() => {
+    if (!uploadSpecsModal) {
+      setPdfFile({});
+    }
+    if (roleId === '7') {
+      setToggleUploadSpecsButton(false);
+    }
+  }, [uploadSpecsModal, toggleUploadSpecsButton, roleId]);
 
   // function related to upload specs
   const backToUpload = () => {
@@ -42,14 +52,14 @@ const Projects = () => {
     try {
       setUploadLoading(true);
       const data = new FormData();
-      data.append("project_id", specUploadProject?.project_id);
-      specUploadProject?.project_type === "ufgs" &&
-        data.append("project_type", specUploadProject?.project_type);
-      Object.values(pdfFile)?.forEach((file) => data.append("files", file));
+      data.append('project_id', specUploadProject?.project_id);
+      specUploadProject?.project_type === 'ufgs' &&
+        data.append('project_type', specUploadProject?.project_type);
+      Object.values(pdfFile)?.forEach((file) => data.append('files', file));
       const response = await axiosInstance({
-        method: "post",
-        url: "/upload_file",
-        data,
+        method: 'post',
+        url: '/upload_file',
+        data
       });
       if (response.data) {
         // console.log(response.data);
@@ -59,6 +69,13 @@ const Projects = () => {
         toggleSuccessModal(true);
         setPageRefresh(!pageRefresh);
       }
+      axiosInstance({
+        method: 'get',
+        url: '/collab/create_spec_index',
+        params: {
+          project_id: specUploadProject?.project_id
+        }
+      });
     } catch (error) {
       setUploadLoading(false);
       toggleErrorModal(true);
@@ -68,11 +85,11 @@ const Projects = () => {
   };
 
   // function used in the project tiles to navigate to project details
-  const handleLaunch = (project) => {
-    const custId =
-      localStorage.getItem("roleId") === "0"
-        ? state.customer_id
-        : localStorage.getItem("userId");
+  const custId =
+    localStorage.getItem('roleId') === '0'
+      ? state.customer_id
+      : localStorage.getItem('userId');
+  const handleLaunch = (project, qaDashboard) => {
     // project?.project_type === "ufgs"
     // ?
     navigate(
@@ -82,11 +99,12 @@ const Projects = () => {
           project,
           projectName: project?.project_name,
           customerId:
-            localStorage.getItem("roleId") === "0"
+            localStorage.getItem('roleId') === '0'
               ? state.customer_id
-              : localStorage.getItem("userId"),
-          logType: "Classified",
-        },
+              : localStorage.getItem('userId'),
+          logType: 'Classified',
+          qaDashboard
+        }
       }
     );
     // : navigate("/project-details", {
@@ -100,17 +118,34 @@ const Projects = () => {
     //   });
   };
 
+  const handleCollaborationLaunch = (project) => {
+    navigate(
+      `/collaboration-hub?projectDetails=${project?.project_id},${custId},Classified&projectName=${project?.project_name}`,
+      {
+        state: {
+          project,
+          projectName: project?.project_name,
+          customerId:
+            localStorage.getItem('roleId') === '0'
+              ? state.customer_id
+              : localStorage.getItem('userId'),
+          logType: 'Classified'
+        }
+      }
+    );
+  };
+
   useEffect(() => {
     const url =
-      roleId === "6" || roleId === "7"
-        ? `/projects/${localStorage.getItem("userId")}`
+      roleId === '6' || roleId === '7'
+        ? `/projects/${localStorage.getItem('userId')}`
         : state?.customer_id
         ? `/projects/${state.customer_id}`
-        : `/projects/${localStorage.getItem("userId")}`;
+        : `/projects/${localStorage.getItem('userId')}`;
     const fetchData = async () => {
       const response = await axiosInstance({
-        method: "get",
-        url,
+        method: 'get',
+        url
       });
       // setProjectData(response.data.message);
       setProjectData(
@@ -137,16 +172,18 @@ const Projects = () => {
             //     ? "Add Personal Project"
             //     : roleId !== "6" && roleId !== "7" && "Create New Project"
             // }
-            showBtn={"Create New Project"}
-            breadcrumb={"View Projects"}
+            showBtn={'Create New Project'}
+            breadcrumb={'View Projects'}
           />
           {slider ? (
             <PersonalProject
               handleLaunch={handleLaunch}
+              handleCollaborationLaunch={handleCollaborationLaunch}
               toggleSlider={toggleSlider}
               slider={slider}
               projectData={projectData}
               toggleUploadSpecsModal={toggleUploadSpecsModal}
+              toggleUploadSpecsButton={toggleUploadSpecsButton}
               createProjectModal={createProjectModal}
               toggleCreateProjectModal={toggleCreateProjectModal}
               state={state}
@@ -158,6 +195,7 @@ const Projects = () => {
           ) : (
             <CustomerProjects
               toggleSlider={toggleSlider}
+              handleCollaborationLaunch={handleCollaborationLaunch}
               slider={slider}
               customerData={customerData}
               setCustomerData={setCustomerData}
