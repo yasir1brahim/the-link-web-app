@@ -691,8 +691,6 @@ const ProjectLogs = () => {
         successModal={successModal}
         toggleSuccessModal={toggleSuccessModal}
         fileData={fileData}
-        project={state.project}
-        logScreenUrl={`/project-logs?projectDetails=${projectId || state.project?.project_id},${customerId},Classified`}
       />
       <Procore
         companyId={companyId}
