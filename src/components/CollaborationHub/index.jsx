@@ -8,13 +8,14 @@ import { useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../config/axios';
 import handleError from '../../config/errorHandler';
 import CollaborationPdfReader from '../PdfReader/collaborationPdfReader';
-import Switch from 'react-switch';
+// import Switch from 'react-switch';
 import CollaborationPdfVersionControl from '../PdfReader/collaborationPdfVersionControl';
 
 const CollaborationHub = () => {
   const { state } = useLocation();
   const [searchParams] = useSearchParams();
-  const [toggleState, setToggleState] = useState(false);
+  // const [toggleState, setToggleState] = useState(false);
+  const toggleState = false;
   const [userList, setUserList] = useState([]);
   const projectDetails = searchParams.get('projectDetails')?.split(',');
   const projectId = projectDetails?.length
@@ -82,12 +83,12 @@ const CollaborationHub = () => {
     });
   }, [state?.project, projectId]);
 
-  useEffect(() => {
-    if (toggleState) {
-      const div = document.getElementById('chub-item-container');
-      div.innerHTML = '';
-    }
-  }, [toggleState]);
+  // useEffect(() => {
+  //   if (toggleState) {
+  //     const div = document.getElementById('chub-item-container');
+  //     div.innerHTML = '';
+  //   }
+  // }, [toggleState]);
 
   return (
     <>
@@ -107,6 +108,7 @@ const CollaborationHub = () => {
 
             // toggleModal={toggleModal}
           />
+          {/* // Removed due to client request on : 13 Sep 2023
           <div class="version-control-toggle">
             Compare Versions &nbsp;
             <Switch
@@ -115,7 +117,7 @@ const CollaborationHub = () => {
               onChange={() => setToggleState(!toggleState)}
               checked={toggleState}
             />
-          </div>
+          </div> */}
         </div>
         <div className="collaboration-wrapper-sidenav">
           <div className="collabHub-sideNav-contents">
