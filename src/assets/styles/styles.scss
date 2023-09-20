@@ -100,6 +100,8 @@ ul {
       display: flex;
       flex-direction: column;
       border: 1px solid #E2E2E2;
+      max-height: calc(100vh - 195px);
+      overflow: auto;
       .side-nav-chub-item {
         align-items: center;
         padding: 2px;
