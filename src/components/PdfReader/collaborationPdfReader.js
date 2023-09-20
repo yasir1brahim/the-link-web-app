@@ -142,10 +142,37 @@ const CollaborationPdfReader = ({
         return true;
       });
 
-      const userDatas = userList?.map((user) => ({
-        value: user.full_name,
-        email: user.email_address
-      }));
+      // const userDatas = userList?.map((user) => ({
+      //   value: user.full_name,
+      //   email: user.email_address
+      // }));
+
+      const userDatas = [
+        {
+          value: "Hugh Seaton",
+          email: "hugh.seaton@thelink.ai",
+        },
+        {
+          value: "Bhabani",
+          email: "bhabani@getcarnera.com",
+        },
+        {
+          value: "Nikhil",
+          email: "nikhil@getcarnera.com",
+        },
+        {
+          value: "Pranshul",
+          email: "pranshul@getcarnera.com",
+        },
+        {
+          value: "Siddharth",
+          email: "sid@getcarnera.com",
+        },
+        {
+          value: 'Task',
+          email: 'tasks@thelink.ai'
+        }
+      ];
 
       instance.UI.mentions.setUserData(userDatas);
 
@@ -246,7 +273,8 @@ const CollaborationPdfReader = ({
               message: annot?.cqa,
               redirect_url: window.location.href,
               project_name: projectName,
-              sender_name: fullName
+              sender_name: fullName,
+              selected_text: ""
             }
           });
         }
