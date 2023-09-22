@@ -4,6 +4,10 @@
   "private": true,
   "proxy": "https://log-manager-api-prod.thelink.ai",
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.9",
+    "@mui/material": "^5.14.9",
     "@pdftron/webviewer": "^10.1.0",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.2",
