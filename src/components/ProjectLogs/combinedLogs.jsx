@@ -606,8 +606,7 @@ export default function CombinedLogs(props) {
                             Close Pdf
                           </button>
                         ) : (
-                          newRowIndex !== index &&
-                          log.user_id === 1 && (
+                          newRowIndex !== index && (
                             <>
                               <PdfButton
                                 onClick={() =>
