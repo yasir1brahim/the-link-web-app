@@ -119,6 +119,27 @@ const Header = ({ ...props }) => {
           >
             Collab Hub
           </button>
+          {!window.location.href.includes('app.thelink.ai') ? (
+            <button
+              type="button"
+              className={`btn btn-primary btn-white ${
+                props.btnSize === 'small' ? 'btn-small' : ''
+              }`}
+              style={
+                props.navBtn === 'collab'
+                  ? { marginLeft: '4px' }
+                  : { marginLeft: '0' }
+              }
+            >
+              <a
+                href="https://specgpt.ai/chat"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Spec GPT <span style={{ fontSize: '9px' }}>Beta</span>
+              </a>
+            </button>
+          ) : null}
         </div>
       )}
       {props.showBtn && localStorage.getItem('roleId') !== '7' ? (
