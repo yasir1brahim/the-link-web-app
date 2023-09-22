@@ -88,6 +88,7 @@ const ProjectLogs = () => {
     ? 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9'
     : 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9';
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
+  let dataStoreFlag = false;
 
   useEffect(() => {
     if (!modal) {
@@ -348,7 +349,10 @@ const ProjectLogs = () => {
         submittalLogs?.map((item) => item?.id)
       );
       setCompleteLogData(response.data.message);
-      setLoading(false);
+      if (response.data.message) {
+        setLoading(false);
+        dataStoreFlag = true;
+      }
     };
 
     fetchData().catch((error) => {
@@ -525,7 +529,9 @@ const ProjectLogs = () => {
             {logData.length === 0 ? (
               <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
                 <span className="d-flex align-items-center justify-content-center">
-                  Please upload documents, before seeing the logs
+                  {dataStoreFlag
+                    ? `Please upload documents, before seeing the logs`
+                    : `Refreshing data...`}
                 </span>
               </div>
             ) : (

@@ -278,24 +278,26 @@ export default function CombinedLogs(props) {
             <th className="text-center small-font">Source</th>
             <th className="small-font">
               <span className="has-sorting">
-                Spec Sec{' '}
-                <i
-                  className={
-                    sorting.column === 'spec_section'
-                      ? sorting.order === 'asc'
-                        ? 'sort-i'
-                        : 'sort-d'
-                      : ''
-                  }
-                  onClick={() => handleSorting('spec_section')}
-                ></i>
-                <i
-                  className="has-filter"
-                  onClick={() => {
-                    setFilterModal(true);
-                    setFilterColumn('spec_section');
-                  }}
-                />
+                Spec Section{' '}
+                <div>
+                  <i
+                    className={
+                      sorting.column === 'spec_section'
+                        ? sorting.order === 'asc'
+                          ? 'sort-i'
+                          : 'sort-d'
+                        : ''
+                    }
+                    onClick={() => handleSorting('spec_section')}
+                  ></i>
+                  <i
+                    className="has-filter"
+                    onClick={() => {
+                      setFilterModal(true);
+                      setFilterColumn('spec_section');
+                    }}
+                  />
+                </div>
               </span>
             </th>
             {props.projectType === 'ufgs' && (
@@ -336,30 +338,32 @@ export default function CombinedLogs(props) {
             )}
             {props.projectType !== 'ufgs' && (
               <th className="para-no small-font">
-                <span>Para</span>
+                <span>Paragraph</span>
               </th>
             )}
             {props.projectType !== 'ufgs' && (
               <th className="small-font">
                 <span className="has-sorting">
                   Submittal Heading{' '}
-                  <i
-                    className={
-                      sorting.column === 'type'
-                        ? sorting.order === 'asc'
-                          ? 'sort-i'
-                          : 'sort-d'
-                        : ''
-                    }
-                    onClick={() => handleSorting('type')}
-                  ></i>
-                  <i
-                    className="has-filter"
-                    onClick={() => {
-                      setFilterModal(true);
-                      setFilterColumn('type');
-                    }}
-                  />
+                  <div>
+                    <i
+                      className={
+                        sorting.column === 'type'
+                          ? sorting.order === 'asc'
+                            ? 'sort-i'
+                            : 'sort-d'
+                          : ''
+                      }
+                      onClick={() => handleSorting('type')}
+                    ></i>
+                    <i
+                      className="has-filter"
+                      onClick={() => {
+                        setFilterModal(true);
+                        setFilterColumn('type');
+                      }}
+                    />
+                  </div>
                 </span>
               </th>
             )}
@@ -802,7 +806,7 @@ export default function CombinedLogs(props) {
                           }
                         >
                           {log.para_context}
-                          {log.para_context.length > 10 && (
+                          {log.para_context.length > 85 && (
                             <span
                               className="showmore-wrap"
                               onClick={() =>
