@@ -25,6 +25,7 @@ import Procore from './procore';
 import { ReactComponent as Logo } from '../../assets/images/procore-vector-logo.svg';
 import { ReactComponent as ExcelLogo } from '../../assets/images/excel.svg';
 import handleError from '../../config/errorHandler';
+import Pagination from '../shared/Pagination/LogsPagination';
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -89,7 +90,8 @@ const ProjectLogs = () => {
     : 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9';
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
   let dataStoreFlag = false;
-
+  const [totalCount, setTotalCount] = useState(0);
+  
   useEffect(() => {
     if (!modal) {
       setPdfFile({});
@@ -321,40 +323,43 @@ const ProjectLogs = () => {
       }
     }
   };
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const response = await axiosInstance({
-        method: 'post',
-        url: '/filter_logs',
-        data: {
-          project_id: state?.projectId || projectId,
-          search: '',
-          filters: {},
-          order_col: '',
-          order: ''
-        }
-      });
-
-      // setLogData(response.data.message);
-      setSelectedFilterValue(response.data.all_filter_vals);
-      const submittalLogs = response.data.message
-        ?.map((logs) => (logs?.type === 'Submittal' ? logs : null))
-        .filter((e) => e);
-      selectedLogData.length
-        ? setSelectedLogData(submittalLogs)
-        : setLogData(submittalLogs);
-      localStorage.setItem(
-        'filteredIds',
-        submittalLogs?.map((item) => item?.id)
-      );
-      setCompleteLogData(response.data.message);
-      if (response.data.message) {
-        setLoading(false);
-        dataStoreFlag = true;
+  const fetchData = async (page, itemsPerPage) => {
+    setLoading(true);
+    const response = await axiosInstance({
+      method: 'post',
+      url: '/filter_logs',
+      data: {
+        project_id: state?.projectId || projectId,
+        search: '',
+        filters: {},
+        order_col: '',
+        order: '',
+        page_number: page || 0,
+        limit: itemsPerPage
       }
-    };
-
+    });
+    // setLogData(response.data.message);
+    setSelectedFilterValue(response.data.all_filter_vals);
+    const submittalLogs = response.data.message
+      console.log("🚀 ~ file: ProjectLogs.jsx:344 ~ fetchData ~ response.data.message:", response.data.message)
+      ?.map((logs) => (logs?.type === 'Submittal' ? logs : null))
+      .filter((e) => e);
+    selectedLogData.length
+      ? setSelectedLogData(submittalLogs)
+      : setLogData(submittalLogs);
+    localStorage.setItem(
+      'filteredIds',
+      submittalLogs?.map((item) => item?.id)
+    );
+    setCompleteLogData(response.data.message);
+    setLoading(false);
+    if (response?.data?.total_count) {
+      setTotalCount(response?.data?.total_count);
+    } else {
+      setTotalCount(response?.data?.total_count);
+    }
+  };
+  useEffect(() => {
     fetchData().catch((error) => {
       setLoading(false);
       handleError(error);
@@ -395,14 +400,14 @@ const ProjectLogs = () => {
   useEffect(() => {
     let filterData = selectedLogData.length ? selectedLogData : logData;
     let filteredLog = filterData
-      .map((log) => {
-        return Object.values(log)
-          .filter((value) => value)
-          .filter((value) => value.toString().includes(searchValue)).length
-          ? log
-          : null;
-      })
-      .filter((value) => value);
+      // .map((log) => {
+      //   return Object.values(log)
+      //     .filter((value) => value)
+      //     .filter((value) => value.toString().includes(searchValue)).length
+      //     ? log
+      //     : null;
+      // })
+      // .filter((value) => value);
     setFilteredLogData(filteredLog);
   }, [selectedLogData, logData, searchValue, setFilteredLogData]);
   // let filteredLogData = selectedLogData.length ? selectedLogData : logData
@@ -634,6 +639,14 @@ const ProjectLogs = () => {
                   />
                   {pdfData.url && <PdfWrapper pdfData={pdfData} />}
                 </div>
+                {!pdfData.url && (
+                  <div className="table-footer-content logs-pagination">
+                    <Pagination
+                      totalItems={totalCount}
+                      fetchData={fetchData}
+                    />
+                  </div>
+                )}
                 {/* {state.project?.type === 'Submittal' && (
                  
                   <SubmittalTable
