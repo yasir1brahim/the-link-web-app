@@ -2,17 +2,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axiosInstance from '../../config/axios';
 import WebViewer from '@pdftron/webviewer';
+import { toast, ToastContainer } from 'react-toastify';
 
 const CollaborationPdfReader = ({
-  docId,
+  //   docId,
   projectName,
   collabDocs,
   userList
 }) => {
   const fullName = localStorage.getItem('fullName');
   const viewer = useRef(null);
-  // const [documentId, setDocId] = useState(collabDocs[0]?.id)
   const [documentId, _setDocId] = useState('');
+  let sectionId = '';
+  let docId = '';
   const docIdRef = React.useRef(documentId);
   const setDocId = (data) => {
     docIdRef.current = data;
@@ -25,13 +27,8 @@ const CollaborationPdfReader = ({
     }
   }, [collabDocs]);
 
-  const handleDocumentLoaded = async (
-    docId,
-    annotationManager,
-    sectionNumber
-  ) => {
-    setDocId(docId);
-    const fetchData = async () => {
+  const handleDocumentLoaded = async (docId, sectionNumber) => {
+    try {
       const response = await axiosInstance({
         method: 'post',
         url: `/pdf/v2/getMetadata`,
@@ -40,21 +37,16 @@ const CollaborationPdfReader = ({
           section_no: sectionNumber
         }
       });
-      if (response.status === 200) {
-        response.data.data?.map(async (item) => {
-          const annotations = await annotationManager.importAnnotationCommand(
-            item.xfdf_string
-          );
-          console.log('annotations', annotations);
-          annotations.forEach((annotation) => {
-            annotationManager.redrawAnnotation(annotation);
-          });
-        });
+      let xfdfString = '';
+      const dataLength = response.data.data.length;
+      if (dataLength) {
+        xfdfString = response.data.data[0].xfdf_string;
       }
-    };
-    fetchData().catch((error) => {
-      console.log(error);
-    });
+      return xfdfString;
+    } catch (e) {
+      console.log(e);
+    }
+    setDocId(docId);
   };
 
   const loadPDF = () => {
@@ -64,7 +56,12 @@ const CollaborationPdfReader = ({
         licenseKey:
           'Thelinkai, Inc. (thelink.ai):PWS:Thelinkai::B+2:D0333312DD61815C33A681734AA1DD04DD5EB88FFD89F8DBFE1FBDE14C08D8EFE6EE4ED826BD',
         initialDoc: collabDocs[0].section_file_path,
-        extension: 'pdf'
+        extension: 'pdf',
+        documentXFDFRetriever: () =>
+          handleDocumentLoaded(
+            docId || collabDocs[0].doc_id,
+            sectionId || collabDocs[0].section_no
+          )
       },
       viewer.current
     ).then(async (instance) => {
@@ -72,32 +69,26 @@ const CollaborationPdfReader = ({
       const { documentViewer, annotationManager } = instance.Core;
       const annotHistoryManager = documentViewer.getAnnotationHistoryManager();
 
-      handleDocumentLoaded(
-        collabDocs[0].doc_id,
-        annotationManager,
-        collabDocs[0].section_no
-      );
-      annotationManager.addEventListener(
-        'annotationChanged',
-        async (annotations, action, { imported }) => {
-          if (imported) return;
-
-          const xfdfString = await annotationManager.exportAnnotationCommand();
-          if (docIdRef?.current === collabDocs[0].doc_id) {
-            await axiosInstance({
-              method: 'post',
-              url: '/pdf/v2/saveMetadata',
-              data: {
-                doc_id: collabDocs[0].doc_id,
-                edited_by: parseInt(localStorage.getItem('userId')),
-                section_no: collabDocs[0].section_no,
-                data: [{ id: annotations[0].qt, xfdf_string: xfdfString }],
-                pdf_type: 'pdftron'
-              }
-            });
-          }
+      const saveXfdfString = async (documentId, sectionId, xfdfString) => {
+        try {
+          //   if (docIdRef?.current === collabDocs[0].doc_id) {
+          await axiosInstance({
+            method: 'post',
+            url: '/pdf/v2/saveMetadata',
+            data: {
+              doc_id: documentId,
+              edited_by: parseInt(localStorage.getItem('userId')),
+              section_no: sectionId,
+              data: [{ id: sectionId, xfdf_string: xfdfString }],
+              pdf_type: 'pdftron'
+            }
+          });
+          //   }
+        } catch (error) {
+          console.log(error);
         }
-      );
+      };
+
       collabDocs.map((cd, index) => {
         const div = document.getElementById('chub-item-container');
         const loadDocumentButton = document.createElement('div');
@@ -107,37 +98,11 @@ const CollaborationPdfReader = ({
         loadDocumentButton.innerHTML = cd.section_no;
         div.appendChild(loadDocumentButton);
         loadDocumentButton.addEventListener('click', () => {
-          // documentViewer.removeEventListener("documentLoaded")
+          sectionId = cd.section_no;
+          docId = cd.doc_id;
           instance.UI.loadDocument(`${cd.section_file_path}`, {
             documentId: `${cd.doc_id}`
           });
-          handleDocumentLoaded(cd?.doc_id, annotationManager, cd.section_no);
-          annotationManager.addEventListener(
-            'annotationChanged',
-            async (annotations, action, { imported }) => {
-              // If the event is triggered by importing then it can be ignored
-              // This will happen when importing the initial annotations
-              // from the server or individual changes from other users
-              if (imported) return;
-
-              const xfdfString =
-                await annotationManager.exportAnnotationCommand();
-              console.log('aa', annotations[0].qt, cd, docIdRef);
-              if (docIdRef?.current === cd.doc_id) {
-                await axiosInstance({
-                  method: 'post',
-                  url: '/pdf/v2/saveMetadata',
-                  data: {
-                    doc_id: cd.doc_id,
-                    edited_by: parseInt(localStorage.getItem('userId')),
-                    section_no: cd.section_no,
-                    data: [{ id: annotations[0].qt, xfdf_string: xfdfString }],
-                    pdf_type: 'pdftron'
-                  }
-                });
-              }
-            }
-          );
         });
         return true;
       });
@@ -149,24 +114,24 @@ const CollaborationPdfReader = ({
 
       const userDatas = [
         {
-          value: "Hugh Seaton",
-          email: "hugh.seaton@thelink.ai",
+          value: 'Hugh Seaton',
+          email: 'hugh.seaton@thelink.ai'
         },
         {
-          value: "Bhabani",
-          email: "bhabani@getcarnera.com",
+          value: 'Bhabani',
+          email: 'bhabani@getcarnera.com'
         },
         {
-          value: "Nikhil",
-          email: "nikhil@getcarnera.com",
+          value: 'Nikhil',
+          email: 'nikhil@getcarnera.com'
         },
         {
-          value: "Pranshul",
-          email: "pranshul@getcarnera.com",
+          value: 'Pranshul',
+          email: 'pranshul@getcarnera.com'
         },
         {
-          value: "Siddharth",
-          email: "sid@getcarnera.com",
+          value: 'Siddharth',
+          email: 'sid@getcarnera.com'
         },
         {
           value: 'Task',
@@ -223,7 +188,57 @@ const CollaborationPdfReader = ({
           },
           { type: 'toolButton', toolName: 'AnnotationEraserTool' },
           { type: 'divider' },
-          { type: 'spacer' }
+          { type: 'spacer' },
+          {
+            type: 'customElement',
+            Title: 'Save Pdf',
+            render: () => {
+              return (
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    border: '0.5px solid #202a44',
+                    padding: '3px',
+                    borderRadius: '2px',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => {
+                    annotationManager
+                      .exportAnnotations({ links: false, widgets: false })
+                      .then(function (xfdfString) {
+                        saveXfdfString(
+                          docId || collabDocs[0].doc_id,
+                          sectionId || collabDocs[0].section_no,
+                          xfdfString
+                        ).then(function () {
+                          toast.success('Annotations saved successfully!', {
+                            position: 'bottom-center',
+                            autoClose: 5000,
+                            hideProgressBar: true,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined
+                          })
+                        });
+                      });
+                  }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M0 0h24v24H0z" fill="none" />
+                    <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
+                  </svg>
+                  Save Changes
+                </span>
+              );
+            }
+          }
         );
         // add the tools overlay to the top header
         header.push(toolsOverlay);
@@ -274,7 +289,7 @@ const CollaborationPdfReader = ({
               redirect_url: window.location.href,
               project_name: projectName,
               sender_name: fullName,
-              selected_text: ""
+              selected_text: ''
             }
           });
         }
@@ -290,54 +305,6 @@ const CollaborationPdfReader = ({
         console.log(mentions);
         console.log(window.location);
       });
-      // annotationManager.addEventListener(
-      //   "annotationChanged",
-      //   async (annotations, action, { imported }) => {
-      //     // If the event is triggered by importing then it can be ignored
-      //     // This will happen when importing the initial annotations
-      //     // from the server or individual changes from other users
-      //     if (imported) return;
-
-      //     const xfdfString = await annotationManager.exportAnnotationCommand();
-      //     console.log("aa", annotations[0].qt);
-      //     await axiosInstance({
-      //       method: "post",
-      //       url: "/saveMetadata",
-      //       data: {
-      //         doc_id: 2360,
-      //         edited_by: parseInt(localStorage.getItem("userId")),
-      //         data: [{ id: annotations[0].qt, xfdf_string: xfdfString }],
-      //         pdf_type: "pdftron",
-      //       },
-      //     });
-      //   }
-      // );
-
-      // documentViewer.addEventListener("documentLoaded", () => {
-      //   console.log('document deets', instance.Core.documentViewer.getDocument());
-      //   const fetchData = async () => {
-      //     const response = await axiosInstance({
-      //       method: "get",
-      //       url: `/getMetadata/${documentId || '2360'}`,
-      //     });
-      //     if (response.status === 200) {
-      //       console.log("resss", response.data, response.data.data[0]);
-      //       response.data.data?.map(async (item) => {
-      //         const annotations =
-      //           await annotationManager.importAnnotationCommand(
-      //             item.xfdf_string
-      //           );
-      //         console.log("annotations", annotations);
-      //         annotations.forEach((annotation) => {
-      //           annotationManager.redrawAnnotation(annotation);
-      //         });
-      //       });
-      //     }
-      //   };
-      //   fetchData().catch((error) => {
-      //     console.log(error);
-      //   });
-      // });
     });
   };
   return (
@@ -349,6 +316,14 @@ const CollaborationPdfReader = ({
         className="full-window-div border border-gray-100 h-screen"
         // onDocumentLoad={loadPDF()}
       ></div>
+      <ToastContainer
+        position="bottom-center"
+        autoClose={1000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+      />
     </>
   );
 };
