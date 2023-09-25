@@ -84,10 +84,35 @@ const CollaborationPdfReader = ({
             }
           });
           //   }
+          toast.success('Annotations saved successfully!', {
+            position: 'bottom-center',
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined
+          });
         } catch (error) {
           console.log(error);
         }
       };
+      annotationManager.addEventListener(
+        'annotationChanged',
+        async (annotations, action, { imported }) => {
+          if (imported) return;
+
+          const xfdfString = await annotationManager.exportAnnotations({
+            links: false,
+            widgets: false
+          });
+          saveXfdfString(
+            docId || collabDocs[0].doc_id,
+            sectionId || collabDocs[0].section_no,
+            xfdfString
+          );
+        }
+      );
 
       collabDocs.map((cd, index) => {
         const div = document.getElementById('chub-item-container');
@@ -188,57 +213,57 @@ const CollaborationPdfReader = ({
           },
           { type: 'toolButton', toolName: 'AnnotationEraserTool' },
           { type: 'divider' },
-          { type: 'spacer' },
-          {
-            type: 'customElement',
-            Title: 'Save Pdf',
-            render: () => {
-              return (
-                <span
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    border: '0.5px solid #202a44',
-                    padding: '3px',
-                    borderRadius: '2px',
-                    cursor: 'pointer'
-                  }}
-                  onClick={() => {
-                    annotationManager
-                      .exportAnnotations({ links: false, widgets: false })
-                      .then(function (xfdfString) {
-                        saveXfdfString(
-                          docId || collabDocs[0].doc_id,
-                          sectionId || collabDocs[0].section_no,
-                          xfdfString
-                        ).then(function () {
-                          toast.success('Annotations saved successfully!', {
-                            position: 'bottom-center',
-                            autoClose: 5000,
-                            hideProgressBar: true,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            progress: undefined
-                          })
-                        });
-                      });
-                  }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M0 0h24v24H0z" fill="none" />
-                    <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
-                  </svg>
-                  Save Changes
-                </span>
-              );
-            }
-          }
+          { type: 'spacer' }
+          // {
+          //   type: 'customElement',
+          //   Title: 'Save Pdf',
+          //   render: () => {
+          //     return (
+          //       <span
+          //         style={{
+          //           display: 'flex',
+          //           alignItems: 'center',
+          //           border: '0.5px solid #202a44',
+          //           padding: '3px',
+          //           borderRadius: '2px',
+          //           cursor: 'pointer'
+          //         }}
+          //         onClick={() => {
+          //           annotationManager
+          //             .exportAnnotations({ links: false, widgets: false })
+          //             .then(function (xfdfString) {
+          //               saveXfdfString(
+          //                 docId || collabDocs[0].doc_id,
+          //                 sectionId || collabDocs[0].section_no,
+          //                 xfdfString
+          //               ).then(function () {
+          //                 toast.success('Annotations saved successfully!', {
+          //                   position: 'bottom-center',
+          //                   autoClose: 5000,
+          //                   hideProgressBar: true,
+          //                   closeOnClick: true,
+          //                   pauseOnHover: true,
+          //                   draggable: true,
+          //                   progress: undefined
+          //                 });
+          //               });
+          //             });
+          //         }}
+          //       >
+          //         <svg
+          //           xmlns="http://www.w3.org/2000/svg"
+          //           width="24"
+          //           height="24"
+          //           viewBox="0 0 24 24"
+          //         >
+          //           <path d="M0 0h24v24H0z" fill="none" />
+          //           <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
+          //         </svg>
+          //         Save Changes
+          //       </span>
+          //     );
+          //   }
+          // }
         );
         // add the tools overlay to the top header
         header.push(toolsOverlay);
