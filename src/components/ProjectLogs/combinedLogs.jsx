@@ -15,7 +15,7 @@ import { Tooltip } from 'reactstrap';
 import handleError from '../../config/errorHandler';
 
 export default function CombinedLogs(props) {
-  const { logData, newRowIndex } = props;
+  const { logData, newRowIndex, filterValues, setFilterValues, setTotalCount } = props;
   const [editRow, setEditRow] = useState('');
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
@@ -25,13 +25,7 @@ export default function CombinedLogs(props) {
   const [sorting, setSorting] = useState({ column: '', order: 'desc' });
   const [filterModal, setFilterModal] = useState(false);
   const [filterColumn, setFilterColumn] = useState('');
-  const [filterValues, setFilterValues] = useState({
-    spec_section: [],
-    type: ['Submittal'],
-    item_desc: [],
-    classification: [],
-    sd_title: []
-  });
+ 
   // const [addRowTooltip, setaddRowTooltip] = useState(null)
   // const [editRowTooltip, setEditRowTooltip] = useState(null)
   const [pdfTooltip, setPdfTooltip] = useState(null);
@@ -927,6 +921,7 @@ export default function CombinedLogs(props) {
         listId={props.listId}
         setSelectedLogData={props.setSelectedLogData}
         qaDashboard={props?.qaDashboard}
+        setTotalCount={setTotalCount}
       />
     </div>
   );
