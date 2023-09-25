@@ -24,6 +24,7 @@ import { useSearchParams } from 'react-router-dom';
 import Procore from './procore';
 import { ReactComponent as Logo } from '../../assets/images/procore-vector-logo.svg';
 import { ReactComponent as ExcelLogo } from '../../assets/images/excel.svg';
+import { ReactComponent as SearchIcon } from '../../assets/images/search.svg';
 import handleError from '../../config/errorHandler';
 import Pagination from '../shared/Pagination/LogsPagination';
 
@@ -330,15 +331,15 @@ const ProjectLogs = () => {
       }
     }
   };
-  const fetchData = async (page, itemsPerPage, filters) => {
+  const fetchData = async (page, itemsPerPage, filters, search) => {
     setLoading(true);
     const response = await axiosInstance({
       method: 'post',
       url: '/filter_logs',
       data: {
         project_id: state?.projectId || projectId,
-        search: '',
-        filters: {...filters},
+        search: search || '',
+        filters: { ...filters },
         order_col: '',
         order: '',
         page_number: page || 0,
@@ -404,15 +405,15 @@ const ProjectLogs = () => {
 
   useEffect(() => {
     let filterData = selectedLogData.length ? selectedLogData : logData;
-    let filteredLog = filterData
-      // .map((log) => {
-      //   return Object.values(log)
-      //     .filter((value) => value)
-      //     .filter((value) => value.toString().includes(searchValue)).length
-      //     ? log
-      //     : null;
-      // })
-      // .filter((value) => value);
+    let filteredLog = filterData;
+    // .map((log) => {
+    //   return Object.values(log)
+    //     .filter((value) => value)
+    //     .filter((value) => value.toString().includes(searchValue)).length
+    //     ? log
+    //     : null;
+    // })
+    // .filter((value) => value);
     setFilteredLogData(filteredLog);
   }, [selectedLogData, logData, searchValue, setFilteredLogData]);
   // let filteredLogData = selectedLogData.length ? selectedLogData : logData
@@ -515,6 +516,22 @@ const ProjectLogs = () => {
     }
   };
 
+  const heandleSearchClick = () => {
+    let filters = {};
+    if (
+      Object.values(filterValues)
+        .map((value) => (value.length ? true : false))
+        .includes(true)
+    ) {
+      Object.keys(filterValues).forEach((key) =>
+        filterValues[key].length
+          ? (filters = { ...filters, [key]: filterValues[key] })
+          : null
+      );
+    }
+    fetchData(0, 25, filters, searchValue);
+  };
+
   return (
     <div className="page-wrap">
       <NavbarTop qaDashboard={state?.qaDashboard} />
@@ -580,9 +597,13 @@ const ProjectLogs = () => {
                         <input
                           type="text"
                           placeholder="Find In Log"
-                          className="search-icon log-search-input"
+                          className="log-search-input"
                           value={searchValue}
                           onChange={(e) => handleSearchChange(e.target.value)}
+                        />
+                        <SearchIcon
+                          className="search-icon"
+                          onClick={heandleSearchClick}
                         />
                       </div>
                       {localStorage.getItem('roleId') !== '7' && (

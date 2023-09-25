@@ -77,19 +77,22 @@
             }
           }
           .log-search {
+            display: flex;
             .search-icon {
-              display: inline-block;
-              background: url('../../assets/images/search.svg') no-repeat 8px
-                center;
+              padding: 8px;
+              border: 1px solid #e2e2e2;
+              height: 34px;
+              width: 40px;
+              border-left: none;
             }
             &-input {
               height: 34px;
               border: 1px solid $border-color;
               outline: none !important;
-              padding: 8px 8px 8px 34px;
-              min-width: 240px;
+              border-radius: 2px;
+              padding: 8px;
+              min-width: 220px;
               transition: all 0.3s ease;
-              border-radius: 4px;
               &:focus {
                 border-color: $primary;
               }
