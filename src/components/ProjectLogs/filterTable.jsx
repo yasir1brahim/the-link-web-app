@@ -70,6 +70,7 @@ export const FilterTable = (props) => {
         ? props.setSelectedLogData(response.data.message)
         : props.setLogData(response.data.message);
       toggleFilter && props.setFilterModal();
+      props.setTotalCount(response.data.total_count);
     } catch (error) {
       console.log(error.message);
       handleError(error);

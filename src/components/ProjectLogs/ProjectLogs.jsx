@@ -91,7 +91,14 @@ const ProjectLogs = () => {
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
   let dataStoreFlag = false;
   const [totalCount, setTotalCount] = useState(0);
-  
+  const [filterValues, setFilterValues] = useState({
+    spec_section: [],
+    type: ['Submittal'],
+    item_desc: [],
+    classification: [],
+    sd_title: []
+  });
+
   useEffect(() => {
     if (!modal) {
       setPdfFile({});
@@ -323,7 +330,7 @@ const ProjectLogs = () => {
       }
     }
   };
-  const fetchData = async (page, itemsPerPage) => {
+  const fetchData = async (page, itemsPerPage, filters) => {
     setLoading(true);
     const response = await axiosInstance({
       method: 'post',
@@ -331,7 +338,7 @@ const ProjectLogs = () => {
       data: {
         project_id: state?.projectId || projectId,
         search: '',
-        filters: {},
+        filters: {...filters},
         order_col: '',
         order: '',
         page_number: page || 0,
@@ -341,7 +348,6 @@ const ProjectLogs = () => {
     // setLogData(response.data.message);
     setSelectedFilterValue(response.data.all_filter_vals);
     const submittalLogs = response.data.message
-      console.log("🚀 ~ file: ProjectLogs.jsx:344 ~ fetchData ~ response.data.message:", response.data.message)
       ?.map((logs) => (logs?.type === 'Submittal' ? logs : null))
       .filter((e) => e);
     selectedLogData.length
@@ -353,11 +359,10 @@ const ProjectLogs = () => {
     );
     setCompleteLogData(response.data.message);
     setLoading(false);
-    if (response?.data?.total_count) {
-      setTotalCount(response?.data?.total_count);
-    } else {
-      setTotalCount(response?.data?.total_count);
+    if (response.data.message.length) {
+      dataStoreFlag = true;
     }
+    setTotalCount(response?.data?.total_count);
   };
   useEffect(() => {
     fetchData().catch((error) => {
@@ -534,7 +539,7 @@ const ProjectLogs = () => {
             {logData.length === 0 ? (
               <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
                 <span className="d-flex align-items-center justify-content-center">
-                  {dataStoreFlag
+                  {!dataStoreFlag
                     ? `Please upload documents, before seeing the logs`
                     : `Refreshing data...`}
                 </span>
@@ -636,6 +641,9 @@ const ProjectLogs = () => {
                     projectType={projectType}
                     qaDashboard={state?.qaDashboard}
                     selectedFilterValue={selectedFilterValue}
+                    filterValues={filterValues}
+                    setFilterValues={setFilterValues}
+                    setTotalCount={setTotalCount}
                   />
                   {pdfData.url && <PdfWrapper pdfData={pdfData} />}
                 </div>
@@ -644,6 +652,7 @@ const ProjectLogs = () => {
                     <Pagination
                       totalItems={totalCount}
                       fetchData={fetchData}
+                      filterValues={filterValues}
                     />
                   </div>
                 )}
