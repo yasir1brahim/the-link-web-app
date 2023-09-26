@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axiosInstance from '../../config/axios';
 import WebViewer from '@pdftron/webviewer';
-import { toast, ToastContainer } from 'react-toastify';
 
 const CollaborationPdfReader = ({
   //   docId,
@@ -84,15 +83,6 @@ const CollaborationPdfReader = ({
             }
           });
           //   }
-          toast.success('Annotations saved successfully!', {
-            position: 'bottom-center',
-            autoClose: 5000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined
-          });
         } catch (error) {
           console.log(error);
         }
@@ -295,10 +285,15 @@ const CollaborationPdfReader = ({
         'textSquigglyToolButton',
         'textStrikeoutToolButton',
         'linkButton',
-        'freeTextToolGroupButton'
+        'freeTextToolGroupButton',
+        'noteState',
+        'highlightToolButton2',
+        'highlightToolButton3',
+        'highlightToolButton4',
+        'toolStylePopup'
       ]);
       instance.UI.NotesPanel.enableAutoExpandCommentThread();
-      instance.UI.openElements('notesPanel');
+      instance.UI.openElements(['notesPanel']);
       instance.UI.mentions.on('mentionChanged', async (mentions, action) => {
         if (action === 'add') {
           // a new mention was just added to a comment
@@ -341,14 +336,6 @@ const CollaborationPdfReader = ({
         className="full-window-div border border-gray-100 h-screen"
         // onDocumentLoad={loadPDF()}
       ></div>
-      <ToastContainer
-        position="bottom-center"
-        autoClose={1000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-      />
     </>
   );
 };
