@@ -119,7 +119,7 @@ const Header = ({ ...props }) => {
           >
             Collab Hub
           </button>
-          {!window.location.href.includes('app.thelink.ai') ? (
+          {!window.location.href.includes('https://app.thelink.ai') ? (
             <button
               type="button"
               className={`btn btn-primary btn-white ${
