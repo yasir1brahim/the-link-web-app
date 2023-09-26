@@ -15,7 +15,8 @@ import { Tooltip } from 'reactstrap';
 import handleError from '../../config/errorHandler';
 
 export default function CombinedLogs(props) {
-  const { logData, newRowIndex, filterValues, setFilterValues, setTotalCount } = props;
+  const { logData, newRowIndex, filterValues, setFilterValues, setTotalCount } =
+    props;
   const [editRow, setEditRow] = useState('');
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
@@ -25,7 +26,7 @@ export default function CombinedLogs(props) {
   const [sorting, setSorting] = useState({ column: '', order: 'desc' });
   const [filterModal, setFilterModal] = useState(false);
   const [filterColumn, setFilterColumn] = useState('');
- 
+
   // const [addRowTooltip, setaddRowTooltip] = useState(null)
   // const [editRowTooltip, setEditRowTooltip] = useState(null)
   const [pdfTooltip, setPdfTooltip] = useState(null);
@@ -247,7 +248,12 @@ export default function CombinedLogs(props) {
     setEditRow('');
   }, [props.searchValue]);
   return (
-    <div className="l-table-wrapper">
+    <div
+      className="l-table-wrapper"
+      style={{
+        maxHeight: props.pdfData.url ? 'calc(100vh - 230px)' : 'calc(90vh - 250px)'
+      }}
+    >
       <table className="table">
         <thead>
           <tr>
