@@ -65,9 +65,9 @@ const ProjectLogs = () => {
   const [newRowIndex, setNewRowIndex] = useState(null);
   const projectType = state?.project.project_type;
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const baseUrl = window.location.href.includes('app.thelink.ai')
+  const baseUrl = window.location.href.includes('https://app.thelink.ai')
     ? `https://app.thelink.ai/`
-    : `http://d3fy104eoanlsd.cloudfront.net/`;
+    : `https://dev-app.thelink.ai/`;
   //Procore states
   const [procoreModal, setProcoreModal] = useState(false);
   const toggleProcoreModal = () => setProcoreModal(!procoreModal);
@@ -86,7 +86,7 @@ const ProjectLogs = () => {
   const projectName = searchParams.get('projectName');
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
   const authCode = searchParams.get('code');
-  const clientId = window.location.href.includes('app.thelink.ai')
+  const clientId = window.location.href.includes('https://app.thelink.ai')
     ? 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9'
     : 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9';
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
