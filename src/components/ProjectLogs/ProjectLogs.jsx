@@ -348,9 +348,15 @@ const ProjectLogs = () => {
     });
     // setLogData(response.data.message);
     setSelectedFilterValue(response.data.all_filter_vals);
-    const submittalLogs = response.data.message
-      ?.map((logs) => (logs?.type === 'Submittal' ? logs : null))
-      .filter((e) => e);
+    //check if any other filter has been selected for submittal type instead of submittal
+    const hasDifferentFilters = filters?.type?.filter(
+      (item) => item !== 'Submittal'
+    ).length;
+    const submittalLogs = hasDifferentFilters
+      ? response.data.message
+      : response.data.message
+          ?.map((logs) => (logs?.type === 'Submittal' ? logs : null))
+          .filter((e) => e);
     selectedLogData.length
       ? setSelectedLogData(submittalLogs)
       : setLogData(submittalLogs);
@@ -556,7 +562,7 @@ const ProjectLogs = () => {
             {logData.length === 0 ? (
               <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
                 <span className="d-flex align-items-center justify-content-center">
-                  {!dataStoreFlag
+                  {dataStoreFlag
                     ? `Please upload documents, before seeing the logs`
                     : `Refreshing data...`}
                 </span>
