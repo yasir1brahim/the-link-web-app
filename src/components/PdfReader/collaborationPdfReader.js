@@ -68,6 +68,8 @@ const CollaborationPdfReader = ({
       const { documentViewer, annotationManager } = instance.Core;
       const annotHistoryManager = documentViewer.getAnnotationHistoryManager();
 
+      annotationManager.setCurrentUser(localStorage.getItem('fullName'));
+
       const saveXfdfString = async (documentId, sectionId, xfdfString) => {
         try {
           //   if (docIdRef?.current === collabDocs[0].doc_id) {
