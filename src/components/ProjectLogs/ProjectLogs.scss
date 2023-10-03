@@ -31,23 +31,22 @@
   cursor: not-allowed;
   opacity: 0.65;
 }
-
+.nologs-wrapper {
+  height: 247px;
+  // border: 1px dashed $border-color;
+  border-radius: 8px;
+  margin-top: 24px;
+  span {
+    color: $primary;
+    font-size: 0.75rem;
+    svg {
+      margin-right: 8px;
+    }
+  }
+}
 .project-logs-wrapper {
   .project-logs-content {
     .project-logs {
-      .nologs-wrapper {
-        height: 247px;
-        border: 1px dashed $border-color;
-        border-radius: 8px;
-        margin-top: 24px;
-        span {
-          color: $primary;
-          font-size: 0.75rem;
-          svg {
-            margin-right: 8px;
-          }
-        }
-      }
       .table-top-content {
         margin: 1rem 0;
         display: flex;
