@@ -23,7 +23,7 @@ const Resetpwd = () => {
     let error = false;
 
     if (newPassword && newPassword !== confirmedPassword) {
-      setError('Password not matched with confirm Passsword.');
+      setError('Password not matched with confirm Password.');
       error = true;
     }
     if (newPassword === '') {
