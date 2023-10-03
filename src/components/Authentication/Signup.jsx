@@ -114,12 +114,12 @@ const SignUp = () => {
           </div>
 
           <div className="form-group">
-            <label className="text-label">Passsword</label>
+            <label className="text-label">Password</label>
             <input
               type={showPwd ? 'text' : 'password'}
               className="form-control"
-              id="passsword"
-              aria-describedby="passsword"
+              id="password"
+              aria-describedby="password"
               placeholder="Password"
               required
               value={password}

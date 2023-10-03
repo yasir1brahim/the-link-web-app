@@ -225,7 +225,7 @@ const CustomerProfile = (props) => {
     if (password.value && password.value !== confirmPassword.value) {
       setPassword({
         ...password,
-        errors: 'Password not matched with confirm Passsword.'
+        errors: 'Password not matched with confirm Password.'
       });
       error = true;
     }
