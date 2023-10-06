@@ -5,10 +5,16 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Box from '@mui/material/Box';
-const LogsPagination = ({ totalItems, fetchData, filterValues }) => {
-  const [rowsPerPage, setRowsPerPage] = React.useState(25);
+const LogsPagination = ({
+  totalItems,
+  fetchData,
+  filterValues,
+  page,
+  setPage,
+  rowsPerPage,
+  setRowsPerPage
+}) => {
   const [pageCount, setPageCount] = useState(0);
-  const [page, setPage] = React.useState(1);
   let filters = {};
   if (
     Object.values(filterValues)

@@ -2,13 +2,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axiosInstance from '../../config/axios';
 import WebViewer from '@pdftron/webviewer';
+import handleError from '../../config/errorHandler';
+import { useSearchParams } from 'react-router-dom';
 
 const CollaborationPdfReader = ({
   //   docId,
   projectName,
-  collabDocs,
-  userList
+  collabDocs
 }) => {
+  const [searchParams] = useSearchParams();
+  const projectDetails = searchParams.get('projectDetails')?.split(',');
+  const projectId = projectDetails?.length
+    ? JSON.parse(projectDetails[0])
+    : null;
   const fullName = localStorage.getItem('fullName');
   const viewer = useRef(null);
   const [documentId, _setDocId] = useState('');
@@ -25,6 +31,26 @@ const CollaborationPdfReader = ({
       loadPDF();
     }
   }, [collabDocs]);
+
+  const setUserData = async (instance, userDatas) => {
+    try {
+      const userListResp = await axiosInstance({
+        method: 'get',
+        url: `/collab/get_project_users`,
+        params: {
+          project_id: projectId
+        }
+      });
+      instance.UI.mentions.setUserData(
+        userListResp.data.data?.map((user) => ({
+          value: user.full_name,
+          email: user.email_address
+        })) || userDatas
+      );
+    } catch (e) {
+      handleError(e);
+    }
+  };
 
   const handleDocumentLoaded = async (docId, sectionNumber) => {
     try {
@@ -124,11 +150,6 @@ const CollaborationPdfReader = ({
         return true;
       });
 
-      // const userDatas = userList?.map((user) => ({
-      //   value: user.full_name,
-      //   email: user.email_address
-      // }));
-
       const userDatas = [
         {
           value: 'Hugh Seaton',
@@ -156,7 +177,7 @@ const CollaborationPdfReader = ({
         }
       ];
 
-      instance.UI.mentions.setUserData(userDatas);
+      setUserData(instance, userDatas);
 
       //Changes label of highlight button to comment for select text menu
       instance.UI.updateElement('textHighlightToolButton', {
@@ -302,6 +323,11 @@ const CollaborationPdfReader = ({
           const annot = annotationManager.getAnnotationById(
             mentions[0]?.annotId
           );
+          let selectedText = annot?.Vi[`trn-annot-preview`]
+            ? annot?.Vi[`trn-annot-preview`]
+            : annotationManager.getAnnotationById(annot?.InReplyTo)?.Vi[
+                `trn-annot-preview`
+              ];
           await axiosInstance({
             method: 'post',
             url: '/comments/notify',
@@ -311,7 +337,7 @@ const CollaborationPdfReader = ({
               redirect_url: window.location.href,
               project_name: projectName,
               sender_name: fullName,
-              selected_text: ''
+              selected_text: selectedText
             }
           });
         }

@@ -99,6 +99,9 @@ const ProjectLogs = () => {
     classification: [],
     sd_title: []
   });
+  const [rowsPerPage, setRowsPerPage] = React.useState(25);
+  const [page, setPage] = React.useState(1);
+
 
   useEffect(() => {
     if (!modal) {
@@ -670,6 +673,8 @@ const ProjectLogs = () => {
                   setFilterValues={setFilterValues}
                   setTotalCount={setTotalCount}
                   errorMessage={errorMessage}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
                 />
                 {pdfData.url && <PdfWrapper pdfData={pdfData} />}
               </div>
@@ -679,6 +684,10 @@ const ProjectLogs = () => {
                     totalItems={totalCount}
                     fetchData={fetchLogData}
                     filterValues={filterValues}
+                    rowsPerPage={rowsPerPage}
+                    setRowsPerPage={setRowsPerPage}
+                    page={page}
+                    setPage={setPage}
                   />
                 </div>
               )}

@@ -16,7 +16,6 @@ const CollaborationHub = () => {
   const [searchParams] = useSearchParams();
   // const [toggleState, setToggleState] = useState(false);
   const toggleState = false;
-  const [userList, setUserList] = useState([]);
   const projectDetails = searchParams.get('projectDetails')?.split(',');
   const projectId = projectDetails?.length
     ? JSON.parse(projectDetails[0])
@@ -71,23 +70,6 @@ const CollaborationHub = () => {
     });
   }, [state?.project, projectId]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const userListResp = await axiosInstance({
-        method: 'get',
-        url: `/collab/get_project_users`,
-        params: {
-          project_id: state.project?.project_id || projectId
-        }
-      });
-      setUserList(userListResp.data.data);
-    };
-
-    fetchData().catch((error) => {
-      handleError(error);
-    });
-  }, [state?.project, projectId]);
-
   // useEffect(() => {
   //   if (toggleState) {
   //     const div = document.getElementById('chub-item-container');
@@ -114,7 +96,6 @@ const CollaborationHub = () => {
         setFileData(response.data.message);
         setModal(false);
         toggleSuccessModal(true);
-        setPageRefresh(!pageRefresh);
       }
       axiosInstance({
         method: 'get',
@@ -123,6 +104,15 @@ const CollaborationHub = () => {
           project_id: projectId || state.project?.project_id
         }
       });
+      const specIndexResponse = await axiosInstance({
+        method: 'get',
+        url: `/collab/get_spec_index`,
+        params: {
+          project_id: state?.project?.project_id || projectId
+        }
+      });
+      setCollabDocs(specIndexResponse.data?.indexes);
+      setPageRefresh(!pageRefresh);
     } catch (error) {
       setUploadLoading(false);
       toggleErrorModal(true);
@@ -184,7 +174,6 @@ const CollaborationHub = () => {
                 <CollaborationPdfReader
                   collabDocs={collabDocs}
                   projectName={state?.projectName || projectName || ''}
-                  userList={userList}
                 />
               )
             )}

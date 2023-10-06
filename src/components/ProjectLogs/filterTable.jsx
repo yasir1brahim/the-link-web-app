@@ -59,7 +59,9 @@ export const FilterTable = (props) => {
           filters: a,
           order_col: props.orderColumn,
           order: props.order,
-          list_id: props.selectedLogData.length ? props.listId : ''
+          list_id: props.selectedLogData.length ? props.listId : '',
+          page_number: props?.page,
+          limit: props?.rowsPerPage
         }
       });
       localStorage.setItem(
