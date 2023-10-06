@@ -248,7 +248,7 @@ const ProjectLogs = () => {
           url: '/procore/access_token',
           data: {
             code: authCode,
-            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType}`
+            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType}&projectName=${projectName}`
           }
         });
         localStorage.setItem(
@@ -622,7 +622,7 @@ const ProjectLogs = () => {
                           </DropdownItem>
                           <DropdownItem>
                             <a
-                              href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType}`}
+                              href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType}&projectName=${projectName}`}
                               className="breadcrumb-text"
                             >
                               <Logo style={{ height: '90px' }} />
