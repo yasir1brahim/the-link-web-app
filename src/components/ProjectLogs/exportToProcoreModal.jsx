@@ -20,6 +20,7 @@ const ExportToProcoreModal = (props) => {
   const projectId = localStorage.getItem('projectId');
   const customerId = localStorage.getItem('customerId');
   const logType = localStorage.getItem('logType');
+  const projectName = localStorage.getItem('projectName');
 
   useEffect(() => {
     const getProcoreStatus = async () => {
@@ -72,7 +73,7 @@ const ExportToProcoreModal = (props) => {
           });
           toggle();
           navigate(
-            `/project-logs?projectDetails=${projectId},${customerId},${logType}`
+            `/project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`
           );
           localStorage.setItem('selectedRows', '');
         }
@@ -81,7 +82,7 @@ const ExportToProcoreModal = (props) => {
     } catch (error) {
       localStorage.setItem('selectedRows', '');
       navigate(
-        `/project-logs?projectDetails=${projectId},${customerId},${logType}`
+        `/project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`
       );
       handleError(error);
     }
