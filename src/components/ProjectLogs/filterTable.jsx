@@ -60,7 +60,7 @@ export const FilterTable = (props) => {
           order_col: props.orderColumn,
           order: props.order,
           list_id: props.selectedLogData.length ? props.listId : '',
-          page_number: props?.page,
+          page_number: props?.page - 1,
           limit: props?.rowsPerPage
         }
       });
@@ -73,6 +73,7 @@ export const FilterTable = (props) => {
         : props.setLogData(response.data.message);
       toggleFilter && props.setFilterModal();
       props.setTotalCount(response.data.total_count);
+      setSearchValue('')
     } catch (error) {
       console.log(error.message);
       handleError(error);

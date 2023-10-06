@@ -166,7 +166,7 @@ export default function CombinedLogs(props) {
           order_col: columnName || '',
           order: sortingOrder === 'desc' ? 'asc' : 'desc' || '',
           list_id: props.selectedLogData.length ? props.listId : '',
-          page_number: props?.page,
+          page_number: props?.page - 1,
           limit: props?.rowsPerPage
         }
       });
