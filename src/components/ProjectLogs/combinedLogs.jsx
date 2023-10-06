@@ -165,7 +165,9 @@ export default function CombinedLogs(props) {
           filters: a,
           order_col: columnName || '',
           order: sortingOrder === 'desc' ? 'asc' : 'desc' || '',
-          list_id: props.selectedLogData.length ? props.listId : ''
+          list_id: props.selectedLogData.length ? props.listId : '',
+          page_number: props?.page,
+          limit: props?.rowsPerPage
         }
       });
       localStorage.setItem(
@@ -936,6 +938,8 @@ export default function CombinedLogs(props) {
         setSelectedLogData={props.setSelectedLogData}
         qaDashboard={props?.qaDashboard}
         setTotalCount={setTotalCount}
+        page={props?.page}
+        rowsPerPage={props?.rowsPerPage}
       />
       {errorMessage && (
         <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
