@@ -93,7 +93,7 @@ const Projects = () => {
     // project?.project_type === "ufgs"
     // ?
     navigate(
-      `/project-logs?projectDetails=${project?.project_id},${custId},Classified`,
+      `/project-logs?projectDetails=${project?.project_id},${custId},Classified,${project?.project_name}`,
       {
         state: {
           project,
@@ -120,7 +120,7 @@ const Projects = () => {
 
   const handleCollaborationLaunch = (project) => {
     navigate(
-      `/collaboration-hub?projectDetails=${project?.project_id},${custId},Classified&projectName=${project?.project_name}`,
+      `/collaboration-hub?projectDetails=${project?.project_id},${custId},Classified,${project?.project_name}`,
       {
         state: {
           project,
@@ -225,7 +225,7 @@ const Projects = () => {
           toggleSuccessModal={toggleSuccessModal}
           fileData={fileData}
           project={specUploadProject}
-          logScreenUrl={`/project-logs?projectDetails=${specUploadProject?.project_id},${custId},Classified`}
+          logScreenUrl={`/project-logs?projectDetails=${specUploadProject?.project_id},${custId},Classified,${specUploadProject?.project_name}`}
         />
       </div>
     </>

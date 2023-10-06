@@ -21,7 +21,8 @@ const CollaborationHub = () => {
     ? JSON.parse(projectDetails[0])
     : null;
   // const projectType = state?.project.project_type;
-  const projectName = searchParams.get('projectName');
+  // const projectName = searchParams.get('projectName');
+  const projectName = projectDetails?.length >= 4 ? projectDetails[3] : null;
   const [modal, setModal] = useState(false);
   const toggleModal = () => setModal(!modal);
   const [pdfFile, setPdfFile] = useState({});

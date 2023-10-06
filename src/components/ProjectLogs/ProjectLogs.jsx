@@ -83,8 +83,9 @@ const ProjectLogs = () => {
     : null;
   const customerId =
     projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
-  const projectName = searchParams.get('projectName');
+  // const projectName = searchParams.get('projectName');
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
+  const projectName = projectDetails?.length >= 4 ? projectDetails[3] : null;
   const authCode = searchParams.get('code');
   const clientId = window.location.href.includes('https://app.thelink.ai')
     ? 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9'
@@ -248,7 +249,7 @@ const ProjectLogs = () => {
           url: '/procore/access_token',
           data: {
             code: authCode,
-            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType}&projectName=${projectName}`
+            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`
           }
         });
         localStorage.setItem(
@@ -269,6 +270,7 @@ const ProjectLogs = () => {
           localStorage.setItem('projectId', projectId);
           localStorage.setItem('logType', logType);
           localStorage.setItem('customerId', customerId);
+          localStorage.setItem('projectName', projectName);
           searchParams.set('code', '');
           handleExportToProcore();
         }
@@ -622,7 +624,7 @@ const ProjectLogs = () => {
                           </DropdownItem>
                           <DropdownItem>
                             <a
-                              href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType}&projectName=${projectName}`}
+                              href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`}
                               className="breadcrumb-text"
                             >
                               <Logo style={{ height: '90px' }} />

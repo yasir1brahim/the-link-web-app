@@ -17,7 +17,7 @@ const Header = ({ ...props }) => {
     navigate(
       `/${
         redirectFrom === 'collab' ? `project-logs` : `collaboration-hub`
-      }?projectDetails=${projectId},${customerId},${logType}&projectName=${
+      }?projectDetails=${projectId},${customerId},${logType},${
         searchParams.get('projectName') || props?.title
       }`
     );
