@@ -103,7 +103,6 @@ const ProjectLogs = () => {
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
   const [page, setPage] = React.useState(1);
 
-
   useEffect(() => {
     if (!modal) {
       setPdfFile({});
@@ -338,7 +337,7 @@ const ProjectLogs = () => {
   };
   const fetchLogData = async (page, itemsPerPage, filters, search) => {
     setLoading(true);
-    setErrorMessage('Fetching data...')
+    setErrorMessage('Fetching data...');
     const response = await axiosInstance({
       method: 'post',
       url: '/filter_logs',
@@ -354,7 +353,7 @@ const ProjectLogs = () => {
     });
     // setLogData(response.data.message);
     setSelectedFilterValue(response.data.all_filter_vals);
-    
+
     const submittalLogs = response.data.message;
     selectedLogData.length
       ? setSelectedLogData(submittalLogs)
@@ -363,14 +362,26 @@ const ProjectLogs = () => {
       'filteredIds',
       submittalLogs?.map((item) => item?.id)
     );
-    setCompleteLogData(response.data.message);
     setLoading(false);
-    setErrorMessage('')
+    const completeResponse = await axiosInstance({
+      method: 'post',
+      url: '/filter_logs',
+      data: {
+        project_id: state?.projectId || projectId,
+        // search: search || '',
+        // filters: { ...filters },
+        order_col: '',
+        order: ''
+      }
+    });
+    setCompleteLogData(completeResponse.data.message);
+    setErrorMessage('');
     if (response.data.message.length === 0) {
-     if(search){ setErrorMessage('Sorry, no results found for your search query.');} else {
-      setErrorMessage('Please upload documents, before seeing the logs.')
-     }
-
+      if (search) {
+        setErrorMessage('Sorry, no results found for your search query.');
+      } else {
+        setErrorMessage('Please upload documents, before seeing the logs.');
+      }
     }
     setTotalCount(response?.data?.total_count);
   };
@@ -507,6 +518,7 @@ const ProjectLogs = () => {
         toast.success('List created successfully', {
           position: 'bottom-center'
         });
+        setSelected([]);
       } catch (error) {
         handleError(error);
       }
@@ -578,7 +590,10 @@ const ProjectLogs = () => {
                     <button
                       type="button"
                       className="btn btn-primary mr-3 btn-small"
-                      onClick={() => setSelectedLogData([])}
+                      onClick={() => {
+                        setSelectedLogData([]);
+                        setSelected([]);
+                      }}
                     >
                       Clear Selection
                     </button>
@@ -680,7 +695,7 @@ const ProjectLogs = () => {
                 />
                 {pdfData.url && <PdfWrapper pdfData={pdfData} />}
               </div>
-              {!pdfData.url && (
+              {!pdfData.url && !selectedLogData.length && (
                 <div className="table-footer-content logs-pagination">
                   <Pagination
                     totalItems={totalCount}
