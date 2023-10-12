@@ -3,11 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { ReactComponent as Mail } from '../../assets/images/mail.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
-import axiosInstance from '../../config/axios';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark 1.svg';
-import handleError from '../../config/errorHandler';
 import { login } from '../../api/Authentication/api'
 const Signin = (props) => {
   const [showPwd, setShowPwd] = useState(false);
