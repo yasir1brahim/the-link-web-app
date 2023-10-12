@@ -8,6 +8,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark 1.svg';
 import handleError from '../../config/errorHandler';
+import { login } from '../../api/Authentication/api'
 const Signin = (props) => {
   const [showPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState({ value: '', errors: '' });
@@ -32,31 +33,19 @@ const Signin = (props) => {
     e.preventDefault();
     let errors = validate();
     if (!errors) {
-      try {
-        const response = await axiosInstance({
-          method: 'post',
-          url: '/login',
-          data: {
-            email_address: email.value,
-            password: password.value
-          }
-        });
-        if (response.data) {
-          localStorage.setItem('token', response.data.access_token);
-          localStorage.setItem('roleId', response.data.role_id);
-          localStorage.setItem('userId', response.data.user_id);
-          localStorage.setItem('fullName', response.data.full_name);
-          console.log(response.data);
-          return response.data.role_id === 0
+      const response = await login(email.value,password.value);
+      if (response.data) {
+        localStorage.setItem('token', response.data.access_token);
+        localStorage.setItem('roleId', response.data.role_id);
+        localStorage.setItem('userId', response.data.user_id);
+        localStorage.setItem('fullName', response.data.full_name);
+        return response.data.role_id === 0
             ? history({ pathname: '/admin-landing' })
             : response.data.role_id === 2 ||
-              response.data.role_id === 6 ||
-              response.data.role_id === 7
-            ? history({ pathname: '/project-list' })
-            : history({ pathname: '/' });
-        }
-      } catch (error) {
-        handleError(error);
+            response.data.role_id === 6 ||
+            response.data.role_id === 7
+                ? history({ pathname: '/project-list' })
+                : history({ pathname: '/' });
       }
     }
   };
