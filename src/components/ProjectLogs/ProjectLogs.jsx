@@ -27,6 +27,7 @@ import { ReactComponent as ExcelLogo } from '../../assets/images/excel.svg';
 import { ReactComponent as SearchIcon } from '../../assets/images/search.svg';
 import handleError from '../../config/errorHandler';
 import Pagination from '../shared/Pagination/LogsPagination';
+import { getSavedLogs } from '../../api/ProjectLogs/api';
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -553,6 +554,12 @@ const ProjectLogs = () => {
     fetchLogData(0, 25, filters, searchValue);
   };
 
+  const handleOpenSaveList = async (listId) => {
+    const savedLogs = await getSavedLogs(listId);
+    setSelectedLogData(savedLogs?.data?.message);
+    setToggleViewSavedList(false);
+  };
+
   return (
     <div className="page-wrap">
       <NavbarTop qaDashboard={state?.qaDashboard} />
@@ -586,7 +593,7 @@ const ProjectLogs = () => {
             <>
               {!state?.qaDashboard && (
                 <div className="table-top-content">
-                  {selectedLogData.length ? (
+                  {selectedLogData?.length ? (
                     <button
                       type="button"
                       className="btn btn-primary mr-3 btn-small"
@@ -854,14 +861,7 @@ const ProjectLogs = () => {
                               type="button"
                               className="btn btn-primary mr-3"
                               onClick={() => {
-                                setSelectedLogData(
-                                  completeLogData.filter((log) => {
-                                    return list.records.includes(log.id)
-                                      ? log
-                                      : null;
-                                  })
-                                );
-                                setToggleViewSavedList(false);
+                                handleOpenSaveList(list.id);
                                 setListId(list.id);
                               }}
                             >
@@ -874,13 +874,7 @@ const ProjectLogs = () => {
                                 style={{ textTransform: 'none' }}
                                 onClick={() =>
                                   handleExportExcel(
-                                    completeLogData
-                                      .map((log) => {
-                                        return list.records.includes(log.id)
-                                          ? log.id
-                                          : null;
-                                      })
-                                      .filter((id) => id),
+                                    list.records,
                                     list.view_name
                                   )
                                 }
