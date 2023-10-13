@@ -5,19 +5,38 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Box from '@mui/material/Box';
-const LogsPagination = ({ totalItems, fetchData }) => {
-  const [rowsPerPage, setRowsPerPage] = React.useState(25);
+const LogsPagination = ({
+  totalItems,
+  fetchData,
+  filterValues,
+  page,
+  setPage,
+  rowsPerPage,
+  setRowsPerPage
+}) => {
   const [pageCount, setPageCount] = useState(0);
-  const [page, setPage] = React.useState(1);
+  let filters = {};
+  if (
+    Object.values(filterValues)
+      .map((value) => (value.length ? true : false))
+      .includes(true)
+  ) {
+    Object.keys(filterValues).forEach((key) =>
+      filterValues[key].length
+        ? (filters = { ...filters, [key]: filterValues[key] })
+        : null
+    );
+  }
+
   const onClickChangePage = (e, page) => {
     e.preventDefault();
     setPage(page);
-    fetchData(page - 1, rowsPerPage);
+    fetchData(page - 1, rowsPerPage, filters);
   };
   const handleChangeRowsPerPage = (event) => {
     let rowsCount = parseInt(event.target.value, 10);
     setRowsPerPage(rowsCount);
-    fetchData(0, rowsCount);
+    fetchData(0, rowsCount, filters);
     setPage(1);
   };
 
@@ -26,7 +45,7 @@ const LogsPagination = ({ totalItems, fetchData }) => {
   }, [totalItems, rowsPerPage]);
 
   return (
-    <Box sx={{display: 'flex', alignItems: 'center'}}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <FormControl sx={{ m: 1, minWidth: 80 }}>
         <InputLabel id="demo-simple-select-autowidth-label">Rows</InputLabel>
         <Select
@@ -39,7 +58,7 @@ const LogsPagination = ({ totalItems, fetchData }) => {
           <MenuItem value={10}>10</MenuItem>
           <MenuItem value={20}>20</MenuItem>
           <MenuItem value={25}>25</MenuItem>
-          <MenuItem value={30}>30</MenuItem>
+          <MenuItem value={50}>50</MenuItem>
         </Select>
       </FormControl>
 

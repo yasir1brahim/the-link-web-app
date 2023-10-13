@@ -17,7 +17,7 @@ class ViewSDKClient {
   }
 
   previewFile(divId, viewerConfig, url, setNewAnnotations) {
-    const clientId = window.location.href.includes('app.thelink.ai')
+    const clientId = window.location.href.includes('https://app.thelink.ai')
       ? 'f59bde8fafcd4dcba42ebed3acbaa23f'
       : window.location.href.includes('localhost')
       ? 'd3c644fbd03e48ea8b592b78c42afe41'
@@ -102,7 +102,7 @@ class ViewSDKClient {
     return previewFilePromise;
   }
   previewFileUsingFilePromise(divId, filePromise, fileName) {
-    const clientId = window.location.href.includes('app.thelink.ai')
+    const clientId = window.location.href.includes('https://app.thelink.ai')
       ? 'f59bde8fafcd4dcba42ebed3acbaa23f'
       : window.location.href.includes('localhost')
       ? 'd3c644fbd03e48ea8b592b78c42afe41'

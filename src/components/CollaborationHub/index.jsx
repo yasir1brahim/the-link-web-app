@@ -4,7 +4,7 @@ import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
 // import PersonalProject from "./PersonalProject";
 import { useSearchParams } from 'react-router-dom';
-// import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
+import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
 import axiosInstance from '../../config/axios';
 import handleError from '../../config/errorHandler';
 import CollaborationPdfReader from '../PdfReader/collaborationPdfReader';
@@ -16,18 +16,23 @@ const CollaborationHub = () => {
   const [searchParams] = useSearchParams();
   // const [toggleState, setToggleState] = useState(false);
   const toggleState = false;
-  const [userList, setUserList] = useState([]);
   const projectDetails = searchParams.get('projectDetails')?.split(',');
   const projectId = projectDetails?.length
     ? JSON.parse(projectDetails[0])
     : null;
   // const projectType = state?.project.project_type;
-  const projectName = searchParams.get('projectName');
-  // const [modal, setModal] = useState(false);
-  // const toggleModal = () => setModal(!modal);
-  // const [pdfFile, setPdfFile] = useState({});
+  // const projectName = searchParams.get('projectName');
+  const projectName = projectDetails?.length >= 4 ? projectDetails[3] : null;
+  const [modal, setModal] = useState(false);
+  const toggleModal = () => setModal(!modal);
+  const [pdfFile, setPdfFile] = useState({});
+  const [fileData, setFileData] = useState({});
   const [docParsed, setDocParsed] = useState(0);
   const [collabDocs, setCollabDocs] = useState([]);
+  const [isUploadLoading, setUploadLoading] = useState(false);
+  const [pageRefresh, setPageRefresh] = useState(false);
+  const [errorModal, toggleErrorModal] = useState(false);
+  const [successModal, toggleSuccessModal] = useState(false);
 
   // useEffect(() => {
   //   if (!modal) {
@@ -66,29 +71,60 @@ const CollaborationHub = () => {
     });
   }, [state?.project, projectId]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const userListResp = await axiosInstance({
-        method: 'get',
-        url: `/collab/get_project_users`,
-        params: {
-          project_id: state.project?.project_id || projectId
-        }
-      });
-      setUserList(userListResp.data.data);
-    };
-
-    fetchData().catch((error) => {
-      handleError(error);
-    });
-  }, [state?.project, projectId]);
-
   // useEffect(() => {
   //   if (toggleState) {
   //     const div = document.getElementById('chub-item-container');
   //     div.innerHTML = '';
   //   }
   // }, [toggleState]);
+
+  const handleSubmit = async () => {
+    // console.log(pdfFile);
+    try {
+      setUploadLoading(true);
+      const data = new FormData();
+      data.append('project_id', projectId || state.project?.project_id);
+      // projectType === 'ufgs' && data.append('project_type', projectType);
+      Object.values(pdfFile)?.forEach((file) => data.append('files', file));
+      const response = await axiosInstance({
+        method: 'post',
+        url: '/upload_file',
+        data
+      });
+      if (response.data) {
+        // console.log(response.data);
+        setUploadLoading(false);
+        setFileData(response.data.message);
+        setModal(false);
+        toggleSuccessModal(true);
+      }
+      axiosInstance({
+        method: 'get',
+        url: '/collab/create_spec_index',
+        params: {
+          project_id: projectId || state.project?.project_id
+        }
+      });
+      const specIndexResponse = await axiosInstance({
+        method: 'get',
+        url: `/collab/get_spec_index`,
+        params: {
+          project_id: state?.project?.project_id || projectId
+        }
+      });
+      setCollabDocs(specIndexResponse.data?.indexes);
+      setPageRefresh(!pageRefresh);
+    } catch (error) {
+      setUploadLoading(false);
+      toggleErrorModal(true);
+      setModal(false);
+      handleError(error);
+    }
+  };
+  const backToUpload = () => {
+    toggleErrorModal(false);
+    setModal(true);
+  };
 
   return (
     <>
@@ -105,8 +141,7 @@ const CollaborationHub = () => {
             // docParsed={docParsed}
             showBtn={'Upload Additional'}
             navBtn={'collab'}
-
-            // toggleModal={toggleModal}
+            toggleModal={toggleModal}
           />
           {/* // Removed due to client request on : 13 Sep 2023
           <div class="version-control-toggle">
@@ -140,14 +175,13 @@ const CollaborationHub = () => {
                 <CollaborationPdfReader
                   collabDocs={collabDocs}
                   projectName={state?.projectName || projectName || ''}
-                  userList={userList}
                 />
               )
             )}
           </div>
         </div>
       </div>
-      {/* <UploadDocuments
+      <UploadDocuments
         modal={modal}
         toggleModal={toggleModal}
         setPdfFile={setPdfFile}
@@ -160,7 +194,7 @@ const CollaborationHub = () => {
         successModal={successModal}
         toggleSuccessModal={toggleSuccessModal}
         fileData={fileData}
-      /> */}
+      />
     </>
   );
 };

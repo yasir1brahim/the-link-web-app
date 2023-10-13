@@ -4,7 +4,7 @@ import { ReactComponent as Mail } from '../../assets/images/mail.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import axiosInstance from '../../config/axios';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark 1.svg';
+import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
 
 const SignUp = () => {
   const [showPwd, setShowPwd] = useState(false);
@@ -114,12 +114,12 @@ const SignUp = () => {
           </div>
 
           <div className="form-group">
-            <label className="text-label">Passsword</label>
+            <label className="text-label">Password</label>
             <input
               type={showPwd ? 'text' : 'password'}
               className="form-control"
-              id="passsword"
-              aria-describedby="passsword"
+              id="password"
+              aria-describedby="password"
               placeholder="Password"
               required
               value={password}

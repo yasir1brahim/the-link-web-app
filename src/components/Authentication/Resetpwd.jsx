@@ -3,7 +3,7 @@ import { ReactComponent as Keys } from '../../assets/images/keys.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import { ReactComponent as ArrowLeft } from '../../assets/images/arrow-left.svg';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark 1.svg';
+import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../config/axios';
@@ -23,7 +23,7 @@ const Resetpwd = () => {
     let error = false;
 
     if (newPassword && newPassword !== confirmedPassword) {
-      setError('Password not matched with confirm Passsword.');
+      setError('Password not matched with confirm Password.');
       error = true;
     }
     if (newPassword === '') {

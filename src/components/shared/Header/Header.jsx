@@ -17,7 +17,7 @@ const Header = ({ ...props }) => {
     navigate(
       `/${
         redirectFrom === 'collab' ? `project-logs` : `collaboration-hub`
-      }?projectDetails=${projectId},${customerId},${logType}&projectName=${
+      }?projectDetails=${projectId},${customerId},${logType},${
         searchParams.get('projectName') || props?.title
       }`
     );
@@ -119,6 +119,27 @@ const Header = ({ ...props }) => {
           >
             Collab Hub
           </button>
+          {!window.location.href.includes('https://app.thelink.ai') ? (
+            <button
+              type="button"
+              className={`btn btn-primary btn-white ${
+                props.btnSize === 'small' ? 'btn-small' : ''
+              }`}
+              style={
+                props.navBtn === 'collab'
+                  ? { marginLeft: '4px' }
+                  : { marginLeft: '0' }
+              }
+            >
+              <a
+                href="https://specgpt.ai/chat"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Spec GPT <span style={{ fontSize: '9px' }}>Beta</span>
+              </a>
+            </button>
+          ) : null}
         </div>
       )}
       {props.showBtn && localStorage.getItem('roleId') !== '7' ? (

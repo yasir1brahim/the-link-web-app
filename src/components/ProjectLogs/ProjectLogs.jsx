@@ -24,6 +24,7 @@ import { useSearchParams } from 'react-router-dom';
 import Procore from './procore';
 import { ReactComponent as Logo } from '../../assets/images/procore-vector-logo.svg';
 import { ReactComponent as ExcelLogo } from '../../assets/images/excel.svg';
+import { ReactComponent as SearchIcon } from '../../assets/images/search.svg';
 import handleError from '../../config/errorHandler';
 import Pagination from '../shared/Pagination/LogsPagination';
 
@@ -64,9 +65,9 @@ const ProjectLogs = () => {
   const [newRowIndex, setNewRowIndex] = useState(null);
   const projectType = state?.project.project_type;
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const baseUrl = window.location.href.includes('app.thelink.ai')
+  const baseUrl = window.location.href.includes('https://app.thelink.ai')
     ? `https://app.thelink.ai/`
-    : `http://d3fy104eoanlsd.cloudfront.net/`;
+    : `https://dev-app.thelink.ai/`;
   //Procore states
   const [procoreModal, setProcoreModal] = useState(false);
   const toggleProcoreModal = () => setProcoreModal(!procoreModal);
@@ -82,16 +83,26 @@ const ProjectLogs = () => {
     : null;
   const customerId =
     projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
-  const projectName = searchParams.get('projectName');
+  // const projectName = searchParams.get('projectName');
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
+  const projectName = projectDetails?.length >= 4 ? projectDetails[3] : null;
   const authCode = searchParams.get('code');
-  const clientId = window.location.href.includes('app.thelink.ai')
+  const clientId = window.location.href.includes('https://app.thelink.ai')
     ? 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9'
     : 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9';
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
-  let dataStoreFlag = false;
+  const [errorMessage, setErrorMessage] = useState('');
   const [totalCount, setTotalCount] = useState(0);
-  
+  const [filterValues, setFilterValues] = useState({
+    spec_section: [],
+    type: ['Submittal'],
+    item_desc: [],
+    classification: [],
+    sd_title: []
+  });
+  const [rowsPerPage, setRowsPerPage] = React.useState(25);
+  const [page, setPage] = React.useState(1);
+
   useEffect(() => {
     if (!modal) {
       setPdfFile({});
@@ -237,7 +248,7 @@ const ProjectLogs = () => {
           url: '/procore/access_token',
           data: {
             code: authCode,
-            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType}`
+            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`
           }
         });
         localStorage.setItem(
@@ -258,6 +269,7 @@ const ProjectLogs = () => {
           localStorage.setItem('projectId', projectId);
           localStorage.setItem('logType', logType);
           localStorage.setItem('customerId', customerId);
+          localStorage.setItem('projectName', projectName);
           searchParams.set('code', '');
           handleExportToProcore();
         }
@@ -323,15 +335,16 @@ const ProjectLogs = () => {
       }
     }
   };
-  const fetchData = async (page, itemsPerPage) => {
+  const fetchLogData = async (page, itemsPerPage, filters, search) => {
     setLoading(true);
+    setErrorMessage('Fetching data...');
     const response = await axiosInstance({
       method: 'post',
       url: '/filter_logs',
       data: {
         project_id: state?.projectId || projectId,
-        search: '',
-        filters: {},
+        search: search || '',
+        filters: { ...filters },
         order_col: '',
         order: '',
         page_number: page || 0,
@@ -340,10 +353,8 @@ const ProjectLogs = () => {
     });
     // setLogData(response.data.message);
     setSelectedFilterValue(response.data.all_filter_vals);
-    const submittalLogs = response.data.message
-      console.log("🚀 ~ file: ProjectLogs.jsx:344 ~ fetchData ~ response.data.message:", response.data.message)
-      ?.map((logs) => (logs?.type === 'Submittal' ? logs : null))
-      .filter((e) => e);
+
+    const submittalLogs = response.data.message;
     selectedLogData.length
       ? setSelectedLogData(submittalLogs)
       : setLogData(submittalLogs);
@@ -351,16 +362,31 @@ const ProjectLogs = () => {
       'filteredIds',
       submittalLogs?.map((item) => item?.id)
     );
-    setCompleteLogData(response.data.message);
     setLoading(false);
-    if (response?.data?.total_count) {
-      setTotalCount(response?.data?.total_count);
-    } else {
-      setTotalCount(response?.data?.total_count);
+    const completeResponse = await axiosInstance({
+      method: 'post',
+      url: '/filter_logs',
+      data: {
+        project_id: state?.projectId || projectId,
+        // search: search || '',
+        // filters: { ...filters },
+        order_col: '',
+        order: ''
+      }
+    });
+    setCompleteLogData(completeResponse.data.message);
+    setErrorMessage('');
+    if (response.data.message.length === 0) {
+      if (search) {
+        setErrorMessage('Sorry, no results found for your search query.');
+      } else {
+        setErrorMessage('Please upload documents, before seeing the logs.');
+      }
     }
+    setTotalCount(response?.data?.total_count);
   };
   useEffect(() => {
-    fetchData().catch((error) => {
+    fetchLogData(0, 25, { type: ['Submittal'] }).catch((error) => {
       setLoading(false);
       handleError(error);
     });
@@ -399,15 +425,15 @@ const ProjectLogs = () => {
 
   useEffect(() => {
     let filterData = selectedLogData.length ? selectedLogData : logData;
-    let filteredLog = filterData
-      // .map((log) => {
-      //   return Object.values(log)
-      //     .filter((value) => value)
-      //     .filter((value) => value.toString().includes(searchValue)).length
-      //     ? log
-      //     : null;
-      // })
-      // .filter((value) => value);
+    let filteredLog = filterData;
+    // .map((log) => {
+    //   return Object.values(log)
+    //     .filter((value) => value)
+    //     .filter((value) => value.toString().includes(searchValue)).length
+    //     ? log
+    //     : null;
+    // })
+    // .filter((value) => value);
     setFilteredLogData(filteredLog);
   }, [selectedLogData, logData, searchValue, setFilteredLogData]);
   // let filteredLogData = selectedLogData.length ? selectedLogData : logData
@@ -459,7 +485,7 @@ const ProjectLogs = () => {
       FileDownload(
         blob,
         `${
-          state?.project.project_name
+          state?.project.project_name || `Project`
         }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`
       );
     } catch (error) {
@@ -492,6 +518,7 @@ const ProjectLogs = () => {
         toast.success('List created successfully', {
           position: 'bottom-center'
         });
+        setSelected([]);
       } catch (error) {
         handleError(error);
       }
@@ -508,6 +535,22 @@ const ProjectLogs = () => {
     } catch (error) {
       handleError(error);
     }
+  };
+
+  const heandleSearchClick = () => {
+    let filters = {};
+    if (
+      Object.values(filterValues)
+        .map((value) => (value.length ? true : false))
+        .includes(true)
+    ) {
+      Object.keys(filterValues).forEach((key) =>
+        filterValues[key].length
+          ? (filters = { ...filters, [key]: filterValues[key] })
+          : null
+      );
+    }
+    fetchLogData(0, 25, filters, searchValue);
   };
 
   return (
@@ -531,123 +574,141 @@ const ProjectLogs = () => {
 
         <div className="project-logs-content">
           <div className="project-logs">
-            {logData.length === 0 ? (
+            {/* {logData.length === 0 ? (
               <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
                 <span className="d-flex align-items-center justify-content-center">
-                  {dataStoreFlag
+                  {errorMessage
                     ? `Please upload documents, before seeing the logs`
                     : `Refreshing data...`}
                 </span>
               </div>
-            ) : (
-              <>
-                {!state?.qaDashboard && (
-                  <div className="table-top-content">
-                    {selectedLogData.length ? (
-                      <button
-                        type="button"
-                        className="btn btn-primary mr-3 btn-small"
-                        onClick={() => setSelectedLogData([])}
-                      >
-                        Clear Selection
-                      </button>
-                    ) : null}
-                    {!selectedLogData.length ? (
-                      <button
-                        type="button"
-                        className="btn btn-primary mr-3 btn-small btn-disabled"
-                        onClick={toggleSaveListName}
-                        disabled={selected.length === 0}
-                      >
-                        Save Selection
-                      </button>
-                    ) : null}
+            ) : ( */}
+            <>
+              {!state?.qaDashboard && (
+                <div className="table-top-content">
+                  {selectedLogData.length ? (
                     <button
                       type="button"
-                      className="btn btn-secondary btn-small"
-                      onClick={getList}
+                      className="btn btn-primary mr-3 btn-small"
+                      onClick={() => {
+                        setSelectedLogData([]);
+                        setSelected([]);
+                      }}
                     >
-                      {' '}
-                      View Saved Lists{' '}
+                      Clear Selection
                     </button>
-                    <div className="table-bulk-changes">
-                      <div className="log-search">
-                        <input
-                          type="text"
-                          placeholder="Find In Log"
-                          className="search-icon log-search-input"
-                          value={searchValue}
-                          onChange={(e) => handleSearchChange(e.target.value)}
-                        />
-                      </div>
-                      {localStorage.getItem('roleId') !== '7' && (
-                        <Dropdown isOpen={dropdownOpen} toggle={toggle}>
-                          <DropdownToggle caret>Export</DropdownToggle>
-                          <DropdownMenu>
-                            <DropdownItem onClick={() => handleExportExcel('')}>
-                              <ExcelLogo style={{ height: '90px' }} />
-                            </DropdownItem>
-                            <DropdownItem>
-                              <a
-                                href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType}`}
-                                className="breadcrumb-text"
-                              >
-                                <Logo style={{ height: '90px' }} />
-                              </a>
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </Dropdown>
-                      )}
-                      {localStorage.getItem('roleId') !== '7' && (
-                        <button
-                          type="button"
-                          className="d-flex btn btn-secondary btn-sm"
-                          onClick={handleDeleteLogs}
-                        >
-                          {' '}
-                          <Trash />{' '}
-                        </button>
-                      )}
+                  ) : null}
+                  {!selectedLogData.length ? (
+                    <button
+                      type="button"
+                      className="btn btn-primary mr-3 btn-small btn-disabled"
+                      onClick={toggleSaveListName}
+                      disabled={selected.length === 0}
+                    >
+                      Save Selection
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-small"
+                    onClick={getList}
+                  >
+                    {' '}
+                    View Saved Lists{' '}
+                  </button>
+                  <div className="table-bulk-changes">
+                    <div className="log-search">
+                      <input
+                        type="text"
+                        placeholder="Find In Log"
+                        className="log-search-input"
+                        value={searchValue}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                      />
+                      <SearchIcon
+                        className="search-icon"
+                        onClick={heandleSearchClick}
+                      />
                     </div>
+                    {localStorage.getItem('roleId') !== '7' && (
+                      <Dropdown isOpen={dropdownOpen} toggle={toggle}>
+                        <DropdownToggle caret>Export</DropdownToggle>
+                        <DropdownMenu>
+                          <DropdownItem onClick={() => handleExportExcel('')}>
+                            <ExcelLogo style={{ height: '90px' }} />
+                          </DropdownItem>
+                          <DropdownItem>
+                            <a
+                              href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`}
+                              className="breadcrumb-text"
+                            >
+                              <Logo style={{ height: '90px' }} />
+                            </a>
+                          </DropdownItem>
+                        </DropdownMenu>
+                      </Dropdown>
+                    )}
+                    {localStorage.getItem('roleId') !== '7' && (
+                      <button
+                        type="button"
+                        className="d-flex btn btn-secondary btn-sm"
+                        onClick={handleDeleteLogs}
+                      >
+                        {' '}
+                        <Trash />{' '}
+                      </button>
+                    )}
                   </div>
-                )}
-                <div className={pdfData.url && 'side-by-side'}>
-                  <CombinedLogs
-                    logData={filteredLogData}
-                    setFilteredLogData={setFilteredLogData}
-                    selected={selected}
-                    handleSelect={handleSelect}
-                    handleSelectAll={handleSelectAll}
-                    pageRefresh={pageRefresh}
-                    setPageRefresh={setPageRefresh}
-                    customerId={state?.customerId || customerId}
-                    groupingData={groupingData}
-                    setLogData={setLogData}
-                    projectId={state?.projectId || projectId}
-                    listId={listId}
-                    selectedLogData={selectedLogData}
-                    setSelectedLogData={setSelectedLogData}
-                    setPdfData={setPdfData}
-                    pdfData={pdfData}
-                    completeLogData={logData}
-                    newRowIndex={newRowIndex}
-                    setNewRowIndex={setNewRowIndex}
-                    searchValue={searchValue}
-                    projectType={projectType}
-                    qaDashboard={state?.qaDashboard}
-                    selectedFilterValue={selectedFilterValue}
-                  />
-                  {pdfData.url && <PdfWrapper pdfData={pdfData} />}
                 </div>
-                {!pdfData.url && (
-                  <div className="table-footer-content logs-pagination">
-                    <Pagination
-                      totalItems={totalCount}
-                      fetchData={fetchData}
-                    />
-                  </div>
-                )}
-                {/* {state.project?.type === 'Submittal' && (
+              )}
+              <div className={pdfData.url && 'side-by-side'}>
+                <CombinedLogs
+                  logData={filteredLogData}
+                  setFilteredLogData={setFilteredLogData}
+                  selected={selected}
+                  handleSelect={handleSelect}
+                  handleSelectAll={handleSelectAll}
+                  pageRefresh={pageRefresh}
+                  setPageRefresh={setPageRefresh}
+                  customerId={state?.customerId || customerId}
+                  groupingData={groupingData}
+                  setLogData={setLogData}
+                  projectId={state?.projectId || projectId}
+                  listId={listId}
+                  selectedLogData={selectedLogData}
+                  setSelectedLogData={setSelectedLogData}
+                  setPdfData={setPdfData}
+                  pdfData={pdfData}
+                  completeLogData={logData}
+                  newRowIndex={newRowIndex}
+                  setNewRowIndex={setNewRowIndex}
+                  searchValue={searchValue}
+                  projectType={projectType}
+                  qaDashboard={state?.qaDashboard}
+                  selectedFilterValue={selectedFilterValue}
+                  filterValues={filterValues}
+                  setFilterValues={setFilterValues}
+                  setTotalCount={setTotalCount}
+                  errorMessage={errorMessage}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                />
+                {pdfData.url && <PdfWrapper pdfData={pdfData} />}
+              </div>
+              {!pdfData.url && !selectedLogData.length && (
+                <div className="table-footer-content logs-pagination">
+                  <Pagination
+                    totalItems={totalCount}
+                    fetchData={fetchLogData}
+                    filterValues={filterValues}
+                    rowsPerPage={rowsPerPage}
+                    setRowsPerPage={setRowsPerPage}
+                    page={page}
+                    setPage={setPage}
+                  />
+                </div>
+              )}
+              {/* {state.project?.type === 'Submittal' && (
                  
                   <SubmittalTable
                     logData={logData}
@@ -680,8 +741,8 @@ const ProjectLogs = () => {
                     handleSelectAll={handleSelectAll}
                   />
                 )}{' '} */}
-              </>
-            )}
+            </>
+            {/* )} */}
           </div>
         </div>
       </div>

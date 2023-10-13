@@ -35,7 +35,6 @@ const Adminlanding = (props) => {
       localStorage.setItem('account_id', response.data.account_id);
       localStorage.setItem('selectedRows', ''); //Clearing selected rows on navigating to home page
       setLoading(false);
-      console.log(response.data.message);
     };
 
     fetchData().catch((error) => {
@@ -172,7 +171,7 @@ const Adminlanding = (props) => {
                 <tbody>
                   {currentItems.map((customer) => {
                     return (
-                      <tr>
+                      <tr key={customer?.account_id}>
                         {/* <td className="ticket-checkbox">
                           <div className="form-group">
                             <div className="custom-control custom-checkbox">

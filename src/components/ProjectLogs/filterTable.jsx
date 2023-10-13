@@ -23,17 +23,17 @@ export const FilterTable = (props) => {
       });
     }
   };
-  const handleSelectAll = () => {
-    let selectedLogs = props?.selectedFilterValue[props?.filterColumn]
-      ?.filter((value) => value.toString().includes(searchValue))
-      ?.map((log) => {
-        return log;
-      });
-    props.setFilterValues({
-      ...props.filterValues,
-      [props?.filterColumn]: selectedLogs
-    });
-  };
+  // const handleSelectAll = () => {
+  //   let selectedLogs = props?.selectedFilterValue[props?.filterColumn]
+  //     ?.filter((value) => value.toString().includes(searchValue))
+  //     ?.map((log) => {
+  //       return log;
+  //     });
+  //   props.setFilterValues({
+  //     ...props.filterValues,
+  //     [props?.filterColumn]: selectedLogs
+  //   });
+  // };
 
   const handleClear = () => {
     props.setFilterValues({ ...props.filterValues, [props?.filterColumn]: [] });
@@ -59,7 +59,9 @@ export const FilterTable = (props) => {
           filters: a,
           order_col: props.orderColumn,
           order: props.order,
-          list_id: props.selectedLogData.length ? props.listId : ''
+          list_id: props.selectedLogData.length ? props.listId : '',
+          page_number: props?.page - 1,
+          limit: props?.rowsPerPage
         }
       });
       localStorage.setItem(
@@ -70,20 +72,27 @@ export const FilterTable = (props) => {
         ? props.setSelectedLogData(response.data.message)
         : props.setLogData(response.data.message);
       toggleFilter && props.setFilterModal();
+      props.setTotalCount(response.data.total_count);
+      setSearchValue('')
     } catch (error) {
       console.log(error.message);
       handleError(error);
     }
   };
+
+  const toggleModal = () => {
+    setSearchValue('')
+    props.setFilterModal()
+  }
   return (
     <Modal
       isOpen={props.modal}
       fade={false}
-      toggle={props.setFilterModal}
+      toggle={toggleModal}
       className="new-user modal-lg"
       style={{ maxWidth: '500px' }}
     >
-      <ModalHeader toggle={props.setFilterModal} style={{}}>
+      <ModalHeader toggle={toggleModal} style={{}}>
         Filter By Column Values
       </ModalHeader>
       <ModalBody>
@@ -116,7 +125,7 @@ export const FilterTable = (props) => {
                                     )} */}
                 </div>
                 <div style={{ marginBottom: '20px', float: 'right' }}>
-                  <span
+                  {/* <span
                     style={{
                       textDecoration: 'underline',
                       color: 'blue',
@@ -126,7 +135,7 @@ export const FilterTable = (props) => {
                     onClick={handleSelectAll}
                   >
                     Select all
-                  </span>
+                  </span> */}
                   <span
                     style={{
                       textDecoration: 'underline',
@@ -168,7 +177,7 @@ export const FilterTable = (props) => {
             </div>
           </div>
           <ModalFooter style={{ justifyContent: 'center' }}>
-            <Button color="secondary" onClick={props.setFilterModal}>
+            <Button color="secondary" onClick={toggleModal}>
               Cancel
             </Button>
             <Button color="primary" onClick={() => handleApplyFilter(true)}>

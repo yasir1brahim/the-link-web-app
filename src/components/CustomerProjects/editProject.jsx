@@ -33,6 +33,7 @@ const EditProject = ({
   const [endDate, setEndDate] = useState('');
   // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
   const [employeeList, setEmployeeList] = useState([]);
+  const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
   // const [accountId, setAccountId] = useState({ value: '', errors: '' });
   // const startDateMoment = moment(
   //   new Date(project?.start_date?.replaceAll('-', '/'))
@@ -311,7 +312,7 @@ const EditProject = ({
                       <SelectDropdown label={'Project Type'} labelKey="name" />
                     </div>
                   </div> */}
-                  {/* <div className="col-12">
+                   <div className="col-12">
                     <div className="users-section">
                       <ul>
                         <li>
@@ -337,7 +338,7 @@ const EditProject = ({
                         </li>
                       </ul>
                     </div>
-                  </div> */}
+                  </div>
                 </div>
               </div>
               <div className="lproject-footer">

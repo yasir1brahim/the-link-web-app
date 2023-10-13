@@ -15,7 +15,14 @@ import { Tooltip } from 'reactstrap';
 import handleError from '../../config/errorHandler';
 
 export default function CombinedLogs(props) {
-  const { logData, newRowIndex } = props;
+  const {
+    logData,
+    newRowIndex,
+    filterValues,
+    setFilterValues,
+    setTotalCount,
+    errorMessage
+  } = props;
   const [editRow, setEditRow] = useState('');
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
@@ -25,13 +32,7 @@ export default function CombinedLogs(props) {
   const [sorting, setSorting] = useState({ column: '', order: 'desc' });
   const [filterModal, setFilterModal] = useState(false);
   const [filterColumn, setFilterColumn] = useState('');
-  const [filterValues, setFilterValues] = useState({
-    spec_section: [],
-    type: ['Submittal'],
-    item_desc: [],
-    classification: [],
-    sd_title: []
-  });
+
   // const [addRowTooltip, setaddRowTooltip] = useState(null)
   // const [editRowTooltip, setEditRowTooltip] = useState(null)
   const [pdfTooltip, setPdfTooltip] = useState(null);
@@ -161,10 +162,12 @@ export default function CombinedLogs(props) {
           project_id: props.projectId,
           search: '',
           // filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
-          filters: { ...a, type: ['Submittal'] },
+          filters: a,
           order_col: columnName || '',
           order: sortingOrder === 'desc' ? 'asc' : 'desc' || '',
-          list_id: props.selectedLogData.length ? props.listId : ''
+          list_id: props.selectedLogData.length ? props.listId : '',
+          page_number: props?.page - 1,
+          limit: props?.rowsPerPage
         }
       });
       localStorage.setItem(
@@ -253,7 +256,14 @@ export default function CombinedLogs(props) {
     setEditRow('');
   }, [props.searchValue]);
   return (
-    <div className="l-table-wrapper">
+    <div
+      className="l-table-wrapper"
+      style={{
+        maxHeight: props.pdfData.url
+          ? 'calc(100vh - 230px)'
+          : 'calc(90vh - 250px)'
+      }}
+    >
       <table className="table">
         <thead>
           <tr>
@@ -927,7 +937,17 @@ export default function CombinedLogs(props) {
         listId={props.listId}
         setSelectedLogData={props.setSelectedLogData}
         qaDashboard={props?.qaDashboard}
+        setTotalCount={setTotalCount}
+        page={props?.page}
+        rowsPerPage={props?.rowsPerPage}
       />
+      {errorMessage && (
+        <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
+          <span className="d-flex align-items-center justify-content-center">
+            {errorMessage}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

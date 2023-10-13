@@ -51,6 +51,11 @@ const ProjectLogsReader = ({ url, textLoc, docId }) => {
       instance.UI.enableFeatures([instance.UI.Feature.InlineComment]);
       handleDocumentLoaded(instance.Core.annotationManager);
 
+      //Below code scrolls the pdf to the location of the text on load
+      instance.Core.documentViewer.addEventListener('documentLoaded', ()=>{
+        instance.Core.documentViewer.displayPageLocation(textLoc?.page_no, textLoc?.x, textLoc?.y)
+      })
+
       instance.UI.disableElements([
         'downloadButton',
         'printButton',

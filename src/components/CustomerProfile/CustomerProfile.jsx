@@ -67,12 +67,12 @@ const CustomerProfile = (props) => {
     localStorage.getItem('roleId') === '0'
       ? customerId || state?.customer_id || customer?.id || customer[0]?.id
       : Number(localStorage.getItem('userId'));
-  const redirectUri = window.location.href.includes('app.thelink.ai')
+  const redirectUri = window.location.href.includes('https://app.thelink.ai')
     ? `https://app.thelink.ai/customer-profile?id=${customerId || customerID}`
-    : `http://d3fy104eoanlsd.cloudfront.net/customer-profile?id=${
+    : `https://dev-app.thelink.ai/customer-profile?id=${
         customerId || customerID
       }`;
-  const clientId = window.location.href.includes('app.thelink.ai')
+  const clientId = window.location.href.includes('https://app.thelink.ai')
     ? 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9'
     : 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9';
 
@@ -225,7 +225,7 @@ const CustomerProfile = (props) => {
     if (password.value && password.value !== confirmPassword.value) {
       setPassword({
         ...password,
-        errors: 'Password not matched with confirm Passsword.'
+        errors: 'Password not matched with confirm Password.'
       });
       error = true;
     }

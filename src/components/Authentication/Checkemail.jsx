@@ -1,7 +1,7 @@
 import React from 'react';
 import { ReactComponent as Mail } from '../../assets/images/mail.svg';
 import { ReactComponent as ArrowLeft } from '../../assets/images/arrow-left.svg';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark 1.svg';
+import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
 
 const Checkemail = () => {
   return (
