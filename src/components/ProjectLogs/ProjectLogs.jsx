@@ -55,7 +55,6 @@ const ProjectLogs = () => {
   const [isLoading, setLoading] = useState(false);
   const [groupingData, setGroupingData] = useState([]);
   const [selectedLogData, setSelectedLogData] = useState([]);
-  const [completeLogData, setCompleteLogData] = useState([]);
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({
     url: '',
@@ -364,18 +363,6 @@ const ProjectLogs = () => {
       submittalLogs?.map((item) => item?.id)
     );
     setLoading(false);
-    const completeResponse = await axiosInstance({
-      method: 'post',
-      url: '/filter_logs',
-      data: {
-        project_id: state?.projectId || projectId,
-        // search: search || '',
-        // filters: { ...filters },
-        order_col: '',
-        order: ''
-      }
-    });
-    setCompleteLogData(completeResponse.data.message);
     setErrorMessage('');
     if (response.data.message.length === 0) {
       if (search) {
