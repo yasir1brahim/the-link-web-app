@@ -94,6 +94,9 @@ const EditProject = ({
               : employeeList.find(
                   (employee) => employee.name === project?.lead_contact
                 )?.emp_id,
+            employee_list: selectedEmployeeList.map(
+              (employee) => employee.value
+            ),
             start_date: startDate
               ? moment(startDate).format('YYYY-MM-DD')
               : project?.start_date
@@ -312,7 +315,7 @@ const EditProject = ({
                       <SelectDropdown label={'Project Type'} labelKey="name" />
                     </div>
                   </div> */}
-                   <div className="col-12">
+                  <div className="col-12">
                     <div className="users-section">
                       <ul>
                         <li>
@@ -327,7 +330,7 @@ const EditProject = ({
                                   options={employeeList.map((project) => {
                                     return {
                                       value: project.emp_id,
-                                      label: project.name,
+                                      label: project.name
                                     };
                                   })}
                                   placeholder="Add Employees"
