@@ -628,7 +628,7 @@ const ProjectLogs = () => {
                       <Dropdown isOpen={dropdownOpen} toggle={toggle}>
                         <DropdownToggle caret>Export</DropdownToggle>
                         <DropdownMenu>
-                          <DropdownItem onClick={() => handleExportExcel('')}>
+                          <DropdownItem onClick={() => handleExportExcel('All')}>
                             <ExcelLogo style={{ height: '90px' }} />
                           </DropdownItem>
                           <DropdownItem>
