@@ -188,9 +188,9 @@ const CollaborationPdfReader = ({
       // instance.UI.setToolbarGroup('toolbarGroup-Annotate'); // set default toolbar group to annotate
       instance.UI.setHeaderItems(function (header) {
         // get the tools overlay
-        const toolsOverlay = header
-          .getHeader('toolbarGroup-Annotate')
-          .get('toolsOverlay');
+        // const toolsOverlay = header
+        //   .getHeader('toolbarGroup-Annotate')
+        //   .get('toolsOverlay');
         // header.getHeader('toolbarGroup-Annotate').delete('toolsOverlay');
         // add the line tool to the top header
         header.getHeader('default').push(
@@ -279,7 +279,7 @@ const CollaborationPdfReader = ({
           // }
         );
         // add the tools overlay to the top header
-        header.push(toolsOverlay);
+        // header.push(toolsOverlay);
       });
       instance.UI.disableElements([
         'downloadButton',
