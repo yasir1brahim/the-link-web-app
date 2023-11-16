@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import { BASE_URL } from '../utils/config';
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -115,7 +116,7 @@ const SourcesComponent = ({sources, token}) => {
                 {sources.map((source, index) => (               
                     <div key={index} className="col-8">
                         <img src={pdfIconPath} alt="logo" style={pdfIconStyle} />{'   '}
-                        <a href="#"
+                        <a href={source?.link}
                             onClick={() => {
                                 fetchPdf(source.docid);
                             }}
