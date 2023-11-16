@@ -161,11 +161,6 @@ const ChatPage = ({ token }) => {
   //   }
   // };
 
-  useEffect(() => {
-    // fetchChatHistory();
-    fetchChatSessionHistory(chatSessionId)
-  }, [chatSessionId, fetchChatSessionHistory]);
-
   const fetchChatSessionHistory = async (chatSessionID) => {
     const url = `${baseURL}/spec-gpt/chat_session_history?chat_session_id=${chatSessionID}`;
     try {
@@ -193,6 +188,11 @@ const ChatPage = ({ token }) => {
       console.log('Error: ', error);
     }
   };
+
+  useEffect(() => {
+    // fetchChatHistory();
+    fetchChatSessionHistory(chatSessionId)
+  }, [chatSessionId, fetchChatSessionHistory]);
 
   const countUserDocs = async () => {
     const url = `${BASE_URL}/api/doc-count`;

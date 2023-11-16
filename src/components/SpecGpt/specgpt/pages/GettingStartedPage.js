@@ -147,7 +147,7 @@ import useLogout from '../utils/useLogout';
                     <div className="getting-started-step">Step 4</div>
                     <div className="getting-started-item">Press "delete" and all your uploaded files will be deleted (we will delete all uploaded files weekly).</div>
 
-                    <div className="mt-5">For help email <a href="mailto:support@thelink.ai" target="_blank" rel="noopener">support@thelink.ai</a></div>
+                    {/* <div className="mt-5">For help email <a href="mailto:support@thelink.ai" target="_blank" rel="noopener">support@thelink.ai</a></div> */}
                 </div>
 
                 <div className="col-6">

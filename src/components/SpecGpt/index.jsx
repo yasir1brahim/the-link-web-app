@@ -2,7 +2,7 @@ import React from 'react'
 import { useSearchParams } from 'react-router-dom';
 import Header from '../shared/Header/Header'
 import NavbarTop from '../shared/NavbarTop/NavbarTop'
-import GettingStartedPage from './specgpt/pages/GettingStartedPage';
+// import GettingStartedPage from './specgpt/pages/GettingStartedPage';
 import ChatPage from './specgpt/pages/ChatPage';
 
 export const SpecGpt = () => {
