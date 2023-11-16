@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef } from 'react';
 import { BASE_URL } from '../utils/config';
 // import Form from 'react-bootstrap/Form';
@@ -24,7 +25,7 @@ import SubmitButton from '@mui/icons-material/East';
 import { Typography, Box, Link, Grid  } from '@mui/material';
 import TextareaAutosize from '@mui/material/TextareaAutosize';
 import IconButton from '@mui/material/IconButton';
-import axiosInstance from '../../../../config/axios';
+// import axiosInstance from '../../../../config/axios';
 
 // new ones
 const pageContainerStyle2 = {
@@ -33,14 +34,14 @@ const pageContainerStyle2 = {
   overlfow: 'hidden',
 };
 
-const leftPanelStyle2 = {
-  backgroundColor: 'rgb(31, 42, 67)',
-  width: '15vw',
-  minWidth: '200px',
-  padding: '1%',
-  color: '#FFFFFF',
-  paddingRight: '0'
-};
+// const leftPanelStyle2 = {
+//   backgroundColor: 'rgb(31, 42, 67)',
+//   width: '15vw',
+//   minWidth: '200px',
+//   padding: '1%',
+//   color: '#FFFFFF',
+//   paddingRight: '0'
+// };
 
 const rightPanelStyle2 = {
   backgroundColor: '#FFFFFF',
@@ -87,12 +88,12 @@ const formInputStyle = {
   alignItems: 'center'
 };
 
-const quickQuestionStyle = {
-  padding: '5px',
-  border: '1px solid',
-  marginBottom: '10px',
-  cursor: 'pointer'
-};
+// const quickQuestionStyle = {
+//   padding: '5px',
+//   border: '1px solid',
+//   marginBottom: '10px',
+//   cursor: 'pointer'
+// };
 
 const voiceCommandText = {
     width: '14%',
@@ -110,13 +111,13 @@ const ChatPage = ({ token }) => {
   const [promptArea, setPromptArea] = useState('');
   const [promptMessage, setPromptMessage] = useState('');
   const [messages, setMessages] = useState(testMessages);
-  const [k, setK] = useState(21);
-  const [docCount, setDocCount] = useState(0);
+  // const [k, setK] = useState(21);
+  // const [docCount, setDocCount] = useState(0);
   const [showPurgeFilesModal, setShowPurgeFilesModal] = useState(false);
   const [showPurgingSpinnerModal, setShowPurgingSpinnerModal] = useState(false);
   const [chatSessionId, setChatSessionId] = useState(uuidv4());
-  const [chatHistory, setChatHistory] = useState([]);
-  const [transcript, setTranscript] = useState('');
+  // const [chatHistory, setChatHistory] = useState([]);
+  // const [transcript, setTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -140,30 +141,30 @@ const ChatPage = ({ token }) => {
     promptAreaRef.current.style.height = `${promptAreaRef.current.scrollHeight}px`;
   }, [promptArea]);
 
-  const fetchChatHistory = async () => {
-    const url = `${baseURL}/spec-gpt/chat_history`;
-    try {
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + localStorage.getItem('token')
-        }
-      });
-      checkIfLoggedOut(response);
-      const data = await response.json();
-      if (data.success) {
-        setChatHistory([...data.chat_history]);
-        console.log(data);
-      }
-    } catch (error) {
-      console.log('Error: ', error);
-    }
-  };
+  // const fetchChatHistory = async () => {
+  //   const url = `${baseURL}/spec-gpt/chat_history`;
+  //   try {
+  //     const response = await fetch(url, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: 'Bearer ' + localStorage.getItem('token')
+  //       }
+  //     });
+  //     checkIfLoggedOut(response);
+  //     const data = await response.json();
+  //     if (data.success) {
+  //       setChatHistory([...data.chat_history]);
+  //       console.log(data);
+  //     }
+  //   } catch (error) {
+  //     console.log('Error: ', error);
+  //   }
+  // };
 
   useEffect(() => {
     // fetchChatHistory();
     fetchChatSessionHistory(chatSessionId)
-  }, [chatSessionId]);
+  }, [chatSessionId, fetchChatSessionHistory]);
 
   const fetchChatSessionHistory = async (chatSessionID) => {
     const url = `${baseURL}/spec-gpt/chat_session_history?chat_session_id=${chatSessionID}`;
@@ -205,7 +206,7 @@ const ChatPage = ({ token }) => {
       checkIfLoggedOut(response);
       const data = await response.json();
       if (data.success) {
-        setDocCount(data.count);
+        // setDocCount(data.count);
       }
     } catch (error) {
       console.log('Error: ', error);
@@ -350,7 +351,7 @@ const ChatPage = ({ token }) => {
         .map((result) => result.transcript)
         .join('');
 
-      setTranscript(text);
+      // setTranscript(text);
       setPromptArea(text);
 
       clearTimeout(timeoutRef.current);
@@ -430,9 +431,9 @@ const ChatPage = ({ token }) => {
     );
   };
 
-  const gotoUploadPage = () => {
-    navigate('/uploaded-files');
-  };
+  // const gotoUploadPage = () => {
+  //   navigate('/uploaded-files');
+  // };
 
   const PromptBox = () => {
     return (

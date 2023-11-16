@@ -1,9 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
  import React, {useEffect, useState, useMemo} from 'react';
- import { CSS_VARS } from '../utils/enums';
- import Header from '../components/Header';
+//  import { CSS_VARS } from '../utils/enums';
+//  import Header from '../components/Header';
  import Uploady,
  {
-    useItemFinishListener,
+    // useItemFinishListener,
     UPLOADER_EVENTS,
  } from "@rpldy/uploady";
 import UploadButton from "@rpldy/upload-button";
@@ -11,7 +12,7 @@ import UploadDropZone from "@rpldy/upload-drop-zone";
 import { BASE_URL } from '../utils/config';
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // import { icon, solid } from '@fortawesome/fontawesome-svg-core/import.macro';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import LoadingModal from '../components/LoadingModal';
 import CustomModal from '../components/CustomModal';
 import useLogout from '../utils/useLogout';
@@ -28,42 +29,42 @@ import useLogout from '../utils/useLogout';
  const GettingStartedPage = ({token}) => {
     const navigate = useNavigate();
     const {checkIfLoggedOut} = useLogout();
-    const [uploadedFiles, setUploadedFiles] = useState([]);
-    const [docCount, setDocCount] = useState(0);
+    // const [uploadedFiles, setUploadedFiles] = useState([]);
+    // const [docCount, setDocCount] = useState(0);
     const [showUploadingModal, setShowUploading] = useState(false);
     const [textUploadingFiles, setTextUploadingFiles] = useState('Uploading Files.');
-    const [totalFilesToUpload, setTotalFilesToUpload] = useState(0);
+    // const [totalFilesToUpload, setTotalFilesToUpload] = useState(0);
     const [filesUploaded, setFilesUploaded] = useState(0);
-    const [showUploadMaxError, setShowUploadMaxError] = useState(false);
+    // const [showUploadMaxError, setShowUploadMaxError] = useState(false);
     const [showUploadCompleteModal, setShowUploadCompleteModal] = useState(false);
-    const [uploadErrors, setUploadErrors] = useState([]);    
+    // const [uploadErrors, setUploadErrors] = useState([]);    
 
-    const uploadCompleteCallback = (item) => {        
-        loadDocCount();
-        console.log('upload call back ', item);
-        if (item.data.reachedUploadLimit) {
-            setShowUploadMaxError(true);
-            return;
-        } else if (!item.data.success) {
-            if (item.data.error != '') {
-                setUploadErrors([...uploadErrors, item.data.error]);
-            }
-        }
-        updateUploadText(filesUploaded, totalFilesToUpload);
-        let newUploadedFiles = [...uploadedFiles, ...item.data.filenames];
-        // sort newUploadedFiles
-        newUploadedFiles.sort((a, b) => {
-            if (a.filename < b.filename) {
-                return -1;
-            }
-            if (a.filename > b.filename) {
-                return 1;
-            }
-            return 0;
-        });
-        console.log('newUploadedFiles: ', newUploadedFiles);        
-        setUploadedFiles([...newUploadedFiles]);
-    }
+    // const uploadCompleteCallback = (item) => {        
+    //     loadDocCount();
+    //     console.log('upload call back ', item);
+    //     if (item.data.reachedUploadLimit) {
+    //         setShowUploadMaxError(true);
+    //         return;
+    //     } else if (!item.data.success) {
+    //         if (item.data.error != '') {
+    //             setUploadErrors([...uploadErrors, item.data.error]);
+    //         }
+    //     }
+    //     updateUploadText(filesUploaded, totalFilesToUpload);
+    //     let newUploadedFiles = [...uploadedFiles, ...item.data.filenames];
+    //     // sort newUploadedFiles
+    //     newUploadedFiles.sort((a, b) => {
+    //         if (a.filename < b.filename) {
+    //             return -1;
+    //         }
+    //         if (a.filename > b.filename) {
+    //             return 1;
+    //         }
+    //         return 0;
+    //     });
+    //     console.log('newUploadedFiles: ', newUploadedFiles);        
+    //     setUploadedFiles([...newUploadedFiles]);
+    // }
 
     const loadDocCount = async () => {
         const url = `${BASE_URL}/api/doc-count`;
@@ -78,7 +79,7 @@ import useLogout from '../utils/useLogout';
             const data = await response.json();
             if (data.success) {
                 console.log(data);
-                setDocCount(data.count)
+                // setDocCount(data.count)
             }            
         } catch (error) {
             console.log('error: ', error);
@@ -91,7 +92,7 @@ import useLogout from '../utils/useLogout';
 
     const updateUploadText = (filesUploaded2, totalFilesToUpload2) => {
         setFilesUploaded(filesUploaded2 + 1); 
-        setTotalFilesToUpload(totalFilesToUpload2);
+        // setTotalFilesToUpload(totalFilesToUpload2);
         const percent = (filesUploaded2 / totalFilesToUpload2) * 100;
         const text = `Uploading Files. ${filesUploaded2} of ${totalFilesToUpload2} uploaded. ${percent.toFixed(0)}% complete.`;
         setTextUploadingFiles(text);
@@ -146,7 +147,7 @@ import useLogout from '../utils/useLogout';
                     <div className="getting-started-step">Step 4</div>
                     <div className="getting-started-item">Press "delete" and all your uploaded files will be deleted (we will delete all uploaded files weekly).</div>
 
-                    <div className="mt-5">For help email <a href="mailto:support@thelink.ai" target="_blank">support@thelink.ai</a></div>
+                    <div className="mt-5">For help email <a href="mailto:support@thelink.ai" target="_blank" rel="noopener">support@thelink.ai</a></div>
                 </div>
 
                 <div className="col-6">
