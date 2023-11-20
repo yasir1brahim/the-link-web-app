@@ -258,40 +258,35 @@ const RatingComponent = ({questionid, token}) => {
 const MessageBubble = ({message, textStyle, containerStyle, iconPath, questionid, token, sources}) => {
     
     return (
-        <Grid item xs={12} style={containerStyle}>
-            <div style={innerMessageContainerStyle}>
-                <div style={logoContainerStyle}>
-                    {iconPath === 'link' ? 
-                    // <img src='../../../../assets/images/logo-dark-v7.svg' alt="logo" style={logoStyle} />:
-                    <span style={{...logoStyle, display: 'flex'}}><Logo/></span>:
-                   <span className="user-icon-spec">
+      <Grid item xs={12} style={containerStyle}>
+        <div style={innerMessageContainerStyle}>
+          <div style={logoContainerStyle}>
+            {iconPath === 'link' ? (
+              // <img src='../../../../assets/images/logo-dark-v7.svg' alt="logo" style={logoStyle} />:
+              <span style={{ ...logoStyle, display: 'flex' }}>
+                <Logo />
+              </span>
+            ) : (
+              <span className="user-icon-spec">
                 {localStorage.getItem('fullName')?.charAt(0) || (
                   <i className="fa fa-user"></i>
                 )}
-              </span> 
-                    
-                }
-                </div>
+              </span>
+            )}
+          </div>
 
-                <div style={textStyle}>
-
-                    <span dangerouslySetInnerHTML={{__html: message}}></span>
-                </div>
-                {/* {questionid !== undefined && (
-                    <RatingComponent                         
-                        questionid={questionid}
-                        token={token}
-                    />                       
-                )}     */}
-            </div>
-            {sources !== undefined && (
-                    <SourcesComponent
-                        sources={sources}
-                        token={token}
-                    />
-                )}
-        </Grid>   
-    )
+          <div style={textStyle}>
+            <span dangerouslySetInnerHTML={{ __html: message }}></span>
+          </div>
+          {questionid !== undefined && (
+            <RatingComponent questionid={questionid} token={token} />
+          )}
+        </div>
+        {sources !== undefined && (
+          <SourcesComponent sources={sources} token={token} />
+        )}
+      </Grid>
+    );
 }
 
 export const AssistantMessageBubble = ({message, questionid, token, sources}) => {    
