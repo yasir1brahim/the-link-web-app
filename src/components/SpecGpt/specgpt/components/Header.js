@@ -27,9 +27,9 @@ export const Header = ({isLoggedIn}) => {
                 <div className="specgpt-logo-title">
                     SpecGPT
                 </div>
-                <div className="beta-v1-text">
+                {/* <div className="beta-v1-text">
                     Beta V1
-                </div>
+                </div> */}
             </div>
 
             <div className="col-2"></div>

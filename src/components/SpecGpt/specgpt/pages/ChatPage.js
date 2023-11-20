@@ -53,7 +53,7 @@ const rightPanelStyle2 = {
 const preQuestionStyle = {
   textAlign: 'center',
   height: '55vh',
-  width: '100%',
+  width: '90%',
   // marginTop: '17px',
   display: 'flex',
   flexDirection: 'row'
@@ -97,7 +97,7 @@ const formInputStyle = {
 
 const voiceCommandText = {
     width: '14%',
-    marginLeft: '14%'
+    marginLeft: '9%'
 };
 
 const ChatPage = ({ token }) => {
@@ -234,10 +234,10 @@ const ChatPage = ({ token }) => {
     }
   };
 
-  const scrollToDivRef = useRef(null);
-  useEffect(() => {
-    scrollToDivRef.current.scrollIntoView({ behavior: 'instant' });
-  }, [messages]);
+  // const scrollToDivRef = useRef(null);
+  // useEffect(() => {
+  //   scrollToDivRef.current.scrollIntoView({ behavior: 'instant' });
+  // }, [messages]);
 
   useEffect(() => {
     const fetchPromptAnswer = async (prompt) => {
@@ -291,7 +291,7 @@ const ChatPage = ({ token }) => {
             sources: sources
           }
         ]);
-        scrollToDivRef.current.scrollIntoView({ behavior: 'smooth' });
+        // scrollToDivRef.current.scrollIntoView({ behavior: 'smooth' });
       } catch (error) {
         console.log('Error: ', error);
       }
@@ -310,7 +310,7 @@ const ChatPage = ({ token }) => {
       ...messages,
       { role: MESSAGE_ROLE_TYPE.USER, message: promptArea }
     ]);
-    scrollToDivRef.current.scrollIntoView({ behavior: 'smooth' });
+    // scrollToDivRef.current.scrollIntoView({ behavior: 'smooth' });
     setPromptArea('');
     setPromptMessage(promptMessage);
   };
@@ -323,7 +323,7 @@ const ChatPage = ({ token }) => {
       ...messages,
       { role: MESSAGE_ROLE_TYPE.USER, message: promptMessage }
     ]);
-    scrollToDivRef.current.scrollIntoView({ behavior: 'smooth' });
+    // scrollToDivRef.current.scrollIntoView({ behavior: 'smooth' });
     setPromptArea('');
     setPromptMessage(promptMessage);
   };
@@ -555,7 +555,7 @@ const ChatPage = ({ token }) => {
         </Grid>
       </Grid>
       <Grid item sm={12} md={6}>
-        <Typography variant="h4">Some Capabilities of this Beta</Typography>
+        <Typography variant="h4">Some Capabilities of SpecGPT</Typography>
         <div style={{ textAlign: 'center', color: 'white' }}>.</div>
         <Grid container spacing={1}>
           <Grid item xs={12} sm={6}>
@@ -646,7 +646,7 @@ const ChatPage = ({ token }) => {
                                 Beta V1                        
                             </div>
                             </div> */}
-              {messages.length === 0 && <Grid item xs={12} md={12}>{PreQuestion()}</Grid>}
+              {messages.length === 0 && <Grid item xs={12} md={12} style={{ display: 'flex', justifyContent: 'center'}}>{PreQuestion()}</Grid>}
               <>
                 {messages.map((message, index) => {
                   if (message.role === MESSAGE_ROLE_TYPE.ASSISTANT) {
@@ -692,7 +692,7 @@ const ChatPage = ({ token }) => {
                   }
                 })}
               </>
-              <Grid item xs={12} style={{ marginBottom: '50px' }} ref={scrollToDivRef}></Grid>
+              {/* <Grid item xs={12} style={{ marginBottom: '50px' }} ref={scrollToDivRef}></Grid> */}
             {<Grid item xs={12} md={12}>{PromptBox()}</Grid>}
           </Grid>
       </div>

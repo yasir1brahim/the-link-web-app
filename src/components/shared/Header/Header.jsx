@@ -144,7 +144,7 @@ const Header = ({ ...props }) => {
                 target="_blank"
                 rel="noreferrer"
               > */}
-                Spec GPT <span style={{ fontSize: '9px' }}>Beta</span>
+                Spec GPT 
               {/* </a> */}
             </button>
           ) : null}
