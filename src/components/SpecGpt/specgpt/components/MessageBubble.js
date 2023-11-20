@@ -277,12 +277,12 @@ const MessageBubble = ({message, textStyle, containerStyle, iconPath, questionid
 
                     <span dangerouslySetInnerHTML={{__html: message}}></span>
                 </div>
-                {questionid !== undefined && (
+                {/* {questionid !== undefined && (
                     <RatingComponent                         
                         questionid={questionid}
                         token={token}
                     />                       
-                )}    
+                )}     */}
             </div>
             {sources !== undefined && (
                     <SourcesComponent
