@@ -13,6 +13,7 @@ import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined';
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import IconButton from '@mui/material/IconButton';
+import { ReactComponent as PdfButton } from '../../../../assets/images/file-pdf.svg';
 
 const messageContainerStyle = {
     color: 'rgba(52,53,65,1)',
@@ -20,6 +21,7 @@ const messageContainerStyle = {
     borderBottom: '3px',
     width: '100%',
     backgroundColor: '#FFFFFF',
+    marginTop: '16px'
 }
 
 const innerMessageContainerStyle = {
@@ -115,7 +117,7 @@ const SourcesComponent = ({sources, token}) => {
             <div className="d-flex flex-row" style={{maxWidth: '75%'}}>
                 {sources.map((source, index) => (               
                     <div key={index} className="col-8">
-                        <img src={pdfIconPath} alt="logo" style={pdfIconStyle} />{'   '}
+                        <PdfButton/>{'   '}
                         <a href={source?.link}
                             onClick={() => {
                                 fetchPdf(source.docid);
