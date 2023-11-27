@@ -121,7 +121,7 @@ const ChatPage = ({ token }) => {
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
   const timeoutRef = useRef(null);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const projectDetails = searchParams.get('projectDetails')?.split(',');
   const projectId = projectDetails?.length
     ? JSON.parse(projectDetails[0])
@@ -131,6 +131,9 @@ const ChatPage = ({ token }) => {
   const baseURL = window.location.href.includes('https://app.thelink.ai')
       ? 'https://log-manager-api-prod.thelink.ai'
       : ' https://log-manager-api-dev.thelink.ai'
+  const sessionid = searchParams.get('sessionId')
+  const [isLoading, setLoading] = useState(false);
+  
 
   useEffect(() => {
     if (promptAreaRef.current.style != null) {
@@ -162,8 +165,9 @@ const ChatPage = ({ token }) => {
   // };
 
   const fetchChatSessionHistory = async (chatSessionID) => {
-    const url = `${baseURL}/spec-gpt/chat_session_history?chat_session_id=${chatSessionID}`;
+    const url = `${baseURL}/spec-gpt/chat_session_history?chat_session_id=${sessionid || chatSessionID}`;
     try {
+      setLoading(true)
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -183,16 +187,20 @@ const ChatPage = ({ token }) => {
           setMessages([...messageHistory]);
         }
         setChatSessionId(chatSessionID);
+      setLoading(false);
+
       }
     } catch (error) {
       console.log('Error: ', error);
+      setLoading(false);
+
     }
   };
 
   useEffect(() => {
     // fetchChatHistory();
     fetchChatSessionHistory(chatSessionId)
-  }, [chatSessionId, fetchChatSessionHistory]);
+  }, []);
 
   const countUserDocs = async () => {
     const url = `${BASE_URL}/api/doc-count`;
@@ -243,6 +251,7 @@ const ChatPage = ({ token }) => {
     const fetchPromptAnswer = async (prompt) => {
       const url = `${baseURL}/spec-gpt/chat_stream`;
       try {
+        setLoading(true)
         const response = await fetch(url, {
           method: 'POST',
           headers: {
@@ -255,6 +264,7 @@ const ChatPage = ({ token }) => {
             chat_session_id: chatSessionId
           })
         });
+        setLoading(false)
         checkIfLoggedOut(response);
         if (!response.body) return;
         if (response.status === 400) {
@@ -523,8 +533,11 @@ const ChatPage = ({ token }) => {
         },
       }}
       onClick={() => {
+            const projectDetails = searchParams.get('projectDetails')
             setPromptArea(text);
             submitMessageInline(text);
+            // searchParams.set('sessionId', JSON.stringify(chatSessionId))
+            setSearchParams({projectDetails, sessionId: chatSessionId})
           }}
     >
       <Typography variant="body1" align="center" sx={{ fontSize: '16px', letterSpacing: '0%' }}>
@@ -695,6 +708,7 @@ const ChatPage = ({ token }) => {
               {/* <Grid item xs={12} style={{ marginBottom: '50px' }} ref={scrollToDivRef}></Grid> */}
             {<Grid item xs={12} md={12}>{PromptBox()}</Grid>}
           </Grid>
+          <Loader showComponentLoader={isLoading} />
       </div>
       {purgeFilesConfirmModal()}
       {purgingSpinnerModal()}
