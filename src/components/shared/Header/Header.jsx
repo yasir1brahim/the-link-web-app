@@ -127,7 +127,9 @@ const Header = ({ ...props }) => {
           {!window.location.href.includes('https://app.thelink.ai') ? (
             <button
               type="button"
-              className={`btn btn-primary btn-white ${
+              className={`btn btn-primary ${
+                props.navBtn !== 'specGpt' ? 'btn-white' : ''
+              } ${
                 props.btnSize === 'small' ? 'btn-small' : ''
               }`}
               style={
