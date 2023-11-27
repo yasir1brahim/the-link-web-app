@@ -51,13 +51,6 @@ const logoStyle = {
     marginTop: '2px',
 }
 
-const pdfIconStyle = {
-    width: '25px',
-    height: '25px',
-    backgroundColor: 'rgba(247,247,248,1)',
-    marginTop: '-4px',
-}
-
 const assistantMessageStyle = {    
 }
 
@@ -75,7 +68,6 @@ const errorMessageStyle = {
 
 
 const SourcesComponent = ({sources, token}) => {
-    const pdfIconPath = 'images/pdf_icon.png';
     const {checkIfLoggedOut} = useLogout();
 
     const fetchPdf = async (fileId) => {
