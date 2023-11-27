@@ -112,6 +112,13 @@ const CollaborationHub = () => {
           project_id: state?.project?.project_id || projectId
         }
       });
+      axiosInstance({
+        method: 'post',
+        url: `/spec-gpt/load_doc`,
+        body: {
+          project_id: state?.project?.project_id || projectId
+        }
+      });
       setCollabDocs(specIndexResponse.data?.indexes);
       setPageRefresh(!pageRefresh);
     } catch (error) {

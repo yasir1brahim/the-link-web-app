@@ -167,6 +167,13 @@ const ProjectLogs = () => {
           project_id: projectId || state.project?.project_id
         }
       });
+      axiosInstance({
+        method: 'post',
+        url: `/spec-gpt/load_doc`,
+        body: {
+          project_id: state?.project?.project_id || projectId
+        }
+      });
     } catch (error) {
       setUploadLoading(false);
       toggleErrorModal(true);
