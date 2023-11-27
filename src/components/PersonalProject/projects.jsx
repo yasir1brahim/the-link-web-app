@@ -80,7 +80,7 @@ const Projects = () => {
         method: 'post',
         url: `/spec-gpt/load_doc`,
         body: {
-          project_id: state?.project?.project_id || projectId
+          project_id: specUploadProject?.project_id
         }
       });
     } catch (error) {
