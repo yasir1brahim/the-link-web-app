@@ -79,7 +79,7 @@ const Projects = () => {
       axiosInstance({
         method: 'post',
         url: `/spec-gpt/load_doc`,
-        body: {
+        data: {
           project_id: specUploadProject?.project_id
         }
       });
