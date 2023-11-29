@@ -171,7 +171,7 @@ const ProjectLogs = () => {
         method: 'post',
         url: `/spec-gpt/load_doc`,
         data: {
-          project_id: state?.project?.project_id || projectId
+          project_id: projectId || state.project?.project_id
         }
       });
     } catch (error) {
