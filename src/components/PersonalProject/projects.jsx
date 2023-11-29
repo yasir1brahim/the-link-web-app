@@ -76,6 +76,13 @@ const Projects = () => {
           project_id: specUploadProject?.project_id
         }
       });
+      axiosInstance({
+        method: 'post',
+        url: `/spec-gpt/load_doc`,
+        body: {
+          project_id: specUploadProject?.project_id
+        }
+      });
     } catch (error) {
       setUploadLoading(false);
       toggleErrorModal(true);

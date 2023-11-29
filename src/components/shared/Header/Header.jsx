@@ -13,14 +13,19 @@ const Header = ({ ...props }) => {
     projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
 
-  const handleNavRedirect = (redirectFrom) => {
-    navigate(
-      `/${
-        redirectFrom === 'collab' ? `project-logs` : `collaboration-hub`
-      }?projectDetails=${projectId},${customerId},${logType},${
+  const handleNavRedirect = (redirectTo) => {
+    const redirectUrl = {
+      logs: `/project-logs?projectDetails=${projectId},${customerId},${logType},${
+        searchParams.get('projectName') || props?.title
+      }`,
+      collab: `/collaboration-hub?projectDetails=${projectId},${customerId},${logType},${
+        searchParams.get('projectName') || props?.title
+      }`,
+      specGpt: `/spec-gpt?projectDetails=${projectId},${customerId},${logType},${
         searchParams.get('projectName') || props?.title
       }`
-    );
+    };
+    navigate(redirectUrl[redirectTo]);
   };
 
   return (
@@ -103,7 +108,7 @@ const Header = ({ ...props }) => {
               props.navBtn !== 'logs' ? 'btn-white' : 'btn-margin-right'
             } ${props.btnSize === 'small' ? 'btn-small' : ''}`}
             onClick={() =>
-              props.navBtn !== 'logs' ? handleNavRedirect('collab') : null
+              props.navBtn !== 'logs' ? handleNavRedirect('logs') : null
             }
           >
             Submittal Log
@@ -114,32 +119,33 @@ const Header = ({ ...props }) => {
               props.navBtn !== 'collab' ? 'btn-white' : ''
             } ${props.btnSize === 'small' ? 'btn-small' : ''}`}
             onClick={() =>
-              props.navBtn !== 'collab' ? handleNavRedirect('logs') : null
+              props.navBtn !== 'collab' ? handleNavRedirect('collab') : null
             }
           >
             Collab Hub
           </button>
-          {!window.location.href.includes('https://app.thelink.ai') ? (
-            <button
-              type="button"
-              className={`btn btn-primary btn-white ${
-                props.btnSize === 'small' ? 'btn-small' : ''
-              }`}
-              style={
-                props.navBtn === 'collab'
-                  ? { marginLeft: '4px' }
-                  : { marginLeft: '0' }
-              }
-            >
-              <a
+          <button
+            type="button"
+            className={`btn btn-primary ${
+              props.navBtn !== 'specGpt' ? 'btn-white' : ''
+            } ${props.btnSize === 'small' ? 'btn-small' : ''}`}
+            style={
+              props.navBtn === 'collab'
+                ? { marginLeft: '4px' }
+                : { marginLeft: '0' }
+            }
+            onClick={() =>
+              props.navBtn !== 'specGpt' ? handleNavRedirect('specGpt') : null
+            }
+          >
+            {/* <a
                 href="https://specgpt.ai/chat"
                 target="_blank"
                 rel="noreferrer"
-              >
-                Spec GPT <span style={{ fontSize: '9px' }}>Beta</span>
-              </a>
-            </button>
-          ) : null}
+              > */}
+            Spec GPT
+            {/* </a> */}
+          </button>
         </div>
       )}
       {props.showBtn && localStorage.getItem('roleId') !== '7' ? (

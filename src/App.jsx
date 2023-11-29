@@ -18,6 +18,7 @@ import SubmittalMappings from './components/ProjectLogs/submittalMappings';
 // import PersonalProject from './components/PersonalProject/PersonalProject';
 import Projects from './components/PersonalProject/projects';
 import CollaborationHub from './components/CollaborationHub';
+import { SpecGpt } from './components/SpecGpt';
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
         <Route path="/admin-user" element={<AdminUser />} />
         <Route path="/submital-mappings" element={<SubmittalMappings />} />
         <Route path="/collaboration-hub" element={<CollaborationHub />} />
+        <Route path="/spec-gpt" element={<SpecGpt />} />
         {/* <Route path="/personal-project" element={<PersonalProject />} /> */}
 
         <Route exact path="/" element={<Navigate to="/login" />} />
