@@ -115,7 +115,7 @@ const CollaborationHub = () => {
       axiosInstance({
         method: 'post',
         url: `/spec-gpt/load_doc`,
-        body: {
+        data: {
           project_id: projectId || state.project?.project_id
         }
       });
