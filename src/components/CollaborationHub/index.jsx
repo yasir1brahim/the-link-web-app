@@ -116,7 +116,7 @@ const CollaborationHub = () => {
         method: 'post',
         url: `/spec-gpt/load_doc`,
         body: {
-          project_id: state?.project?.project_id || projectId
+          project_id: projectId || state.project?.project_id
         }
       });
       setCollabDocs(specIndexResponse.data?.indexes);
