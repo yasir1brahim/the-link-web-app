@@ -527,6 +527,8 @@ export default function CombinedLogs(props) {
         </thead>
         <tbody style={{ fontSize: '12px' }}>
           {logData.map((log, index) => {
+            let pdfIndex = props.pdfData.index
+            const showPdf = !(pdfIndex && pdfIndex !== index) && pdfIndex !== 0
             return (
               <tr
                 className={
@@ -599,7 +601,7 @@ export default function CombinedLogs(props) {
                         target="_blank" >
                         Pdf
                       </Link> */}
-                        {props.pdfData.index === index ? (
+                        {pdfIndex === index ? (
                           <button
                             type="button"
                             className="btn btn-secondary btn-sm"
@@ -616,7 +618,7 @@ export default function CombinedLogs(props) {
                             Close Pdf
                           </button>
                         ) : (
-                          newRowIndex !== index && (
+                          newRowIndex !== index && showPdf && (
                             <>
                               <PdfButton
                                 onClick={() =>
