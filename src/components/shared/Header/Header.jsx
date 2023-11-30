@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import axiosInstance from '../../../config/axios';
+import { Tooltip } from '@mui/material';
 
 // @ts-ignore
 const Header = ({ ...props }) => {
@@ -12,6 +14,37 @@ const Header = ({ ...props }) => {
   const customerId =
     projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
+
+  const [docsLoaded, setDocsLoaded] = useState(false);
+
+  const checkDocsStatus = async () => {
+    try {
+      const response = await axiosInstance({
+        method: 'get',
+        url: '/spec-gpt/docsIndexed',
+        params: {
+          project_id: projectId
+        }
+      });
+      const { docsIndexed } = response.data;
+      setDocsLoaded(docsIndexed);
+    } catch (error) {
+      console.error('Error checking docs status:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Initial check
+    checkDocsStatus();
+
+    // Set up interval to check docs status every 10 seconds (adjust as needed)
+    const intervalId = setInterval(() => {
+      checkDocsStatus();
+    }, 120000);
+
+    // Cleanup the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleNavRedirect = (redirectTo) => {
     const redirectUrl = {
@@ -124,28 +157,41 @@ const Header = ({ ...props }) => {
           >
             Collab Hub
           </button>
-          <button
-            type="button"
-            className={`btn btn-primary ${
-              props.navBtn !== 'specGpt' ? 'btn-white' : ''
-            } ${props.btnSize === 'small' ? 'btn-small' : ''}`}
-            style={
-              props.navBtn === 'collab'
-                ? { marginLeft: '4px' }
-                : { marginLeft: '0' }
+          <Tooltip
+            disableHoverListener={docsLoaded}
+            title={
+              <span style={{ fontSize: '14px' }}>
+                Documents are being loaded to SepcGPT currently. It will be
+                ready to use soon!
+              </span>
             }
-            onClick={() =>
-              props.navBtn !== 'specGpt' ? handleNavRedirect('specGpt') : null
-            }
+            placement="right-end"
+            arrow
           >
-            {/* <a
+            <button
+              type="button"
+              className={`btn btn-primary ${
+                props.navBtn !== 'specGpt' ? 'btn-white' : ''
+              } ${props.btnSize === 'small' ? 'btn-small' : ''}`}
+              style={
+                props.navBtn === 'collab'
+                  ? { marginLeft: '4px' }
+                  : { marginLeft: '0' }
+              }
+              onClick={() =>
+                props.navBtn !== 'specGpt' ? handleNavRedirect('specGpt') : null
+              }
+              disabled={!docsLoaded}
+            >
+              {/* <a
                 href="https://specgpt.ai/chat"
                 target="_blank"
                 rel="noreferrer"
               > */}
-            Spec GPT
-            {/* </a> */}
-          </button>
+              Spec GPT
+              {/* </a> */}
+            </button>
+          </Tooltip>
         </div>
       )}
       {props.showBtn && localStorage.getItem('roleId') !== '7' ? (
