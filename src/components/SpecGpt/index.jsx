@@ -15,7 +15,7 @@ export const SpecGpt = () => {
         <div className="project-logs-wrapper log-table-width">
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
-          centerText={'Commercial'}
+          // centerText={'Commercial'}
           breadcrumb={'Project Details'}
           breadcrumb2={'View Projects'}
           breadcrumb3={'Spec GPT'}
