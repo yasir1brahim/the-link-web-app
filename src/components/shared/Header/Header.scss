@@ -127,3 +127,9 @@
   font-size: 12px;
   margin: 5px
 }
+
+.spec-btn-disabled {
+  &.disabled {
+   background-color: #999999;
+}
+}

@@ -38,6 +38,16 @@ const innerMessageContainerStyle = {
     gap: '20px',
 }
 
+const sourceContainerStyle = {
+    paddingBottom: '1.5rem',
+    paddingTop: '1.5rem',
+    fontSize: '1rem',
+    lineHeight: '1.5rem',
+    marginLeft: '23%',
+    marginRight: '23%',
+    gap: '20px',
+}
+
 const logoContainerStyle = {
     
     maxWidth: '30px',
@@ -93,7 +103,7 @@ const SourcesComponent = ({sources, token}) => {
     }
 
     const shorterFileName = (filename) => {
-        const MAX_LENGTH = 10;
+        const MAX_LENGTH = 50;
         // keep pdf extension in filename
         const extension = filename.split('.').pop();
         const filenameWithoutExtension = filename.substring(0, filename.length - extension.length - 1);
@@ -106,16 +116,17 @@ const SourcesComponent = ({sources, token}) => {
 
     const renderSources = () => {
         return (
-            <div className="d-flex flex-row" style={{maxWidth: '75%'}}>
+            <div className="flex-row" style={{maxWidth: '100%', fontSize: '12px'}}>
                 {sources.map((source, index) => (               
                     <div key={index} className="col-8">
                         <PdfButton/>{'   '}
                         <a href={source?.link}
-                            onClick={() => {
-                                fetchPdf(source.docid);
-                            }}
+                        target="_blank"
+                            // onClick={() => {
+                            //     fetchPdf(source.docid);
+                            // }}
                         >
-                            {' '} {shorterFileName(source.filename)}
+                            {' '} {(source.filename)}
                         </a>
                     </div>
                 ))}
@@ -123,7 +134,7 @@ const SourcesComponent = ({sources, token}) => {
         )
     }
     return (
-        <div style={innerMessageContainerStyle}>
+        <div style={sourceContainerStyle}>
             {sources.length > 0 && <div><strong>Source:</strong></div>}
             {sources.length > 0 && renderSources()}
         </div>
