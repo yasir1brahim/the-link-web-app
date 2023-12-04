@@ -78,7 +78,7 @@ const errorMessageStyle = {
 
 
 const SourcesComponent = ({sources, token}) => {
-    const {checkIfLoggedOut} = useLogout();
+    // const {checkIfLoggedOut} = useLogout();
 
     // const fetchPdf = async (fileId) => {
 
