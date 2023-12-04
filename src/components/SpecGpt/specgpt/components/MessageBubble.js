@@ -80,38 +80,38 @@ const errorMessageStyle = {
 const SourcesComponent = ({sources, token}) => {
     const {checkIfLoggedOut} = useLogout();
 
-    const fetchPdf = async (fileId) => {
+    // const fetchPdf = async (fileId) => {
 
-        try {
-            const response = await fetch(`${BASE_URL}/api/signed-url?id=${fileId}`, {
-                method: 'GET',
-                headers: {
-                    "Content-Type": "application/json",
-                    'Authorization': 'Bearer ' + token,
-                },
-            });
-            checkIfLoggedOut(response);
-            const data = await response.json();
-            if (data.success) {
-                console.log('signed url', data.url);
-                //setSignedUrl(data.url);
-                window.open(data.url, '_blank');
-            }
-        } catch (error) {
-            console.log('error: ', error);
-        }            
-    }
+    //     try {
+    //         const response = await fetch(`${BASE_URL}/api/signed-url?id=${fileId}`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //                 'Authorization': 'Bearer ' + token,
+    //             },
+    //         });
+    //         checkIfLoggedOut(response);
+    //         const data = await response.json();
+    //         if (data.success) {
+    //             console.log('signed url', data.url);
+    //             //setSignedUrl(data.url);
+    //             window.open(data.url, '_blank');
+    //         }
+    //     } catch (error) {
+    //         console.log('error: ', error);
+    //     }            
+    // }
 
-    const shorterFileName = (filename) => {
-        const MAX_LENGTH = 50;
-        // keep pdf extension in filename
-        const extension = filename.split('.').pop();
-        const filenameWithoutExtension = filename.substring(0, filename.length - extension.length - 1);
-        if (filenameWithoutExtension.length > MAX_LENGTH) {
-            return filenameWithoutExtension.substring(0, MAX_LENGTH) + '...' + extension;
-        }
-        return filename;
-    }
+    // const shorterFileName = (filename) => {
+    //     const MAX_LENGTH = 50;
+    //     // keep pdf extension in filename
+    //     const extension = filename.split('.').pop();
+    //     const filenameWithoutExtension = filename.substring(0, filename.length - extension.length - 1);
+    //     if (filenameWithoutExtension.length > MAX_LENGTH) {
+    //         return filenameWithoutExtension.substring(0, MAX_LENGTH) + '...' + extension;
+    //     }
+    //     return filename;
+    // }
 
 
     const renderSources = () => {
@@ -121,7 +121,6 @@ const SourcesComponent = ({sources, token}) => {
                     <div key={index} className="col-8">
                         <PdfButton/>{'   '}
                         <a href={source?.link}
-                        target="_blank"
                             // onClick={() => {
                             //     fetchPdf(source.docid);
                             // }}
