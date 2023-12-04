@@ -16,7 +16,7 @@ const Header = ({ ...props }) => {
     projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
 
-  const [docsLoaded, setDocsLoaded] = useState(false);
+  const [docsLoaded, setDocsLoaded] = useState(true);
 
   const checkDocsStatus = async () => {
     try {
@@ -162,8 +162,7 @@ const Header = ({ ...props }) => {
             disableHoverListener={docsLoaded}
             title={
               <span style={{ fontSize: '14px' }}>
-                Documents are being loaded to SepcGPT currently. It will be
-                ready to use soon!
+                Documents are being processed, SpecGPT will be available shortly
               </span>
             }
             placement="right-end"
@@ -171,7 +170,7 @@ const Header = ({ ...props }) => {
           >
             <button
               type="button"
-              className={`btn btn-primary ${
+              className={`btn btn-primary spec-btn-disabled ${
                 props.navBtn !== 'specGpt' ? 'btn-white' : ''
               } ${props.btnSize === 'small' ? 'btn-small' : ''}`}
               style={
@@ -211,7 +210,7 @@ const Header = ({ ...props }) => {
           ) : (
             ''
           )}
-          {!props?.qaDashboard && (
+          {props.navBtn !== 'specGpt' && (
             <button
               type="button"
               className={`btn btn-primary ${
