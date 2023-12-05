@@ -183,7 +183,7 @@ const CustomerProfile = (props) => {
     fetchData().catch((error) => {
       console.log(error);
     });
-  }, [state, pageRefresh]);
+  }, [state, pageRefresh, customerID]);
 
   // const handleViewEmployee = (employee) => {
   //   navigate('/project-list', { state: employee });

@@ -166,7 +166,7 @@ const Projects = () => {
     fetchData().catch((error) => {
       handleError(error);
     });
-  }, [state, pageRefresh, isArchived, roleId, setProjectData]);
+  }, [state, pageRefresh, isArchived, roleId, setProjectData, customerId]);
 
   return (
     <>
