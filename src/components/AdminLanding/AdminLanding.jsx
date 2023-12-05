@@ -83,7 +83,7 @@ const Adminlanding = (props) => {
   };
 
   const handleViewProjects = (customer) => {
-    navigate('/project-list', { state: customer });
+    navigate(`/project-list?id=${customer?.customer_id}`, { state: customer });
   };
 
   return (

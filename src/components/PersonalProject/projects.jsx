@@ -4,7 +4,7 @@ import CustomerProjects from '../CustomerProjects/CustomerProjects';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
 import PersonalProject from './PersonalProject';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
 import axiosInstance from '../../config/axios';
 import handleError from '../../config/errorHandler';
@@ -31,6 +31,8 @@ const Projects = () => {
     setCreateProjectModal(!createProjectModal);
   const toggleUploadSpecsModal = () => setUploadSpecsModal(!uploadSpecsModal);
   const [toggleUploadSpecsButton, setToggleUploadSpecsButton] = useState(true);
+  const [searchParams] = useSearchParams();
+  const customerId = searchParams.get('id');
 
   useEffect(() => {
     if (!uploadSpecsModal) {
@@ -94,7 +96,7 @@ const Projects = () => {
   // function used in the project tiles to navigate to project details
   const custId =
     localStorage.getItem('roleId') === '0'
-      ? state.customer_id
+      ? customerId
       : localStorage.getItem('userId');
   const handleLaunch = (project, qaDashboard) => {
     // project?.project_type === "ufgs"
@@ -107,7 +109,7 @@ const Projects = () => {
           projectName: project?.project_name,
           customerId:
             localStorage.getItem('roleId') === '0'
-              ? state.customer_id
+              ? customerId
               : localStorage.getItem('userId'),
           logType: 'Classified',
           qaDashboard
@@ -134,7 +136,7 @@ const Projects = () => {
           projectName: project?.project_name,
           customerId:
             localStorage.getItem('roleId') === '0'
-              ? state.customer_id
+              ? customerId
               : localStorage.getItem('userId'),
           logType: 'Classified'
         }
@@ -146,8 +148,8 @@ const Projects = () => {
     const url =
       roleId === '6' || roleId === '7'
         ? `/projects/${localStorage.getItem('userId')}`
-        : state?.customer_id
-        ? `/projects/${state.customer_id}`
+        : customerId
+        ? `/projects/${customerId}`
         : `/projects/${localStorage.getItem('userId')}`;
     const fetchData = async () => {
       const response = await axiosInstance({
@@ -215,6 +217,7 @@ const Projects = () => {
               handleLaunch={handleLaunch}
               isArchived={isArchived}
               toggleArchive={toggleArchive}
+              customerId={customerId}
             />
           )}
         </div>

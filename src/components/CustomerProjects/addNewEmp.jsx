@@ -33,7 +33,7 @@ export const AddNewEmp = (props) => {
             projects: [],
             // contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
             customer_id:
-              props.customer?.customer_id || localStorage.getItem('userId')
+              props.customerID || localStorage.getItem('userId')
           }
         });
         if (response.data) {

@@ -561,9 +561,10 @@ const ProjectLogs = () => {
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
           centerText={`${projectType === 'ufgs' ? 'UFGS' : 'Commercial'}`}
-          breadcrumb={'Project Details'}
-          breadcrumb2={'View Projects'}
-          breadcrumb3={'Requrement Logs'}
+          // breadcrumb={'Project Details'}
+          breadcrumb={'View Projects'}
+          breadcrumbUrl={`/project-list?id=${customerId}`}
+          breadcrumb2={'Requrement Logs'}
           showBtn={'Upload Additional'}
           toggleModal={toggleModal}
           btnSize={'small'}
