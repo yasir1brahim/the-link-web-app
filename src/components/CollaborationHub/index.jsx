@@ -22,6 +22,8 @@ const CollaborationHub = () => {
     : null;
   // const projectType = state?.project.project_type;
   // const projectName = searchParams.get('projectName');
+  const customerId =
+    projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
   const projectName = projectDetails?.length >= 4 ? projectDetails[3] : null;
   const [modal, setModal] = useState(false);
   const toggleModal = () => setModal(!modal);
@@ -141,7 +143,8 @@ const CollaborationHub = () => {
           <Header
             // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
             // centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
-            breadcrumb={projectName || 'Project'}
+            breadcrumb={'View Projects'}
+            breadcrumbUrl={`/project-list?id=${customerId}`}
             breadcrumb2={'Collab Hub'}
             btnSize={'small'}
             title={state?.projectName || projectName || ''}

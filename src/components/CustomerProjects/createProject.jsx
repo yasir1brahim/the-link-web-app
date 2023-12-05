@@ -19,7 +19,8 @@ const CreateProject = ({
   pageRefresh,
   setPageRefresh,
   projects,
-  isPersonalProject = false
+  isPersonalProject = false,
+  customerID
 }) => {
   // const [email, setEmail] = useState({ value: '', errors: '' });
   // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
@@ -61,7 +62,7 @@ const CreateProject = ({
         const response = await axiosInstance({
           method: 'get',
           url: `/employeeList/${
-            customer?.customer_id || localStorage.getItem('userId')
+            customer?.customer_id || customerID || localStorage.getItem('userId')
           }`
         });
         setEmployeeList(response.data.message);
@@ -70,7 +71,7 @@ const CreateProject = ({
           method: 'get',
           url: `/getLogo/${
             localStorage.getItem('roleId') === '0'
-              ? customer?.customer_id
+              ? customer?.customer_id || customerID
               : Number(localStorage.getItem('userId'))
           }`
         });
@@ -81,7 +82,7 @@ const CreateProject = ({
 
       fetchData().catch(console.error);
     }
-  }, [customer, modal, refetchEmp]);
+  }, [customer, modal, refetchEmp, customerID]);
 
   const validate = () => {
     let error = false;
@@ -122,7 +123,7 @@ const CreateProject = ({
             start_date: startDate ? moment(startDate).format('YYYY-MM-DD') : '',
             end_date: endDate ? moment(endDate).format('YYYY-MM-DD') : '',
             customer_id:
-              customer?.customer_id || localStorage.getItem('userId'),
+              customer?.customer_id || customerID || localStorage.getItem('userId'),
             status: 'Open',
             employee_list: selectedEmployeeList.map(
               (employee) => employee.value
@@ -392,7 +393,7 @@ const CreateProject = ({
                   {empForm && (
                     <>
                       <AddNewEmp
-                        customer={customer}
+                        customerID={customerID || customer?.customer_id}
                         openEmpForm={openEmpForm}
                         setRefetchEmp={setRefetchEmp}
                       />

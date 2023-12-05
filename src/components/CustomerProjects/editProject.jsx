@@ -18,7 +18,8 @@ const EditProject = ({
   project,
   pageRefresh,
   setPageRefresh,
-  isAdminUser
+  isAdminUser,
+  customerID
 }) => {
   // const [email, setEmail] = useState({ value: '', errors: '' });
   // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
@@ -57,6 +58,7 @@ const EditProject = ({
           url: `/employeeList/${
             customer?.customer_id ||
             project?.customer_id ||
+            customerID ||
             localStorage.getItem('userId')
           }`
         });
@@ -68,7 +70,7 @@ const EditProject = ({
 
       fetchData().catch(console.error);
     }
-  }, [customer, modal, project?.customer_id]);
+  }, [customer, modal, project?.customer_id, customerID]);
 
   // const validate = () => {
   //   let error = false;
@@ -112,6 +114,7 @@ const EditProject = ({
                 ).format('YYYY-MM-DD')
               : '',
             customer_id:
+              customerID ||
               customer?.customer_id ||
               customer?.id ||
               project?.customer_id ||

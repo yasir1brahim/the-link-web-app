@@ -31,7 +31,8 @@ const CustomerProjects = ({
   setProjectData,
   handleLaunch,
   isArchived,
-  toggleArchive
+  toggleArchive,
+  customerId
 }) => {
   const [employeeModal, setEmployeeModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
@@ -48,13 +49,14 @@ const CustomerProjects = ({
   const roleId = localStorage.getItem('roleId');
 
   useEffect(() => {
+    const custId = customerId || state?.customer_id
     if (roleId !== '6' && roleId !== '7') {
       const fetchData = async () => {
         setLoading(true);
         const response = await axiosInstance({
           method: 'get',
-          url: state?.customer_id
-            ? `/customer/${state.customer_id}`
+          url: custId
+            ? `/customer/${custId}`
             : `/customer/${localStorage.getItem('userId')}`
         });
         setLoading(false);
@@ -66,7 +68,7 @@ const CustomerProjects = ({
         handleError(error);
       });
     }
-  }, [state, pageRefresh, setCustomerData, roleId]);
+  }, [state, pageRefresh, setCustomerData, roleId, customerId]);
 
   const handleEdit = (project) => {
     setProject(project);
@@ -95,7 +97,7 @@ const CustomerProjects = ({
               : '',
             customer_id:
               localStorage.getItem('roleId') === '0'
-                ? state.customer_id
+                ? customerId || state.customer_id
                 : localStorage.getItem('userId'),
             status: isArchived ? 'Active' : 'Archived',
             project_id: project.project_id
@@ -310,6 +312,7 @@ const CustomerProjects = ({
             modal={employeeModal}
             toggleModal={toggleEmployeeModal}
             customer={state || customerData}
+            customerID={customerId}
             pageRefresh={pageRefresh}
             setPageRefresh={setPageRefresh}
           />
@@ -319,6 +322,7 @@ const CustomerProjects = ({
             customer={state || customerData}
             pageRefresh={pageRefresh}
             setPageRefresh={setPageRefresh}
+            customerID={customerId}
           />
           <EditProject
             modal={editModal}
@@ -327,6 +331,7 @@ const CustomerProjects = ({
             project={project}
             pageRefresh={pageRefresh}
             setPageRefresh={setPageRefresh}
+            customerID={customerId}
           />
         </div>
       </div>
