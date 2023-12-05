@@ -172,7 +172,7 @@ const CustomerProfile = (props) => {
         method: 'get',
         url: `/getLogo/${
           localStorage.getItem('roleId') === '0'
-            ? state.customer_id
+            ? customerID || state.customer_id 
             : Number(localStorage.getItem('userId'))
         }`
       });

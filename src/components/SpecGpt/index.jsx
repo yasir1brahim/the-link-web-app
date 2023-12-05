@@ -9,6 +9,8 @@ export const SpecGpt = () => {
     const [searchParams] = useSearchParams();
     const projectDetails = searchParams.get('projectDetails')?.split(',');
     const projectName = projectDetails?.length >= 4 ? projectDetails[3] : null;
+    const customerId =
+    projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
   return (
     <div className="page-wrap">
         <NavbarTop/>
@@ -16,9 +18,9 @@ export const SpecGpt = () => {
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
           // centerText={'Commercial'}
-          breadcrumb={'Project Details'}
-          breadcrumb2={'View Projects'}
-          breadcrumb3={'Spec GPT'}
+          breadcrumb={'View Projects'}
+          breadcrumbUrl={`/project-list?id=${customerId}`}
+          breadcrumb2={'Spec GPT'}
           showBtn={'Upload Additional'}
         //   toggleModal={toggleModal}
           btnSize={'small'}

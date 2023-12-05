@@ -87,9 +87,7 @@ const Header = ({ ...props }) => {
               <a
                 href={() => false}
                 onClick={() =>
-                  props.breadcrumb3 && localStorage.getItem('roleId') === '0'
-                    ? navigate(-2)
-                    : navigate(-1)
+                 navigate(props.breadcrumbUrl) 
                 }
                 className="breadcrumb-text"
                 style={{ cursor: 'pointer' }}
