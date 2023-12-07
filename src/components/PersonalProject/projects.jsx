@@ -200,6 +200,7 @@ const Projects = () => {
               pageRefresh={pageRefresh}
               setPageRefresh={setPageRefresh}
               setSpecUploadProject={setSpecUploadProject}
+              customerId={customerId}
             />
           ) : (
             <CustomerProjects

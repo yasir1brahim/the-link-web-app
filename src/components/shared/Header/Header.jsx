@@ -19,18 +19,24 @@ const Header = ({ ...props }) => {
   const [docsLoaded, setDocsLoaded] = useState(true);
 
   const checkDocsStatus = async () => {
-    try {
-      const response = await axiosInstance({
-        method: 'get',
-        url: '/spec-gpt/docsIndexed',
-        params: {
-          project_id: projectId
-        }
-      });
-      const { docsIndexed } = response.data;
-      setDocsLoaded(docsIndexed);
-    } catch (error) {
-      console.error('Error checking docs status:', error);
+    if (
+      props.breadcrumb2 === 'Requrement Logs' ||
+      props.breadcrumb2 === 'Collab Hub' ||
+      props.breadcrumb2 === 'Spec GPT'
+    ) {
+      try {
+        const response = await axiosInstance({
+          method: 'get',
+          url: '/spec-gpt/docsIndexed',
+          params: {
+            project_id: projectId
+          }
+        });
+        const { docsIndexed } = response.data;
+        setDocsLoaded(docsIndexed);
+      } catch (error) {
+        console.error('Error checking docs status:', error);
+      }
     }
   };
 
