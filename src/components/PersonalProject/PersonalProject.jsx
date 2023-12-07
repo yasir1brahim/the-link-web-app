@@ -17,7 +17,8 @@ const PersonalProject = ({
   setPageRefresh,
   setSpecUploadProject,
   toggleUploadSpecsButton,
-  handleCollaborationLaunch
+  handleCollaborationLaunch,
+  customerId
 }) => {
   console.log(projectData);
 
@@ -88,6 +89,7 @@ const PersonalProject = ({
         pageRefresh={pageRefresh}
         setPageRefresh={setPageRefresh}
         isPersonalProject={true}
+        customerID={customerId}
       />
     </div>
   );
