@@ -1,4 +1,4 @@
-import moment from 'moment';
+// import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../config/axios';
 // import DateSelector from '../shared/DateSelector/DateSelector';
@@ -25,11 +25,11 @@ export default function CombinedLogs(props) {
     setNewRowIndex
   } = props;
   const [editRow, setEditRow] = useState(1);
-  const [dateIssued, setDateIssued] = useState('');
-  const [dateApproved, setDateApproved] = useState('');
-  const [statusValue, setStatus] = useState({});
-  const [groupingValue, setGroupingValue] = useState({});
-  const [searchValue, setSearchValue] = useState('');
+  // const [dateIssued, setDateIssued] = useState('');
+  // const [dateApproved, setDateApproved] = useState('');
+  // const [statusValue, setStatus] = useState({});
+  // const [groupingValue, setGroupingValue] = useState({});
+  // const [searchValue, setSearchValue] = useState('');
   const [sorting, setSorting] = useState({ column: '', order: 'desc' });
   const [filterModal, setFilterModal] = useState(false);
   const [filterColumn, setFilterColumn] = useState('');
@@ -59,8 +59,8 @@ export default function CombinedLogs(props) {
   const handleEditToggle = (log, index) => {
     setRowData(log);
     setEditRow(index);
-    setDateIssued('');
-    setDateApproved('');
+    // setDateIssued('');
+    // setDateApproved('');
   };
 
   const handleUpdateLog = async () => {
@@ -580,9 +580,9 @@ export default function CombinedLogs(props) {
                                 status: '',
                                 type: '',
                               });
-                              setDateApproved('');
-                              setDateIssued('');
-                              setStatus({});
+                              // setDateApproved('');
+                              // setDateIssued('');
+                              // setStatus({});
                               setNewRowIndex(null)
                               newRowIndex === index && props.setLogData(deleteElement(props.logData, index))
                             }}
