@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../config/axios';
 import Header from '../shared/Header/Header'
-import Loader from '../shared/Loader/Loader';
 import NavbarTop from '../shared/NavbarTop/NavbarTop'
 // import GettingStartedPage from './specgpt/pages/GettingStartedPage';
 import ChatPage from './specgpt/pages/ChatPage';
