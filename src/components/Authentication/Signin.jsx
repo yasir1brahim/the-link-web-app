@@ -37,6 +37,7 @@ const Signin = (props) => {
         localStorage.setItem('roleId', response.data.role_id);
         localStorage.setItem('userId', response.data.user_id);
         localStorage.setItem('fullName', response.data.full_name);
+        localStorage.setItem('isSpecGptUser', response.data.is_gpt_user);
         return response.data.role_id === 0
             ? history({ pathname: '/admin-landing' })
             : response.data.role_id === 2 ||
