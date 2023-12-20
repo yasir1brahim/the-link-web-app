@@ -100,7 +100,7 @@ const voiceCommandText = {
     marginLeft: '9%'
 };
 
-const ChatPage = ({ token }) => {
+const ChatPage = ({ token, docsLoaded }) => {
   const navigate = useNavigate();
   const { checkIfLoggedOut } = useLogout();
 
@@ -589,6 +589,7 @@ const ChatPage = ({ token }) => {
     );
   };
 
+  if (!docsLoaded) return <Loader showComponentLoader={true} specGptLoader={true}/>
   return (
     <>
       <div style={pageContainerStyle2}>

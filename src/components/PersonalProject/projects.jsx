@@ -33,7 +33,7 @@ const Projects = () => {
   const [toggleUploadSpecsButton, setToggleUploadSpecsButton] = useState(true);
   const [searchParams] = useSearchParams();
   const customerId = searchParams.get('id');
-
+  
   useEffect(() => {
     if (!uploadSpecsModal) {
       setPdfFile({});
@@ -98,10 +98,14 @@ const Projects = () => {
     localStorage.getItem('roleId') === '0'
       ? customerId
       : localStorage.getItem('userId');
+
   const handleLaunch = (project, qaDashboard) => {
-    // project?.project_type === "ufgs"
-    // ?
+    localStorage.getItem('isSpecGptUser') === 'true'
+    ?
     navigate(
+      `/spec-gpt?projectDetails=${project?.project_id},${custId},Classified,${project?.project_name}`
+    )
+    : navigate(
       `/project-logs?projectDetails=${project?.project_id},${custId},Classified,${project?.project_name}`,
       {
         state: {
@@ -115,16 +119,7 @@ const Projects = () => {
           qaDashboard
         }
       }
-    );
-    // : navigate("/project-details", {
-    //     state: {
-    //       project,
-    //       customerId:
-    //         localStorage.getItem("roleId") === "0"
-    //           ? state.customer_id
-    //           : localStorage.getItem("userId"),
-    //     },
-    //   });
+    )
   };
 
   const handleCollaborationLaunch = (project) => {
@@ -236,7 +231,11 @@ const Projects = () => {
           toggleSuccessModal={toggleSuccessModal}
           fileData={fileData}
           project={specUploadProject}
-          logScreenUrl={`/project-logs?projectDetails=${specUploadProject?.project_id},${custId},Classified,${specUploadProject?.project_name}`}
+          logScreenUrl={
+            localStorage.getItem('isSpecGptUser') === 'true'
+              ? `/spec-gpt?projectDetails=${specUploadProject?.project_id},${custId},Classified,${specUploadProject?.project_name}`
+              : `/project-logs?projectDetails=${specUploadProject?.project_id},${custId},Classified,${specUploadProject?.project_name}`
+          }
         />
       </div>
     </>

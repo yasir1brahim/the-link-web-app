@@ -172,6 +172,23 @@ const AdminUser = (props) => {
     }
   };
 
+  const handleSpecGptUser = async (id, isGptUser) => {
+    try {
+      await axiosInstance({
+        method: 'put',
+        url: `/admin/set-gpt-user`,
+        data: {
+          user_id: id,
+          set_gpt_user: !isGptUser
+        }
+      });
+      setPageRefresh(!pageRefresh);
+    } catch (error) {
+      setLoading(false);
+      handleError(error);
+    }
+  };
+
   const handleUpdateList = async () => {
     try {
       console.log('hero', externalUserData, {
@@ -390,6 +407,7 @@ const AdminUser = (props) => {
                               Associated Projects <i className="sort-i"></i>
                             </span>
                           </th>
+                          <th>SpecGPT user</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -422,6 +440,7 @@ const AdminUser = (props) => {
                                   })}
                                 </div>
                               </td>
+                              <td>{employee.is_gpt_user ? 'Yes' : 'No'}</td>
                               <td>
                                 <div className="action-wrapper">
                                   <button
@@ -465,6 +484,17 @@ const AdminUser = (props) => {
                                     {employee.employee_status === 'active'
                                       ? 'Deactivate'
                                       : 'Activate'}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() =>
+                                      handleSpecGptUser(employee.id, employee.is_gpt_user)
+                                    }
+                                  >
+                                    {!employee.is_gpt_user
+                                      ? 'Make SpectGPT user'
+                                      : 'Remove SpecGPT user'}
                                   </button>
                                 </div>
                               </td>
