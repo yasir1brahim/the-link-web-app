@@ -21,9 +21,9 @@ const Header = ({ ...props }) => {
 
   const checkDocsStatus = async () => {
     if (
-      props.breadcrumb2 === 'Requrement Logs' ||
-      props.breadcrumb2 === 'Collab Hub' ||
-      props.breadcrumb2 === 'Spec GPT' &&
+      (props.breadcrumb2 === 'Requrement Logs' ||
+        props.breadcrumb2 === 'Collab Hub' ||
+        props.breadcrumb2 === 'Spec GPT') &&
       !specGptUser
     ) {
       try {
