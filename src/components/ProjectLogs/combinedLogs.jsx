@@ -63,7 +63,7 @@ export default function CombinedLogs(props) {
     // setDateApproved('');
   };
 
-  const handleUpdateLog = async () => {
+  const handleUpdateLog = async (isFullEdit) => {
     try {
       setEditRow('');
       if (newRowIndex) {
@@ -90,14 +90,14 @@ export default function CombinedLogs(props) {
             //   : searchValue
             //     ? searchValue
             //     : rowData.package,
-            submittal_description: rowData.para_context,
+            submittal_description: isFullEdit ? rowData.para_context : undefined,
             // classification: rowData?.classification,
             // phase: null,
             // sd_no: rowData?.sd_no,
             // div_no: rowData?.div_no,
             // para_no: rowData.para_no,
             project_id: rowData.project_id,
-            spec_section: rowData.spec_section,
+            spec_section: isFullEdit ? rowData.spec_section : undefined,
             // status: statusValue?.length ? statusValue[0].value : '',
             submittal_heading: rowData.type,
             // date_issued: !dateIssued
@@ -561,7 +561,7 @@ export default function CombinedLogs(props) {
                       <>
                         {editRow === index ? (
                         <>
-                          <SaveButton onClick={handleUpdateLog} style={{ marginRight: '5px' }} />
+                          <SaveButton onClick={() => handleUpdateLog(JSON.parse(log.full_edit))} style={{ marginRight: '5px' }} />
                           <CancelButton
                             style={{ marginRight: '5px' }}
                             onClick={() => {
@@ -669,7 +669,7 @@ export default function CombinedLogs(props) {
                 </td>
                 <td className="reduce-height">
                   {editRow === index &&
-                  (newRowIndex === index || log.user_id !== 1) ? (
+                  (newRowIndex === index || log.user_id !== 1) && JSON.parse(log.full_edit) ? (
                     <input
                       placeholder="Enter"
                       className="form-control"
@@ -796,7 +796,7 @@ export default function CombinedLogs(props) {
                     )}
                   </td> */}
                     <td className="reduce-height">
-                      {editRow === index ? (
+                      {editRow === index && JSON.parse(log.full_edit) ? (
                         <input
                           placeholder="Enter"
                           className="form-control"
