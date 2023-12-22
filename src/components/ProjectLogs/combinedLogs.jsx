@@ -4,11 +4,11 @@ import axiosInstance from '../../config/axios';
 // import DateSelector from '../shared/DateSelector/DateSelector';
 // import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 import { FilterTable } from './filterTable';
-// import { ReactComponent as EditButton } from '../../assets/images/edit-button.svg';
-// import { ReactComponent as AddButton } from '../../assets/images/circle-add.svg';
+import { ReactComponent as EditButton } from '../../assets/images/edit-button.svg';
+import { ReactComponent as AddButton } from '../../assets/images/circle-add.svg';
 import { ReactComponent as PdfButton } from '../../assets/images/file-pdf.svg';
-// import { ReactComponent as SaveButton } from '../../assets/images/label-approve.svg';
-// import { ReactComponent as CancelButton } from '../../assets/images/label-reject.svg';
+import { ReactComponent as SaveButton } from '../../assets/images/label-approve.svg';
+import { ReactComponent as CancelButton } from '../../assets/images/label-reject.svg';
 import { ReactComponent as ExpandButton } from '../../assets/images/down-arrow.svg';
 import { ReactComponent as CollapseButton } from '../../assets/images/up-arrow.svg';
 import { Tooltip } from 'reactstrap';
@@ -21,9 +21,10 @@ export default function CombinedLogs(props) {
     filterValues,
     setFilterValues,
     setTotalCount,
-    errorMessage
+    errorMessage,
+    setNewRowIndex
   } = props;
-  const [editRow, setEditRow] = useState('');
+  const [editRow, setEditRow] = useState(1);
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
   // const [statusValue, setStatus] = useState({});
@@ -33,14 +34,14 @@ export default function CombinedLogs(props) {
   const [filterModal, setFilterModal] = useState(false);
   const [filterColumn, setFilterColumn] = useState('');
 
-  // const [addRowTooltip, setaddRowTooltip] = useState(null)
-  // const [editRowTooltip, setEditRowTooltip] = useState(null)
+  const [addRowTooltip, setaddRowTooltip] = useState(null)
+  const [editRowTooltip, setEditRowTooltip] = useState(null)
   const [pdfTooltip, setPdfTooltip] = useState(null);
   // const navigate = useNavigate();
 
   const [rowData, setRowData] = useState({
     comments: '',
-    id: 1,
+    // id: 1,
     item_desc: '',
     package: '',
     para_context: '',
@@ -55,83 +56,83 @@ export default function CombinedLogs(props) {
   const [showMore, setModal] = useState(null);
   // const toggleShowMore = () => setModal(!showMore);
 
-  // const handleEditToggle = (log, index) => {
-  //   setRowData(log);
-  //   setEditRow(index);
-  //   setDateIssued('');
-  //   setDateApproved('');
-  // };
+  const handleEditToggle = (log, index) => {
+    setRowData(log);
+    setEditRow(index);
+    // setDateIssued('');
+    // setDateApproved('');
+  };
 
-  // const handleUpdateLog = async () => {
-  //   try {
-  //     setEditRow('');
-  //     if (newRowIndex) {
-  //       await axiosInstance({
-  //         method: 'post',
-  //         url: '/addRecord',
-  //         data: {
-  //           ...rowData,
-  //           customer_id: props.customerId,
-  //           user_id: localStorage.getItem('userId')
-  //         }
-  //       });
-  //     } else {
-  //       await axiosInstance({
-  //         method: 'put',
-  //         url: '/update_logs',
-  //         data: {
-  //           customer_id: props.customerId,
-  //           comments: rowData.comments,
-  //           id: rowData.id,
-  //           item_desc: rowData.item_desc,
-  //           package: groupingValue?.length
-  //             ? groupingValue[0].label
-  //             : searchValue
-  //               ? searchValue
-  //               : rowData.package,
-  //           para_context: rowData.para_context,
-  //           classification: rowData?.classification,
-  //           phase: null,
-  //           sd_no: rowData?.sd_no,
-  //           div_no: rowData?.div_no,
-  //           para_no: rowData.para_no,
-  //           project_id: rowData.project_id,
-  //           spec_section: rowData.spec_section,
-  //           status: statusValue?.length ? statusValue[0].value : '',
-  //           type: rowData.type,
-  //           date_issued: !dateIssued
-  //             ? rowData?.date_issued
-  //               ? moment(
-  //                 new Date((rowData?.date_issued).replaceAll('-', '/'))
-  //               ).format('YYYY-MM-DD')
-  //               : null
-  //             : moment(dateIssued).format('YYYY-MM-DD'),
-  //           date_approved: !dateApproved
-  //             ? rowData?.date_approved
-  //               ? moment(
-  //                 new Date((rowData?.date_approved).replaceAll('-', '/'))
-  //               ).format('YYYY-MM-DD')
-  //               : null
-  //             : moment(dateApproved).format('YYYY-MM-DD'),
-  //         },
-  //       });
+  const handleUpdateLog = async (isFullEdit) => {
+    try {
+      setEditRow('');
+      if (newRowIndex) {
+        await axiosInstance({
+          method: 'post',
+          url: '/addRecord',
+          data: {
+            ...rowData,
+            customer_id: props.customerId,
+            user_id: localStorage.getItem('userId')
+          }
+        });
+      } else {
+        await axiosInstance({
+          method: 'put',
+          url: '/v2/update_logs',
+          data: {
+            // customer_id: props.customerId,
+            // comments: rowData.comments,
+            record: rowData.id,
+            submittal_type: rowData.item_desc,
+            // package: groupingValue?.length
+            //   ? groupingValue[0].label
+            //   : searchValue
+            //     ? searchValue
+            //     : rowData.package,
+            submittal_description: isFullEdit ? rowData.para_context : undefined,
+            // classification: rowData?.classification,
+            // phase: null,
+            // sd_no: rowData?.sd_no,
+            // div_no: rowData?.div_no,
+            // para_no: rowData.para_no,
+            project_id: rowData.project_id,
+            spec_section: isFullEdit ? rowData.spec_section : undefined,
+            // status: statusValue?.length ? statusValue[0].value : '',
+            submittal_heading: rowData.type,
+            // date_issued: !dateIssued
+            //   ? rowData?.date_issued
+            //     ? moment(
+            //       new Date((rowData?.date_issued).replaceAll('-', '/'))
+            //     ).format('YYYY-MM-DD')
+            //     : null
+            //   : moment(dateIssued).format('YYYY-MM-DD'),
+            // date_approved: !dateApproved
+            //   ? rowData?.date_approved
+            //     ? moment(
+            //       new Date((rowData?.date_approved).replaceAll('-', '/'))
+            //     ).format('YYYY-MM-DD')
+            //     : null
+            //   : moment(dateApproved).format('YYYY-MM-DD'),
+          },
+        });
 
-  //     }
-  //     setNewRowIndex(null)
-  //     props.setPageRefresh(!props.pageRefresh);
-  //   } catch (error) {
-  //     console.log(error.message);
-  //     toast.error(error?.response?.data?.message || error?.message, {
-  //       position: 'bottom-center',
-  //       autoClose: 5000,
-  //       hideProgressBar: true,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //     });
-  //   }
-  // };
+      }
+      setNewRowIndex(null)
+      props.setPageRefresh(!props.pageRefresh);
+    } catch (error) {
+      console.log(error.message);
+      // toast.error(error?.response?.data?.message || error?.message, {
+      //   position: 'bottom-center',
+      //   autoClose: 5000,
+      //   hideProgressBar: true,
+      //   closeOnClick: true,
+      //   pauseOnHover: true,
+      //   draggable: true,
+      //   progress: undefined,
+      // });
+    }
+  };
 
   const handleSorting = async (columnName) => {
     let sortingOrder = sorting.column === columnName ? sorting.order : 'desc';
@@ -198,60 +199,60 @@ export default function CombinedLogs(props) {
       docId: id
     });
   };
-  // const insertElement = (arr, index, newItem) => [
-  //   // part of the array before the specified index
-  //   ...arr.slice(0, index),
-  //   // inserted item
-  //   newItem,
-  //   // part of the array after the specified index
-  //   ...arr.slice(index)
-  // ]
-  // const deleteElement = (arr, index) => [
-  //   // part of the array before the specified index
-  //   ...arr.slice(0, index),
-  //   // part of the array after the specified index
-  //   ...arr.slice(index + 1)
-  // ]
+  const insertElement = (arr, index, newItem) => [
+    // part of the array before the specified index
+    ...arr.slice(0, index),
+    // inserted item
+    newItem,
+    // part of the array after the specified index
+    ...arr.slice(index)
+  ]
+  const deleteElement = (arr, index) => [
+    // part of the array before the specified index
+    ...arr.slice(0, index),
+    // part of the array after the specified index
+    ...arr.slice(index + 1)
+  ]
 
-  // const handleAddRow = async (log) => {
-  //   try {
-  //     let index = props.logData?.findIndex(item => item === log)
-  //     const dashIndex = log.para_no.search('-')
-  //     // Below we are making an array of para_nos then filtering them like if log.para_no = 1.04, paraNos will have all entries of 1.04 i.e. 1.04-a, 1.04-b etc.
-  //     const paraNos = completeLogData?.map(log => log.para_no).filter(paraNo => paraNo.includes(dashIndex !== -1 ? log.para_no.slice(0, dashIndex) : log.para_no))
-  //     //Now we are making an array containing the ascii character values of elements after '-' in paraNos
-  //     const charArray = paraNos.map(paraNo => paraNo.search('-') !== -1 ? paraNo.codePointAt(paraNo.search('-') + 1) : 96)
-  //     const logObj = {
-  //       ...log,
-  //       //Here we are checking if para_no already contains a character after '-'.
-  //       // If yes, we are increasing the ascii value of the character by 1 for ex.- if it's a it will make it b.
-  //       // If No, it will add '-a' to para_no
-  //       para_no: dashIndex !== -1 ?
-  //         log.para_no.slice(0, dashIndex + 1) + String.fromCharCode(Math.max(...charArray) + 1) :
-  //         `${log.para_no}-${String.fromCharCode(Math.max(...charArray) + 1)}`,
-  //       customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
-  //     }
-  //     const result = insertElement(props.logData, index + 1, logObj)
-  //     props.setFilteredLogData(result)
+  const handleAddRow = async (log) => {
+    try {
+      let index = props.logData?.findIndex(item => item === log)
+      const dashIndex = log.para_no.search('-')
+      // Below we are making an array of para_nos then filtering them like if log.para_no = 1.04, paraNos will have all entries of 1.04 i.e. 1.04-a, 1.04-b etc.
+      const paraNos = props.logData?.map(log => log.para_no).filter(paraNo => paraNo.includes(dashIndex !== -1 ? log.para_no.slice(0, dashIndex) : log.para_no))
+      //Now we are making an array containing the ascii character values of elements after '-' in paraNos
+      const charArray = paraNos.map(paraNo => paraNo.search('-') !== -1 ? paraNo.codePointAt(paraNo.search('-') + 1) : 96)
+      const logObj = {
+        ...log,
+        //Here we are checking if para_no already contains a character after '-'.
+        // If yes, we are increasing the ascii value of the character by 1 for ex.- if it's a it will make it b.
+        // If No, it will add '-a' to para_no
+        para_no: dashIndex !== -1 ?
+          log.para_no.slice(0, dashIndex + 1) + String.fromCharCode(Math.max(...charArray) + 1) :
+          `${log.para_no}-${String.fromCharCode(Math.max(...charArray) + 1)}`,
+        // customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
+      }
+      const result = insertElement(props.logData, index + 1, logObj)
+      props.setFilteredLogData(result)
 
-  //     setNewRowIndex(index + 1)
-  //     handleEditToggle(logObj, index + 1)
-  //     if (props.pdfData.url) {
-  //       let docElement = document.getElementsByClassName("l-table-wrapper")
-  //       docElement[0].scrollTo(890, 0)
-  //     }
-  //   } catch (error) {
-  //     toast.error(error?.response?.data?.message || error?.message, {
-  //       position: 'bottom-center',
-  //       autoClose: 5000,
-  //       hideProgressBar: true,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //     });
-  //   }
-  // }
+      setNewRowIndex(index + 1)
+      handleEditToggle(logObj, index + 1)
+      if (props.pdfData.url) {
+        let docElement = document.getElementsByClassName("l-table-wrapper")
+        docElement[0].scrollTo(890, 0)
+      }
+    } catch (error) {
+      // toast.error(error?.response?.data?.message || error?.message, {
+      //   position: 'bottom-center',
+      //   autoClose: 5000,
+      //   hideProgressBar: true,
+      //   closeOnClick: true,
+      //   pauseOnHover: true,
+      //   draggable: true,
+      //   progress: undefined,
+      // });
+    }
+  }
   useEffect(() => {
     setEditRow('');
   }, [props.searchValue]);
@@ -558,9 +559,9 @@ export default function CombinedLogs(props) {
                   <div className="action-items">
                     {
                       <>
-                        {/* {editRow === index ? (
+                        {editRow === index ? (
                         <>
-                          <SaveButton onClick={handleUpdateLog} style={{ marginRight: '5px' }} />
+                          <SaveButton onClick={() => handleUpdateLog(JSON.parse(log.full_edit))} style={{ marginRight: '5px' }} />
                           <CancelButton
                             style={{ marginRight: '5px' }}
                             onClick={() => {
@@ -569,7 +570,7 @@ export default function CombinedLogs(props) {
                                 comments: '',
                                 date_approved: '',
                                 date_issued: '',
-                                id: 1,
+                                // id: 1,
                                 item_desc: '',
                                 package: '',
                                 para_context: '',
@@ -579,9 +580,9 @@ export default function CombinedLogs(props) {
                                 status: '',
                                 type: '',
                               });
-                              setDateApproved('');
-                              setDateIssued('');
-                              setStatus({});
+                              // setDateApproved('');
+                              // setDateIssued('');
+                              // setStatus({});
                               setNewRowIndex(null)
                               newRowIndex === index && props.setLogData(deleteElement(props.logData, index))
                             }}
@@ -593,7 +594,7 @@ export default function CombinedLogs(props) {
                           <Tooltip placement="left" target={'Edit-Tooltip-' + index + 1} isOpen={editRowTooltip === index + 1} toggle={() => setEditRowTooltip(editRowTooltip ? editRowTooltip === index + 1 ? null : index + 1 : index + 1)}>
                             Edit Row
                           </Tooltip></>
-                      )} */}
+                      )}
                         {/* <Link
                         style={{ fontWeight: 'normal' }}
                         className="btn btn-secondary btn-sm"
@@ -651,7 +652,7 @@ export default function CombinedLogs(props) {
                             </>
                           )
                         )}
-                        {/* {!props.selectedLogData.length && <><AddButton onClick={() => {
+                        {!props.selectedLogData.length && <><AddButton onClick={() => {
                         if (!newRowIndex) {
                           handleAddRow(log)
                         } else if (newRowIndex === index + 1) {
@@ -661,14 +662,14 @@ export default function CombinedLogs(props) {
                       />
                         <Tooltip placement="right" target={'Tooltip-' + index + 1} isOpen={addRowTooltip === index + 1} toggle={() => setaddRowTooltip(addRowTooltip ? addRowTooltip === index + 1 ? null : index + 1 : index + 1)}>
                           Add Row below
-                        </Tooltip></>} */}
+                        </Tooltip></>}
                       </>
                     }
                   </div>
                 </td>
                 <td className="reduce-height">
                   {editRow === index &&
-                  (newRowIndex === index || log.user_id !== 1) ? (
+                  (newRowIndex === index || log.user_id !== 1) && JSON.parse(log.full_edit) ? (
                     <input
                       placeholder="Enter"
                       className="form-control"
@@ -795,7 +796,7 @@ export default function CombinedLogs(props) {
                     )}
                   </td> */}
                     <td className="reduce-height">
-                      {editRow === index ? (
+                      {editRow === index && JSON.parse(log.full_edit) ? (
                         <input
                           placeholder="Enter"
                           className="form-control"

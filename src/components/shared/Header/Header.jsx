@@ -17,12 +17,14 @@ const Header = ({ ...props }) => {
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
 
   const [docsLoaded, setDocsLoaded] = useState(true);
+  const specGptUser = localStorage.getItem('isSpecGptUser') === 'true'
 
   const checkDocsStatus = async () => {
     if (
-      props.breadcrumb2 === 'Requrement Logs' ||
-      props.breadcrumb2 === 'Collab Hub' ||
-      props.breadcrumb2 === 'Spec GPT'
+      (props.breadcrumb2 === 'Requrement Logs' ||
+        props.breadcrumb2 === 'Collab Hub' ||
+        props.breadcrumb2 === 'Spec GPT') &&
+      !specGptUser
     ) {
       try {
         const response = await axiosInstance({
@@ -148,6 +150,7 @@ const Header = ({ ...props }) => {
             onClick={() =>
               props.navBtn !== 'logs' ? handleNavRedirect('logs') : null
             }
+            disabled={specGptUser}
           >
             Submittal Log
           </button>
@@ -159,6 +162,7 @@ const Header = ({ ...props }) => {
             onClick={() =>
               props.navBtn !== 'collab' ? handleNavRedirect('collab') : null
             }
+            disabled={specGptUser}
           >
             Collab Hub
           </button>

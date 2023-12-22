@@ -8,10 +8,16 @@ const Loader = (props) => {
           'loader-wrapper ' +
           (props.showComponentLoader ? 'wrapper-component' : '')
         }
+        style={props.specGptLoader && {top: '18%'}}
       >
         <div className="dots">
           {props.showProcessing ? (
             <p className="dot-processing">Processing, this might take upto 5 minutes.</p>
+          ) : (
+            ''
+          )}
+          {props.specGptLoader ? (
+            <p className="dot-processing">Documents are being processed, SpecGPT will be available shortly.</p>
           ) : (
             ''
           )}
