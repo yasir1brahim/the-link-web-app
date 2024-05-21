@@ -3,7 +3,7 @@ import axios from 'axios';
 const axiosInstance = axios.create({
   baseURL: window.location.href.includes('https://app.thelink.ai')
     ? 'https://log-manager-api-prod.thelink.ai'
-    : ' https://log-manager-api-dev.thelink.ai/'
+    : 'https://app-qa-api.thelink.ai'
   // baseURL: 'https://log-manager-api-prod.thelink.ai',
   // headers: {
   //   Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -16,6 +16,7 @@ axiosInstance.interceptors.request.use(function (config) {
     ? localStorage.getItem('token')
     : new URLSearchParams(window.location.search)?.get('token');
   config.headers['Authorization'] = 'Bearer ' + token;
+  // config.headers['ngrok-skip-browser-warning'] = 'true';
   return config;
 });
 

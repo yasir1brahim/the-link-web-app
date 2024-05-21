@@ -27,8 +27,8 @@ const PersonalProject = ({
       <div className="grid-top-content">
         <label className="table-entries">
           Showing entries
-          <span className="showing-strong"> {projectData.length} </span>
-          of <span className="showing-strong"> {projectData.length} </span>
+          <span className="showing-strong"> {projectData?.length} </span>
+          of <span className="showing-strong"> {projectData?.length} </span>
         </label>
         <div className="grid-list-toggle">
           <span className="tag-list-view">List View</span>
