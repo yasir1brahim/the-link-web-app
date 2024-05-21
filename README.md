@@ -1,5 +1,21 @@
 # the-link-web-app
 
+To run locally:
+
+```
+nvm use
+npm install --legacy-peer-deps
+npm run move-static
+npm start
+```
+
+Note: This project requires Python 3.10 to run due to an issue with node-gyp (https://stackoverflow.com/questions/74715990/node-gyp-err-invalid-mode-ru-while-trying-to-load-binding-gyp)
+
+This can be resolved without changing your global python version by installing Python 3.10 on your system (`brew install python@3.10` for Mac) and then creating a `.npmrc` file at the same level as this readme, with the following contents:
+```
+python=/path/to/python3.10/installation/python3.10
+```
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
