@@ -95,7 +95,7 @@ const ProjectLogs = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [filterValues, setFilterValues] = useState({
     spec_section: [],
-    type: ['Submittal'],
+    type: [],
     item_desc: [],
     classification: [],
     sd_title: []
