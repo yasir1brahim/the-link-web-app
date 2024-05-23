@@ -95,7 +95,6 @@ const ProjectLogs = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [filterValues, setFilterValues] = useState({
     spec_section: [],
-    type: [],
     item_desc: [],
     classification: [],
     sd_title: []
@@ -381,7 +380,7 @@ const ProjectLogs = () => {
     setTotalCount(response?.data?.total_count);
   };
   useEffect(() => {
-    fetchLogData(0, 25, { type: [] }).catch((error) => {
+    fetchLogData(0, 25).catch((error) => {
       setLoading(false);
       handleError(error);
     });
