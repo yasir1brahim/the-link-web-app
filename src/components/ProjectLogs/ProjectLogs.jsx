@@ -381,7 +381,7 @@ const ProjectLogs = () => {
     setTotalCount(response?.data?.total_count);
   };
   useEffect(() => {
-    fetchLogData(0, 25, { type: ['Submittal'] }).catch((error) => {
+    fetchLogData(0, 25, { type: [] }).catch((error) => {
       setLoading(false);
       handleError(error);
     });
