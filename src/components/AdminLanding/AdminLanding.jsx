@@ -55,7 +55,6 @@ const Adminlanding = (props) => {
         url: '/updateCustomer',
         data: {
           email_address: customer?.email_address,
-          password: '',
           customer_name: customer?.customer_name,
           account_owner: customer?.account_owner,
           contact_number: customer?.contact_number,
