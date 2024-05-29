@@ -33,8 +33,6 @@ const CustomerProfile = (props) => {
   const [employeeData, setEmployeeData] = useState([]);
   const [empId, setEmpId] = useState('');
   // const [projectData, setProjectData] = useState([]);
-  const [resetPwd, setResetPwd] = useState(false);
-  const toggleResetPwd = () => setResetPwd(!resetPwd);
   const [email, setEmail] = useState({ value: '', errors: '' });
   const [companyName, setCompanyName] = useState({
     value: undefined,
@@ -43,13 +41,8 @@ const CustomerProfile = (props) => {
   const [accountOwner, setAccountOwner] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [address, setAddress] = useState({ value: '', errors: '' });
-  const [password, setPassword] = useState({ value: '', errors: '' });
   const [employee, setEmployee] = useState({});
   const [customerData, setCustomerData] = useState({});
-  const [confirmPassword, setConfirmPassword] = useState({
-    value: '',
-    errors: ''
-  });
   const [profilePicture, setProfilePicture] = useState('');
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -222,23 +215,6 @@ const CustomerProfile = (props) => {
       setCompanyName({ ...companyName, errors: 'Company name is required' });
       error = true;
     }
-    if (password.value && password.value !== confirmPassword.value) {
-      setPassword({
-        ...password,
-        errors: 'Password not matched with confirm Password.'
-      });
-      error = true;
-    }
-    if (
-      (password.value && !confirmPassword.value) ||
-      (confirmPassword.value && !password.value)
-    ) {
-      setPassword({
-        ...password,
-        errors: 'Please enter both password and confirm password'
-      });
-      error = true;
-    }
     if (
       contactNumber.value.replace(/[^0-9]/g, '').length &&
       contactNumber.value.replace(/[^0-9]/g, '').length < 10
@@ -272,7 +248,6 @@ const CustomerProfile = (props) => {
           url: '/updateCustomer',
           data: {
             email_address: email.value || customerData?.email_address,
-            password: password.value || '',
             customer_name: companyName.value || customerData?.customer_name,
             account_owner: accountOwner?.value || customerData?.account_owner,
             contact_number:
@@ -624,95 +599,6 @@ const CustomerProfile = (props) => {
                             Address
                           </label>
                         </div>
-                      </div>
-                      <div className="col-12">
-                        <div onClick={toggleResetPwd} className="pwd-link">
-                          Reset Password?
-                        </div>
-                        {resetPwd ? (
-                          <div className="row">
-                            {/* <div className="col-4">
-                              <div className="form-group">
-                                <input
-                                  type="password"
-                                  className="form-control"
-                                  id="oldPassword"
-                                  aria-describedby="oldPassword"
-                                  placeholder="Enter"
-                                  required
-                                />
-                                <label
-                                  className="text-label"
-                                  htmlFor="oldPassword"
-                                >
-                                  Old Password
-                                </label>
-                              </div>
-                            </div> */}
-                            <div className="col-4">
-                              <div className="form-group">
-                                <input
-                                  type="password"
-                                  className="form-control"
-                                  id="newPassword"
-                                  aria-describedby="newPassword"
-                                  placeholder="Enter"
-                                  required
-                                  value={password.value}
-                                  onChange={(e) => {
-                                    setPassword({
-                                      ...password,
-                                      value: e.target.value
-                                    });
-                                  }}
-                                />
-                                <label
-                                  className="text-label"
-                                  htmlFor="newPassword"
-                                >
-                                  New Password
-                                </label>
-                                {password.errors && (
-                                  <small className="form-error">
-                                    {password.errors}
-                                  </small>
-                                )}
-                              </div>
-                            </div>
-                            <div className="col-4">
-                              <div className="form-group">
-                                <input
-                                  type="password"
-                                  className="form-control"
-                                  id="confirmNewPassword"
-                                  aria-describedby="confirmNewPassword"
-                                  placeholder="Enter"
-                                  required
-                                  value={confirmPassword.value}
-                                  onChange={(e) => {
-                                    setConfirmPassword({
-                                      ...confirmPassword,
-                                      value: e.target.value
-                                    });
-                                  }}
-                                />
-                                <label
-                                  className="text-label"
-                                  htmlFor="confirmNewPassword"
-                                >
-                                  Confirm New Password
-                                </label>
-                                {password.errors && (
-                                  <small className="form-error">
-                                    {password.errors}
-                                  </small>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          ''
-                        )}
                       </div>
                     </div>
                   </div>

@@ -15,7 +15,6 @@ const CreateCustomer = ({
   pageRefresh
 }) => {
   const [email, setEmail] = useState({ value: '', errors: '' });
-  const [password, setPassword] = useState({ value: '', errors: '' });
   const [companyName, setCompanyName] = useState({ value: '', errors: '' });
   const [accountOwner, setAccountOwner] = useState({ value: '', errors: '' });
   const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
@@ -26,7 +25,6 @@ const CreateCustomer = ({
   useEffect(() => {
     if (!modal) {
       setEmail({ value: '', errors: '' });
-      setPassword({ value: '', errors: '' });
       setCompanyName({ value: '', errors: '' });
       setAccountOwner({ value: '', errors: '' });
       setContactNumber({ value: '', errors: '' });
@@ -45,10 +43,6 @@ const CreateCustomer = ({
       setCompanyName({ ...companyName, errors: 'Company Name is required.' });
       error = true;
     }
-    // if (password.value === '') {
-    //   setPassword({ ...password, errors: 'Password is reuired.' });
-    //   error = true;
-    // }
     if (
       contactNumber.value.replace(/[^0-9]/g, '').length !== 0 &&
       contactNumber.value.replace(/[^0-9]/g, '').length < 10
@@ -88,7 +82,6 @@ const CreateCustomer = ({
           url: '/createCustomer',
           data: {
             email_address: email.value,
-            password: password.value,
             customer_name: companyName.value,
             account_owner: accountOwner.value,
             contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
@@ -315,33 +308,6 @@ const CreateCustomer = ({
                     </div>
                   </div>
 
-                  <div className="col-4">
-                    <div className="form-group">
-                      <input
-                        type="password"
-                        className="form-control"
-                        id="accountPassword"
-                        aria-describedby="accountPassword"
-                        placeholder="Enter"
-                        required
-                        value={password.value}
-                        onChange={(e) => {
-                          setPassword({
-                            ...password,
-                            value: e.target.value
-                          });
-                        }}
-                      />
-                      <label className="text-label" htmlFor="accountPassword">
-                        Set Password
-                      </label>
-                      {password.errors && (
-                        <small className="form-error" style={{ color: 'red' }}>
-                          {password.errors}
-                        </small>
-                      )}
-                    </div>
-                  </div>
                   <div className="col-8">
                     <div className="form-group">
                       <input
