@@ -28,6 +28,7 @@ import { ReactComponent as SearchIcon } from '../../assets/images/search.svg';
 import handleError from '../../config/errorHandler';
 import Pagination from '../shared/Pagination/LogsPagination';
 import { getSavedLogs } from '../../api/ProjectLogs/api';
+import DocumentStatus from './documentStatus';
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -74,6 +75,7 @@ const ProjectLogs = () => {
   const [companyList, setCompanyList] = useState([]);
   const [companyId, setCompanyId] = useState();
   const [docParsed, setDocParsed] = useState(0);
+  const [documentData, setDocumentData] = useState([]);
   const toggle = () => setDropdownOpen((prevState) => !prevState);
 
   const [searchParams] = useSearchParams();
@@ -117,6 +119,7 @@ const ProjectLogs = () => {
         url: `/project_data/${projectId || state.project?.project_id}`
       });
       setDocParsed(response.data.doc_parsed);
+      setDocumentData(response.data.document_details);
       setLoading(false);
       console.log(response.data.message);
     };
@@ -572,6 +575,9 @@ const ProjectLogs = () => {
           qaDashboard={state?.qaDashboard}
           navBtn={'logs'}
         />
+
+        <DocumentStatus documentData={documentData} />
+
 
         <div className="project-logs-content">
           <div className="project-logs">
