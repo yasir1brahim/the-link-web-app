@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { Button, ModalFooter } from 'reactstrap';
-import axiosInstance from '../../config/axios';
-import { toast } from 'react-toastify';
-import Loader from '../shared/Loader/Loader';
+import React, { useState } from "react";
+import { Button, ModalFooter } from "reactstrap";
+import axiosInstance from "../../config/axios";
+import { toast } from "react-toastify";
+import Loader from "../shared/Loader/Loader";
 
 export const AddNewEmp = (props) => {
-  const [email, setEmail] = useState({ value: '', errors: '' });
-  const [firstName, setFirstName] = useState({ value: '', errors: '' });
-  const [lastName, setLastName] = useState({ value: '', errors: '' });
+  const [email, setEmail] = useState({ value: "", errors: "" });
+  const [firstName, setFirstName] = useState({ value: "", errors: "" });
+  const [lastName, setLastName] = useState({ value: "", errors: "" });
   const [isLoading, setIsLoading] = useState(false);
   const validate = () => {
     let error = false;
-    if (email.value === '') {
-      setEmail({ ...email, errors: 'Email is required.' });
+    if (email.value === "") {
+      setEmail({ ...email, errors: "Email is required." });
       error = true;
     }
     return error;
@@ -24,49 +24,48 @@ export const AddNewEmp = (props) => {
       try {
         setIsLoading(true);
         const response = await axiosInstance({
-          method: 'post',
-          url: '/createEmployee',
+          method: "post",
+          url: "/createEmployee",
           data: {
             email_address: email.value,
             full_name: `${firstName.value}  ${lastName.value}`,
             // projects: asscProject.map((project) => project.value),
             projects: [],
             // contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
-            customer_id:
-              props.customerID || localStorage.getItem('userId')
-          }
+            customer_id: props.customerID || localStorage.getItem("userId"),
+          },
         });
         if (response.data) {
           console.log(response.data);
           //   setPageRefresh(!pageRefresh);
           //   toggleModal();
           setIsLoading(false);
-          setEmail({ value: '', errors: '' });
-          setFirstName({ value: '', errors: '' });
-          setLastName({ value: '', errors: '' });
+          setEmail({ value: "", errors: "" });
+          setFirstName({ value: "", errors: "" });
+          setLastName({ value: "", errors: "" });
           props.openEmpForm(false);
           props.setRefetchEmp(true);
-          toast.success('Added a new employee.');
+          toast.success("Added a new employee.");
         }
       } catch (error) {
         setIsLoading(false);
         console.log(error.message);
         toast.error(error.response.data.message, {
-          position: 'bottom-center',
+          position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined
+          progress: undefined,
         });
         // toggleModal();
       }
     }
   };
   return (
-    <>
-      <div className="col-12">
+    <div className="new-employee-table">
+      {/* <div className="col-4">
         <ModalFooter>
           <Button
             color="secondary"
@@ -83,8 +82,32 @@ export const AddNewEmp = (props) => {
             Create Employee
           </Button>{' '}
         </ModalFooter>
+      </div> */}
+      <div className="content-delete">
+        <p className="content">New Employee</p>
+        <svg
+          onClick={() => {
+            props.openEmpForm(false);
+            setEmail({ value: "", errors: "" });
+            setFirstName({ value: "", errors: "" });
+            setLastName({ value: "", errors: "" });
+          }}
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16.125 5.55556L15.3661 16.3489C15.3007 17.2792 14.5387 18 13.6205 18H6.37946C5.46134 18 4.69932 17.2792 4.63391 16.3489L3.875 5.55556M8.25 9.11111V14.4444M11.75 9.11111V14.4444M12.625 5.55556V2.88889C12.625 2.39797 12.2332 2 11.75 2H8.25C7.76675 2 7.375 2.39797 7.375 2.88889V5.55556M3 5.55556H17"
+            stroke="#0E2332"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
-      <div className="col-4">
+      <div style={{ gap: "20px" }} className="d-flex">
         <div className="form-group">
           <input
             type="text"
@@ -97,7 +120,7 @@ export const AddNewEmp = (props) => {
             onChange={(e) => {
               setFirstName({
                 ...firstName,
-                value: e.target.value
+                value: e.target.value,
               });
             }}
           />
@@ -105,8 +128,6 @@ export const AddNewEmp = (props) => {
             First Name
           </label>
         </div>
-      </div>
-      <div className="col-4">
         <div className="form-group">
           <input
             type="text"
@@ -119,7 +140,7 @@ export const AddNewEmp = (props) => {
             onChange={(e) => {
               setLastName({
                 ...lastName,
-                value: e.target.value
+                value: e.target.value,
               });
             }}
           />
@@ -128,34 +149,35 @@ export const AddNewEmp = (props) => {
           </label>
         </div>
       </div>
-      <div className="col-4">
-        <div className="form-group">
-          <input
-            type="email"
-            className="form-control"
-            id="userEmailAddress"
-            aria-describedby="userEmailAddress"
-            placeholder="Enter"
-            required
-            value={email.value}
-            onChange={(e) => {
-              setEmail({
-                ...email,
-                value: e.target.value
-              });
-            }}
-          />
-          <label className="text-label" htmlFor="userEmailAddress">
-            Email Address
-          </label>
-          {email.errors && (
-            <small className="form-error" style={{ color: 'red' }}>
-              {email.errors}
-            </small>
-          )}
-        </div>
+      <div className="form-group">
+        <input
+          type="email"
+          className="form-control"
+          id="userEmailAddress"
+          aria-describedby="userEmailAddress"
+          placeholder="Enter"
+          required
+          value={email.value}
+          onChange={(e) => {
+            setEmail({
+              ...email,
+              value: e.target.value,
+            });
+          }}
+        />
+        <label className="text-label" htmlFor="userEmailAddress">
+          Email Address
+        </label>
+        {email.errors && (
+          <small className="form-error" style={{ color: "red" }}>
+            {email.errors}
+          </small>
+        )}
       </div>
+      <Button color="primary" onClick={handleSubmit}>
+        Create
+      </Button>{" "}
       {isLoading && <Loader showComponentLoader={true} />}
-    </>
+    </div>
   );
 };

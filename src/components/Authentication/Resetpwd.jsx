@@ -87,7 +87,7 @@ const Resetpwd = () => {
             Your new password must be different to <br /> previous 3 passwords?
           </p> */}
           <div className="form-group">
-            <label className="text-label" for="newPassword">
+            <label className="text-label" htmlFor="newPassword">
               New Password
             </label>
             <input
@@ -108,7 +108,7 @@ const Resetpwd = () => {
             {/* <small className='form-error'>Please enter a Password</small> */}
           </div>
           <div className="form-group">
-            <label className="text-label" for="cNewPassword">
+            <label className="text-label" htmlFor="cNewPassword">
               Confirm New Password
             </label>
             <input

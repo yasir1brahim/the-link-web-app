@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router';
-import CustomerProjects from '../CustomerProjects/CustomerProjects';
-import Header from '../shared/Header/Header';
-import NavbarTop from '../shared/NavbarTop/NavbarTop';
-import PersonalProject from './PersonalProject';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
-import axiosInstance from '../../config/axios';
-import handleError from '../../config/errorHandler';
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router";
+import CustomerProjects from "../CustomerProjects/CustomerProjects";
+import Header from "../shared/Header/Header";
+import NavbarTop from "../shared/NavbarTop/NavbarTop";
+import PersonalProject from "./PersonalProject";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
+import axiosInstance from "../../config/axios";
+import handleError from "../../config/errorHandler";
+import HeaderTabs from "../shared/HeaderTabs/HeaderTabs";
 
 const Projects = () => {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const Projects = () => {
   const [successModal, toggleSuccessModal] = useState(false);
   const [fileData, setFileData] = useState({});
   const [specUploadProject, setSpecUploadProject] = useState({});
-  const roleId = localStorage.getItem('roleId');
+  const roleId = localStorage.getItem("roleId");
   const { state } = useLocation();
   const toggleSlider = () => setSlider(!slider);
   const [isArchived, toggleArchive] = useState(false);
@@ -32,13 +33,13 @@ const Projects = () => {
   const toggleUploadSpecsModal = () => setUploadSpecsModal(!uploadSpecsModal);
   const [toggleUploadSpecsButton, setToggleUploadSpecsButton] = useState(true);
   const [searchParams] = useSearchParams();
-  const customerId = searchParams.get('id');
-  
+  const customerId = searchParams.get("id");
+
   useEffect(() => {
     if (!uploadSpecsModal) {
       setPdfFile({});
     }
-    if (roleId === '7') {
+    if (roleId === "7") {
       setToggleUploadSpecsButton(false);
     }
   }, [uploadSpecsModal, toggleUploadSpecsButton, roleId]);
@@ -54,14 +55,14 @@ const Projects = () => {
     try {
       setUploadLoading(true);
       const data = new FormData();
-      data.append('project_id', specUploadProject?.project_id);
-      specUploadProject?.project_type === 'ufgs' &&
-        data.append('project_type', specUploadProject?.project_type);
-      Object.values(pdfFile)?.forEach((file) => data.append('files', file));
+      data.append("project_id", specUploadProject?.project_id);
+      specUploadProject?.project_type === "ufgs" &&
+        data.append("project_type", specUploadProject?.project_type);
+      Object.values(pdfFile)?.forEach((file) => data.append("files", file));
       const response = await axiosInstance({
-        method: 'post',
-        url: '/upload_file',
-        data
+        method: "post",
+        url: "/upload_file",
+        data,
       });
       if (response.data) {
         // console.log(response.data);
@@ -72,18 +73,18 @@ const Projects = () => {
         setPageRefresh(!pageRefresh);
       }
       axiosInstance({
-        method: 'get',
-        url: '/collab/create_spec_index',
+        method: "get",
+        url: "/collab/create_spec_index",
         params: {
-          project_id: specUploadProject?.project_id
-        }
+          project_id: specUploadProject?.project_id,
+        },
       });
       axiosInstance({
-        method: 'post',
+        method: "post",
         url: `/spec-gpt/load_doc`,
         data: {
-          project_id: specUploadProject?.project_id
-        }
+          project_id: specUploadProject?.project_id,
+        },
       });
     } catch (error) {
       setUploadLoading(false);
@@ -95,31 +96,30 @@ const Projects = () => {
 
   // function used in the project tiles to navigate to project details
   const custId =
-    localStorage.getItem('roleId') === '0'
+    localStorage.getItem("roleId") === "0"
       ? customerId
-      : localStorage.getItem('userId');
+      : localStorage.getItem("userId");
 
   const handleLaunch = (project, qaDashboard) => {
-    localStorage.getItem('isSpecGptUser') === 'true'
-    ?
-    navigate(
-      `/spec-gpt?projectDetails=${project?.project_id},${custId},Classified,${project?.project_name}`
-    )
-    : navigate(
-      `/project-logs?projectDetails=${project?.project_id},${custId},Classified,${project?.project_name}`,
-      {
-        state: {
-          project,
-          projectName: project?.project_name,
-          customerId:
-            localStorage.getItem('roleId') === '0'
-              ? customerId
-              : localStorage.getItem('userId'),
-          logType: 'Classified',
-          qaDashboard
-        }
-      }
-    )
+    localStorage.getItem("isSpecGptUser") === "true"
+      ? navigate(
+          `/spec-gpt?projectDetails=${project?.project_id},${custId},Classified,${project?.project_name}`,
+        )
+      : navigate(
+          `/project-logs?projectDetails=${project?.project_id},${custId},Classified,${project?.project_name}`,
+          {
+            state: {
+              project,
+              projectName: project?.project_name,
+              customerId:
+                localStorage.getItem("roleId") === "0"
+                  ? customerId
+                  : localStorage.getItem("userId"),
+              logType: "Classified",
+              qaDashboard,
+            },
+          },
+        );
   };
 
   const handleCollaborationLaunch = (project) => {
@@ -130,30 +130,30 @@ const Projects = () => {
           project,
           projectName: project?.project_name,
           customerId:
-            localStorage.getItem('roleId') === '0'
+            localStorage.getItem("roleId") === "0"
               ? customerId
-              : localStorage.getItem('userId'),
-          logType: 'Classified'
-        }
-      }
+              : localStorage.getItem("userId"),
+          logType: "Classified",
+        },
+      },
     );
   };
 
   useEffect(() => {
     const url =
-      roleId === '6' || roleId === '7'
-        ? `/projects/${localStorage.getItem('userId')}`
+      roleId === "6" || roleId === "7"
+        ? `/projects/${localStorage.getItem("userId")}`
         : customerId
         ? `/projects/${customerId}`
-        : `/projects/${localStorage.getItem('userId')}`;
+        : `/projects/${localStorage.getItem("userId")}`;
     const fetchData = async () => {
       const response = await axiosInstance({
-        method: 'get',
-        url
+        method: "get",
+        url,
       });
       // setProjectData(response.data.message);
       setProjectData(
-        isArchived ? response.data.archived_projects : response.data.message
+        isArchived ? response.data.archived_projects : response.data.message,
       );
       console.log(response.data.message);
     };
@@ -176,9 +176,13 @@ const Projects = () => {
             //     ? "Add Personal Project"
             //     : roleId !== "6" && roleId !== "7" && "Create New Project"
             // }
-            showBtn={'Create New Project'}
-            breadcrumb={'View Projects'}
+            showBtn={"Create New Project"}
+            breadcrumb={"View Projects"}
           />
+          <div style={{ marginTop: "32px" }} className="">
+            <HeaderTabs isArchived={isArchived}
+              toggleArchive={toggleArchive} />
+          </div>
           {slider ? (
             <PersonalProject
               handleLaunch={handleLaunch}
@@ -195,6 +199,8 @@ const Projects = () => {
               pageRefresh={pageRefresh}
               setPageRefresh={setPageRefresh}
               setSpecUploadProject={setSpecUploadProject}
+              isArchived={isArchived}
+              toggleArchive={toggleArchive}
               customerId={customerId}
             />
           ) : (
@@ -211,6 +217,9 @@ const Projects = () => {
               projectData={projectData}
               setProjectData={setProjectData}
               handleLaunch={handleLaunch}
+              toggleUploadSpecsModal={toggleUploadSpecsModal}
+              toggleUploadSpecsButton={toggleUploadSpecsButton}
+              setSpecUploadProject={setSpecUploadProject}
               isArchived={isArchived}
               toggleArchive={toggleArchive}
               customerId={customerId}
@@ -232,7 +241,7 @@ const Projects = () => {
           fileData={fileData}
           project={specUploadProject}
           logScreenUrl={
-            localStorage.getItem('isSpecGptUser') === 'true'
+            localStorage.getItem("isSpecGptUser") === "true"
               ? `/spec-gpt?projectDetails=${specUploadProject?.project_id},${custId},Classified,${specUploadProject?.project_name}`
               : `/project-logs?projectDetails=${specUploadProject?.project_id},${custId},Classified,${specUploadProject?.project_name}`
           }

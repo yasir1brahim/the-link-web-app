@@ -49,11 +49,11 @@ function PaginatedItems({
       {/* <Items currentItems={currentItems} /> */}
       <ReactPaginate
         breakLabel="..."
-        nextLabel="next >"
+        nextLabel=">"
         onPageChange={handlePageClick}
         pageRangeDisplayed={5}
         pageCount={pageCount}
-        previousLabel="< previous"
+        previousLabel="<"
         renderOnZeroPageCount={null}
       />
       <label className="showing-content d-flex align-items-center justify-content-center">
