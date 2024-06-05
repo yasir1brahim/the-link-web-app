@@ -60,7 +60,7 @@ export const UploadDocuments = (props) => {
                       <br />
                       Maximum Individual File size: <b>100 MB</b>.
                       <br />A maximum of <b>200</b> files can be uploaded at a
-                      time, processing time may be upto <b>5</b> minutes.
+                      time, processing time may be up to <b>10</b> minutes.
                     </span>
                   </div>
                 </label>
@@ -158,36 +158,15 @@ export const UploadDocuments = (props) => {
           <div className="success-upload text-center">
             <Success />
             <h5>Success</h5>
-            <p>Your file has been succesfully parsed.</p>
-            <ul className="doc-content-table">
-              <li className="doc-content-heading">
-                <span>Type</span>
-                <span>Total Logs</span>
-              </li>
-              <li className="doc-content-list">
-                <span>Submittals</span>
-                <span>{fileData?.submittal}</span>
-              </li>
-              <li className="doc-content-list">
-                <span>Testings</span>
-                <span>{fileData?.testing}</span>
-              </li>
-              <li className="doc-content-list">
-                <span>Meetings</span>
-                <span>{fileData?.meeting}</span>
-              </li>
-              <li className="doc-content-list">
-                <span>Closeouts</span>
-                <span>{fileData?.closeout}</span>
-              </li>
-            </ul>
+            <p>Your files have been succesfully uploaded and are being processed.</p>
+            <p>This may take up to 10 minutes to complete.</p>
             <div className="text-right">
               <button
                 type="button"
                 onClick={() => toggleSuccessModal(false)}
                 className="d-inline-block btn btn-secondary mr-3"
               >
-                Cancel
+                Close
               </button>
               <button
                 type="button"
@@ -199,7 +178,7 @@ export const UploadDocuments = (props) => {
                 }}
                 className="d-inline-block btn btn-primary"
               >
-                Save
+                Go to Project Details
               </button>
             </div>
           </div>

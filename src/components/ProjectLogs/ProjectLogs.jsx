@@ -28,11 +28,14 @@ import { ReactComponent as SearchIcon } from "../../assets/images/search.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
 import { getSavedLogs } from "../../api/ProjectLogs/api";
+import DocumentStatus from './documentStatus';
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
+  const [showDocumentStatusModal, setShowDocumentStatusModal] = useState(false);
+  const toggleDocumentStatusModal = () => setShowDocumentStatusModal(!showDocumentStatusModal);
   const toggleModal = () => setModal(!modal);
   const [pdfFile, setPdfFile] = useState({});
   const [fileData, setFileData] = useState({});
@@ -74,6 +77,7 @@ const ProjectLogs = () => {
   const [companyList, setCompanyList] = useState([]);
   const [companyId, setCompanyId] = useState();
   const [docParsed, setDocParsed] = useState(0);
+  const [documentData, setDocumentData] = useState([]);
   const toggle = () => setDropdownOpen((prevState) => !prevState);
 
   const [searchParams] = useSearchParams();
@@ -117,6 +121,7 @@ const ProjectLogs = () => {
         url: `/project_data/${projectId || state.project?.project_id}`,
       });
       setDocParsed(response.data.doc_parsed);
+      setDocumentData(response.data.document_details);
       setLoading(false);
       console.log(response.data.message);
     };
@@ -126,6 +131,21 @@ const ProjectLogs = () => {
       handleError(error);
     });
   }, [state?.project, pageRefresh, projectId]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      axiosInstance({
+        method: "get",
+        url: `/project_data/${projectId || state.project?.project_id}`,
+      }).then(response => {
+        setDocumentData(response.data.document_details);
+      }).catch(error => {
+        handleError(error);
+      });
+    }, 10000); // 10000 milliseconds = 10 seconds
+  
+    return () => clearInterval(intervalId); // This will clear the interval when the component unmounts
+  }, [projectId, state.project?.project_id]); // Dependencies array, re-run the effect if these values change
 
   useEffect(() => {
     if (!modal) {
@@ -374,7 +394,13 @@ const ProjectLogs = () => {
       if (search) {
         setErrorMessage("Sorry, no results found for your search query.");
       } else {
-        setErrorMessage("Please upload documents, before seeing the logs.");
+        if (documentData.length === 0) {
+          setErrorMessage("Upload spec documents to generate submittal log");
+        } else if (documentIsProcessing(documentData)) {
+          setErrorMessage("Documents are being processed...");
+        } else {
+          setErrorMessage("No submittals were detected in the uploaded document(s)");
+        }
       }
     }
     setTotalCount(response?.data?.total_count);
@@ -442,6 +468,8 @@ const ProjectLogs = () => {
       setSelected(selectedLogs);
     }
   };
+
+  const documentIsProcessing = (documents) => documents.some(doc => ['PENDING_PROCESSING', 'PROCESSING', 'SUBSECTIONS_EXTRACTED'].includes(doc.document_status));
 
   // useEffect(() => {
   //   const retriveSelected = localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
@@ -564,7 +592,7 @@ const ProjectLogs = () => {
           breadcrumb={"View Projects"}
           breadcrumbUrl={`/project-list?id=${customerId}`}
           breadcrumb2={"Requrement Logs"}
-          showBtn={"Upload Additional"}
+          showBtn={"Upload Documents"}
           toggleModal={toggleModal}
           btnSize={"small"}
           title={state?.projectName || projectName || ""}
@@ -572,6 +600,12 @@ const ProjectLogs = () => {
           qaDashboard={state?.qaDashboard}
           navBtn={"logs"}
         />
+        {documentIsProcessing(documentData) && (
+          <div className="alert alert-info" role="alert">
+            Documents are being processed...
+          </div>
+        )}
+
 
         <div className="project-logs-content">
           <div className="project-logs">
@@ -646,6 +680,13 @@ const ProjectLogs = () => {
                     </svg>
 
                     <span>View Saved Lists</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="table-top-btn ml-3"
+                    onClick={toggleDocumentStatusModal}
+                  >
+                    <span>Check Document Status</span>
                   </button>
                   <div className="table-bulk-changes">
                     <div className="log-search">
@@ -980,6 +1021,20 @@ const ProjectLogs = () => {
               Close
             </Button>
           </ModalFooter>
+        </ModalBody>
+      </Modal>
+
+      <Modal 
+        isOpen={showDocumentStatusModal} 
+        toggle={toggleDocumentStatusModal}
+        fade={false}
+        className="new-customer modal-xl"
+      >
+        <ModalHeader toggle={toggleDocumentStatusModal}>
+          Document Status
+        </ModalHeader>
+        <ModalBody>
+          <DocumentStatus documentData={documentData} />
         </ModalBody>
       </Modal>
     </div>

@@ -149,7 +149,7 @@ const CollaborationHub = () => {
             btnSize={'small'}
             title={state?.projectName || projectName || ''}
             // docParsed={docParsed}
-            showBtn={'Upload Additional'}
+            showBtn={'Upload Documents'}
             navBtn={'collab'}
             toggleModal={toggleModal}
           />
