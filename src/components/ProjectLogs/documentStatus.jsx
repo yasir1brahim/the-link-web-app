@@ -8,7 +8,7 @@ import PendingOutlined from '@mui/icons-material/PendingOutlined';
 export default function DocumentStatus(props) {
 
     const getStatusDisplay = (status, isDocumentStatus = false) => {
-        if (status === "PROCESSED") {
+        if (status === "PROCESSED" || status === null) {
             return <span><CheckIcon color='success'/>{isDocumentStatus ? "Document" : "Section"} Processed</span>;
         } else if (status === "FAILED") {
             return <span><ErrorIcon color='error'/>{isDocumentStatus ? "Document" : "Section"} Failed</span>;
