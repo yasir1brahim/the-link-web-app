@@ -63,7 +63,7 @@ export const SpecGpt = () => {
           breadcrumb={'View Projects'}
           breadcrumbUrl={`/project-list?id=${customerId}`}
           breadcrumb2={'Spec GPT'}
-          showBtn={'Upload Additional'}
+          showBtn={'Upload Documents'}
         //   toggleModal={toggleModal}
           btnSize={'small'}
             title={projectName || ''}

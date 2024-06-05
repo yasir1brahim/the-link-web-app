@@ -12,7 +12,7 @@ const Loader = (props) => {
       >
         <div className="dots">
           {props.showProcessing ? (
-            <p className="dot-processing">Processing, this might take upto 5 minutes.</p>
+            <p className="dot-processing">Uploading files...</p>
           ) : (
             ''
           )}
