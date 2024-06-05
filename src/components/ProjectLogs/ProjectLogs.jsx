@@ -34,6 +34,8 @@ const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
+  const [showDocumentStatusModal, setShowDocumentStatusModal] = useState(false);
+  const toggleDocumentStatusModal = () => setShowDocumentStatusModal(!showDocumentStatusModal);
   const toggleModal = () => setModal(!modal);
   const [pdfFile, setPdfFile] = useState({});
   const [fileData, setFileData] = useState({});
@@ -576,7 +578,7 @@ const ProjectLogs = () => {
           navBtn={'logs'}
         />
 
-        <DocumentStatus documentData={documentData} />
+        <Button color="primary" onClick={toggleDocumentStatusModal}>Check Document Status</Button>
 
 
         <div className="project-logs-content">
@@ -895,6 +897,20 @@ const ProjectLogs = () => {
               Close
             </Button>
           </ModalFooter>
+        </ModalBody>
+      </Modal>
+
+      <Modal 
+        isOpen={showDocumentStatusModal} 
+        toggle={toggleDocumentStatusModal}
+        fade={false}
+        className="new-customer modal-xl"
+      >
+        <ModalHeader toggle={toggleDocumentStatusModal}>
+          Document Status
+        </ModalHeader>
+        <ModalBody>
+          <DocumentStatus documentData={documentData} />
         </ModalBody>
       </Modal>
     </div>
