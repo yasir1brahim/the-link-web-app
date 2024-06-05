@@ -133,6 +133,21 @@ const ProjectLogs = () => {
   }, [state?.project, pageRefresh, projectId]);
 
   useEffect(() => {
+    const intervalId = setInterval(() => {
+      axiosInstance({
+        method: "get",
+        url: `/project_data/${projectId || state.project?.project_id}`,
+      }).then(response => {
+        setDocumentData(response.data.document_details);
+      }).catch(error => {
+        handleError(error);
+      });
+    }, 10000); // 10000 milliseconds = 10 seconds
+  
+    return () => clearInterval(intervalId); // This will clear the interval when the component unmounts
+  }, [projectId, state.project?.project_id]); // Dependencies array, re-run the effect if these values change
+
+  useEffect(() => {
     if (!modal) {
       setPdfFile({});
     }
