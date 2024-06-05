@@ -379,7 +379,13 @@ const ProjectLogs = () => {
       if (search) {
         setErrorMessage("Sorry, no results found for your search query.");
       } else {
-        setErrorMessage("Please upload documents, before seeing the logs.");
+        if (documentData.length === 0) {
+          setErrorMessage("Upload spec documents to generate submittal log");
+        } else if (documentIsProcessing(documentData)) {
+          setErrorMessage("Documents are being processed...");
+        } else {
+          setErrorMessage("No submittals were detected in the uploaded document(s)");
+        }
       }
     }
     setTotalCount(response?.data?.total_count);
@@ -447,6 +453,8 @@ const ProjectLogs = () => {
       setSelected(selectedLogs);
     }
   };
+
+  const documentIsProcessing = (documents) => documents.some(doc => ['PENDING_PROCESSING', 'PROCESSING', 'SUBSECTIONS_EXTRACTED'].includes(doc.document_status));
 
   // useEffect(() => {
   //   const retriveSelected = localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
@@ -569,7 +577,7 @@ const ProjectLogs = () => {
           breadcrumb={"View Projects"}
           breadcrumbUrl={`/project-list?id=${customerId}`}
           breadcrumb2={"Requrement Logs"}
-          showBtn={"Upload Additional"}
+          showBtn={"Upload Documents"}
           toggleModal={toggleModal}
           btnSize={"small"}
           title={state?.projectName || projectName || ""}
@@ -577,8 +585,11 @@ const ProjectLogs = () => {
           qaDashboard={state?.qaDashboard}
           navBtn={"logs"}
         />
-
-        <Button color="primary" onClick={toggleDocumentStatusModal}>Check Document Status</Button>
+        {documentIsProcessing(documentData) && (
+          <div className="alert alert-info" role="alert">
+            Documents are being processed...
+          </div>
+        )}
 
 
         <div className="project-logs-content">
@@ -654,6 +665,13 @@ const ProjectLogs = () => {
                     </svg>
 
                     <span>View Saved Lists</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="table-top-btn ml-3"
+                    onClick={toggleDocumentStatusModal}
+                  >
+                    <span>Check Document Status</span>
                   </button>
                   <div className="table-bulk-changes">
                     <div className="log-search">
