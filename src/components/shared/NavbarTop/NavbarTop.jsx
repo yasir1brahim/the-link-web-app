@@ -24,6 +24,17 @@ const NavbarTop = () => {
   });
   // Click Outside code ends
 
+  const generateInitials = (name) => {
+    // Split the name into words
+    const words = name.split(" ");
+    const initials = words
+      .map((word) => word.charAt(0))
+      .join("")
+      .substring(0, 2);
+
+    return initials.toUpperCase();
+  }
+
   return (
     <section className="navigation-wrapper d-flex align-items-center justify-content-center">
       <Navbar
@@ -54,7 +65,7 @@ const NavbarTop = () => {
               onClick={toggleDrop}
             >
               <span className="user-icon">
-                {localStorage.getItem('fullName')?.charAt(0) || (
+                {generateInitials(localStorage.getItem('fullName')) || (
                   <i className="fa fa-user"></i>
                 )}
               </span>

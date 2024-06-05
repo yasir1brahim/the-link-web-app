@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Typeahead } from 'react-bootstrap-typeahead';
-import 'react-bootstrap-typeahead/css/Typeahead.css';
+import React, { useState } from "react";
+import { Typeahead } from "react-bootstrap-typeahead";
+import "react-bootstrap-typeahead/css/Typeahead.css";
 
 const SelectDropdown = ({ ...props }) => {
   // const [selected, setSelected] = useState([]);
@@ -9,12 +9,12 @@ const SelectDropdown = ({ ...props }) => {
 
   return (
     <div
-      className={`has-typehead ${focused ? 'is-focused' : ''} ${
-        props.searchValue?.length === 0 ? 'empty' : ''
+      className={`has-typehead ${focused ? "is-focused" : ""} ${
+        props.searchValue?.length === 0 ? "empty" : ""
       }`}
     >
       <Typeahead
-        id="basic-example"
+        id="select-dropdown"
         onChange={(e) => {
           props.setSelected(e);
           // props.setSearchValue && props.setSearchValue('');
@@ -27,8 +27,8 @@ const SelectDropdown = ({ ...props }) => {
           //   props.setSearchValue(e[0])}
         }}
         labelKey={props.labelKey}
-        onFocus={(e) => (focused === e ? '' : setFocused(e))}
-        onBlur={(e) => (focused !== e ? '' : setFocused(e))}
+        onFocus={(e) => (focused === e ? "" : setFocused(e))}
+        onBlur={(e) => (focused !== e ? "" : setFocused(e))}
         onInputChange={(e) => {
           props.setSelected({});
           props.setSearchValue && props.setSearchValue(e);

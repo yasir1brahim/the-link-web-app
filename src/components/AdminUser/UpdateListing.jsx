@@ -79,7 +79,7 @@ const UpdateListing = (props) => {
                       />
                       <label
                         className="custom-control-label"
-                        for={`project-${index}`}
+                        htmlFor={`project-${index}`}
                       >
                         {isEmpExtTab ? project.project_name : project.full_name}
                       </label>

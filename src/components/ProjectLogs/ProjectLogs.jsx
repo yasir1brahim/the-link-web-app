@@ -1,33 +1,33 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useCallback } from 'react';
-import Header from '../shared/Header/Header';
-import NavbarTop from '../shared/NavbarTop/NavbarTop';
+import React, { useState, useEffect, useCallback } from "react";
+import Header from "../shared/Header/Header";
+import NavbarTop from "../shared/NavbarTop/NavbarTop";
 import {
   Dropdown,
   DropdownMenu,
   DropdownToggle,
-  DropdownItem
-} from 'reactstrap';
-import { ReactComponent as Trash } from '../../assets/images/trash.svg';
-import { useLocation } from 'react-router-dom';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import axiosInstance from '../../config/axios';
-import CombinedLogs from './combinedLogs';
-import { debounce, get } from 'lodash';
-import Loader from '../shared/Loader/Loader';
-import PdfWrapper from '../../pdfWrapper';
-import FileDownload from 'js-file-download';
-import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
-import { useSearchParams } from 'react-router-dom';
-import Procore from './procore';
-import { ReactComponent as Logo } from '../../assets/images/procore-vector-logo.svg';
-import { ReactComponent as ExcelLogo } from '../../assets/images/excel.svg';
-import { ReactComponent as SearchIcon } from '../../assets/images/search.svg';
-import handleError from '../../config/errorHandler';
-import Pagination from '../shared/Pagination/LogsPagination';
-import { getSavedLogs } from '../../api/ProjectLogs/api';
+  DropdownItem,
+} from "reactstrap";
+import { ReactComponent as Trash } from "../../assets/images/trash.svg";
+import { useLocation } from "react-router-dom";
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axiosInstance from "../../config/axios";
+import CombinedLogs from "./combinedLogs";
+import { debounce, get } from "lodash";
+import Loader from "../shared/Loader/Loader";
+import PdfWrapper from "../../pdfWrapper";
+import FileDownload from "js-file-download";
+import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
+import { useSearchParams } from "react-router-dom";
+import Procore from "./procore";
+import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
+import { ReactComponent as ExcelLogo } from "../../assets/images/excel.svg";
+import { ReactComponent as SearchIcon } from "../../assets/images/search.svg";
+import handleError from "../../config/errorHandler";
+import Pagination from "../shared/Pagination/LogsPagination";
+import { getSavedLogs } from "../../api/ProjectLogs/api";
 import DocumentStatus from './documentStatus';
 
 const ProjectLogs = () => {
@@ -43,7 +43,7 @@ const ProjectLogs = () => {
 
   const [saveListName, setToggleSaveListNameModal] = useState(false);
   const toggleSaveListName = () => setToggleSaveListNameModal(!saveListName);
-  const [listName, setListName] = useState({ value: '', errors: '' });
+  const [listName, setListName] = useState({ value: "", errors: "" });
   const [viewList, setList] = useState([]);
   const [viewSavedList, setToggleViewSavedList] = useState(false);
   const toggleViewSavedList = () => setToggleViewSavedList(!viewSavedList);
@@ -52,7 +52,7 @@ const ProjectLogs = () => {
   const [filteredLogData, setFilteredLogData] = useState([]);
   const [selected, setSelected] = useState([]);
   const [pageRefresh, setPageRefresh] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
   // const [currentItems, setCurrentItems] = useState([]);
   // const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setLoading] = useState(false);
@@ -60,15 +60,15 @@ const ProjectLogs = () => {
   const [selectedLogData, setSelectedLogData] = useState([]);
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({
-    url: '',
+    url: "",
     textLoc: {},
-    index: '',
-    docId: null
+    index: "",
+    docId: null,
   });
   const [newRowIndex, setNewRowIndex] = useState(null);
   const projectType = state?.project.project_type;
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const baseUrl = window.location.href.includes('https://app.thelink.ai')
+  const baseUrl = window.location.href.includes("https://app.thelink.ai")
     ? `https://app.thelink.ai/`
     : `https://dev-app.thelink.ai/`;
   //Procore states
@@ -81,7 +81,7 @@ const ProjectLogs = () => {
   const toggle = () => setDropdownOpen((prevState) => !prevState);
 
   const [searchParams] = useSearchParams();
-  const projectDetails = searchParams.get('projectDetails')?.split(',');
+  const projectDetails = searchParams.get("projectDetails")?.split(",");
   const projectId = projectDetails?.length
     ? JSON.parse(projectDetails[0])
     : null;
@@ -90,18 +90,18 @@ const ProjectLogs = () => {
   // const projectName = searchParams.get('projectName');
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
   const projectName = projectDetails?.length >= 4 ? projectDetails[3] : null;
-  const authCode = searchParams.get('code');
-  const clientId = window.location.href.includes('https://app.thelink.ai')
-    ? 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9'
-    : 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9';
+  const authCode = searchParams.get("code");
+  const clientId = window.location.href.includes("https://app.thelink.ai")
+    ? "ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9"
+    : "ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9";
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [totalCount, setTotalCount] = useState(0);
   const [filterValues, setFilterValues] = useState({
     spec_section: [],
     item_desc: [],
     classification: [],
-    sd_title: []
+    sd_title: [],
   });
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
   const [page, setPage] = React.useState(1);
@@ -117,8 +117,8 @@ const ProjectLogs = () => {
     const fetchData = async () => {
       setLoading(true);
       const response = await axiosInstance({
-        method: 'get',
-        url: `/project_data/${projectId || state.project?.project_id}`
+        method: "get",
+        url: `/project_data/${projectId || state.project?.project_id}`,
       });
       setDocParsed(response.data.doc_parsed);
       setDocumentData(response.data.document_details);
@@ -148,13 +148,13 @@ const ProjectLogs = () => {
     try {
       setUploadLoading(true);
       const data = new FormData();
-      data.append('project_id', projectId || state.project?.project_id);
-      projectType === 'ufgs' && data.append('project_type', projectType);
-      Object.values(pdfFile)?.forEach((file) => data.append('files', file));
+      data.append("project_id", projectId || state.project?.project_id);
+      projectType === "ufgs" && data.append("project_type", projectType);
+      Object.values(pdfFile)?.forEach((file) => data.append("files", file));
       const response = await axiosInstance({
-        method: 'post',
-        url: '/upload_file',
-        data
+        method: "post",
+        url: "/upload_file",
+        data,
       });
       if (response.data) {
         // console.log(response.data);
@@ -165,18 +165,18 @@ const ProjectLogs = () => {
         setPageRefresh(!pageRefresh);
       }
       axiosInstance({
-        method: 'get',
-        url: '/collab/create_spec_index',
+        method: "get",
+        url: "/collab/create_spec_index",
         params: {
-          project_id: projectId || state.project?.project_id
-        }
+          project_id: projectId || state.project?.project_id,
+        },
       });
       axiosInstance({
-        method: 'post',
+        method: "post",
         url: `/spec-gpt/load_doc`,
         data: {
-          project_id: projectId || state.project?.project_id
-        }
+          project_id: projectId || state.project?.project_id,
+        },
       });
     } catch (error) {
       setUploadLoading(false);
@@ -193,12 +193,12 @@ const ProjectLogs = () => {
         newRowIndex &&
           setLogData([
             ...logData.slice(0, newRowIndex),
-            ...logData.slice(newRowIndex + 1)
+            ...logData.slice(newRowIndex + 1),
           ]),
         setNewRowIndex(null),
-        200
+        200,
       ),
-    [setSearchValue, logData, newRowIndex]
+    [setSearchValue, logData, newRowIndex],
   );
 
   const handleSelect = (id) => {
@@ -211,9 +211,9 @@ const ProjectLogs = () => {
   };
 
   const selectedRows =
-    localStorage?.getItem('selectedRows') === ''
-      ? 'All'
-      : localStorage?.getItem('selectedRows');
+    localStorage?.getItem("selectedRows") === ""
+      ? "All"
+      : localStorage?.getItem("selectedRows");
   // ?.split(',')
   // ?.map((row) => JSON.parse(row));
 
@@ -223,31 +223,31 @@ const ProjectLogs = () => {
       try {
         // setStatus(get(statusResp, 'data.data'));
         const resp = await axiosInstance({
-          method: 'post',
-          url: '/procore/create_submittals',
+          method: "post",
+          url: "/procore/create_submittals",
           data: {
             project_id: Number(projectId),
-            records: selectedRows // array of ids
+            records: selectedRows, // array of ids
             // status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
-          }
+          },
         });
         if (resp.status === 200) {
           // setProjectMappingsNoContent(false)
-          toast.success('Successfully exported to Procore!', {
-            position: 'bottom-center',
+          toast.success("Successfully exported to Procore!", {
+            position: "bottom-center",
             autoClose: 5000,
             hideProgressBar: true,
             closeOnClick: true,
             pauseOnHover: true,
             draggable: true,
-            progress: undefined
+            progress: undefined,
           });
-          localStorage.setItem('selectedRows', '');
+          localStorage.setItem("selectedRows", "");
         }
         // setLoading(false);
       } catch (error) {
-        console.log('error', error);
-        localStorage.setItem('selectedRows', '');
+        console.log("error", error);
+        localStorage.setItem("selectedRows", "");
         handleError(error);
       }
     };
@@ -255,40 +255,40 @@ const ProjectLogs = () => {
     if (authCode) {
       const fetchData = async () => {
         const accessTokenData = await axiosInstance({
-          method: 'post',
-          url: '/procore/access_token',
+          method: "post",
+          url: "/procore/access_token",
           data: {
             code: authCode,
-            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`
-          }
+            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`,
+          },
         });
         localStorage.setItem(
-          'procore_access_token',
-          accessTokenData?.data.data.access_token
+          "procore_access_token",
+          accessTokenData?.data.data.access_token,
         );
 
         const res = await axiosInstance({
-          method: 'get',
-          url: `/procore/project_mapping/${projectId}`
+          method: "get",
+          url: `/procore/project_mapping/${projectId}`,
         });
-        if (get(res, 'data.data')) {
-          setCompanyId(get(res, 'data.data.procore_company_id'));
+        if (get(res, "data.data")) {
+          setCompanyId(get(res, "data.data.procore_company_id"));
           localStorage.setItem(
-            'companyId',
-            get(res, 'data.data.procore_company_id')
+            "companyId",
+            get(res, "data.data.procore_company_id"),
           );
-          localStorage.setItem('projectId', projectId);
-          localStorage.setItem('logType', logType);
-          localStorage.setItem('customerId', customerId);
-          localStorage.setItem('projectName', projectName);
-          searchParams.set('code', '');
+          localStorage.setItem("projectId", projectId);
+          localStorage.setItem("logType", logType);
+          localStorage.setItem("customerId", customerId);
+          localStorage.setItem("projectName", projectName);
+          searchParams.set("code", "");
           handleExportToProcore();
         }
-        if (get(res, 'status') === 204) {
+        if (get(res, "status") === 204) {
           setProcoreModal(true);
           const companyResp = await axiosInstance({
-            method: 'get',
-            url: '/procore/companies'
+            method: "get",
+            url: "/procore/companies",
           });
           setCompanyList(companyResp?.data.data);
         }
@@ -305,62 +305,62 @@ const ProjectLogs = () => {
     projectId,
     selectedRows,
     searchParams,
-    baseUrl
+    baseUrl,
   ]);
 
   const handleDeleteLogs = async () => {
     if (selected.length !== 0) {
       try {
         await axiosInstance({
-          method: 'delete',
-          url: '/delete_logs',
+          method: "delete",
+          url: "/delete_logs",
           data: {
             project_id: state?.projectId || projectId,
             records: selected,
-            type: 'Submittal'
-          }
+            type: "Submittal",
+          },
         });
         setPageRefresh(!pageRefresh);
         setSelected([]);
-        toast.success('Successfully Deleted Logs!', {
-          position: 'bottom-center',
+        toast.success("Successfully Deleted Logs!", {
+          position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined
+          progress: undefined,
         });
       } catch (error) {
         // console.log(error.message);
         setSelected([]);
         toast.error(error.response.data.message, {
-          position: 'bottom-center',
+          position: "bottom-center",
           autoClose: 5000,
           hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined
+          progress: undefined,
         });
       }
     }
   };
   const fetchLogData = async (page, itemsPerPage, filters, search) => {
     setLoading(true);
-    setErrorMessage('Fetching data...');
+    setErrorMessage("Fetching data...");
     const response = await axiosInstance({
-      method: 'post',
-      url: '/filter_logs',
+      method: "post",
+      url: "/filter_logs",
       data: {
         project_id: state?.projectId || projectId,
-        search: search || '',
+        search: search || "",
         filters: { ...filters },
-        order_col: '',
-        order: '',
+        order_col: "",
+        order: "",
         page_number: page || 0,
-        limit: itemsPerPage
-      }
+        limit: itemsPerPage,
+      },
     });
     // setLogData(response.data.message);
     setSelectedFilterValue(response.data.all_filter_vals);
@@ -370,16 +370,16 @@ const ProjectLogs = () => {
       ? setSelectedLogData(submittalLogs)
       : setLogData(submittalLogs);
     localStorage.setItem(
-      'filteredIds',
-      submittalLogs?.map((item) => item?.id)
+      "filteredIds",
+      submittalLogs?.map((item) => item?.id),
     );
     setLoading(false);
-    setErrorMessage('');
+    setErrorMessage("");
     if (response.data.message.length === 0) {
       if (search) {
-        setErrorMessage('Sorry, no results found for your search query.');
+        setErrorMessage("Sorry, no results found for your search query.");
       } else {
-        setErrorMessage('Please upload documents, before seeing the logs.');
+        setErrorMessage("Please upload documents, before seeing the logs.");
       }
     }
     setTotalCount(response?.data?.total_count);
@@ -402,16 +402,16 @@ const ProjectLogs = () => {
   useEffect(() => {
     const fetchData = async () => {
       const response = await axiosInstance({
-        method: 'get',
-        url: `/getPackages/${state?.customerId || customerId}`
+        method: "get",
+        url: `/getPackages/${state?.customerId || customerId}`,
       });
       setGroupingData(
         response.data.message.map((packageData) => {
           return {
             value: packageData.id,
-            label: packageData.name
+            label: packageData.name,
           };
-        })
+        }),
       );
 
       // console.log(response.data.message);
@@ -458,34 +458,34 @@ const ProjectLogs = () => {
     // do not update the values if navigated from procore page
     if (document.referrer && selected?.length) {
       const rowsSelected = JSON.stringify(selected);
-      localStorage.setItem('selectedRows', `${rowsSelected}`);
+      localStorage.setItem("selectedRows", `${rowsSelected}`);
     }
   }, [selected]);
 
   const handleExportExcel = async (recordData, fileName) => {
     try {
       const response = await axiosInstance({
-        method: 'post',
-        url: '/exportLogs',
-        responseType: 'arraybuffer',
+        method: "post",
+        url: "/exportLogs",
+        responseType: "arraybuffer",
         data: {
           project_id: state?.projectId || projectId,
           records:
             recordData ||
             localStorage
-              .getItem('filteredIds')
-              ?.split(',')
-              ?.map((item) => Number(item))
-        }
+              .getItem("filteredIds")
+              ?.split(",")
+              ?.map((item) => Number(item)),
+        },
       });
       let blob = new Blob([response.data], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
       FileDownload(
         blob,
         `${
           state?.project.project_name || `Project`
-        }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`
+        }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`,
       );
     } catch (error) {
       handleError(error);
@@ -493,8 +493,8 @@ const ProjectLogs = () => {
   };
   const validate = () => {
     let error = false;
-    if (listName.value === '') {
-      setListName({ ...listName, errors: 'List Name is required.' });
+    if (listName.value === "") {
+      setListName({ ...listName, errors: "List Name is required." });
       error = true;
     }
     return error;
@@ -505,17 +505,17 @@ const ProjectLogs = () => {
     if (!errors) {
       try {
         await axiosInstance({
-          method: 'post',
-          url: '/save_list',
+          method: "post",
+          url: "/save_list",
           data: {
             project_id: state?.projectId || projectId,
             records: selected,
-            view_name: listName.value
-          }
+            view_name: listName.value,
+          },
         });
         setToggleSaveListNameModal(false);
-        toast.success('List created successfully', {
-          position: 'bottom-center'
+        toast.success("List created successfully", {
+          position: "bottom-center",
         });
         setSelected([]);
       } catch (error) {
@@ -526,8 +526,8 @@ const ProjectLogs = () => {
   const getList = async () => {
     try {
       const response = await axiosInstance({
-        method: 'get',
-        url: `/get_list/${state?.projectId || projectId}`
+        method: "get",
+        url: `/get_list/${state?.projectId || projectId}`,
       });
       setList(response.data.message);
       setToggleViewSavedList(true);
@@ -546,7 +546,7 @@ const ProjectLogs = () => {
       Object.keys(filterValues).forEach((key) =>
         filterValues[key].length
           ? (filters = { ...filters, [key]: filterValues[key] })
-          : null
+          : null,
       );
     }
     fetchLogData(0, 25, filters, searchValue);
@@ -564,18 +564,18 @@ const ProjectLogs = () => {
       <div className="project-logs-wrapper log-table-width">
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
-          centerText={`${projectType === 'ufgs' ? 'UFGS' : 'Commercial'}`}
+          centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
           // breadcrumb={'Project Details'}
-          breadcrumb={'View Projects'}
+          breadcrumb={"View Projects"}
           breadcrumbUrl={`/project-list?id=${customerId}`}
-          breadcrumb2={'Requrement Logs'}
-          showBtn={'Upload Additional'}
+          breadcrumb2={"Requrement Logs"}
+          showBtn={"Upload Additional"}
           toggleModal={toggleModal}
-          btnSize={'small'}
-          title={state?.projectName || projectName || ''}
+          btnSize={"small"}
+          title={state?.projectName || projectName || ""}
           docParsed={docParsed}
           qaDashboard={state?.qaDashboard}
-          navBtn={'logs'}
+          navBtn={"logs"}
         />
 
         <Button color="primary" onClick={toggleDocumentStatusModal}>Check Document Status</Button>
@@ -610,20 +610,50 @@ const ProjectLogs = () => {
                   {!selectedLogData.length ? (
                     <button
                       type="button"
-                      className="btn btn-primary mr-3 btn-small btn-disabled"
+                      className=" mr-3 table-top-btn btn-disabled"
                       onClick={toggleSaveListName}
                       disabled={selected.length === 0}
                     >
-                      Save Selection
+                      <svg
+                        width="14"
+                        height="18"
+                        viewBox="0 0 14 18"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M1.16683 0.666748H12.8335C13.0545 0.666748 13.2665 0.754545 13.4228 0.910826C13.579 1.06711 13.6668 1.27907 13.6668 1.50008V17.4526C13.6669 17.5271 13.647 17.6003 13.6092 17.6645C13.5715 17.7287 13.5171 17.7816 13.4519 17.8176C13.3868 17.8537 13.3131 17.8717 13.2386 17.8696C13.1641 17.8675 13.0916 17.8456 13.0285 17.8059L7.00016 14.0251L0.971829 17.8051C0.908803 17.8447 0.836319 17.8667 0.761914 17.8688C0.68751 17.8709 0.613901 17.853 0.548742 17.817C0.483583 17.781 0.429252 17.7283 0.391398 17.6642C0.353545 17.6001 0.333551 17.527 0.333496 17.4526V1.50008C0.333496 1.27907 0.421294 1.06711 0.577574 0.910826C0.733854 0.754545 0.945816 0.666748 1.16683 0.666748ZM12.0002 2.33341H2.00016V15.1934L7.00016 12.0592L12.0002 15.1934V2.33341Z"
+                          fill={selected.length === 0 ? "#374151" : "#0E2332"}
+                        />
+                      </svg>
+                      <span>Save Selection</span>
                     </button>
                   ) : null}
                   <button
                     type="button"
-                    className="btn btn-secondary btn-small"
+                    className="table-top-btn"
                     onClick={getList}
                   >
-                    {' '}
-                    View Saved Lists{' '}
+                    <svg
+                      width="18"
+                      height="14"
+                      viewBox="0 0 18 14"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M16.7058 6.22443C16.9872 6.70814 16.9872 7.2942 16.7058 7.7779C15.7367 9.44405 13.0929 13.2113 9.00016 13.2113C4.90743 13.2113 2.26364 9.44405 1.29451 7.7779C1.01316 7.2942 1.01316 6.70814 1.29451 6.22443C2.26364 4.55828 4.90743 0.791016 9.00016 0.791016C13.0929 0.791016 15.7367 4.55828 16.7058 6.22443Z"
+                        stroke="#0E2332"
+                        strokeWidth="1.5"
+                      />
+                      <path
+                        d="M11.3887 7.00117C11.3887 8.32031 10.3193 9.38969 9.00016 9.38969C7.68102 9.38969 6.61164 8.32031 6.61164 7.00117C6.61164 5.68202 7.68102 4.61265 9.00016 4.61265C10.3193 4.61265 11.3887 5.68202 11.3887 7.00117Z"
+                        stroke="#0E2332"
+                        strokeWidth="1.5"
+                      />
+                    </svg>
+
+                    <span>View Saved Lists</span>
                   </button>
                   <div className="table-bulk-changes">
                     <div className="log-search">
@@ -634,43 +664,81 @@ const ProjectLogs = () => {
                         value={searchValue}
                         onChange={(e) => handleSearchChange(e.target.value)}
                       />
-                      <SearchIcon
+                      <span
                         className="search-icon"
                         onClick={heandleSearchClick}
-                      />
+                      >
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M17.5001 17.4998L12.9165 12.9167"
+                            stroke="#CBCBCB"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <circle
+                            cx="8.75"
+                            cy="8.75"
+                            r="5.5"
+                            stroke="#CBCBCB"
+                            strokeWidth="1.5"
+                          />
+                        </svg>
+                      </span>
                     </div>
-                    {localStorage.getItem('roleId') !== '7' && (
+                    {localStorage.getItem("roleId") !== "7" && (
                       <Dropdown isOpen={dropdownOpen} toggle={toggle}>
                         <DropdownToggle caret>Export</DropdownToggle>
                         <DropdownMenu>
-                          <DropdownItem onClick={() => handleExportExcel('All')}>
-                            <ExcelLogo style={{ height: '90px' }} />
+                          <DropdownItem
+                            onClick={() => handleExportExcel("All")}
+                          >
+                            <ExcelLogo style={{ height: "90px" }} />
                           </DropdownItem>
                           <DropdownItem>
                             <a
                               href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`}
                               className="breadcrumb-text"
                             >
-                              <Logo style={{ height: '90px' }} />
+                              <Logo style={{ height: "90px" }} />
                             </a>
                           </DropdownItem>
                         </DropdownMenu>
                       </Dropdown>
                     )}
-                    {localStorage.getItem('roleId') !== '7' && (
+                    {localStorage.getItem("roleId") !== "7" && (
                       <button
                         type="button"
-                        className="d-flex btn btn-secondary btn-sm"
+                        className="trash-icon"
                         onClick={handleDeleteLogs}
                       >
-                        {' '}
-                        <Trash />{' '}
+                        <svg
+                          width="16"
+                          height="18"
+                          viewBox="0 0 16 18"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M14.125 4.55556L13.3661 15.3489C13.3007 16.2792 12.5387 17 11.6205 17H4.37946C3.46134 17 2.69932 16.2792 2.63391 15.3489L1.875 4.55556M6.25 8.11111V13.4444M9.75 8.11111V13.4444M10.625 4.55556V1.88889C10.625 1.39797 10.2332 1 9.75 1H6.25C5.76675 1 5.375 1.39797 5.375 1.88889V4.55556M1 4.55556H15"
+                            stroke="#0E2332"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
                       </button>
                     )}
                   </div>
                 </div>
               )}
-              <div className={pdfData.url && 'side-by-side'}>
+              <div className={pdfData.url && "side-by-side"}>
                 <CombinedLogs
                   logData={filteredLogData}
                   setFilteredLogData={setFilteredLogData}
@@ -702,9 +770,24 @@ const ProjectLogs = () => {
                   page={page}
                   rowsPerPage={rowsPerPage}
                 />
-                {pdfData.url && <PdfWrapper pdfData={pdfData} />}
+                {pdfData.url && (
+                  <div className="left-paginator table-footer-content logs-pagination">
+                    <Pagination
+                      totalItems={totalCount}
+                      fetchData={fetchLogData}
+                      filterValues={filterValues}
+                      rowsPerPage={rowsPerPage}
+                      setRowsPerPage={setRowsPerPage}
+                      page={page}
+                      setPage={setPage}
+                    />
+                  </div>
+                )}
+                {pdfData.url && (
+                  <PdfWrapper pdfData={pdfData} setPdfData={setPdfData} />
+                )}
               </div>
-              {!pdfData.url && !selectedLogData.length && (
+              {!pdfData.url && (
                 <div className="table-footer-content logs-pagination">
                   <Pagination
                     totalItems={totalCount}
@@ -797,7 +880,7 @@ const ProjectLogs = () => {
         toggle={toggleSaveListName}
         className="new-customer modal-md"
       >
-        <ModalHeader toggle={toggleSaveListName}>Save Selection</ModalHeader>
+        <ModalHeader>Save Selection</ModalHeader>
         <ModalBody>
           <form className="create-customer-form">
             <div className="save-list-name">
@@ -829,12 +912,16 @@ const ProjectLogs = () => {
               </div>
             </div>
             <ModalFooter>
-              <Button color="secondary" onClick={toggleSaveListName}>
+              <Button className="save-btn" onClick={handleListSubmit}>
+                Save
+              </Button>
+              <Button
+                className="cancel-btn"
+                color="secondary"
+                onClick={toggleSaveListName}
+              >
                 Cancel
               </Button>
-              <Button color="primary" onClick={handleListSubmit}>
-                Save
-              </Button>{' '}
             </ModalFooter>
           </form>
         </ModalBody>
@@ -846,22 +933,22 @@ const ProjectLogs = () => {
         toggle={toggleViewSavedList}
         className="new-customer modal-md"
       >
-        <ModalHeader toggle={toggleViewSavedList}>Saved List</ModalHeader>
+        <ModalHeader>Saved List</ModalHeader>
         <ModalBody>
-          <div className="save-list-name">
+          <div className="save-list-name save-list">
             {viewList.length
               ? viewList.map((list) => {
                   return (
                     JSON.parse(list.records).length !== 0 && (
-                      <div className="row mb-3">
+                      <div className="row">
                         <div className="col-6">
-                          <h5 className="my-2">{list.view_name}</h5>
+                          <h5 className="">{list.view_name}</h5>
                         </div>
                         <div className="col-6">
                           <div className="d-flex align-item-center justify-content-flex-end">
                             <button
                               type="button"
-                              className="btn btn-primary mr-3"
+                              className="btn open-btn mr-2"
                               onClick={() => {
                                 handleOpenSaveList(list.id);
                                 setListId(list.id);
@@ -869,15 +956,15 @@ const ProjectLogs = () => {
                             >
                               Open
                             </button>
-                            {localStorage.getItem('roleId') !== '7' && (
+                            {localStorage.getItem("roleId") !== "7" && (
                               <button
                                 type="button"
-                                className="btn btn-primary"
-                                style={{ textTransform: 'none' }}
+                                className="btn open-btn"
+                                style={{ textTransform: "none" }}
                                 onClick={() =>
                                   handleExportExcel(
                                     list.records,
-                                    list.view_name
+                                    list.view_name,
                                   )
                                 }
                               >
@@ -893,7 +980,11 @@ const ProjectLogs = () => {
               : null}
           </div>
           <ModalFooter>
-            <Button color="secondary" onClick={toggleViewSavedList}>
+            <Button
+              className="cancel-btn"
+              color="secondary"
+              onClick={toggleViewSavedList}
+            >
               Close
             </Button>
           </ModalFooter>

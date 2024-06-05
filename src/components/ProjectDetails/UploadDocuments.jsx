@@ -1,12 +1,12 @@
-import React from 'react';
-import { ReactComponent as Upload } from '../../assets/images/upload.svg';
-import { ReactComponent as FileDocument } from '../../assets/images/file-document.svg';
-import { ReactComponent as Close } from '../../assets/images/close.svg';
-import { ReactComponent as Error } from '../../assets/images/error.svg';
-import { ReactComponent as Success } from '../../assets/images/circle-success.svg';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from 'reactstrap';
-import Loader from '../shared/Loader/Loader';
-import { useNavigate } from 'react-router';
+import React from "react";
+import { ReactComponent as Upload } from "../../assets/images/upload.svg";
+import { ReactComponent as FileDocument } from "../../assets/images/file-document.svg";
+import { ReactComponent as Close } from "../../assets/images/close.svg";
+import { ReactComponent as Error } from "../../assets/images/error.svg";
+import { ReactComponent as Success } from "../../assets/images/circle-success.svg";
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "reactstrap";
+import Loader from "../shared/Loader/Loader";
+import { useNavigate } from "react-router";
 
 export const UploadDocuments = (props) => {
   const {
@@ -22,7 +22,7 @@ export const UploadDocuments = (props) => {
     toggleSuccessModal,
     fileData,
     logScreenUrl,
-    project
+    project,
   } = props;
   const navigate = useNavigate();
 
@@ -80,8 +80,8 @@ export const UploadDocuments = (props) => {
                             onClick={() =>
                               setPdfFile({
                                 ...Object.values(pdfFile).filter(
-                                  (pdf) => pdf.name !== file.name
-                                )
+                                  (pdf) => pdf.name !== file.name,
+                                ),
                               })
                             }
                           />
@@ -100,7 +100,7 @@ export const UploadDocuments = (props) => {
                   Upload
                 </button> */}
             </div>
-            <ModalFooter>
+            <ModalFooter className="mt-3 float-right">
               <Button color="secondary" onClick={toggleModal}>
                 Cancel
               </Button>
@@ -110,7 +110,7 @@ export const UploadDocuments = (props) => {
                 className="submit-accent"
               >
                 Get Log
-              </Button>{' '}
+              </Button>{" "}
             </ModalFooter>
           </form>
           {/* Upload form code */}
@@ -194,7 +194,7 @@ export const UploadDocuments = (props) => {
                 onClick={() => {
                   toggleSuccessModal(false);
                   navigate(logScreenUrl, {
-                    state: { project, projectName: project?.project_name }
+                    state: { project, projectName: project?.project_name },
                   });
                 }}
                 className="d-inline-block btn btn-primary"
