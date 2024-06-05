@@ -311,7 +311,7 @@ const AdminUser = (props) => {
                   <div className="form-group">
                     <div className={`has-typehead`}>
                       <Typeahead
-                        id="basic-example-v2"
+                        id="customer-name"
                         options={customerData.map((customer) => {
                           return {
                             id: customer.customer_id,
@@ -417,7 +417,7 @@ const AdminUser = (props) => {
                             <tr>
                               <td>
                                 <a
-                                  href={() => false}
+                                  // href={() => false}
                                   onClick={() => toggleDetailInfo(employee)}
                                 >
                                   {employee.full_name}
@@ -551,7 +551,7 @@ const AdminUser = (props) => {
                             <tr>
                               <td>
                                 <a
-                                  href={() => false}
+                                  // href={() => false}
                                   onClick={() => {
                                     toggleProjectModal(project);
                                   }}

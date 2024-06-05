@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import Pagination from '@mui/material/Pagination';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import Box from '@mui/material/Box';
+import React, { useEffect, useState } from "react";
+import Pagination from "@mui/material/Pagination";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
+import Box from "@mui/material/Box";
 const LogsPagination = ({
   totalItems,
   fetchData,
@@ -12,7 +12,7 @@ const LogsPagination = ({
   page,
   setPage,
   rowsPerPage,
-  setRowsPerPage
+  setRowsPerPage,
 }) => {
   const [pageCount, setPageCount] = useState(0);
   let filters = {};
@@ -24,7 +24,7 @@ const LogsPagination = ({
     Object.keys(filterValues).forEach((key) =>
       filterValues[key].length
         ? (filters = { ...filters, [key]: filterValues[key] })
-        : null
+        : null,
     );
   }
 
@@ -45,8 +45,8 @@ const LogsPagination = ({
   }, [totalItems, rowsPerPage]);
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <FormControl sx={{ m: 1, minWidth: 80 }}>
+    <Box sx={{ display: "flex", alignItems: "center" }}>
+      <FormControl sx={{ minWidth: 80 }}>
         <InputLabel id="demo-simple-select-autowidth-label">Rows</InputLabel>
         <Select
           labelId="demo-simple-select-label"
@@ -61,19 +61,18 @@ const LogsPagination = ({
           <MenuItem value={50}>50</MenuItem>
         </Select>
       </FormControl>
-
       <Pagination
         component="div"
         count={pageCount}
         page={page}
         shape="rounded"
         onChange={onClickChangePage}
-        size={'medium'}
+        size={"medium"}
         // boundaryCount={1}
         // siblingCount={1}
         defaultPage={1}
         variant="string"
-        rowsPerPage={rowsPerPage}
+        rowsperpage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
     </Box>

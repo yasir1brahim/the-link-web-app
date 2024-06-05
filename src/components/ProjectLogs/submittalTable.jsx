@@ -21,7 +21,7 @@ export default function SubmittalTable(props) {
                   />
                   <label
                     className="custom-control-label"
-                    for="ticketHeading"
+                    htmlFor="ticketHeading"
                   ></label>
                 </div>
               </div>
@@ -81,7 +81,7 @@ export default function SubmittalTable(props) {
                       />
                       <label
                         className="custom-control-label"
-                        for="ticketRow1"
+                        htmlFor="ticketRow1"
                       ></label>
                     </div>
                   </div>

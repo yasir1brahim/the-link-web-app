@@ -65,7 +65,7 @@ const Forgotpwd = (props) => {
             No worries, we’ll send you reset instructions.
           </p>
           <div className="form-group">
-            <label className="text-label" for="loginEmail">
+            <label className="text-label" htmlFor="loginEmail">
               Email
             </label>
             <input
