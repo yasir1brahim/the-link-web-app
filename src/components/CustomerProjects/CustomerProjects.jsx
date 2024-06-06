@@ -21,6 +21,7 @@ import { ArchiveIcon } from "../shared/icons/archiveIcon";
 import { EditIcon } from "../shared/icons/editIcon";
 import { UploadIcon } from "../shared/icons/uploadIcon";
 import { LaunchIcon } from "../shared/icons/launchIcon";
+import { ArchiveProjectModal } from "../PersonalProject/archiveProjectModal";
 
 const CustomerProjects = ({
   toggleSlider,
@@ -31,6 +32,8 @@ const CustomerProjects = ({
   setPageRefresh,
   toggleCreateProjectModal,
   createProjectModal,
+  archiveProjectModal,
+  toggleArchiveProjectModal,
   projectData,
   setProjectData,
   handleLaunch,
@@ -45,6 +48,7 @@ const CustomerProjects = ({
   const [editModal, setEditModal] = useState(false);
   const toggleEditModal = () => setEditModal(!editModal);
   const toggleEmployeeModal = () => setEmployeeModal(!employeeModal);
+  const [archiveProject, setArchiveProject] = useState(null);
 
   const [project, setProject] = useState({});
   const [currentItems, setCurrentItems] = useState([]);
@@ -81,7 +85,7 @@ const CustomerProjects = ({
     toggleEditModal();
   };
 
-  const handleArchiveProject = async (project) => {
+  const handleArchiveProject = async () => {
     let errors = false;
     if (!errors) {
       try {
@@ -89,16 +93,16 @@ const CustomerProjects = ({
           method: "put",
           url: "/updateProject",
           data: {
-            project_name: project.project_name,
-            lead_contact: project.lead_contact,
-            start_date: project?.start_date
+            project_name: archiveProject.project_name,
+            lead_contact: archiveProject.lead_contact,
+            start_date: archiveProject?.start_date
               ? moment(
-                  new Date((project?.start_date).replaceAll("-", "/")),
+                  new Date((archiveProject?.start_date).replaceAll("-", "/")),
                 ).format("YYYY-MM-DD")
               : "",
-            end_date: project?.end_date
+            end_date: archiveProject?.end_date
               ? moment(
-                  new Date((project?.end_date).replaceAll("-", "/")),
+                  new Date((archiveProject?.end_date).replaceAll("-", "/")),
                 ).format("YYYY-MM-DD")
               : "",
             customer_id:
@@ -106,12 +110,13 @@ const CustomerProjects = ({
                 ? customerId || state.customer_id
                 : localStorage.getItem("userId"),
             status: isArchived ? "Active" : "Archived",
-            project_id: project.project_id,
+            project_id: archiveProject.project_id,
           },
         });
         if (response.data) {
           console.log(response.data);
           setPageRefresh(!pageRefresh);
+          toggleArchiveProjectModal();
         }
       } catch (error) {
         console.log(error.message);
@@ -381,7 +386,10 @@ const CustomerProjects = ({
                                 <span onClick={() => handleEdit(project)}>
                                   <EditIcon />
                                 </span>
-                                <span onClick={() => handleArchiveProject(project)}>
+                                <span onClick={() => {
+                                  toggleArchiveProjectModal()
+                                  setArchiveProject(project)
+                                }}>
                                   <ArchiveIcon />
                                 </span>
                               </>
@@ -439,6 +447,12 @@ const CustomerProjects = ({
         </div>
       </div>
       <Loader showComponentLoader={isLoading} />
+
+      <ArchiveProjectModal
+        modal={archiveProjectModal}
+        toggleModal={toggleArchiveProjectModal}
+        handleSubmit={handleArchiveProject}
+      />
 
       <ToastContainer
         position="bottom-center"

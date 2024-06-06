@@ -605,8 +605,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.06);
-  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 1px 4px 9px 1px rgba(0, 0, 0, 0.2);
   .upper-card{
     padding: 24px;
     .contract-wrapper{
@@ -660,10 +659,10 @@
     .name-wrapper{
       margin: 16px 0px;
       .content{
-        font-size: 24px;
-        line-height: 22px;
+        font-size: 20px;
+        line-height: 24px;
         letter-spacing: -1%;
-        font-weight: 600;
+        font-weight: 550;
         color:#0E2332 ;
       }
     }

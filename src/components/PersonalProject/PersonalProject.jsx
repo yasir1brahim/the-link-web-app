@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import axiosInstance from "../../config/axios";
 import handleError from "../../config/errorHandler";
 import CreateProject from "../CustomerProjects/createProject";
+import EditProject from "../CustomerProjects/editProject";
+import { ArchiveProjectModal } from "./archiveProjectModal";
 import ContractTile from "./contractTile";
 import PersonalTile from "./personalTile";
 
@@ -14,6 +16,8 @@ const PersonalProject = ({
   toggleUploadSpecsModal,
   createProjectModal,
   toggleCreateProjectModal,
+  archiveProjectModal,
+  toggleArchiveProjectModal,
   state,
   customerData,
   pageRefresh,
@@ -30,13 +34,14 @@ const PersonalProject = ({
   const [editModal, setEditModal] = useState(false);
   const toggleEditModal = () => setEditModal(!editModal);
   const [project, setProject] = useState({});
+  const [archiveProject, setArchiveProject] = useState(null);
 
   const handleEdit = (project) => {
     setProject(project);
     toggleEditModal();
   };
 
-  const handleArchiveProject = async (project) => {
+  const handleArchiveProject = async () => {
     let errors = false;
     if (!errors) {
       try {
@@ -44,16 +49,16 @@ const PersonalProject = ({
           method: "put",
           url: "/updateProject",
           data: {
-            project_name: project.project_name,
-            lead_contact: project.lead_contact,
-            start_date: project?.start_date
+            project_name: archiveProject.project_name,
+            lead_contact: archiveProject.lead_contact,
+            start_date: archiveProject?.start_date
               ? moment(
-                  new Date((project?.start_date).replaceAll("-", "/")),
+                  new Date((archiveProject?.start_date).replaceAll("-", "/")),
                 ).format("YYYY-MM-DD")
               : "",
-            end_date: project?.end_date
+            end_date: archiveProject?.end_date
               ? moment(
-                  new Date((project?.end_date).replaceAll("-", "/")),
+                  new Date((archiveProject?.end_date).replaceAll("-", "/")),
                 ).format("YYYY-MM-DD")
               : "",
             customer_id:
@@ -61,12 +66,13 @@ const PersonalProject = ({
                 ? customerId || state.customer_id
                 : localStorage.getItem("userId"),
             status: isArchived ? "Active" : "Archived",
-            project_id: project.project_id,
+            project_id: archiveProject.project_id,
           },
         });
         if (response.data) {
           console.log(response.data);
           setPageRefresh(!pageRefresh);
+          toggleArchiveProjectModal();
         }
       } catch (error) {
         console.log(error.message);
@@ -149,7 +155,8 @@ const PersonalProject = ({
                       handleCollaborationLaunch={handleCollaborationLaunch}
                       roleId={roleId}
                       handleEdit={handleEdit}
-                      handleArchiveProject={handleArchiveProject}
+                      toggleArchiveProjectModal={toggleArchiveProjectModal}
+                      setArchiveProject={setArchiveProject}
                     />
                   </div>
                 );
@@ -179,6 +186,20 @@ const PersonalProject = ({
         setPageRefresh={setPageRefresh}
         isPersonalProject={true}
         customerID={customerId}
+      />
+      <EditProject
+        modal={editModal}
+        toggleModal={toggleEditModal}
+        customer={state || customerData}
+        project={project}
+        pageRefresh={pageRefresh}
+        setPageRefresh={setPageRefresh}
+        customerID={customerId}
+      />
+      <ArchiveProjectModal
+        modal={archiveProjectModal}
+        toggleModal={toggleArchiveProjectModal}
+        handleSubmit={handleArchiveProject}
       />
     </div>
   );
