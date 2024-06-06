@@ -135,7 +135,7 @@ const Header = ({ ...props }) => {
     </div>
     
     {props.navBtn && (
-        <div className={`header-center`} style={localStorage.getItem("roleId") === "7" ? { width: "58%", justifyContent: "initial" } : { width: "100%" }}>
+        <div className={`header-center pt-0`} style={localStorage.getItem("roleId") === "7" ? { width: "58%", justifyContent: "initial" } : { width: "100%" }}>
           <button
             type="button"
             className={`btn-normal ${props.navBtn !== "logs" ? "" : "btn-active"} ${props.btnSize === "small" ? "btn-small" : ""}`}
