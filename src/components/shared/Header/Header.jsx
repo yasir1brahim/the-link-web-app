@@ -144,7 +144,7 @@ const Header = ({ ...props }) => {
           >
             Submittal Log
           </button>
-          <button
+          {/* <button
             type="button"
             className={`btn-normal ${props.navBtn !== "collab" ? "" : "btn-active"} ${props.btnSize === "small" ? "btn-small" : ""}`}
             onClick={() => (props.navBtn !== "collab" ? handleNavRedirect("collab") : null)}
@@ -159,16 +159,16 @@ const Header = ({ ...props }) => {
               style={props.navBtn === "collab" ? { marginLeft: "4px" } : { marginLeft: "0" }}
               onClick={() => (props.navBtn !== "specGpt" ? handleNavRedirect("specGpt") : null)}
               disabled={!docsLoaded}
-            >
+            > */}
               {/* <a
                 href="https://specgpt.ai/chat"
                 target="_blank"
                 rel="noreferrer"
               > */}
-              Spec GPT
+              {/* Spec GPT */}
               {/* </a> */}
-            </button>
-          </Tooltip>
+            {/* </button>
+          </Tooltip> */}
         </div>
       )}
     </>
