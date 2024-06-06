@@ -14,7 +14,8 @@ const ContractTile = ({
   toggleUploadSpecsButton,
   roleId,
   handleEdit,
-  handleArchiveProject,
+  toggleArchiveProjectModal,
+  setArchiveProject,
 }) => {
   const generateInitials = (name) => {
     // Split the name into words
@@ -28,7 +29,12 @@ const ContractTile = ({
   }
   return (
     <div className="contract-card-wrapper">
-      <div className="upper-card">
+      <div
+        className="upper-card"
+        onClick={() => handleLaunch(project)}
+        disabled={!ifSpecsUploaded}
+        style={{ cursor: "pointer" }}
+      >
         <div className="contract-wrapper">
           <div className="content-wrapper">
             <p className="content"># {project.project_type}</p>
@@ -126,10 +132,16 @@ const ContractTile = ({
           ) : null}
           {roleId !== "6" && roleId !== "7" && (
             <>
-              <span onClick={() => handleEdit(project)}>
+              <span onClick={() => handleEdit(project)} style={{ cursor: "pointer" }}>
                 <EditIcon />
               </span>
-              <span onClick={() => handleArchiveProject(project)}>
+              <span
+                onClick={() => {
+                  toggleArchiveProjectModal()
+                  setArchiveProject(project)
+                }}
+                style={{ cursor: "pointer" }}
+              >
                 <ArchiveIcon />
               </span>
             </>

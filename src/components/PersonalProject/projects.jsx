@@ -13,7 +13,8 @@ import HeaderTabs from "../shared/HeaderTabs/HeaderTabs";
 const Projects = () => {
   const navigate = useNavigate();
   const [uploadSpecsModal, setUploadSpecsModal] = useState(false);
-  const [slider, setSlider] = useState(true);
+  const [archiveProjectModal, setArchiveProjectModal] = useState(false);
+  const [slider, setSlider] = useState(false);
   const [customerData, setCustomerData] = useState({});
   const [createProjectModal, setCreateProjectModal] = useState(false);
   const [pageRefresh, setPageRefresh] = useState(false);
@@ -31,6 +32,7 @@ const Projects = () => {
   const toggleCreateProjectModal = () =>
     setCreateProjectModal(!createProjectModal);
   const toggleUploadSpecsModal = () => setUploadSpecsModal(!uploadSpecsModal);
+  const toggleArchiveProjectModal = () => setArchiveProjectModal(!archiveProjectModal);
   const [toggleUploadSpecsButton, setToggleUploadSpecsButton] = useState(true);
   const [searchParams] = useSearchParams();
   const customerId = searchParams.get("id");
@@ -194,6 +196,8 @@ const Projects = () => {
               toggleUploadSpecsButton={toggleUploadSpecsButton}
               createProjectModal={createProjectModal}
               toggleCreateProjectModal={toggleCreateProjectModal}
+              archiveProjectModal={archiveProjectModal}
+              toggleArchiveProjectModal={toggleArchiveProjectModal}
               state={state}
               customerData={customerData}
               pageRefresh={pageRefresh}
@@ -214,6 +218,8 @@ const Projects = () => {
               setPageRefresh={setPageRefresh}
               toggleCreateProjectModal={toggleCreateProjectModal}
               createProjectModal={createProjectModal}
+              archiveProjectModal={archiveProjectModal}
+              toggleArchiveProjectModal={toggleArchiveProjectModal}
               projectData={projectData}
               setProjectData={setProjectData}
               handleLaunch={handleLaunch}
