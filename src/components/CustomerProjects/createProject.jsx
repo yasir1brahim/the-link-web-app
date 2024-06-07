@@ -43,6 +43,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       setEmployeeList([]);
       setSelectedEmployeeList([]);
       setVisibilityType("Contract");
+      openEmpForm(false);
     }
   }, [modal]);
 
