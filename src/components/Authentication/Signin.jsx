@@ -107,14 +107,7 @@ const Signin = (props) => {
             )}
           </div>
           <div className="form-group forgot-pwd">
-            <div className="custom-control custom-checkbox">
-              <input
-                type="checkbox"
-                className="custom-control-input"
-                name="ticketRow1"
-                id="ticketRow1"
-              />
-              <label className="custom-control-label">Remember Me</label>
+            <div>
             </div>
             <a className="forgot-pwd" href="/forgot-password">
               Forgot Password?
