@@ -286,9 +286,9 @@ const CustomerProjects = ({
               </thead>
               {project ? (
                 <tbody>
-                  {currentItems.map((project) => {
+                  {currentItems.map((project, index) => {
                     return (
-                      <tr>
+                      <tr key={index}>
                         {/* <td className="ticket-checkbox">
                               <div className="form-group">
                                 <div className="custom-control custom-checkbox">
