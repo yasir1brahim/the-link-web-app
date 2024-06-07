@@ -406,7 +406,7 @@ const ProjectLogs = () => {
     setTotalCount(response?.data?.total_count);
   };
   useEffect(() => {
-    fetchLogData(0, 25).catch((error) => {
+    fetchLogData(0, rowsPerPage).catch((error) => {
       setLoading(false);
       handleError(error);
     });
@@ -572,7 +572,7 @@ const ProjectLogs = () => {
           : null,
       );
     }
-    fetchLogData(0, 25, filters, searchValue);
+    fetchLogData(0, rowsPerPage, filters, searchValue);
   };
 
   const handleOpenSaveList = async (listId) => {
@@ -580,6 +580,29 @@ const ProjectLogs = () => {
     setSelectedLogData(savedLogs?.data?.message);
     setToggleViewSavedList(false);
   };
+
+  const handleEnterKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      heandleSearchClick();
+    }
+  }
+
+  const handleClearSearch = () => {
+    setSearchValue("");
+    let filters = {};
+    if (
+      Object.values(filterValues)
+        .map((value) => (value.length ? true : false))
+        .includes(true)
+    ) {
+      Object.keys(filterValues).forEach((key) =>
+        filterValues[key].length
+          ? (filters = { ...filters, [key]: filterValues[key] })
+          : null,
+      );
+    }
+    fetchLogData(0, rowsPerPage, filters, "");
+  }
 
   return (
     <div className="page-wrap">
@@ -696,6 +719,7 @@ const ProjectLogs = () => {
                         className="log-search-input"
                         value={searchValue}
                         onChange={(e) => handleSearchChange(e.target.value)}
+                        onKeyPress={handleEnterKeyPress}
                       />
                       <span
                         className="search-icon"
@@ -722,6 +746,15 @@ const ProjectLogs = () => {
                             stroke="#CBCBCB"
                             strokeWidth="1.5"
                           />
+                        </svg>
+                      </span>
+                      <span
+                        className="clear-icon"
+                        onClick={handleClearSearch}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M5 5L15 15" stroke="#cbcbcb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M15 5L5 15" stroke="#cbcbcb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                       </span>
                     </div>

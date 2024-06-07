@@ -73,7 +73,7 @@ const LogsPagination = ({
         defaultPage={1}
         variant="string"
         rowsperpage={rowsPerPage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
+        // onRowsPerPageChange={handleChangeRowsPerPage}
       />
     </Box>
   );
