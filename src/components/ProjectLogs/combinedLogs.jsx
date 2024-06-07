@@ -90,9 +90,7 @@ export default function CombinedLogs(props) {
             //   : searchValue
             //     ? searchValue
             //     : rowData.package,
-            submittal_description: isFullEdit
-              ? rowData.para_context
-              : undefined,
+            submittal_description: rowData.para_context,
             // classification: rowData?.classification,
             // phase: null,
             // sd_no: rowData?.sd_no,
