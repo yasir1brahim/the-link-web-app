@@ -10,8 +10,6 @@ const Header = ({ ...props }) => {
   const [searchParams] = useSearchParams();
   const projectDetails = searchParams.get("projectDetails")?.split(",");
   const projectId = projectDetails?.length ? JSON.parse(projectDetails[0]) : null;
-  const customerId = projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
-  const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
 
   const [docsLoaded, setDocsLoaded] = useState(true);
   const specGptUser = localStorage.getItem("isSpecGptUser") === "true";
@@ -47,18 +45,9 @@ const Header = ({ ...props }) => {
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleNavRedirect = (redirectTo) => {
-    const redirectUrl = {
-      logs: `/project-logs?projectDetails=${projectId},${customerId},${logType},${searchParams.get("projectName") || props?.title}`,
-      collab: `/collaboration-hub?projectDetails=${projectId},${customerId},${logType},${searchParams.get("projectName") || props?.title}`,
-      specGpt: `/spec-gpt?projectDetails=${projectId},${customerId},${logType},${searchParams.get("projectName") || props?.title}`,
-    };
-    navigate(redirectUrl[redirectTo]);
-  };
-
   return (
     <>
-    <div className={props.breadcrumb === "Collaboration Hub" ? "header-wrapper collab-wrapper" : "header-wrapper-swap"}>
+    <div className="header-wrapper-swap">
       <div className="header-swap">
         <div className="main-wrapper">
           <div className="breadcrumb-wrap">
@@ -134,45 +123,9 @@ const Header = ({ ...props }) => {
       )}
     </div>
     
-    {props.navBtn && (
-        <div className={`header-center pt-0`} style={localStorage.getItem("roleId") === "7" ? { width: "58%", justifyContent: "initial" } : { width: "100%" }}>
-          <button
-            type="button"
-            className={`btn-normal ${props.navBtn !== "logs" ? "" : "btn-active"} ${props.btnSize === "small" ? "btn-small" : ""}`}
-            onClick={() => (props.navBtn !== "logs" ? handleNavRedirect("logs") : null)}
-            disabled={specGptUser}
-          >
-            Submittal Log
-          </button>
-          {/* <button
-            type="button"
-            className={`btn-normal ${props.navBtn !== "collab" ? "" : "btn-active"} ${props.btnSize === "small" ? "btn-small" : ""}`}
-            onClick={() => (props.navBtn !== "collab" ? handleNavRedirect("collab") : null)}
-            disabled={specGptUser}
-          >
-            Collab Hub
-          </button>
-          <Tooltip disableHoverListener={docsLoaded} title={<span style={{ fontSize: "14px" }}>Documents are being processed, SpecGPT will be available shortly</span>} placement="right-end" arrow>
-            <button
-              type="button"
-              className={`btn-normal spec-btn-disabled ${props.navBtn !== "specGpt" ? "" : "btn-active"} ${props.btnSize === "small" ? "btn-small" : ""}`}
-              style={props.navBtn === "collab" ? { marginLeft: "4px" } : { marginLeft: "0" }}
-              onClick={() => (props.navBtn !== "specGpt" ? handleNavRedirect("specGpt") : null)}
-              disabled={!docsLoaded}
-            > */}
-              {/* <a
-                href="https://specgpt.ai/chat"
-                target="_blank"
-                rel="noreferrer"
-              > */}
-              {/* Spec GPT */}
-              {/* </a> */}
-            {/* </button>
-          </Tooltip> */}
-        </div>
-      )}
+    <div className="header-center pt-0">
+    </div>
     </>
-    
   );
 };
 

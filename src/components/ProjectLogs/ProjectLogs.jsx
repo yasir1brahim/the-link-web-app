@@ -837,35 +837,20 @@ const ProjectLogs = () => {
                   rowsPerPage={rowsPerPage}
                 />
                 {pdfData.url && (
-                  <div className="left-paginator table-footer-content logs-pagination">
-                    <Pagination
-                      totalItems={totalCount}
-                      fetchData={fetchLogData}
-                      filterValues={filterValues}
-                      rowsPerPage={rowsPerPage}
-                      setRowsPerPage={setRowsPerPage}
-                      page={page}
-                      setPage={setPage}
-                    />
-                  </div>
-                )}
-                {pdfData.url && (
                   <PdfWrapper pdfData={pdfData} setPdfData={setPdfData} />
                 )}
               </div>
-              {!pdfData.url && (
-                <div className="table-footer-content logs-pagination">
-                  <Pagination
-                    totalItems={totalCount}
-                    fetchData={fetchLogData}
-                    filterValues={filterValues}
-                    rowsPerPage={rowsPerPage}
-                    setRowsPerPage={setRowsPerPage}
-                    page={page}
-                    setPage={setPage}
-                  />
-                </div>
-              )}
+              <div className="table-footer-content logs-pagination">
+                <Pagination
+                  totalItems={totalCount}
+                  fetchData={fetchLogData}
+                  filterValues={filterValues}
+                  rowsPerPage={rowsPerPage}
+                  setRowsPerPage={setRowsPerPage}
+                  page={page}
+                  setPage={setPage}
+                />
+              </div>
               {/* {state.project?.type === 'Submittal' && (
                  
                   <SubmittalTable

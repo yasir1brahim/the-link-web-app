@@ -47,13 +47,22 @@ const LogsPagination = ({
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
       <FormControl sx={{ minWidth: 80 }}>
-        <InputLabel id="demo-simple-select-autowidth-label">Rows</InputLabel>
+        <InputLabel id="rows-per-page-select-autowidth-label">Rows</InputLabel>
         <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
+          labelId="rows-per-page-select-label"
+          id="rows-per-page-select"
           value={rowsPerPage}
           label="Rows per page"
           onChange={(e) => handleChangeRowsPerPage(e)}
+          sx={{
+            '.MuiSelect-select': {
+              padding: 1,
+            },
+            '.MuiOutlinedInput-input': {
+              padding: 1,
+              textAlign: 'center'
+            },
+          }}
         >
           <MenuItem value={10}>10</MenuItem>
           <MenuItem value={20}>20</MenuItem>

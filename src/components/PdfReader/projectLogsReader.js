@@ -191,7 +191,7 @@ const ProjectLogsReader = ({ url, textLoc, docId, setPdfData }) => {
   return (
     <>
       <div
-        style={{ height: "calc(72vh - 75px)", position: "relative" }}
+        style={{ height: "calc(100vh - 295px)", position: "relative" }}
         ref={viewer}
         id="pdf-div"
         className="full-window-div  h-screen"

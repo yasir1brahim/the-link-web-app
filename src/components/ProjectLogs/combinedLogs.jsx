@@ -274,7 +274,7 @@ export default function CombinedLogs(props) {
     <div
       className="l-table-wrapper"
       style={{
-        maxHeight: "calc(90vh - 320px)"
+        maxHeight: "calc(100vh - 295px)"
       }}
     >
       <table className="table">
