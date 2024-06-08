@@ -1,7 +1,10 @@
-name: Deploy Frontend to QA
+name: Deploy Frontend to Production
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 env:
   AWS_REGION: us-east-1
@@ -11,7 +14,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: production
+    environment: qa
     defaults:
       run:
         working-directory: .
