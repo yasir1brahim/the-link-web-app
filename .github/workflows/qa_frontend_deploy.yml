@@ -1,4 +1,4 @@
-name: Deploy Frontend to Production
+name: Deploy Frontend to QA
 
 on:
   workflow_dispatch:
