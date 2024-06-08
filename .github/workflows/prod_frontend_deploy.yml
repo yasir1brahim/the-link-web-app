@@ -1,0 +1,44 @@
+name: Deploy Frontend to Production
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1
+  CI: false
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: qa
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build app
+        run: npm run build
+
+      - name: Upload to S3
+        uses: kersvers/s3-sync-with-cloudfront-invalidation@v1.0.0
+        env:
+          SOURCE_DIR: ./build
+          AWS_S3_BUCKET: ${{ vars.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
