@@ -23,7 +23,6 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [projectType, setProjectType] = useState("commercial");
   const [dateError, setDateError] = useState({ startError: "", endError: "" });
   // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
   const [employeeList, setEmployeeList] = useState([]);
@@ -110,7 +109,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
             customer_id: customer?.customer_id || customerID || localStorage.getItem("userId"),
             status: "Open",
             employee_list: selectedEmployeeList.map((employee) => employee.value),
-            project_type: projectType,
+            project_type: "commercial",
             visibility_type: visibilityType,
           },
         });
@@ -140,7 +139,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       <div className={"create-new-lproject " + (modal ? "show-lproject-popup" : "")}>
         <div className="lproject-backdrop"></div>
         <div className="lproject-content">
-          <div className="lproject-header">
+          <div className="lproject-header" style={{ marginBottom: "0px" }}>
             <h5>Create New Project</h5>
             <span className="close" onClick={toggleModal}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -157,27 +156,6 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
             <form className="create-project-form">
               <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
                 <div className="customer-profile">
-                  <div className="project-type">
-                    <p className="">Project type</p>
-                  </div>
-                  <div className="radio-selector">
-                    <input type="radio" name="ticketHeading" id="ticketHeading" onClick={() => setProjectType("commercial")} defaultChecked={projectType === "commercial"} />
-                    <label htmlFor="ticketHeading">Commercial Project</label>
-                  </div>
-                  <div className="col-6">
-                    <div className="text-label-value">
-                      <div className="text-label">{customer?.address}</div>
-                    </div>
-                  </div>
-                  <div className="radio-selector">
-                    <input type="radio" name="ticketHeading" id="ticketHeading" onClick={() => setProjectType("ufgs")} defaultChecked={projectType === "ufgs"} />
-                    <label htmlFor="ticketHeading">Military/Gov Project(UFGS Specs)</label>
-                  </div>
-                  <div className="col-6">
-                    <div className="text-label-value">
-                      <div className="text-label">{customer?.contact_number}</div>
-                    </div>
-                  </div>
                   {/* <div className="col-6">
                       <div className="custom-control custom-checkbox">
                         <input
@@ -201,7 +179,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
                     </div> */}
                 </div>
               </div>
-              <div className="create-project-content">
+              <div className="create-project-content" style={{ marginTop: "0px" }}>
                 <div className="form-group">
                   <input
                     type="text"
