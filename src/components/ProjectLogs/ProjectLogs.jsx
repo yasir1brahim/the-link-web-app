@@ -399,7 +399,7 @@ const ProjectLogs = () => {
       setLoading(false);
       handleError(error);
     });
-  }, [state, pageRefresh, projectId]);
+  }, [state, pageRefresh, projectId, documentData]);
 
   // useEffect(()=>{
   //   Afer edit of a column in the selected view below code updates the value of the field
@@ -613,7 +613,7 @@ const ProjectLogs = () => {
           navBtn={"logs"}
         />
         {documentIsProcessing(documentData) && (
-          <div className="alert alert-info" role="alert">
+          <div className="alert" style={{ backgroundColor: "#D5E73E" }} role="alert">
             Documents are being processed...
           </div>
         )}
