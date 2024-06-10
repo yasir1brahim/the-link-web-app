@@ -365,7 +365,6 @@ const ProjectLogs = () => {
   };
   const fetchLogData = async (page, itemsPerPage, filters, search) => {
     setLoading(true);
-    setErrorMessage("Fetching data...");
     const response = await axiosInstance({
       method: "post",
       url: "/filter_logs",
