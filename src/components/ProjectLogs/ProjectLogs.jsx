@@ -9,7 +9,6 @@ import {
   DropdownItem,
 } from "reactstrap";
 import { ReactComponent as Trash } from "../../assets/images/trash.svg";
-import { Refresh } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { toast, ToastContainer } from "react-toastify";
@@ -113,28 +112,42 @@ const ProjectLogs = () => {
     }
   }, [modal]);
 
-  const fetchProjectData = async () => {
-    setLoading(true);
-    const response = await axiosInstance({
-      method: "get",
-      url: `/project_data/${projectId || state.project?.project_id}`,
-    });
-    setDocParsed(response.data.doc_parsed);
-    setDocumentData(response.data.document_details);
-    setLoading(false);
-    console.log(response.data.message);
-  };
-
-
   // get the number of documents uploaded
   useEffect(() => {
-    
-    fetchProjectData().catch((error) => {
+    const fetchData = async () => {
+      setLoading(true);
+      const response = await axiosInstance({
+        method: "get",
+        url: `/project_data/${projectId || state.project?.project_id}`,
+      });
+      setDocParsed(response.data.doc_parsed);
+      setDocumentData(response.data.document_details);
+      setLoading(false);
+      console.log(response.data.message);
+    };
+
+    fetchData().catch((error) => {
       setLoading(false);
       handleError(error);
     });
   }, [state?.project, pageRefresh, projectId]);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      axiosInstance({
+        method: "get",
+        url: `/project_data/${projectId || state.project?.project_id}`,
+      }).then(response => {
+        setDocumentData(response.data.document_details).then(() => {
+          fetchLogData(0, rowsPerPage);
+        });
+      }).catch(error => {
+        handleError(error);
+      });
+    }, 15000); // 15000 milliseconds = 15 seconds
+  
+    return () => clearInterval(intervalId); // This will clear the interval when the component unmounts
+  }, [projectId, state.project?.project_id]); // Dependencies array, re-run the effect if these values change
 
   useEffect(() => {
     if (!modal) {
@@ -352,7 +365,6 @@ const ProjectLogs = () => {
   };
   const fetchLogData = async (page, itemsPerPage, filters, search) => {
     setLoading(true);
-    setErrorMessage("Fetching data...");
     const response = await axiosInstance({
       method: "post",
       url: "/filter_logs",
@@ -889,7 +901,6 @@ const ProjectLogs = () => {
         draggable
         pauseOnHover
       />
-      {isLoading && <Loader showComponentLoader={true} />}
       <UploadDocuments
         modal={modal}
         toggleModal={toggleModal}
@@ -1038,10 +1049,7 @@ const ProjectLogs = () => {
         className="new-customer modal-xl"
       >
         <ModalHeader toggle={toggleDocumentStatusModal}>
-          <div className="d-flex">
-            <span>Document Status</span>
-            <span style={{ cursor: "pointer", color: "#0E2332", textDecoration: "underline" }} className="ml-5" onClick={fetchProjectData}><Refresh className="mr-2"/>Refresh</span>
-          </div>
+          Document Status
         </ModalHeader>
         <ModalBody>
           <DocumentStatus documentData={documentData} />

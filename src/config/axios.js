@@ -3,9 +3,7 @@ import axios from 'axios';
 const axiosInstance = axios.create({
   baseURL: window.location.href.includes('https://app.thelink.ai')
     ? 'https://log-manager-api-prod.thelink.ai'
-    : window.location.href.includes('http://localhost:3000')
-    ? 'http://localhost:8000'
-    : 'https://app-qa-api.thelink.ai',
+    : 'https://app-qa-api.thelink.ai'
   // baseURL: 'https://log-manager-api-prod.thelink.ai',
   // headers: {
   //   Authorization: `Bearer ${localStorage.getItem('token')}`,
