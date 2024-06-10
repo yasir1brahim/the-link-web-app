@@ -203,6 +203,7 @@ const EditProject = ({
                           id="ticketHeading"
                           onClick={() => setProjectType("commercial")}
                           checked={projectType === "commercial"}
+                          onChange={() => {}}
                         />
                         <label htmlFor="ticketHeading">Commercial Project</label>
                       </div>
@@ -218,6 +219,7 @@ const EditProject = ({
                           id="ticketHeading"
                           onClick={() => setProjectType("ufgs")}
                           checked={projectType === "ufgs"}
+                          onChange={() => {}}
                         />
                         <label htmlFor="ticketHeading">
                           Military/Gov Project(UFGS Specs)

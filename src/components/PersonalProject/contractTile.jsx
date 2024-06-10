@@ -2,6 +2,7 @@ import { ArchiveIcon } from "../shared/icons/archiveIcon";
 import { EditIcon } from "../shared/icons/editIcon";
 import { LaunchIcon } from "../shared/icons/launchIcon";
 import { UploadIcon } from "../shared/icons/uploadIcon";
+import { Tooltip } from "reactstrap";
 
 const ContractTile = ({
   ifSpecsUploaded,
@@ -16,6 +17,15 @@ const ContractTile = ({
   handleEdit,
   toggleArchiveProjectModal,
   setArchiveProject,
+  index,
+  launchTooltip,
+  setLaunchTooltip,
+  uploadTooltip,
+  setUploadTooltip,
+  editTooltip,
+  setEditTooltip,
+  archiveTooltip,
+  setArchiveTooltip,
 }) => {
   const generateInitials = (name) => {
     // Split the name into words
@@ -116,24 +126,85 @@ const ContractTile = ({
             onClick={() => handleLaunch(project)}
             disabled={!ifSpecsUploaded}
             style={{ cursor: "pointer" }}
+            id={"launch-tooltip" + index + 1}
           >
             <LaunchIcon />
           </span>
-          {toggleUploadSpecsButton ? (
-            <span
-              onClick={() => {
-                toggleUploadSpecsModal();
-                setSpecUploadProject(project);
-              }}
-              style={{ cursor: "pointer" }}
+          <span>
+            <Tooltip
+              placement="left"
+              target={"launch-tooltip" + index + 1}
+              isOpen={launchTooltip === index + 1}
+              toggle={() =>
+                setLaunchTooltip(
+                  launchTooltip
+                    ? launchTooltip === index + 1
+                      ? null
+                      : index + 1
+                    : index + 1,
+                )
+              }
             >
-              <UploadIcon />
-            </span>
+              Launch Project
+            </Tooltip>
+          </span>
+          {toggleUploadSpecsButton ? (
+            <>
+              <span
+                onClick={() => {
+                  toggleUploadSpecsModal();
+                  setSpecUploadProject(project);
+                }}
+                style={{ cursor: "pointer" }}
+                id={"upload-tooltip" + index + 1}
+              >
+                <UploadIcon />
+              </span>
+              <span>
+                <Tooltip
+                  placement="left"
+                  target={"upload-tooltip" + index + 1}
+                  isOpen={uploadTooltip === index + 1}
+                  toggle={() =>
+                    setUploadTooltip(
+                      uploadTooltip
+                        ? uploadTooltip === index + 1
+                          ? null
+                          : index + 1
+                        : index + 1,
+                    )
+                  }
+                >
+                  Upload Document
+                </Tooltip>
+              </span>
+            </>
           ) : null}
           {roleId !== "6" && roleId !== "7" && (
             <>
-              <span onClick={() => handleEdit(project)} style={{ cursor: "pointer" }}>
+              <span
+                onClick={() => handleEdit(project)} style={{ cursor: "pointer" }}
+                id={"edit-tooltip" + index + 1}
+              >
                 <EditIcon />
+              </span>
+              <span>
+                <Tooltip
+                  placement="left"
+                  target={"edit-tooltip" + index + 1}
+                  isOpen={editTooltip === index + 1}
+                  toggle={() =>
+                    setEditTooltip(
+                      editTooltip
+                        ? editTooltip === index + 1
+                          ? null
+                          : index + 1
+                        : index + 1,
+                    )
+                  }
+                >
+                  Edit Project
+                </Tooltip>
               </span>
               <span
                 onClick={() => {
@@ -141,8 +212,27 @@ const ContractTile = ({
                   setArchiveProject(project)
                 }}
                 style={{ cursor: "pointer" }}
+                id={"archive-tooltip" + index + 1}
               >
                 <ArchiveIcon />
+              </span>
+              <span>
+                <Tooltip
+                  placement="left"
+                  target={"archive-tooltip" + index + 1}
+                  isOpen={archiveTooltip === index + 1}
+                  toggle={() =>
+                    setArchiveTooltip(
+                      archiveTooltip
+                        ? archiveTooltip === index + 1
+                          ? null
+                          : index + 1
+                        : index + 1,
+                    )
+                  }
+                >
+                  Archive Project
+                </Tooltip>
               </span>
             </>
           )}
