@@ -138,11 +138,13 @@ const ProjectLogs = () => {
         method: "get",
         url: `/project_data/${projectId || state.project?.project_id}`,
       }).then(response => {
-        setDocumentData(response.data.document_details);
+        setDocumentData(response.data.document_details).then(() => {
+          fetchLogData(0, rowsPerPage);
+        });
       }).catch(error => {
         handleError(error);
       });
-    }, 10000); // 10000 milliseconds = 10 seconds
+    }, 15000); // 15000 milliseconds = 15 seconds
   
     return () => clearInterval(intervalId); // This will clear the interval when the component unmounts
   }, [projectId, state.project?.project_id]); // Dependencies array, re-run the effect if these values change
@@ -900,7 +902,6 @@ const ProjectLogs = () => {
         draggable
         pauseOnHover
       />
-      {isLoading && <Loader showComponentLoader={true} />}
       <UploadDocuments
         modal={modal}
         toggleModal={toggleModal}
