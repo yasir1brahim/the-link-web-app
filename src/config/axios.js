@@ -27,7 +27,8 @@ axiosInstance.interceptors.response.use(
   (error) => {
     // return error.response
     if (error?.response?.status === 401) {
-      window.location = '/';
+      if (error?.response?.data?.message !== 'Incorrect email or password')
+        window.location = '/';
     }
     throw error;
   }
