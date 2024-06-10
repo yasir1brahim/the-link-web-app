@@ -35,7 +35,10 @@ const PersonalProject = ({
   const toggleEditModal = () => setEditModal(!editModal);
   const [project, setProject] = useState({});
   const [archiveProject, setArchiveProject] = useState(null);
-
+  const [launchTooltip, setLaunchTooltip] = useState(null);
+  const [uploadTooltip, setUploadTooltip] = useState(null);
+  const [editTooltip, setEditTooltip] = useState(null);
+  const [archiveTooltip, setArchiveTooltip] = useState(null);
   const handleEdit = (project) => {
     setProject(project);
     toggleEditModal();
@@ -157,6 +160,15 @@ const PersonalProject = ({
                       handleEdit={handleEdit}
                       toggleArchiveProjectModal={toggleArchiveProjectModal}
                       setArchiveProject={setArchiveProject}
+                      index={index}
+                      launchTooltip={launchTooltip}
+                      setLaunchTooltip={setLaunchTooltip}
+                      uploadTooltip={uploadTooltip}
+                      setUploadTooltip={setUploadTooltip}
+                      editTooltip={editTooltip}
+                      setEditTooltip={setEditTooltip}
+                      archiveTooltip={archiveTooltip}
+                      setArchiveTooltip={setArchiveTooltip}
                     />
                   </div>
                 );

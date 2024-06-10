@@ -22,6 +22,7 @@ import { EditIcon } from "../shared/icons/editIcon";
 import { UploadIcon } from "../shared/icons/uploadIcon";
 import { LaunchIcon } from "../shared/icons/launchIcon";
 import { ArchiveProjectModal } from "../PersonalProject/archiveProjectModal";
+import { Tooltip } from "reactstrap";
 
 const CustomerProjects = ({
   toggleSlider,
@@ -49,7 +50,10 @@ const CustomerProjects = ({
   const toggleEditModal = () => setEditModal(!editModal);
   const toggleEmployeeModal = () => setEmployeeModal(!employeeModal);
   const [archiveProject, setArchiveProject] = useState(null);
-
+  const [launchTooltip, setLaunchTooltip] = useState(null);
+  const [uploadTooltip, setUploadTooltip] = useState(null);
+  const [editTooltip, setEditTooltip] = useState(null);
+  const [archiveTooltip, setArchiveTooltip] = useState(null);
   const [project, setProject] = useState({});
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -367,30 +371,112 @@ const CustomerProjects = ({
                           <div className="action-wrapper">
                             <span
                               onClick={() => handleLaunch(project)}
+                              id={"launch-tooltip" + index + 1}
                             >
                               <LaunchIcon />
                             </span>
-                            {toggleUploadSpecsButton ? (
-                              <span
-                                onClick={() => {
-                                  toggleUploadSpecsModal();
-                                  setSpecUploadProject(project);
-                                }}
-                                style={{ cursor: "pointer" }}
+                            <span>
+                              <Tooltip
+                                placement="left"
+                                target={"launch-tooltip" + index + 1}
+                                isOpen={launchTooltip === index + 1}
+                                toggle={() =>
+                                  setLaunchTooltip(
+                                    launchTooltip
+                                      ? launchTooltip === index + 1
+                                        ? null
+                                        : index + 1
+                                      : index + 1,
+                                  )
+                                }
                               >
-                                <UploadIcon />
-                              </span>
+                                Launch Project
+                              </Tooltip>
+                            </span>
+                            {toggleUploadSpecsButton ? (
+                              <>
+                                <span
+                                  onClick={() => {
+                                    toggleUploadSpecsModal();
+                                    setSpecUploadProject(project);
+                                  }}
+                                  style={{ cursor: "pointer" }}
+                                  id={"upload-tooltip" + index + 1}
+                                >
+                                  <UploadIcon />
+                                </span>
+                                <span>
+                                  <Tooltip
+                                    placement="left"
+                                    target={"upload-tooltip" + index + 1}
+                                    isOpen={uploadTooltip === index + 1}
+                                    toggle={() =>
+                                      setUploadTooltip(
+                                        uploadTooltip
+                                          ? uploadTooltip === index + 1
+                                            ? null
+                                            : index + 1
+                                          : index + 1,
+                                      )
+                                    }
+                                  >
+                                    Upload Document
+                                  </Tooltip>
+                                </span>
+                              </>
                             ) : null}
                             {roleId !== "6" && roleId !== "7" && (
                               <>
-                                <span onClick={() => handleEdit(project)}>
+                                <span
+                                  onClick={() => handleEdit(project)}
+                                  id={"edit-tooltip" + index + 1}
+                                >
                                   <EditIcon />
                                 </span>
-                                <span onClick={() => {
-                                  toggleArchiveProjectModal()
-                                  setArchiveProject(project)
-                                }}>
+                                <span>
+                                  <Tooltip
+                                    placement="left"
+                                    target={"edit-tooltip" + index + 1}
+                                    isOpen={editTooltip === index + 1}
+                                    toggle={() =>
+                                      setEditTooltip(
+                                        editTooltip
+                                          ? editTooltip === index + 1
+                                            ? null
+                                            : index + 1
+                                          : index + 1,
+                                      )
+                                    }
+                                  >
+                                    Edit Project
+                                  </Tooltip>
+                                </span>
+                                <span
+                                  onClick={() => {
+                                    toggleArchiveProjectModal()
+                                    setArchiveProject(project)
+                                  }}
+                                  id={"archive-tooltip" + index + 1}
+                                >
                                   <ArchiveIcon />
+                                </span>
+                                <span>
+                                  <Tooltip
+                                    placement="left"
+                                    target={"archive-tooltip" + index + 1}
+                                    isOpen={archiveTooltip === index + 1}
+                                    toggle={() =>
+                                      setArchiveTooltip(
+                                        archiveTooltip
+                                          ? archiveTooltip === index + 1
+                                            ? null
+                                            : index + 1
+                                          : index + 1,
+                                      )
+                                    }
+                                  >
+                                    Archive Project
+                                  </Tooltip>
                                 </span>
                               </>
                             )}
