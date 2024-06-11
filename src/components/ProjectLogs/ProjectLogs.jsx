@@ -102,6 +102,7 @@ const ProjectLogs = () => {
     item_desc: [],
     classification: [],
     sd_title: [],
+    type: []
   });
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
   const [page, setPage] = React.useState(1);
@@ -363,8 +364,20 @@ const ProjectLogs = () => {
       }
     }
   };
-  const fetchLogData = async (page, itemsPerPage, filters, search) => {
+  const fetchLogData = async (page, itemsPerPage, filters_, search) => {
     setLoading(true);
+    let filters = {};
+    if (
+      Object.values(filterValues)
+        .map((value) => (value.length ? true : false))
+        .includes(true)
+    ) {
+      Object.keys(filterValues).forEach((key) =>
+        filterValues[key].length
+          ? (filters = { ...filters, [key]: filterValues[key] })
+          : null,
+      );
+    }
     const response = await axiosInstance({
       method: "post",
       url: "/filter_logs",
@@ -754,8 +767,8 @@ const ProjectLogs = () => {
                         onClick={handleClearSearch}
                       >
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M5 5L15 15" stroke="#cbcbcb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M15 5L5 15" stroke="#cbcbcb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M5 5L15 15" stroke="#cbcbcb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M15 5L5 15" stroke="#cbcbcb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </span>
                     </div>
