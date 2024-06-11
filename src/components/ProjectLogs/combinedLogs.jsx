@@ -52,6 +52,13 @@ export default function CombinedLogs(props) {
     type: "",
     classification: "",
   });
+  const [formValid, setFormValid] = useState({
+    spec_section: true,
+    para_no: true,
+    para_context: true,
+    type: true,
+    item_desc: true,
+  });
 
   const [showMore, setModal] = useState(null);
   // const toggleShowMore = () => setModal(!showMore);
@@ -63,8 +70,27 @@ export default function CombinedLogs(props) {
     // setDateApproved('');
   };
 
-  const handleUpdateLog = async (isFullEdit) => {
+  const handleUpdateLog = async () => {
     try {
+      setFormValid({
+        spec_section: true,
+        para_no: true,
+        para_context: true,
+        type: true,
+        item_desc: true,
+      });
+      if (rowData.spec_section === "" || rowData.para_no === "" || rowData.para_context === "" || rowData.type === "" || rowData.item_desc === "") {
+        setFormValid({
+          ...formValid,
+          spec_section: rowData.spec_section === "" ? false : true,
+          para_no: rowData.para_no === "" ? false : true,
+          para_context: rowData.para_context === "" ? false : true,
+          type: rowData.type === "" ? false : true,
+          item_desc: rowData.item_desc === "" ? false : true,
+        })
+        return
+      }
+
       setEditRow("");
       if (newRowIndex) {
         await axiosInstance({
@@ -95,9 +121,9 @@ export default function CombinedLogs(props) {
             // phase: null,
             // sd_no: rowData?.sd_no,
             // div_no: rowData?.div_no,
-            // para_no: rowData.para_no,
+            para_no: rowData.para_no,
             project_id: rowData.project_id,
-            spec_section: isFullEdit ? rowData.spec_section : undefined,
+            spec_section: rowData.spec_section,
             // status: statusValue?.length ? statusValue[0].value : '',
             submittal_heading: rowData.type,
             para_context: rowData.para_context,
@@ -885,12 +911,10 @@ export default function CombinedLogs(props) {
                     editRow === index ? "activeTh" : ""
                   } reduce-height`}
                 >
-                  {editRow === index &&
-                  (newRowIndex === index || log.user_id !== 1) &&
-                  JSON.parse(log.full_edit) ? (
+                  {editRow === index ? (
                     <input
                       placeholder="Enter"
-                      className="form-control"
+                      className={`form-control ${formValid.spec_section ? '' : 'form-required'}`}
                       type="text"
                       value={rowData.spec_section}
                       // style={{ border: 'none' }}
@@ -927,21 +951,20 @@ export default function CombinedLogs(props) {
                       editRow === index ? "activeTh" : ""
                     } reduce-height`}
                   >
-                    {log.para_no}
-                    {/* {editRow === index ? (
-                    <input
-                      placeholder="Enter"
-                      className="form-control"
-                      type="text"
-                      value={rowData.para_no}
-                      // style={{ border: 'none' }}
-                      onChange={(e) =>
-                        setRowData({ ...rowData, para_no: e.target.value })
-                      }
-                    />
-                  ) : (
-                    log.para_no
-                  )} */}
+                    {editRow === index ? (
+                      <input
+                        placeholder="Enter"
+                        className={`form-control ${formValid.para_no ? '' : 'form-required'}`}
+                        type="text"
+                        value={rowData.para_no}
+                        // style={{ border: 'none' }}
+                        onChange={(e) =>
+                          setRowData({ ...rowData, para_no: e.target.value })
+                        }
+                      />
+                    ) : (
+                      log.para_no
+                    )}
                   </td>
                 )}
                 {props.projectType !== "ufgs" && (
@@ -953,7 +976,7 @@ export default function CombinedLogs(props) {
                     {editRow === index ? (
                       <input
                         placeholder="Enter"
-                        className="form-control"
+                        className={`form-control ${formValid.type ? '' : 'form-required'}`}
                         type="text"
                         value={rowData.type}
                         // style={{ border: 'none' }}
@@ -977,7 +1000,7 @@ export default function CombinedLogs(props) {
                   {editRow === index ? (
                     <input
                       placeholder="Enter"
-                      className="form-control"
+                      className={`form-control ${formValid.item_desc ? '' : 'form-required'}`}
                       type="text"
                       value={rowData.item_desc}
                       // style={{ border: 'none' }}
@@ -1048,7 +1071,7 @@ export default function CombinedLogs(props) {
                       {editRow === index && JSON.parse(log.full_edit) ? (
                         <input
                           placeholder="Enter"
-                          className="form-control"
+                          className={`form-control ${formValid.para_context ? '' : 'form-required'}`}
                           type="text"
                           value={rowData.para_context}
                           // style={{ border: 'none' }}
@@ -1062,7 +1085,7 @@ export default function CombinedLogs(props) {
                       ) : editRow === index ? (
                         <input
                           placeholder="Enter"
-                          className="form-control"
+                          className={`form-control ${formValid.para_context ? '' : 'form-required'}`}
                           type="text"
                           value={rowData.para_context}
                           // style={{ border: 'none' }}
@@ -1195,7 +1218,7 @@ export default function CombinedLogs(props) {
                           <>
                             <div
                               onClick={() =>
-                                handleUpdateLog(JSON.parse(log.full_edit))
+                                handleUpdateLog()
                               }
                               style={{ marginRight: "5px", cursor: "pointer" }}
                             >
@@ -1219,6 +1242,13 @@ export default function CombinedLogs(props) {
                               style={{ marginRight: "5px", cursor: "pointer" }}
                               onClick={() => {
                                 setEditRow("");
+                                setFormValid({
+                                  spec_section: true,
+                                  para_no: true,
+                                  para_context: true,
+                                  type: true,
+                                  item_desc: true,
+                                });
                                 setRowData({
                                   comments: "",
                                   date_approved: "",
