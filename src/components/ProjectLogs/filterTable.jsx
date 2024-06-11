@@ -154,14 +154,16 @@ export const FilterTable = (props) => {
                       )
                       .map((filterVal, index) => {
                         return (
-                          <>
+                          <div key={index}>
                             <input
                               type="checkbox"
                               id={index}
                               value={filterVal}
-                              checked={props.filterValues[
-                                props?.filterColumn
-                              ].includes(filterVal)}
+                              checked={
+                                props.filterValues[
+                                  props?.filterColumn
+                                ].includes(filterVal)
+                              }
                               name={filterVal}
                               onChange={() => handleSelect(filterVal)}
                             />
@@ -169,7 +171,7 @@ export const FilterTable = (props) => {
                               {filterVal}
                             </label>
                             <br />
-                          </>
+                          </div>
                         );
                       })
                   : null}
