@@ -207,38 +207,6 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
                 </div>
                 <div style={{ gap: "25px" }} className="d-flex">
                   <div className="form-group">
-                    <SelectDropdown
-                      label={"Lead Contact"}
-                      // labelKey="name"
-                      setSelected={setLeadContact}
-                      value={leadContact.label}
-                      selected={leadContact.label}
-                      options={employeeList.map((project) => {
-                        return {
-                          value: project.emp_id,
-                          label: project.name,
-                          email: project.emp_email,
-                        };
-                      })}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="projectLeadEmail"
-                      aria-describedby="projectLeadEmail"
-                      placeholder="Enter"
-                      value={leadContact[0] ? leadContact[0].email : leadContact.email}
-                      disabled
-                    />
-                    <label className="text-label" htmlFor="projectLeadEmail">
-                      Email Address(Lead Contact)
-                    </label>
-                  </div>
-                </div>
-                <div style={{ gap: "25px" }} className="d-flex">
-                  <div className="form-group">
                     <DateSelector isClearable={false} placeholderText="Start Date" labelText="Start Date" onChange={setStartDate} selected={startDate} />
                     {dateError.startError && (
                       <small className="form-error" style={{ color: "red" }}>
