@@ -104,7 +104,7 @@ const ProjectLogs = () => {
     sd_title: [],
     type: []
   });
-  const [rowsPerPage, setRowsPerPage] = React.useState(25);
+  const [rowsPerPage, setRowsPerPage] = React.useState(20);
   const [page, setPage] = React.useState(1);
 
   useEffect(() => {
