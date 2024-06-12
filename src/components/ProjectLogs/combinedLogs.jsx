@@ -325,6 +325,9 @@ export default function CombinedLogs(props) {
               </div>
             </th>
 
+            <th className="text-center small-font">Actions</th>
+
+
             <th className="small-font">
               <span className="has-sorting">
                 <div className="d-flex">
@@ -868,7 +871,6 @@ export default function CombinedLogs(props) {
             <th className="log-description">
               <span>Comments</span>
             </th> */}
-            <th className="text-center small-font">Source</th>
           </tr>
         </thead>
         <tbody style={{ fontSize: "12px" }}>
@@ -903,6 +905,243 @@ export default function CombinedLogs(props) {
                         htmlFor={`ticketRow-${index}`}
                       ></label>
                     </div>
+                  </div>
+                </td>
+
+                <td
+                  className={`${
+                    editRow === index ? "activeTh" : ""
+                  } reduce-height`}
+                >
+                  <div className="action-items">
+                    {
+                      <>
+                        {editRow === index ? (
+                          <>
+                            <div
+                              onClick={() =>
+                                handleUpdateLog()
+                              }
+                              style={{ marginRight: "5px", cursor: "pointer" }}
+                            >
+                              <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 14 14"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M12.4162 3.84491L5.51162 10.7497L1.58325 6.82137"
+                                  stroke="#2F5AA3"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            </div>
+                            <div
+                              style={{ marginRight: "5px", cursor: "pointer" }}
+                              onClick={() => {
+                                setEditRow("");
+                                setFormValid({
+                                  spec_section: true,
+                                  para_no: true,
+                                  para_context: true,
+                                  type: true,
+                                  item_desc: true,
+                                });
+                                setRowData({
+                                  comments: "",
+                                  date_approved: "",
+                                  date_issued: "",
+                                  // id: 1,
+                                  item_desc: "",
+                                  package: "",
+                                  para_context: "",
+                                  para_no: "",
+                                  project_id: "",
+                                  spec_section: "",
+                                  status: "",
+                                  type: "",
+                                });
+                                // setDateApproved('');
+                                // setDateIssued('');
+                                // setStatus({});
+                                setNewRowIndex(null);
+                                newRowIndex === index &&
+                                  props.setLogData(
+                                    deleteElement(props.logData, index),
+                                  );
+                              }}
+                            >
+                              <svg
+                                width="10"
+                                height="10"
+                                viewBox="0 0 10 10"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  clipRule="evenodd"
+                                  d="M0.244078 0.244078C0.569515 -0.0813592 1.09715 -0.0813592 1.42259 0.244078L5 3.82149L8.57741 0.244078C8.90285 -0.0813592 9.43049 -0.0813592 9.75592 0.244078C10.0814 0.569515 10.0814 1.09715 9.75592 1.42259L6.17851 5L9.75592 8.57741C10.0814 8.90285 10.0814 9.43049 9.75592 9.75592C9.43049 10.0814 8.90285 10.0814 8.57741 9.75592L5 6.17851L1.42259 9.75592C1.09715 10.0814 0.569515 10.0814 0.244078 9.75592C-0.0813592 9.43049 -0.0813592 8.90285 0.244078 8.57741L3.82149 5L0.244078 1.42259C-0.0813592 1.09715 -0.0813592 0.569515 0.244078 0.244078Z"
+                                  fill="#A32F2F"
+                                />
+                              </svg>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <span
+                              onClick={() => handleEditToggle(log, index)}
+                              style={{ cursor: "pointer" }}
+                            >
+                              <svg
+                                id={"Edit-Tooltip-" + index + 1}
+                                width="18"
+                                height="18"
+                                viewBox="0 0 18 18"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  clipRule="evenodd"
+                                  d="M0.666748 2.33332C0.666748 1.41285 1.41294 0.666657 2.33341 0.666657H8.16675C8.62698 0.666657 9.00008 1.03975 9.00008 1.49999C9.00008 1.96023 8.62698 2.33332 8.16675 2.33332H2.33341V15.6667H15.6667V9.83332C15.6667 9.37308 16.0398 8.99999 16.5001 8.99999C16.9603 8.99999 17.3334 9.37308 17.3334 9.83332V15.6667C17.3334 16.5871 16.5872 17.3333 15.6667 17.3333H2.33341C1.41295 17.3333 0.666748 16.5871 0.666748 15.6667V2.33332ZM13.4562 0.666657C13.6773 0.666614 13.8894 0.754465 14.0458 0.910863L17.0895 3.9559C17.4147 4.28131 17.4147 4.80875 17.0895 5.13416L8.47163 13.7558C8.31534 13.9121 8.10332 14 7.88225 14H4.83341C4.37318 14 4.00008 13.6269 4.00008 13.1667V10.1333C4.00008 9.91244 4.08774 9.70063 4.24381 9.54438L12.8668 0.911087C13.023 0.75463 13.2351 0.666699 13.4562 0.666657ZM13.4566 2.67898L5.66675 10.4782V12.3333H7.53696L15.3218 4.54503L13.4566 2.67898Z"
+                                  fill="#36454F"
+                                />
+                              </svg>
+                            </span>
+                            <span>
+                              <Tooltip
+                                placement="left"
+                                target={"Edit-Tooltip-" + index + 1}
+                                isOpen={editRowTooltip === index + 1}
+                                toggle={() =>
+                                  setEditRowTooltip(
+                                    editRowTooltip
+                                      ? editRowTooltip === index + 1
+                                        ? null
+                                        : index + 1
+                                      : index + 1,
+                                  )
+                                }
+                              >
+                                Edit Row
+                              </Tooltip>
+                            </span>
+                          </>
+                        )}
+                        {/* <Link
+                        style={{ fontWeight: 'normal' }}
+                        className="btn btn-secondary btn-sm"
+                        to={{ pathname: `/pdf-view`, search: `?url=${log?.doc_link}&textLoc=${log.text_loc}` }}
+                        target="_blank" >
+                        Pdf
+                      </Link> */}
+                        {pdfIndex === index ? (
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            style={{ marginRight: "5px" }}
+                            onClick={() =>
+                              props.setPdfData({
+                                url: "",
+                                textLoc: {},
+                                index: "",
+                                docId: null,
+                              })
+                            }
+                          >
+                            Close Pdf
+                          </button>
+                        ) : (
+                          newRowIndex !== index &&
+                          showPdf && (
+                            <>
+                              <span
+                                onClick={() =>
+                                  handleViewPdf(
+                                    log.doc_link,
+                                    log.text_loc,
+                                    index,
+                                    log.doc_id,
+                                  )
+                                }
+                                style={{ cursor: "pointer" }}
+                              >
+                                <svg
+                                  id={"Pdf-Tooltip-" + index + 1}
+                                  width="16"
+                                  height="20"
+                                  viewBox="0 0 16 20"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M0.5 2.50001C0.5 1.57954 1.24619 0.833344 2.16667 0.833344H10.5C10.721 0.833344 10.933 0.921141 11.0893 1.07742L15.2559 5.24409C15.4122 5.40037 15.5 5.61233 15.5 5.83334V17.5C15.5 18.4205 14.7538 19.1667 13.8333 19.1667H2.16667C1.2462 19.1667 0.5 18.4205 0.5 17.5V2.50001ZM10.1548 2.50001H2.16667V17.5H13.8333V6.17852L10.1548 2.50001ZM4.66667 7.50001C4.66667 7.03977 5.03976 6.66668 5.5 6.66668H10.5C10.9602 6.66668 11.3333 7.03977 11.3333 7.50001V10.8299C11.3333 11.2899 10.9606 11.6629 10.5006 11.6632L6.33333 11.6661V14.1667C6.33333 14.6269 5.96024 15 5.5 15C5.03976 15 4.66667 14.6269 4.66667 14.1667V7.50001ZM6.33593 9.99943L9.66667 9.99713V8.33334H6.3342L6.33593 9.99943Z"
+                                    fill="#36454F"
+                                  />
+                                </svg>
+                              </span>
+                              <span>
+                                <Tooltip
+                                  placement="top"
+                                  target={"Pdf-Tooltip-" + index + 1}
+                                  isOpen={pdfTooltip === index + 1}
+                                  toggle={() =>
+                                    setPdfTooltip(
+                                      pdfTooltip
+                                        ? pdfTooltip === index + 1
+                                          ? null
+                                          : index + 1
+                                        : index + 1,
+                                    )
+                                  }
+                                >
+                                  View Pdf
+                                </Tooltip>
+                              </span>
+                            </>
+                          )
+                        )}
+                        {!props.selectedLogData.length && (
+                          <>
+                            <AddButton
+                              onClick={() => {
+                                if (!newRowIndex) {
+                                  handleAddRow(log);
+                                } else if (newRowIndex === index + 1) {
+                                  handleAddRow(log);
+                                }
+                              }}
+                              id={"Tooltip-" + index + 1}
+                            />
+                            <span>
+                              <Tooltip
+                                placement="right"
+                                target={"Tooltip-" + index + 1}
+                                isOpen={addRowTooltip === index + 1}
+                                toggle={() =>
+                                  setaddRowTooltip(
+                                    addRowTooltip
+                                      ? addRowTooltip === index + 1
+                                        ? null
+                                        : index + 1
+                                      : index + 1,
+                                  )
+                                }
+                              >
+                                Add Row below
+                              </Tooltip>
+                            </span>
+                          </>
+                        )}
+                      </>
+                    }
                   </div>
                 </td>
 
@@ -1206,242 +1445,7 @@ export default function CombinedLogs(props) {
                     log.comments
                   )}
                 </td> */}
-                <td
-                  className={`${
-                    editRow === index ? "activeTh" : ""
-                  } reduce-height`}
-                >
-                  <div className="action-items">
-                    {
-                      <>
-                        {editRow === index ? (
-                          <>
-                            <div
-                              onClick={() =>
-                                handleUpdateLog()
-                              }
-                              style={{ marginRight: "5px", cursor: "pointer" }}
-                            >
-                              <svg
-                                width="14"
-                                height="14"
-                                viewBox="0 0 14 14"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M12.4162 3.84491L5.51162 10.7497L1.58325 6.82137"
-                                  stroke="#2F5AA3"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            </div>
-                            <div
-                              style={{ marginRight: "5px", cursor: "pointer" }}
-                              onClick={() => {
-                                setEditRow("");
-                                setFormValid({
-                                  spec_section: true,
-                                  para_no: true,
-                                  para_context: true,
-                                  type: true,
-                                  item_desc: true,
-                                });
-                                setRowData({
-                                  comments: "",
-                                  date_approved: "",
-                                  date_issued: "",
-                                  // id: 1,
-                                  item_desc: "",
-                                  package: "",
-                                  para_context: "",
-                                  para_no: "",
-                                  project_id: "",
-                                  spec_section: "",
-                                  status: "",
-                                  type: "",
-                                });
-                                // setDateApproved('');
-                                // setDateIssued('');
-                                // setStatus({});
-                                setNewRowIndex(null);
-                                newRowIndex === index &&
-                                  props.setLogData(
-                                    deleteElement(props.logData, index),
-                                  );
-                              }}
-                            >
-                              <svg
-                                width="10"
-                                height="10"
-                                viewBox="0 0 10 10"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  clipRule="evenodd"
-                                  d="M0.244078 0.244078C0.569515 -0.0813592 1.09715 -0.0813592 1.42259 0.244078L5 3.82149L8.57741 0.244078C8.90285 -0.0813592 9.43049 -0.0813592 9.75592 0.244078C10.0814 0.569515 10.0814 1.09715 9.75592 1.42259L6.17851 5L9.75592 8.57741C10.0814 8.90285 10.0814 9.43049 9.75592 9.75592C9.43049 10.0814 8.90285 10.0814 8.57741 9.75592L5 6.17851L1.42259 9.75592C1.09715 10.0814 0.569515 10.0814 0.244078 9.75592C-0.0813592 9.43049 -0.0813592 8.90285 0.244078 8.57741L3.82149 5L0.244078 1.42259C-0.0813592 1.09715 -0.0813592 0.569515 0.244078 0.244078Z"
-                                  fill="#A32F2F"
-                                />
-                              </svg>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <span
-                              onClick={() => handleEditToggle(log, index)}
-                              style={{ cursor: "pointer" }}
-                            >
-                              <svg
-                                id={"Edit-Tooltip-" + index + 1}
-                                width="18"
-                                height="18"
-                                viewBox="0 0 18 18"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  clipRule="evenodd"
-                                  d="M0.666748 2.33332C0.666748 1.41285 1.41294 0.666657 2.33341 0.666657H8.16675C8.62698 0.666657 9.00008 1.03975 9.00008 1.49999C9.00008 1.96023 8.62698 2.33332 8.16675 2.33332H2.33341V15.6667H15.6667V9.83332C15.6667 9.37308 16.0398 8.99999 16.5001 8.99999C16.9603 8.99999 17.3334 9.37308 17.3334 9.83332V15.6667C17.3334 16.5871 16.5872 17.3333 15.6667 17.3333H2.33341C1.41295 17.3333 0.666748 16.5871 0.666748 15.6667V2.33332ZM13.4562 0.666657C13.6773 0.666614 13.8894 0.754465 14.0458 0.910863L17.0895 3.9559C17.4147 4.28131 17.4147 4.80875 17.0895 5.13416L8.47163 13.7558C8.31534 13.9121 8.10332 14 7.88225 14H4.83341C4.37318 14 4.00008 13.6269 4.00008 13.1667V10.1333C4.00008 9.91244 4.08774 9.70063 4.24381 9.54438L12.8668 0.911087C13.023 0.75463 13.2351 0.666699 13.4562 0.666657ZM13.4566 2.67898L5.66675 10.4782V12.3333H7.53696L15.3218 4.54503L13.4566 2.67898Z"
-                                  fill="#36454F"
-                                />
-                              </svg>
-                            </span>
-                            <span>
-                              <Tooltip
-                                placement="left"
-                                target={"Edit-Tooltip-" + index + 1}
-                                isOpen={editRowTooltip === index + 1}
-                                toggle={() =>
-                                  setEditRowTooltip(
-                                    editRowTooltip
-                                      ? editRowTooltip === index + 1
-                                        ? null
-                                        : index + 1
-                                      : index + 1,
-                                  )
-                                }
-                              >
-                                Edit Row
-                              </Tooltip>
-                            </span>
-                          </>
-                        )}
-                        {/* <Link
-                        style={{ fontWeight: 'normal' }}
-                        className="btn btn-secondary btn-sm"
-                        to={{ pathname: `/pdf-view`, search: `?url=${log?.doc_link}&textLoc=${log.text_loc}` }}
-                        target="_blank" >
-                        Pdf
-                      </Link> */}
-                        {pdfIndex === index ? (
-                          <button
-                            type="button"
-                            className="btn btn-secondary btn-sm"
-                            style={{ marginRight: "5px" }}
-                            onClick={() =>
-                              props.setPdfData({
-                                url: "",
-                                textLoc: {},
-                                index: "",
-                                docId: null,
-                              })
-                            }
-                          >
-                            Close Pdf
-                          </button>
-                        ) : (
-                          newRowIndex !== index &&
-                          showPdf && (
-                            <>
-                              <span
-                                onClick={() =>
-                                  handleViewPdf(
-                                    log.doc_link,
-                                    log.text_loc,
-                                    index,
-                                    log.doc_id,
-                                  )
-                                }
-                                style={{ cursor: "pointer" }}
-                              >
-                                <svg
-                                  id={"Pdf-Tooltip-" + index + 1}
-                                  width="16"
-                                  height="20"
-                                  viewBox="0 0 16 20"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    clipRule="evenodd"
-                                    d="M0.5 2.50001C0.5 1.57954 1.24619 0.833344 2.16667 0.833344H10.5C10.721 0.833344 10.933 0.921141 11.0893 1.07742L15.2559 5.24409C15.4122 5.40037 15.5 5.61233 15.5 5.83334V17.5C15.5 18.4205 14.7538 19.1667 13.8333 19.1667H2.16667C1.2462 19.1667 0.5 18.4205 0.5 17.5V2.50001ZM10.1548 2.50001H2.16667V17.5H13.8333V6.17852L10.1548 2.50001ZM4.66667 7.50001C4.66667 7.03977 5.03976 6.66668 5.5 6.66668H10.5C10.9602 6.66668 11.3333 7.03977 11.3333 7.50001V10.8299C11.3333 11.2899 10.9606 11.6629 10.5006 11.6632L6.33333 11.6661V14.1667C6.33333 14.6269 5.96024 15 5.5 15C5.03976 15 4.66667 14.6269 4.66667 14.1667V7.50001ZM6.33593 9.99943L9.66667 9.99713V8.33334H6.3342L6.33593 9.99943Z"
-                                    fill="#36454F"
-                                  />
-                                </svg>
-                              </span>
-                              <span>
-                                <Tooltip
-                                  placement="top"
-                                  target={"Pdf-Tooltip-" + index + 1}
-                                  isOpen={pdfTooltip === index + 1}
-                                  toggle={() =>
-                                    setPdfTooltip(
-                                      pdfTooltip
-                                        ? pdfTooltip === index + 1
-                                          ? null
-                                          : index + 1
-                                        : index + 1,
-                                    )
-                                  }
-                                >
-                                  View Pdf
-                                </Tooltip>
-                              </span>
-                            </>
-                          )
-                        )}
-                        {!props.selectedLogData.length && (
-                          <>
-                            <AddButton
-                              onClick={() => {
-                                if (!newRowIndex) {
-                                  handleAddRow(log);
-                                } else if (newRowIndex === index + 1) {
-                                  handleAddRow(log);
-                                }
-                              }}
-                              id={"Tooltip-" + index + 1}
-                            />
-                            <span>
-                              <Tooltip
-                                placement="right"
-                                target={"Tooltip-" + index + 1}
-                                isOpen={addRowTooltip === index + 1}
-                                toggle={() =>
-                                  setaddRowTooltip(
-                                    addRowTooltip
-                                      ? addRowTooltip === index + 1
-                                        ? null
-                                        : index + 1
-                                      : index + 1,
-                                  )
-                                }
-                              >
-                                Add Row below
-                              </Tooltip>
-                            </span>
-                          </>
-                        )}
-                      </>
-                    }
-                  </div>
-                </td>
+                
               </tr>
             );
           })}
