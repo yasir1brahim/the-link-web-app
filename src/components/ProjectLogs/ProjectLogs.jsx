@@ -135,20 +135,23 @@ const ProjectLogs = () => {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      axiosInstance({
-        method: "get",
-        url: `/project_data/${projectId || state.project?.project_id}`,
-      }).then(response => {
-        setDocumentData(response.data.document_details).then(() => {
-          fetchLogData(0, rowsPerPage);
+      if(documentIsProcessing(documentData)){
+        axiosInstance({
+          method: "get",
+          url: `/project_data/${projectId || state.project?.project_id}`,
+        }).then(response => {
+          setDocumentData(response.data.document_details)
+          if (!documentIsProcessing(response.data.document_details)){
+            fetchLogData(0, rowsPerPage);
+          }
+        }).catch(error => {
+          handleError(error);
         });
-      }).catch(error => {
-        handleError(error);
-      });
-    }, 15000); // 15000 milliseconds = 15 seconds
+      }
+    }, 10000); // 10000 milliseconds = 10 seconds
   
     return () => clearInterval(intervalId); // This will clear the interval when the component unmounts
-  }, [projectId, state.project?.project_id]); // Dependencies array, re-run the effect if these values change
+  }, [projectId, state.project?.project_id, documentData]); // Dependencies array, re-run the effect if these values change
 
   useEffect(() => {
     if (!modal) {
@@ -424,7 +427,7 @@ const ProjectLogs = () => {
       setLoading(false);
       handleError(error);
     });
-  }, [state, pageRefresh, projectId, documentData]);
+  }, [state, pageRefresh, projectId]);
 
   // useEffect(()=>{
   //   Afer edit of a column in the selected view below code updates the value of the field
