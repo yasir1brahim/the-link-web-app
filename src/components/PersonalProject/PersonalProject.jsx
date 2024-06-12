@@ -5,6 +5,7 @@ import handleError from "../../config/errorHandler";
 import CreateProject from "../CustomerProjects/createProject";
 import EditProject from "../CustomerProjects/editProject";
 import { ArchiveProjectModal } from "./archiveProjectModal";
+import { RestoreProjectModal } from "./restoreProjectModal";
 import ContractTile from "./contractTile";
 import PersonalTile from "./personalTile";
 
@@ -18,6 +19,8 @@ const PersonalProject = ({
   toggleCreateProjectModal,
   archiveProjectModal,
   toggleArchiveProjectModal,
+  restoreProjectModal,
+  toggleRestoreProjectModal,
   state,
   customerData,
   pageRefresh,
@@ -35,25 +38,46 @@ const PersonalProject = ({
   const toggleEditModal = () => setEditModal(!editModal);
   const [project, setProject] = useState({});
   const [archiveProject, setArchiveProject] = useState(null);
+  const [restoreProject, setRestoreProject] = useState(null);
   const [launchTooltip, setLaunchTooltip] = useState(null);
   const [uploadTooltip, setUploadTooltip] = useState(null);
   const [editTooltip, setEditTooltip] = useState(null);
   const [archiveTooltip, setArchiveTooltip] = useState(null);
+  const [restoreTooltip, setRestoreTooltip] = useState(null);
   const handleEdit = (project) => {
     setProject(project);
     toggleEditModal();
   };
 
+  const getEmployeeList = async (project) => {
+    try {
+      const response = await axiosInstance({
+        method: "get",
+        url: `/employeeList/${
+          project?.customer_id
+        }`,
+      });
+      if (response.data.message) {
+        return(response.data.message);
+      }
+    } catch (error) {
+      return null;
+    }
+  }
+
   const handleArchiveProject = async () => {
     let errors = false;
     if (!errors) {
       try {
+        const employeeList = await getEmployeeList(archiveProject);
         const response = await axiosInstance({
           method: "put",
           url: "/updateProject",
           data: {
             project_name: archiveProject.project_name,
-            lead_contact: archiveProject.lead_contact,
+            lead_contact: employeeList.find(
+              (employee) => employee.name === archiveProject.lead_contact,
+            )?.emp_id,
             start_date: archiveProject?.start_date
               ? moment(
                   new Date((archiveProject?.start_date).replaceAll("-", "/")),
@@ -83,6 +107,46 @@ const PersonalProject = ({
       }
     }
   };
+
+  const handleRestoreProject = async () => {
+    try {
+      const employeeList = await getEmployeeList(restoreProject);
+      const response = await axiosInstance({
+        method: "put",
+        url: "/updateProject",
+        data: {
+          project_name: restoreProject.project_name,
+          lead_contact: employeeList.find(
+            (employee) => employee.name === restoreProject.lead_contact,
+          )?.emp_id,
+          employee_list: employeeList,
+          start_date: restoreProject?.start_date
+            ? moment(
+                new Date((restoreProject?.start_date).replaceAll("-", "/")),
+              ).format("YYYY-MM-DD")
+            : "",
+          end_date: restoreProject?.end_date
+            ? moment(
+                new Date((restoreProject?.end_date).replaceAll("-", "/")),
+              ).format("YYYY-MM-DD")
+            : "",
+          customer_id:
+            localStorage.getItem("roleId") === "0"
+              ? customerId || state.customer_id
+              : localStorage.getItem("userId"),
+          status: "Open",
+          project_id: restoreProject.project_id,
+        },
+      });
+      if (response.data) {
+        console.log(response.data);
+        setPageRefresh(!pageRefresh);
+        toggleRestoreProjectModal();
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
   return (
     <div className="personal-projects-content">
       <div className="content-show-tile">
@@ -160,6 +224,8 @@ const PersonalProject = ({
                       handleEdit={handleEdit}
                       toggleArchiveProjectModal={toggleArchiveProjectModal}
                       setArchiveProject={setArchiveProject}
+                      toggleRestoreProjectModal={toggleRestoreProjectModal}
+                      setRestoreProject={setRestoreProject}
                       index={index}
                       launchTooltip={launchTooltip}
                       setLaunchTooltip={setLaunchTooltip}
@@ -169,6 +235,8 @@ const PersonalProject = ({
                       setEditTooltip={setEditTooltip}
                       archiveTooltip={archiveTooltip}
                       setArchiveTooltip={setArchiveTooltip}
+                      restoreTooltip={restoreTooltip}
+                      setRestoreTooltip={setRestoreTooltip}
                     />
                   </div>
                 );
@@ -212,6 +280,11 @@ const PersonalProject = ({
         modal={archiveProjectModal}
         toggleModal={toggleArchiveProjectModal}
         handleSubmit={handleArchiveProject}
+      />
+      <RestoreProjectModal
+        modal={restoreProjectModal}
+        toggleModal={toggleRestoreProjectModal}
+        handleSubmit={handleRestoreProject}
       />
     </div>
   );

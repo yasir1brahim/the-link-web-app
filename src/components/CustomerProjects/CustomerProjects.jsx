@@ -23,6 +23,8 @@ import { UploadIcon } from "../shared/icons/uploadIcon";
 import { LaunchIcon } from "../shared/icons/launchIcon";
 import { ArchiveProjectModal } from "../PersonalProject/archiveProjectModal";
 import { Tooltip } from "reactstrap";
+import { RestoreProjectModal } from "../PersonalProject/restoreProjectModal";
+import { RestoreIcon } from "../shared/icons/restoreIcon";
 
 const CustomerProjects = ({
   toggleSlider,
@@ -35,6 +37,8 @@ const CustomerProjects = ({
   createProjectModal,
   archiveProjectModal,
   toggleArchiveProjectModal,
+  restoreProjectModal,
+  toggleRestoreProjectModal,
   projectData,
   setProjectData,
   handleLaunch,
@@ -50,10 +54,12 @@ const CustomerProjects = ({
   const toggleEditModal = () => setEditModal(!editModal);
   const toggleEmployeeModal = () => setEmployeeModal(!employeeModal);
   const [archiveProject, setArchiveProject] = useState(null);
+  const [restoreProject, setRestoreProject] = useState(null);
   const [launchTooltip, setLaunchTooltip] = useState(null);
   const [uploadTooltip, setUploadTooltip] = useState(null);
   const [editTooltip, setEditTooltip] = useState(null);
   const [archiveTooltip, setArchiveTooltip] = useState(null);
+  const [restoreTooltip, setRestoreTooltip] = useState(null);
   const [project, setProject] = useState({});
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -89,16 +95,35 @@ const CustomerProjects = ({
     toggleEditModal();
   };
 
+  const getEmployeeList = async (project) => {
+    try {
+      const response = await axiosInstance({
+        method: "get",
+        url: `/employeeList/${
+          project?.customer_id
+        }`,
+      });
+      if (response.data.message) {
+        return(response.data.message);
+      }
+    } catch (error) {
+      return null;
+    }
+  }
+
   const handleArchiveProject = async () => {
     let errors = false;
     if (!errors) {
       try {
+        const employeeList = await getEmployeeList(archiveProject);
         const response = await axiosInstance({
           method: "put",
           url: "/updateProject",
           data: {
             project_name: archiveProject.project_name,
-            lead_contact: archiveProject.lead_contact,
+            lead_contact: employeeList.find(
+              (employee) => employee.name === archiveProject.lead_contact,
+            )?.emp_id,
             start_date: archiveProject?.start_date
               ? moment(
                   new Date((archiveProject?.start_date).replaceAll("-", "/")),
@@ -125,6 +150,49 @@ const CustomerProjects = ({
       } catch (error) {
         console.log(error.message);
         handleError(error);
+      }
+    }
+  };
+
+  const handleRestoreProject = async () => {
+    let errors = false;
+    if (!errors) {
+      try {
+        const employeeList = await getEmployeeList(restoreProject);
+        const response = await axiosInstance({
+          method: "put",
+          url: "/updateProject",
+          data: {
+            project_name: restoreProject.project_name,
+            lead_contact: employeeList.find(
+              (employee) => employee.name === restoreProject.lead_contact,
+            )?.emp_id,
+            employee_list: employeeList,
+            start_date: restoreProject?.start_date
+              ? moment(
+                  new Date((restoreProject?.start_date).replaceAll("-", "/")),
+                ).format("YYYY-MM-DD")
+              : "",
+            end_date: restoreProject?.end_date
+              ? moment(
+                  new Date((restoreProject?.end_date).replaceAll("-", "/")),
+                ).format("YYYY-MM-DD")
+              : "",
+            customer_id:
+              localStorage.getItem("roleId") === "0"
+                ? customerId || state.customer_id
+                : localStorage.getItem("userId"),
+            status: "Open",
+            project_id: restoreProject.project_id,
+          },
+        });
+        if (response.data) {
+          console.log(response.data);
+          setPageRefresh(!pageRefresh);
+          toggleRestoreProjectModal();
+        }
+      } catch (error) {
+        console.log(error.message);
       }
     }
   };
@@ -394,7 +462,7 @@ const CustomerProjects = ({
                               </Tooltip>
                             </span>
                             {toggleUploadSpecsButton ? (
-                              <>
+                              project.status !== "Archived" && <>
                                 <span
                                   onClick={() => {
                                     toggleUploadSpecsModal();
@@ -426,6 +494,38 @@ const CustomerProjects = ({
                               </>
                             ) : null}
                             {roleId !== "6" && roleId !== "7" && (
+                              project.status === "Archived" ? (
+                                <>
+                                  <span
+                                    onClick={() => {
+                                      toggleRestoreProjectModal()
+                                      setRestoreProject(project)
+                                    }}
+                                    style={{ cursor: "pointer" }}
+                                    id={"restore-tooltip" + index + 1}
+                                  >
+                                    <RestoreIcon />
+                                  </span>
+                                  <span>
+                                    <Tooltip
+                                      placement="left"
+                                      target={"restore-tooltip" + index + 1}
+                                      isOpen={restoreTooltip === index + 1}
+                                      toggle={() =>
+                                        setRestoreTooltip(
+                                          restoreTooltip
+                                            ? restoreTooltip === index + 1
+                                              ? null
+                                              : index + 1
+                                            : index + 1,
+                                        )
+                                      }
+                                    >
+                                      Restore Project
+                                    </Tooltip>
+                                  </span>
+                                </>
+                              ) :
                               <>
                                 <span
                                   onClick={() => handleEdit(project)}
@@ -538,6 +638,12 @@ const CustomerProjects = ({
         modal={archiveProjectModal}
         toggleModal={toggleArchiveProjectModal}
         handleSubmit={handleArchiveProject}
+      />
+
+      <RestoreProjectModal
+        modal={restoreProjectModal}
+        toggleModal={toggleRestoreProjectModal}
+        handleSubmit={handleRestoreProject}
       />
 
       <ToastContainer
