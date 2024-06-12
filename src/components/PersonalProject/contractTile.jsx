@@ -2,6 +2,7 @@ import { ArchiveIcon } from "../shared/icons/archiveIcon";
 import { EditIcon } from "../shared/icons/editIcon";
 import { LaunchIcon } from "../shared/icons/launchIcon";
 import { UploadIcon } from "../shared/icons/uploadIcon";
+import { RestoreIcon } from "../shared/icons/restoreIcon";
 import { Tooltip } from "reactstrap";
 
 const ContractTile = ({
@@ -17,6 +18,8 @@ const ContractTile = ({
   handleEdit,
   toggleArchiveProjectModal,
   setArchiveProject,
+  toggleRestoreProjectModal,
+  setRestoreProject,
   index,
   launchTooltip,
   setLaunchTooltip,
@@ -26,6 +29,8 @@ const ContractTile = ({
   setEditTooltip,
   archiveTooltip,
   setArchiveTooltip,
+  restoreTooltip,
+  setRestoreTooltip
 }) => {
   const generateInitials = (name) => {
     // Split the name into words
@@ -149,7 +154,7 @@ const ContractTile = ({
             </Tooltip>
           </span>
           {toggleUploadSpecsButton ? (
-            <>
+            project.status !== "Archived" && <>
               <span
                 onClick={() => {
                   toggleUploadSpecsModal();
@@ -181,6 +186,38 @@ const ContractTile = ({
             </>
           ) : null}
           {roleId !== "6" && roleId !== "7" && (
+            project.status === "Archived" ? (
+              <>
+                <span
+                  onClick={() => {
+                    toggleRestoreProjectModal()
+                    setRestoreProject(project)
+                  }}
+                  style={{ cursor: "pointer" }}
+                  id={"restore-tooltip" + index + 1}
+                >
+                  <RestoreIcon />
+                </span>
+                <span>
+                  <Tooltip
+                    placement="left"
+                    target={"restore-tooltip" + index + 1}
+                    isOpen={restoreTooltip === index + 1}
+                    toggle={() =>
+                      setRestoreTooltip(
+                        restoreTooltip
+                          ? restoreTooltip === index + 1
+                            ? null
+                            : index + 1
+                          : index + 1,
+                      )
+                    }
+                  >
+                    Restore Project
+                  </Tooltip>
+                </span>
+              </>
+            ) : 
             <>
               <span
                 onClick={() => handleEdit(project)} style={{ cursor: "pointer" }}

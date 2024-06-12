@@ -14,6 +14,7 @@ const Projects = () => {
   const navigate = useNavigate();
   const [uploadSpecsModal, setUploadSpecsModal] = useState(false);
   const [archiveProjectModal, setArchiveProjectModal] = useState(false);
+  const [restoreProjectModal, setRestoreProjectModal] = useState(false);
   const [slider, setSlider] = useState(false);
   const [customerData, setCustomerData] = useState({});
   const [createProjectModal, setCreateProjectModal] = useState(false);
@@ -33,6 +34,7 @@ const Projects = () => {
     setCreateProjectModal(!createProjectModal);
   const toggleUploadSpecsModal = () => setUploadSpecsModal(!uploadSpecsModal);
   const toggleArchiveProjectModal = () => setArchiveProjectModal(!archiveProjectModal);
+  const toggleRestoreProjectModal = () => setRestoreProjectModal(!restoreProjectModal);
   const [toggleUploadSpecsButton, setToggleUploadSpecsButton] = useState(true);
   const [searchParams] = useSearchParams();
   const customerId = searchParams.get("id");
@@ -198,6 +200,8 @@ const Projects = () => {
               toggleCreateProjectModal={toggleCreateProjectModal}
               archiveProjectModal={archiveProjectModal}
               toggleArchiveProjectModal={toggleArchiveProjectModal}
+              restoreProjectModal={restoreProjectModal}
+              toggleRestoreProjectModal={toggleRestoreProjectModal}
               state={state}
               customerData={customerData}
               pageRefresh={pageRefresh}
@@ -220,6 +224,8 @@ const Projects = () => {
               createProjectModal={createProjectModal}
               archiveProjectModal={archiveProjectModal}
               toggleArchiveProjectModal={toggleArchiveProjectModal}
+              restoreProjectModal={restoreProjectModal}
+              toggleRestoreProjectModal={toggleRestoreProjectModal}
               projectData={projectData}
               setProjectData={setProjectData}
               handleLaunch={handleLaunch}
