@@ -35,6 +35,11 @@ const NavbarTop = () => {
     return initials.toUpperCase();
   }
 
+  const handleLogout = () => {
+    localStorage.clear();
+    setNavDrop(!navDrop);
+  }
+
   return (
     <section className="navigation-wrapper d-flex align-items-center justify-content-center">
       <Navbar
@@ -64,11 +69,11 @@ const NavbarTop = () => {
               // href="/"
               onClick={toggleDrop}
             >
-              <span className="user-icon">
+              {localStorage.getItem('fullName') && <span className="user-icon">
                 {generateInitials(localStorage.getItem('fullName')) || (
                   <i className="fa fa-user"></i>
                 )}
-              </span>
+              </span>}
               <span className="user-name">
                 {localStorage.getItem('fullName')}
               </span>
@@ -98,7 +103,7 @@ const NavbarTop = () => {
                 <a
                   href="/"
                   className="navlist list-logout"
-                  onClick={toggleDrop}
+                  onClick={handleLogout}
                 >
                   Logout
                 </a>

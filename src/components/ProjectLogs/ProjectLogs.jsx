@@ -9,7 +9,7 @@ import {
   DropdownItem,
 } from "reactstrap";
 import { ReactComponent as Trash } from "../../assets/images/trash.svg";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -106,12 +106,34 @@ const ProjectLogs = () => {
   });
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
   const [page, setPage] = React.useState(1);
+  const history = useNavigate();
+  const [isAssociatedUser, setIsAssociatedUser] = useState(true);
 
   useEffect(() => {
     if (!modal) {
       setPdfFile({});
     }
   }, [modal]);
+
+  useEffect(() => {
+    if (customerId.toString() !== localStorage.getItem("userId")) {
+      if (localStorage.getItem("roleId") > 1) {
+        setIsAssociatedUser(false);
+        history({ pathname: localStorage.getItem('roleId') === '0'
+        ? '/admin-landing'
+        : '/project-list' })
+        toast.warn("You are not authorized to view this project.", {
+            position: "bottom-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        });
+      }
+    }
+  }, [])
 
   // get the number of documents uploaded
   useEffect(() => {
@@ -131,7 +153,7 @@ const ProjectLogs = () => {
       setLoading(false);
       handleError(error);
     });
-  }, [state?.project, pageRefresh, projectId]);
+  }, [state, pageRefresh, projectId]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -148,7 +170,7 @@ const ProjectLogs = () => {
     }, 15000); // 15000 milliseconds = 15 seconds
   
     return () => clearInterval(intervalId); // This will clear the interval when the component unmounts
-  }, [projectId, state.project?.project_id]); // Dependencies array, re-run the effect if these values change
+  }, [projectId, state]); // Dependencies array, re-run the effect if these values change
 
   useEffect(() => {
     if (!modal) {
@@ -621,7 +643,7 @@ const ProjectLogs = () => {
   return (
     <div className="page-wrap">
       <NavbarTop qaDashboard={state?.qaDashboard} />
-      <div className="project-logs-wrapper log-table-width">
+      {isAssociatedUser === true && <div className="project-logs-wrapper log-table-width">
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
           centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
@@ -902,7 +924,7 @@ const ProjectLogs = () => {
             {/* )} */}
           </div>
         </div>
-      </div>
+      </div>}
       <ToastContainer
         position="bottom-center"
         autoClose={5000}
