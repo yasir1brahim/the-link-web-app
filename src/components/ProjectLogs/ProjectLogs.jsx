@@ -106,6 +106,8 @@ const ProjectLogs = () => {
   });
   const [rowsPerPage, setRowsPerPage] = React.useState(20);
   const [page, setPage] = React.useState(1);
+  const [logIdList, setLogIdList] = React.useState([]);
+  const [isSelectAll, setIsSelectAll] = React.useState(false);
 
   useEffect(() => {
     if (!modal) {
@@ -367,20 +369,23 @@ const ProjectLogs = () => {
       }
     }
   };
-  const fetchLogData = async (page, itemsPerPage, filters_, search) => {
+  const fetchLogData = async (page, itemsPerPage, search, listId=null, _filters=null) => {
     setLoading(true);
     let filters = {};
-    if (
-      Object.values(filterValues)
-        .map((value) => (value.length ? true : false))
-        .includes(true)
-    ) {
-      Object.keys(filterValues).forEach((key) =>
-        filterValues[key].length
-          ? (filters = { ...filters, [key]: filterValues[key] })
-          : null,
-      );
+    if (_filters === null) {
+      if (
+        Object.values(filterValues)
+          .map((value) => (value.length ? true : false))
+          .includes(true)
+      ) {
+        Object.keys(filterValues).forEach((key) =>
+          filterValues[key].length
+            ? (filters = { ...filters, [key]: filterValues[key] })
+            : null,
+        );
+      }
     }
+
     const response = await axiosInstance({
       method: "post",
       url: "/filter_logs",
@@ -392,19 +397,19 @@ const ProjectLogs = () => {
         order: "",
         page_number: page || 0,
         limit: itemsPerPage,
+        list_id: listId
       },
     });
     // setLogData(response.data.message);
     setSelectedFilterValue(response.data.all_filter_vals);
 
     const submittalLogs = response.data.message;
-    selectedLogData.length
-      ? setSelectedLogData(submittalLogs)
-      : setLogData(submittalLogs);
+    setLogData(submittalLogs);
     localStorage.setItem(
       "filteredIds",
       submittalLogs?.map((item) => item?.id),
     );
+    setLogIdList(response.data.log_id_list);
     setLoading(false);
     setErrorMessage("");
     if (response.data.message.length === 0) {
@@ -461,29 +466,12 @@ const ProjectLogs = () => {
   }, [state, pageRefresh, customerId]);
 
   useEffect(() => {
-    let filterData = selectedLogData.length ? selectedLogData : logData;
-    let filteredLog = filterData;
-    // .map((log) => {
-    //   return Object.values(log)
-    //     .filter((value) => value)
-    //     .filter((value) => value.toString().includes(searchValue)).length
-    //     ? log
-    //     : null;
-    // })
-    // .filter((value) => value);
-    setFilteredLogData(filteredLog);
-  }, [selectedLogData, logData, searchValue, setFilteredLogData]);
-  // let filteredLogData = selectedLogData.length ? selectedLogData : logData
+    setFilteredLogData(logData);
+  }, [logData, searchValue, setFilteredLogData]);
 
   const handleSelectAll = () => {
-    if (selected?.length === filteredLogData?.length) {
-      setSelected([]);
-    } else {
-      let selectedLogs = filteredLogData?.map((log) => {
-        return log.id;
-      });
-      setSelected(selectedLogs);
-    }
+    setIsSelectAll(!isSelectAll);
+    setSelected(isSelectAll ? [] : logIdList);
   };
 
   const documentIsProcessing = (documents) => documents.some(doc => ['PENDING_PROCESSING', 'PROCESSING', 'SUBSECTIONS_EXTRACTED'].includes(doc.document_status));
@@ -500,6 +488,7 @@ const ProjectLogs = () => {
       const rowsSelected = JSON.stringify(selected);
       localStorage.setItem("selectedRows", `${rowsSelected}`);
     }
+    setIsSelectAll(((selected.length === logIdList.length) && (selected.length > 0)) ? true : false);
   }, [selected]);
 
   const handleExportExcel = async (recordData, fileName) => {
@@ -577,24 +566,25 @@ const ProjectLogs = () => {
   };
 
   const heandleSearchClick = () => {
-    let filters = {};
-    if (
-      Object.values(filterValues)
-        .map((value) => (value.length ? true : false))
-        .includes(true)
-    ) {
-      Object.keys(filterValues).forEach((key) =>
-        filterValues[key].length
-          ? (filters = { ...filters, [key]: filterValues[key] })
-          : null,
-      );
-    }
-    fetchLogData(0, rowsPerPage, filters, searchValue);
+    fetchLogData(0, rowsPerPage, searchValue, listId);
   };
 
   const handleOpenSaveList = async (listId) => {
-    const savedLogs = await getSavedLogs(listId);
-    setSelectedLogData(savedLogs?.data?.message);
+    // const savedLogs = await getSavedLogs(listId);
+    const initFilter = {
+      spec_section: [],
+      item_desc: [],
+      classification: [],
+      sd_title: [],
+      type: []
+    }
+    setFilterValues(initFilter);
+
+    await fetchLogData(0, rowsPerPage, "", listId, {});
+
+    setListId(listId);
+    setSearchValue("");
+    
     setToggleViewSavedList(false);
   };
 
@@ -606,19 +596,14 @@ const ProjectLogs = () => {
 
   const handleClearSearch = () => {
     setSearchValue("");
-    let filters = {};
-    if (
-      Object.values(filterValues)
-        .map((value) => (value.length ? true : false))
-        .includes(true)
-    ) {
-      Object.keys(filterValues).forEach((key) =>
-        filterValues[key].length
-          ? (filters = { ...filters, [key]: filterValues[key] })
-          : null,
-      );
-    }
-    fetchLogData(0, rowsPerPage, filters, "");
+
+    fetchLogData(0, rowsPerPage, "", listId);
+  }
+
+  const handleClearSelection = async() => {
+    await fetchLogData(0, rowsPerPage, searchValue, null);
+    setListId(null);
+    setSelected([]);
   }
 
   return (
@@ -661,19 +646,18 @@ const ProjectLogs = () => {
             <>
               {!state?.qaDashboard && (
                 <div className="table-top-content">
-                  {selectedLogData?.length ? (
+                  {(listId !== null) ? (
                     <button
                       type="button"
                       className="btn btn-primary mr-3 btn-small"
                       onClick={() => {
-                        setSelectedLogData([]);
-                        setSelected([]);
+                        handleClearSelection();
                       }}
                     >
                       Clear Selection
                     </button>
                   ) : null}
-                  {!selectedLogData.length ? (
+                  {(listId === null) ? (
                     <button
                       type="button"
                       className=" mr-3 table-top-btn btn-disabled"
@@ -835,8 +819,6 @@ const ProjectLogs = () => {
                   setLogData={setLogData}
                   projectId={state?.projectId || projectId}
                   listId={listId}
-                  selectedLogData={selectedLogData}
-                  setSelectedLogData={setSelectedLogData}
                   setPdfData={setPdfData}
                   pdfData={pdfData}
                   completeLogData={logData}
@@ -852,6 +834,9 @@ const ProjectLogs = () => {
                   errorMessage={errorMessage}
                   page={page}
                   rowsPerPage={rowsPerPage}
+                  setLogIdList={setLogIdList}
+                  isSelectAll={isSelectAll}
+                  setSelected={setSelected}
                 />
                 {pdfData.url && (
                   <PdfWrapper pdfData={pdfData} setPdfData={setPdfData} />
@@ -861,11 +846,12 @@ const ProjectLogs = () => {
                 <Pagination
                   totalItems={totalCount}
                   fetchData={fetchLogData}
-                  filterValues={filterValues}
                   rowsPerPage={rowsPerPage}
                   setRowsPerPage={setRowsPerPage}
                   page={page}
                   setPage={setPage}
+                  listId={listId}
+                  searchValue={searchValue}
                 />
               </div>
               {/* {state.project?.type === 'Submittal' && (
@@ -1018,7 +1004,6 @@ const ProjectLogs = () => {
                               className="btn open-btn mr-2"
                               onClick={() => {
                                 handleOpenSaveList(list.id);
-                                setListId(list.id);
                               }}
                             >
                               Open

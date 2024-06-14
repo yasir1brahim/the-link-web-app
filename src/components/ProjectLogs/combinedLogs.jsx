@@ -194,7 +194,7 @@ export default function CombinedLogs(props) {
           filters: a,
           order_col: columnName || "",
           order: sortingOrder === "desc" ? "asc" : "desc" || "",
-          list_id: props.selectedLogData.length ? props.listId : "",
+          list_id: props.listId,
           page_number: props?.page - 1,
           limit: props?.rowsPerPage,
         },
@@ -203,10 +203,8 @@ export default function CombinedLogs(props) {
         "filteredIds",
         response.data?.message?.map((item) => item?.id),
       );
-      props.selectedLogData.length
-        ? props.setSelectedLogData(response.data.message)
-        : props.setLogData(response.data.message);
-
+      props.setLogData(response.data.message);
+      props.setLogIdList(response.data.log_id_list);
       setSorting({
         ...sorting,
         column: columnName,
@@ -317,7 +315,7 @@ export default function CombinedLogs(props) {
                     name="ticketHeading"
                     id="ticketHeading"
                     onChange={props.handleSelectAll}
-                    checked={props.selected.length === logData.length}
+                    checked={props.isSelectAll}
                   />
                   <label
                     className="custom-control-label"
@@ -340,7 +338,7 @@ export default function CombinedLogs(props) {
                     <SortIcon />
                   </span>
                 </div>
-                <div className="ml-3">
+                <div className={`ml-3 p-1 ${filterValues.spec_section.length > 0 ? 'bg-warning rounded' : ''}`}>
                   <span
                     onClick={() => {
                       setFilterModal(true);
@@ -405,7 +403,7 @@ export default function CombinedLogs(props) {
                       <SortIcon />
                     </span>
                   </div>
-                  <div className="ml-3">
+                  <div className={`ml-3 p-1 ${filterValues.type.length > 0 ? 'bg-warning rounded' : ''}`}>
                     <span
                       onClick={() => {
                         setFilterModal(true);
@@ -455,7 +453,7 @@ export default function CombinedLogs(props) {
                     </span>
                   </div>
                   <span
-                    className="ml-3"
+                    className={`ml-3 p-1 ${filterValues.sd_title.length > 0 ? 'bg-warning rounded' : ''}`}
                     onClick={() => {
                       setFilterModal(true);
                       setFilterColumn("sd_title");
@@ -477,7 +475,7 @@ export default function CombinedLogs(props) {
                     <SortIcon />
                   </span>
                 </div>
-                <div className="ml-3">
+                <div className={`ml-3 p-1 ${filterValues.item_desc.length > 0 ? 'bg-warning rounded' : ''}`}>
                   <span
                     onClick={() => {
                       setFilterModal(true);
@@ -509,7 +507,7 @@ export default function CombinedLogs(props) {
                     </span>
                   </div>
                   <span
-                    className="ml-3"
+                    className={`ml-3 p-1 ${filterValues.classification.length > 0 ? 'bg-warning rounded' : ''}`}
                     onClick={() => {
                       setFilterModal(true);
                       setFilterColumn("classification");
@@ -798,7 +796,7 @@ export default function CombinedLogs(props) {
                             </>
                           )
                         )}
-                        {!props.selectedLogData.length && (
+                        {(props.listId === null) && (
                           <>
                             <AddButton
                               onClick={() => {
@@ -1152,13 +1150,13 @@ export default function CombinedLogs(props) {
         setLogData={props.setLogData}
         orderColumn={sorting.column || ""}
         order={sorting.order === "desc" ? "asc" : "desc" || ""}
-        selectedLogData={props.selectedLogData}
         listId={props.listId}
-        setSelectedLogData={props.setSelectedLogData}
         qaDashboard={props?.qaDashboard}
         setTotalCount={setTotalCount}
         page={props?.page}
         rowsPerPage={props?.rowsPerPage}
+        setLogIdList={props?.setLogIdList}
+        setSelected={props?.setSelected}
       />
       {errorMessage && (
         <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
