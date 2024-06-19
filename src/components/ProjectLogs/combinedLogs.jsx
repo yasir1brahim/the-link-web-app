@@ -23,8 +23,11 @@ export default function CombinedLogs(props) {
     setTotalCount,
     errorMessage,
     setNewRowIndex,
+    editRow,
+    setEditRow,
+    rowData,
+    setRowData
   } = props;
-  const [editRow, setEditRow] = useState(1);
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
   // const [statusValue, setStatus] = useState({});
@@ -39,19 +42,6 @@ export default function CombinedLogs(props) {
   const [pdfTooltip, setPdfTooltip] = useState(null);
   // const navigate = useNavigate();
 
-  const [rowData, setRowData] = useState({
-    comments: "",
-    // id: 1,
-    item_desc: "",
-    package: "",
-    para_context: "",
-    para_no: "",
-    project_id: "",
-    spec_section: "",
-    status: "",
-    type: "",
-    classification: "",
-  });
   const [formValid, setFormValid] = useState({
     spec_section: true,
     para_no: true,
@@ -146,6 +136,13 @@ export default function CombinedLogs(props) {
       }
       setNewRowIndex(null);
       props.setPageRefresh(!props.pageRefresh);
+      props.setLogInViewer(null);
+      props.setPdfData({
+        url: "",
+        textLoc: {},
+        index: "",
+        docId: null,
+      })
     } catch (error) {
       console.log(error.message);
       // toast.error(error?.response?.data?.message || error?.message, {
@@ -973,6 +970,12 @@ export default function CombinedLogs(props) {
                                   props.setLogData(
                                     deleteElement(props.logData, index),
                                   );
+                                newRowIndex === index + 1 &&
+                                  props.setLogData(
+                                    deleteElement(props.logData, index),
+                                  );
+                                newRowIndex === index + 1 &&
+                                  props.setPdfData({...props.pdfData, index: props.pdfData.index - 1})
                               }}
                             >
                               <svg
@@ -1045,14 +1048,15 @@ export default function CombinedLogs(props) {
                             type="button"
                             className="btn btn-secondary btn-sm"
                             style={{ marginRight: "5px" }}
-                            onClick={() =>
+                            onClick={() => {
+                              props.setLogInViewer(null);
                               props.setPdfData({
                                 url: "",
                                 textLoc: {},
                                 index: "",
                                 docId: null,
                               })
-                            }
+                            }}
                           >
                             Close Pdf
                           </button>
@@ -1061,14 +1065,15 @@ export default function CombinedLogs(props) {
                           showPdf && (
                             <>
                               <span
-                                onClick={() =>
+                                onClick={() => {
                                   handleViewPdf(
                                     log.doc_link,
                                     log.text_loc,
                                     index,
                                     log.doc_id,
-                                  )
-                                }
+                                  );
+                                  props.setLogInViewer(log);
+                                }}
                                 style={{ cursor: "pointer" }}
                               >
                                 <svg

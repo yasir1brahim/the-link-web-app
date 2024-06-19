@@ -12,6 +12,9 @@ const PdfWrapper = (props) => {
         textLoc={props.pdfData.textLoc}
         docId={props.pdfData.docId}
         setPdfData={props.setPdfData}
+        handleAddNewRow={props.handleAddNewRow}
+        handleAppendRowAbove={props.handleAppendRowAbove}
+        setLogInViewer={props.setLogInViewer}
       />
       {/* <PdfReader url={props.pdfData.url} textLoc={props.pdfData.textLoc} docId={props.pdfData.docId}/> */}
     </div>
