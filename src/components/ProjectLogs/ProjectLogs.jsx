@@ -38,7 +38,7 @@ const ProjectLogs = () => {
   const toggleDocumentStatusModal = () => setShowDocumentStatusModal(!showDocumentStatusModal);
   const toggleModal = () => setModal(!modal);
   const [pdfFile, setPdfFile] = useState({});
-  const [fileData, setFileData] = useState({});
+  const [alreadyExistingFiles, setAlreadyExistingFiles] = useState([]);
   const [isUploadLoading, setUploadLoading] = useState(false);
 
   const [saveListName, setToggleSaveListNameModal] = useState(false);
@@ -202,7 +202,7 @@ const ProjectLogs = () => {
       if (response.data) {
         // console.log(response.data);
         setUploadLoading(false);
-        setFileData(response.data.message);
+        setAlreadyExistingFiles(response.data.already_exist);
         setModal(false);
         toggleSuccessModal(true);
         setPageRefresh(!pageRefresh);
@@ -937,7 +937,7 @@ const ProjectLogs = () => {
         backToUpload={backToUpload}
         successModal={successModal}
         toggleSuccessModal={toggleSuccessModal}
-        fileData={fileData}
+        alreadyExistingFiles={alreadyExistingFiles}
       />
       <Procore
         companyId={companyId}
