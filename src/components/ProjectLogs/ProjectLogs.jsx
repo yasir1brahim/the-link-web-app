@@ -38,7 +38,7 @@ const ProjectLogs = () => {
   const toggleDocumentStatusModal = () => setShowDocumentStatusModal(!showDocumentStatusModal);
   const toggleModal = () => setModal(!modal);
   const [pdfFile, setPdfFile] = useState({});
-  const [fileData, setFileData] = useState({});
+  const [alreadyExistingFiles, setAlreadyExistingFiles] = useState([]);
   const [isUploadLoading, setUploadLoading] = useState(false);
 
   const [saveListName, setToggleSaveListNameModal] = useState(false);
@@ -202,25 +202,11 @@ const ProjectLogs = () => {
       if (response.data) {
         // console.log(response.data);
         setUploadLoading(false);
-        setFileData(response.data.message);
+        setAlreadyExistingFiles(response.data.already_exist);
         setModal(false);
         toggleSuccessModal(true);
         setPageRefresh(!pageRefresh);
       }
-      axiosInstance({
-        method: "get",
-        url: "/collab/create_spec_index",
-        params: {
-          project_id: projectId || state.project?.project_id,
-        },
-      });
-      axiosInstance({
-        method: "post",
-        url: `/spec-gpt/load_doc`,
-        data: {
-          project_id: projectId || state.project?.project_id,
-        },
-      });
     } catch (error) {
       setUploadLoading(false);
       toggleErrorModal(true);
@@ -951,7 +937,7 @@ const ProjectLogs = () => {
         backToUpload={backToUpload}
         successModal={successModal}
         toggleSuccessModal={toggleSuccessModal}
-        fileData={fileData}
+        alreadyExistingFiles={alreadyExistingFiles}
       />
       <Procore
         companyId={companyId}

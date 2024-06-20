@@ -20,7 +20,7 @@ export const UploadDocuments = (props) => {
     backToUpload,
     successModal,
     toggleSuccessModal,
-    fileData,
+    alreadyExistingFiles,
     logScreenUrl,
     project,
   } = props;
@@ -160,6 +160,14 @@ export const UploadDocuments = (props) => {
             <h5>Success</h5>
             <p>Your files have been succesfully uploaded and are being processed.</p>
             <p>This may take up to 10 minutes to complete.</p>
+            {alreadyExistingFiles?.length > 0 && (<>
+              <p><b>Note:</b> The following files had the same title and content as other files you already uploaded for this project. They will not be re-processed.</p>
+              <ul className="doc-content-table">
+                {alreadyExistingFiles.map((filename) => (
+                  <li className="doc-content-list">{filename}</li>
+                ))}
+              </ul></>
+            )}
             <div className="text-right">
               <button
                 type="button"
