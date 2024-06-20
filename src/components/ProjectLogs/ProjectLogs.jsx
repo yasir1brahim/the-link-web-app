@@ -207,20 +207,6 @@ const ProjectLogs = () => {
         toggleSuccessModal(true);
         setPageRefresh(!pageRefresh);
       }
-      axiosInstance({
-        method: "get",
-        url: "/collab/create_spec_index",
-        params: {
-          project_id: projectId || state.project?.project_id,
-        },
-      });
-      axiosInstance({
-        method: "post",
-        url: `/spec-gpt/load_doc`,
-        data: {
-          project_id: projectId || state.project?.project_id,
-        },
-      });
     } catch (error) {
       setUploadLoading(false);
       toggleErrorModal(true);
