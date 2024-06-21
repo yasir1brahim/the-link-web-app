@@ -711,7 +711,7 @@ const ProjectLogs = () => {
           // breadcrumb={'Project Details'}
           breadcrumb={"View Projects"}
           breadcrumbUrl={`/project-list?id=${customerId}`}
-          breadcrumb2={"Requrement Logs"}
+          breadcrumb2={"Requirements Logs"}
           showBtn={"Upload Documents"}
           toggleModal={toggleModal}
           btnSize={"small"}
