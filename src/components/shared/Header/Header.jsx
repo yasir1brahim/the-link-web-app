@@ -15,7 +15,7 @@ const Header = ({ ...props }) => {
   const specGptUser = localStorage.getItem("isSpecGptUser") === "true";
 
   const checkDocsStatus = async () => {
-    if ((props.breadcrumb2 === "Requrement Logs" || props.breadcrumb2 === "Collab Hub" || props.breadcrumb2 === "Spec GPT") && !specGptUser) {
+    if ((props.breadcrumb2 === "Requirements Logs" || props.breadcrumb2 === "Collab Hub" || props.breadcrumb2 === "Spec GPT") && !specGptUser) {
       try {
         const response = await axiosInstance({
           method: "get",
