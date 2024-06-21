@@ -9,7 +9,7 @@ import {
   DropdownItem,
 } from "reactstrap";
 import { ReactComponent as Trash } from "../../assets/images/trash.svg";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -40,6 +40,7 @@ const ProjectLogs = () => {
   const [pdfFile, setPdfFile] = useState({});
   const [logInViewer, setLogInViewer] = useState(null);
   const [fileData, setFileData] = useState({});
+  const [alreadyExistingFiles, setAlreadyExistingFiles] = useState([]);
   const [isUploadLoading, setUploadLoading] = useState(false);
 
   const [saveListName, setToggleSaveListNameModal] = useState(false);
@@ -121,11 +122,36 @@ const ProjectLogs = () => {
   const [rowsPerPage, setRowsPerPage] = React.useState(20);
   const [page, setPage] = React.useState(1);
 
+  const [logIdList, setLogIdList] = React.useState([]);
+  const [isSelectAll, setIsSelectAll] = React.useState(false);
+  const history = useNavigate();
+  const [isAssociatedUser, setIsAssociatedUser] = useState(true);
+
   useEffect(() => {
     if (!modal) {
       setPdfFile({});
     }
   }, [modal]);
+
+  useEffect(() => {
+    if (customerId.toString() !== localStorage.getItem("userId")) {
+      if (localStorage.getItem("roleId") > 1) {
+        setIsAssociatedUser(false);
+        history({ pathname: localStorage.getItem('roleId') === '0'
+        ? '/admin-landing'
+        : '/project-list' })
+        toast.warn("You are not authorized to view this project.", {
+            position: "bottom-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        });
+      }
+    }
+  }, [])
 
   // get the number of documents uploaded
   useEffect(() => {
@@ -145,7 +171,7 @@ const ProjectLogs = () => {
       setLoading(false);
       handleError(error);
     });
-  }, [state?.project, pageRefresh, projectId]);
+  }, [state, pageRefresh, projectId]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -165,7 +191,7 @@ const ProjectLogs = () => {
     }, 10000); // 10000 milliseconds = 10 seconds
   
     return () => clearInterval(intervalId); // This will clear the interval when the component unmounts
-  }, [projectId, state.project?.project_id, documentData]); // Dependencies array, re-run the effect if these values change
+  }, [projectId, state, documentData]); // Dependencies array, re-run the effect if these values change
 
   useEffect(() => {
     if (!modal) {
@@ -194,25 +220,11 @@ const ProjectLogs = () => {
       if (response.data) {
         // console.log(response.data);
         setUploadLoading(false);
-        setFileData(response.data.message);
+        setAlreadyExistingFiles(response.data.already_exist);
         setModal(false);
         toggleSuccessModal(true);
         setPageRefresh(!pageRefresh);
       }
-      axiosInstance({
-        method: "get",
-        url: "/collab/create_spec_index",
-        params: {
-          project_id: projectId || state.project?.project_id,
-        },
-      });
-      axiosInstance({
-        method: "post",
-        url: `/spec-gpt/load_doc`,
-        data: {
-          project_id: projectId || state.project?.project_id,
-        },
-      });
     } catch (error) {
       setUploadLoading(false);
       toggleErrorModal(true);
@@ -381,20 +393,23 @@ const ProjectLogs = () => {
       }
     }
   };
-  const fetchLogData = async (page, itemsPerPage, filters_, search) => {
+  const fetchLogData = async (page, itemsPerPage, search, listId=null, _filters=null) => {
     setLoading(true);
     let filters = {};
-    if (
-      Object.values(filterValues)
-        .map((value) => (value.length ? true : false))
-        .includes(true)
-    ) {
-      Object.keys(filterValues).forEach((key) =>
-        filterValues[key].length
-          ? (filters = { ...filters, [key]: filterValues[key] })
-          : null,
-      );
+    if (_filters === null) {
+      if (
+        Object.values(filterValues)
+          .map((value) => (value.length ? true : false))
+          .includes(true)
+      ) {
+        Object.keys(filterValues).forEach((key) =>
+          filterValues[key].length
+            ? (filters = { ...filters, [key]: filterValues[key] })
+            : null,
+        );
+      }
     }
+
     const response = await axiosInstance({
       method: "post",
       url: "/filter_logs",
@@ -406,19 +421,19 @@ const ProjectLogs = () => {
         order: "",
         page_number: page || 0,
         limit: itemsPerPage,
+        list_id: listId
       },
     });
     // setLogData(response.data.message);
     setSelectedFilterValue(response.data.all_filter_vals);
 
     const submittalLogs = response.data.message;
-    selectedLogData.length
-      ? setSelectedLogData(submittalLogs)
-      : setLogData(submittalLogs);
+    setLogData(submittalLogs);
     localStorage.setItem(
       "filteredIds",
       submittalLogs?.map((item) => item?.id),
     );
+    setLogIdList(response.data.log_id_list);
     setLoading(false);
     setErrorMessage("");
     if (response.data.message.length === 0) {
@@ -475,29 +490,12 @@ const ProjectLogs = () => {
   }, [state, pageRefresh, customerId]);
 
   useEffect(() => {
-    let filterData = selectedLogData.length ? selectedLogData : logData;
-    let filteredLog = filterData;
-    // .map((log) => {
-    //   return Object.values(log)
-    //     .filter((value) => value)
-    //     .filter((value) => value.toString().includes(searchValue)).length
-    //     ? log
-    //     : null;
-    // })
-    // .filter((value) => value);
-    setFilteredLogData(filteredLog);
-  }, [selectedLogData, logData, searchValue, setFilteredLogData]);
-  // let filteredLogData = selectedLogData.length ? selectedLogData : logData
+    setFilteredLogData(logData);
+  }, [logData, searchValue, setFilteredLogData]);
 
   const handleSelectAll = () => {
-    if (selected?.length === filteredLogData?.length) {
-      setSelected([]);
-    } else {
-      let selectedLogs = filteredLogData?.map((log) => {
-        return log.id;
-      });
-      setSelected(selectedLogs);
-    }
+    setIsSelectAll(!isSelectAll);
+    setSelected(isSelectAll ? [] : logIdList);
   };
 
   const documentIsProcessing = (documents) => documents.some(doc => ['PENDING_PROCESSING', 'PROCESSING', 'SUBSECTIONS_EXTRACTED'].includes(doc.document_status));
@@ -514,6 +512,7 @@ const ProjectLogs = () => {
       const rowsSelected = JSON.stringify(selected);
       localStorage.setItem("selectedRows", `${rowsSelected}`);
     }
+    setIsSelectAll(((selected.length === logIdList.length) && (selected.length > 0)) ? true : false);
   }, [selected]);
 
   const handleExportExcel = async (recordData, fileName) => {
@@ -591,24 +590,25 @@ const ProjectLogs = () => {
   };
 
   const heandleSearchClick = () => {
-    let filters = {};
-    if (
-      Object.values(filterValues)
-        .map((value) => (value.length ? true : false))
-        .includes(true)
-    ) {
-      Object.keys(filterValues).forEach((key) =>
-        filterValues[key].length
-          ? (filters = { ...filters, [key]: filterValues[key] })
-          : null,
-      );
-    }
-    fetchLogData(0, rowsPerPage, filters, searchValue);
+    fetchLogData(0, rowsPerPage, searchValue, listId);
   };
 
   const handleOpenSaveList = async (listId) => {
-    const savedLogs = await getSavedLogs(listId);
-    setSelectedLogData(savedLogs?.data?.message);
+    // const savedLogs = await getSavedLogs(listId);
+    const initFilter = {
+      spec_section: [],
+      item_desc: [],
+      classification: [],
+      sd_title: [],
+      type: []
+    }
+    setFilterValues(initFilter);
+
+    await fetchLogData(0, rowsPerPage, "", listId, {});
+
+    setListId(listId);
+    setSearchValue("");
+    
     setToggleViewSavedList(false);
   };
 
@@ -620,19 +620,14 @@ const ProjectLogs = () => {
 
   const handleClearSearch = () => {
     setSearchValue("");
-    let filters = {};
-    if (
-      Object.values(filterValues)
-        .map((value) => (value.length ? true : false))
-        .includes(true)
-    ) {
-      Object.keys(filterValues).forEach((key) =>
-        filterValues[key].length
-          ? (filters = { ...filters, [key]: filterValues[key] })
-          : null,
-      );
-    }
-    fetchLogData(0, rowsPerPage, filters, "");
+
+    fetchLogData(0, rowsPerPage, "", listId);
+  }
+
+  const handleClearSelection = async() => {
+    await fetchLogData(0, rowsPerPage, searchValue, null);
+    setListId(null);
+    setSelected([]);
   }
 
   const insertElement = (arr, index, newItem) => [
@@ -709,7 +704,7 @@ const ProjectLogs = () => {
   return (
     <div className="page-wrap">
       <NavbarTop qaDashboard={state?.qaDashboard} />
-      <div className="project-logs-wrapper log-table-width">
+      {isAssociatedUser === true && <div className="project-logs-wrapper log-table-width">
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
           centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
@@ -746,19 +741,18 @@ const ProjectLogs = () => {
             <>
               {!state?.qaDashboard && (
                 <div className="table-top-content">
-                  {selectedLogData?.length ? (
+                  {(listId !== null) ? (
                     <button
                       type="button"
                       className="btn btn-primary mr-3 btn-small"
                       onClick={() => {
-                        setSelectedLogData([]);
-                        setSelected([]);
+                        handleClearSelection();
                       }}
                     >
                       Clear Selection
                     </button>
                   ) : null}
-                  {!selectedLogData.length ? (
+                  {(listId === null) ? (
                     <button
                       type="button"
                       className=" mr-3 table-top-btn btn-disabled"
@@ -920,8 +914,6 @@ const ProjectLogs = () => {
                   setLogData={setLogData}
                   projectId={state?.projectId || projectId}
                   listId={listId}
-                  selectedLogData={selectedLogData}
-                  setSelectedLogData={setSelectedLogData}
                   setPdfData={setPdfData}
                   pdfData={pdfData}
                   completeLogData={logData}
@@ -942,6 +934,9 @@ const ProjectLogs = () => {
                   setEditRow={setEditRow}
                   rowData={rowData}
                   setRowData={setRowData}
+                  setLogIdList={setLogIdList}
+                  isSelectAll={isSelectAll}
+                  setSelected={setSelected}
                 />
                 {pdfData.url && (
                   <PdfWrapper
@@ -957,11 +952,12 @@ const ProjectLogs = () => {
                 <Pagination
                   totalItems={totalCount}
                   fetchData={fetchLogData}
-                  filterValues={filterValues}
                   rowsPerPage={rowsPerPage}
                   setRowsPerPage={setRowsPerPage}
                   page={page}
                   setPage={setPage}
+                  listId={listId}
+                  searchValue={searchValue}
                 />
               </div>
               {/* {state.project?.type === 'Submittal' && (
@@ -1001,7 +997,7 @@ const ProjectLogs = () => {
             {/* )} */}
           </div>
         </div>
-      </div>
+      </div>}
       <ToastContainer
         position="bottom-center"
         autoClose={5000}
@@ -1025,7 +1021,7 @@ const ProjectLogs = () => {
         backToUpload={backToUpload}
         successModal={successModal}
         toggleSuccessModal={toggleSuccessModal}
-        fileData={fileData}
+        alreadyExistingFiles={alreadyExistingFiles}
       />
       <Procore
         companyId={companyId}
@@ -1114,7 +1110,6 @@ const ProjectLogs = () => {
                               className="btn open-btn mr-2"
                               onClick={() => {
                                 handleOpenSaveList(list.id);
-                                setListId(list.id);
                               }}
                             >
                               Open

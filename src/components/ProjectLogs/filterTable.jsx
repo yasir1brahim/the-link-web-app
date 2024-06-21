@@ -41,10 +41,10 @@ export const FilterTable = (props) => {
   };
 
   const handleApplyFilter = async (toggleFilter) => {
-    let a = {};
+    let filter = {};
     Object.keys(props.filterValues).forEach((key) =>
       props.filterValues[key].length
-        ? (a = { ...a, [key]: props.filterValues[key] })
+        ? (filter = { ...filter, [key]: props.filterValues[key] })
         : null
     );
     try {
@@ -56,21 +56,22 @@ export const FilterTable = (props) => {
           project_id: props.projectId,
           search: '',
           // filters: {...a, type: ["Submittal"]},
-          filters: a,
+          filters: filter,
           order_col: props.orderColumn,
           order: props.order,
-          list_id: props.selectedLogData.length ? props.listId : '',
+          list_id: props.listId,
           page_number: props?.page - 1,
-          limit: props?.rowsPerPage
+          limit: props?.rowsPerPage,
+          list_id: props.listId
         }
       });
       localStorage.setItem(
         'filteredIds',
         response.data?.message?.map((item) => item?.id)
       );
-      props.selectedLogData.length
-        ? props.setSelectedLogData(response.data.message)
-        : props.setLogData(response.data.message);
+      props.setLogData(response.data.message);
+      props.setLogIdList(response.data.log_id_list);
+      props.setSelected([]);
       toggleFilter && props.setFilterModal();
       props.setTotalCount(response.data.total_count);
       setSearchValue('')
