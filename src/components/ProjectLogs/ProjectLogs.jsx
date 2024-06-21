@@ -38,6 +38,8 @@ const ProjectLogs = () => {
   const toggleDocumentStatusModal = () => setShowDocumentStatusModal(!showDocumentStatusModal);
   const toggleModal = () => setModal(!modal);
   const [pdfFile, setPdfFile] = useState({});
+  const [logInViewer, setLogInViewer] = useState(null);
+  const [fileData, setFileData] = useState({});
   const [alreadyExistingFiles, setAlreadyExistingFiles] = useState([]);
   const [isUploadLoading, setUploadLoading] = useState(false);
 
@@ -66,6 +68,19 @@ const ProjectLogs = () => {
     docId: null,
   });
   const [newRowIndex, setNewRowIndex] = useState(null);
+  const [editRow, setEditRow] = useState(1);
+  const [rowData, setRowData] = useState({
+    comments: "",
+    item_desc: "",
+    package: "",
+    para_context: "",
+    para_no: "",
+    project_id: "",
+    spec_section: "",
+    status: "",
+    type: "",
+    classification: "",
+  });
   const projectType = state?.project.project_type;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const baseUrl = window.location.href.includes("https://app.thelink.ai")
@@ -615,6 +630,77 @@ const ProjectLogs = () => {
     setSelected([]);
   }
 
+  const insertElement = (arr, index, newItem) => [
+    // part of the array before the specified index
+    ...arr.slice(0, index),
+    // inserted item
+    newItem,
+    // part of the array after the specified index
+    ...arr.slice(index),
+  ];
+
+  const handleEditToggle = (log, index) => {
+    setRowData(log);
+    setEditRow(index);
+  };
+
+  const handleAddNewRow = async (content) => {
+    try {
+      let index = logData?.findIndex((item) => item === logInViewer);
+      const dashIndex = logInViewer.para_no.search("-");
+      // Below we are making an array of para_nos then filtering them like if log.para_no = 1.04, paraNos will have all entries of 1.04 i.e. 1.04-a, 1.04-b etc.
+      const paraNos = logData
+        ?.map((log) => log.para_no)
+        .filter((paraNo) =>
+          paraNo.includes(
+            dashIndex !== -1 ? logInViewer.para_no.slice(0, dashIndex) : logInViewer.para_no,
+          ),
+        );
+      //Now we are making an array containing the ascii character values of elements after '-' in paraNos
+      const charArray = paraNos.map((paraNo) =>
+        paraNo.search("-") !== -1
+          ? paraNo.codePointAt(paraNo.search("-") + 1)
+          : 96,
+      );
+      const logObj = {
+        ...logInViewer,
+        para_no:
+          dashIndex !== -1
+            ? logInViewer.para_no.slice(0, dashIndex + 1) +
+              String.fromCharCode(Math.max(...charArray) + 1)
+            : `${logInViewer.para_no}-${String.fromCharCode(
+                Math.max(...charArray) + 1,
+              )}`,
+        para_context: content
+      };
+      const result = insertElement(logData, index + 1, logObj);
+      // setLogData(result)
+      setFilteredLogData(result);
+
+      setNewRowIndex(index + 1);
+      handleEditToggle(logObj, index + 1);
+      if (pdfData.url) {
+        let docElement = document.getElementsByClassName("l-table-wrapper");
+        docElement[0].scrollTo(890, 0);
+      }
+    } catch (error) {
+      console.log('error', error)
+    }
+  }
+
+  const handleAppendToSelectedRow = async (content) => {
+    try {
+      let index = logData?.findIndex((item) => item === logInViewer);
+      const logObj = {
+        ...logInViewer,
+        para_context: `${logInViewer.para_context} ${content}`
+      };
+      handleEditToggle(logObj, index);
+    } catch (error) {
+      console.log('error', error)
+    }
+  }
+
   return (
     <div className="page-wrap">
       <NavbarTop qaDashboard={state?.qaDashboard} />
@@ -843,12 +929,23 @@ const ProjectLogs = () => {
                   errorMessage={errorMessage}
                   page={page}
                   rowsPerPage={rowsPerPage}
+                  setLogInViewer={setLogInViewer}
+                  editRow={editRow}
+                  setEditRow={setEditRow}
+                  rowData={rowData}
+                  setRowData={setRowData}
                   setLogIdList={setLogIdList}
                   isSelectAll={isSelectAll}
                   setSelected={setSelected}
                 />
                 {pdfData.url && (
-                  <PdfWrapper pdfData={pdfData} setPdfData={setPdfData} />
+                  <PdfWrapper
+                    pdfData={pdfData}
+                    setPdfData={setPdfData}
+                    handleAddNewRow={handleAddNewRow}
+                    handleAppendToSelectedRow={handleAppendToSelectedRow}
+                    setLogInViewer={setLogInViewer}
+                  />
                 )}
               </div>
               <div className="table-footer-content logs-pagination">
