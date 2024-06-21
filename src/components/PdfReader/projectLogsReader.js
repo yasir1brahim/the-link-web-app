@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from "react";
 import WebViewer from "@pdftron/webviewer";
 import axiosInstance from "../../config/axios";
 
-const ProjectLogsReader = ({ url, textLoc, docId, setPdfData, handleAddNewRow, handleAppendRowAbove, setLogInViewer }) => {
+const ProjectLogsReader = ({ url, textLoc, docId, setPdfData, handleAddNewRow, handleAppendToSelectedRow, setLogInViewer }) => {
   const viewer = useRef(null);
 
   useEffect(() => {
@@ -224,7 +224,7 @@ const ProjectLogsReader = ({ url, textLoc, docId, setPdfData, handleAddNewRow, h
       lastItem.dataElement);
       instance.UI.textPopup.add({
         type: 'actionButton',
-        label: 'Append Row Above',
+        label: 'Append to Selected Row',
         img: `<svg
                 width="20"
                 height="20"
@@ -248,7 +248,7 @@ const ProjectLogsReader = ({ url, textLoc, docId, setPdfData, handleAddNewRow, h
                   />
                 </g>
               </svg>`,
-        onClick: () => handleAppendRowAbove(instance.Core.documentViewer.getSelectedText())
+        onClick: () => handleAppendToSelectedRow(instance.Core.documentViewer.getSelectedText())
       },
       lastItem.dataElement);
     });
