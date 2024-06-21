@@ -337,15 +337,14 @@ export default function CombinedLogs(props) {
                   >
                     <SortIcon />
                   </span>
-                </div>
-                <div className={`ml-3 p-1 ${filterValues.spec_section.length > 0 ? 'bg-warning rounded' : ''}`}>
                   <span
+                    className="ml-1"
                     onClick={() => {
                       setFilterModal(true);
                       setFilterColumn("spec_section");
                     }}
                   >
-                    <FilterIcon />
+                    <FilterIcon fillColor={`${filterValues.spec_section.length > 0 ? '#FFC107' : '#36454F'}`}/>
                   </span>
                 </div>
               </span>
@@ -402,15 +401,14 @@ export default function CombinedLogs(props) {
                     >
                       <SortIcon />
                     </span>
-                  </div>
-                  <div className={`ml-3 p-1 ${filterValues.type.length > 0 ? 'bg-warning rounded' : ''}`}>
                     <span
+                      className="ml-1"
                       onClick={() => {
                         setFilterModal(true);
                         setFilterColumn("type");
                       }}
                     >
-                      <FilterIcon />
+                      <FilterIcon fillColor={`${filterValues.type.length > 0 ? '#FFC107' : '#36454F'}`}/>
                     </span>
                   </div>
                 </span>
@@ -427,16 +425,16 @@ export default function CombinedLogs(props) {
                     >
                       <SortIcon />
                     </span>
+                    <span
+                      className="ml-1"
+                      onClick={() => {
+                        setFilterModal(true);
+                        setFilterColumn("owner_contractor");
+                      }}
+                    >
+                      <FilterIcon fillColor={`${filterValues.owner_contractor.length > 0 ? '#FFC107' : '#36454F'}`}/>
+                    </span>
                   </div>
-                  <span
-                    className="ml-3"
-                    onClick={() => {
-                      setFilterModal(true);
-                      setFilterColumn("owner_contractor");
-                    }}
-                  >
-                    <FilterIcon />
-                  </span>
                 </span>
               </th>
             )}
@@ -451,16 +449,16 @@ export default function CombinedLogs(props) {
                     >
                       <SortIcon />
                     </span>
+                    <span
+                      className="ml-1"
+                      onClick={() => {
+                        setFilterModal(true);
+                        setFilterColumn("sd_title");
+                      }}
+                    >
+                      <FilterIcon fillColor={`${filterValues.sd_title.length > 0 ? '#FFC107' : '#36454F'}`}/>
+                    </span>
                   </div>
-                  <span
-                    className={`ml-3 p-1 ${filterValues.sd_title.length > 0 ? 'bg-warning rounded' : ''}`}
-                    onClick={() => {
-                      setFilterModal(true);
-                      setFilterColumn("sd_title");
-                    }}
-                  >
-                    <FilterIcon />
-                  </span>
                 </span>
               </th>
             )}
@@ -474,15 +472,14 @@ export default function CombinedLogs(props) {
                   >
                     <SortIcon />
                   </span>
-                </div>
-                <div className={`ml-3 p-1 ${filterValues.item_desc.length > 0 ? 'bg-warning rounded' : ''}`}>
                   <span
+                    className="ml-1"
                     onClick={() => {
                       setFilterModal(true);
                       setFilterColumn("item_desc");
                     }}
                   >
-                    <FilterIcon />
+                    <FilterIcon fillColor={`${filterValues.item_desc.length > 0 ? '#FFC107' : '#36454F'}`}/>
                   </span>
                 </div>
               </span>
@@ -505,16 +502,16 @@ export default function CombinedLogs(props) {
                     >
                       <SortIcon />
                     </span>
+                    <span
+                      className="ml-1"
+                      onClick={() => {
+                        setFilterModal(true);
+                        setFilterColumn("classification");
+                      }}
+                    >
+                      <FilterIcon fillColor={`${filterValues.classification.length > 0 ? '#FFC107' : '#36454F'}`}/>
+                    </span>
                   </div>
-                  <span
-                    className={`ml-3 p-1 ${filterValues.classification.length > 0 ? 'bg-warning rounded' : ''}`}
-                    onClick={() => {
-                      setFilterModal(true);
-                      setFilterColumn("classification");
-                    }}
-                  >
-                    <FilterIcon />
-                  </span>
                 </span>
               </th>
             )}
