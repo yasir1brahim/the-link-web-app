@@ -13,6 +13,8 @@ import { ReactComponent as ExpandButton } from "../../assets/images/down-arrow.s
 import { ReactComponent as CollapseButton } from "../../assets/images/up-arrow.svg";
 import { Tooltip } from "reactstrap";
 import handleError from "../../config/errorHandler";
+import { SortIcon } from "../shared/icons/sortIcon";
+import { FilterIcon } from "../shared/icons/filterIcon";
 
 export default function CombinedLogs(props) {
   const {
@@ -192,7 +194,7 @@ export default function CombinedLogs(props) {
           filters: a,
           order_col: columnName || "",
           order: sortingOrder === "desc" ? "asc" : "desc" || "",
-          list_id: props.selectedLogData.length ? props.listId : "",
+          list_id: props.listId,
           page_number: props?.page - 1,
           limit: props?.rowsPerPage,
         },
@@ -201,10 +203,8 @@ export default function CombinedLogs(props) {
         "filteredIds",
         response.data?.message?.map((item) => item?.id),
       );
-      props.selectedLogData.length
-        ? props.setSelectedLogData(response.data.message)
-        : props.setLogData(response.data.message);
-
+      props.setLogData(response.data.message);
+      props.setLogIdList(response.data.log_id_list);
       setSorting({
         ...sorting,
         column: columnName,
@@ -315,7 +315,7 @@ export default function CombinedLogs(props) {
                     name="ticketHeading"
                     id="ticketHeading"
                     onChange={props.handleSelectAll}
-                    checked={props.selected.length === logData.length}
+                    checked={props.isSelectAll}
                   />
                   <label
                     className="custom-control-label"
@@ -327,7 +327,6 @@ export default function CombinedLogs(props) {
 
             <th className="text-center small-font">Actions</th>
 
-
             <th className="small-font">
               <span className="has-sorting">
                 <div className="d-flex">
@@ -336,63 +335,17 @@ export default function CombinedLogs(props) {
                     style={{ cursor: "pointer", marginLeft: "6px" }}
                     onClick={() => handleSorting("spec_section")}
                   >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 14 14"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M6.30556 4.36109L3.52778 1.58331L0.75 4.36109"
-                        stroke="#36454F"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M3.52832 1.58331V10.6111"
-                        stroke="#36454F"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M13.2504 9.63885L10.4726 12.4166L7.69482 9.63885"
-                        stroke="#36454F"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M10.4731 12.4166V3.38885"
-                        stroke="#36454F"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <SortIcon />
                   </span>
                 </div>
-                <div className="ml-3">
+                <div className={`ml-3 p-1 ${filterValues.spec_section.length > 0 ? 'bg-warning rounded' : ''}`}>
                   <span
                     onClick={() => {
                       setFilterModal(true);
                       setFilterColumn("spec_section");
                     }}
                   >
-                    <svg
-                      width="16"
-                      height="14"
-                      viewBox="0 0 16 14"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0 1.30312C0 0.584375 0.584375 0 1.30313 0H14.6969C15.4156 0 16 0.584375 16 1.30312C16 1.60312 15.8969 1.89375 15.7063 2.125L10.5 8.51562V12.9906C10.5 13.5469 10.0469 14 9.49063 14C9.2625 14 9.04063 13.9219 8.8625 13.7812L5.97188 11.4875C5.67188 11.25 5.5 10.8906 5.5 10.5094V8.51562L0.29375 2.125C0.103125 1.89375 0 1.60312 0 1.30312ZM1.71875 1.5L6.83125 7.775C6.94063 7.90937 7 8.075 7 8.25V10.3875L9 11.975V8.25C9 8.07812 9.05937 7.90937 9.16875 7.775L14.2812 1.5H1.71875Z"
-                        fill="#36454F"
-                      />
-                    </svg>
+                    <FilterIcon />
                   </span>
                 </div>
               </span>
@@ -447,63 +400,17 @@ export default function CombinedLogs(props) {
                       style={{ cursor: "pointer", marginLeft: "6px" }}
                       onClick={() => handleSorting("type")}
                     >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 14 14"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M6.30556 4.36109L3.52778 1.58331L0.75 4.36109"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M3.52832 1.58331V10.6111"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M13.2504 9.63885L10.4726 12.4166L7.69482 9.63885"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M10.4731 12.4166V3.38885"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <SortIcon />
                     </span>
                   </div>
-                  <div className="ml-3">
+                  <div className={`ml-3 p-1 ${filterValues.type.length > 0 ? 'bg-warning rounded' : ''}`}>
                     <span
                       onClick={() => {
                         setFilterModal(true);
                         setFilterColumn("type");
                       }}
                     >
-                      <svg
-                        width="16"
-                        height="14"
-                        viewBox="0 0 16 14"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M0 1.30312C0 0.584375 0.584375 0 1.30313 0H14.6969C15.4156 0 16 0.584375 16 1.30312C16 1.60312 15.8969 1.89375 15.7063 2.125L10.5 8.51562V12.9906C10.5 13.5469 10.0469 14 9.49063 14C9.2625 14 9.04063 13.9219 8.8625 13.7812L5.97188 11.4875C5.67188 11.25 5.5 10.8906 5.5 10.5094V8.51562L0.29375 2.125C0.103125 1.89375 0 1.60312 0 1.30312ZM1.71875 1.5L6.83125 7.775C6.94063 7.90937 7 8.075 7 8.25V10.3875L9 11.975V8.25C9 8.07812 9.05937 7.90937 9.16875 7.775L14.2812 1.5H1.71875Z"
-                          fill="#36454F"
-                        />
-                      </svg>
+                      <FilterIcon />
                     </span>
                   </div>
                 </span>
@@ -518,42 +425,7 @@ export default function CombinedLogs(props) {
                       style={{ cursor: "pointer", marginLeft: "6px" }}
                       onClick={() => handleSorting("owner_contractor")}
                     >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 14 14"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M6.30556 4.36109L3.52778 1.58331L0.75 4.36109"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M3.52832 1.58331V10.6111"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M13.2504 9.63885L10.4726 12.4166L7.69482 9.63885"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M10.4731 12.4166V3.38885"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <SortIcon />
                     </span>
                   </div>
                   <span
@@ -563,18 +435,7 @@ export default function CombinedLogs(props) {
                       setFilterColumn("owner_contractor");
                     }}
                   >
-                    <svg
-                      width="16"
-                      height="14"
-                      viewBox="0 0 16 14"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0 1.30312C0 0.584375 0.584375 0 1.30313 0H14.6969C15.4156 0 16 0.584375 16 1.30312C16 1.60312 15.8969 1.89375 15.7063 2.125L10.5 8.51562V12.9906C10.5 13.5469 10.0469 14 9.49063 14C9.2625 14 9.04063 13.9219 8.8625 13.7812L5.97188 11.4875C5.67188 11.25 5.5 10.8906 5.5 10.5094V8.51562L0.29375 2.125C0.103125 1.89375 0 1.60312 0 1.30312ZM1.71875 1.5L6.83125 7.775C6.94063 7.90937 7 8.075 7 8.25V10.3875L9 11.975V8.25C9 8.07812 9.05937 7.90937 9.16875 7.775L14.2812 1.5H1.71875Z"
-                        fill="#36454F"
-                      />
-                    </svg>
+                    <FilterIcon />
                   </span>
                 </span>
               </th>
@@ -588,63 +449,17 @@ export default function CombinedLogs(props) {
                       style={{ cursor: "pointer", marginLeft: "6px" }}
                       onClick={() => handleSorting("sd_title")}
                     >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 14 14"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M6.30556 4.36109L3.52778 1.58331L0.75 4.36109"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M3.52832 1.58331V10.6111"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M13.2504 9.63885L10.4726 12.4166L7.69482 9.63885"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M10.4731 12.4166V3.38885"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <SortIcon />
                     </span>
                   </div>
                   <span
-                    className="ml-3"
+                    className={`ml-3 p-1 ${filterValues.sd_title.length > 0 ? 'bg-warning rounded' : ''}`}
                     onClick={() => {
                       setFilterModal(true);
                       setFilterColumn("sd_title");
                     }}
                   >
-                    <svg
-                      width="16"
-                      height="14"
-                      viewBox="0 0 16 14"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0 1.30312C0 0.584375 0.584375 0 1.30313 0H14.6969C15.4156 0 16 0.584375 16 1.30312C16 1.60312 15.8969 1.89375 15.7063 2.125L10.5 8.51562V12.9906C10.5 13.5469 10.0469 14 9.49063 14C9.2625 14 9.04063 13.9219 8.8625 13.7812L5.97188 11.4875C5.67188 11.25 5.5 10.8906 5.5 10.5094V8.51562L0.29375 2.125C0.103125 1.89375 0 1.60312 0 1.30312ZM1.71875 1.5L6.83125 7.775C6.94063 7.90937 7 8.075 7 8.25V10.3875L9 11.975V8.25C9 8.07812 9.05937 7.90937 9.16875 7.775L14.2812 1.5H1.71875Z"
-                        fill="#36454F"
-                      />
-                    </svg>
+                    <FilterIcon />
                   </span>
                 </span>
               </th>
@@ -657,63 +472,17 @@ export default function CombinedLogs(props) {
                     style={{ cursor: "pointer", marginLeft: "6px" }}
                     onClick={() => handleSorting("item_desc")}
                   >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 14 14"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M6.30556 4.36109L3.52778 1.58331L0.75 4.36109"
-                        stroke="#36454F"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M3.52832 1.58331V10.6111"
-                        stroke="#36454F"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M13.2504 9.63885L10.4726 12.4166L7.69482 9.63885"
-                        stroke="#36454F"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M10.4731 12.4166V3.38885"
-                        stroke="#36454F"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <SortIcon />
                   </span>
                 </div>
-                <div className="ml-3">
+                <div className={`ml-3 p-1 ${filterValues.item_desc.length > 0 ? 'bg-warning rounded' : ''}`}>
                   <span
                     onClick={() => {
                       setFilterModal(true);
                       setFilterColumn("item_desc");
                     }}
                   >
-                    <svg
-                      width="16"
-                      height="14"
-                      viewBox="0 0 16 14"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0 1.30312C0 0.584375 0.584375 0 1.30313 0H14.6969C15.4156 0 16 0.584375 16 1.30312C16 1.60312 15.8969 1.89375 15.7063 2.125L10.5 8.51562V12.9906C10.5 13.5469 10.0469 14 9.49063 14C9.2625 14 9.04063 13.9219 8.8625 13.7812L5.97188 11.4875C5.67188 11.25 5.5 10.8906 5.5 10.5094V8.51562L0.29375 2.125C0.103125 1.89375 0 1.60312 0 1.30312ZM1.71875 1.5L6.83125 7.775C6.94063 7.90937 7 8.075 7 8.25V10.3875L9 11.975V8.25C9 8.07812 9.05937 7.90937 9.16875 7.775L14.2812 1.5H1.71875Z"
-                        fill="#36454F"
-                      />
-                    </svg>
+                    <FilterIcon />
                   </span>
                 </div>
               </span>
@@ -734,63 +503,17 @@ export default function CombinedLogs(props) {
                       style={{ cursor: "pointer", marginLeft: "6px" }}
                       onClick={() => handleSorting("classification")}
                     >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 14 14"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M6.30556 4.36109L3.52778 1.58331L0.75 4.36109"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M3.52832 1.58331V10.6111"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M13.2504 9.63885L10.4726 12.4166L7.69482 9.63885"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M10.4731 12.4166V3.38885"
-                          stroke="#36454F"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <SortIcon />
                     </span>
                   </div>
                   <span
-                    className="ml-3"
+                    className={`ml-3 p-1 ${filterValues.classification.length > 0 ? 'bg-warning rounded' : ''}`}
                     onClick={() => {
                       setFilterModal(true);
                       setFilterColumn("classification");
                     }}
                   >
-                    <svg
-                      width="16"
-                      height="14"
-                      viewBox="0 0 16 14"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M0 1.30312C0 0.584375 0.584375 0 1.30313 0H14.6969C15.4156 0 16 0.584375 16 1.30312C16 1.60312 15.8969 1.89375 15.7063 2.125L10.5 8.51562V12.9906C10.5 13.5469 10.0469 14 9.49063 14C9.2625 14 9.04063 13.9219 8.8625 13.7812L5.97188 11.4875C5.67188 11.25 5.5 10.8906 5.5 10.5094V8.51562L0.29375 2.125C0.103125 1.89375 0 1.60312 0 1.30312ZM1.71875 1.5L6.83125 7.775C6.94063 7.90937 7 8.075 7 8.25V10.3875L9 11.975V8.25C9 8.07812 9.05937 7.90937 9.16875 7.775L14.2812 1.5H1.71875Z"
-                        fill="#36454F"
-                      />
-                    </svg>
+                    <FilterIcon />
                   </span>
                 </span>
               </th>
@@ -810,42 +533,7 @@ export default function CombinedLogs(props) {
                         style={{ cursor: "pointer", marginLeft: "6px" }}
                         onClick={() => handleSorting("para_context")}
                       >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 14 14"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M6.30556 4.36109L3.52778 1.58331L0.75 4.36109"
-                            stroke="#36454F"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M3.52832 1.58331V10.6111"
-                            stroke="#36454F"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M13.2504 9.63885L10.4726 12.4166L7.69482 9.63885"
-                            stroke="#36454F"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M10.4731 12.4166V3.38885"
-                            stroke="#36454F"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
+                        <SortIcon />
                       </span>
                     </div>
                   </span>
@@ -1108,7 +796,7 @@ export default function CombinedLogs(props) {
                             </>
                           )
                         )}
-                        {!props.selectedLogData.length && (
+                        {(props.listId === null) && (
                           <>
                             <AddButton
                               onClick={() => {
@@ -1462,13 +1150,13 @@ export default function CombinedLogs(props) {
         setLogData={props.setLogData}
         orderColumn={sorting.column || ""}
         order={sorting.order === "desc" ? "asc" : "desc" || ""}
-        selectedLogData={props.selectedLogData}
         listId={props.listId}
-        setSelectedLogData={props.setSelectedLogData}
         qaDashboard={props?.qaDashboard}
         setTotalCount={setTotalCount}
         page={props?.page}
         rowsPerPage={props?.rowsPerPage}
+        setLogIdList={props?.setLogIdList}
+        setSelected={props?.setSelected}
       />
       {errorMessage && (
         <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
