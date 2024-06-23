@@ -688,7 +688,7 @@ const ProjectLogs = () => {
       let index = logData?.findIndex((item) => item === logInViewer);
       const logObj = {
         ...logInViewer,
-        para_context: `${logInViewer.para_context} ${content}`
+        para_context: `${logInViewer.para_context} \n\n${content}`
       };
       handleEditToggle(logObj, index);
     } catch (error) {
