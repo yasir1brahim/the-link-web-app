@@ -112,13 +112,15 @@ const ProjectLogs = () => {
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [totalCount, setTotalCount] = useState(0);
-  const [filterValues, setFilterValues] = useState({
+  const initFilter = {
     spec_section: [],
     item_desc: [],
     classification: [],
     sd_title: [],
     type: []
-  });
+  }
+  const [filterValues, setFilterValues] = useState(initFilter);
+  const [showClearFilters, setShowClearFilters] = useState(false)
   const [rowsPerPage, setRowsPerPage] = React.useState(20);
   const [page, setPage] = React.useState(1);
 
@@ -595,13 +597,6 @@ const ProjectLogs = () => {
 
   const handleOpenSaveList = async (listId) => {
     // const savedLogs = await getSavedLogs(listId);
-    const initFilter = {
-      spec_section: [],
-      item_desc: [],
-      classification: [],
-      sd_title: [],
-      type: []
-    }
     setFilterValues(initFilter);
 
     await fetchLogData(0, rowsPerPage, "", listId, {});
@@ -701,6 +696,20 @@ const ProjectLogs = () => {
     }
   }
 
+  useEffect(() => {
+    Object.keys(filterValues).forEach((key) =>
+      filterValues[key].length
+        ? setShowClearFilters(true)
+        : null
+    );
+  }, [filterValues])
+
+  const clearFilters = async () => {
+    setFilterValues(initFilter);
+    await fetchLogData(0, rowsPerPage, "", listId, {});
+    setShowClearFilters(false);
+  }
+
   return (
     <div className="page-wrap">
       <NavbarTop qaDashboard={state?.qaDashboard} />
@@ -725,7 +734,6 @@ const ProjectLogs = () => {
             Documents are being processed...
           </div>
         )}
-
 
         <div className="project-logs-content">
           <div className="project-logs">
@@ -808,6 +816,15 @@ const ProjectLogs = () => {
                     <span>Check Document Status</span>
                   </button>
                   <div className="table-bulk-changes">
+                    {showClearFilters && <div className="clear-filters">
+                      <button
+                        type="button"
+                        className="table-top-btn ml-3"
+                        onClick={clearFilters}
+                      >
+                        <span>Clear Filters</span>
+                      </button>
+                    </div>}
                     <div className="log-search">
                       <input
                         type="text"
