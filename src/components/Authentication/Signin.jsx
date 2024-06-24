@@ -60,7 +60,7 @@ const Signin = (props) => {
         <form className="login-form" onSubmit={handleSubmit}>
           <h1 className="form-heading">Hello!</h1>
           <p className="form-info">
-            Welcome to The Link Requirements Manager. Please sign in if you have
+            Welcome to The Link Submittal Log Manager. Please sign in if you have
             credentials. If not, please see your administrator.
           </p>
           <div className="form-group">
