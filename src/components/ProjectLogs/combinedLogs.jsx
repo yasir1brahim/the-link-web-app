@@ -843,7 +843,7 @@ export default function CombinedLogs(props) {
                               </span>
                               <span>
                                 <Tooltip
-                                  placement="top"
+                                  placement="right"
                                   target={"Pdf-Tooltip-" + index + 1}
                                   isOpen={pdfTooltip === index + 1}
                                   toggle={() =>
