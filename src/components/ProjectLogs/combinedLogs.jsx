@@ -306,15 +306,24 @@ export default function CombinedLogs(props) {
     6: 0,
   })
 
+  const minWidths = {
+    1: 190,
+    2: 150,
+    3: 100,
+    4: 180,
+    5: 250,
+    6: 500,
+  }
+
   useEffect(() => {
     if (parentRef.current !== null) {
       setTableWidths({
-        1: Math.round(parentRef.current.offsetWidth * 0.1),
-        2: Math.round(parentRef.current.offsetWidth * 0.1),
-        3: Math.round(parentRef.current.offsetWidth * 0.06),
-        4: Math.round(parentRef.current.offsetWidth * 0.1),
-        5: Math.round(parentRef.current.offsetWidth * 0.13),
-        6: Math.round(parentRef.current.offsetWidth * 0.495)
+        1: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[1]),
+        2: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[2]),
+        3: Math.max(Math.round(parentRef.current.offsetWidth * 0.06), minWidths[3]),
+        4: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[4]),
+        5: Math.max(Math.round(parentRef.current.offsetWidth * 0.13), minWidths[5]),
+        6: Math.max(Math.round(parentRef.current.offsetWidth * 0.495), minWidths[6])
       })
     }
   }, [parentRef.current])
@@ -322,14 +331,7 @@ export default function CombinedLogs(props) {
   const handleMouseDown = (e, colIndex) => {
     const startX = e.clientX;
     const startWidth = tableRef.current.querySelectorAll('th')[colIndex].offsetWidth;
-    const minWidths = {
-      1: 170,
-      2: 150,
-      3: 115,
-      4: 180,
-      5: 250,
-      6: 500,
-    }
+    
     const handleMouseMove = (e) => {
       const newWidth = Math.max(startWidth + (e.clientX - startX), minWidths[colIndex]);
       tableRef.current.querySelectorAll('th')[colIndex].style.width = `${newWidth}px`;
