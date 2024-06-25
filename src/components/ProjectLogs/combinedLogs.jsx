@@ -635,7 +635,7 @@ export default function CombinedLogs(props) {
                 className={
                   log.user_id !== 1 || index % 2 !== 0 ? "highlight-row" : ""
                 }
-                style={{ lineHeight: 1.2 }}
+                style={{ lineHeight: 1.2, backgroundColor: pdfIndex === index ? '#f8f8fa' : 'white' }}
                 key={index}
               >
                 <td
