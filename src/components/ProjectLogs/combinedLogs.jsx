@@ -405,7 +405,7 @@ export default function CombinedLogs(props) {
                       setFilterColumn("spec_section");
                     }}
                   >
-                    <FilterIcon fillColor={`${filterValues.spec_section.length > 0 ? '#FFC107' : '#36454F'}`}/>
+                    <FilterIcon isActive={filterValues.spec_section.length > 0 ? true : false}/>
                   </span>
                   <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 2) }>|</div>
                 </div>
@@ -473,7 +473,7 @@ export default function CombinedLogs(props) {
                         setFilterColumn("type");
                       }}
                     >
-                      <FilterIcon fillColor={`${filterValues.type.length > 0 ? '#FFC107' : '#36454F'}`}/>
+                      <FilterIcon isActive={filterValues.type.length > 0 ? true : false}/>
                     </span>
                     <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 4) }>|</div>
                   </div>
@@ -498,7 +498,7 @@ export default function CombinedLogs(props) {
                         setFilterColumn("owner_contractor");
                       }}
                     >
-                      <FilterIcon fillColor={`${filterValues.owner_contractor.length > 0 ? '#FFC107' : '#36454F'}`}/>
+                      <FilterIcon isActive={filterValues.owner_contractor.length > 0 ? true : false}/>
                     </span>
                   </div>
                 </span>
@@ -522,7 +522,7 @@ export default function CombinedLogs(props) {
                         setFilterColumn("sd_title");
                       }}
                     >
-                      <FilterIcon fillColor={`${filterValues.sd_title.length > 0 ? '#FFC107' : '#36454F'}`}/>
+                      <FilterIcon isActive={filterValues.sd_title.length > 0 ? true : false}/>
                     </span>
                   </div>
                 </span>
@@ -545,7 +545,7 @@ export default function CombinedLogs(props) {
                       setFilterColumn("item_desc");
                     }}
                   >
-                    <FilterIcon fillColor={`${filterValues.item_desc.length > 0 ? '#FFC107' : '#36454F'}`}/>
+                    <FilterIcon isActive={filterValues.item_desc.length > 0 ? true : false}/>
                   </span>
                   <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 5) }>|</div>
                 </div>
@@ -576,7 +576,7 @@ export default function CombinedLogs(props) {
                         setFilterColumn("classification");
                       }}
                     >
-                      <FilterIcon fillColor={`${filterValues.classification.length > 0 ? '#FFC107' : '#36454F'}`}/>
+                      <FilterIcon isActive={filterValues.classification.length > 0 ? true : false}/>
                     </span>
                   </div>
                 </span>
