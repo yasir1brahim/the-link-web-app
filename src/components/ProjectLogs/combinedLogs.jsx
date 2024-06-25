@@ -15,6 +15,7 @@ import { Tooltip } from "reactstrap";
 import handleError from "../../config/errorHandler";
 import { SortIcon } from "../shared/icons/sortIcon";
 import { FilterIcon } from "../shared/icons/filterIcon";
+import { useRef } from "react";
 
 export default function CombinedLogs(props) {
   const {
@@ -293,17 +294,68 @@ export default function CombinedLogs(props) {
   useEffect(() => {
     setEditRow("");
   }, [props.searchValue]);
+
+  const tableRef = useRef(null);
+  const parentRef = useRef(null);
+  const [tableWidths, setTableWidths] = useState({
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+    6: 0,
+  })
+
+  useEffect(() => {
+    if (parentRef.current !== null) {
+      setTableWidths({
+        1: Math.round(parentRef.current.offsetWidth * 0.1),
+        2: Math.round(parentRef.current.offsetWidth * 0.1),
+        3: Math.round(parentRef.current.offsetWidth * 0.06),
+        4: Math.round(parentRef.current.offsetWidth * 0.1),
+        5: Math.round(parentRef.current.offsetWidth * 0.13),
+        6: Math.round(parentRef.current.offsetWidth * 0.495)
+      })
+    }
+  }, [parentRef.current])
+
+  const handleMouseDown = (e, colIndex) => {
+    const startX = e.clientX;
+    const startWidth = tableRef.current.querySelectorAll('th')[colIndex].offsetWidth;
+    const minWidths = {
+      1: 170,
+      2: 150,
+      3: 115,
+      4: 180,
+      5: 250,
+      6: 500,
+    }
+    const handleMouseMove = (e) => {
+      const newWidth = Math.max(startWidth + (e.clientX - startX), minWidths[colIndex]);
+      tableRef.current.querySelectorAll('th')[colIndex].style.width = `${newWidth}px`;
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
   return (
     <div
       className="l-table-wrapper"
       style={{
         maxHeight: "calc(100vh - 275px)"
       }}
+      ref={parentRef}
     >
-      <table className="table">
+      <table className="table logs-table" ref={tableRef}>
         <thead>
           <tr>
-            <th className="ticket-checkbox small-font">
+            <th className="ticket-checkbox small-font" style={{width: '16px'}}>
               <div className="form-group">
                 <div className="custom-control custom-checkbox">
                   <input
@@ -322,9 +374,14 @@ export default function CombinedLogs(props) {
               </div>
             </th>
 
-            <th className="text-center small-font">Actions</th>
+            <th className="text-center small-font" style={{width: `${tableWidths[1]}px`}}>
+              <div className="d-flex">
+                <span className="w-100">Actions</span>
+                <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 1) }>|</div>
+              </div>
+            </th>
 
-            <th className="small-font">
+            <th className="small-font" style={{width: `${tableWidths[2]}px`}}>
               <span className="has-sorting">
                 <div className="d-flex">
                   Spec Section{" "}
@@ -343,6 +400,7 @@ export default function CombinedLogs(props) {
                   >
                     <FilterIcon fillColor={`${filterValues.spec_section.length > 0 ? '#FFC107' : '#36454F'}`}/>
                   </span>
+                  <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 2) }>|</div>
                 </div>
               </span>
             </th>
@@ -383,12 +441,15 @@ export default function CombinedLogs(props) {
               </>
             )}
             {props.projectType !== "ufgs" && (
-              <th className="para-no small-font">
-                <span>Paragraph</span>
+              <th className="para-no small-font" style={{width: `${tableWidths[3]}px`}}>
+                <div className="d-flex">
+                  <span>Paragraph</span>
+                  <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 3) }>|</div>
+                </div>
               </th>
             )}
             {props.projectType !== "ufgs" && (
-              <th className="small-font">
+              <th className="small-font" style={{width: `${tableWidths[4]}px`}}>
                 <span className="has-sorting">
                   <div className="d-flex">
                     Submittal Heading{" "}
@@ -407,6 +468,7 @@ export default function CombinedLogs(props) {
                     >
                       <FilterIcon fillColor={`${filterValues.type.length > 0 ? '#FFC107' : '#36454F'}`}/>
                     </span>
+                    <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 4) }>|</div>
                   </div>
                 </span>
               </th>
@@ -459,7 +521,7 @@ export default function CombinedLogs(props) {
                 </span>
               </th>
             )}
-            <th className="small-font">
+            <th className="small-font"  style={{width: `${tableWidths[5]}px`}}>
               <span className="has-sorting">
                 <div className="d-flex">
                   Submittal Type
@@ -478,6 +540,7 @@ export default function CombinedLogs(props) {
                   >
                     <FilterIcon fillColor={`${filterValues.item_desc.length > 0 ? '#FFC107' : '#36454F'}`}/>
                   </span>
+                  <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 5) }>|</div>
                 </div>
               </span>
             </th>
@@ -519,7 +582,7 @@ export default function CombinedLogs(props) {
                   Grouping <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
                 </span>
               </th> */}
-                <th className="log-description small-font">
+                <th className="log-description small-font" style={{width: `${tableWidths[6]}px`}}>
                   <span className="has-sorting">
                     <div className="d-flex">
                       Submittal Description{" "}
@@ -529,6 +592,7 @@ export default function CombinedLogs(props) {
                       >
                         <SortIcon />
                       </span>
+                      <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 6) }>|</div>
                     </div>
                   </span>
                 </th>

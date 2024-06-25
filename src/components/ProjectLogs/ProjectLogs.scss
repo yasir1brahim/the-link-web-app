@@ -166,6 +166,17 @@
                 padding: 4px 8px !important;
                 border-right: none !important;
                 box-shadow: none !important;
+                span {
+                  position: relative;
+                }
+                .resizer {
+                  position: absolute;
+                  cursor: col-resize;
+                  z-index: 1;
+                  width: 6px;
+                  height: 100%;
+                  right: 0;
+                }
               }
             }
           }
@@ -305,6 +316,10 @@
               background-color: white !important;
             }
           }
+        }
+        .logs-table {
+          table-layout: fixed !important;
+          width: fit-content;
         }
       }
       .side-by-side {
