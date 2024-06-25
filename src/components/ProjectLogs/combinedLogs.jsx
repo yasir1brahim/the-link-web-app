@@ -308,10 +308,10 @@ export default function CombinedLogs(props) {
 
   const minWidths = {
     1: 190,
-    2: 150,
-    3: 100,
-    4: 180,
-    5: 250,
+    2: 145,
+    3: 85,
+    4: 190,
+    5: 190,
     6: 500,
   }
 
@@ -319,11 +319,11 @@ export default function CombinedLogs(props) {
     if (parentRef.current !== null) {
       setTableWidths({
         1: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[1]),
-        2: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[2]),
-        3: Math.max(Math.round(parentRef.current.offsetWidth * 0.06), minWidths[3]),
-        4: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[4]),
-        5: Math.max(Math.round(parentRef.current.offsetWidth * 0.13), minWidths[5]),
-        6: Math.max(Math.round(parentRef.current.offsetWidth * 0.495), minWidths[6])
+        2: Math.max(Math.round(parentRef.current.offsetWidth * 0.075), minWidths[2]),
+        3: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[3]),
+        4: Math.max(Math.round(parentRef.current.offsetWidth * 0.11), minWidths[4]),
+        5: Math.max(Math.round(parentRef.current.offsetWidth * 0.11), minWidths[5]),
+        6: Math.max(Math.round(parentRef.current.offsetWidth * 0.54), minWidths[6])
       })
     }
   }, [parentRef.current])
