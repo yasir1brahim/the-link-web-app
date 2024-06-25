@@ -344,6 +344,11 @@ export default function CombinedLogs(props) {
     document.addEventListener('mouseup', handleMouseUp);
   };
 
+  const formatSpecSection = (specSection) => {
+    if (typeof specSection !== 'string') return specSection;
+    return specSection.slice(0, 2) + ' ' + specSection.slice(2);
+  }
+
   return (
     <div
       className="l-table-wrapper"
@@ -916,7 +921,7 @@ export default function CombinedLogs(props) {
                       }
                     />
                   ) : (
-                    log.spec_section
+                    formatSpecSection(log.spec_section)
                   )}
                   {/* {log.spec_section} */}
                 </td>
