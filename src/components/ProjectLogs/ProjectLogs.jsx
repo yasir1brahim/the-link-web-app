@@ -106,9 +106,12 @@ const ProjectLogs = () => {
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
   const projectName = projectDetails?.length >= 4 ? projectDetails[3] : null;
   const authCode = searchParams.get("code");
-  const clientId = window.location.href.includes("https://app.thelink.ai")
-    ? "ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9"
+  const procoreClientId = window.location.href.includes("https://app.thelink.ai")
+    ? "974cb8bfa7aaadc4759a6d60a2d8427387d32db0c4fa4dfbe1da15b5ce3abfc5"
     : "ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9";
+  const procoreAuthBaseUrl = window.location.href.includes("https://app.thelink.ai")
+  ? "https://login.procore.com"
+  : "https://login-sandbox.procore.com";
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [totalCount, setTotalCount] = useState(0);
@@ -302,6 +305,7 @@ const ProjectLogs = () => {
     };
 
     if (authCode) {
+      console.log("Received procore auth code:", authCode);
       const fetchData = async () => {
         const accessTokenData = await axiosInstance({
           method: "post",
@@ -882,7 +886,7 @@ const ProjectLogs = () => {
                           </DropdownItem>
                           <DropdownItem>
                             <a
-                              href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`}
+                              href={`${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`}
                               className="breadcrumb-text"
                             >
                               <Logo style={{ height: "90px" }} />
