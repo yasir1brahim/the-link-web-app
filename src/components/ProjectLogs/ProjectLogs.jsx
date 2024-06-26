@@ -85,7 +85,7 @@ const ProjectLogs = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const baseUrl = window.location.href.includes("https://app.thelink.ai")
     ? `https://app.thelink.ai/`
-    : `https://dev-app.thelink.ai/`;
+    : `https://app-sl.thelink.ai/`;
   //Procore states
   const [procoreModal, setProcoreModal] = useState(false);
   const toggleProcoreModal = () => setProcoreModal(!procoreModal);
