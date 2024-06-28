@@ -62,7 +62,7 @@ const CustomerProfile = (props) => {
       : Number(localStorage.getItem('userId'));
   const redirectUri = window.location.href.includes('https://app.thelink.ai')
     ? `https://app.thelink.ai/customer-profile?id=${customerId || customerID}`
-    : `https://dev-app.thelink.ai/customer-profile?id=${
+    : `https://app-sl.thelink.ai/customer-profile?id=${
         customerId || customerID
       }`;
   const clientId = window.location.href.includes('https://app.thelink.ai')
