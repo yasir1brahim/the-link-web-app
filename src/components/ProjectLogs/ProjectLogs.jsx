@@ -104,7 +104,7 @@ const ProjectLogs = () => {
     projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
   // const projectName = searchParams.get('projectName');
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
-  const projectName = projectDetails?.length >= 4 ? projectDetails[3] : null;
+  const projectName = projectDetails?.length >= 4 ? projectDetails[3].replace(/_space/g, ' ') : null;
   const authCode = searchParams.get("code");
   const procoreClientId = window.location.href.includes("https://app.thelink.ai")
     ? "974cb8bfa7aaadc4759a6d60a2d8427387d32db0c4fa4dfbe1da15b5ce3abfc5"
@@ -312,7 +312,7 @@ const ProjectLogs = () => {
           url: "/procore/access_token",
           data: {
             code: authCode,
-            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`,
+            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName.replace(/ /g, '_space')}`,
           },
         });
         localStorage.setItem(
@@ -886,7 +886,7 @@ const ProjectLogs = () => {
                           </DropdownItem>
                           <DropdownItem>
                             <a
-                              href={`${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName}`}
+                              href={`${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName.replace(/ /g, '_space')}`}
                               className="breadcrumb-text"
                             >
                               <Logo style={{ height: "90px" }} />
