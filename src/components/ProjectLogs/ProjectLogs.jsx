@@ -44,6 +44,7 @@ const ProjectLogs = () => {
   const [isUploadLoading, setUploadLoading] = useState(false);
 
   const [saveListName, setToggleSaveListNameModal] = useState(false);
+  const [exportToProcoreModal, setExportToProcoreModal] = useState(false);
   const toggleSaveListName = () => setToggleSaveListNameModal(!saveListName);
   const [listName, setListName] = useState({ value: "", errors: "" });
   const [viewList, setList] = useState([]);
@@ -52,7 +53,7 @@ const ProjectLogs = () => {
   const { state } = useLocation();
   const [logData, setLogData] = useState([]);
   const [filteredLogData, setFilteredLogData] = useState([]);
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState(localStorage?.getItem("selectedRows") === "" ? [] : JSON.parse(localStorage?.getItem("selectedRows")));
   const [pageRefresh, setPageRefresh] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   // const [currentItems, setCurrentItems] = useState([]);
@@ -85,6 +86,8 @@ const ProjectLogs = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const baseUrl = window.location.href.includes("https://app.thelink.ai")
     ? `https://app.thelink.ai/`
+    : window.location.href.includes("http://localhost:3000")
+    ? `http://localhost:3000/`
     : `https://app-sl.thelink.ai/`;
   //Procore states
   const [procoreModal, setProcoreModal] = useState(false);
@@ -112,6 +115,7 @@ const ProjectLogs = () => {
   const procoreAuthBaseUrl = window.location.href.includes("https://app.thelink.ai")
   ? "https://login.procore.com"
   : "https://login-sandbox.procore.com";
+  const [procoreProjectName, setProcoreProjectName] = useState('')
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [totalCount, setTotalCount] = useState(0);
@@ -271,39 +275,6 @@ const ProjectLogs = () => {
 
   // onClick export Procore, we redirect to the same page and POST access token // gets called first
   useEffect(() => {
-    const handleExportToProcore = async () => {
-      try {
-        // setStatus(get(statusResp, 'data.data'));
-        const resp = await axiosInstance({
-          method: "post",
-          url: "/procore/create_submittals",
-          data: {
-            project_id: Number(projectId),
-            records: selectedRows, // array of ids
-            // status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
-          },
-        });
-        if (resp.status === 200) {
-          // setProjectMappingsNoContent(false)
-          toast.success("Successfully exported to Procore!", {
-            position: "bottom-center",
-            autoClose: 5000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
-          localStorage.setItem("selectedRows", "");
-        }
-        // setLoading(false);
-      } catch (error) {
-        console.log("error", error);
-        localStorage.setItem("selectedRows", "");
-        handleError(error);
-      }
-    };
-
     if (authCode) {
       console.log("Received procore auth code:", authCode);
       const fetchData = async () => {
@@ -324,7 +295,7 @@ const ProjectLogs = () => {
           method: "get",
           url: `/procore/project_mapping/${projectId}`,
         });
-        if (get(res, "data.data")) {
+        if (get(res, "status") === 200) {
           setCompanyId(get(res, "data.data.procore_company_id"));
           localStorage.setItem(
             "companyId",
@@ -335,7 +306,8 @@ const ProjectLogs = () => {
           localStorage.setItem("customerId", customerId);
           localStorage.setItem("projectName", projectName);
           searchParams.set("code", "");
-          handleExportToProcore();
+          setProcoreProjectName(get(res, "data.data.procore_project_name"));
+          setExportToProcoreModal(true);
         }
         if (get(res, "status") === 204) {
           setProcoreModal(true);
@@ -360,6 +332,44 @@ const ProjectLogs = () => {
     searchParams,
     baseUrl,
   ]);
+
+  const handleExportToProcore = async () => {
+    try {
+      // setStatus(get(statusResp, 'data.data'));
+      setLoading(true);
+      const resp = await axiosInstance({
+        method: "post",
+        url: "/procore/create_submittals",
+        data: {
+          project_id: Number(projectId),
+          records: selectedRows, // array of ids
+          // status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
+        },
+      });
+      if (resp.status === 200) {
+        // setProjectMappingsNoContent(false)
+        setLoading(false);
+        toast.success("Successfully exported to Procore!", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        localStorage.setItem("selectedRows", "");
+        setSelected([]);
+      }
+      // setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log("error", error);
+      localStorage.setItem("selectedRows", "");
+      setSelected([]);
+      handleError(error);
+    }
+  };
 
   const handleDeleteLogs = async () => {
     if (selected.length !== 0) {
@@ -517,6 +527,9 @@ const ProjectLogs = () => {
     if (document.referrer && selected?.length) {
       const rowsSelected = JSON.stringify(selected);
       localStorage.setItem("selectedRows", `${rowsSelected}`);
+    }
+    if (selected.length === 0) {
+      localStorage.setItem("selectedRows", "");
     }
     setIsSelectAll(((selected.length === logIdList.length) && (selected.length > 0)) ? true : false);
   }, [selected]);
@@ -712,6 +725,11 @@ const ProjectLogs = () => {
     setFilterValues(initFilter);
     await fetchLogData(0, rowsPerPage, "", listId, {});
     setShowClearFilters(false);
+  }
+
+  const handleProceedWithExport = () => {
+    handleExportToProcore()
+    setExportToProcoreModal(false);
   }
 
   return (
@@ -1049,10 +1067,9 @@ const ProjectLogs = () => {
         companyList={companyList}
         procoreModal={procoreModal}
         projectId={projectId}
-        setLoading={setLoading}
-        selectedRows={selectedRows}
         toggleProcoreModal={toggleProcoreModal}
         setProcoreModal={setProcoreModal}
+        setExportToProcoreModal={setExportToProcoreModal}
       />
       <Modal
         isOpen={saveListName}
@@ -1181,6 +1198,46 @@ const ProjectLogs = () => {
         </ModalHeader>
         <ModalBody>
           <DocumentStatus documentData={documentData} />
+        </ModalBody>
+      </Modal>
+
+      <Modal
+        isOpen={exportToProcoreModal}
+        fade={false}
+        toggle={() => setExportToProcoreModal(!exportToProcoreModal)}
+        className="new-customer modal-md"
+      >
+        <ModalHeader>Export to Procore</ModalHeader>
+        <ModalBody>
+          <form className="create-customer-form">
+            <div className="save-list-name">
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <p>
+                      This action will export
+                      <b> {selectedRows === 'All' ? logIdList.length : JSON.parse(selectedRows).length} </b>
+                      submittals to the
+                      <b> {procoreProjectName}</b> project in Procore. 
+                      Do you want to proceed?
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ModalFooter>
+              <Button className="save-btn" onClick={() => handleProceedWithExport()}>
+                Proceed with Export
+              </Button>
+              <Button
+                className="cancel-btn"
+                color="secondary"
+                onClick={() => setExportToProcoreModal(false)}
+              >
+                Cancel
+              </Button>
+            </ModalFooter>
+          </form>
         </ModalBody>
       </Modal>
     </div>
