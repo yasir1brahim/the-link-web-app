@@ -53,7 +53,7 @@ const ProjectLogs = () => {
   const { state } = useLocation();
   const [logData, setLogData] = useState([]);
   const [filteredLogData, setFilteredLogData] = useState([]);
-  const [selected, setSelected] = useState(localStorage?.getItem("selectedRows") === "" ? [] : JSON.parse(localStorage?.getItem("selectedRows")));
+  const [selected, setSelected] = useState(!localStorage?.getItem("selectedRows") ? [] : JSON.parse(localStorage?.getItem("selectedRows")));
   const [pageRefresh, setPageRefresh] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   // const [currentItems, setCurrentItems] = useState([]);
@@ -787,7 +787,7 @@ const ProjectLogs = () => {
                       type="button"
                       className=" mr-3 table-top-btn btn-disabled"
                       onClick={toggleSaveListName}
-                      disabled={selected.length === 0}
+                      disabled={selected?.length === 0}
                     >
                       <svg
                         width="14"
