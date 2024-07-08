@@ -735,7 +735,7 @@ const ProjectLogs = () => {
   return (
     <div className="page-wrap">
       <NavbarTop qaDashboard={state?.qaDashboard} />
-      {isAssociatedUser === true && <div className="project-logs-wrapper log-table-width">
+      {<div className="project-logs-wrapper log-table-width">
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
           centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
