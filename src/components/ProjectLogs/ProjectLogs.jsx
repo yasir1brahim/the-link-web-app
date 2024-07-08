@@ -53,7 +53,7 @@ const ProjectLogs = () => {
   const { state } = useLocation();
   const [logData, setLogData] = useState([]);
   const [filteredLogData, setFilteredLogData] = useState([]);
-  const [selected, setSelected] = useState(!localStorage?.getItem("selectedRows") ? [] : JSON.parse(localStorage?.getItem("selectedRows")));
+  const [selected, setSelected] = useState(localStorage?.getItem("selectedRows") === "" ? [] : JSON.parse(localStorage?.getItem("selectedRows")));
   const [pageRefresh, setPageRefresh] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   // const [currentItems, setCurrentItems] = useState([]);
@@ -143,6 +143,9 @@ const ProjectLogs = () => {
   }, [modal]);
 
   useEffect(() => {
+    console.log("In Auth Check")
+    console.log("Customer ID:", customerId)
+    console.log("User ID:", localStorage.getItem("userId"))
     if (customerId.toString() !== localStorage.getItem("userId")) {
       if (localStorage.getItem("roleId") > 1) {
         setIsAssociatedUser(false);
@@ -164,6 +167,7 @@ const ProjectLogs = () => {
 
   // get the number of documents uploaded
   useEffect(() => {
+    console.log("Getting document data")
     const fetchData = async () => {
       setLoading(true);
       const response = await axiosInstance({
@@ -468,6 +472,7 @@ const ProjectLogs = () => {
     setTotalCount(response?.data?.total_count);
   };
   useEffect(() => {
+    console.log("Fetching log data")
     fetchLogData(0, rowsPerPage).catch((error) => {
       setLoading(false);
       handleError(error);
@@ -483,6 +488,7 @@ const ProjectLogs = () => {
   //   }
   // },[logData, selectedLogData])
   useEffect(() => {
+    console.log("Fetching grouping data")
     const fetchData = async () => {
       const response = await axiosInstance({
         method: "get",
@@ -735,7 +741,7 @@ const ProjectLogs = () => {
   return (
     <div className="page-wrap">
       <NavbarTop qaDashboard={state?.qaDashboard} />
-      {<div className="project-logs-wrapper log-table-width">
+      {isAssociatedUser === true && <div className="project-logs-wrapper log-table-width">
         <Header
           // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
           centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
@@ -787,7 +793,7 @@ const ProjectLogs = () => {
                       type="button"
                       className=" mr-3 table-top-btn btn-disabled"
                       onClick={toggleSaveListName}
-                      disabled={selected?.length === 0}
+                      disabled={selected.length === 0}
                     >
                       <svg
                         width="14"
