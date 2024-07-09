@@ -728,6 +728,15 @@ const ProjectLogs = () => {
   const handleProceedWithExport = () => {
     handleExportToProcore()
     setExportToProcoreModal(false);
+    toast.info(`Exporting ${selectedRows === 'All' ? logIdList.length : JSON.parse(selectedRows).length} submittals to ${procoreProjectName} project in Procore...`, {
+      position: 'bottom-center',
+      autoClose: 10000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined
+    });
   }
 
   return (
