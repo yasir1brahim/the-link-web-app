@@ -31,6 +31,7 @@ import { getSavedLogs } from "../../api/ProjectLogs/api";
 import DocumentStatus from './documentStatus';
 
 const ProjectLogs = () => {
+  console.log("In Project Logs")
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -534,10 +535,10 @@ const ProjectLogs = () => {
       const rowsSelected = JSON.stringify(selected);
       localStorage.setItem("selectedRows", `${rowsSelected}`);
     }
-    if (selected.length === 0) {
+    if (selected?.length === 0) {
       localStorage.setItem("selectedRows", "");
     }
-    setIsSelectAll(((selected.length === logIdList.length) && (selected.length > 0)) ? true : false);
+    setIsSelectAll(((selected?.length === logIdList?.length) && (selected?.length > 0)) ? true : false);
   }, [selected]);
 
   const handleExportExcel = async (recordData, fileName) => {
@@ -793,7 +794,7 @@ const ProjectLogs = () => {
                       type="button"
                       className=" mr-3 table-top-btn btn-disabled"
                       onClick={toggleSaveListName}
-                      disabled={selected.length === 0}
+                      disabled={selected?.length === 0}
                     >
                       <svg
                         width="14"
@@ -804,7 +805,7 @@ const ProjectLogs = () => {
                       >
                         <path
                           d="M1.16683 0.666748H12.8335C13.0545 0.666748 13.2665 0.754545 13.4228 0.910826C13.579 1.06711 13.6668 1.27907 13.6668 1.50008V17.4526C13.6669 17.5271 13.647 17.6003 13.6092 17.6645C13.5715 17.7287 13.5171 17.7816 13.4519 17.8176C13.3868 17.8537 13.3131 17.8717 13.2386 17.8696C13.1641 17.8675 13.0916 17.8456 13.0285 17.8059L7.00016 14.0251L0.971829 17.8051C0.908803 17.8447 0.836319 17.8667 0.761914 17.8688C0.68751 17.8709 0.613901 17.853 0.548742 17.817C0.483583 17.781 0.429252 17.7283 0.391398 17.6642C0.353545 17.6001 0.333551 17.527 0.333496 17.4526V1.50008C0.333496 1.27907 0.421294 1.06711 0.577574 0.910826C0.733854 0.754545 0.945816 0.666748 1.16683 0.666748ZM12.0002 2.33341H2.00016V15.1934L7.00016 12.0592L12.0002 15.1934V2.33341Z"
-                          fill={selected.length === 0 ? "#374151" : "#0E2332"}
+                          fill={selected?.length === 0 ? "#374151" : "#0E2332"}
                         />
                       </svg>
                       <span>Save Selection</span>
