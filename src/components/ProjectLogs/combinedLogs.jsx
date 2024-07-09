@@ -661,7 +661,7 @@ export default function CombinedLogs(props) {
                         className="custom-control-input"
                         name={`ticketRow-${index}`}
                         id={`ticketRow-${index}`}
-                        checked={props.selected ? props.selected.includes(log.id) : false}
+                        checked={!!props.selected ? props.selected?.includes(log.id) : false}
                         onChange={() => props?.handleSelect(log.id)}
                       />
                       <label
