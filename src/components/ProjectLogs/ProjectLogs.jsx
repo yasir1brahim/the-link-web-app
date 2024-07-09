@@ -377,7 +377,7 @@ const ProjectLogs = () => {
   };
 
   const handleDeleteLogs = async () => {
-    if (selected.length !== 0) {
+    if (selected?.length !== 0) {
       try {
         await axiosInstance({
           method: "delete",
@@ -420,11 +420,11 @@ const ProjectLogs = () => {
     if (_filters === null) {
       if (
         Object.values(filterValues)
-          .map((value) => (value.length ? true : false))
+          .map((value) => (value?.length ? true : false))
           .includes(true)
       ) {
         Object.keys(filterValues).forEach((key) =>
-          filterValues[key].length
+          filterValues[key]?.length
             ? (filters = { ...filters, [key]: filterValues[key] })
             : null,
         );
@@ -457,11 +457,11 @@ const ProjectLogs = () => {
     setLogIdList(response.data.log_id_list);
     setLoading(false);
     setErrorMessage("");
-    if (response.data.message.length === 0) {
+    if (response.data.message?.length === 0) {
       if (search) {
         setErrorMessage("Sorry, no results found for your search query.");
       } else {
-        if (documentData.length === 0) {
+        if (documentData?.length === 0) {
           setErrorMessage("Upload spec documents to generate submittal log");
         } else if (documentIsProcessing(documentData)) {
           setErrorMessage("Documents are being processed...");
@@ -722,7 +722,7 @@ const ProjectLogs = () => {
 
   useEffect(() => {
     Object.keys(filterValues).forEach((key) =>
-      filterValues[key].length
+      filterValues[key]?.length
         ? setShowClearFilters(true)
         : null
     );
@@ -1140,10 +1140,10 @@ const ProjectLogs = () => {
         <ModalHeader>Saved List</ModalHeader>
         <ModalBody>
           <div className="save-list-name save-list">
-            {viewList.length
-              ? viewList.map((list) => {
+            {viewList?.length
+              ? viewList?.map((list) => {
                   return (
-                    JSON.parse(list.records).length !== 0 && (
+                    JSON.parse(list.records)?.length !== 0 && (
                       <div className="row">
                         <div className="col-6">
                           <h5 className="">{list.view_name}</h5>
@@ -1223,7 +1223,7 @@ const ProjectLogs = () => {
                   <div className="form-group">
                     <p>
                       This action will export
-                      <b> {selectedRows === 'All' ? logIdList.length : JSON.parse(selectedRows).length} </b>
+                      <b> {selectedRows === 'All' ? logIdList?.length : JSON.parse(selectedRows)?.length} </b>
                       submittals to the
                       <b> {procoreProjectName}</b> project in Procore. 
                       Do you want to proceed?
