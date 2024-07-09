@@ -31,7 +31,6 @@ import { getSavedLogs } from "../../api/ProjectLogs/api";
 import DocumentStatus from './documentStatus';
 
 const ProjectLogs = () => {
-  console.log("In Project Logs")
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -144,9 +143,6 @@ const ProjectLogs = () => {
   }, [modal]);
 
   useEffect(() => {
-    console.log("In Auth Check")
-    console.log("Customer ID:", customerId)
-    console.log("User ID:", localStorage.getItem("userId"))
     if (customerId.toString() !== localStorage.getItem("userId")) {
       if (localStorage.getItem("roleId") > 1) {
         setIsAssociatedUser(false);
@@ -168,7 +164,6 @@ const ProjectLogs = () => {
 
   // get the number of documents uploaded
   useEffect(() => {
-    console.log("Getting document data")
     const fetchData = async () => {
       setLoading(true);
       const response = await axiosInstance({
@@ -178,7 +173,6 @@ const ProjectLogs = () => {
       setDocParsed(response.data.doc_parsed);
       setDocumentData(response.data.document_details);
       setLoading(false);
-      console.log(response.data.message);
     };
 
     fetchData().catch((error) => {
@@ -281,7 +275,6 @@ const ProjectLogs = () => {
   // onClick export Procore, we redirect to the same page and POST access token // gets called first
   useEffect(() => {
     if (authCode) {
-      console.log("Received procore auth code:", authCode);
       const fetchData = async () => {
         const accessTokenData = await axiosInstance({
           method: "post",
@@ -473,7 +466,6 @@ const ProjectLogs = () => {
     setTotalCount(response?.data?.total_count);
   };
   useEffect(() => {
-    console.log("Fetching log data")
     fetchLogData(0, rowsPerPage).catch((error) => {
       setLoading(false);
       handleError(error);
@@ -489,7 +481,6 @@ const ProjectLogs = () => {
   //   }
   // },[logData, selectedLogData])
   useEffect(() => {
-    console.log("Fetching grouping data")
     const fetchData = async () => {
       const response = await axiosInstance({
         method: "get",

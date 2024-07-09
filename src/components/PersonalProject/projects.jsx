@@ -105,17 +105,6 @@ const Projects = () => {
       : localStorage.getItem("userId");
 
   const handleLaunch = (project, qaDashboard) => {
-    console.log("in handle launch")
-    console.log("State:", JSON.stringify({
-      project,
-      projectName: project?.project_name,
-      customerId:
-        localStorage.getItem("roleId") === "0"
-          ? customerId
-          : localStorage.getItem("userId"),
-      logType: "Classified",
-      qaDashboard,
-    }, null, 2))
     localStorage.getItem("isSpecGptUser") === "true"
       ? navigate(
           `/spec-gpt?projectDetails=${project?.project_id},${custId},Classified,${project?.project_name}`,
