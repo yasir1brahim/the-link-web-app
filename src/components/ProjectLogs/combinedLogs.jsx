@@ -275,7 +275,7 @@ export default function CombinedLogs(props) {
 
       setNewRowIndex(index + 1);
       handleEditToggle(logObj, index + 1);
-      if (props.pdfData.url) {
+      if (props.pdfData?.url) {
         let docElement = document.getElementsByClassName("l-table-wrapper");
         docElement[0].scrollTo(890, 0);
       }
@@ -639,7 +639,7 @@ export default function CombinedLogs(props) {
         </thead>
         <tbody style={{ fontSize: "12px" }}>
           {logData.map((log, index) => {
-            let pdfIndex = props.pdfData.index;
+            let pdfIndex = props.pdfData?.index;
             const showPdf = !(pdfIndex && pdfIndex !== index) && pdfIndex !== 0;
             return (
               <tr
@@ -661,8 +661,8 @@ export default function CombinedLogs(props) {
                         className="custom-control-input"
                         name={`ticketRow-${index}`}
                         id={`ticketRow-${index}`}
-                        checked={props.selected.includes(log.id)}
-                        onChange={() => props.handleSelect(log.id)}
+                        checked={!!props.selected ? props.selected?.includes(log.id) : false}
+                        onChange={() => props?.handleSelect(log.id)}
                       />
                       <label
                         className="custom-control-label"
@@ -742,7 +742,7 @@ export default function CombinedLogs(props) {
                                     deleteElement(props.logData, index),
                                   );
                                 newRowIndex === index + 1 &&
-                                  props.setPdfData({...props.pdfData, index: props.pdfData.index - 1})
+                                  props.setPdfData({...props.pdfData, index: props.pdfData?.index - 1})
                               }}
                             >
                               <svg
