@@ -22,6 +22,7 @@ import FileDownload from "js-file-download";
 import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
 import { useSearchParams } from "react-router-dom";
 import Procore from "./procore";
+import ManageProcore from "./manageProcore";
 import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
 import { ReactComponent as ExcelLogo } from "../../assets/images/excel.svg";
 import { ReactComponent as SearchIcon } from "../../assets/images/search.svg";
@@ -29,6 +30,7 @@ import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
 import { getSavedLogs } from "../../api/ProjectLogs/api";
 import DocumentStatus from './documentStatus';
+import { CircularProgress } from "@mui/material";
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -53,7 +55,7 @@ const ProjectLogs = () => {
   const { state } = useLocation();
   const [logData, setLogData] = useState([]);
   const [filteredLogData, setFilteredLogData] = useState([]);
-  const [selected, setSelected] = useState(localStorage?.getItem("selectedRows") === "" ? [] : JSON.parse(localStorage?.getItem("selectedRows")));
+  const [selected, setSelected] = useState(localStorage?.getItem("selectedRows") === "" || localStorage?.getItem("selectedRows") === null ? [] : JSON.parse(localStorage?.getItem("selectedRows")));
   const [pageRefresh, setPageRefresh] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   // const [currentItems, setCurrentItems] = useState([]);
@@ -92,13 +94,19 @@ const ProjectLogs = () => {
   //Procore states
   const [procoreModal, setProcoreModal] = useState(false);
   const toggleProcoreModal = () => setProcoreModal(!procoreModal);
+  const [manageProcoreModal, setManageProcoreModal] = useState(false);
+  const toggleManageProcoreModal = () => setManageProcoreModal(!manageProcoreModal);
+  const [changeProcoreAccountModal, setChangeProcoreAccountModal] = useState(false);
+  const toggleChangeProcoreAccountModal = () => setChangeProcoreAccountModal(!changeProcoreAccountModal);
+  const [initLoading, setInitLoading] = useState(false);
+  const [loadingProjectDetails, setLoadingProjectDetails] = useState(false);
   const [companyList, setCompanyList] = useState([]);
   const [companyId, setCompanyId] = useState();
   const [docParsed, setDocParsed] = useState(0);
   const [documentData, setDocumentData] = useState([]);
   const toggle = () => setDropdownOpen((prevState) => !prevState);
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const projectDetails = searchParams.get("projectDetails")?.split(",");
   const projectId = projectDetails?.length
     ? JSON.parse(projectDetails[0])
@@ -113,9 +121,19 @@ const ProjectLogs = () => {
     ? "974cb8bfa7aaadc4759a6d60a2d8427387d32db0c4fa4dfbe1da15b5ce3abfc5"
     : "ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9";
   const procoreAuthBaseUrl = window.location.href.includes("https://app.thelink.ai")
-  ? "https://login.procore.com"
-  : "https://login-sandbox.procore.com";
+    ? "https://login.procore.com"
+    : "https://login-sandbox.procore.com";
+  const procoreBaseUrl = window.location.href.includes("https://app.thelink.ai")
+    ? "https://procore.com"
+    : "https://sandbox.procore.com";
+  const procoreAuthUrl = `${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName.replace(/ /g, '_space')}`;
+  const procoreAccessToken = localStorage.getItem("procore_access_token");
+  const [procoreAuthUserInfo, setProcoreAuthUserInfo] = useState(null);
+  const [procoreCompanyName, setProcoreCompanyName] = useState('')
   const [procoreProjectName, setProcoreProjectName] = useState('')
+  const [procoreProjectId, setProcoreProjectId] = useState(null)
+  const [procoreSubmittalManagerId, setProcoreSubmittalManagerId] = useState(null);
+  const [procoreSubmittalManagerName, setProcoreSubmittalManagerName] = useState('');
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [totalCount, setTotalCount] = useState(0);
@@ -142,7 +160,52 @@ const ProjectLogs = () => {
     }
   }, [modal]);
 
+  const getProcoreAccessTokenData = async () => {
+    try {
+      const accessTokenData = await axiosInstance({
+        method: "get",
+        url: "/procore/refresh_token",
+        params: {
+          user_id: localStorage.getItem("userId")
+        }
+      });
+      if (accessTokenData?.status === 200) {
+        localStorage.setItem(
+          "procore_access_token",
+          accessTokenData?.data.data.access_token,
+        );
+      }
+    } catch (error) {
+      console.log(error)
+      localStorage.setItem(
+        "procore_access_token", null,
+      );
+    }
+  }
+
+  const getProcoreAuthUser = async() => {
+    if (procoreAccessToken !== 'null') {
+      const resp = await axiosInstance({
+        method: "get",
+        url: "/procore/me"
+      });
+      if (resp?.status === 200) {
+        setProcoreAuthUserInfo(resp?.data.data);
+      } else {
+        setProcoreAuthUserInfo(null);
+      }
+    }
+    
+  }
+
   useEffect(() => {
+    const initLoading = async () => {
+      setInitLoading(true);
+      await getProcoreAccessTokenData();
+      await getProcoreAuthUser();
+      await checkProjectMapping();
+      setInitLoading(false);
+    }
     if (customerId.toString() !== localStorage.getItem("userId")) {
       if (localStorage.getItem("roleId") > 1) {
         setIsAssociatedUser(false);
@@ -159,6 +222,7 @@ const ProjectLogs = () => {
             progress: undefined,
         });
       }
+      initLoading();
     }
   }, [])
 
@@ -266,7 +330,7 @@ const ProjectLogs = () => {
   };
 
   const selectedRows =
-    localStorage?.getItem("selectedRows") === ""
+    localStorage?.getItem("selectedRows") === "" || localStorage?.getItem("selectedRows") === null 
       ? "All"
       : localStorage?.getItem("selectedRows");
   // ?.split(',')
@@ -289,32 +353,15 @@ const ProjectLogs = () => {
           accessTokenData?.data.data.access_token,
         );
 
-        const res = await axiosInstance({
-          method: "get",
-          url: `/procore/project_mapping/${projectId}`,
-        });
-        if (get(res, "status") === 200) {
-          setCompanyId(get(res, "data.data.procore_company_id"));
-          localStorage.setItem(
-            "companyId",
-            get(res, "data.data.procore_company_id"),
-          );
-          localStorage.setItem("projectId", projectId);
-          localStorage.setItem("logType", logType);
-          localStorage.setItem("customerId", customerId);
-          localStorage.setItem("projectName", projectName);
-          searchParams.set("code", "");
-          setProcoreProjectName(get(res, "data.data.procore_project_name"));
-          setExportToProcoreModal(true);
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete('code');
+        setSearchParams(newSearchParams);
+        if (localStorage.getItem('change_procore_account') === 'true') {
+          localStorage.setItem('change_procore_account', false);
+          return;
         }
-        if (get(res, "status") === 204) {
-          setProcoreModal(true);
-          const companyResp = await axiosInstance({
-            method: "get",
-            url: "/procore/companies",
-          });
-          setCompanyList(companyResp?.data.data);
-        }
+        await checkProjectMappingBeforeExport();
+        await getProcoreAuthUser();
       };
 
       fetchData().catch((error) => {
@@ -330,6 +377,70 @@ const ProjectLogs = () => {
     searchParams,
     baseUrl,
   ]);
+
+  const checkProjectMappingBeforeExport = async () => {
+    const res = await axiosInstance({
+      method: "get",
+      url: `/procore/project_mapping/${projectId}`,
+    });
+
+    if (get(res, "status") === 200) {
+      setCompanyId(get(res, "data.data.procore_company_id"));
+      setProcoreCompanyName(get(res, "data.data.procore_company_name"))
+      localStorage.setItem(
+        "companyId",
+        get(res, "data.data.procore_company_id"),
+      );
+      localStorage.setItem("projectId", projectId);
+      localStorage.setItem("logType", logType);
+      localStorage.setItem("customerId", customerId);
+      localStorage.setItem("projectName", projectName);
+      setProcoreProjectName(get(res, "data.data.procore_project_name"));
+      setProcoreProjectId(get(res, "data.data.procore_project_id"));
+      setProcoreSubmittalManagerId(get(res, "data.data.submittal_manager_id"));
+      setProcoreSubmittalManagerName(get(res, "data.data.procore_submittal_manager_name"));
+      setExportToProcoreModal(true);
+    }
+    if (get(res, "status") === 204) {
+      setProcoreModal(true);
+      const companyResp = await axiosInstance({
+        method: "get",
+        url: "/procore/companies",
+      });
+      setCompanyList(companyResp?.data.data);
+    }
+  }
+
+  const checkProjectMapping = async () => {
+    const res = await axiosInstance({
+      method: "get",
+      url: `/procore/project_mapping/${projectId}`,
+    });
+
+    if (get(res, "status") === 500) {
+      return
+    }
+    if (get(res, "status") === 200) {
+      setCompanyId(get(res, "data.data.procore_company_id"));
+      setProcoreCompanyName(get(res, "data.data.procore_company_name"))
+      localStorage.setItem(
+        "companyId",
+        get(res, "data.data.procore_company_id"),
+      );
+      localStorage.setItem("projectId", projectId);
+      localStorage.setItem("logType", logType);
+      localStorage.setItem("customerId", customerId);
+      localStorage.setItem("projectName", projectName);
+      setProcoreProjectName(get(res, "data.data.procore_project_name"));
+      setProcoreProjectId(get(res, "data.data.procore_project_id"));
+      setProcoreSubmittalManagerId(get(res, "data.data.submittal_manager_id"));
+      setProcoreSubmittalManagerName(get(res, "data.data.procore_submittal_manager_name"));
+    }
+  }
+
+  const handleExportToProcoreButtonClick = async() => {
+    await checkProjectMappingBeforeExport();
+  }
 
   const handleExportToProcore = async () => {
     try {
@@ -730,7 +841,7 @@ const ProjectLogs = () => {
     setExportToProcoreModal(false);
     toast.info(`Exporting ${selectedRows === 'All' ? logIdList.length : JSON.parse(selectedRows).length} submittals to ${procoreProjectName} project in Procore...`, {
       position: 'bottom-center',
-      autoClose: 10000,
+      autoClose: 6000,
       hideProgressBar: true,
       closeOnClick: true,
       pauseOnHover: true,
@@ -739,6 +850,39 @@ const ProjectLogs = () => {
     });
   }
 
+  const handleManageProcoreButtonClick = async() => {
+    setManageProcoreModal(true);
+  }
+
+  const deleteProcoreToken = async () => {
+    try {
+      const resp = await axiosInstance({
+        method: "get",
+        url: "/procore/delete_token",
+        params: {
+          user_id: localStorage.getItem("userId")
+        }
+      });
+      console.log(resp)
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const handleChangeProcoreAccount = async() => {
+    setManageProcoreModal(false);
+    localStorage.setItem("change_procore_account", true);
+    await deleteProcoreToken();
+    window.location.href = `${procoreAuthUrl}`;
+  }
+
+  const handleProcoreLogout = async() => {
+    const link = document.createElement('a');
+    link.href = procoreBaseUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.click()
+  }
   return (
     <div className="page-wrap">
       <NavbarTop qaDashboard={state?.qaDashboard} />
@@ -910,15 +1054,29 @@ const ProjectLogs = () => {
                             <ExcelLogo style={{ height: "90px" }} />
                           </DropdownItem>
                           <DropdownItem>
-                            <a
-                              href={`${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName.replace(/ /g, '_space')}`}
-                              className="breadcrumb-text"
-                            >
-                              <Logo style={{ height: "90px" }} />
-                            </a>
+                            {procoreAccessToken === 'null' ?
+                              <a
+                                href={procoreAuthUrl}
+                                className="breadcrumb-text"
+                              >
+                                <Logo style={{ height: "90px" }} />
+                              </a>
+                              : <div onClick={handleExportToProcoreButtonClick}>
+                                <Logo style={{ height: "90px" }} />
+                              </div>}
                           </DropdownItem>
                         </DropdownMenu>
                       </Dropdown>
+                    )}
+                    {localStorage.getItem("roleId") !== "7" && (
+                      <button
+                        type="button"
+                        className="trash-icon"
+                        onClick={handleManageProcoreButtonClick}
+                        disabled={initLoading || loadingProjectDetails}
+                      >
+                        Manage Procore Integration {(initLoading || loadingProjectDetails) && <CircularProgress size={12} />}
+                      </button>
                     )}
                     {localStorage.getItem("roleId") !== "7" && (
                       <button
@@ -1077,6 +1235,27 @@ const ProjectLogs = () => {
         toggleProcoreModal={toggleProcoreModal}
         setProcoreModal={setProcoreModal}
         setExportToProcoreModal={setExportToProcoreModal}
+      />
+      <ManageProcore
+        procoreAuthUserInfo={procoreAuthUserInfo}
+        companyId={companyId}
+        procoreCompanyName={procoreCompanyName}
+        manageProcoreModal={manageProcoreModal}
+        projectId={projectId}
+        procoreProjectId={procoreProjectId}
+        procoreProjectName={procoreProjectName}
+        procoreSubmittalManagerId={procoreSubmittalManagerId}
+        procoreSubmittalManagerName={procoreSubmittalManagerName}
+        toggleManageProcoreModal={toggleManageProcoreModal}
+        setManageProcoreModal={setManageProcoreModal}
+        toggleChangeProcoreAccountModal={toggleChangeProcoreAccountModal}
+        setLoadingProjectDetails={setLoadingProjectDetails}
+        setCompanyId={setCompanyId}
+        setProcoreCompanyName={setProcoreCompanyName}
+        setProcoreProjectId={setProcoreProjectId}
+        setProcoreProjectName={setProcoreProjectName}
+        setProcoreSubmittalManagerId={setProcoreSubmittalManagerId}
+        setProcoreSubmittalManagerName={setProcoreSubmittalManagerName}
       />
       <Modal
         isOpen={saveListName}
@@ -1243,6 +1422,50 @@ const ProjectLogs = () => {
               >
                 Cancel
               </Button>
+            </ModalFooter>
+          </form>
+        </ModalBody>
+      </Modal>
+
+      <Modal
+        isOpen={changeProcoreAccountModal}
+        fade={false}
+        toggle={toggleChangeProcoreAccountModal}
+        className="new-customer modal-md"
+      >
+        <ModalHeader toggle={toggleChangeProcoreAccountModal}>Change Procore Account</ModalHeader>
+        <ModalBody>
+          <form className="create-customer-form">
+            <div className="save-list-name">
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <p>
+                      If your website has an active Procore login session, this might not work properly.
+                      Have you logged out of Procore in your browser?
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ModalFooter>
+              <div>
+                <Button className="save-btn" onClick={handleChangeProcoreAccount}>
+                  Yes, continue to change Procore account
+                </Button>
+              </div>
+              <div>
+                <Button className="save-btn" onClick={handleProcoreLogout}>
+                  Go to Progore and log out
+                </Button>
+                <Button
+                  className="cancel-btn"
+                  color="secondary"
+                  onClick={toggleChangeProcoreAccountModal}
+                >
+                  Cancel
+                </Button>
+              </div>
             </ModalFooter>
           </form>
         </ModalBody>

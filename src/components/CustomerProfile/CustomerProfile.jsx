@@ -836,7 +836,7 @@ const CustomerProfile = (props) => {
         companyId={customerId}
         companyList={companyList}
         procoreModal={procoreModal}
-        setLoading={setLoading}
+        projectId={null}
         toggleProcoreModal={toggleProcoreModal}
         setProcoreModal={setProcoreModal}
         isFromCustomerScreen={true}

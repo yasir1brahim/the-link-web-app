@@ -208,7 +208,6 @@ const CustomerProjects = ({
 
     return initials.toUpperCase();
   }
-  console.log("currentItems+++++", currentItems);
   return (
     <>
       <div className="customer-projects-content">
