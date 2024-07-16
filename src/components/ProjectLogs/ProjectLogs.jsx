@@ -128,7 +128,7 @@ const ProjectLogs = () => {
   }
   const [filterValues, setFilterValues] = useState(initFilter);
   const [showClearFilters, setShowClearFilters] = useState(false)
-  const [rowsPerPage, setRowsPerPage] = React.useState(20);
+  const [rowsPerPage, setRowsPerPage] = React.useState(50);
   const [page, setPage] = React.useState(1);
 
   const [logIdList, setLogIdList] = React.useState([]);
