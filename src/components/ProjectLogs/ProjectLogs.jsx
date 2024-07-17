@@ -988,7 +988,12 @@ const ProjectLogs = () => {
                   >
                     <span>Check Document Status</span>
                   </button>
+                  
                   <div className="table-bulk-changes">
+                    <div className="total-count-submittals ml-2">
+                      {`${totalCount} submittals`}
+                    </div>
+                    <div className="divider ml-2"></div>
                     {showClearFilters && <div className="clear-filters">
                       <button
                         type="button"
