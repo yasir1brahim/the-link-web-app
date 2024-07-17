@@ -1456,7 +1456,7 @@ const ProjectLogs = () => {
               </div>
               <div>
                 <Button className="save-btn" onClick={handleProcoreLogout}>
-                  Go to Progore and log out
+                  Go to Procore and log out
                 </Button>
                 <Button
                   className="cancel-btn"

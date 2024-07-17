@@ -228,7 +228,7 @@ const ManageProcore = ({
               <div className="col-12">
                 <div className="form-group log-datepicker">
                   <SelectDropdown
-                    label={'Select  Submittal Manager'}
+                    label={'Select Submittal Manager'}
                     setSelected={setSubmittalManager}
                     selected={submittalManager?.label}
                     defaultInputValue={procoreSubmittalManagerName}
