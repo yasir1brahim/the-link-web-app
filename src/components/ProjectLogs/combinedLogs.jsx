@@ -308,25 +308,24 @@ export default function CombinedLogs(props) {
   })
 
   const minWidths = {
-    1: 190,
+    1: 160,
     2: 145,
     3: 150,
     4: 85,
     5: 190,
     6: 190,
-    7: 500,
+    7: 520,
   }
-
   useEffect(() => {
     if (parentRef.current !== null) {
       setTableWidths({
-        1: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[1]),
+        1: Math.max(Math.round(parentRef.current.offsetWidth * 0.08), minWidths[1]),
         2: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[2]),
         3: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[3]),
         4: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[4]),
         5: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[5]),
         6: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[6]),
-        7: Math.max(Math.round(parentRef.current.offsetWidth * 0.48), minWidths[7])
+        7: parentRef.current.offsetWidth - 950
       })
     }
   }, [parentRef.current])
@@ -813,8 +812,7 @@ export default function CombinedLogs(props) {
                         {pdfIndex === index ? (
                           <button
                             type="button"
-                            className="btn btn-secondary btn-sm"
-                            style={{ marginRight: "5px" }}
+                            className="btn btn-secondary close-button"
                             onClick={() => {
                               props.setLogInViewer(null);
                               props.setPdfData({
