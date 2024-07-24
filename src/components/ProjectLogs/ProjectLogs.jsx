@@ -938,18 +938,40 @@ const ProjectLogs = () => {
                   {(listId !== null) ? (
                     <button
                       type="button"
-                      className="table-top-btn"
+                      className="table-top-btn selection-btn"
                       onClick={() => {
                         handleClearSelection();
                       }}
                     >
-                      Clear Selection
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5 5L15 15"
+                          stroke="#0E2332"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M15 5L5 15"
+                          stroke="#0E2332"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <span>Clear Selection</span>
                     </button>
                   ) : null}
                   {(listId === null) ? (
                     selected?.length > 0 && <button
                       type="button"
-                      className="table-top-btn btn-disabled"
+                      className="table-top-btn btn-disabled selection-btn"
                       onClick={toggleSaveListName}
                       disabled={selected?.length === 0}
                     >
@@ -971,13 +993,13 @@ const ProjectLogs = () => {
                 </div>
                 <div className="col-4 d-flex row">
                   <div className="col-6">
-                    <button
+                    {documentIsProcessing(documentData) && <button
                       type="button"
                       className="table-top-btn m-auto"
                       onClick={toggleDocumentStatusModal}
                     >
                       <span>Check Document Status</span>
-                    </button>
+                    </button>}
                   </div>
                   <div className="col-6">
                     {showClearFilters && <div className="clear-filters">
@@ -992,15 +1014,15 @@ const ProjectLogs = () => {
                   </div>
                 </div>
                 <div className="col-4 d-flex row">
-                  <div className="col-6 d-flex">
-                    <div className="total-count-submittals ml-2">
+                  <div className="col-6 d-flex px-0">
+                    <div className="total-count-submittals">
                       {`${totalCount} submittals`}
                     </div>
                   </div>
                   <div className="col-6 d-flex p-0 justify-content-end">
                     {localStorage.getItem("roleId") !== "7" && (
                       <Dropdown isOpen={dropdownOpen} toggle={toggle}>
-                        <DropdownToggle caret>Export</DropdownToggle>
+                        <DropdownToggle caret className="export-btn">Export</DropdownToggle>
                         <DropdownMenu>
                           <DropdownItem
                             onClick={() => handleExportExcel("All")}

@@ -52,8 +52,8 @@ const ProjectLogsHeader = ({ ...props }) => {
 
   return (
     <>
-      <div className="header-wrapper-swap row">
-        <div className="col-4">
+      <div className="header-wrapper-swap row mx-0">
+        <div className="col-4 px-0">
           <div className="header-swap">
             <button
               type="button"
@@ -84,7 +84,7 @@ const ProjectLogsHeader = ({ ...props }) => {
         </div>
         <div className="col-4"></div>
         <div className="col-4 d-flex row">
-          <div className="col-6">
+          <div className="col-6 px-0">
             {props?.docParsed ? (
               <div className="total-count-documents">
                 {props?.docParsed} document{props?.docParsed > 1 ? 's' : ''}{' '}
@@ -94,7 +94,7 @@ const ProjectLogsHeader = ({ ...props }) => {
               ''
             )}
           </div>
-          <div className="col-6 d-flex justify-content-end">
+          <div className="col-6 d-flex justify-content-end px-0">
             {props.showBtn && localStorage.getItem('roleId') !== '7' ? (
               <button
                 type="button"
