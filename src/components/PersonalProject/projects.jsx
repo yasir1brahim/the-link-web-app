@@ -121,6 +121,7 @@ const Projects = () => {
                   : localStorage.getItem("userId"),
               logType: "Classified",
               qaDashboard,
+              customerData,
             },
           },
         );

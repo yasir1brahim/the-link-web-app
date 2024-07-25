@@ -30,7 +30,8 @@ import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
 import { getSavedLogs } from "../../api/ProjectLogs/api";
 import DocumentStatus from './documentStatus';
-import { CircularProgress } from "@mui/material";
+import ProjectLogsHeader from "../shared/Header/ProjectLogsHeader";
+import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -84,6 +85,7 @@ const ProjectLogs = () => {
     type: "",
     classification: "",
   });
+  const customerData = state?.customerData;
   const projectType = state?.project.project_type;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const baseUrl = window.location.href.includes("https://app.thelink.ai")
@@ -633,7 +635,7 @@ const ProjectLogs = () => {
   // add the selected rows in session storage to be used by export procore
   useEffect(() => {
     // do not update the values if navigated from procore page
-    if (document.referrer && selected?.length) {
+    if (selected?.length) {
       const rowsSelected = JSON.stringify(selected);
       localStorage.setItem("selectedRows", `${rowsSelected}`);
     }
@@ -885,19 +887,30 @@ const ProjectLogs = () => {
   }
   return (
     <div className="page-wrap">
-      <NavbarTop qaDashboard={state?.qaDashboard} />
+      <NavbarTop
+        qaDashboard={state?.qaDashboard}
+        projectTitle={state?.projectName || projectName || ""}
+        handleManageProcoreButtonClick={handleManageProcoreButtonClick}
+        initLoading={initLoading}
+        loadingProjectDetails={loadingProjectDetails}
+        customerData={customerData}
+      />
       {isAssociatedUser === true && <div className="project-logs-wrapper log-table-width">
-        <Header
-          // title={`${state.project?.type} Logs  - ${state.projectName || ''}`}
-          centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
-          // breadcrumb={'Project Details'}
+        <ProjectLogsHeaderTop
           breadcrumb={"View Projects"}
           breadcrumbUrl={`/project-list?id=${customerId}`}
           breadcrumb2={"Submittal Log"}
+          searchValue={searchValue}
+          handleSearchChange={handleSearchChange}
+          handleEnterKeyPress={handleEnterKeyPress}
+          handleClearSearch={handleClearSearch}
+        />
+        <ProjectLogsHeader
+          centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
+          getList={getList}
           showBtn={"Upload Documents"}
           toggleModal={toggleModal}
           btnSize={"small"}
-          title={state?.projectName || projectName || ""}
           docParsed={docParsed}
           qaDashboard={state?.qaDashboard}
           navBtn={"logs"}
@@ -920,23 +933,45 @@ const ProjectLogs = () => {
               </div>
             ) : ( */}
             <>
-              {!state?.qaDashboard && (
-                <div className="table-top-content">
+              <div className="table-top-content row">
+                <div className="col-4 p-0">
                   {(listId !== null) ? (
                     <button
                       type="button"
-                      className="btn btn-primary mr-3 btn-small"
+                      className="table-top-btn selection-btn"
                       onClick={() => {
                         handleClearSelection();
                       }}
                     >
-                      Clear Selection
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5 5L15 15"
+                          stroke="#0E2332"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M15 5L5 15"
+                          stroke="#0E2332"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <span>Clear Selection</span>
                     </button>
                   ) : null}
                   {(listId === null) ? (
-                    <button
+                    selected?.length > 0 && <button
                       type="button"
-                      className=" mr-3 table-top-btn btn-disabled"
+                      className="table-top-btn btn-disabled selection-btn"
                       onClick={toggleSaveListName}
                       disabled={selected?.length === 0}
                     >
@@ -955,103 +990,39 @@ const ProjectLogs = () => {
                       <span>Save Selection</span>
                     </button>
                   ) : null}
-                  <button
-                    type="button"
-                    className="table-top-btn"
-                    onClick={getList}
-                  >
-                    <svg
-                      width="18"
-                      height="14"
-                      viewBox="0 0 18 14"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
+                </div>
+                <div className="col-4 d-flex row">
+                  <div className="col-6">
+                    {documentIsProcessing(documentData) && <button
+                      type="button"
+                      className="table-top-btn m-auto"
+                      onClick={toggleDocumentStatusModal}
                     >
-                      <path
-                        d="M16.7058 6.22443C16.9872 6.70814 16.9872 7.2942 16.7058 7.7779C15.7367 9.44405 13.0929 13.2113 9.00016 13.2113C4.90743 13.2113 2.26364 9.44405 1.29451 7.7779C1.01316 7.2942 1.01316 6.70814 1.29451 6.22443C2.26364 4.55828 4.90743 0.791016 9.00016 0.791016C13.0929 0.791016 15.7367 4.55828 16.7058 6.22443Z"
-                        stroke="#0E2332"
-                        strokeWidth="1.5"
-                      />
-                      <path
-                        d="M11.3887 7.00117C11.3887 8.32031 10.3193 9.38969 9.00016 9.38969C7.68102 9.38969 6.61164 8.32031 6.61164 7.00117C6.61164 5.68202 7.68102 4.61265 9.00016 4.61265C10.3193 4.61265 11.3887 5.68202 11.3887 7.00117Z"
-                        stroke="#0E2332"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
-
-                    <span>View Saved Lists</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="table-top-btn ml-3"
-                    onClick={toggleDocumentStatusModal}
-                  >
-                    <span>Check Document Status</span>
-                  </button>
-                  
-                  <div className="table-bulk-changes">
-                    <div className="total-count-submittals ml-2">
-                      {`${totalCount} submittals`}
-                    </div>
-                    <div className="divider ml-2"></div>
+                      <span>Check Document Status</span>
+                    </button>}
+                  </div>
+                  <div className="col-6">
                     {showClearFilters && <div className="clear-filters">
                       <button
                         type="button"
-                        className="table-top-btn ml-3"
+                        className="table-top-btn m-auto"
                         onClick={clearFilters}
                       >
                         <span>Clear Filters</span>
                       </button>
                     </div>}
-                    <div className="log-search">
-                      <input
-                        type="text"
-                        placeholder="Find In Log"
-                        className="log-search-input"
-                        value={searchValue}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                        onKeyPress={handleEnterKeyPress}
-                      />
-                      <span
-                        className="search-icon"
-                        onClick={heandleSearchClick}
-                      >
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M17.5001 17.4998L12.9165 12.9167"
-                            stroke="#CBCBCB"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <circle
-                            cx="8.75"
-                            cy="8.75"
-                            r="5.5"
-                            stroke="#CBCBCB"
-                            strokeWidth="1.5"
-                          />
-                        </svg>
-                      </span>
-                      <span
-                        className="clear-icon"
-                        onClick={handleClearSearch}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M5 5L15 15" stroke="#cbcbcb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M15 5L5 15" stroke="#cbcbcb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </span>
+                  </div>
+                </div>
+                <div className="col-4 d-flex row">
+                  <div className="col-6 d-flex px-0">
+                    <div className="total-count-submittals">
+                      {`${totalCount} submittals`}
                     </div>
+                  </div>
+                  <div className="col-6 d-flex p-0 justify-content-end">
                     {localStorage.getItem("roleId") !== "7" && (
                       <Dropdown isOpen={dropdownOpen} toggle={toggle}>
-                        <DropdownToggle caret>Export</DropdownToggle>
+                        <DropdownToggle caret className="export-btn">Export</DropdownToggle>
                         <DropdownMenu>
                           <DropdownItem
                             onClick={() => handleExportExcel("All")}
@@ -1072,16 +1043,6 @@ const ProjectLogs = () => {
                           </DropdownItem>
                         </DropdownMenu>
                       </Dropdown>
-                    )}
-                    {localStorage.getItem("roleId") !== "7" && (
-                      <button
-                        type="button"
-                        className="trash-icon"
-                        onClick={handleManageProcoreButtonClick}
-                        disabled={initLoading || loadingProjectDetails}
-                      >
-                        Manage Procore Integration {(initLoading || loadingProjectDetails) && <CircularProgress size={12} />}
-                      </button>
                     )}
                     {localStorage.getItem("roleId") !== "7" && (
                       <button
@@ -1108,7 +1069,7 @@ const ProjectLogs = () => {
                     )}
                   </div>
                 </div>
-              )}
+              </div>
               <div className={pdfData.url && "side-by-side"}>
                 <CombinedLogs
                   logData={filteredLogData}
