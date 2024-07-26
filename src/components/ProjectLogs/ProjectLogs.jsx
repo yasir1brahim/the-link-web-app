@@ -911,6 +911,8 @@ const ProjectLogs = () => {
           procoreAuthUrl={procoreAuthUrl}
           handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
           handleDeleteLogs={handleDeleteLogs}
+          showClearFilters={showClearFilters}
+          clearFilters={clearFilters}
         />
         {documentIsProcessing(documentData) && (
           <div className="alert" style={{ backgroundColor: "#D5E73E" }} role="alert">
@@ -989,26 +991,13 @@ const ProjectLogs = () => {
                   ) : null}
                 </div>
                 <div className="col-4 d-flex row">
-                  <div className="col-6">
-                    {documentIsProcessing(documentData) && <button
-                      type="button"
-                      className="table-top-btn m-auto"
-                      onClick={toggleDocumentStatusModal}
-                    >
-                      <span>Check Document Status</span>
-                    </button>}
-                  </div>
-                  <div className="col-6">
-                    {showClearFilters && <div className="clear-filters">
-                      <button
-                        type="button"
-                        className="table-top-btn m-auto"
-                        onClick={clearFilters}
-                      >
-                        <span>Clear Filters</span>
-                      </button>
-                    </div>}
-                  </div>
+                  {documentIsProcessing(documentData) && <button
+                    type="button"
+                    className="table-top-btn m-auto"
+                    onClick={toggleDocumentStatusModal}
+                  >
+                    <span>Check Document Status</span>
+                  </button>}
                 </div>
                 <div className="col-4 d-flex row">
                   {localStorage.getItem('roleId') !== '7' ? (

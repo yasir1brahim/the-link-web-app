@@ -89,7 +89,17 @@ const ProjectLogsHeader = ({ ...props }) => {
           </button>
         </div>
       </div>
-      <div className="col-4"></div>
+      <div className="col-4">
+        {props.showClearFilters && <div className="clear-filters">
+          <button
+            type="button"
+            className="table-top-btn m-auto"
+            onClick={props.clearFilters}
+          >
+            <span>Clear Filters</span>
+          </button>
+        </div>}
+      </div>
 
       <div className="col-4 d-flex row">
         <div className="col-6 d-flex px-0">
