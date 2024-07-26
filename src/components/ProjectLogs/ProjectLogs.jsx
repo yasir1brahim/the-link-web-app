@@ -1012,12 +1012,12 @@ const ProjectLogs = () => {
                 </div>
                 <div className="col-4 d-flex row">
                   {localStorage.getItem('roleId') !== '7' ? (
-                    <div className="header-right-swap header-right">
+                    <div className="header-right-swap header-right w-100">
                       <div className="log-search">
                         <input
                           type="text"
                           placeholder="Find In Log"
-                          className="log-search-input"
+                          className="log-search-input w-100"
                           value={searchValue}
                           onChange={(e) => handleSearchChange(e.target.value)}
                           onKeyPress={handleEnterKeyPress}
