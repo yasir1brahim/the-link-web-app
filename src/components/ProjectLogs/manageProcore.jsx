@@ -43,30 +43,34 @@ const ManageProcore = ({
   }
 
   const getProjectList = async (companyId_) => {
-    const fetchData = async () => {
-      const projectListResp = await axiosInstance({
-        method: 'get',
-        url: `/procore/projects/${companyId_}`
+    if (companyId_ !== undefined) {
+      const fetchData = async () => {
+        const projectListResp = await axiosInstance({
+          method: 'get',
+          url: `/procore/projects/${companyId_}`
+        });
+        setProjectList(projectListResp?.data?.data);
+      };
+      await fetchData().catch((error) => {
+        handleError(error);
       });
-      setProjectList(projectListResp?.data?.data);
-    };
-    await fetchData().catch((error) => {
-      handleError(error);
-    });
+    }
   }
 
   const getSubmittalManagerList = async (projectId_) => {
-    const fetchData = async () => {
-      const submittalManagerResp = await axiosInstance({
-        method: 'get',
-        url: `/procore/managers/${projectId_}`
-      });
-      setSubmittalManagerList(submittalManagerResp?.data?.data);
-    };
+    if (projectId_ !== null) {
+      const fetchData = async () => {
+        const submittalManagerResp = await axiosInstance({
+          method: 'get',
+          url: `/procore/managers/${projectId_}`
+        });
+        setSubmittalManagerList(submittalManagerResp?.data?.data);
+      };
 
-    await fetchData().catch((error) => {
-      handleError(error);
-    });
+      await fetchData().catch((error) => {
+        handleError(error);
+      });
+    }
   }
 
   useEffect(() => {

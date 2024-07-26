@@ -34,6 +34,7 @@ const Signin = (props) => {
       const response = await login(email.value,password.value);
       if (response.data) {
         localStorage.setItem('token', response.data.access_token);
+        localStorage.setItem('refresh_token', response.data.refresh_token);
         localStorage.setItem('roleId', response.data.role_id);
         localStorage.setItem('userId', response.data.user_id);
         localStorage.setItem('fullName', response.data.full_name);
