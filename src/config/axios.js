@@ -1,13 +1,31 @@
 import axios from 'axios';
 
+const baseURL = window.location.href.includes('https://app.thelink.ai') 
+? 'https://log-manager-api-prod.thelink.ai'
+: 'https://app-qa-api.thelink.ai'
+
+const refreshToken = async () => {
+  try {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await axios.post(`${baseURL}/refresh`, { refresh_token: refreshToken });
+    const { access_token } = response.data;
+    localStorage.setItem('token', access_token);
+    return access_token;
+  } catch (error) {
+    console.error('Unable to refresh token', error);
+    localStorage.removeItem('token');
+    localStorage.removeItem('refresh_token');
+    window.location = '/';
+    throw error;
+  }
+};
+
 const axiosInstance = axios.create({
-  baseURL: window.location.href.includes('https://app.thelink.ai')
-    ? 'https://log-manager-api-prod.thelink.ai'
-    : 'https://app-qa-api.thelink.ai'
-  // baseURL: 'https://log-manager-api-prod.thelink.ai',
-  // headers: {
-  //   Authorization: `Bearer ${localStorage.getItem('token')}`,
-  // },
+  baseURL: baseURL
 });
 
 axiosInstance.interceptors.request.use(function (config) {
@@ -24,11 +42,22 @@ axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
-    // return error.response
+  async (error) => {
+    const originalRequest = error.config;
     if (error?.response?.status === 401) {
-      if (error?.response?.data?.message !== 'Incorrect email or password')
-        window.location = '/';
+      if (error?.response?.data?.message !== 'Incorrect email or password') {
+        if (!originalRequest._retry) {
+          originalRequest._retry = true;
+          try {
+            const newToken = await refreshToken();
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + newToken;
+            originalRequest.headers['Authorization'] = 'Bearer ' + newToken;
+            return axiosInstance(originalRequest);
+          } catch (refreshError) {
+            window.location = '/';
+          }
+        }
+      }
     }
     throw error;
   }
