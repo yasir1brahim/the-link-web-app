@@ -2,12 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Header from "../shared/Header/Header";
 import NavbarTop from "../shared/NavbarTop/NavbarTop";
-import {
-  Dropdown,
-  DropdownMenu,
-  DropdownToggle,
-  DropdownItem,
-} from "reactstrap";
+
 import { ReactComponent as Trash } from "../../assets/images/trash.svg";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
@@ -23,8 +18,6 @@ import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
 import { useSearchParams } from "react-router-dom";
 import Procore from "./procore";
 import ManageProcore from "./manageProcore";
-import { ReactComponent as Logo } from "../../assets/images/procore-vector-logo.svg";
-import { ReactComponent as ExcelLogo } from "../../assets/images/excel.svg";
 import { ReactComponent as SearchIcon } from "../../assets/images/search.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
@@ -900,20 +893,24 @@ const ProjectLogs = () => {
           breadcrumb={"View Projects"}
           breadcrumbUrl={`/project-list?id=${customerId}`}
           breadcrumb2={"Submittal Log"}
-          searchValue={searchValue}
-          handleSearchChange={handleSearchChange}
-          handleEnterKeyPress={handleEnterKeyPress}
-          handleClearSearch={handleClearSearch}
-        />
-        <ProjectLogsHeader
-          centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
-          getList={getList}
           showBtn={"Upload Documents"}
           toggleModal={toggleModal}
           btnSize={"small"}
           docParsed={docParsed}
           qaDashboard={state?.qaDashboard}
           navBtn={"logs"}
+        />
+        <ProjectLogsHeader
+          centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
+          getList={getList}
+          totalCount={totalCount}
+          dropdownOpen={dropdownOpen}
+          toggle={toggle}
+          handleExportExcel={handleExportExcel}
+          procoreAccessToken={procoreAccessToken}
+          procoreAuthUrl={procoreAuthUrl}
+          handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
+          handleDeleteLogs={handleDeleteLogs}
         />
         {documentIsProcessing(documentData) && (
           <div className="alert" style={{ backgroundColor: "#D5E73E" }} role="alert">
@@ -1014,60 +1011,70 @@ const ProjectLogs = () => {
                   </div>
                 </div>
                 <div className="col-4 d-flex row">
-                  <div className="col-6 d-flex px-0">
-                    <div className="total-count-submittals">
-                      {`${totalCount} submittals`}
-                    </div>
-                  </div>
-                  <div className="col-6 d-flex p-0 justify-content-end">
-                    {localStorage.getItem("roleId") !== "7" && (
-                      <Dropdown isOpen={dropdownOpen} toggle={toggle}>
-                        <DropdownToggle caret className="export-btn">Export</DropdownToggle>
-                        <DropdownMenu>
-                          <DropdownItem
-                            onClick={() => handleExportExcel("All")}
+                  {localStorage.getItem('roleId') !== '7' ? (
+                    <div className="header-right-swap header-right">
+                      <div className="log-search">
+                        <input
+                          type="text"
+                          placeholder="Find In Log"
+                          className="log-search-input"
+                          value={searchValue}
+                          onChange={(e) => handleSearchChange(e.target.value)}
+                          onKeyPress={handleEnterKeyPress}
+                        />
+                        <span className="search-icon" onClick={heandleSearchClick}>
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            <ExcelLogo style={{ height: "90px" }} />
-                          </DropdownItem>
-                          <DropdownItem>
-                            {procoreAccessToken === 'null' ?
-                              <a
-                                href={procoreAuthUrl}
-                                className="breadcrumb-text"
-                              >
-                                <Logo style={{ height: "90px" }} />
-                              </a>
-                              : <div onClick={handleExportToProcoreButtonClick}>
-                                <Logo style={{ height: "90px" }} />
-                              </div>}
-                          </DropdownItem>
-                        </DropdownMenu>
-                      </Dropdown>
-                    )}
-                    {localStorage.getItem("roleId") !== "7" && (
-                      <button
-                        type="button"
-                        className="trash-icon"
-                        onClick={handleDeleteLogs}
-                      >
-                        <svg
-                          width="16"
-                          height="18"
-                          viewBox="0 0 16 18"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M14.125 4.55556L13.3661 15.3489C13.3007 16.2792 12.5387 17 11.6205 17H4.37946C3.46134 17 2.69932 16.2792 2.63391 15.3489L1.875 4.55556M6.25 8.11111V13.4444M9.75 8.11111V13.4444M10.625 4.55556V1.88889C10.625 1.39797 10.2332 1 9.75 1H6.25C5.76675 1 5.375 1.39797 5.375 1.88889V4.55556M1 4.55556H15"
-                            stroke="#0E2332"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
+                            <path
+                              d="M17.5001 17.4998L12.9165 12.9167"
+                              stroke="#CBCBCB"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <circle
+                              cx="8.75"
+                              cy="8.75"
+                              r="5.5"
+                              stroke="#CBCBCB"
+                              strokeWidth="1.5"
+                            />
+                          </svg>
+                        </span>
+                        <span className="clear-icon" onClick={handleClearSearch}>
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5 5L15 15"
+                              stroke="#cbcbcb"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M15 5L5 15"
+                              stroke="#cbcbcb"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    ''
+                  )}
                 </div>
               </div>
               <div className={pdfData.url && "side-by-side"}>
