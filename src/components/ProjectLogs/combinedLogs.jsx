@@ -308,7 +308,7 @@ export default function CombinedLogs(props) {
   })
 
   const minWidths = {
-    1: 160,
+    1: 140,
     2: 145,
     3: 150,
     4: 85,
@@ -319,13 +319,13 @@ export default function CombinedLogs(props) {
   useEffect(() => {
     if (parentRef.current !== null) {
       setTableWidths({
-        1: Math.max(Math.round(parentRef.current.offsetWidth * 0.08), minWidths[1]),
+        1: Math.max(Math.round(parentRef.current.offsetWidth * 0.075), minWidths[1]),
         2: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[2]),
         3: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[3]),
         4: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[4]),
         5: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[5]),
         6: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[6]),
-        7: parentRef.current.offsetWidth - 950
+        7: parentRef.current.offsetWidth - 930
       })
     }
   }, [parentRef.current])
@@ -364,7 +364,7 @@ export default function CombinedLogs(props) {
       <table className="table logs-table" ref={tableRef}>
         <thead>
           <tr>
-            <th className="ticket-checkbox small-font" style={{width: '16px'}}>
+            <th className="ticket-checkbox small-font" >
               <div className="form-group">
                 <div className="custom-control custom-checkbox">
                   <input
@@ -674,7 +674,7 @@ export default function CombinedLogs(props) {
                 <td
                   className={`${
                     editRow === index ? "activeTh" : ""
-                  } reduce-height`}
+                  } reduce-height actions-td`}
                 >
                   <div className="action-items">
                     {
@@ -768,8 +768,8 @@ export default function CombinedLogs(props) {
                             >
                               <svg
                                 id={"Edit-Tooltip-" + index + 1}
-                                width="18"
-                                height="18"
+                                width="16"
+                                height="16"
                                 viewBox="0 0 18 18"
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"
@@ -844,7 +844,7 @@ export default function CombinedLogs(props) {
                                 <svg
                                   id={"Pdf-Tooltip-" + index + 1}
                                   width="16"
-                                  height="20"
+                                  height="18"
                                   viewBox="0 0 16 20"
                                   fill="none"
                                   xmlns="http://www.w3.org/2000/svg"
