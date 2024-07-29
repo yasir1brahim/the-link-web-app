@@ -65,6 +65,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       };
 
       fetchData().catch(console.error);
+      setRefetchEmp(false);
     }
   }, [customer, modal, refetchEmp, customerID]);
 
