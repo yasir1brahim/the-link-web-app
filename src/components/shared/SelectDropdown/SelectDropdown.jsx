@@ -1,34 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 
 const SelectDropdown = ({ ...props }) => {
-  // const [selected, setSelected] = useState([]);
   const [focused, setFocused] = useState(false);
-  // const [searchValue, setSearchValue] = useState('');
+  const typeaheadRef = useRef(null);
+  const dropdownRef = useRef(null);
+
+  const handleClickOutside = (event) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target) &&
+      typeaheadRef.current
+    ) {
+      setFocused(false);
+      const element = document.getElementById(typeaheadRef.current.props.id);
+      if (element) {
+        element.style.display = 'none';
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (focused) {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      setFocused(false);
+    };
+    }
+  }, [focused]);
 
   return (
     <div
+      ref={dropdownRef}
       className={`has-typehead ${focused ? "is-focused" : ""} ${
         props.searchValue?.length === 0 ? "empty" : ""
       }`}
     >
       <Typeahead
-        id="select-dropdown"
+        id={`select-dropdown${props.label.replace(/\s+/g, '')}`}
+        ref={typeaheadRef}
         onChange={(e) => {
           props.setSelected(e);
-          // props.setSearchValue && props.setSearchValue('');
           if (props.onChange) {
-            // @ts-ignore
             props.onChange(e[0]);
           }
-          // if (props.searchValue === ''){
-          //   // props.setSelected([])
-          //   props.setSearchValue(e[0])}
         }}
         labelKey={props.labelKey}
-        onFocus={(e) => (focused === e ? "" : setFocused(e))}
-        onBlur={(e) => (focused !== e ? "" : setFocused(e))}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         onInputChange={(e) => {
           props.setSelected({});
           props.setSearchValue && props.setSearchValue(e);

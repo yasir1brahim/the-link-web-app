@@ -319,7 +319,7 @@ export default function CombinedLogs(props) {
   useEffect(() => {
     if (parentRef.current !== null) {
       setTableWidths({
-        1: Math.max(Math.round(parentRef.current.offsetWidth * 0.075), minWidths[1]),
+        1: Math.max(Math.round(parentRef.current.offsetWidth * 0.074), minWidths[1]),
         2: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[2]),
         3: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[3]),
         4: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[4]),
