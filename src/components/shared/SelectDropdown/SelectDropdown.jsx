@@ -24,6 +24,10 @@ const SelectDropdown = ({ ...props }) => {
   useEffect(() => {
     if (focused) {
     document.addEventListener("mousedown", handleClickOutside);
+    const element = document.getElementById(typeaheadRef.current.props.id);
+    if (element) {
+      element.style.display = 'block';
+    }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       setFocused(false);
