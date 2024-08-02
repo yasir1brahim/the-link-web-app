@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-// import ProfilePhoto from '../../assets/images/dummy-profile.svg';
-// import { ReactComponent as Camera } from '../../assets/images/camera.svg';
 import axiosInstance from "../../config/axios";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -10,6 +8,7 @@ import moment from "moment";
 import handleError from "../../config/errorHandler";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
+import { CircularProgress } from "@mui/material";
 
 const EditProject = ({
   modal,
@@ -21,8 +20,6 @@ const EditProject = ({
   isAdminUser,
   customerID,
 }) => {
-  // const [email, setEmail] = useState({ value: '', errors: '' });
-  // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [projectType, setProjectType] = useState("commercial");
   const typeaheadRef = useRef(null);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
@@ -33,28 +30,32 @@ const EditProject = ({
   });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  // const [projectStatus, setProjectStatus] = useState({ value: '', errors: '' });
   const [employeeList, setEmployeeList] = useState([]);
   const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
-  // const [accountId, setAccountId] = useState({ value: '', errors: '' });
-  // const startDateMoment = moment(
-  //   new Date(project?.start_date?.replaceAll('-', '/'))
-  // );
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: "", errors: "" });
-      setLeadContact([]);
+      setLeadContact({
+        value: "",
+        label: "",
+        email: "",
+      });
       typeaheadRef?.current?.clear();
       setStartDate("");
       setEndDate("");
       setEmployeeList([]);
+      setSelectedEmployeeList([]);
     }
   }, [modal, typeaheadRef]);
 
   useEffect(() => {
     if (modal) {
-      const fetchData = async () => {
-        const response = await axiosInstance({
+      const preSelectEmployeesForProject = async () => {
+        setIsLoading(true);
+        // fetch employees for customer
+        const resp_employees_by_customer = await axiosInstance({
           method: "get",
           url: `/employeeList/${
             customer?.customer_id ||
@@ -63,25 +64,40 @@ const EditProject = ({
             localStorage.getItem("userId")
           }`,
         });
-        if (response.data.message) {
-          setEmployeeList(response.data.message);
+        const emps_by_c = resp_employees_by_customer.data.message
+        if (emps_by_c) {
+          setEmployeeList(emps_by_c);
         }
-        console.log(response.data.message);
+
+        // fetch employees for project
+        const resp_employees_by_project = await axiosInstance({
+          method: "get",
+          url: `/employees_by_project/${
+            project?.project_id
+          }`,
+        });
+        const emps_by_p = resp_employees_by_project.data.message;
+
+        // pre-select employees for project
+        if (emps_by_p.length > 0) {
+          if (emps_by_c.length > 0) {
+            const selected_emps = emps_by_c.filter((emp) => emps_by_p.includes(emp.emp_id));
+            if (selected_emps.length > 0) {
+              setSelectedEmployeeList(selected_emps.map((emp) => {
+                return {
+                  value: emp.emp_id,
+                  label: emp.name,
+                };
+              }));
+            }
+          }
+        }
+        setIsLoading(false);
       };
 
-      fetchData().catch(console.error);
+      preSelectEmployeesForProject().catch(console.error);
     }
   }, [customer, modal, project?.customer_id, customerID]);
-
-  // const validate = () => {
-  //   let error = false;
-  //   if (email.value === '') {
-  //     setEmail({ ...email, errors: 'Email is required.' });
-  //     error = true;
-  //   }
-
-  //   return error;
-  // };
 
   const handleSubmit = async () => {
     let errors = false;
@@ -392,18 +408,22 @@ const EditProject = ({
                     />
                   </div>
                   <span className="icon-locate">
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 14 14"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M6.99998 13.6666C3.31798 13.6666 0.333313 10.682 0.333313 6.99998C0.333313 3.31798 3.31798 0.333313 6.99998 0.333313C10.682 0.333313 13.6666 3.31798 13.6666 6.99998C13.6666 10.682 10.682 13.6666 6.99998 13.6666ZM6.33331 6.33331H3.66665V7.66665H6.33331V10.3333H7.66665V7.66665H10.3333V6.33331H7.66665V3.66665H6.33331V6.33331Z"
-                        fill="#676F74"
-                      />
-                    </svg>
+                    {isLoading ? (
+                      <CircularProgress size={12} />
+                    ) : (
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 14 14"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M6.99998 13.6666C3.31798 13.6666 0.333313 10.682 0.333313 6.99998C0.333313 3.31798 3.31798 0.333313 6.99998 0.333313C10.682 0.333313 13.6666 3.31798 13.6666 6.99998C13.6666 10.682 10.682 13.6666 6.99998 13.6666ZM6.33331 6.33331H3.66665V7.66665H6.33331V10.3333H7.66665V7.66665H10.3333V6.33331H7.66665V3.66665H6.33331V6.33331Z"
+                          fill="#676F74"
+                        />
+                      </svg>
+                    )}
                   </span>
                   <span className="icon-right-locate">
                     <svg
