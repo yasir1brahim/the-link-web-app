@@ -640,6 +640,18 @@ const ProjectLogs = () => {
 
   const handleExportExcel = async (recordData, fileName) => {
     try {
+      let filters = {};
+      if (
+        Object.values(filterValues)
+          .map((value) => (value?.length ? true : false))
+          .includes(true)
+      ) {
+        Object.keys(filterValues).forEach((key) =>
+          filterValues[key]?.length
+            ? (filters = { ...filters, [key]: filterValues[key] })
+            : null,
+        );
+      }
       const response = await axiosInstance({
         method: "post",
         url: "/exportLogs",
@@ -652,6 +664,8 @@ const ProjectLogs = () => {
               .getItem("filteredIds")
               ?.split(",")
               ?.map((item) => Number(item)),
+          filters: { ...filters },
+          page_number: -1,
         },
       });
       let blob = new Blob([response.data], {
