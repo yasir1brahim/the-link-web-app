@@ -69,6 +69,21 @@ const ProjectLogsReader = ({ url, textLoc, docId, setPdfData, handleAddNewRow, h
           textLoc?.x,
           textLoc?.y,
         );
+        
+        // Add rectangular highlight
+        const annotationManager = instance.Core.annotationManager;
+        const Annotations = instance.Core.Annotations;
+        const rectangleAnnot = new Annotations.RectangleAnnotation({
+          PageNumber: textLoc?.page_no,
+          X: textLoc?.x,
+          Y: textLoc?.y,
+          Width: textLoc?.width,
+          Height: textLoc?.height,
+          Color: new Annotations.Color(213, 231, 62, 0),
+          FillColor: new Annotations.Color(213, 231, 62, 0.25),
+        });
+        annotationManager.addAnnotation(rectangleAnnot);
+        annotationManager.redrawAnnotation(rectangleAnnot);
       });
       instance.UI.updateElement("menuButton", {
         img: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
