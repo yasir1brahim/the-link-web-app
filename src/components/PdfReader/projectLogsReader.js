@@ -79,7 +79,8 @@ const ProjectLogsReader = ({ url, textLoc, docId, setPdfData, handleAddNewRow, h
           Y: textLoc?.y,
           Width: textLoc?.width,
           Height: textLoc?.height,
-          Color: new Annotations.Color(255, 0, 0, 0.5) // Yellow color with 50% opacity
+          Color: new Annotations.Color(213, 231, 62, 0),
+          FillColor: new Annotations.Color(213, 231, 62, 0.25),
         });
         annotationManager.addAnnotation(rectangleAnnot);
         annotationManager.redrawAnnotation(rectangleAnnot);
