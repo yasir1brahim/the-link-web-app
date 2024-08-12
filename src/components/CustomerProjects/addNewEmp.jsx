@@ -37,12 +37,14 @@ export const AddNewEmp = (props) => {
         });
         if (response.data) {
           console.log(response.data);
+          const employee_id = response.data.data.user_id;
           //   setPageRefresh(!pageRefresh);
           //   toggleModal();
           setIsLoading(false);
           setEmail({ value: "", errors: "" });
           setFirstName({ value: "", errors: "" });
           setLastName({ value: "", errors: "" });
+          props.setSelectedEmployeeList([...props.selectedEmployeeList, {label: `${firstName.value}  ${lastName.value}`, value: employee_id}])
           props.openEmpForm(false);
           props.setRefetchEmp(true);
           toast.success("Added a new employee.");

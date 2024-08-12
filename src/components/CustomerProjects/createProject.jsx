@@ -278,7 +278,13 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
                 )}
                 {empForm && (
                   <>
-                    <AddNewEmp customerID={customerID || customer?.customer_id} openEmpForm={openEmpForm} setRefetchEmp={setRefetchEmp} />
+                    <AddNewEmp
+                      customerID={customerID || customer?.customer_id}
+                      openEmpForm={openEmpForm}
+                      setRefetchEmp={setRefetchEmp}
+                      selectedEmployeeList={selectedEmployeeList}
+                      setSelectedEmployeeList={setSelectedEmployeeList}
+                    />
                   </>
                 )}
               </div>
