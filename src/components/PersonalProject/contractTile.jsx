@@ -185,7 +185,7 @@ const ContractTile = ({
               </span>
             </>
           ) : null}
-          {roleId !== "6" && roleId !== "7" && (
+          {(
             project.status === "Archived" ? (
               <>
                 <span

@@ -158,6 +158,14 @@ const CustomerProjects = ({
     let errors = false;
     if (!errors) {
       try {
+        // fetch employees for project
+        const resp_employees_by_project = await axiosInstance({
+          method: "get",
+          url: `/employees_by_project/${
+            restoreProject?.project_id
+          }`,
+        });
+        const emps_by_p = resp_employees_by_project.data.message;
         const employeeList = await getEmployeeList(restoreProject);
         const response = await axiosInstance({
           method: "put",
@@ -167,7 +175,7 @@ const CustomerProjects = ({
             lead_contact: employeeList.find(
               (employee) => employee.name === restoreProject.lead_contact,
             )?.emp_id,
-            employee_list: employeeList,
+            employee_list: emps_by_p,
             start_date: restoreProject?.start_date
               ? moment(
                   new Date((restoreProject?.start_date).replaceAll("-", "/")),
@@ -492,7 +500,7 @@ const CustomerProjects = ({
                                 </span>
                               </>
                             ) : null}
-                            {roleId !== "6" && roleId !== "7" && (
+                            {(
                               project.status === "Archived" ? (
                                 <>
                                   <span
