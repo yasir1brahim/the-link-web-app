@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { ReactComponent as Upload } from "../../assets/images/upload.svg";
 import { ReactComponent as FileDocument } from "../../assets/images/file-document.svg";
 import { ReactComponent as Close } from "../../assets/images/close.svg";
@@ -24,7 +24,82 @@ export const UploadDocuments = (props) => {
     logScreenUrl,
     project,
   } = props;
+
   const navigate = useNavigate();
+  const [dragOver, setDragOver] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleFileDrop = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+  
+    // Get dropped files
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    console.log('Dropped files:', droppedFiles);
+  
+    // Check if files array is empty
+    if (droppedFiles.length === 0) {
+      console.log('No files were dropped.');
+      return;
+    }
+  
+    // Filter out empty files and avoid adding duplicates
+    const validFiles = droppedFiles.filter(file => file.size > 0);
+    console.log('Valid files:', validFiles);
+  
+    // Update state with new files
+    try {
+      setPdfFile(prevFiles => {
+        const existingFiles = Array.from(prevFiles);
+        const newFiles = [
+          ...existingFiles,
+          ...validFiles.filter(file => 
+            !existingFiles.some(existingFile => existingFile.name === file.name && existingFile.size === file.size)
+          )
+        ];
+        console.log('Updated file list:', newFiles);
+        return newFiles;
+      });
+    } catch (error) {
+      setErrorMessage("Failed to process dropped files.");
+      console.error(error);
+    }
+  }, [setPdfFile]);
+  
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+  };
+
+  const handleFileChange = (e) => {
+    try {
+      const selectedFiles = Array.from(e.target.files);
+      setPdfFile(prevFiles => {
+        const existingFiles = Array.from(prevFiles);
+        const newFiles = [...existingFiles, ...selectedFiles.filter(file => !existingFiles.some(existingFile => existingFile.name === file.name))];
+        return newFiles;
+      });
+    } catch (error) {
+      setErrorMessage("Failed to process selected files.");
+      console.error(error);
+    }
+  };
+
+  const removeFile = (fileName) => {
+    setPdfFile(prevFiles => {
+      console.log('Removing file:', fileName);
+      return Array.from(prevFiles).filter(file => file.name !== fileName);
+    });
+  };
 
   return (
     <>
@@ -36,27 +111,28 @@ export const UploadDocuments = (props) => {
       >
         <ModalHeader toggle={toggleModal}>Upload Document</ModalHeader>
         <ModalBody>
-          {/* Upload form code */}
-          <form className="upload-document-form">
+          <form
+            className={`upload-document-form ${dragOver ? 'drag-over' : ''}`}
+            onDrop={handleFileDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+          >
             <div className="upload-document-content">
               <div className="select-File">
                 <input
                   className="d-none"
                   type="file"
-                  // name="files[]"
                   id="uploadDocs"
                   accept="application/pdf"
                   multiple
-                  // disabled={Object.keys(pdfFile).length !== 0}
-                  onChange={(e) => setPdfFile(e.target.files)}
+                  onChange={handleFileChange}
                 />
                 <label htmlFor="uploadDocs">
                   <div className="upload-text d-flex align-items-center justify-content-center">
                     <Upload />
                     <small>Select a File</small>
                     <span className="text-center">
-                      Click to browse or drop here to upload. Supported Format
-                      {/* Formats: Excel, csv, xml. */}: <b>PDF</b>.
+                      Click to browse or drop here to upload. Supported Format: <b>PDF</b>.
                       <br />
                       Maximum Individual File size: <b>100 MB</b>.
                       <br />A maximum of <b>200</b> files can be uploaded at a
@@ -65,40 +141,22 @@ export const UploadDocuments = (props) => {
                   </div>
                 </label>
               </div>
-              {Object.values(pdfFile).length ? (
+              {pdfFile.length ? (
                 <div className="uploaded-file-list">
-                  {Object.values(pdfFile).map((file) => {
-                    return (
-                      <div className="uploaded-file d-flex align-items-center justify-content-center">
-                        <FileDocument />
-                        <div className="file-name ml-3 d-flex align-items-start flex-column justify-content-center">
-                          <span>{file.name}</span>
-                          <small>{`${file.size * 0.001}KB `}</small>
-                        </div>
-                        <div className="ml-auto">
-                          <Close
-                            onClick={() =>
-                              setPdfFile({
-                                ...Object.values(pdfFile).filter(
-                                  (pdf) => pdf.name !== file.name,
-                                ),
-                              })
-                            }
-                          />
-                        </div>
+                  {pdfFile.map((file) => (
+                    <div key={file.name} className="uploaded-file d-flex align-items-center justify-content-center">
+                      <FileDocument />
+                      <div className="file-name ml-3 d-flex align-items-start flex-column justify-content-center">
+                        <span>{file.name}</span>
+                        <small>{`${(file.size / 1000).toFixed(2)} KB`}</small>
                       </div>
-                    );
-                  })}
+                      <div className="ml-auto">
+                        <Close onClick={() => removeFile(file.name)} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : null}
-              {/* <button
-                  type="button"
-                  className="btn btn-secondary btn-sm mb-4 ml-auto"
-                  onClick={handleSubmit}
-                  //   disabled={Object.keys(pdfFile).length === 0}
-                >
-                  Upload
-                </button> */}
             </div>
             <ModalFooter className="mt-3 float-right">
               <Button color="secondary" onClick={toggleModal}>
@@ -110,17 +168,16 @@ export const UploadDocuments = (props) => {
                 className="submit-accent"
               >
                 Get Log
-              </Button>{" "}
+              </Button>
             </ModalFooter>
           </form>
-          {/* Upload form code */}
 
-          {/* Error Upload code */}
           {isUploadLoading && (
             <Loader showComponentLoader={true} showProcessing={true} />
           )}
         </ModalBody>
       </Modal>
+
       <Modal
         isOpen={errorModal}
         fade={false}
@@ -129,11 +186,10 @@ export const UploadDocuments = (props) => {
       >
         <ModalHeader toggle={toggleModal}>Upload Document</ModalHeader>
         <ModalBody>
-          {/* Error Upload code */}
           <div className="error-upload text-center">
             <Error />
             <h5>Error</h5>
-            <p>There was some error uploading this file.</p>
+            <p>{errorMessage || "There was some error uploading this file."}</p>
             <button
               type="button"
               className="d-inline-block btn btn-primary"
@@ -144,6 +200,7 @@ export const UploadDocuments = (props) => {
           </div>
         </ModalBody>
       </Modal>
+
       <Modal
         isOpen={successModal}
         fade={false}
@@ -154,19 +211,20 @@ export const UploadDocuments = (props) => {
           Upload Document
         </ModalHeader>
         <ModalBody>
-          {/* Success Upload code */}
           <div className="success-upload text-center">
             <Success />
             <h5>Success</h5>
-            <p>Your files have been succesfully uploaded and are being processed.</p>
+            <p>Your files have been successfully uploaded and are being processed.</p>
             <p>This may take up to 10 minutes to complete.</p>
-            {alreadyExistingFiles?.length > 0 && (<>
-              <p><b>Note:</b> The following files had the same title and content as other files you already uploaded for this project. They will not be re-processed.</p>
-              <ul className="doc-content-table">
-                {alreadyExistingFiles.map((filename) => (
-                  <li className="doc-content-list">{filename}</li>
-                ))}
-              </ul></>
+            {alreadyExistingFiles?.length > 0 && (
+              <>
+                <p><b>Note:</b> The following files had the same title and content as other files you already uploaded for this project. They will not be re-processed.</p>
+                <ul className="doc-content-table">
+                  {alreadyExistingFiles.map((filename) => (
+                    <li key={filename} className="doc-content-list">{filename}</li>
+                  ))}
+                </ul>
+              </>
             )}
             <div className="text-right">
               <button
