@@ -131,13 +131,12 @@ export const UploadDocuments = (props) => {
                   <div className="upload-text d-flex align-items-center justify-content-center">
                     <Upload />
                     <small>Select a File</small>
-                    <span className="text-center">
-                      Click to browse or drop here to upload. Supported Format: <b>PDF</b>.
-                      <br />
-                      Maximum Individual File size: <b>100 MB</b>.
-                      <br />A maximum of <b>200</b> files can be uploaded at a
-                      time, processing time may be up to <b>10</b> minutes.
-                    </span>
+                    <ul className="uploader-notify">
+                      <li>All specifications must be a native PDF (i.e., not a flat, scanned file)</li>
+                      <li>For best results, specifications should be in standard CSI SectionFormat</li>
+                      <li>Maximum individual file size is 150 MB</li>
+                      <li>Maximum number of files in one upload is 250</li>
+                    </ul>
                   </div>
                 </label>
               </div>
