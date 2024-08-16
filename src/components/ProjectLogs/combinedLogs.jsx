@@ -11,6 +11,7 @@ import { ReactComponent as SaveButton } from "../../assets/images/label-approve.
 import { ReactComponent as CancelButton } from "../../assets/images/label-reject.svg";
 import { ReactComponent as ExpandButton } from "../../assets/images/down-arrow.svg";
 import { ReactComponent as CollapseButton } from "../../assets/images/up-arrow.svg";
+import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import { Tooltip } from "reactstrap";
 import handleError from "../../config/errorHandler";
 import { SortIcon } from "../shared/icons/sortIcon";
@@ -308,7 +309,7 @@ export default function CombinedLogs(props) {
   })
 
   const minWidths = {
-    1: 140,
+    1: 155,
     2: 145,
     3: 150,
     4: 85,
@@ -325,7 +326,7 @@ export default function CombinedLogs(props) {
         4: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[4]),
         5: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[5]),
         6: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[6]),
-        7: parentRef.current.offsetWidth - 930
+        7: parentRef.current.offsetWidth - 945
       })
     }
   }, [parentRef.current])
@@ -645,7 +646,7 @@ export default function CombinedLogs(props) {
                 className={
                   log.user_id !== 1 || index % 2 !== 0 ? "highlight-row" : ""
                 }
-                style={{ lineHeight: 1.2, backgroundColor: pdfIndex === index ? '#f8f8fa' : log.parsing_method === 'AI_SUBMITTAL' ? '#FFFFC5' : 'white' }}
+                style={{ lineHeight: 1.2, backgroundColor: pdfIndex === index ? '#f8f8fa' : log.parsing_method === 'AI_SUBMITTAL' ? '#007bff40' : 'white' }}
                 key={index}
               >
                 <td
@@ -910,6 +911,7 @@ export default function CombinedLogs(props) {
                             </span>
                           </>
                         )}
+                        {log.parsing_method === 'AI_SUBMITTAL' ? <Sparkles /> : ''}
                       </>
                     }
                   </div>
