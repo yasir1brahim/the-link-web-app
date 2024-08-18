@@ -64,6 +64,7 @@ const ProjectLogs = () => {
     textLoc: {},
     index: "",
     docId: null,
+    additionalTextLocations: [],
   });
   const [newRowIndex, setNewRowIndex] = useState(null);
   const [editRow, setEditRow] = useState(1);

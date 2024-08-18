@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from "react";
 import WebViewer from "@pdftron/webviewer";
 import axiosInstance from "../../config/axios";
 
-const ProjectLogsReader = ({ url, textLoc, docId, setPdfData, handleAddNewRow, handleAppendToSelectedRow, setLogInViewer }) => {
+const ProjectLogsReader = ({ url, textLoc, docId, additionalTextLocations, setPdfData, handleAddNewRow, handleAppendToSelectedRow, setLogInViewer }) => {
   const viewer = useRef(null);
 
   useEffect(() => {
@@ -19,6 +19,7 @@ const ProjectLogsReader = ({ url, textLoc, docId, setPdfData, handleAddNewRow, h
       textLoc: {},
       index: "",
       docId: null,
+      additionalTextLocations: [],
     });
   };
 
@@ -59,6 +60,7 @@ const ProjectLogsReader = ({ url, textLoc, docId, setPdfData, handleAddNewRow, h
       },
       viewer.current,
     ).then(async (instance) => {
+      console.log("additionalTextLocations", additionalTextLocations);
       instance.UI.enableFeatures([instance.UI.Feature.InlineComment]);
       handleDocumentLoaded(instance.Core.annotationManager);
       instance.UI.setZoomLevel('100%');
@@ -84,6 +86,21 @@ const ProjectLogsReader = ({ url, textLoc, docId, setPdfData, handleAddNewRow, h
         });
         annotationManager.addAnnotation(rectangleAnnot);
         annotationManager.redrawAnnotation(rectangleAnnot);
+
+        for (let i = 0; i < additionalTextLocations?.length; i++) {
+          const additionalTextLocation = additionalTextLocations[i];
+          const rectangleAnnot = new Annotations.RectangleAnnotation({
+            PageNumber: additionalTextLocation?.page_no,
+            X: additionalTextLocation?.x,
+            Y: additionalTextLocation?.y,
+            Width: additionalTextLocation?.width,
+            Height: additionalTextLocation?.height,
+            Color: new Annotations.Color(213, 231, 62, 0),
+            FillColor: new Annotations.Color(213, 231, 62, 0.25),
+          });
+          annotationManager.addAnnotation(rectangleAnnot);
+          annotationManager.redrawAnnotation(rectangleAnnot);
+        }
       });
       instance.UI.updateElement("menuButton", {
         img: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
