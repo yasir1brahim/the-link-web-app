@@ -19,6 +19,7 @@ import { useSearchParams } from "react-router-dom";
 import Procore from "./procore";
 import ManageProcore from "./manageProcore";
 import { ReactComponent as SearchIcon } from "../../assets/images/search.svg";
+import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
 import { getSavedLogs } from "../../api/ProjectLogs/api";
@@ -1128,17 +1129,22 @@ const ProjectLogs = () => {
                   />
                 )}
               </div>
-              <div className="table-footer-content logs-pagination">
-                <Pagination
-                  totalItems={totalCount}
-                  fetchData={fetchLogData}
-                  rowsPerPage={rowsPerPage}
-                  setRowsPerPage={setRowsPerPage}
-                  page={page}
-                  setPage={setPage}
-                  listId={listId}
-                  searchValue={searchValue}
-                />
+              <div style={{ position: 'relative' }}>
+                <div style={{ position: 'absolute', marginTop: '10px', fontStyle: 'italic', fontSize: '14px' }}>
+                  <strong>*</strong> <span style={{ color: 'rgba(0, 123, 255, 0.8)' }}>Light blue color</span> and <span role="img" aria-label="sparkle"><Sparkles /></span> indicate this submittal was extracted by our AI.
+                </div>
+                <div className="table-footer-content logs-pagination">
+                  <Pagination
+                    totalItems={totalCount}
+                    fetchData={fetchLogData}
+                    rowsPerPage={rowsPerPage}
+                    setRowsPerPage={setRowsPerPage}
+                    page={page}
+                    setPage={setPage}
+                    listId={listId}
+                    searchValue={searchValue}
+                  />
+                </div>
               </div>
               {/* {state.project?.type === 'Submittal' && (
                  
