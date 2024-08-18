@@ -33,6 +33,7 @@ const Signin = (props) => {
     if (!errors) {
       const response = await login(email.value,password.value);
       if (response.data) {
+        window.heap.identify(email.value);
         localStorage.setItem('token', response.data.access_token);
         localStorage.setItem('refresh_token', response.data.refresh_token);
         localStorage.setItem('roleId', response.data.role_id);
