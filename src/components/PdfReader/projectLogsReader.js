@@ -60,6 +60,7 @@ const ProjectLogsReader = ({ url, textLoc, docId, additionalTextLocations, setPd
       },
       viewer.current,
     ).then(async (instance) => {
+      console.log("additionalTextLocations", additionalTextLocations);
       instance.UI.enableFeatures([instance.UI.Feature.InlineComment]);
       handleDocumentLoaded(instance.Core.annotationManager);
       instance.UI.setZoomLevel('100%');

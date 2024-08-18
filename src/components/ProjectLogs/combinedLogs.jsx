@@ -823,6 +823,7 @@ export default function CombinedLogs(props) {
                                 textLoc: {},
                                 index: "",
                                 docId: null,
+                                additionalTextLocations: [],
                               })
                             }}
                           >
@@ -839,7 +840,7 @@ export default function CombinedLogs(props) {
                                     log.text_loc,
                                     index,
                                     log.doc_id,
-                                    log.additionalTextLocations,
+                                    log.additional_text_locations,
                                   );
                                   props.setLogInViewer(log);
                                 }}
