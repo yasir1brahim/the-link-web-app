@@ -97,6 +97,9 @@
               transition: all 0.2s ease-in-out;
             }
           }
+          &.support {
+            margin-right: 5px;
+          }
         }
         .nav-dropdown {
           top: calc(100% + 12px);

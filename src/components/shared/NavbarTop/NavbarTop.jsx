@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ReactComponent as Logo } from '../../../assets/images/logo-dark-v7.svg';
 import { ReactComponent as Down } from '../../../assets/images/chevron-bottom.svg';
+import { ReactComponent as Help } from '../../../assets/images/help.svg';
 // import { ReactComponent as Notification } from '../../../assets/images/notificat.svg';
 import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
 import { CircularProgress } from "@mui/material";
@@ -70,6 +71,9 @@ const NavbarTop = ({...props}) => {
           <div className='col-4 pt-1'>
             <Nav className='justify-content-end' navbar>
               <NavItem>
+                <NavLink className="support" href="mailto:support@thelink.zendesk.com">
+                  <Help />
+                </NavLink>
                 <NavLink
                   className={'user-wrapper ' + (navDrop ? 'navdrop-open' : '')}
                   // href="/"
