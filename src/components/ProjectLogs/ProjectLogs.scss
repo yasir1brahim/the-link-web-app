@@ -180,8 +180,8 @@
               background: #f8f8fa !important;
             }
             .ticket-checkbox {
-              width: 20px;
-              min-width: 20px;
+              width: 28px;
+              min-width: 28px;
               cursor: pointer;
               .form-group {
                 margin: 0;
@@ -316,9 +316,6 @@
               font-size: 13px !important;
               border-right: none !important;
               padding: 1.5px 5px !important;
-              &.actions-td {
-                padding-left: 0px !important;
-              }
             }
           }
         }
