@@ -328,7 +328,7 @@ export default function CombinedLogs(props) {
         4: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[4]),
         5: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[5]),
         6: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[6]),
-        7: parentRef.current.offsetWidth - 945
+        7: parentRef.current.offsetWidth - 953
       })
     }
   }, [parentRef.current])
@@ -648,7 +648,7 @@ export default function CombinedLogs(props) {
                 className={
                   log.user_id !== 1 || index % 2 !== 0 ? "highlight-row" : ""
                 }
-                style={{ lineHeight: 1.2, backgroundColor: pdfIndex === index ? '#f8f8fa' : log.parsing_method === 'AI_SUBMITTAL' ? '#007bff40' : 'white' }}
+                style={{ lineHeight: 1.2, backgroundColor: pdfIndex === index ? '#f8f8fa' : 'white' }}
                 key={index}
               >
                 <td
@@ -678,6 +678,7 @@ export default function CombinedLogs(props) {
                   className={`${
                     editRow === index ? "activeTh" : ""
                   } reduce-height actions-td`}
+                  style={{ backgroundColor: log.parsing_method === 'AI_SUBMITTAL' ? '#007bff40' : 'white' }}
                 >
                   <div className="action-items">
                     {
