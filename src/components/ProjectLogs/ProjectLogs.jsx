@@ -1132,7 +1132,7 @@ const ProjectLogs = () => {
               </div>
               <div style={{ position: 'relative' }}>
                 <div style={{ position: 'absolute', marginTop: '10px', fontStyle: 'italic', fontSize: '14px' }}>
-                  <strong>*</strong> <span style={{ color: 'rgba(0, 123, 255, 0.8)' }}>Light blue color</span> and <span role="img" aria-label="sparkle"><Sparkles /></span> indicate this submittal was extracted by our AI.
+                  <strong>Note: </strong><span role="img" aria-label="sparkle"><Sparkles /></span> indicates this submittal was extracted by our AI.
                 </div>
                 <div className="table-footer-content logs-pagination">
                   <Pagination
