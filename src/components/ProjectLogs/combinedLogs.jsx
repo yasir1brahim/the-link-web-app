@@ -678,7 +678,6 @@ export default function CombinedLogs(props) {
                   className={`${
                     editRow === index ? "activeTh" : ""
                   } reduce-height actions-td`}
-                  style={{ backgroundColor: log.parsing_method === 'AI_SUBMITTAL' ? '#007bff40' : 'white' }}
                 >
                   <div className="action-items">
                     {
