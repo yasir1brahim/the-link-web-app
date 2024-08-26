@@ -1160,6 +1160,7 @@ export default function CombinedLogs(props) {
                       ) : (
                         <div
                           className={
+                            "log-desc " +
                             (showMore[index] ? "show-content" : "text-overflow")
                           }
                           ref={(element) => rowRefs.current.push(element)}
