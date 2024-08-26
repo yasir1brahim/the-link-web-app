@@ -49,6 +49,14 @@
     }
   }
 }
+.text-overflow {
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .project-logs-wrapper {
   .project-logs-content {
     .project-logs {
@@ -289,7 +297,6 @@
               }
             }
             .log-desc {
-              height: 15px;
               overflow: hidden;
               position: relative;
               &.show-content {
