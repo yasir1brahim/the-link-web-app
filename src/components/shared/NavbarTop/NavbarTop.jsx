@@ -61,15 +61,20 @@ const NavbarTop = ({...props}) => {
             <Logo />
           </a>
           {props?.customerData &&
-            <div className="cust-name pt-3">{props?.customerData['customer_name']}</div>}
+            <div className="cust-name d-flex justify-content-center">
+              <div className="title-wrap">
+                <h1 className="title-content">{props?.customerData['customer_name']}</h1>
+              </div>
+            </div>
+          }
           </div>
-          <div className='col-4 text-center pt-3'>
+          <div className='col-4 text-center d-flex justify-content-center'>
             <div className="title-wrap">
               <h1 className="title-content">{props.projectTitle}</h1>
             </div>
           </div>
-          <div className='col-4 pt-1'>
-            <Nav className='justify-content-end' navbar>
+          <div className='col-4 d-flex justify-content-end'>
+            <Nav navbar>
               <NavItem>
                 <NavLink className="support" href="mailto:support@thelink.zendesk.com">
                   <HelpOutlineSharpIcon sx={{ color: '#d5e642', fontSize: '28px' }} />
