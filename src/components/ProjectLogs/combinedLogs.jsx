@@ -54,8 +54,47 @@ export default function CombinedLogs(props) {
     item_desc: true,
   });
 
-  const [showMore, setModal] = useState(null);
-  // const toggleShowMore = () => setModal(!showMore);
+  const [showMore, setShowMore] = useState([]);
+  const [shouldShowExpansionButton, setShouldShowExpansionButton] = useState([]);
+  const rowRefs = useRef([]);
+
+  useEffect(() => {
+    setShowMore(Array(props.logData.length).fill(false));
+  }, [props.logData]);
+
+  useEffect(() => {
+    const hasClamping = (el) => {
+      const { clientHeight, scrollHeight, textContent } = el;
+      console.log(clientHeight, scrollHeight, textContent);
+      return clientHeight !== scrollHeight;
+    };
+
+    const checkButtonAvailability = () => {
+      const newShowExpansionButton = [];
+      for (let i = 0; i < rowRefs.current.length; i++) {
+        if (rowRefs.current[i]) {
+          // Save current state to reapply later if necessary.
+          const hadTextOverflowClass = rowRefs.current[i].classList.contains("text-overflow");
+          // Make sure that CSS clamping is applied if applicable.
+          if (!hadTextOverflowClass) rowRefs.current[i].classList.add("text-overflow");
+          // Check for clamping and show or hide button accordingly.
+          newShowExpansionButton.push(hasClamping(rowRefs.current[i]));
+          // Sync clamping with local state.
+          if (!hadTextOverflowClass) rowRefs.current[i].classList.remove("text-overflow");
+        }
+      }
+      setShouldShowExpansionButton(newShowExpansionButton);
+    };
+
+    // const debouncedCheck = lodash.debounce(checkButtonAvailability, 50);
+
+    checkButtonAvailability();
+    // window.addEventListener("resize", debouncedCheck);
+
+    // return () => {
+    //   window.removeEventListener("resize", debouncedCheck);
+    // };
+  }, [rowRefs, props.logData]);
 
   const handleEditToggle = (log, index) => {
     setRowData(log);
@@ -1121,19 +1160,19 @@ export default function CombinedLogs(props) {
                       ) : (
                         <div
                           className={
-                            "log-desc " +
-                            (showMore === index ? "show-content" : "")
+                            (showMore[index] ? "show-content" : "text-overflow")
                           }
+                          ref={(element) => rowRefs.current.push(element)}
                         >
                           {log.para_context}
-                          {log.para_context.length > 85 && (
+                          {shouldShowExpansionButton[index] && (
                             <span
                               className="showmore-wrap"
                               onClick={() =>
-                                setModal(showMore === index ? null : index)
+                                setShowMore(showMore.with(index, !showMore[index]))
                               }
                             >
-                              {showMore === index ? (
+                              {showMore[index] ? (
                                 <CollapseButton />
                               ) : (
                                 <ExpandButton />
