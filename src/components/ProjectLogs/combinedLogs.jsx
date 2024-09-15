@@ -30,7 +30,8 @@ export default function CombinedLogs(props) {
     editRow,
     setEditRow,
     rowData,
-    setRowData
+    setRowData,
+    loading,
   } = props;
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
@@ -55,7 +56,9 @@ export default function CombinedLogs(props) {
   });
 
   const [showMore, setShowMore] = useState([]);
-  const [shouldShowExpansionButton, setShouldShowExpansionButton] = useState([]);
+  const [shouldShowExpansionButton, setShouldShowExpansionButton] = useState(
+    []
+  );
   const rowRefs = useRef([]);
 
   useEffect(() => {
@@ -65,7 +68,7 @@ export default function CombinedLogs(props) {
   useEffect(() => {
     const hasClamping = (el) => {
       const { clientHeight, scrollHeight, textContent } = el;
-      console.log(clientHeight, scrollHeight, textContent);
+      // console.log(clientHeight, scrollHeight, textContent);
       return clientHeight !== scrollHeight;
     };
 
@@ -74,13 +77,16 @@ export default function CombinedLogs(props) {
       for (let i = 0; i < rowRefs.current.length; i++) {
         if (rowRefs.current[i]) {
           // Save current state to reapply later if necessary.
-          const hadTextOverflowClass = rowRefs.current[i].classList.contains("text-overflow");
+          const hadTextOverflowClass =
+            rowRefs.current[i].classList.contains("text-overflow");
           // Make sure that CSS clamping is applied if applicable.
-          if (!hadTextOverflowClass) rowRefs.current[i].classList.add("text-overflow");
+          if (!hadTextOverflowClass)
+            rowRefs.current[i].classList.add("text-overflow");
           // Check for clamping and show or hide button accordingly.
           newShowExpansionButton.push(hasClamping(rowRefs.current[i]));
           // Sync clamping with local state.
-          if (!hadTextOverflowClass) rowRefs.current[i].classList.remove("text-overflow");
+          if (!hadTextOverflowClass)
+            rowRefs.current[i].classList.remove("text-overflow");
         }
       }
       setShouldShowExpansionButton(newShowExpansionButton);
@@ -112,7 +118,13 @@ export default function CombinedLogs(props) {
         type: true,
         item_desc: true,
       });
-      if (rowData.spec_section === "" || rowData.para_no === "" || rowData.para_context === "" || rowData.type === "" || rowData.item_desc === "") {
+      if (
+        rowData.spec_section === "" ||
+        rowData.para_no === "" ||
+        rowData.para_context === "" ||
+        rowData.type === "" ||
+        rowData.item_desc === ""
+      ) {
         setFormValid({
           ...formValid,
           spec_section: rowData.spec_section === "" ? false : true,
@@ -120,8 +132,8 @@ export default function CombinedLogs(props) {
           para_context: rowData.para_context === "" ? false : true,
           type: rowData.type === "" ? false : true,
           item_desc: rowData.item_desc === "" ? false : true,
-        })
-        return
+        });
+        return;
       }
 
       setEditRow("");
@@ -186,7 +198,7 @@ export default function CombinedLogs(props) {
         index: "",
         docId: null,
         additionalTextLocations: [],
-      })
+      });
     } catch (error) {
       console.log(error.message);
       // toast.error(error?.response?.data?.message || error?.message, {
@@ -212,7 +224,7 @@ export default function CombinedLogs(props) {
       Object.keys(filterValues).forEach((key) =>
         filterValues[key].length
           ? (a = { ...a, [key]: filterValues[key] })
-          : null,
+          : null
       );
     }
     try {
@@ -240,7 +252,7 @@ export default function CombinedLogs(props) {
       });
       localStorage.setItem(
         "filteredIds",
-        response.data?.message?.map((item) => item?.id),
+        response.data?.message?.map((item) => item?.id)
       );
       props.setLogData(response.data.message);
       props.setLogIdList(response.data.log_id_list);
@@ -255,7 +267,33 @@ export default function CombinedLogs(props) {
     }
   };
 
-  const handleViewPdf = (pdfUrl, textLocation, rowIndex, id, additionalTextLocations) => {
+  const handlePdf = (index, log) => {
+    if (loading) return;
+    
+    const pdfIndex = props.pdfData?.index; 
+    if (editRow !== index && pdfIndex !== index)  {
+      handleViewPdf(
+        log.doc_link,
+        log.text_loc,
+        index,
+        log.doc_id,
+        log.additional_text_locations
+      );
+      props.setLogInViewer({...log});
+    }
+  };
+
+  const handleIgnorePdfView = (e)=>{
+    e.stopPropagation();
+  }
+
+  const handleViewPdf = (
+    pdfUrl,
+    textLocation,
+    rowIndex,
+    id,
+    additionalTextLocations
+  ) => {
     props.setPdfData({
       ...props.pdfData,
       url: pdfUrl,
@@ -289,14 +327,14 @@ export default function CombinedLogs(props) {
         ?.map((log) => log.para_no)
         .filter((paraNo) =>
           paraNo.includes(
-            dashIndex !== -1 ? log.para_no.slice(0, dashIndex) : log.para_no,
-          ),
+            dashIndex !== -1 ? log.para_no.slice(0, dashIndex) : log.para_no
+          )
         );
       //Now we are making an array containing the ascii character values of elements after '-' in paraNos
       const charArray = paraNos.map((paraNo) =>
         paraNo.search("-") !== -1
           ? paraNo.codePointAt(paraNo.search("-") + 1)
-          : 96,
+          : 96
       );
       const logObj = {
         ...log,
@@ -308,7 +346,7 @@ export default function CombinedLogs(props) {
             ? log.para_no.slice(0, dashIndex + 1) +
               String.fromCharCode(Math.max(...charArray) + 1)
             : `${log.para_no}-${String.fromCharCode(
-                Math.max(...charArray) + 1,
+                Math.max(...charArray) + 1
               )}`,
         // customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
       };
@@ -347,7 +385,7 @@ export default function CombinedLogs(props) {
     5: 0,
     6: 0,
     7: 0,
-  })
+  });
 
   const minWidths = {
     1: 155,
@@ -357,56 +395,80 @@ export default function CombinedLogs(props) {
     5: 190,
     6: 190,
     7: 520,
-  }
+  };
   useEffect(() => {
     if (parentRef.current !== null) {
       setTableWidths({
-        1: Math.max(Math.round(parentRef.current.offsetWidth * 0.074), minWidths[1]),
-        2: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[2]),
-        3: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[3]),
-        4: Math.max(Math.round(parentRef.current.offsetWidth * 0.045), minWidths[4]),
-        5: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[5]),
-        6: Math.max(Math.round(parentRef.current.offsetWidth * 0.1), minWidths[6]),
-        7: parentRef.current.offsetWidth - 953
-      })
+        1: Math.max(
+          Math.round(parentRef.current.offsetWidth * 0.074),
+          minWidths[1]
+        ),
+        2: Math.max(
+          Math.round(parentRef.current.offsetWidth * 0.045),
+          minWidths[2]
+        ),
+        3: Math.max(
+          Math.round(parentRef.current.offsetWidth * 0.045),
+          minWidths[3]
+        ),
+        4: Math.max(
+          Math.round(parentRef.current.offsetWidth * 0.045),
+          minWidths[4]
+        ),
+        5: Math.max(
+          Math.round(parentRef.current.offsetWidth * 0.1),
+          minWidths[5]
+        ),
+        6: Math.max(
+          Math.round(parentRef.current.offsetWidth * 0.1),
+          minWidths[6]
+        ),
+        7: parentRef.current.offsetWidth - 953,
+      });
     }
-  }, [parentRef.current])
+  }, [parentRef.current]);
 
   const handleMouseDown = (e, colIndex) => {
     const startX = e.clientX;
-    const startWidth = tableRef.current.querySelectorAll('th')[colIndex].offsetWidth;
-    
+    const startWidth =
+      tableRef.current.querySelectorAll("th")[colIndex].offsetWidth;
+
     const handleMouseMove = (e) => {
-      const newWidth = Math.max(startWidth + (e.clientX - startX), minWidths[colIndex]);
-      tableRef.current.querySelectorAll('th')[colIndex].style.width = `${newWidth}px`;
+      const newWidth = Math.max(
+        startWidth + (e.clientX - startX),
+        minWidths[colIndex]
+      );
+      tableRef.current.querySelectorAll("th")[
+        colIndex
+      ].style.width = `${newWidth}px`;
     };
 
     const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
   const formatSpecSection = (specSection) => {
-    if (typeof specSection !== 'string') return specSection;
-    return specSection.slice(0, 2) + ' ' + specSection.slice(2);
-  }
+    if (typeof specSection !== "string") return specSection;
+    return specSection.slice(0, 2) + " " + specSection.slice(2);
+  };
 
   return (
     <div
       className="l-table-wrapper"
       style={{
-        maxHeight: "calc(100vh - 270px)"
+        maxHeight: "calc(100vh - 270px)",
       }}
       ref={parentRef}
     >
       <table className="table logs-table" ref={tableRef}>
         <thead>
           <tr>
-            <th className="ticket-checkbox small-font" >
+            <th className="ticket-checkbox small-font">
               <div className="form-group">
                 <div className="custom-control custom-checkbox">
                   <input
@@ -425,14 +487,22 @@ export default function CombinedLogs(props) {
               </div>
             </th>
 
-            <th className="text-center small-font" style={{width: `${tableWidths[1]}px`}}>
+            <th
+              className="text-center small-font"
+              style={{ width: `${tableWidths[1]}px` }}
+            >
               <div className="d-flex">
                 <span className="w-100">Actions</span>
-                <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 1) }>|</div>
+                <div
+                  className="resizer"
+                  onMouseDown={(e) => handleMouseDown(e, 1)}
+                >
+                  |
+                </div>
               </div>
             </th>
 
-            <th className="small-font" style={{width: `${tableWidths[2]}px`}}>
+            <th className="small-font" style={{ width: `${tableWidths[2]}px` }}>
               <span className="has-sorting">
                 <div className="d-flex">
                   Spec Section{" "}
@@ -449,17 +519,34 @@ export default function CombinedLogs(props) {
                       setFilterColumn("spec_section");
                     }}
                   >
-                    <FilterIcon isActive={filterValues.spec_section.length > 0 ? true : false}/>
+                    <FilterIcon
+                      isActive={
+                        filterValues.spec_section.length > 0 ? true : false
+                      }
+                    />
                   </span>
-                  <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 2) }>|</div>
+                  <div
+                    className="resizer"
+                    onMouseDown={(e) => handleMouseDown(e, 2)}
+                  >
+                    |
+                  </div>
                 </div>
               </span>
             </th>
             {props.projectType !== "ufgs" && (
-              <th className="para-no small-font" style={{width: `${tableWidths[3]}px`}}>
+              <th
+                className="para-no small-font"
+                style={{ width: `${tableWidths[3]}px` }}
+              >
                 <div className="d-flex">
                   <span>Section Title</span>
-                  <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 3) }>|</div>
+                  <div
+                    className="resizer"
+                    onMouseDown={(e) => handleMouseDown(e, 3)}
+                  >
+                    |
+                  </div>
                 </div>
               </th>
             )}
@@ -500,15 +587,26 @@ export default function CombinedLogs(props) {
               </>
             )}
             {props.projectType !== "ufgs" && (
-              <th className="para-no small-font" style={{width: `${tableWidths[4]}px`}}>
+              <th
+                className="para-no small-font"
+                style={{ width: `${tableWidths[4]}px` }}
+              >
                 <div className="d-flex">
                   <span>Paragraph</span>
-                  <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 4) }>|</div>
+                  <div
+                    className="resizer"
+                    onMouseDown={(e) => handleMouseDown(e, 4)}
+                  >
+                    |
+                  </div>
                 </div>
               </th>
             )}
             {props.projectType !== "ufgs" && (
-              <th className="small-font" style={{width: `${tableWidths[5]}px`}}>
+              <th
+                className="small-font"
+                style={{ width: `${tableWidths[5]}px` }}
+              >
                 <span className="has-sorting">
                   <div className="d-flex">
                     Submittal Heading{" "}
@@ -525,9 +623,16 @@ export default function CombinedLogs(props) {
                         setFilterColumn("type");
                       }}
                     >
-                      <FilterIcon isActive={filterValues.type.length > 0 ? true : false}/>
+                      <FilterIcon
+                        isActive={filterValues.type.length > 0 ? true : false}
+                      />
                     </span>
-                    <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 5) }>|</div>
+                    <div
+                      className="resizer"
+                      onMouseDown={(e) => handleMouseDown(e, 5)}
+                    >
+                      |
+                    </div>
                   </div>
                 </span>
               </th>
@@ -550,7 +655,13 @@ export default function CombinedLogs(props) {
                         setFilterColumn("owner_contractor");
                       }}
                     >
-                      <FilterIcon isActive={filterValues.owner_contractor.length > 0 ? true : false}/>
+                      <FilterIcon
+                        isActive={
+                          filterValues.owner_contractor.length > 0
+                            ? true
+                            : false
+                        }
+                      />
                     </span>
                   </div>
                 </span>
@@ -574,13 +685,17 @@ export default function CombinedLogs(props) {
                         setFilterColumn("sd_title");
                       }}
                     >
-                      <FilterIcon isActive={filterValues.sd_title.length > 0 ? true : false}/>
+                      <FilterIcon
+                        isActive={
+                          filterValues.sd_title.length > 0 ? true : false
+                        }
+                      />
                     </span>
                   </div>
                 </span>
               </th>
             )}
-            <th className="small-font"  style={{width: `${tableWidths[6]}px`}}>
+            <th className="small-font" style={{ width: `${tableWidths[6]}px` }}>
               <span className="has-sorting">
                 <div className="d-flex">
                   Submittal Type
@@ -597,9 +712,18 @@ export default function CombinedLogs(props) {
                       setFilterColumn("item_desc");
                     }}
                   >
-                    <FilterIcon isActive={filterValues.item_desc.length > 0 ? true : false}/>
+                    <FilterIcon
+                      isActive={
+                        filterValues.item_desc.length > 0 ? true : false
+                      }
+                    />
                   </span>
-                  <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 6) }>|</div>
+                  <div
+                    className="resizer"
+                    onMouseDown={(e) => handleMouseDown(e, 6)}
+                  >
+                    |
+                  </div>
                 </div>
               </span>
             </th>
@@ -628,7 +752,11 @@ export default function CombinedLogs(props) {
                         setFilterColumn("classification");
                       }}
                     >
-                      <FilterIcon isActive={filterValues.classification.length > 0 ? true : false}/>
+                      <FilterIcon
+                        isActive={
+                          filterValues.classification.length > 0 ? true : false
+                        }
+                      />
                     </span>
                   </div>
                 </span>
@@ -641,7 +769,10 @@ export default function CombinedLogs(props) {
                   Grouping <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
                 </span>
               </th> */}
-                <th className="log-description small-font" style={{width: `${tableWidths[7]}px`}}>
+                <th
+                  className="log-description small-font"
+                  style={{ width: `${tableWidths[7]}px` }}
+                >
                   <span className="has-sorting">
                     <div className="d-flex">
                       Submittal Description{" "}
@@ -651,7 +782,12 @@ export default function CombinedLogs(props) {
                       >
                         <SortIcon />
                       </span>
-                      <div className="resizer" onMouseDown={(e) => handleMouseDown(e, 7) }>|</div>
+                      <div
+                        className="resizer"
+                        onMouseDown={(e) => handleMouseDown(e, 7)}
+                      >
+                        |
+                      </div>
                     </div>
                   </span>
                 </th>
@@ -681,19 +817,24 @@ export default function CombinedLogs(props) {
         <tbody style={{ fontSize: "12px" }}>
           {logData.map((log, index) => {
             let pdfIndex = props.pdfData?.index;
-            const showPdf = !(pdfIndex && pdfIndex !== index) && pdfIndex !== 0;
+            // const showPdf = !(pdfIndex && pdfIndex !== index) && pdfIndex !== 0;
             return (
               <tr
                 className={
                   log.user_id !== 1 || index % 2 !== 0 ? "highlight-row" : ""
                 }
-                style={{ lineHeight: 1.2, backgroundColor: pdfIndex === index ? '#f8f8fa' : 'white' }}
+                style={{
+                  lineHeight: 1.2,
+                  backgroundColor: pdfIndex === index ? "#f8f8fa" : "white",
+                }}
                 key={index}
+                onClick={() => { handlePdf(index, log); }}
               >
                 <td
                   className={`${
                     editRow === index ? "activeTh" : ""
                   } ticket-checkbox reduce-height`}
+                  onClick={handleIgnorePdfView}
                 >
                   <div className="form-group">
                     <div className="custom-control custom-checkbox">
@@ -702,7 +843,11 @@ export default function CombinedLogs(props) {
                         className="custom-control-input"
                         name={`ticketRow-${index}`}
                         id={`ticketRow-${index}`}
-                        checked={!!props.selected ? props.selected?.includes(log.id) : false}
+                        checked={
+                          !!props.selected
+                            ? props.selected?.includes(log.id)
+                            : false
+                        }
                         onChange={() => props?.handleSelect(log.id)}
                       />
                       <label
@@ -717,6 +862,7 @@ export default function CombinedLogs(props) {
                   className={`${
                     editRow === index ? "activeTh" : ""
                   } reduce-height actions-td`}
+                  onClick={handleIgnorePdfView}
                 >
                   <div className="action-items">
                     {
@@ -724,9 +870,7 @@ export default function CombinedLogs(props) {
                         {editRow === index ? (
                           <>
                             <div
-                              onClick={() =>
-                                handleUpdateLog()
-                              }
+                              onClick={() => handleUpdateLog()}
                               style={{ marginRight: "5px", cursor: "pointer" }}
                             >
                               <svg
@@ -776,14 +920,17 @@ export default function CombinedLogs(props) {
                                 setNewRowIndex(null);
                                 newRowIndex === index &&
                                   props.setLogData(
-                                    deleteElement(props.logData, index),
+                                    deleteElement(props.logData, index)
                                   );
                                 newRowIndex === index + 1 &&
                                   props.setLogData(
-                                    deleteElement(props.logData, index),
+                                    deleteElement(props.logData, index)
                                   );
                                 newRowIndex === index + 1 &&
-                                  props.setPdfData({...props.pdfData, index: props.pdfData?.index - 1})
+                                  props.setPdfData({
+                                    ...props.pdfData,
+                                    index: props.pdfData?.index - 1,
+                                  });
                               }}
                             >
                               <svg
@@ -835,7 +982,7 @@ export default function CombinedLogs(props) {
                                       ? editRowTooltip === index + 1
                                         ? null
                                         : index + 1
-                                      : index + 1,
+                                      : index + 1
                                   )
                                 }
                               >
@@ -851,7 +998,7 @@ export default function CombinedLogs(props) {
                         target="_blank" >
                         Pdf
                       </Link> */}
-                        {pdfIndex === index ? (
+                        {/*pdfIndex === index ? (
                           <button
                             type="button"
                             className="btn btn-secondary close-button"
@@ -921,8 +1068,8 @@ export default function CombinedLogs(props) {
                               </span>
                             </>
                           )
-                        )}
-                        {(props.listId === null) && (
+                        )*/}
+                        {props.listId === null && (
                           <>
                             <AddButton
                               onClick={() => {
@@ -945,7 +1092,7 @@ export default function CombinedLogs(props) {
                                       ? addRowTooltip === index + 1
                                         ? null
                                         : index + 1
-                                      : index + 1,
+                                      : index + 1
                                   )
                                 }
                               >
@@ -954,7 +1101,11 @@ export default function CombinedLogs(props) {
                             </span>
                           </>
                         )}
-                        {log.parsing_method === 'AI_SUBMITTAL' ? <Sparkles /> : ''}
+                        {log.parsing_method === "AI_SUBMITTAL" ? (
+                          <Sparkles />
+                        ) : (
+                          ""
+                        )}
                       </>
                     }
                   </div>
@@ -964,11 +1115,14 @@ export default function CombinedLogs(props) {
                   className={`${
                     editRow === index ? "activeTh" : ""
                   } reduce-height`}
+                 
                 >
                   {editRow === index ? (
                     <input
                       placeholder="Enter"
-                      className={`form-control ${formValid.spec_section ? '' : 'form-required'}`}
+                      className={`form-control ${
+                        formValid.spec_section ? "" : "form-required"
+                      }`}
                       type="text"
                       value={rowData.spec_section}
                       // style={{ border: 'none' }}
@@ -982,10 +1136,8 @@ export default function CombinedLogs(props) {
                   {/* {log.spec_section} */}
                 </td>
                 {props.projectType !== "ufgs" && (
-                  <td
-                    className="reduce-height"
-                  >
-                    {log.section_title}
+                  <td className="reduce-height">
+                    {log.section_title} <br /> {log.id}
                   </td>
                 )}
                 {props.projectType === "ufgs" && (
@@ -1015,7 +1167,9 @@ export default function CombinedLogs(props) {
                     {editRow === index ? (
                       <input
                         placeholder="Enter"
-                        className={`form-control ${formValid.para_no ? '' : 'form-required'}`}
+                        className={`form-control ${
+                          formValid.para_no ? "" : "form-required"
+                        }`}
                         type="text"
                         value={rowData.para_no}
                         // style={{ border: 'none' }}
@@ -1037,7 +1191,9 @@ export default function CombinedLogs(props) {
                     {editRow === index ? (
                       <input
                         placeholder="Enter"
-                        className={`form-control ${formValid.type ? '' : 'form-required'}`}
+                        className={`form-control ${
+                          formValid.type ? "" : "form-required"
+                        }`}
                         type="text"
                         value={rowData.type}
                         // style={{ border: 'none' }}
@@ -1061,7 +1217,9 @@ export default function CombinedLogs(props) {
                   {editRow === index ? (
                     <input
                       placeholder="Enter"
-                      className={`form-control ${formValid.item_desc ? '' : 'form-required'}`}
+                      className={`form-control ${
+                        formValid.item_desc ? "" : "form-required"
+                      }`}
                       type="text"
                       value={rowData.item_desc}
                       // style={{ border: 'none' }}
@@ -1132,7 +1290,9 @@ export default function CombinedLogs(props) {
                       {editRow === index && JSON.parse(log.full_edit) ? (
                         <input
                           placeholder="Enter"
-                          className={`form-control ${formValid.para_context ? '' : 'form-required'}`}
+                          className={`form-control ${
+                            formValid.para_context ? "" : "form-required"
+                          }`}
                           type="text"
                           value={rowData.para_context}
                           // style={{ border: 'none' }}
@@ -1146,7 +1306,9 @@ export default function CombinedLogs(props) {
                       ) : editRow === index ? (
                         <input
                           placeholder="Enter"
-                          className={`form-control ${formValid.para_context ? '' : 'form-required'}`}
+                          className={`form-control ${
+                            formValid.para_context ? "" : "form-required"
+                          }`}
                           type="text"
                           value={rowData.para_context}
                           // style={{ border: 'none' }}
@@ -1170,7 +1332,9 @@ export default function CombinedLogs(props) {
                             <span
                               className="showmore-wrap"
                               onClick={() =>
-                                setShowMore(showMore.with(index, !showMore[index]))
+                                setShowMore(
+                                  showMore.with(index, !showMore[index])
+                                )
                               }
                             >
                               {showMore[index] ? (
@@ -1268,7 +1432,6 @@ export default function CombinedLogs(props) {
                     log.comments
                   )}
                 </td> */}
-                
               </tr>
             );
           })}
