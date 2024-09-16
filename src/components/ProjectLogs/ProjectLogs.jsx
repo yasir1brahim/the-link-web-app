@@ -986,9 +986,6 @@ const ProjectLogs = () => {
     link.click();
   };
 
-  const handleCombineRowsToggle = () => {
-    console.log(selected);
-  };
   return (
     <div className="page-wrap">
       <NavbarTop
@@ -1109,44 +1106,6 @@ const ProjectLogs = () => {
                                 />
                               </svg>
                               <span>Save Selection</span>
-                            </button>
-                            <button
-                              type="button"
-                              className="table-top-btn btn-disabled selection-btn ml-2"
-                              onClick={handleCombineRowsToggle}
-                              disabled={selected?.length === 0}
-                            >
-                              <svg
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 26"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M12 2L16 6L12 10L8 6L12 2Z"
-                                  fill="currentColor"
-                                />
-                                <path
-                                  d="M4 12H20"
-                                  stroke="currentColor"
-                                  stroke-width="2"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                />
-                                <path
-                                  d="M4 16H20"
-                                  stroke="currentColor"
-                                  stroke-width="2"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                />
-                                <path
-                                  d="M12 18L16 22L12 26L8 22L12 18Z"
-                                  fill="currentColor"
-                                />
-                              </svg>
-                              <span>Combine Rows</span>
                             </button>
                           </div>
                         )
