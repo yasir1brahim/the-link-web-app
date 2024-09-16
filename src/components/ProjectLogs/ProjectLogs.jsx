@@ -23,16 +23,19 @@ import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
 import { getSavedLogs } from "../../api/ProjectLogs/api";
-import DocumentStatus from './documentStatus';
+import DocumentStatus from "./documentStatus";
 import ProjectLogsHeader from "../shared/Header/ProjectLogsHeader";
 import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
   const [showDocumentStatusModal, setShowDocumentStatusModal] = useState(false);
-  const toggleDocumentStatusModal = () => setShowDocumentStatusModal(!showDocumentStatusModal);
+  const toggleDocumentStatusModal = () =>
+    setShowDocumentStatusModal(!showDocumentStatusModal);
   const toggleModal = () => setModal(!modal);
   const [pdfFile, setPdfFile] = useState({});
   const [logInViewer, setLogInViewer] = useState(null);
@@ -50,7 +53,12 @@ const ProjectLogs = () => {
   const { state } = useLocation();
   const [logData, setLogData] = useState([]);
   const [filteredLogData, setFilteredLogData] = useState([]);
-  const [selected, setSelected] = useState(localStorage?.getItem("selectedRows") === "" || localStorage?.getItem("selectedRows") === null ? [] : JSON.parse(localStorage?.getItem("selectedRows")));
+  const [selected, setSelected] = useState(
+    localStorage?.getItem("selectedRows") === "" ||
+      localStorage?.getItem("selectedRows") === null
+      ? []
+      : JSON.parse(localStorage?.getItem("selectedRows"))
+  );
   const [pageRefresh, setPageRefresh] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   // const [currentItems, setCurrentItems] = useState([]);
@@ -92,9 +100,12 @@ const ProjectLogs = () => {
   const [procoreModal, setProcoreModal] = useState(false);
   const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [manageProcoreModal, setManageProcoreModal] = useState(false);
-  const toggleManageProcoreModal = () => setManageProcoreModal(!manageProcoreModal);
-  const [changeProcoreAccountModal, setChangeProcoreAccountModal] = useState(false);
-  const toggleChangeProcoreAccountModal = () => setChangeProcoreAccountModal(!changeProcoreAccountModal);
+  const toggleManageProcoreModal = () =>
+    setManageProcoreModal(!manageProcoreModal);
+  const [changeProcoreAccountModal, setChangeProcoreAccountModal] =
+    useState(false);
+  const toggleChangeProcoreAccountModal = () =>
+    setChangeProcoreAccountModal(!changeProcoreAccountModal);
   const [initLoading, setInitLoading] = useState(false);
   const [loadingProjectDetails, setLoadingProjectDetails] = useState(false);
   const [companyList, setCompanyList] = useState([]);
@@ -112,25 +123,38 @@ const ProjectLogs = () => {
     projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
   // const projectName = searchParams.get('projectName');
   const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
-  const projectName = projectDetails?.length >= 4 ? projectDetails[3].replace(/_space/g, ' ') : null;
+  const projectName =
+    projectDetails?.length >= 4
+      ? projectDetails[3].replace(/_space/g, " ")
+      : null;
   const authCode = searchParams.get("code");
-  const procoreClientId = window.location.href.includes("https://app.thelink.ai")
+  const procoreClientId = window.location.href.includes(
+    "https://app.thelink.ai"
+  )
     ? "974cb8bfa7aaadc4759a6d60a2d8427387d32db0c4fa4dfbe1da15b5ce3abfc5"
     : "ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9";
-  const procoreAuthBaseUrl = window.location.href.includes("https://app.thelink.ai")
+  const procoreAuthBaseUrl = window.location.href.includes(
+    "https://app.thelink.ai"
+  )
     ? "https://login.procore.com"
     : "https://login-sandbox.procore.com";
   const procoreBaseUrl = window.location.href.includes("https://app.thelink.ai")
     ? "https://procore.com"
     : "https://sandbox.procore.com";
-  const procoreAuthUrl = `${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName.replace(/ /g, '_space')}`;
+  const procoreAuthUrl = `${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName.replace(
+    / /g,
+    "_space"
+  )}`;
   const procoreAccessToken = localStorage.getItem("procore_access_token");
+  const [loadingView, setLoadingView] = useState(false);
   const [procoreAuthUserInfo, setProcoreAuthUserInfo] = useState(null);
-  const [procoreCompanyName, setProcoreCompanyName] = useState('')
-  const [procoreProjectName, setProcoreProjectName] = useState('')
-  const [procoreProjectId, setProcoreProjectId] = useState(null)
-  const [procoreSubmittalManagerId, setProcoreSubmittalManagerId] = useState(null);
-  const [procoreSubmittalManagerName, setProcoreSubmittalManagerName] = useState('');
+  const [procoreCompanyName, setProcoreCompanyName] = useState("");
+  const [procoreProjectName, setProcoreProjectName] = useState("");
+  const [procoreProjectId, setProcoreProjectId] = useState(null);
+  const [procoreSubmittalManagerId, setProcoreSubmittalManagerId] =
+    useState(null);
+  const [procoreSubmittalManagerName, setProcoreSubmittalManagerName] =
+    useState("");
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [totalCount, setTotalCount] = useState(0);
@@ -139,10 +163,10 @@ const ProjectLogs = () => {
     item_desc: [],
     classification: [],
     sd_title: [],
-    type: []
-  }
+    type: [],
+  };
   const [filterValues, setFilterValues] = useState(initFilter);
-  const [showClearFilters, setShowClearFilters] = useState(false)
+  const [showClearFilters, setShowClearFilters] = useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(50);
   const [page, setPage] = React.useState(1);
 
@@ -163,28 +187,26 @@ const ProjectLogs = () => {
         method: "get",
         url: "/procore/refresh_token",
         params: {
-          user_id: localStorage.getItem("userId")
-        }
+          user_id: localStorage.getItem("userId"),
+        },
       });
       if (accessTokenData?.status === 200) {
         localStorage.setItem(
           "procore_access_token",
-          accessTokenData?.data.data.access_token,
+          accessTokenData?.data.data.access_token
         );
       }
     } catch (error) {
-      console.log(error)
-      localStorage.setItem(
-        "procore_access_token", null,
-      );
+      console.log(error);
+      localStorage.setItem("procore_access_token", null);
     }
-  }
+  };
 
-  const getProcoreAuthUser = async() => {
-    if (procoreAccessToken !== 'null') {
+  const getProcoreAuthUser = async () => {
+    if (procoreAccessToken !== "null") {
       const resp = await axiosInstance({
         method: "get",
-        url: "/procore/me"
+        url: "/procore/me",
       });
       if (resp?.status === 200) {
         setProcoreAuthUserInfo(resp?.data.data);
@@ -192,8 +214,7 @@ const ProjectLogs = () => {
         setProcoreAuthUserInfo(null);
       }
     }
-    
-  }
+  };
 
   useEffect(() => {
     const initLoading = async () => {
@@ -202,26 +223,29 @@ const ProjectLogs = () => {
       await getProcoreAuthUser();
       await checkProjectMapping();
       setInitLoading(false);
-    }
+    };
     if (customerId.toString() !== localStorage.getItem("userId")) {
       if (localStorage.getItem("roleId") > 1) {
         setIsAssociatedUser(false);
-        history({ pathname: localStorage.getItem('roleId') === '0'
-        ? '/admin-landing'
-        : '/project-list' })
+        history({
+          pathname:
+            localStorage.getItem("roleId") === "0"
+              ? "/admin-landing"
+              : "/project-list",
+        });
         toast.warn("You are not authorized to view this project.", {
-            position: "bottom-center",
-            autoClose: 5000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
         });
       }
       initLoading();
     }
-  }, [])
+  }, []);
 
   // get the number of documents uploaded
   useEffect(() => {
@@ -244,21 +268,23 @@ const ProjectLogs = () => {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if(documentIsProcessing(documentData)){
+      if (documentIsProcessing(documentData)) {
         axiosInstance({
           method: "get",
           url: `/project_data/${projectId || state.project?.project_id}`,
-        }).then(response => {
-          setDocumentData(response.data.document_details)
-          if (!documentIsProcessing(response.data.document_details)){
-            fetchLogData(0, rowsPerPage);
-          }
-        }).catch(error => {
-          handleError(error);
-        });
+        })
+          .then((response) => {
+            setDocumentData(response.data.document_details);
+            if (!documentIsProcessing(response.data.document_details)) {
+              fetchLogData(0, rowsPerPage);
+            }
+          })
+          .catch((error) => {
+            handleError(error);
+          });
       }
     }, 10000); // 10000 milliseconds = 10 seconds
-  
+
     return () => clearInterval(intervalId); // This will clear the interval when the component unmounts
   }, [projectId, state, documentData]); // Dependencies array, re-run the effect if these values change
 
@@ -312,9 +338,9 @@ const ProjectLogs = () => {
             ...logData.slice(newRowIndex + 1),
           ]),
         setNewRowIndex(null),
-        200,
+        200
       ),
-    [setSearchValue, logData, newRowIndex],
+    [setSearchValue, logData, newRowIndex]
   );
 
   const handleSelect = (id) => {
@@ -327,7 +353,8 @@ const ProjectLogs = () => {
   };
 
   const selectedRows =
-    localStorage?.getItem("selectedRows") === "" || localStorage?.getItem("selectedRows") === null 
+    localStorage?.getItem("selectedRows") === "" ||
+    localStorage?.getItem("selectedRows") === null
       ? "All"
       : localStorage?.getItem("selectedRows");
   // ?.split(',')
@@ -342,19 +369,22 @@ const ProjectLogs = () => {
           url: "/procore/access_token",
           data: {
             code: authCode,
-            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName.replace(/ /g, '_space')}`,
+            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName.replace(
+              / /g,
+              "_space"
+            )}`,
           },
         });
         localStorage.setItem(
           "procore_access_token",
-          accessTokenData?.data.data.access_token,
+          accessTokenData?.data.data.access_token
         );
 
         const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.delete('code');
+        newSearchParams.delete("code");
         setSearchParams(newSearchParams);
-        if (localStorage.getItem('change_procore_account') === 'true') {
-          localStorage.setItem('change_procore_account', false);
+        if (localStorage.getItem("change_procore_account") === "true") {
+          localStorage.setItem("change_procore_account", false);
           return;
         }
         await checkProjectMappingBeforeExport();
@@ -383,10 +413,10 @@ const ProjectLogs = () => {
 
     if (get(res, "status") === 200) {
       setCompanyId(get(res, "data.data.procore_company_id"));
-      setProcoreCompanyName(get(res, "data.data.procore_company_name"))
+      setProcoreCompanyName(get(res, "data.data.procore_company_name"));
       localStorage.setItem(
         "companyId",
-        get(res, "data.data.procore_company_id"),
+        get(res, "data.data.procore_company_id")
       );
       localStorage.setItem("projectId", projectId);
       localStorage.setItem("logType", logType);
@@ -395,7 +425,9 @@ const ProjectLogs = () => {
       setProcoreProjectName(get(res, "data.data.procore_project_name"));
       setProcoreProjectId(get(res, "data.data.procore_project_id"));
       setProcoreSubmittalManagerId(get(res, "data.data.submittal_manager_id"));
-      setProcoreSubmittalManagerName(get(res, "data.data.procore_submittal_manager_name"));
+      setProcoreSubmittalManagerName(
+        get(res, "data.data.procore_submittal_manager_name")
+      );
       setExportToProcoreModal(true);
     }
     if (get(res, "status") === 204) {
@@ -406,7 +438,7 @@ const ProjectLogs = () => {
       });
       setCompanyList(companyResp?.data.data);
     }
-  }
+  };
 
   const checkProjectMapping = async () => {
     const res = await axiosInstance({
@@ -415,14 +447,14 @@ const ProjectLogs = () => {
     });
 
     if (get(res, "status") === 500) {
-      return
+      return;
     }
     if (get(res, "status") === 200) {
       setCompanyId(get(res, "data.data.procore_company_id"));
-      setProcoreCompanyName(get(res, "data.data.procore_company_name"))
+      setProcoreCompanyName(get(res, "data.data.procore_company_name"));
       localStorage.setItem(
         "companyId",
-        get(res, "data.data.procore_company_id"),
+        get(res, "data.data.procore_company_id")
       );
       localStorage.setItem("projectId", projectId);
       localStorage.setItem("logType", logType);
@@ -431,13 +463,15 @@ const ProjectLogs = () => {
       setProcoreProjectName(get(res, "data.data.procore_project_name"));
       setProcoreProjectId(get(res, "data.data.procore_project_id"));
       setProcoreSubmittalManagerId(get(res, "data.data.submittal_manager_id"));
-      setProcoreSubmittalManagerName(get(res, "data.data.procore_submittal_manager_name"));
+      setProcoreSubmittalManagerName(
+        get(res, "data.data.procore_submittal_manager_name")
+      );
     }
-  }
+  };
 
-  const handleExportToProcoreButtonClick = async() => {
+  const handleExportToProcoreButtonClick = async () => {
     await checkProjectMappingBeforeExport();
-  }
+  };
 
   const handleExportToProcore = async () => {
     try {
@@ -515,8 +549,24 @@ const ProjectLogs = () => {
       }
     }
   };
-  const fetchLogData = async (page, itemsPerPage, search, listId=null, _filters=null) => {
+  const fetchLogData = async (
+    page,
+    itemsPerPage,
+    search,
+    listId = null,
+    _filters = null
+  ) => {
     setLoading(true);
+    setLoadingView(true);
+    setLogInViewer(null);
+    setPdfData({
+      url: "",
+      textLoc: {},
+      index: "",
+      docId: null,
+      additionalTextLocations: [],
+    });
+
     let filters = {};
     if (_filters === null) {
       if (
@@ -527,7 +577,7 @@ const ProjectLogs = () => {
         Object.keys(filterValues).forEach((key) =>
           filterValues[key]?.length
             ? (filters = { ...filters, [key]: filterValues[key] })
-            : null,
+            : null
         );
       }
     }
@@ -543,7 +593,7 @@ const ProjectLogs = () => {
         order: "",
         page_number: page || 0,
         limit: itemsPerPage,
-        list_id: listId
+        list_id: listId,
       },
     });
     // setLogData(response.data.message);
@@ -553,10 +603,11 @@ const ProjectLogs = () => {
     setLogData(submittalLogs);
     localStorage.setItem(
       "filteredIds",
-      submittalLogs?.map((item) => item?.id),
+      submittalLogs?.map((item) => item?.id)
     );
     setLogIdList(response.data.log_id_list);
     setLoading(false);
+    setLoadingView(false);
     setErrorMessage("");
     if (response.data.message?.length === 0) {
       if (search) {
@@ -567,7 +618,9 @@ const ProjectLogs = () => {
         } else if (documentIsProcessing(documentData)) {
           setErrorMessage("Documents are being processed...");
         } else {
-          setErrorMessage("No submittals were detected in the uploaded document(s)");
+          setErrorMessage(
+            "No submittals were detected in the uploaded document(s)"
+          );
         }
       }
     }
@@ -600,7 +653,7 @@ const ProjectLogs = () => {
             value: packageData.id,
             label: packageData.name,
           };
-        }),
+        })
       );
 
       // console.log(response.data.message);
@@ -620,7 +673,12 @@ const ProjectLogs = () => {
     setSelected(isSelectAll ? [] : logIdList);
   };
 
-  const documentIsProcessing = (documents) => documents.some(doc => ['PENDING_PROCESSING', 'PROCESSING', 'SUBSECTIONS_EXTRACTED'].includes(doc.document_status));
+  const documentIsProcessing = (documents) =>
+    documents.some((doc) =>
+      ["PENDING_PROCESSING", "PROCESSING", "SUBSECTIONS_EXTRACTED"].includes(
+        doc.document_status
+      )
+    );
 
   // useEffect(() => {
   //   const retriveSelected = localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
@@ -637,7 +695,11 @@ const ProjectLogs = () => {
     if (selected?.length === 0) {
       localStorage.setItem("selectedRows", "");
     }
-    setIsSelectAll(((selected?.length === logIdList?.length) && (selected?.length > 0)) ? true : false);
+    setIsSelectAll(
+      selected?.length === logIdList?.length && selected?.length > 0
+        ? true
+        : false
+    );
   }, [selected]);
 
   const handleExportExcel = async (recordData, fileName) => {
@@ -651,7 +713,7 @@ const ProjectLogs = () => {
         Object.keys(filterValues).forEach((key) =>
           filterValues[key]?.length
             ? (filters = { ...filters, [key]: filterValues[key] })
-            : null,
+            : null
         );
       }
       const response = await axiosInstance({
@@ -677,7 +739,7 @@ const ProjectLogs = () => {
         blob,
         `${
           state?.project.project_name || `Project`
-        }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`,
+        }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`
       );
     } catch (error) {
       handleError(error);
@@ -691,6 +753,28 @@ const ProjectLogs = () => {
     }
     return error;
   };
+
+  const handleUpDownView = (direction) => {
+    if (!pdfData || loadingView) return;
+
+    if (
+      (direction > 0 && pdfData.index < filteredLogData.length - 1) ||
+      (direction < 0 && pdfData.index > 0)
+    ) {
+      const pIndex = pdfData.index + direction;
+      const data = filteredLogData[pIndex];
+      
+      setPdfData({
+        ...pdfData,
+        url: data.doc_link,
+        textLoc: data.text_loc,
+        index: pIndex,
+        docId: data.doc_id,
+        additionalTextLocations: data.additional_text_locations,
+      });
+    }
+  };
+
   const handleListSubmit = async (e) => {
     e.preventDefault();
     let errors = validate();
@@ -740,27 +824,27 @@ const ProjectLogs = () => {
 
     setListId(listId);
     setSearchValue("");
-    
+
     setToggleViewSavedList(false);
   };
 
   const handleEnterKeyPress = (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === "Enter") {
       heandleSearchClick();
     }
-  }
+  };
 
   const handleClearSearch = () => {
     setSearchValue("");
 
     fetchLogData(0, rowsPerPage, "", listId);
-  }
+  };
 
-  const handleClearSelection = async() => {
+  const handleClearSelection = async () => {
     await fetchLogData(0, rowsPerPage, searchValue, null);
     setListId(null);
     setSelected([]);
-  }
+  };
 
   const insertElement = (arr, index, newItem) => [
     // part of the array before the specified index
@@ -785,14 +869,16 @@ const ProjectLogs = () => {
         ?.map((log) => log.para_no)
         .filter((paraNo) =>
           paraNo.includes(
-            dashIndex !== -1 ? logInViewer.para_no.slice(0, dashIndex) : logInViewer.para_no,
-          ),
+            dashIndex !== -1
+              ? logInViewer.para_no.slice(0, dashIndex)
+              : logInViewer.para_no
+          )
         );
       //Now we are making an array containing the ascii character values of elements after '-' in paraNos
       const charArray = paraNos.map((paraNo) =>
         paraNo.search("-") !== -1
           ? paraNo.codePointAt(paraNo.search("-") + 1)
-          : 96,
+          : 96
       );
       const logObj = {
         ...logInViewer,
@@ -801,9 +887,9 @@ const ProjectLogs = () => {
             ? logInViewer.para_no.slice(0, dashIndex + 1) +
               String.fromCharCode(Math.max(...charArray) + 1)
             : `${logInViewer.para_no}-${String.fromCharCode(
-                Math.max(...charArray) + 1,
+                Math.max(...charArray) + 1
               )}`,
-        para_context: content
+        para_context: content,
       };
       const result = insertElement(logData, index + 1, logObj);
       // setLogData(result)
@@ -816,54 +902,59 @@ const ProjectLogs = () => {
         docElement[0].scrollTo(890, 0);
       }
     } catch (error) {
-      console.log('error', error)
+      console.log("error", error);
     }
-  }
+  };
 
   const handleAppendToSelectedRow = async (content) => {
     try {
       let index = logData?.findIndex((item) => item === logInViewer);
       const logObj = {
         ...logInViewer,
-        para_context: `${logInViewer.para_context} \n\n${content}`
+        para_context: `${logInViewer.para_context} \n\n${content}`,
       };
       handleEditToggle(logObj, index);
     } catch (error) {
-      console.log('error', error)
+      console.log("error", error);
     }
-  }
+  };
 
   useEffect(() => {
     Object.keys(filterValues).forEach((key) =>
-      filterValues[key]?.length
-        ? setShowClearFilters(true)
-        : null
+      filterValues[key]?.length ? setShowClearFilters(true) : null
     );
-  }, [filterValues])
+  }, [filterValues]);
 
   const clearFilters = async () => {
     setFilterValues(initFilter);
     await fetchLogData(0, rowsPerPage, "", listId, {});
     setShowClearFilters(false);
-  }
+  };
 
   const handleProceedWithExport = () => {
-    handleExportToProcore()
+    handleExportToProcore();
     setExportToProcoreModal(false);
-    toast.info(`Exporting ${selectedRows === 'All' ? logIdList.length : JSON.parse(selectedRows).length} submittals to ${procoreProjectName} project in Procore...`, {
-      position: 'bottom-center',
-      autoClose: 6000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined
-    });
-  }
+    toast.info(
+      `Exporting ${
+        selectedRows === "All"
+          ? logIdList.length
+          : JSON.parse(selectedRows).length
+      } submittals to ${procoreProjectName} project in Procore...`,
+      {
+        position: "bottom-center",
+        autoClose: 6000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      }
+    );
+  };
 
-  const handleManageProcoreButtonClick = async() => {
+  const handleManageProcoreButtonClick = async () => {
     setManageProcoreModal(true);
-  }
+  };
 
   const deleteProcoreToken = async () => {
     try {
@@ -871,29 +962,33 @@ const ProjectLogs = () => {
         method: "get",
         url: "/procore/delete_token",
         params: {
-          user_id: localStorage.getItem("userId")
-        }
+          user_id: localStorage.getItem("userId"),
+        },
       });
-      console.log(resp)
+      console.log(resp);
     } catch (error) {
       handleError(error);
     }
   };
 
-  const handleChangeProcoreAccount = async() => {
+  const handleChangeProcoreAccount = async () => {
     setManageProcoreModal(false);
     localStorage.setItem("change_procore_account", true);
     await deleteProcoreToken();
     window.location.href = `${procoreAuthUrl}`;
-  }
+  };
 
-  const handleProcoreLogout = async() => {
-    const link = document.createElement('a');
+  const handleProcoreLogout = async () => {
+    const link = document.createElement("a");
     link.href = procoreBaseUrl;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.click()
-  }
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.click();
+  };
+
+  const handleCombineRowsToggle = () => {
+    console.log(selected);
+  };
   return (
     <div className="page-wrap">
       <NavbarTop
@@ -904,41 +999,46 @@ const ProjectLogs = () => {
         loadingProjectDetails={loadingProjectDetails}
         customerData={customerData}
       />
-      {isAssociatedUser === true && <div className="project-logs-wrapper log-table-width">
-        <ProjectLogsHeaderTop
-          breadcrumb={"View Projects"}
-          breadcrumbUrl={`/project-list?id=${customerId}`}
-          breadcrumb2={"Submittal Log"}
-          showBtn={"Upload Documents"}
-          toggleModal={toggleModal}
-          btnSize={"small"}
-          docParsed={docParsed}
-          qaDashboard={state?.qaDashboard}
-          navBtn={"logs"}
-        />
-        <ProjectLogsHeader
-          centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
-          getList={getList}
-          totalCount={totalCount}
-          dropdownOpen={dropdownOpen}
-          toggle={toggle}
-          handleExportExcel={handleExportExcel}
-          procoreAccessToken={procoreAccessToken}
-          procoreAuthUrl={procoreAuthUrl}
-          handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
-          handleDeleteLogs={handleDeleteLogs}
-          showClearFilters={showClearFilters}
-          clearFilters={clearFilters}
-        />
-        {documentIsProcessing(documentData) && (
-          <div className="alert" style={{ backgroundColor: "#D5E73E" }} role="alert">
-            Documents are being processed...
-          </div>
-        )}
+      {isAssociatedUser === true && (
+        <div className="project-logs-wrapper log-table-width">
+          <ProjectLogsHeaderTop
+            breadcrumb={"View Projects"}
+            breadcrumbUrl={`/project-list?id=${customerId}`}
+            breadcrumb2={"Submittal Log"}
+            showBtn={"Upload Documents"}
+            toggleModal={toggleModal}
+            btnSize={"small"}
+            docParsed={docParsed}
+            qaDashboard={state?.qaDashboard}
+            navBtn={"logs"}
+          />
+          <ProjectLogsHeader
+            centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
+            getList={getList}
+            totalCount={totalCount}
+            dropdownOpen={dropdownOpen}
+            toggle={toggle}
+            handleExportExcel={handleExportExcel}
+            procoreAccessToken={procoreAccessToken}
+            procoreAuthUrl={procoreAuthUrl}
+            handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
+            handleDeleteLogs={handleDeleteLogs}
+            showClearFilters={showClearFilters}
+            clearFilters={clearFilters}
+          />
+          {documentIsProcessing(documentData) && (
+            <div
+              className="alert"
+              style={{ backgroundColor: "#D5E73E" }}
+              role="alert"
+            >
+              Documents are being processed...
+            </div>
+          )}
 
-        <div className="project-logs-content">
-          <div className="project-logs">
-            {/* {logData.length === 0 ? (
+          <div className="project-logs-content">
+            <div className="project-logs">
+              {/* {logData.length === 0 ? (
               <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
                 <span className="d-flex align-items-center justify-content-center">
                   {errorMessage
@@ -947,207 +1047,315 @@ const ProjectLogs = () => {
                 </span>
               </div>
             ) : ( */}
-            <>
-              <div className="table-top-content row">
-                <div className="col-4 p-0">
-                  {(listId !== null) ? (
-                    <button
-                      type="button"
-                      className="table-top-btn selection-btn"
-                      onClick={() => {
-                        handleClearSelection();
-                      }}
-                    >
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
+              <>
+                <div className="table-top-content row">
+                  <div className="col-4 p-0">
+                    {listId !== null ? (
+                      <button
+                        type="button"
+                        className="table-top-btn selection-btn"
+                        onClick={() => {
+                          handleClearSelection();
+                        }}
                       >
-                        <path
-                          d="M5 5L15 15"
-                          stroke="#0E2332"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M15 5L5 15"
-                          stroke="#0E2332"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <span>Clear Selection</span>
-                    </button>
-                  ) : null}
-                  {(listId === null) ? (
-                    selected?.length > 0 && <button
-                      type="button"
-                      className="table-top-btn btn-disabled selection-btn"
-                      onClick={toggleSaveListName}
-                      disabled={selected?.length === 0}
-                    >
-                      <svg
-                        width="14"
-                        height="18"
-                        viewBox="0 0 14 18"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M5 5L15 15"
+                            stroke="#0E2332"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M15 5L5 15"
+                            stroke="#0E2332"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <span>Clear Selection</span>
+                      </button>
+                    ) : null}
+                    {listId === null
+                      ? selected?.length > 0 && (
+                          <div className="d-flex">
+                            <button
+                              type="button"
+                              className="table-top-btn btn-disabled selection-btn"
+                              onClick={toggleSaveListName}
+                              disabled={selected?.length === 0}
+                            >
+                              <svg
+                                width="14"
+                                height="18"
+                                viewBox="0 0 14 18"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M1.16683 0.666748H12.8335C13.0545 0.666748 13.2665 0.754545 13.4228 0.910826C13.579 1.06711 13.6668 1.27907 13.6668 1.50008V17.4526C13.6669 17.5271 13.647 17.6003 13.6092 17.6645C13.5715 17.7287 13.5171 17.7816 13.4519 17.8176C13.3868 17.8537 13.3131 17.8717 13.2386 17.8696C13.1641 17.8675 13.0916 17.8456 13.0285 17.8059L7.00016 14.0251L0.971829 17.8051C0.908803 17.8447 0.836319 17.8667 0.761914 17.8688C0.68751 17.8709 0.613901 17.853 0.548742 17.817C0.483583 17.781 0.429252 17.7283 0.391398 17.6642C0.353545 17.6001 0.333551 17.527 0.333496 17.4526V1.50008C0.333496 1.27907 0.421294 1.06711 0.577574 0.910826C0.733854 0.754545 0.945816 0.666748 1.16683 0.666748ZM12.0002 2.33341H2.00016V15.1934L7.00016 12.0592L12.0002 15.1934V2.33341Z"
+                                  fill={
+                                    selected?.length === 0
+                                      ? "#374151"
+                                      : "#0E2332"
+                                  }
+                                />
+                              </svg>
+                              <span>Save Selection</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="table-top-btn btn-disabled selection-btn ml-2"
+                              onClick={handleCombineRowsToggle}
+                              disabled={selected?.length === 0}
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 26"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M12 2L16 6L12 10L8 6L12 2Z"
+                                  fill="currentColor"
+                                />
+                                <path
+                                  d="M4 12H20"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                                <path
+                                  d="M4 16H20"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                                <path
+                                  d="M12 18L16 22L12 26L8 22L12 18Z"
+                                  fill="currentColor"
+                                />
+                              </svg>
+                              <span>Combine Rows</span>
+                            </button>
+                          </div>
+                        )
+                      : null}
+                  </div>
+                  <div className="col-4 d-flex row">
+                    {documentIsProcessing(documentData) && (
+                      <button
+                        type="button"
+                        className="table-top-btn m-auto"
+                        onClick={toggleDocumentStatusModal}
                       >
-                        <path
-                          d="M1.16683 0.666748H12.8335C13.0545 0.666748 13.2665 0.754545 13.4228 0.910826C13.579 1.06711 13.6668 1.27907 13.6668 1.50008V17.4526C13.6669 17.5271 13.647 17.6003 13.6092 17.6645C13.5715 17.7287 13.5171 17.7816 13.4519 17.8176C13.3868 17.8537 13.3131 17.8717 13.2386 17.8696C13.1641 17.8675 13.0916 17.8456 13.0285 17.8059L7.00016 14.0251L0.971829 17.8051C0.908803 17.8447 0.836319 17.8667 0.761914 17.8688C0.68751 17.8709 0.613901 17.853 0.548742 17.817C0.483583 17.781 0.429252 17.7283 0.391398 17.6642C0.353545 17.6001 0.333551 17.527 0.333496 17.4526V1.50008C0.333496 1.27907 0.421294 1.06711 0.577574 0.910826C0.733854 0.754545 0.945816 0.666748 1.16683 0.666748ZM12.0002 2.33341H2.00016V15.1934L7.00016 12.0592L12.0002 15.1934V2.33341Z"
-                          fill={selected?.length === 0 ? "#374151" : "#0E2332"}
-                        />
-                      </svg>
-                      <span>Save Selection</span>
-                    </button>
-                  ) : null}
-                </div>
-                <div className="col-4 d-flex row">
-                  {documentIsProcessing(documentData) && <button
-                    type="button"
-                    className="table-top-btn m-auto"
-                    onClick={toggleDocumentStatusModal}
-                  >
-                    <span>Check Document Status</span>
-                  </button>}
-                </div>
-                <div className="col-4 d-flex row">
-                  {localStorage.getItem('roleId') !== '7' ? (
-                    <div className="header-right-swap header-right w-100">
-                      <div className="log-search">
-                        <input
-                          type="text"
-                          placeholder="Find In Log"
-                          className="log-search-input w-100"
-                          value={searchValue}
-                          onChange={(e) => handleSearchChange(e.target.value)}
-                          onKeyPress={handleEnterKeyPress}
-                        />
-                        <span className="search-icon" onClick={heandleSearchClick}>
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                        <span>Check Document Status</span>
+                      </button>
+                    )}
+                  </div>
+                  <div className="col-4 d-flex row">
+                    {localStorage.getItem("roleId") !== "7" ? (
+                      <div className="header-right-swap header-right w-100">
+                        <div className="log-search">
+                          <input
+                            type="text"
+                            placeholder="Find In Log"
+                            className="log-search-input w-100"
+                            value={searchValue}
+                            onChange={(e) => handleSearchChange(e.target.value)}
+                            onKeyPress={handleEnterKeyPress}
+                          />
+                          <span
+                            className="search-icon"
+                            onClick={heandleSearchClick}
                           >
-                            <path
-                              d="M17.5001 17.4998L12.9165 12.9167"
-                              stroke="#CBCBCB"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <circle
-                              cx="8.75"
-                              cy="8.75"
-                              r="5.5"
-                              stroke="#CBCBCB"
-                              strokeWidth="1.5"
-                            />
-                          </svg>
-                        </span>
-                        <span className="clear-icon" onClick={handleClearSearch}>
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                            <svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 20 20"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M17.5001 17.4998L12.9165 12.9167"
+                                stroke="#CBCBCB"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <circle
+                                cx="8.75"
+                                cy="8.75"
+                                r="5.5"
+                                stroke="#CBCBCB"
+                                strokeWidth="1.5"
+                              />
+                            </svg>
+                          </span>
+                          <span
+                            className="clear-icon"
+                            onClick={handleClearSearch}
                           >
-                            <path
-                              d="M5 5L15 15"
-                              stroke="#cbcbcb"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <path
-                              d="M15 5L5 15"
-                              stroke="#cbcbcb"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </span>
+                            <svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 20 20"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M5 5L15 15"
+                                stroke="#cbcbcb"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M15 5L5 15"
+                                stroke="#cbcbcb"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </span>
+                        </div>
                       </div>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
+                <div className={pdfData.url && "side-by-side"}>
+                  <CombinedLogs
+                    logData={filteredLogData}
+                    setFilteredLogData={setFilteredLogData}
+                    selected={selected}
+                    handleSelect={handleSelect}
+                    handleSelectAll={handleSelectAll}
+                    pageRefresh={pageRefresh}
+                    setPageRefresh={setPageRefresh}
+                    customerId={state?.customerId || customerId}
+                    groupingData={groupingData}
+                    setLogData={setLogData}
+                    projectId={state?.projectId || projectId}
+                    listId={listId}
+                    setPdfData={setPdfData}
+                    pdfData={pdfData}
+                    completeLogData={logData}
+                    newRowIndex={newRowIndex}
+                    setNewRowIndex={setNewRowIndex}
+                    searchValue={searchValue}
+                    projectType={projectType}
+                    qaDashboard={state?.qaDashboard}
+                    selectedFilterValue={selectedFilterValue}
+                    filterValues={filterValues}
+                    setFilterValues={setFilterValues}
+                    setTotalCount={setTotalCount}
+                    errorMessage={errorMessage}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    setLogInViewer={setLogInViewer}
+                    editRow={editRow}
+                    setEditRow={setEditRow}
+                    rowData={rowData}
+                    setRowData={setRowData}
+                    setLogIdList={setLogIdList}
+                    isSelectAll={isSelectAll}
+                    setSelected={setSelected}
+                    loading={loadingView}
+                  />
+                  {pdfData.url && (
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 24,
+                          justifyContent: "center",
+                        }}
+                      >
+                        <button
+                          disabled={pdfData && pdfData.index > 0 ? false : true}
+                          onClick={() => {
+                            handleUpDownView(-1);
+                          }}
+                          style={{
+                            borderColor: "#E2E2E2",
+                            borderWidth: "thin",
+                          }}
+                        >
+                          <ArrowDropUpIcon/>
+                        </button>
+                        <button
+                          disabled={
+                            pdfData &&
+                            pdfData.index < filteredLogData.length - 1
+                              ? false
+                              : true
+                          }
+                          onClick={() => {
+                            handleUpDownView(1);
+                          }}
+                          style={{
+                            borderColor: "#E2E2E2",
+                            borderWidth: "thin",
+                          }}
+                        >
+                          <ArrowDropDownIcon />
+                        </button>
+                      </div>
+                      <PdfWrapper
+                        pdfData={pdfData}
+                        setPdfData={setPdfData}
+                        handleAddNewRow={handleAddNewRow}
+                        handleAppendToSelectedRow={handleAppendToSelectedRow}
+                        setLogInViewer={setLogInViewer}
+                        loading={loadingView}
+                        setLoading={setLoadingView}
+                      />
                     </div>
-                  ) : (
-                    ''
                   )}
                 </div>
-              </div>
-              <div className={pdfData.url && "side-by-side"}>
-                <CombinedLogs
-                  logData={filteredLogData}
-                  setFilteredLogData={setFilteredLogData}
-                  selected={selected}
-                  handleSelect={handleSelect}
-                  handleSelectAll={handleSelectAll}
-                  pageRefresh={pageRefresh}
-                  setPageRefresh={setPageRefresh}
-                  customerId={state?.customerId || customerId}
-                  groupingData={groupingData}
-                  setLogData={setLogData}
-                  projectId={state?.projectId || projectId}
-                  listId={listId}
-                  setPdfData={setPdfData}
-                  pdfData={pdfData}
-                  completeLogData={logData}
-                  newRowIndex={newRowIndex}
-                  setNewRowIndex={setNewRowIndex}
-                  searchValue={searchValue}
-                  projectType={projectType}
-                  qaDashboard={state?.qaDashboard}
-                  selectedFilterValue={selectedFilterValue}
-                  filterValues={filterValues}
-                  setFilterValues={setFilterValues}
-                  setTotalCount={setTotalCount}
-                  errorMessage={errorMessage}
-                  page={page}
-                  rowsPerPage={rowsPerPage}
-                  setLogInViewer={setLogInViewer}
-                  editRow={editRow}
-                  setEditRow={setEditRow}
-                  rowData={rowData}
-                  setRowData={setRowData}
-                  setLogIdList={setLogIdList}
-                  isSelectAll={isSelectAll}
-                  setSelected={setSelected}
-                />
-                {pdfData.url && (
-                  <PdfWrapper
-                    pdfData={pdfData}
-                    setPdfData={setPdfData}
-                    handleAddNewRow={handleAddNewRow}
-                    handleAppendToSelectedRow={handleAppendToSelectedRow}
-                    setLogInViewer={setLogInViewer}
-                  />
-                )}
-              </div>
-              <div style={{ position: 'relative' }}>
-                <div style={{ position: 'absolute', marginTop: '10px', fontStyle: 'italic', fontSize: '14px' }}>
-                  <strong>Note: </strong><span role="img" aria-label="sparkle"><Sparkles /></span> indicates this submittal was extracted by our AI.
+                <div style={{ position: "relative" }}>
+                  <div
+                    style={{
+                      position: "absolute",
+                      marginTop: "10px",
+                      fontStyle: "italic",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <strong>Note: </strong>
+                    <span role="img" aria-label="sparkle">
+                      <Sparkles />
+                    </span>{" "}
+                    indicates this submittal was extracted by our AI.
+                  </div>
+                  <div className="table-footer-content logs-pagination">
+                    <Pagination
+                      totalItems={totalCount}
+                      fetchData={fetchLogData}
+                      rowsPerPage={rowsPerPage}
+                      setRowsPerPage={setRowsPerPage}
+                      page={page}
+                      setPage={setPage}
+                      listId={listId}
+                      searchValue={searchValue}
+                    />
+                  </div>
                 </div>
-                <div className="table-footer-content logs-pagination">
-                  <Pagination
-                    totalItems={totalCount}
-                    fetchData={fetchLogData}
-                    rowsPerPage={rowsPerPage}
-                    setRowsPerPage={setRowsPerPage}
-                    page={page}
-                    setPage={setPage}
-                    listId={listId}
-                    searchValue={searchValue}
-                  />
-                </div>
-              </div>
-              {/* {state.project?.type === 'Submittal' && (
+                {/* {state.project?.type === 'Submittal' && (
                  
                   <SubmittalTable
                     logData={logData}
@@ -1180,11 +1388,12 @@ const ProjectLogs = () => {
                     handleSelectAll={handleSelectAll}
                   />
                 )}{' '} */}
-            </>
-            {/* )} */}
+              </>
+              {/* )} */}
+            </div>
           </div>
         </div>
-      </div>}
+      )}
       <ToastContainer
         position="bottom-center"
         autoClose={5000}
@@ -1329,7 +1538,7 @@ const ProjectLogs = () => {
                                 onClick={() =>
                                   handleExportExcel(
                                     list.records,
-                                    list.view_name,
+                                    list.view_name
                                   )
                                 }
                               >
@@ -1356,8 +1565,8 @@ const ProjectLogs = () => {
         </ModalBody>
       </Modal>
 
-      <Modal 
-        isOpen={showDocumentStatusModal} 
+      <Modal
+        isOpen={showDocumentStatusModal}
         toggle={toggleDocumentStatusModal}
         fade={false}
         className="new-customer modal-xl"
@@ -1385,17 +1594,25 @@ const ProjectLogs = () => {
                   <div className="form-group">
                     <p>
                       This action will export
-                      <b> {selectedRows === 'All' ? logIdList?.length : JSON.parse(selectedRows)?.length} </b>
+                      <b>
+                        {" "}
+                        {selectedRows === "All"
+                          ? logIdList?.length
+                          : JSON.parse(selectedRows)?.length}{" "}
+                      </b>
                       submittals to the
-                      <b> {procoreProjectName}</b> project in Procore. 
-                      Do you want to proceed?
+                      <b> {procoreProjectName}</b> project in Procore. Do you
+                      want to proceed?
                     </p>
                   </div>
                 </div>
               </div>
             </div>
             <ModalFooter>
-              <Button className="save-btn" onClick={() => handleProceedWithExport()}>
+              <Button
+                className="save-btn"
+                onClick={() => handleProceedWithExport()}
+              >
                 Proceed with Export
               </Button>
               <Button
@@ -1416,7 +1633,9 @@ const ProjectLogs = () => {
         toggle={toggleChangeProcoreAccountModal}
         className="new-customer modal-md"
       >
-        <ModalHeader toggle={toggleChangeProcoreAccountModal}>Change Procore Account</ModalHeader>
+        <ModalHeader toggle={toggleChangeProcoreAccountModal}>
+          Change Procore Account
+        </ModalHeader>
         <ModalBody>
           <form className="create-customer-form">
             <div className="save-list-name">
@@ -1424,8 +1643,9 @@ const ProjectLogs = () => {
                 <div className="col">
                   <div className="form-group">
                     <p>
-                      If your website has an active Procore login session, this might not work properly.
-                      Have you logged out of Procore in your browser?
+                      If your website has an active Procore login session, this
+                      might not work properly. Have you logged out of Procore in
+                      your browser?
                     </p>
                   </div>
                 </div>
@@ -1433,7 +1653,10 @@ const ProjectLogs = () => {
             </div>
             <ModalFooter>
               <div>
-                <Button className="save-btn" onClick={handleChangeProcoreAccount}>
+                <Button
+                  className="save-btn"
+                  onClick={handleChangeProcoreAccount}
+                >
                   Yes, continue to change Procore account
                 </Button>
               </div>
