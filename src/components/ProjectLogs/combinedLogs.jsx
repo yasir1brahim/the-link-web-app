@@ -60,6 +60,8 @@ export default function CombinedLogs(props) {
     []
   );
   const rowRefs = useRef([]);
+  const logRowRefs = useRef([]);
+  const stickyHeaderRef = useRef(null);
 
   useEffect(() => {
     setShowMore(Array(props.logData.length).fill(false));
@@ -267,22 +269,6 @@ export default function CombinedLogs(props) {
     }
   };
 
-  const handlePdf = (index, log) => {
-    if (loading) return;
-    
-    const pdfIndex = props.pdfData?.index; 
-    if (editRow !== index && pdfIndex !== index)  {
-      handleViewPdf(
-        log.doc_link,
-        log.text_loc,
-        index,
-        log.doc_id,
-        log.additional_text_locations
-      );
-      props.setLogInViewer({...log});
-    }
-  };
-
   const handleIgnorePdfView = (e)=>{
     e.stopPropagation();
   }
@@ -457,6 +443,20 @@ export default function CombinedLogs(props) {
     return specSection.slice(0, 2) + " " + specSection.slice(2);
   };
 
+  useEffect(() => {
+    if (logRowRefs.current[props.pdfData.index]) {
+      const rowElement = logRowRefs.current[props.pdfData.index];
+      const containerElement = parentRef.current;
+      const stickyHeaderHeight = stickyHeaderRef.current?.offsetHeight || 0; // Get sticky header height
+      // Get the top position of the row relative to the container
+      const rowTop = rowElement.offsetTop;
+      // Scroll the container, adjusting for the sticky header
+      containerElement.scrollTo({
+        top: rowTop - stickyHeaderHeight, // Adjust by sticky header height
+        behavior: 'smooth',
+      });
+    }
+  }, [props.pdfData.index])
   return (
     <div
       className="l-table-wrapper"
@@ -467,7 +467,7 @@ export default function CombinedLogs(props) {
     >
       <table className="table logs-table" ref={tableRef}>
         <thead>
-          <tr>
+          <tr ref={stickyHeaderRef}>
             <th className="ticket-checkbox small-font">
               <div className="form-group">
                 <div className="custom-control custom-checkbox">
@@ -817,7 +817,7 @@ export default function CombinedLogs(props) {
         <tbody style={{ fontSize: "12px" }}>
           {logData.map((log, index) => {
             let pdfIndex = props.pdfData?.index;
-            // const showPdf = !(pdfIndex && pdfIndex !== index) && pdfIndex !== 0;
+            const showPdf = !(pdfIndex && pdfIndex !== index) && pdfIndex !== 0;
             return (
               <tr
                 className={
@@ -828,7 +828,7 @@ export default function CombinedLogs(props) {
                   backgroundColor: pdfIndex === index ? "#f8f8fa" : "white",
                 }}
                 key={index}
-                onClick={() => { handlePdf(index, log); }}
+                ref={el => (logRowRefs.current[index] = el)}
               >
                 <td
                   className={`${
@@ -998,7 +998,7 @@ export default function CombinedLogs(props) {
                         target="_blank" >
                         Pdf
                       </Link> */}
-                        {/*pdfIndex === index ? (
+                        {pdfIndex === index ? (
                           <button
                             type="button"
                             className="btn btn-secondary close-button"
@@ -1068,7 +1068,7 @@ export default function CombinedLogs(props) {
                               </span>
                             </>
                           )
-                        )*/}
+                        )}
                         {props.listId === null && (
                           <>
                             <AddButton
