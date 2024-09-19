@@ -21,7 +21,7 @@ const Signin = (props) => {
       error = true;
     }
     if (password.value === '') {
-      setPassword({ ...password, errors: 'Password is reuired.' });
+      setPassword({ ...password, errors: 'Password is required.' });
       error = true;
     }
     return error;
@@ -31,22 +31,15 @@ const Signin = (props) => {
     e.preventDefault();
     let errors = validate();
     if (!errors) {
-      const response = await login(email.value,password.value);
-      if (response.data) {
+      const response = await login(email.value, password.value);
+      console.log(response);
+      if (response.data.status === 'success') {
         window.heap.identify(email.value);
-        localStorage.setItem('token', response.data.access_token);
-        localStorage.setItem('refresh_token', response.data.refresh_token);
-        localStorage.setItem('roleId', response.data.role_id);
-        localStorage.setItem('userId', response.data.user_id);
-        localStorage.setItem('fullName', response.data.full_name);
-        localStorage.setItem('isSpecGptUser', response.data.is_gpt_user);
-        return response.data.role_id === 0
-            ? history({ pathname: '/admin-landing' })
-            : response.data.role_id === 2 ||
-            response.data.role_id === 6 ||
-            response.data.role_id === 7
-                ? history({ pathname: '/project-list' })
-                : history({ pathname: '/' });
+        localStorage.setItem('token', response.data.jwt.access);
+        localStorage.setItem('refresh_token', response.data.jwt.refresh);
+        localStorage.setItem('userId', response.data.jwt.user.id);
+        localStorage.setItem('fullName', response.data.jwt.user.get_display_name);
+        return history({ pathname: '/project-list' });
       }
     }
   };

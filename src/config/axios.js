@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const baseURL = window.location.href.includes('https://app.thelink.ai') 
 ? 'https://log-manager-api-prod.thelink.ai'
-: 'https://app-qa-api.thelink.ai'
+: 'http://localhost:8000'
 
 const refreshToken = async () => {
   try {
@@ -33,7 +33,9 @@ axiosInstance.interceptors.request.use(function (config) {
   let token = !window.location.pathname.includes('reset-password')
     ? localStorage.getItem('token')
     : new URLSearchParams(window.location.search)?.get('token');
-  config.headers['Authorization'] = 'Bearer ' + token;
+  if (token && !window.location.pathname.includes('login')) {
+    config.headers['Authorization'] = 'Bearer ' + token;
+  }
   // config.headers['ngrok-skip-browser-warning'] = 'true';
   return config;
 });

@@ -5,9 +5,9 @@ const login = async (email,password) => {
     try {
         return await axiosInstance({
             method: 'post',
-            url: '/login',
+            url: '/api/auth/login/',
             data: {
-                email_address: email,
+                email: email,
                 password: password
             }
         });

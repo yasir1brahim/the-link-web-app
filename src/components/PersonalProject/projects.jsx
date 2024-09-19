@@ -9,13 +9,13 @@ import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
 import axiosInstance from "../../config/axios";
 import handleError from "../../config/errorHandler";
 import HeaderTabs from "../shared/HeaderTabs/HeaderTabs";
+import { listProjects } from "../../api/Projects/api";
 
 const Projects = () => {
   const navigate = useNavigate();
   const [uploadSpecsModal, setUploadSpecsModal] = useState(false);
   const [archiveProjectModal, setArchiveProjectModal] = useState(false);
   const [restoreProjectModal, setRestoreProjectModal] = useState(false);
-  const [slider, setSlider] = useState(false);
   const [customerData, setCustomerData] = useState({});
   const [createProjectModal, setCreateProjectModal] = useState(false);
   const [pageRefresh, setPageRefresh] = useState(false);
@@ -28,7 +28,6 @@ const Projects = () => {
   const [specUploadProject, setSpecUploadProject] = useState({});
   const roleId = localStorage.getItem("roleId");
   const { state } = useLocation();
-  const toggleSlider = () => setSlider(!slider);
   const [isArchived, toggleArchive] = useState(false);
   const toggleCreateProjectModal = () =>
     setCreateProjectModal(!createProjectModal);
@@ -145,22 +144,12 @@ const Projects = () => {
   };
 
   useEffect(() => {
-    const url =
-      roleId === "6" || roleId === "7"
-        ? `/projects/${localStorage.getItem("userId")}`
-        : customerId
-        ? `/projects/${customerId}`
-        : `/projects/${localStorage.getItem("userId")}`;
     const fetchData = async () => {
-      const response = await axiosInstance({
-        method: "get",
-        url,
-      });
-      // setProjectData(response.data.message);
+      const response = await listProjects();
       setProjectData(
-        isArchived ? response.data.archived_projects : response.data.message,
+        isArchived ? response.data.archived_projects : response.data.results,
       );
-      console.log(response.data.message);
+      console.log(response.data.results);
     };
 
     fetchData().catch((error) => {
@@ -176,11 +165,6 @@ const Projects = () => {
           <Header
             toggleModal={toggleCreateProjectModal}
             title={state?.customer_name || customerData?.customer_name}
-            // showBtn={
-            //   slider
-            //     ? "Add Personal Project"
-            //     : roleId !== "6" && roleId !== "7" && "Create New Project"
-            // }
             showBtn={"Create New Project"}
             breadcrumb={"View Projects"}
           />
@@ -188,56 +172,28 @@ const Projects = () => {
             <HeaderTabs isArchived={isArchived}
               toggleArchive={toggleArchive} />
           </div>
-          {slider ? (
-            <PersonalProject
-              handleLaunch={handleLaunch}
-              handleCollaborationLaunch={handleCollaborationLaunch}
-              toggleSlider={toggleSlider}
-              slider={slider}
-              projectData={projectData}
-              toggleUploadSpecsModal={toggleUploadSpecsModal}
-              toggleUploadSpecsButton={toggleUploadSpecsButton}
-              createProjectModal={createProjectModal}
-              toggleCreateProjectModal={toggleCreateProjectModal}
-              archiveProjectModal={archiveProjectModal}
-              toggleArchiveProjectModal={toggleArchiveProjectModal}
-              restoreProjectModal={restoreProjectModal}
-              toggleRestoreProjectModal={toggleRestoreProjectModal}
-              state={state}
-              customerData={customerData}
-              pageRefresh={pageRefresh}
-              setPageRefresh={setPageRefresh}
-              setSpecUploadProject={setSpecUploadProject}
-              isArchived={isArchived}
-              toggleArchive={toggleArchive}
-              customerId={customerId}
-            />
-          ) : (
-            <CustomerProjects
-              toggleSlider={toggleSlider}
-              handleCollaborationLaunch={handleCollaborationLaunch}
-              slider={slider}
-              customerData={customerData}
-              setCustomerData={setCustomerData}
-              pageRefresh={pageRefresh}
-              setPageRefresh={setPageRefresh}
-              toggleCreateProjectModal={toggleCreateProjectModal}
-              createProjectModal={createProjectModal}
-              archiveProjectModal={archiveProjectModal}
-              toggleArchiveProjectModal={toggleArchiveProjectModal}
-              restoreProjectModal={restoreProjectModal}
-              toggleRestoreProjectModal={toggleRestoreProjectModal}
-              projectData={projectData}
-              setProjectData={setProjectData}
-              handleLaunch={handleLaunch}
-              toggleUploadSpecsModal={toggleUploadSpecsModal}
-              toggleUploadSpecsButton={toggleUploadSpecsButton}
-              setSpecUploadProject={setSpecUploadProject}
-              isArchived={isArchived}
-              toggleArchive={toggleArchive}
-              customerId={customerId}
-            />
-          )}
+          <CustomerProjects
+            handleCollaborationLaunch={handleCollaborationLaunch}
+            customerData={customerData}
+            setCustomerData={setCustomerData}
+            pageRefresh={pageRefresh}
+            setPageRefresh={setPageRefresh}
+            toggleCreateProjectModal={toggleCreateProjectModal}
+            createProjectModal={createProjectModal}
+            archiveProjectModal={archiveProjectModal}
+            toggleArchiveProjectModal={toggleArchiveProjectModal}
+            restoreProjectModal={restoreProjectModal}
+            toggleRestoreProjectModal={toggleRestoreProjectModal}
+            projectData={projectData}
+            setProjectData={setProjectData}
+            handleLaunch={handleLaunch}
+            toggleUploadSpecsModal={toggleUploadSpecsModal}
+            toggleUploadSpecsButton={toggleUploadSpecsButton}
+            setSpecUploadProject={setSpecUploadProject}
+            isArchived={isArchived}
+            toggleArchive={toggleArchive}
+            customerId={customerId}
+          />
         </div>
         <UploadDocuments
           modal={uploadSpecsModal}
