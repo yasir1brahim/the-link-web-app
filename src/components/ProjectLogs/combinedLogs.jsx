@@ -335,6 +335,10 @@ export default function CombinedLogs(props) {
                 Math.max(...charArray) + 1
               )}`,
         // customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
+        submittal_number: null,
+
+        // Only used to help BE determine what to do when inserted
+        added_under_log_id: log.id,
       };
       const result = insertElement(props.logData, index + 1, logObj);
       props.setFilteredLogData(result);
@@ -371,16 +375,18 @@ export default function CombinedLogs(props) {
     5: 0,
     6: 0,
     7: 0,
+    8: 0,
   });
 
   const minWidths = {
     1: 155,
-    2: 145,
-    3: 150,
-    4: 85,
-    5: 190,
+    2: 85,
+    3: 145,
+    4: 150,
+    5: 85,
     6: 190,
-    7: 520,
+    7: 190,
+    8: 520,
   };
   useEffect(() => {
     if (parentRef.current !== null) {
@@ -402,14 +408,18 @@ export default function CombinedLogs(props) {
           minWidths[4]
         ),
         5: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.1),
+          Math.round(parentRef.current.offsetWidth * 0.045),
           minWidths[5]
         ),
         6: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.1),
           minWidths[6]
         ),
-        7: parentRef.current.offsetWidth - 953,
+        7: Math.max(
+          Math.round(parentRef.current.offsetWidth * 0.1),
+          minWidths[7]
+        ),
+        8: parentRef.current.offsetWidth - 953,
       });
     }
   }, [parentRef.current]);
@@ -502,7 +512,22 @@ export default function CombinedLogs(props) {
               </div>
             </th>
 
-            <th className="small-font" style={{ width: `${tableWidths[2]}px` }}>
+            <th
+              className="para-no small-font"
+              style={{ width: `${tableWidths[2]}px` }}
+            >
+              <div className="d-flex">
+                <span>Submittal #</span>
+                <div
+                  className="resizer"
+                  onMouseDown={(e) => handleMouseDown(e, 2)}
+                >
+                  |
+                </div>
+              </div>
+            </th>
+
+            <th className="small-font" style={{ width: `${tableWidths[3]}px` }}>
               <span className="has-sorting">
                 <div className="d-flex">
                   Spec Section{" "}
@@ -537,7 +562,7 @@ export default function CombinedLogs(props) {
             {props.projectType !== "ufgs" && (
               <th
                 className="para-no small-font"
-                style={{ width: `${tableWidths[3]}px` }}
+                style={{ width: `${tableWidths[4]}px` }}
               >
                 <div className="d-flex">
                   <span>Section Title</span>
@@ -589,7 +614,7 @@ export default function CombinedLogs(props) {
             {props.projectType !== "ufgs" && (
               <th
                 className="para-no small-font"
-                style={{ width: `${tableWidths[4]}px` }}
+                style={{ width: `${tableWidths[5]}px` }}
               >
                 <div className="d-flex">
                   <span>Paragraph</span>
@@ -605,7 +630,7 @@ export default function CombinedLogs(props) {
             {props.projectType !== "ufgs" && (
               <th
                 className="small-font"
-                style={{ width: `${tableWidths[5]}px` }}
+                style={{ width: `${tableWidths[6]}px` }}
               >
                 <span className="has-sorting">
                   <div className="d-flex">
@@ -695,7 +720,7 @@ export default function CombinedLogs(props) {
                 </span>
               </th>
             )}
-            <th className="small-font" style={{ width: `${tableWidths[6]}px` }}>
+            <th className="small-font" style={{ width: `${tableWidths[7]}px` }}>
               <span className="has-sorting">
                 <div className="d-flex">
                   Submittal Type
@@ -771,7 +796,7 @@ export default function CombinedLogs(props) {
               </th> */}
                 <th
                   className="log-description small-font"
-                  style={{ width: `${tableWidths[7]}px` }}
+                  style={{ width: `${tableWidths[8]}px` }}
                 >
                   <span className="has-sorting">
                     <div className="d-flex">
@@ -1115,6 +1140,14 @@ export default function CombinedLogs(props) {
                   className={`${
                     editRow === index ? "activeTh" : ""
                   } reduce-height`}
+                >
+                  {log.submittal_number}
+                </td>
+
+                <td
+                  className={`${
+                    editRow === index ? "activeTh" : ""
+                  } reduce-height`}
                  
                 >
                   {editRow === index ? (
@@ -1135,8 +1168,13 @@ export default function CombinedLogs(props) {
                   )}
                   {/* {log.spec_section} */}
                 </td>
-                {props.projectType !== "ufgs" && (
-                  <td className="reduce-height">
+
+                {props.projectType !== 'ufgs' && (
+                  <td
+                    className={`${
+                      editRow === index ? 'activeTh' : ''
+                    } reduce-height`}
+                  >
                     {log.section_title} <br /> {log.id}
                   </td>
                 )}
