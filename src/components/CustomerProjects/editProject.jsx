@@ -57,40 +57,11 @@ const EditProject = ({
         // fetch employees for customer
         const resp_employees_by_customer = await axiosInstance({
           method: "get",
-          url: `/employeeList/${
-            customer?.customer_id ||
-            project?.customer_id ||
-            customerID ||
-            localStorage.getItem("userId")
-          }`,
+          url: `/teams/api/teams/${project?.team}`,
         });
-        const emps_by_c = resp_employees_by_customer.data.message
+        const emps_by_c = resp_employees_by_customer.data.members
         if (emps_by_c) {
           setEmployeeList(emps_by_c);
-        }
-
-        // fetch employees for project
-        const resp_employees_by_project = await axiosInstance({
-          method: "get",
-          url: `/employees_by_project/${
-            project?.project_id
-          }`,
-        });
-        const emps_by_p = resp_employees_by_project.data.message;
-
-        // pre-select employees for project
-        if (emps_by_p.length > 0) {
-          if (emps_by_c.length > 0) {
-            const selected_emps = emps_by_c.filter((emp) => emps_by_p.includes(emp.emp_id));
-            if (selected_emps.length > 0) {
-              setSelectedEmployeeList(selected_emps.map((emp) => {
-                return {
-                  value: emp.emp_id,
-                  label: emp.name,
-                };
-              }));
-            }
-          }
         }
         setIsLoading(false);
       };
@@ -208,68 +179,6 @@ const EditProject = ({
                         </div>
                       </div>
                     </div> */}
-                    <div className="customer-profile">
-                      <div className="project-type">
-                        <p className="">Project type</p>
-                      </div>
-                      <div className="radio-selector">
-                        <input
-                          type="radio"
-                          name="ticketHeading"
-                          id="ticketHeading"
-                          onClick={() => setProjectType("commercial")}
-                          checked={projectType === "commercial"}
-                          onChange={() => {}}
-                        />
-                        <label htmlFor="ticketHeading">Commercial Project</label>
-                      </div>
-                      <div className="col-6">
-                        <div className="text-label-value">
-                          <div className="text-label">{customer?.address}</div>
-                        </div>
-                      </div>
-                      <div className="radio-selector">
-                        <input
-                          type="radio"
-                          name="ticketHeading"
-                          id="ticketHeading"
-                          onClick={() => setProjectType("ufgs")}
-                          checked={projectType === "ufgs"}
-                          onChange={() => {}}
-                        />
-                        <label htmlFor="ticketHeading">
-                          Military/Gov Project(UFGS Specs)
-                        </label>
-                      </div>
-                      <div className="col-6">
-                        <div className="text-label-value">
-                          <div className="text-label">
-                            {customer?.contact_number}
-                          </div>
-                        </div>
-                      </div>
-                      {/* <div className="col-6">
-                      <div className="custom-control custom-checkbox">
-                        <input
-                          type="checkbox"
-                          name="ticketHeading"
-                          id="ticketHeading"
-                          onClick={()=> 
-                            {
-                              if(visibilityType === "Personal")
-                              { setVisibilityType("Contract") } else {
-                                setVisibilityType("Personal")
-                              }
-                            }}
-                          checked={visibilityType === "Personal"}
-                        />
-                        <label
-                          style={{color: 'green', marginLeft: '5px'}}
-                          for="ticketHeading"
-                        >Personal Project</label>
-                      </div>
-                    </div> */}
-                    </div>
                   </>
                 )}
               </div>
@@ -281,7 +190,7 @@ const EditProject = ({
                     id="customerProjectName"
                     aria-describedby="customerProjectName"
                     placeholder="Enter"
-                    defaultValue={project?.project_name}
+                    defaultValue={project?.name}
                     onChange={(e) => {
                       setProjectName({
                         ...projectName,
@@ -299,11 +208,10 @@ const EditProject = ({
                       <Typeahead
                         id="employee-list"
                         ref={typeaheadRef}
-                        options={employeeList.map((project) => {
+                        options={employeeList.map((employee) => {
                           return {
-                            value: project?.emp_id,
-                            label: project?.name,
-                            email: project?.emp_email,
+                            value: employee?.id,
+                            label: employee?.display_name,
                           };
                         })}
                         onChange={(e) => setLeadContact(e)}
@@ -315,32 +223,9 @@ const EditProject = ({
                     </div>
                     {!leadContact[0]?.label ? (
                       <label className="text-label typehead-label">
-                        {project?.lead_contact}
+                        {project?.owner?.display_name}
                       </label>
                     ) : null}
-                  </div>
-                  <div className="form-group">
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="projectLeadEmail"
-                      aria-describedby="projectLeadEmail"
-                      placeholder="Enter"
-                      value={
-                        leadContact[0]
-                          ? leadContact[0].email
-                          : employeeList.length
-                          ? employeeList?.find(
-                              (employee) =>
-                                employee.name === project?.lead_contact,
-                            )?.emp_email
-                          : leadContact.label
-                      }
-                      disabled
-                    />
-                    <label className="text-label" htmlFor="projectLeadEmail">
-                      Email Address(Lead Contact)
-                    </label>
                   </div>
                 </div>
                 <div style={{ gap: "25px" }} className="d-flex">
@@ -397,10 +282,10 @@ const EditProject = ({
                       value={selectedEmployeeList}
                       selected={selectedEmployeeList}
                       onChange={setSelectedEmployeeList}
-                      options={employeeList.map((project) => {
+                      options={employeeList.map((employee) => {
                         return {
-                          value: project.emp_id,
-                          label: project.name,
+                          value: employee.id,
+                          label: employee.display_name,
                         };
                       })}
                       placeholder="Add Employees"

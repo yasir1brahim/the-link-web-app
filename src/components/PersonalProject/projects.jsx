@@ -103,41 +103,15 @@ const Projects = () => {
       ? customerId
       : localStorage.getItem("userId");
 
-  const handleLaunch = (project, qaDashboard) => {
-    localStorage.getItem("isSpecGptUser") === "true"
-      ? navigate(
-          `/spec-gpt?projectDetails=${project?.project_id},${custId},Classified,${project?.project_name}`,
-        )
-      : navigate(
-          `/project-logs?projectDetails=${project?.project_id},${custId},Classified,${project?.project_name}`,
-          {
-            state: {
-              project,
-              projectName: project?.project_name,
-              customerId:
-                localStorage.getItem("roleId") === "0"
-                  ? customerId
-                  : localStorage.getItem("userId"),
-              logType: "Classified",
-              qaDashboard,
-              customerData,
-            },
-          },
-        );
-  };
-
-  const handleCollaborationLaunch = (project) => {
+  const handleLaunch = (project) => {
     navigate(
-      `/collaboration-hub?projectDetails=${project?.project_id},${custId},Classified,${project?.project_name}`,
+      `/project-logs?projectDetails=${project?.id}`,
       {
         state: {
           project,
-          projectName: project?.project_name,
-          customerId:
-            localStorage.getItem("roleId") === "0"
-              ? customerId
-              : localStorage.getItem("userId"),
-          logType: "Classified",
+          projectName: project?.name,
+          userId: localStorage.getItem("userId"),
+          customerData,
         },
       },
     );
@@ -173,7 +147,6 @@ const Projects = () => {
               toggleArchive={toggleArchive} />
           </div>
           <CustomerProjects
-            handleCollaborationLaunch={handleCollaborationLaunch}
             customerData={customerData}
             setCustomerData={setCustomerData}
             pageRefresh={pageRefresh}

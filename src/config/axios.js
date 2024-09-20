@@ -11,10 +11,10 @@ const refreshToken = async () => {
       throw new Error('No refresh token available');
     }
 
-    const response = await axios.post(`${baseURL}/refresh`, { refresh_token: refreshToken });
-    const { access_token } = response.data;
-    localStorage.setItem('token', access_token);
-    return access_token;
+    const response = await axios.post(`${baseURL}/api/auth/token/refresh/`, { refresh: refreshToken });
+    const { access } = response.data;
+    localStorage.setItem('token', access);
+    return access;
   } catch (error) {
     console.error('Unable to refresh token', error);
     localStorage.removeItem('token');
