@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReactComponent as Mail } from '../../assets/images/mail.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
@@ -7,7 +7,13 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
 import { login } from '../../api/Authentication/api'
+import { AuthContext } from '../../auth/authcontext';
+
+
+
 const Signin = (props) => {
+  const { setUserDetails } = useContext(AuthContext);
+
   const [showPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState({ value: '', errors: '' });
   const [password, setPassword] = useState({ value: '', errors: '' });
@@ -34,11 +40,7 @@ const Signin = (props) => {
       const response = await login(email.value, password.value);
       console.log(response);
       if (response.data.status === 'success') {
-        window.heap.identify(email.value);
-        localStorage.setItem('token', response.data.jwt.access);
-        localStorage.setItem('refresh_token', response.data.jwt.refresh);
-        localStorage.setItem('userId', response.data.jwt.user.id);
-        localStorage.setItem('fullName', response.data.jwt.user.get_display_name);
+        setUserDetails(response.data.jwt);
         return history({ pathname: '/project-list' });
       }
     }
