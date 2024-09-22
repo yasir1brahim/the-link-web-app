@@ -20,6 +20,7 @@ import CollaborationHub from './components/CollaborationHub';
 import AdminLanding from './components/AdminLanding/AdminLanding';
 import CustomerProfile from './components/CustomerProfile/CustomerProfile';
 import ProjectLogs from './components/ProjectLogs/ProjectLogs';
+import ProtectedRoute from './components/auth/protectedroute';
 
 
 const router = createBrowserRouter([
@@ -72,7 +73,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/project-list",
-    element: <Projects />,
+    element: <ProtectedRoute><Projects /></ProtectedRoute>,
   },
   {
     path: "/project-logs",
