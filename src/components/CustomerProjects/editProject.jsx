@@ -20,37 +20,21 @@ const EditProject = ({
   isAdminUser,
   customerID,
 }) => {
-  const [projectType, setProjectType] = useState("commercial");
   const typeaheadRef = useRef(null);
-  const [projectName, setProjectName] = useState({ value: "", errors: "" });
+  const [projectName, setProjectName] = useState({ value: project?.project_name, errors: "" });
   const [leadContact, setLeadContact] = useState({
-    value: "",
-    label: "",
-    email: "",
+    value: project?.owner?.id,
+    label: project?.owner?.display_name,
+    email: project?.owner?.email,
   });
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(project?.start_date);
+  const [endDate, setEndDate] = useState(project?.end_date);
   const [employeeList, setEmployeeList] = useState([]);
-  const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
+  const [selectedEmployeeList, setSelectedEmployeeList] = useState(project?.employee_list);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!modal) {
-      setProjectName({ value: "", errors: "" });
-      setLeadContact({
-        value: "",
-        label: "",
-        email: "",
-      });
-      typeaheadRef?.current?.clear();
-      setStartDate("");
-      setEndDate("");
-      setEmployeeList([]);
-      setSelectedEmployeeList([]);
-    }
-  }, [modal, typeaheadRef]);
-
-  useEffect(() => {
+    console.log("leadContact", leadContact)
     if (modal) {
       const preSelectEmployeesForProject = async () => {
         setIsLoading(true);
@@ -215,7 +199,7 @@ const EditProject = ({
                           };
                         })}
                         onChange={(e) => setLeadContact(e)}
-                        selected={leadContact?.label}
+                        selected={[leadContact]}
                       />
 
                       <label className="text-label">{"Lead Contact"}</label>
@@ -270,16 +254,10 @@ const EditProject = ({
                     />
                   </div>
                 </div>
-                {/* <div className="col-4">
-                    <div className="form-group">
-                      <SelectDropdown label={'Project Type'} labelKey="name" />
-                    </div>
-                  </div> */}
                 <div className="users-section">
                   <div className="form-group">
                     <Typeahead
                       multiple
-                      value={selectedEmployeeList}
                       selected={selectedEmployeeList}
                       onChange={setSelectedEmployeeList}
                       options={employeeList.map((employee) => {

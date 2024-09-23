@@ -2,7 +2,7 @@ import {useState, useEffect, ReactNode} from 'react';
 import {AuthContext} from "./authcontext";
 import {getCurrentUserData, getAuthTokenFromRefreshToken} from "../api/Authentication/api";
 
-export const AuthProvider = ({ children }: {children: ReactNode}) => {
+export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);

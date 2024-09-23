@@ -117,7 +117,7 @@ const Signin = (props) => {
           </div>
           <div className="form-helping-text">
             <p>
-              Don’t have credentials?
+              Don't have credentials?
               <br />
               Ask your administrator, or email{' '}
               <a href="mailto:support@thelink.ai">support@thelink.ai</a>

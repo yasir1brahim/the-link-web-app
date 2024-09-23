@@ -57,19 +57,19 @@ const router = createBrowserRouter([
   },
   {
     path: "/pdf-view",
-    element: <PdfWrapper />,
+    element: <ProtectedRoute><PdfWrapper /></ProtectedRoute>,
   },
   {
     path: "/admin-user",
-    element: <AdminUser />,
+    element: <ProtectedRoute><AdminUser /></ProtectedRoute>,
   },
   { 
     path: "/submital-mappings",
-    element: <SubmittalMappings />,
+    element: <ProtectedRoute><SubmittalMappings /></ProtectedRoute>,
   },
   {
     path: "/collaboration-hub",
-    element: <CollaborationHub />,
+    element: <ProtectedRoute><CollaborationHub /></ProtectedRoute>,
   },
   {
     path: "/project-list",
@@ -77,15 +77,15 @@ const router = createBrowserRouter([
   },
   {
     path: "/project-logs",
-    element: <ProjectLogs />,
+    element: <ProtectedRoute><ProjectLogs /></ProtectedRoute>,
   },
   {
     path: "/admin-landing",
-    element: <AdminLanding />,
+    element: <ProtectedRoute><AdminLanding /></ProtectedRoute>,
   },
   {
     path: "/customer-profile",
-    element: <CustomerProfile />,
+    element: <ProtectedRoute><CustomerProfile /></ProtectedRoute>,
   },
 ])
 
