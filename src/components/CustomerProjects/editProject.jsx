@@ -26,11 +26,10 @@ const EditProject = ({
 
   const typeaheadRef = useRef(null);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
-  const [leadContact, setLeadContact] = useState({
+  const [leadContact, setLeadContact] = useState([{
     value: "",
     label: "",
-    email: "",
-  });
+  }]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -42,11 +41,10 @@ const EditProject = ({
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: "", errors: "" });
-      setLeadContact({
+      setLeadContact([{
         value: "",
         label: "",
-        email: "",
-      });
+      }]);
       typeaheadRef?.current?.clear();
       setStartDate("");
       setEndDate("");
@@ -58,13 +56,19 @@ const EditProject = ({
 
   useEffect(() => {
     if (modal) {
+      console.log("leadContact", leadContact)
+      console.log("project", project)
+      console.log("customer.owner", project.owner)
       const preSelectEmployeesForProject = async () => {
         setIsLoading(true);
         // fetch employees for customer
         const resp_employees_by_customer = await getUsersByTeam(project?.team)
         const emps_by_c = resp_employees_by_customer.data.members
         if (emps_by_c) {
-          setFullEmployeeList(emps_by_c);
+          setFullEmployeeList(emps_by_c.map((emp) => ({
+            value: emp.user_id,
+            label: emp.display_name,
+          })));
         }
         const project_members = project?.members ? project.members : []
 
@@ -80,6 +84,7 @@ const EditProject = ({
             label: member.display_name,
           }
         }))
+        setLeadContact([{label: project?.owner?.get_display_name ?? "", value: project?.owner?.id ?? ""}])
         setIsLoading(false);
       };
 
@@ -197,15 +202,13 @@ const EditProject = ({
                       <Typeahead
                         id="employee-list"
                         ref={typeaheadRef}
-                        options={fullEmployeeList.map((employee) => {
-                          return {
-                            value: employee.user_id,
-                            label: employee.display_name,
-                            email: employee.email,
-                          };
-                        })}
+                        options={fullEmployeeList.map((employee) => ({
+                          value: employee.user_id,
+                          label: employee.display_name,
+                        }))}
+                        placeholder="Select Lead Contact"
                         onChange={(e) => setLeadContact(e)}
-                        selected={leadContact?.label}
+                        selected={leadContact}
                       />
 
                       <label className="text-label">{"Lead Contact"}</label>

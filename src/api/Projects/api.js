@@ -1,6 +1,6 @@
 import axiosInstance from "../../config/axios";
 import handleError from "../../config/errorHandler";
-
+import moment from "moment";
 const listProjects = async () => {
     try {
         return await axiosInstance({
@@ -37,10 +37,10 @@ const updateProject = async (projectId, projectName, leadContact, listOfMemberUs
         }))
     }
     if (startDate) {
-        payload.start_date = startDate
+        payload.start_date = moment(startDate).format("YYYY-MM-DD")
     }
     if (endDate) {
-        payload.end_date = endDate
+        payload.end_date = moment(endDate).format("YYYY-MM-DD")
     }
     try {
         return await axiosInstance({

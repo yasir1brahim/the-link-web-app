@@ -66,27 +66,6 @@ const CustomerProjects = ({
   // const customer = state;
   const roleId = localStorage.getItem("roleId");
 
-  // useEffect(() => {
-  //   const custId = customerId || state?.customer_id;
-  //   if (roleId !== "6" && roleId !== "7") {
-  //     const fetchData = async () => {
-  //       setLoading(true);
-  //       const response = await axiosInstance({
-  //         method: "get",
-  //         url: custId
-  //           ? `/customer/${custId}`
-  //           : `/customer/${localStorage.getItem("userId")}`,
-  //       });
-  //       setLoading(false);
-  //       setCustomerData(response.data.message[0]);
-  //       console.log(response.data.message);
-  //     };
-
-  //     fetchData().catch((error) => {
-  //       handleError(error);
-  //     });
-  //   }
-  // }, [state, pageRefresh, setCustomerData, roleId, customerId]);
 
   const handleEdit = (project) => {
     setProject(project);
