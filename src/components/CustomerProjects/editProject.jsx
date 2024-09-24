@@ -20,22 +20,30 @@ const EditProject = ({
   isAdminUser,
   customerID,
 }) => {
+  console.log("project", project)
+
   const typeaheadRef = useRef(null);
   const [projectName, setProjectName] = useState({ value: project?.project_name, errors: "" });
-  const [leadContact, setLeadContact] = useState({
-    value: project?.owner?.id,
-    label: project?.owner?.display_name,
-    email: project?.owner?.email,
-  });
-  const [startDate, setStartDate] = useState(project?.start_date);
-  const [endDate, setEndDate] = useState(project?.end_date);
+  const [leadContact, setLeadContact] = useState({value: "", label: "", email: ""});
+
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [employeeList, setEmployeeList] = useState([]);
-  const [selectedEmployeeList, setSelectedEmployeeList] = useState(project?.employee_list);
+  const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    console.log("leadContact", leadContact)
     if (modal) {
+      console.log(project)
+      setProjectName({ value: project?.project_name, errors: "" });
+      setLeadContact({ value: project?.owner?.id, label: project?.owner?.display_name, email: project?.owner?.email });
+      console.log("leadContact", leadContact)
+      setStartDate(project?.start_date ? new Date((project?.start_date).replaceAll("-", "/")) : null);
+      setEndDate(project?.end_date ? new Date((project?.end_date).replaceAll("-", "/")) : null);
+      setSelectedEmployeeList(project?.members ? project.members.map(member => ({
+        value: member.user_id,
+        label: member.display_name,
+      })) : []);
       const preSelectEmployeesForProject = async () => {
         setIsLoading(true);
         // fetch employees for customer
@@ -52,7 +60,7 @@ const EditProject = ({
 
       preSelectEmployeesForProject().catch(console.error);
     }
-  }, [customer, modal, project?.customer_id, customerID]);
+  }, [customer, modal, project]);
 
   const handleSubmit = async () => {
     let errors = false;
@@ -194,8 +202,8 @@ const EditProject = ({
                         ref={typeaheadRef}
                         options={employeeList.map((employee) => {
                           return {
-                            value: employee?.id,
-                            label: employee?.display_name,
+                            value: employee.user_id,
+                            label: employee.display_name,
                           };
                         })}
                         onChange={(e) => setLeadContact(e)}
@@ -262,7 +270,7 @@ const EditProject = ({
                       onChange={setSelectedEmployeeList}
                       options={employeeList.map((employee) => {
                         return {
-                          value: employee.id,
+                          value: employee.user_id,
                           label: employee.display_name,
                         };
                       })}
