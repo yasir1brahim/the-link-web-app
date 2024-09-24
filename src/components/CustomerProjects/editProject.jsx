@@ -65,26 +65,23 @@ const EditProject = ({
           setEmployeeList(emps_by_c);
         }
         const project_members = project?.members ? project.members : []
-        // pre-select employees for project
-        if (project_members.length > 0) {
-          if (emps_by_c.length > 0) {
-            const selected_emps = emps_by_c.filter((emp) => project_members.includes(emp.user_id));
-            if (selected_emps.length > 0) {
-              setSelectedEmployeeList(selected_emps.map((emp) => {
-                return {
-                  value: emp.user_id,
-                  label: emp.display_name,
-                };
-              }));
-            }
+
+        setSelectedEmployeeList(project_members.map((member) => {
+          return {
+            value: member.user_id,
+            label: member.display_name,
           }
-        }
+        }))
         setIsLoading(false);
       };
 
       preSelectEmployeesForProject().catch(console.error);
     }
   }, [customer, modal, project]);
+
+  useEffect(() => {
+    console.log("selectedEmployeeList", selectedEmployeeList)
+  }, [selectedEmployeeList])
 
   const handleSubmit = async () => {
     let errors = false;
@@ -262,6 +259,7 @@ const EditProject = ({
                   <div className="form-group">
                     <Typeahead
                       multiple
+                      value={selectedEmployeeList}
                       selected={selectedEmployeeList}
                       onChange={setSelectedEmployeeList}
                       options={employeeList.map((employee) => {
