@@ -199,6 +199,7 @@ export default function CombinedLogs(props) {
         textLoc: {},
         index: "",
         docId: null,
+        submittalId: null,
         additionalTextLocations: [],
       });
     } catch (error) {
@@ -277,7 +278,8 @@ export default function CombinedLogs(props) {
     pdfUrl,
     textLocation,
     rowIndex,
-    id,
+    docId,
+    submittalId,
     additionalTextLocations
   ) => {
     props.setPdfData({
@@ -285,9 +287,11 @@ export default function CombinedLogs(props) {
       url: pdfUrl,
       textLoc: textLocation,
       index: rowIndex,
-      docId: id,
+      docId: docId,
+      submittalId: submittalId,
       additionalTextLocations: additionalTextLocations,
     });
+    props.setSubmittalIdParam(submittalId);
   };
   const insertElement = (arr, index, newItem) => [
     // part of the array before the specified index
@@ -1009,8 +1013,10 @@ export default function CombinedLogs(props) {
                                 textLoc: {},
                                 index: "",
                                 docId: null,
+                                submittalId: null,
                                 additionalTextLocations: [],
-                              })
+                              });
+                              props.setSubmittalIdParam(null);
                             }}
                           >
                             Close Pdf
@@ -1026,6 +1032,7 @@ export default function CombinedLogs(props) {
                                     log.text_loc,
                                     index,
                                     log.doc_id,
+                                    log.id,
                                     log.additional_text_locations,
                                   );
                                   props.setLogInViewer(log);
