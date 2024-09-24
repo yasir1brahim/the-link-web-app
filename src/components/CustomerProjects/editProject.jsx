@@ -9,6 +9,8 @@ import handleError from "../../config/errorHandler";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { CircularProgress } from "@mui/material";
+import { getUsersByTeam } from "../../api/Authentication/api";
+import { updateProject } from "../../api/Projects/api";
 
 const EditProject = ({
   modal,
@@ -23,37 +25,59 @@ const EditProject = ({
   console.log("project", project)
 
   const typeaheadRef = useRef(null);
-  const [projectName, setProjectName] = useState({ value: project?.project_name, errors: "" });
-  const [leadContact, setLeadContact] = useState({value: "", label: "", email: ""});
+  const [projectName, setProjectName] = useState({ value: "", errors: "" });
+  const [leadContact, setLeadContact] = useState({
+    value: "",
+    label: "",
+    email: "",
+  });
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
   const [employeeList, setEmployeeList] = useState([]);
   const [selectedEmployeeList, setSelectedEmployeeList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    if (!modal) {
+      setProjectName({ value: "", errors: "" });
+      setLeadContact({
+        value: "",
+        label: "",
+        email: "",
+      });
+      typeaheadRef?.current?.clear();
+      setStartDate("");
+      setEndDate("");
+      setEmployeeList([]);
+      setSelectedEmployeeList([]);
+    }
+  }, [modal, typeaheadRef]);
+
+  useEffect(() => {
     if (modal) {
-      console.log(project)
-      setProjectName({ value: project?.project_name, errors: "" });
-      setLeadContact({ value: project?.owner?.id, label: project?.owner?.display_name, email: project?.owner?.email });
-      console.log("leadContact", leadContact)
-      setStartDate(project?.start_date ? new Date((project?.start_date).replaceAll("-", "/")) : null);
-      setEndDate(project?.end_date ? new Date((project?.end_date).replaceAll("-", "/")) : null);
-      setSelectedEmployeeList(project?.members ? project.members.map(member => ({
-        value: member.user_id,
-        label: member.display_name,
-      })) : []);
       const preSelectEmployeesForProject = async () => {
         setIsLoading(true);
         // fetch employees for customer
-        const resp_employees_by_customer = await axiosInstance({
-          method: "get",
-          url: `/teams/api/teams/${project?.team}`,
-        });
+        const resp_employees_by_customer = await getUsersByTeam(project?.team)
         const emps_by_c = resp_employees_by_customer.data.members
         if (emps_by_c) {
           setEmployeeList(emps_by_c);
+        }
+        const project_members = project?.members ? project.members : []
+        // pre-select employees for project
+        if (project_members.length > 0) {
+          if (emps_by_c.length > 0) {
+            const selected_emps = emps_by_c.filter((emp) => project_members.includes(emp.user_id));
+            if (selected_emps.length > 0) {
+              setSelectedEmployeeList(selected_emps.map((emp) => {
+                return {
+                  value: emp.user_id,
+                  label: emp.display_name,
+                };
+              }));
+            }
+          }
         }
         setIsLoading(false);
       };
@@ -66,44 +90,15 @@ const EditProject = ({
     let errors = false;
     if (!errors) {
       try {
-        const response = await axiosInstance({
-          method: "put",
-          url: "/updateProject",
-          data: {
-            project_name: projectName.value || project?.project_name,
-            lead_contact: leadContact[0]
-              ? leadContact[0].value
-              : employeeList.find(
-                  (employee) => employee.name === project?.lead_contact,
-                )?.emp_id,
-            employee_list: selectedEmployeeList.map(
-              (employee) => employee.value,
-            ),
-            start_date: startDate
-              ? moment(startDate).format("YYYY-MM-DD")
-              : project?.start_date
-              ? moment(
-                  new Date((project?.start_date).replaceAll("-", "/")),
-                ).format("YYYY-MM-DD")
-              : "",
-            end_date: endDate
-              ? moment(endDate).format("YYYY-MM-DD")
-              : project?.end_date
-              ? moment(
-                  new Date((project?.end_date).replaceAll("-", "/")),
-                ).format("YYYY-MM-DD")
-              : "",
-            customer_id:
-              customerID ||
-              customer?.customer_id ||
-              customer?.id ||
-              project?.customer_id ||
-              customer[0]?.id ||
-              localStorage.getItem("userId"),
-            status: "Open",
-            project_id: project?.project_id,
-          },
-        });
+        const response = await updateProject(
+          project?.id,
+          projectName.value || project?.project_name, 
+          leadContact[0] ? leadContact[0].value : project?.owner, 
+          selectedEmployeeList.map((emp) => emp.value), 
+          startDate, 
+          endDate
+        )
+        
         if (response.data) {
           console.log(response.data);
           setPageRefresh(!pageRefresh);
@@ -204,10 +199,11 @@ const EditProject = ({
                           return {
                             value: employee.user_id,
                             label: employee.display_name,
+                            email: employee.email,
                           };
                         })}
                         onChange={(e) => setLeadContact(e)}
-                        selected={[leadContact]}
+                        selected={leadContact?.label}
                       />
 
                       <label className="text-label">{"Lead Contact"}</label>

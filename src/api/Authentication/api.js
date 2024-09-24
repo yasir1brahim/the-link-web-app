@@ -34,4 +34,12 @@ const getCurrentUserData = async () => {
 }
 
 
-export {login, getAuthTokenFromRefreshToken, getCurrentUserData}
+const getUsersByTeam = async (teamId) => {
+    return await axiosInstance({
+        method: 'get',
+        url: `/teams/api/teams/${teamId}`,
+    });
+}
+
+
+export {login, getAuthTokenFromRefreshToken, getCurrentUserData, getUsersByTeam}
