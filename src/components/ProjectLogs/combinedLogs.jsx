@@ -609,7 +609,7 @@ export default function CombinedLogs(props) {
               >
                 <span className="has-sorting">
                   <div className="d-flex">
-                    Submittal Heading{" "}
+                    Submittal Type{" "}
                     <span
                       style={{ cursor: "pointer", marginLeft: "6px" }}
                       onClick={() => handleSorting("type")}
@@ -698,7 +698,7 @@ export default function CombinedLogs(props) {
             <th className="small-font" style={{ width: `${tableWidths[6]}px` }}>
               <span className="has-sorting">
                 <div className="d-flex">
-                  Submittal Type
+                  Submittal Title
                   <span
                     style={{ cursor: "pointer", marginLeft: "6px" }}
                     onClick={() => handleSorting("item_desc")}
