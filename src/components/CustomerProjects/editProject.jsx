@@ -54,11 +54,9 @@ const EditProject = ({
     }
   }, [modal, typeaheadRef]);
 
+
   useEffect(() => {
     if (modal) {
-      console.log("leadContact", leadContact)
-      console.log("project", project)
-      console.log("customer.owner", project.owner)
       const preSelectEmployeesForProject = async () => {
         setIsLoading(true);
         // fetch employees for customer
@@ -66,8 +64,8 @@ const EditProject = ({
         const emps_by_c = resp_employees_by_customer.data.members
         if (emps_by_c) {
           setFullEmployeeList(emps_by_c.map((emp) => ({
-            value: emp.user_id,
-            label: emp.display_name,
+            value: emp.user_id ?? "",
+            label: emp.display_name ?? "",
           })));
         }
         const project_members = project?.members ? project.members : []
@@ -87,7 +85,7 @@ const EditProject = ({
         setLeadContact([{label: project?.owner?.get_display_name ?? "", value: project?.owner?.id ?? ""}])
         setIsLoading(false);
       };
-
+      console.log("fullEmployeeList", fullEmployeeList)
       preSelectEmployeesForProject().catch(console.error);
     }
   }, [customer, modal, project]);
@@ -202,13 +200,12 @@ const EditProject = ({
                       <Typeahead
                         id="employee-list"
                         ref={typeaheadRef}
-                        options={fullEmployeeList.map((employee) => ({
-                          value: employee.user_id,
-                          label: employee.display_name,
-                        }))}
+                        options={fullEmployeeList}
                         placeholder="Select Lead Contact"
                         onChange={(e) => setLeadContact(e)}
                         selected={leadContact}
+                        filterBy={["label"]} // Use only string fields for filtering
+                        labelKey="label"
                       />
 
                       <label className="text-label">{"Lead Contact"}</label>

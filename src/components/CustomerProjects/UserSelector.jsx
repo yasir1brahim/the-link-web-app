@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { CircularProgress } from '@mui/material';
 
@@ -10,12 +11,11 @@ const UserSelector = ({ selectedUsers, setSelectedUsers, employeeList, isLoading
             multiple
             selected={selectedUsers}
             onChange={setSelectedUsers}
-            options={employeeList.map((employee) => ({
-                value: employee.user_id,
-                label: employee.display_name,
-            }))}
+            options={employeeList}
             placeholder={placeholderText}
             id="add-employees"
+            filterBy={["label"]} // Use only string fields for filtering
+            labelKey="label"
         />
         </div>
         <span className="icon-locate">
@@ -53,5 +53,23 @@ const UserSelector = ({ selectedUsers, setSelectedUsers, employeeList, isLoading
     </div>
     );
 };
+
+UserSelector.propTypes = {
+    selectedUsers: PropTypes.arrayOf(
+      PropTypes.shape({
+        label: PropTypes.string.isRequired,
+        value: PropTypes.number.isRequired,
+      })
+    ).isRequired,
+    setSelectedUsers: PropTypes.func.isRequired,
+    employeeList: PropTypes.arrayOf(
+      PropTypes.shape({
+        label: PropTypes.string.isRequired,
+        value: PropTypes.number.isRequired,
+      })
+    ).isRequired,
+    isLoading: PropTypes.bool.isRequired,
+    placeholderText: PropTypes.string,
+  };
 
 export default UserSelector;
