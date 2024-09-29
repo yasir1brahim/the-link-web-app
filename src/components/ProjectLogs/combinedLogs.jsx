@@ -453,6 +453,11 @@ export default function CombinedLogs(props) {
     return specSection.slice(0, 2) + " " + specSection.slice(2);
   };
 
+  const formatSubmittalNumber = (number) => {
+    const str = number.toString();
+    return str.endsWith('.0') ? str.slice(0, -2) : str;
+  };
+
   useEffect(() => {
     if (logRowRefs.current[props.pdfData.index]) {
       const rowElement = logRowRefs.current[props.pdfData.index];
@@ -1141,7 +1146,7 @@ export default function CombinedLogs(props) {
                     editRow === index ? "activeTh" : ""
                   } reduce-height`}
                 >
-                  {log.submittal_number}
+                  {formatSubmittalNumber(log.submittal_number)}
                 </td>
 
                 <td
