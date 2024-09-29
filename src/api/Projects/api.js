@@ -1,11 +1,14 @@
 import axiosInstance from "../../config/axios";
 import handleError from "../../config/errorHandler";
 import moment from "moment";
-const listProjects = async () => {
+const listProjects = async (teamId) => {
     try {
         return await axiosInstance({
             method: 'get',
-            url: '/api/deliverables/projects/',
+            url: `/api/deliverables/projects/`,
+            params: {
+                team_id: teamId
+            }
         });
     } catch (error) {
         handleError(error);

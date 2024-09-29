@@ -41,5 +41,22 @@ const getUsersByTeam = async (teamId) => {
     });
 }
 
+const getUserTeams = async (accessToken) => {
+    if (accessToken) {
+        return await axiosInstance({
+            method: 'get',
+            url: '/teams/api/teams/',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+    } else {
+        return await axiosInstance({
+            method: 'get',
+            url: '/teams/api/teams/',
+        });
+    }
+}
 
-export {login, getAuthTokenFromRefreshToken, getCurrentUserData, getUsersByTeam}
+
+export {login, getAuthTokenFromRefreshToken, getCurrentUserData, getUsersByTeam, getUserTeams}

@@ -6,7 +6,7 @@ import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
-import { login } from '../../api/Authentication/api'
+import { login, getUserTeams } from '../../api/Authentication/api'
 import { AuthContext } from '../../auth/authcontext';
 
 
@@ -41,7 +41,14 @@ const Signin = (props) => {
       console.log(response);
       if (response.data.status === 'success') {
         setUserDetails(response.data.jwt);
-        return history({ pathname: '/project-list' });
+        const teams = await getUserTeams();
+        console.log(teams);
+        if (teams.data.results.length === 1) {
+          localStorage.setItem('currentTeamId', teams.data.results[0].id);
+          const teamId = teams.data[0].id;
+          return history({ pathname: `/project-list/${teamId}` });
+        }
+        return history({ pathname: '/companies' });
       }
     }
   };

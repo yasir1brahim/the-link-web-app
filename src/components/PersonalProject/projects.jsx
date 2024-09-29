@@ -10,6 +10,7 @@ import axiosInstance from "../../config/axios";
 import handleError from "../../config/errorHandler";
 import HeaderTabs from "../shared/HeaderTabs/HeaderTabs";
 import { listProjects } from "../../api/Projects/api";
+import { useParams } from 'react-router-dom';
 
 const Projects = () => {
   const navigate = useNavigate();
@@ -35,8 +36,9 @@ const Projects = () => {
   const toggleArchiveProjectModal = () => setArchiveProjectModal(!archiveProjectModal);
   const toggleRestoreProjectModal = () => setRestoreProjectModal(!restoreProjectModal);
   const [toggleUploadSpecsButton, setToggleUploadSpecsButton] = useState(true);
-  const [searchParams] = useSearchParams();
-  const customerId = searchParams.get("id");
+  const { teamId } = useParams();
+
+  const customerId = teamId;
 
   useEffect(() => {
     if (!uploadSpecsModal) {
@@ -119,7 +121,7 @@ const Projects = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await listProjects();
+      const response = await listProjects(teamId);
       setProjectData(
         isArchived ? response.data.archived_projects : response.data.results,
       );
