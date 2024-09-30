@@ -1181,7 +1181,7 @@ export default function CombinedLogs(props) {
                       editRow === index ? 'activeTh' : ''
                     } reduce-height`}
                   >
-                    {log.section_title} <br /> {log.id}
+                    {log.section_title}
                   </td>
                 )}
                 {props.projectType === "ufgs" && (
