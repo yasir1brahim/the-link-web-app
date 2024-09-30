@@ -454,7 +454,8 @@ export default function CombinedLogs(props) {
   };
 
   const formatSubmittalNumber = (number) => {
-    const str = number.toString();
+    const nonNullNumber = number ?? "";
+    const str = nonNullNumber.toString();
     return str.endsWith('.0') ? str.slice(0, -2) : str;
   };
 
