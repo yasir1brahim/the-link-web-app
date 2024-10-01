@@ -24,7 +24,6 @@ const BaseProjectForm = ({
     formTitle,
     toggleModal,
     modal,
-    isAdminUser,
     typeaheadRef,
     isLoading,
 }) => {
@@ -33,8 +32,7 @@ const BaseProjectForm = ({
             <div
                 className={
                 "create-new-lproject" +
-                (modal ? " show-lproject-popup " : "") +
-                (isAdminUser ? " edit-new-lproject " : "")
+                (modal ? " show-lproject-popup " : "")
                 }
             >
                 <div className="lproject-backdrop"></div>
@@ -60,146 +58,121 @@ const BaseProjectForm = ({
                 </div>
                 <div className="lproject-body">
                     <form className="create-project-form">
-                    <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
-                        {!isAdminUser && (
-                        <>
-                            {/* <div className="customer-dp-container"><img src={WhitingTurner} alt="Company Logo" /></div> */}
-                            {/* <div className="customer-profile">
-                            <div className="row">
-                                <div className="col-12">
-                                <div className="text-label-value">
-                                    <div className="text-value">{customer?.customer_name}</div>
-                                </div>
-                                </div>
-                                <div className="col-12">
-                                <div className="text-label-value">
-                                    <div className="text-label">{customer?.address}</div>
-                                </div>
-                                </div>
-                                <div className="col-12">
-                                <div className="text-label-value">
-                                    <div className="text-label">{customer?.contact_number}</div>
-                                </div>
-                                </div>
-                            </div>
-                            </div> */}
-                        </>
-                        )}
-                    </div>
-                    <div className="create-project-content">
-                        <div className="form-group">
-                        <input
-                            type="text"
-                            className="form-control"
-                            id="customerProjectName"
-                            aria-describedby="customerProjectName"
-                            placeholder="Enter"
-                            defaultValue={project?.name}
-                            onChange={(e) => {
-                            setProjectName({
-                                ...projectName,
-                                value: e.target.value,
-                            });
-                            }}
-                        />
-                        <label className="text-label" htmlFor="customerProjectName">
-                            Project Name
-                        </label>
-                        </div>
-                        <div style={{ gap: "25px" }} className="d-flex">
-                        <div className="form-group">
-                            <div className={`has-typehead`}>
-                            <Typeahead
-                                id="employee-list"
-                                ref={typeaheadRef}
-                                options={fullEmployeeList}
-                                placeholder="Select Lead Contact"
-                                onChange={(e) => setLeadContact(e)}
-                                selected={leadContact}
-                                filterBy={["label"]} // Use only string fields for filtering
-                                labelKey="label"
+                    
+                        <div className="create-project-content">
+                            <div className="form-group">
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="customerProjectName"
+                                aria-describedby="customerProjectName"
+                                placeholder="Enter"
+                                defaultValue={project?.name}
+                                onChange={(e) => {
+                                setProjectName({
+                                    ...projectName,
+                                    value: e.target.value,
+                                });
+                                }}
                             />
-
-                            <label className="text-label">{"Lead Contact"}</label>
-                            <i className="has-icon icon-dropdown"></i>
-                            </div>
-                            {!leadContact[0]?.label ? (
-                            <label className="text-label typehead-label">
-                                {project?.owner?.display_name}
+                            <label className="text-label" htmlFor="customerProjectName">
+                                Project Name
                             </label>
-                            ) : null}
-                        </div>
-                        </div>
-                        <div style={{ gap: "25px" }} className="d-flex">
-                        <div className="form-group">
-                            <DateSelector
-                            isClearable={false}
-                            placeholderText="Start Date"
-                            labelText="Start Date"
-                            onChange={setStartDate}
-                            // selected={
-                            //   project.start_date
-                            //     ? moment(project.start_date, 'DD-MM-YYYY')
-                            //     : null
-                            // }
-                            selected={
-                                startDate
-                                ? startDate
-                                : project?.start_date
-                                ? new Date((project?.start_date).replaceAll("-", "/"))
-                                : ""
-                            }
-                            />
-                        </div>
-                        <div className="form-group">
-                            <DateSelector
-                            isClearable={false}
-                            placeholderText="End Date"
-                            labelText="End Date"
-                            onChange={setEndDate}
-                            // selected={
-                            //   project.end_date
-                            //     ? moment(project.end_date, 'DD-MM-YYYY')
-                            //     : null
-                            // }
-                            selected={
-                                endDate
-                                ? endDate
-                                : project?.end_date
-                                ? new Date((project?.end_date).replaceAll("-", "/"))
-                                : ""
-                            }
-                            />
-                        </div>
-                        </div>
-                        <h6>Project Admins</h6>
-                        <UserSelector selectedUsers={selectedAdminMembersList} setSelectedUsers={setSelectedAdminMembersList} employeeList={fullEmployeeList} isLoading={isLoading} placeholderText={"Add Project Admins"} />
+                            </div>
+                            <div style={{ gap: "25px" }} className="d-flex">
+                            <div className="form-group">
+                                <div className={`has-typehead`}>
+                                <Typeahead
+                                    id="employee-list"
+                                    ref={typeaheadRef}
+                                    options={fullEmployeeList}
+                                    placeholder="Select Lead Contact"
+                                    onChange={(e) => setLeadContact(e)}
+                                    selected={leadContact}
+                                    filterBy={["label"]} // Use only string fields for filtering
+                                    labelKey="label"
+                                />
 
-                        <h6>Project Members</h6>
-                        <UserSelector selectedUsers={selectedStandardMembersList} setSelectedUsers={setSelectedStandardMembersList} employeeList={fullEmployeeList} isLoading={isLoading} placeholderText={"Add Project Members"} />
-                    </div>
-                    <div className="lproject-footer">
-                        <button
-                        style={{ background: "#D5E73E", color: "#0E2332" }}
-                        className="btn btn-primary"
-                        type="button"
-                        onClick={handleSubmit}
-                        >
-                        Save
-                        </button>{" "}
-                        <button
-                        style={{
-                            border: "1px solid #D1D5DB",
-                            color: "#36454F",
-                            background: "white",
-                        }}
-                        className="btn btn-secondary"
-                        type="button"
-                        onClick={toggleModal}
-                        >
-                        Cancel
-                        </button>
-                    </div>
+                                <label className="text-label">{"Lead Contact"}</label>
+                                <i className="has-icon icon-dropdown"></i>
+                                </div>
+                                {!leadContact[0]?.label ? (
+                                <label className="text-label typehead-label">
+                                    {project?.owner?.display_name}
+                                </label>
+                                ) : null}
+                            </div>
+                            </div>
+                            <div style={{ gap: "25px" }} className="d-flex">
+                            <div className="form-group">
+                                <DateSelector
+                                isClearable={false}
+                                placeholderText="Start Date"
+                                labelText="Start Date"
+                                onChange={setStartDate}
+                                // selected={
+                                //   project.start_date
+                                //     ? moment(project.start_date, 'DD-MM-YYYY')
+                                //     : null
+                                // }
+                                selected={
+                                    startDate
+                                    ? startDate
+                                    : project?.start_date
+                                    ? new Date((project?.start_date).replaceAll("-", "/"))
+                                    : ""
+                                }
+                                />
+                            </div>
+                            <div className="form-group">
+                                <DateSelector
+                                isClearable={false}
+                                placeholderText="End Date"
+                                labelText="End Date"
+                                onChange={setEndDate}
+                                // selected={
+                                //   project.end_date
+                                //     ? moment(project.end_date, 'DD-MM-YYYY')
+                                //     : null
+                                // }
+                                selected={
+                                    endDate
+                                    ? endDate
+                                    : project?.end_date
+                                    ? new Date((project?.end_date).replaceAll("-", "/"))
+                                    : ""
+                                }
+                                />
+                            </div>
+                            </div>
+                            <h6>Project Admins</h6>
+                            <UserSelector selectedUsers={selectedAdminMembersList} setSelectedUsers={setSelectedAdminMembersList} employeeList={fullEmployeeList} isLoading={isLoading} placeholderText={"Add Project Admins"} />
+
+                            <h6>Project Members</h6>
+                            <UserSelector selectedUsers={selectedStandardMembersList} setSelectedUsers={setSelectedStandardMembersList} employeeList={fullEmployeeList} isLoading={isLoading} placeholderText={"Add Project Members"} />
+                        </div>
+                        <div className="lproject-footer">
+                            <button
+                            style={{ background: "#D5E73E", color: "#0E2332" }}
+                            className="btn btn-primary"
+                            type="button"
+                            onClick={handleSubmit}
+                            >
+                            Save
+                            </button>{" "}
+                            <button
+                            style={{
+                                border: "1px solid #D1D5DB",
+                                color: "#36454F",
+                                background: "white",
+                            }}
+                            className="btn btn-secondary"
+                            type="button"
+                            onClick={toggleModal}
+                            >
+                            Cancel
+                            </button>
+                        </div>
                     </form>
                 </div>
                 </div>
