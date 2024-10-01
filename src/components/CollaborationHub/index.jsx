@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
-// import PersonalProject from "./PersonalProject";
 import { useSearchParams } from 'react-router-dom';
 import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
 import axiosInstance from '../../config/axios';

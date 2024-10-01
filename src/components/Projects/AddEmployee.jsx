@@ -4,7 +4,7 @@ import axiosInstance from "../../config/axios";
 import { toast } from "react-toastify";
 import Loader from "../shared/Loader/Loader";
 
-export const AddNewEmp = (props) => {
+export const AddEmployee = (props) => {
   const [email, setEmail] = useState({ value: "", errors: "" });
   const [firstName, setFirstName] = useState({ value: "", errors: "" });
   const [lastName, setLastName] = useState({ value: "", errors: "" });
@@ -109,7 +109,9 @@ export const AddNewEmp = (props) => {
           />
         </svg>
       </div>
-      <div style={{ gap: "20px" }} className="d-flex">
+      <form>
+
+      <div style={{ gap: "20px" }} className="d-flex create-project-form create-project-content">
         <div className="form-group">
           <input
             type="text"
@@ -126,10 +128,12 @@ export const AddNewEmp = (props) => {
               });
             }}
           />
-          <label className="text-label" htmlFor="userFirstName">
+          <label htmlFor="userFirstName">
             First Name
           </label>
         </div>
+      </div>
+      <div>
         <div className="form-group">
           <input
             type="text"
@@ -179,6 +183,7 @@ export const AddNewEmp = (props) => {
       <Button color="primary" onClick={handleSubmit}>
         Create
       </Button>{" "}
+      </form>
       {isLoading && <Loader showComponentLoader={true} />}
     </div>
   );
