@@ -19,6 +19,7 @@ import { useSearchParams } from "react-router-dom";
 import Procore from "./procore";
 import ManageProcore from "./manageProcore";
 import { ReactComponent as SearchIcon } from "../../assets/images/search.svg";
+import { ReactComponent as MergeIcon } from "../../assets/images/merge.svg";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
@@ -59,6 +60,13 @@ const ProjectLogs = () => {
       ? []
       : JSON.parse(localStorage?.getItem("selectedRows"))
   );
+
+    // region log combining
+  const [isCombining, setIsCombining] = useState(false);
+  const [combiningQueue, setCombiningQueue] = useState([]);
+  const [combiningResult, setCombiningResult] = useState({_meta: {}});
+  // endregion log combining
+
   const [pageRefresh, setPageRefresh] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   // const [currentItems, setCurrentItems] = useState([]);
@@ -343,13 +351,60 @@ const ProjectLogs = () => {
     [setSearchValue, logData, newRowIndex]
   );
 
-  const handleSelect = (id) => {
-    if (selected.includes(id)) {
-      let selectedLogs = selected.filter((logId) => logId !== id);
-      setSelected(selectedLogs);
-    } else {
-      setSelected([...selected, id]);
+  const areSameValues = (key) => {
+    return combiningQueue.every((log) => log[key] === combiningQueue[0][key]);
+  }
+
+  const updateCombiningQueue = (selectedIds, force = false) => {
+    const newQueue = [];
+
+    if (isCombining || force) {
+      selectedIds.forEach((id) => {
+        const index = logData.findIndex((log) => log.id === id);
+        const queueItem = {...logData[index], index}
+        newQueue.push(queueItem);
+      });
+
+      newQueue.sort((a, b) => a.index - b.index);
     }
+
+    setCombiningQueue(newQueue)
+    if (!newQueue.length) {
+      setCombiningResult({_meta: {}})
+    }
+
+    // Reset values to default if they become homogenous again
+    if (newQueue) {
+      const newValue = {...combiningResult};
+
+      // Submittal Type & Submittal Title should have the top value as default
+      ['type', 'item_desc', 'para_no', 'spec_section'].forEach((key) => {
+        newValue[key] = newQueue[0][key];
+      })
+
+      // Submittal Description should just be joined with newlines
+      newValue['para_context'] = newQueue.map((log) => log.para_context);
+
+      setCombiningResult(newValue);
+    }
+  }
+
+  const handleSelect = (id) => {
+    let selectedLogs
+
+    if (selected.includes(id)) {
+      selectedLogs = selected.filter((logId) => logId !== id);
+    } else {
+      selectedLogs = [...selected, id]
+    }
+    setSelected(selectedLogs);
+
+    // If the user was combining, and then unselected everything, get out of the
+    // combining mode
+    if (selectedLogs.length === 0) {
+      setIsCombining(false)
+    }
+    updateCombiningQueue(selectedLogs)
   };
 
   const selectedRows =
@@ -671,6 +726,10 @@ const ProjectLogs = () => {
   const handleSelectAll = () => {
     setIsSelectAll(!isSelectAll);
     setSelected(isSelectAll ? [] : logIdList);
+
+    if (selected?.length === 0) {
+      setIsCombining(false)
+    }
   };
 
   const documentIsProcessing = (documents) =>
@@ -1081,34 +1140,51 @@ const ProjectLogs = () => {
                           <span>Clear Selection</span>
                         </button>
                       ) : null}
-                      {listId === null
-                        ? selected?.length > 0 && (
+
+                      {listId === null && selected?.length > 0 && (
+                      <div className="d-flex">
+                        <button
+                          type="button"
+                          className="table-top-btn btn-disabled selection-btn"
+                          onClick={toggleSaveListName}
+                          disabled={selected?.length === 0}
+                        >
+                          <svg
+                            width="14"
+                            height="18"
+                            viewBox="0 0 14 18"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M1.16683 0.666748H12.8335C13.0545 0.666748 13.2665 0.754545 13.4228 0.910826C13.579 1.06711 13.6668 1.27907 13.6668 1.50008V17.4526C13.6669 17.5271 13.647 17.6003 13.6092 17.6645C13.5715 17.7287 13.5171 17.7816 13.4519 17.8176C13.3868 17.8537 13.3131 17.8717 13.2386 17.8696C13.1641 17.8675 13.0916 17.8456 13.0285 17.8059L7.00016 14.0251L0.971829 17.8051C0.908803 17.8447 0.836319 17.8667 0.761914 17.8688C0.68751 17.8709 0.613901 17.853 0.548742 17.817C0.483583 17.781 0.429252 17.7283 0.391398 17.6642C0.353545 17.6001 0.333551 17.527 0.333496 17.4526V1.50008C0.333496 1.27907 0.421294 1.06711 0.577574 0.910826C0.733854 0.754545 0.945816 0.666748 1.16683 0.666748ZM12.0002 2.33341H2.00016V15.1934L7.00016 12.0592L12.0002 15.1934V2.33341Z"
+                              fill={
+                                selected?.length === 0
+                                  ? '#374151'
+                                  : '#0E2332'
+                              }
+                            />
+                          </svg>
+                          <span>Save Selection</span>
+                        </button>
+
+                        {!isSelectAll && (
                           <button
                             type="button"
-                            className="table-top-btn btn-disabled selection-btn"
-                            onClick={toggleSaveListName}
-                            disabled={selected?.length === 0}
+                            className="table-top-btn btn-disabled selection-btn ml-2"
+                            onClick={() => {
+                              setIsCombining(value => !value);
+                              updateCombiningQueue(selected, true);
+                            }}
+                            disabled={editRow}
                           >
-                            <svg
-                              width="14"
-                              height="18"
-                              viewBox="0 0 14 18"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.16683 0.666748H12.8335C13.0545 0.666748 13.2665 0.754545 13.4228 0.910826C13.579 1.06711 13.6668 1.27907 13.6668 1.50008V17.4526C13.6669 17.5271 13.647 17.6003 13.6092 17.6645C13.5715 17.7287 13.5171 17.7816 13.4519 17.8176C13.3868 17.8537 13.3131 17.8717 13.2386 17.8696C13.1641 17.8675 13.0916 17.8456 13.0285 17.8059L7.00016 14.0251L0.971829 17.8051C0.908803 17.8447 0.836319 17.8667 0.761914 17.8688C0.68751 17.8709 0.613901 17.853 0.548742 17.817C0.483583 17.781 0.429252 17.7283 0.391398 17.6642C0.353545 17.6001 0.333551 17.527 0.333496 17.4526V1.50008C0.333496 1.27907 0.421294 1.06711 0.577574 0.910826C0.733854 0.754545 0.945816 0.666748 1.16683 0.666748ZM12.0002 2.33341H2.00016V15.1934L7.00016 12.0592L12.0002 15.1934V2.33341Z"
-                                fill={
-                                  selected?.length === 0
-                                    ? "#374151"
-                                    : "#0E2332"
-                                }
-                              />
-                            </svg>
-                            <span>Save Selection</span>
+                            <MergeIcon />
+                            <span>
+                              {isCombining ? 'Stop Combining' : 'Combine Rows'}
+                            </span>
                           </button>
-                          )
-                        : null}
+                        )}
+                      </div>)}
                     </div>
                     <div className="col-6 p-0">
                       {logInViewer &&
@@ -1224,6 +1300,7 @@ const ProjectLogs = () => {
                     handleSelectAll={handleSelectAll}
                     pageRefresh={pageRefresh}
                     setPageRefresh={setPageRefresh}
+                    setLoading={setLoading}
                     customerId={state?.customerId || customerId}
                     groupingData={groupingData}
                     setLogData={setLogData}
@@ -1253,6 +1330,14 @@ const ProjectLogs = () => {
                     isSelectAll={isSelectAll}
                     setSelected={setSelected}
                     loading={loadingView}
+                    isCombining={isCombining}
+                    setIsCombining={setIsCombining}
+                    combiningQueue={combiningQueue}
+                    setCombiningQueue={setCombiningQueue}
+                    updateCombiningQueue={updateCombiningQueue}
+                    combiningResult={combiningResult}
+                    setCombiningResult={setCombiningResult}
+                    areSameValues={areSameValues}
                   />
                   {pdfData.url && (
                     <div style={{ display: "flex", gap: 10 }}>
