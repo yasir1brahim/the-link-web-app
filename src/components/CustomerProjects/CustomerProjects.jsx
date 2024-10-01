@@ -13,7 +13,7 @@ import { useLocation } from "react-router-dom";
 import CreateProject from "./createProject";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import EditProject from "./editProject";
+import CreateOrEditProject from "./editProject";
 import CreateEmployee from "../CustomerProfile/createEmployee";
 import moment from "moment";
 import handleError from "../../config/errorHandler";
@@ -545,7 +545,7 @@ const CustomerProjects = ({
             setPageRefresh={setPageRefresh}
             customerID={customerId}
           />
-          <EditProject
+          <CreateOrEditProject
             modal={editModal}
             toggleModal={toggleEditModal}
             customer={state || customerData}
