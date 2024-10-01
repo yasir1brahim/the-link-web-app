@@ -15,7 +15,7 @@ import Checkemail from './components/Authentication/Checkemail';
 import PdfWrapper from './pdfWrapper';
 import AdminUser from './components/AdminUser/AdminUser';
 import SubmittalMappings from './components/ProjectLogs/submittalMappings';
-import Projects from './components/PersonalProject/projects';
+import ProjectsPage from './components/Projects/ProjectsPage';
 import CollaborationHub from './components/CollaborationHub';
 import AdminLanding from './components/AdminLanding/AdminLanding';
 import CustomerProfile from './components/CustomerProfile/CustomerProfile';
@@ -73,7 +73,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/project-list/:teamId",
-    element: <ProtectedRoute><Projects /></ProtectedRoute>,
+    element: <ProtectedRoute><ProjectsPage /></ProtectedRoute>,
   },
   {
     path: "/companies",

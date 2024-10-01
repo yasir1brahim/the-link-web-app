@@ -21,12 +21,12 @@ import { ArchiveIcon } from "../shared/icons/archiveIcon";
 import { EditIcon } from "../shared/icons/editIcon";
 import { UploadIcon } from "../shared/icons/uploadIcon";
 import { LaunchIcon } from "../shared/icons/launchIcon";
-import { ArchiveProjectModal } from "../PersonalProject/archiveProjectModal";
+import { ArchiveProjectModal } from "./archiveProjectModal";
 import { Tooltip } from "reactstrap";
-import { RestoreProjectModal } from "../PersonalProject/restoreProjectModal";
+import { RestoreProjectModal } from "./restoreProjectModal";
 import { RestoreIcon } from "../shared/icons/restoreIcon";
 
-const CustomerProjects = ({
+const ProjectsTable = ({
   customerData,
   setCustomerData,
   pageRefresh,
@@ -584,4 +584,4 @@ const CustomerProjects = ({
   );
 };
 
-export default CustomerProjects;
+export default ProjectsTable;

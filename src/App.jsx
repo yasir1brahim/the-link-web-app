@@ -16,7 +16,7 @@ import PdfWrapper from './pdfWrapper';
 import AdminUser from './components/AdminUser/AdminUser';
 import SubmittalMappings from './components/ProjectLogs/submittalMappings';
 // import PersonalProject from './components/PersonalProject/PersonalProject';
-import Projects from './components/PersonalProject/projects';
+import ProjectsPage from './components/Projects/ProjectsPage';
 import CollaborationHub from './components/CollaborationHub';
 import { SpecGpt } from './components/SpecGpt';
 
@@ -27,7 +27,7 @@ function App() {
         <Route element={<Authentication />} />
         <Route path="/admin-landing" element={<AdminLanding />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
-        <Route path="/project-list" element={<Projects />} />
+        <Route path="/project-list" element={<ProjectsPage />} />
         <Route path="/project-logs" element={<ProjectLogs />} />
         {/*<Route path="/project-details" element={<ProjectsDetails />} />*/}
         <Route path="/login" element={<Signin />} />

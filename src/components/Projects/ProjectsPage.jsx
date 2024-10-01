@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router";
-import CustomerProjects from "../CustomerProjects/CustomerProjects";
+import ProjectsTable from "./ProjectsTable";
 import Header from "../shared/Header/Header";
 import NavbarTop from "../shared/NavbarTop/NavbarTop";
-import PersonalProject from "./PersonalProject";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
 import axiosInstance from "../../config/axios";
@@ -12,7 +11,7 @@ import HeaderTabs from "../shared/HeaderTabs/HeaderTabs";
 import { listProjects } from "../../api/Projects/api";
 import { useParams } from 'react-router-dom';
 
-const Projects = () => {
+const ProjectsPage = () => {
   const navigate = useNavigate();
   const [uploadSpecsModal, setUploadSpecsModal] = useState(false);
   const [archiveProjectModal, setArchiveProjectModal] = useState(false);
@@ -148,7 +147,7 @@ const Projects = () => {
             <HeaderTabs isArchived={isArchived}
               toggleArchive={toggleArchive} />
           </div>
-          <CustomerProjects
+          <ProjectsTable
             customerData={customerData}
             setCustomerData={setCustomerData}
             pageRefresh={pageRefresh}
@@ -195,4 +194,4 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default ProjectsPage;

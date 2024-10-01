@@ -9,7 +9,7 @@ import UpdateListing from './UpdateListing';
 import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import EditEmployee from '../CustomerProfile/editEmployee';
-import EditProject from '../CustomerProjects/editProject';
+import EditProject from '../Projects/editProject';
 import moment from 'moment';
 import { ExternalUsers } from './externalUsers';
 import handleError from '../../config/errorHandler';
