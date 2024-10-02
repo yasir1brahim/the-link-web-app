@@ -16,6 +16,18 @@ const login = async (email,password) => {
     }
 }
 
+const register = async (email, password1, password2) => {
+    return await axiosInstance({
+        method: 'post',
+        url: '/api/auth/register/',
+        data: {
+            email: email,
+            password1: password1,
+            password2: password2
+        }
+    });
+}
+
 const getAuthTokenFromRefreshToken = async (refreshToken) => {
     return await axiosInstance({
         method: 'post',
@@ -37,7 +49,7 @@ const getCurrentUserData = async () => {
 const getUsersByTeam = async (teamId) => {
     return await axiosInstance({
         method: 'get',
-        url: `/companies/api/${teamId}`,
+        url: `/teams/api/teams/${teamId}`,
     });
 }
 
@@ -45,7 +57,7 @@ const getUserTeams = async (accessToken) => {
     if (accessToken) {
         return await axiosInstance({
             method: 'get',
-            url: '/companies/api/',
+            url: '/teams/api/teams/',
             headers: {
                 'Authorization': `Bearer ${accessToken}`
             }
@@ -53,7 +65,7 @@ const getUserTeams = async (accessToken) => {
     } else {
         return await axiosInstance({
             method: 'get',
-            url: '/companies/api/',
+            url: '/teams/api/teams/',
         });
     }
 }
@@ -70,5 +82,28 @@ const sendInvitation = async (email, teamId, role = 'member') => {
     });
 }
 
+const getInvitation = async (teamId, invitationId) => {
+    return await axiosInstance({
+        method: 'get',
+        url: `/a/${teamId}/team/api/invitations/${invitationId}/`,
+    });
+}
 
-export {login, getAuthTokenFromRefreshToken, getCurrentUserData, getUsersByTeam, getUserTeams, sendInvitation}
+const acceptInvitation = async (teamId, invitationId) => {
+    return await axiosInstance({
+        method: 'post',
+        url: `/a/${teamId}/team/api/invitations/${invitationId}/accept/`,
+    });
+}
+
+export {
+    login, 
+    getAuthTokenFromRefreshToken, 
+    getCurrentUserData, 
+    getUsersByTeam, 
+    getUserTeams, 
+    sendInvitation, 
+    getInvitation, 
+    acceptInvitation,
+    register,
+}

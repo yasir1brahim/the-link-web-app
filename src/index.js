@@ -22,7 +22,7 @@ import CustomerProfile from './components/CustomerProfile/CustomerProfile';
 import ProjectLogs from './components/ProjectLogs/ProjectLogs';
 import ProtectedRoute from './components/auth/protectedroute';
 import Companies from './components/Companies/Companies';
-
+import AcceptInvitation from './components/Authentication/AcceptInvitation';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -35,9 +35,13 @@ const router = createBrowserRouter([
     path: "/login",
     element: <Signin />,
   },
+  // {
+  //   path: "/sign-up",
+  //   element: <SignUp />,
+  // },
   {
-    path: "/sign-up",
-    element: <SignUp />,
+    path: "/accept-invitation",
+    element: <AcceptInvitation />,
   },
   {
     path: "/forgot-password",

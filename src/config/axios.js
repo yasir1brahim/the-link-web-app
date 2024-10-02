@@ -14,7 +14,7 @@ axiosInstance.interceptors.request.use(function (config) {
   let token = !window.location.pathname.includes('reset-password')
     ? localStorage.getItem('token')
     : new URLSearchParams(window.location.search)?.get('token');
-  if (token && !window.location.pathname.includes('login')) {
+  if (token) {
     config.headers['Authorization'] = 'Bearer ' + token;
   }
   // config.headers['ngrok-skip-browser-warning'] = 'true';
