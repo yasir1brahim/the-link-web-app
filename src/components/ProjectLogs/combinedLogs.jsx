@@ -379,7 +379,7 @@ export default function CombinedLogs(props) {
   });
 
   const minWidths = {
-    1: 155,
+    1: 105,
     2: 85,
     3: 145,
     4: 150,
@@ -392,7 +392,7 @@ export default function CombinedLogs(props) {
     if (parentRef.current !== null) {
       setTableWidths({
         1: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.074),
+          Math.round(parentRef.current.offsetWidth * 0.06),
           minWidths[1]
         ),
         2: Math.max(
@@ -419,7 +419,7 @@ export default function CombinedLogs(props) {
           Math.round(parentRef.current.offsetWidth * 0.1),
           minWidths[7]
         ),
-        8: parentRef.current.offsetWidth - 953,
+        8: parentRef.current.offsetWidth - 993,
       });
     }
   }, [parentRef.current]);
@@ -892,7 +892,7 @@ export default function CombinedLogs(props) {
                 <td
                   className={`${
                     editRow === index ? "activeTh" : ""
-                  } reduce-height actions-td`}
+                  } reduce-height actions-td padding-0`}
                   onClick={handleIgnorePdfView}
                 >
                   <div className="action-items">
@@ -1030,9 +1030,8 @@ export default function CombinedLogs(props) {
                         Pdf
                       </Link> */}
                         {pdfIndex === index ? (
-                          <button
-                            type="button"
-                            className="btn btn-secondary close-button"
+                          <>
+                          <div
                             onClick={() => {
                               props.setLogInViewer(null);
                               props.setPdfData({
@@ -1043,9 +1042,36 @@ export default function CombinedLogs(props) {
                                 additionalTextLocations: [],
                               })
                             }}
+                            style={{ cursor: "pointer" }}
+                            className="pdf-button"
                           >
-                            Close Pdf
-                          </button>
+                            <svg id={"Pdf-Tooltip-" + index + 1} width="18px" height="18px" viewBox="0 0 1.08 1.08" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path width="48" height="48" fill="white" fill-opacity="0.01" d="M0 0H1.08V1.08H0V0z"/>
+                              <path d="M1.08 0H0v1.08h1.08z" fill="white" fill-opacity="0.01"/>
+                              <path d="M0.225 0.09h0.45l0.225 0.225v0.63a0.045 0.045 0 0 1 -0.045 0.045H0.225a0.045 0.045 0 0 1 -0.045 -0.045V0.135a0.045 0.045 0 0 1 0.045 -0.045Z" fill="#36454F" stroke="#000000" stroke-width="0.09" stroke-linejoin="round"/>
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M0.405 0.405h0.27v0.18L0.405 0.585z" stroke="white" stroke-width="0.09" stroke-linecap="round" stroke-linejoin="round"/>
+                              <path d="M0.405 0.405v0.36" stroke="white" stroke-width="0.07" stroke-linecap="round"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <Tooltip
+                              placement="right"
+                              target={"Pdf-Tooltip-" + index + 1}
+                              isOpen={pdfTooltip === index + 1}
+                              toggle={() =>
+                                setPdfTooltip(
+                                  pdfTooltip
+                                    ? pdfTooltip === index + 1
+                                      ? null
+                                      : index + 1
+                                    : index + 1,
+                                )
+                              }
+                            >
+                              Close Pdf
+                            </Tooltip>
+                          </div>
+                          </>
                         ) : (
                           newRowIndex !== index &&
                           showPdf && (
@@ -1062,21 +1088,14 @@ export default function CombinedLogs(props) {
                                   props.setLogInViewer(log);
                                 }}
                                 style={{ cursor: "pointer" }}
+                                className="pdf-button"
                               >
-                                <svg
-                                  id={"Pdf-Tooltip-" + index + 1}
-                                  width="16"
-                                  height="18"
-                                  viewBox="0 0 16 20"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    clipRule="evenodd"
-                                    d="M0.5 2.50001C0.5 1.57954 1.24619 0.833344 2.16667 0.833344H10.5C10.721 0.833344 10.933 0.921141 11.0893 1.07742L15.2559 5.24409C15.4122 5.40037 15.5 5.61233 15.5 5.83334V17.5C15.5 18.4205 14.7538 19.1667 13.8333 19.1667H2.16667C1.2462 19.1667 0.5 18.4205 0.5 17.5V2.50001ZM10.1548 2.50001H2.16667V17.5H13.8333V6.17852L10.1548 2.50001ZM4.66667 7.50001C4.66667 7.03977 5.03976 6.66668 5.5 6.66668H10.5C10.9602 6.66668 11.3333 7.03977 11.3333 7.50001V10.8299C11.3333 11.2899 10.9606 11.6629 10.5006 11.6632L6.33333 11.6661V14.1667C6.33333 14.6269 5.96024 15 5.5 15C5.03976 15 4.66667 14.6269 4.66667 14.1667V7.50001ZM6.33593 9.99943L9.66667 9.99713V8.33334H6.3342L6.33593 9.99943Z"
-                                    fill="#36454F"
-                                  />
+                                <svg id={"Pdf-Tooltip-" + index + 1} width="18px" height="18px" viewBox="0 0 1.08 1.08" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path width="48" height="48" fill="white" fill-opacity="0.01" d="M0 0H1.08V1.08H0V0z"/>
+                                  <path d="M1.08 0H0v1.08h1.08z" fill="white" fill-opacity="0.01"/>
+                                  <path d="M0.225 0.09h0.45l0.225 0.225v0.63a0.045 0.045 0 0 1 -0.045 0.045H0.225a0.045 0.045 0 0 1 -0.045 -0.045V0.135a0.045 0.045 0 0 1 0.045 -0.045Z" fill="white" stroke="#000000" stroke-width="0.07" stroke-linejoin="round"/>
+                                  <path fill-rule="evenodd" clip-rule="evenodd" d="M0.405 0.405h0.27v0.18L0.405 0.585z" stroke="#36454F" stroke-width="0.09" stroke-linecap="round" stroke-linejoin="round"/>
+                                  <path d="M0.405 0.405v0.36" stroke="#36454F" stroke-width="0.09" stroke-linecap="round"/>
                                 </svg>
                               </span>
                               <span>
@@ -1100,7 +1119,7 @@ export default function CombinedLogs(props) {
                             </>
                           )
                         )}
-                        {props.listId === null && (
+                        {props.listId === null && editRow !== index && (
                           <>
                             <AddButton
                               onClick={() => {
