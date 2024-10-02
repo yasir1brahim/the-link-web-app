@@ -370,7 +370,7 @@ const ProjectLogs = () => {
 
     setCombiningQueue(newQueue)
     if (!newQueue.length) {
-      setCombiningResult({_meta: {}})
+      setCombiningResult({})
     }
 
     // Reset values to default if they become homogenous again
@@ -1173,6 +1173,18 @@ const ProjectLogs = () => {
                             type="button"
                             className="table-top-btn btn-disabled selection-btn ml-2"
                             onClick={() => {
+                              // PDF reader won't be available with row combining for now
+                              if (logInViewer) {
+                                setLogInViewer(null);
+                                setPdfData({
+                                  url: "",
+                                  textLoc: {},
+                                  index: "",
+                                  docId: null,
+                                  additionalTextLocations: [],
+                                })
+                              }
+
                               setIsCombining(value => !value);
                               updateCombiningQueue(selected, true);
                             }}

@@ -225,9 +225,8 @@ export default function CombinedLogs(props) {
   const handleCombineRows = async () => {
     props.setLoading(true)
 
-    const {_meta, ...preparedObject} = combiningResult
     const payload = {
-      prepared_object: preparedObject,
+      prepared_object: combiningResult,
       project_id: props.projectId,
       lst_all_logs: combiningQueue,
     }
@@ -882,6 +881,7 @@ export default function CombinedLogs(props) {
           {logData.map((log, index) => {
             let pdfIndex = props.pdfData?.index;
             const showPdf = !(pdfIndex && pdfIndex !== index) && pdfIndex !== 0;
+            const isCombineTarget = combiningQueue[0]?.index === index;
 
             return (
               <tr
@@ -896,12 +896,14 @@ export default function CombinedLogs(props) {
                   ...(isCombining
                     ? {
                         opacity: props.selected.includes(log.id) ? null : 0.4,
-                        backgroundColor:
-                          combiningQueue[0].index === index
-                            ? '#f8f8fa'
-                            : 'white'
+                        backgroundColor: isCombineTarget ? '#f8f8fa' : 'white',
+                        textDecoration:
+                          // Only mark selected items that are not the "main" row
+                          combiningQueue.findIndex((item) => item.index === index) > 0
+                            ? 'line-through'
+                            : null
                       }
-                    : {})
+                    : {}),
                 }}
                 key={index}
                 ref={(el) => (logRowRefs.current[index] = el)}
@@ -944,7 +946,7 @@ export default function CombinedLogs(props) {
                     {
                       <>
                         {isCombining ? (
-                          index === combiningQueue[0].index && (
+                          isCombineTarget && (combiningQueue.length > 1) && (
                             // If the row is being combined
                             <>
                               <div
@@ -1270,38 +1272,7 @@ export default function CombinedLogs(props) {
                     editRow === index ? 'activeTh' : ''
                   } reduce-height`}
                 >
-                  {isCombining &&
-                  index === combiningQueue[0].index &&
-                  !areSameValues('spec_section') ? (
-                    // Combining rows with different spec section values
-                    combiningResult._meta.spec_section ? (
-                      <>
-                        <input
-                          placeholder="Enter"
-                          type="text"
-                          value={combiningResult.spec_section}
-                          className="form-control"
-                          onChange={(e) =>
-                            setCombiningResult((value) => {
-                              return { ...value, spec_section: e.target.value };
-                            })
-                          }
-                        />
-                      </>
-                    ) : (
-                      <>
-                        {formatSpecSection(log.spec_section)}
-                        <AddButton
-                          onClick={() =>
-                            setCombiningResult((value) => ({
-                              ...value,
-                              _meta: { ...value._meta, spec_section: true }
-                            }))
-                          }
-                        />
-                      </>
-                    )
-                  ) : editRow === index ? (
+                  {editRow === index ? (
                     <input
                       placeholder="Enter"
                       className={`form-control ${
@@ -1316,6 +1287,11 @@ export default function CombinedLogs(props) {
                     />
                   ) : (
                     formatSpecSection(log.spec_section)
+                    + (isCombining &&
+                       isCombineTarget &&
+                       !areSameValues('spec_section')
+                      ? '+' : ''
+                    )
                   )}
                 </td>
 
@@ -1352,36 +1328,7 @@ export default function CombinedLogs(props) {
                       editRow === index ? 'activeTh' : ''
                     } reduce-height`}
                   >
-                    {isCombining && index === combiningQueue[0].index ? (
-                      // Combining rows with different spec section values
-                      <>
-                        {combiningResult._meta.para_no ? (
-                          <input
-                            placeholder="Enter"
-                            type="text"
-                            value={combiningResult.para_no}
-                            className="form-control"
-                            onChange={(e) =>
-                              setCombiningResult((value) => {
-                                return { ...value, para_no: e.target.value };
-                              })
-                            }
-                          />
-                        ) : (
-                          <>
-                            {log.para_no}
-                            <AddButton
-                              onClick={() =>
-                                setCombiningResult((value) => ({
-                                  ...value,
-                                  _meta: { ...value._meta, para_no: true }
-                                }))
-                              }
-                            />
-                          </>
-                        )}
-                      </>
-                    ) : editRow === index ? (
+                    {editRow === index ? (
                       <input
                         placeholder="Enter"
                         className={`form-control ${
@@ -1396,6 +1343,11 @@ export default function CombinedLogs(props) {
                       />
                     ) : (
                       log.para_no
+                      + (isCombining &&
+                         isCombineTarget &&
+                         combiningQueue.length > 1
+                        ? '+' : ''
+                      )
                     )}
                   </td>
                 )}
@@ -1405,7 +1357,7 @@ export default function CombinedLogs(props) {
                       editRow === index ? 'activeTh' : ''
                     } reduce-height`}
                   >
-                    {isCombining && index === combiningQueue[0].index ? (
+                    {isCombining && isCombineTarget ? (
                       // Combining rows with different spec section values
                       <>
                         <input
@@ -1446,7 +1398,7 @@ export default function CombinedLogs(props) {
                     editRow === index ? 'activeTh' : ''
                   }`}
                 >
-                  {isCombining && index === combiningQueue[0].index ? (
+                  {isCombining && isCombineTarget ? (
                     // Combining rows with different spec section values
                     <>
                       <input
@@ -1534,16 +1486,22 @@ export default function CombinedLogs(props) {
                         editRow === index ? 'activeTh' : ''
                       } reduce-height`}
                     >
-                      {isCombining && index === combiningQueue[0].index ? (
+                      {isCombining && isCombineTarget ? (
                         <div
                           className={
                             'log-desc ' +
-                            (showMore[index] ? 'show-content' : 'text-overflow')
+                            (
+                              isCombineTarget
+                                ? 'show-content'
+                                : showMore[index]
+                                  ? 'show-content'
+                                  : 'text-overflow'
+                            )
                           }
+                          style={{ whiteSpace: 'pre-wrap' }}
                           ref={(element) => rowRefs.current.push(element)}
                         >
-                          {combiningResult.para_context
-                            .reduce((result, item) => [result, <br />, item])}
+                          {combiningResult.para_context}
                           {shouldShowExpansionButton[index] && (
                             <span
                               className="showmore-wrap"
@@ -1600,6 +1558,7 @@ export default function CombinedLogs(props) {
                             (showMore[index] ? 'show-content' : 'text-overflow')
                           }
                           ref={(element) => rowRefs.current.push(element)}
+                          style={{ whiteSpace: 'pre-wrap' }}
                         >
                           {log.para_context}
                           {shouldShowExpansionButton[index] && (
