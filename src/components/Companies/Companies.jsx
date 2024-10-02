@@ -12,12 +12,18 @@ const Companies = () => {
         fetchCompanies();
     }, []);
 
+    const handleCompanyClick = (company) => {
+        localStorage.setItem('currentTeamId', company.id);
+        localStorage.setItem('currentTeamSlug', company.slug);
+        window.location.href = `/project-list/${company.id}`;
+    };
+
     return (
         <div>
             <h1>Select a Company</h1>
             <ul>
                 {companies.map((company) => (
-                    <li key={company.id}><a href={`/project-list/${company.id}`}>{company.name}</a></li>
+                    <li key={company.id}><a onClick={() => handleCompanyClick(company)}>{company.name}</a></li>
                 ))}
             </ul>
         </div>

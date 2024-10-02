@@ -37,7 +37,7 @@ const getCurrentUserData = async () => {
 const getUsersByTeam = async (teamId) => {
     return await axiosInstance({
         method: 'get',
-        url: `/teams/api/teams/${teamId}`,
+        url: `/companies/api/${teamId}`,
     });
 }
 
@@ -45,7 +45,7 @@ const getUserTeams = async (accessToken) => {
     if (accessToken) {
         return await axiosInstance({
             method: 'get',
-            url: '/teams/api/teams/',
+            url: '/companies/api/',
             headers: {
                 'Authorization': `Bearer ${accessToken}`
             }
@@ -53,10 +53,22 @@ const getUserTeams = async (accessToken) => {
     } else {
         return await axiosInstance({
             method: 'get',
-            url: '/teams/api/teams/',
+            url: '/companies/api/',
         });
     }
 }
 
+const sendInvitation = async (email, teamId, role = 'member') => {
+    return await axiosInstance({
+        method: 'post',
+        url: `/a/${teamId}/team/api/invitations/`,
+        data: {
+            email: email,
+            team: teamId,
+            role: role
+        }
+    });
+}
 
-export {login, getAuthTokenFromRefreshToken, getCurrentUserData, getUsersByTeam, getUserTeams}
+
+export {login, getAuthTokenFromRefreshToken, getCurrentUserData, getUsersByTeam, getUserTeams, sendInvitation}

@@ -4,6 +4,8 @@ import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
 // import { Typeahead } from 'react-bootstrap-typeahead';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
+import { sendInvitation } from '../../api/Authentication/api';
+import handleError from "../../config/errorHandler";
 
 const CreateEmployee = ({
   modal,
@@ -51,7 +53,7 @@ const CreateEmployee = ({
     ) {
       setContactNumber({
         ...contactNumber,
-        errors: 'Contact Number should be of 10 digits.'
+        errors: 'Contact Number should be 10 digits long.'
       });
       error = true;
     } else if (contactNumber.value.replace(/[^0-9]/g, '').length === 10) {
@@ -79,37 +81,21 @@ const CreateEmployee = ({
     let errors = validate();
     if (!errors) {
       try {
-        const response = await axiosInstance({
-          method: 'post',
-          url: '/createEmployee',
-          data: {
-            email_address: email.value,
-            full_name: `${firstName.value}  ${lastName.value}`,
-            // projects: asscProject.map((project) => project.value),
-            projects: [],
-            contact_number: contactNumber.value?.replace(/[^0-9]/g, ''),
-            customer_id: customerID
-          }
-        });
+        const response = await sendInvitation(
+          email.value,
+          customerID,
+          'member'
+        );
         if (response?.data) {
           console.log(response?.data);
           setPageRefresh(!pageRefresh);
           toggleModal();
-          toast.success('Employee created successfully!', {
+          toast.success('Invite sent', {
             position: 'bottom-center'
           });
         }
       } catch (error) {
-        console.log(error.message);
-        toast.error(error.response.data.message, {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined
-        });
+        handleError(error);
         toggleModal();
       }
     }

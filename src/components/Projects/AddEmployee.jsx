@@ -3,6 +3,7 @@ import { Button, ModalFooter } from "reactstrap";
 import axiosInstance from "../../config/axios";
 import { toast } from "react-toastify";
 import Loader from "../shared/Loader/Loader";
+import { sendInvitation } from "../../api/Authentication/api";
 
 export const AddEmployee = (props) => {
   const [email, setEmail] = useState({ value: "", errors: "" });
@@ -23,18 +24,7 @@ export const AddEmployee = (props) => {
     if (!errors) {
       try {
         setIsLoading(true);
-        const response = await axiosInstance({
-          method: "post",
-          url: "/createEmployee",
-          data: {
-            email_address: email.value,
-            full_name: `${firstName.value}  ${lastName.value}`,
-            // projects: asscProject.map((project) => project.value),
-            projects: [],
-            // contact_number: contactNumber.value.replace(/[^0-9]/g, ''),
-            customer_id: props.customerID || localStorage.getItem("userId"),
-          },
-        });
+        const response = await sendInvitation(email.value, props.customerID || localStorage.getItem("currentTeamId"));
         if (response.data) {
           console.log(response.data);
           const employee_id = response.data.data.user_id;
