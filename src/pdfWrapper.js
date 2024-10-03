@@ -13,6 +13,7 @@ const PdfWrapper = (props) => {
         docId={props.pdfData.docId}
         additionalTextLocations={props.pdfData.additionalTextLocations}
         setPdfData={props.setPdfData}
+        setSubmittalIdParam={props.setSubmittalIdParam}
         handleAddNewRow={props.handleAddNewRow}
         handleAppendToSelectedRow={props.handleAppendToSelectedRow}
         setLogInViewer={props.setLogInViewer}
