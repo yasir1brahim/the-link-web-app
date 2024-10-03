@@ -60,11 +60,6 @@ const Companies = () => {
                         </th>
                         <th>
                           <span>
-                            Status<i className="sort-d"></i>
-                          </span>
-                        </th>
-                        <th>
-                          <span>
                             Projects<i className="sort-i"></i>
                           </span>
                         </th>
@@ -87,9 +82,8 @@ const Companies = () => {
                                 {company.name}
                               </a>
                             </td>
-                            <td>{company.status}</td>
-                            <td>{company.projects}</td>
-                            <td>{company.users}</td>
+                            <td>{company.project_count}</td>
+                            <td>{company.members.length}</td>
                             <td>
                               <div className="action-wrapper">
                                 <a

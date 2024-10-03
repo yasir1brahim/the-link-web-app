@@ -46,11 +46,18 @@ const getCurrentUserData = async () => {
 }
 
 
-const getUsersByTeam = async (teamId) => {
+const getTeamDetails = async (teamId) => {
     return await axiosInstance({
         method: 'get',
         url: `/teams/api/teams/${teamId}`,
     });
+}
+
+const getUserRoleInTeam = async (userId, teamId) => {
+    const team = await getTeamDetails(teamId);
+    const members = team.data.members;
+    const member = members.find((member) => member.user_id === parseInt(userId));
+    return member.role;
 }
 
 const getUserTeams = async (accessToken) => {
@@ -68,6 +75,10 @@ const getUserTeams = async (accessToken) => {
             url: '/teams/api/teams/',
         });
     }
+}
+
+const updateUserTeamMembership = async (userId, teamId, role) => {
+    // TODO
 }
 
 const sendInvitation = async (email, teamId, role = 'member') => {
@@ -99,9 +110,11 @@ const acceptInvitation = async (teamId, invitationId) => {
 export {
     login, 
     getAuthTokenFromRefreshToken, 
-    getCurrentUserData, 
-    getUsersByTeam, 
+    getCurrentUserData,
+    getUserRoleInTeam,
+    getTeamDetails, 
     getUserTeams, 
+    updateUserTeamMembership,
     sendInvitation, 
     getInvitation, 
     acceptInvitation,

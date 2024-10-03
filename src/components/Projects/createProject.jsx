@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { AddEmployee } from "./AddEmployee";
 import BaseProjectForm from "./BaseProjectForm";
 import { createProject } from "../../api/Projects/api";
-import { getUsersByTeam } from "../../api/Authentication/api";
+import { getTeamDetails } from "../../api/Authentication/api";
 import handleError from "../../config/errorHandler";
 const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefresh, projects, isPersonalProject = false, customerID, isAdminUser }) => {
   const typeaheadRef = useRef(null);
@@ -40,7 +40,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       const preSelectEmployeesForProject = async () => {
         setIsLoading(true);
         // fetch employees for customer
-        const resp_employees_by_customer = await getUsersByTeam(customer?.customer_id || customerID)
+        const resp_employees_by_customer = await getTeamDetails(customer?.customer_id || customerID)
         const emps_by_c = resp_employees_by_customer.data.members
         if (emps_by_c) {
           setFullEmployeeList(emps_by_c.map((emp) => ({

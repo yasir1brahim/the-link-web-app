@@ -9,7 +9,7 @@ import handleError from "../../config/errorHandler";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { CircularProgress } from "@mui/material";
-import { getUsersByTeam } from "../../api/Authentication/api";
+import { getTeamDetails } from "../../api/Authentication/api";
 import { updateProject } from "../../api/Projects/api";
 import UserSelector from "./UserSelector";
 import BaseProjectForm from "./BaseProjectForm";
@@ -61,7 +61,7 @@ const EditProject = ({
       const preSelectEmployeesForProject = async () => {
         setIsLoading(true);
         // fetch employees for customer
-        const resp_employees_by_customer = await getUsersByTeam(project?.team)
+        const resp_employees_by_customer = await getTeamDetails(project?.team)
         const emps_by_c = resp_employees_by_customer.data.members
         if (emps_by_c) {
           setFullEmployeeList(emps_by_c.map((emp) => ({

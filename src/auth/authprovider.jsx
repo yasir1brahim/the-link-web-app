@@ -59,6 +59,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('refresh_token', jwtResponseData.refresh);
     localStorage.setItem('userId', jwtResponseData.user.id);
     localStorage.setItem('fullName', jwtResponseData.user.get_display_name);
+    localStorage.setItem('role', jwtResponseData.user.role);
     setToken(jwtResponseData.access);
     setUser(jwtResponseData.user)
     setIsLoading(false);

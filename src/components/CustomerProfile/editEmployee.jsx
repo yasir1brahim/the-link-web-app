@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import axiosInstance from '../../config/axios';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-// import { Typeahead } from 'react-bootstrap-typeahead';
-import { MaskedInput } from '../shared/MaskedInput/maskedInput';
+import BaseEmployeeForm from './BaseEmployeeForm';
+import { updateUserTeamMembership } from '../../api/Authentication/api';
 
 const EditEmployee = ({
   modal,
@@ -15,19 +13,24 @@ const EditEmployee = ({
   empData
 }) => {
   const [email, setEmail] = useState({
-    value: employee?.emp_email || employee?.email_address,
+    value: employee?.email || "",
     errors: ''
   });
-  const [firstName, setFirstName] = useState({ value: '', errors: '' });
-  const [lastName, setLastName] = useState({ value: '', errors: '' });
-  const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
+  const [firstName, setFirstName] = useState({ value: employee?.first_name || '', errors: '' });
+  const [lastName, setLastName] = useState({ value: employee?.last_name || '', errors: '' });
+
+  useEffect(() => {
+    setEmail({ value: employee?.email || '', errors: '' });
+    setFirstName({ value: employee?.first_name || '', errors: '' });
+    setLastName({ value: employee?.last_name || '', errors: '' });
+  }, [modal, employee]);
 
   const validate = () => {
     let error = false;
     if (email?.value === '') {
       setEmail({ ...email, errors: 'Email is required.' });
       error = true;
-    } else if (empData?.find((item) => item?.emp_email === email?.value)) {
+    } else if (empData?.find((item) => item?.email === email?.value)) {
       setEmail({ ...email, errors: 'Email already exists' });
       error = true;
     } else {
@@ -36,41 +39,12 @@ const EditEmployee = ({
     }
     return error;
   };
-  const handleContactNumberChange = (e) => {
-    let value = contactNumber.value.replace(/[^0-9]/g, '');
-    let regex = /^[0-9]*$/;
-    if (regex.test(value)) {
-      setContactNumber({
-        ...contactNumber,
-        value: e.target.value
-      });
-    }
-  };
 
   const handleSubmit = async () => {
-    // console.log('emailRef', emailRef.current.value)
     let errors = validate();
     if (!errors) {
-      const employeeName = employee?.name || employee?.full_name;
       try {
-        const response = await axiosInstance({
-          method: 'put',
-          url: '/updateEmployee',
-          data: {
-            email_address:
-              email.value || employee?.emp_email || employee?.email_address,
-            full_name: `${
-              firstName.value || employeeName?.split(/(\s+)/)[0]
-            }  ${lastName.value || employeeName?.split(/(\s+)/)[2]}`,
-            // projects: asscProject.map((project) => project.value),
-            projects: [],
-            contact_number:
-              contactNumber.value.replace(/[^0-9]/g, '') ||
-              employee?.contact_number,
-            customer_id: customerID,
-            emp_id: employee?.emp_id || employee?.id
-          }
-        });
+        const response = await updateUserTeamMembership(employee?.id, customerID, 'member');
         if (response.data) {
           console.log(response.data);
           setPageRefresh(!pageRefresh);
@@ -98,177 +72,22 @@ const EditEmployee = ({
         });
         toggleModal();
       }
-      // }
     }
   };
   return (
-    <Modal
-      isOpen={modal}
-      fade={false}
-      toggle={toggleModal}
-      className="new-user modal-lg"
-    >
-      <ModalHeader toggle={toggleModal}>Edit Employee</ModalHeader>
-      <ModalBody>
-        {/* <form className="create-user-form"> */}
-        <div className="create-user-content">
-          <div className="row">
-            <div className="col-4">
-              <div className="form-group">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="userFirstName"
-                  aria-describedby="userFirstName"
-                  placeholder="Enter"
-                  defaultValue={
-                    employee?.name
-                      ? employee?.name.split(/(\s+)/)[0]
-                      : employee?.full_name
-                      ? employee?.full_name.split(/(\s+)/)[0]
-                      : ''
-                  }
-                  onChange={(e) => {
-                    setFirstName({
-                      ...firstName,
-                      value: e.target.value
-                    });
-                  }}
-                />
-                <label className="text-label" htmlFor="userFirstName">
-                  First Name
-                </label>
-              </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="userLastName"
-                  aria-describedby="userLastName"
-                  placeholder="Enter"
-                  defaultValue={
-                    employee?.name
-                      ? employee?.name.split(/(\s+)/)[2]
-                      : employee?.full_name
-                      ? employee?.full_name.split(/(\s+)/)[2]
-                      : ''
-                  }
-                  onChange={(e) => {
-                    setLastName({
-                      ...lastName,
-                      value: e.target.value
-                    });
-                  }}
-                />
-                <label className="text-label" htmlFor="userLastName">
-                  Last Name
-                </label>
-              </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                <input
-                  type="email"
-                  className="form-control"
-                  id="userEmailAddress"
-                  aria-describedby="userEmailAddress"
-                  placeholder="Enter"
-                  defaultValue={employee?.emp_email || employee?.email_address}
-                  onChange={(e) => {
-                    setEmail({
-                      ...email,
-                      value: e.target.value
-                    });
-                  }}
-                />
-                <label className="text-label" htmlFor="userEmailAddress">
-                  Email Address
-                </label>
-                {email.errors && (
-                  <small className="form-error" style={{ color: 'red' }}>
-                    {email.errors}
-                  </small>
-                )}
-              </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                {/* <input
-                    type="text"
-                    className="form-control"
-                    id="userPhone"
-                    aria-describedby="userPhone"
-                    placeholder="Enter"
-                    defaultValue={employee.contact_number}
-                    onChange={(e) => {
-                      setContactNumber({
-                        ...contactNumber,
-                        value: e.target.value,
-                      });
-                    }}
-                  />
-                  <label className="text-label" htmlFor="userPhone">
-                    Phone
-                  </label> */}
-                <MaskedInput
-                  // value={contactNumber.value}
-                  defaultValue={employee?.contact_number}
-                  onChange={(e) => handleContactNumberChange(e)}
-                  name="contactNumber"
-                  error={contactNumber.errors}
-                  mask={[
-                    '(',
-                    /[1-9]/,
-                    /\d/,
-                    /\d/,
-                    ')',
-                    ' ',
-                    /\d/,
-                    /\d/,
-                    /\d/,
-                    '-',
-                    /\d/,
-                    /\d/,
-                    /\d/,
-                    /\d/
-                  ]}
-                  labelClass={'text-label'}
-                  label={'Phone'}
-                />
-              </div>
-            </div>
-            {/* <div className="col-4">
-                <div className="form-group">
-                  <Typeahead
-                    multiple
-                    value={asscProject}
-                    selected={asscProject}
-                    onChange={setAsscProject}
-                    options={projects.map((project) => {
-                      return {
-                        value: project.project_id,
-                        label: project.project_name,
-                      };
-                    })}
-                    placeholder="Projects Associated"
-                  />
-                </div>
-              </div> */}
-          </div>
-        </div>
-        <ModalFooter>
-          <Button color="secondary" onClick={toggleModal}>
-            Cancel
-          </Button>
-          <Button color="primary" onClick={handleSubmit}>
-            Save
-          </Button>{' '}
-        </ModalFooter>
-        {/* </form> */}
-      </ModalBody>
-    </Modal>
+    <BaseEmployeeForm
+      formTitle="Add Employee"
+      toggleModal={toggleModal}
+      modal={modal}
+      handleSubmit={handleSubmit}
+      validate={validate}
+      firstName={firstName}
+      setFirstName={setFirstName}
+      lastName={lastName}
+      setLastName={setLastName}
+      email={email}
+      setEmail={setEmail}
+    />
   );
 };
 
