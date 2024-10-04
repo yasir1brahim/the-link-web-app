@@ -199,6 +199,7 @@ export default function CombinedLogs(props) {
         textLoc: {},
         index: "",
         docId: null,
+        submittalId: null,
         additionalTextLocations: [],
       });
     } catch (error) {
@@ -277,7 +278,8 @@ export default function CombinedLogs(props) {
     pdfUrl,
     textLocation,
     rowIndex,
-    id,
+    docId,
+    submittalId,
     additionalTextLocations
   ) => {
     props.setPdfData({
@@ -285,9 +287,11 @@ export default function CombinedLogs(props) {
       url: pdfUrl,
       textLoc: textLocation,
       index: rowIndex,
-      docId: id,
+      docId: docId,
+      submittalId: submittalId,
       additionalTextLocations: additionalTextLocations,
     });
+    props.setSubmittalIdParam(submittalId);
   };
   const insertElement = (arr, index, newItem) => [
     // part of the array before the specified index
@@ -335,6 +339,10 @@ export default function CombinedLogs(props) {
                 Math.max(...charArray) + 1
               )}`,
         // customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
+        submittal_number: null,
+
+        // Only used to help BE determine what to do when inserted
+        added_under_log_id: log.id,
       };
       const result = insertElement(props.logData, index + 1, logObj);
       props.setFilteredLogData(result);
@@ -371,16 +379,18 @@ export default function CombinedLogs(props) {
     5: 0,
     6: 0,
     7: 0,
+    8: 0,
   });
 
   const minWidths = {
     1: 155,
-    2: 145,
-    3: 150,
-    4: 85,
-    5: 190,
+    2: 85,
+    3: 145,
+    4: 150,
+    5: 85,
     6: 190,
-    7: 520,
+    7: 190,
+    8: 520,
   };
   useEffect(() => {
     if (parentRef.current !== null) {
@@ -402,14 +412,18 @@ export default function CombinedLogs(props) {
           minWidths[4]
         ),
         5: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.1),
+          Math.round(parentRef.current.offsetWidth * 0.045),
           minWidths[5]
         ),
         6: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.1),
           minWidths[6]
         ),
-        7: parentRef.current.offsetWidth - 953,
+        7: Math.max(
+          Math.round(parentRef.current.offsetWidth * 0.1),
+          minWidths[7]
+        ),
+        8: parentRef.current.offsetWidth - 953,
       });
     }
   }, [parentRef.current]);
@@ -441,6 +455,12 @@ export default function CombinedLogs(props) {
   const formatSpecSection = (specSection) => {
     if (typeof specSection !== "string") return specSection;
     return specSection.slice(0, 2) + " " + specSection.slice(2);
+  };
+
+  const formatSubmittalNumber = (number) => {
+    const nonNullNumber = number ?? "";
+    const str = nonNullNumber.toString();
+    return str.endsWith('.0') ? str.slice(0, -2) : str;
   };
 
   useEffect(() => {
@@ -502,7 +522,22 @@ export default function CombinedLogs(props) {
               </div>
             </th>
 
-            <th className="small-font" style={{ width: `${tableWidths[2]}px` }}>
+            <th
+              className="para-no small-font"
+              style={{ width: `${tableWidths[2]}px` }}
+            >
+              <div className="d-flex">
+                <span>Submittal #</span>
+                <div
+                  className="resizer"
+                  onMouseDown={(e) => handleMouseDown(e, 2)}
+                >
+                  |
+                </div>
+              </div>
+            </th>
+
+            <th className="small-font" style={{ width: `${tableWidths[3]}px` }}>
               <span className="has-sorting">
                 <div className="d-flex">
                   Spec Section{" "}
@@ -537,7 +572,7 @@ export default function CombinedLogs(props) {
             {props.projectType !== "ufgs" && (
               <th
                 className="para-no small-font"
-                style={{ width: `${tableWidths[3]}px` }}
+                style={{ width: `${tableWidths[4]}px` }}
               >
                 <div className="d-flex">
                   <span>Section Title</span>
@@ -589,7 +624,7 @@ export default function CombinedLogs(props) {
             {props.projectType !== "ufgs" && (
               <th
                 className="para-no small-font"
-                style={{ width: `${tableWidths[4]}px` }}
+                style={{ width: `${tableWidths[5]}px` }}
               >
                 <div className="d-flex">
                   <span>Paragraph</span>
@@ -605,11 +640,11 @@ export default function CombinedLogs(props) {
             {props.projectType !== "ufgs" && (
               <th
                 className="small-font"
-                style={{ width: `${tableWidths[5]}px` }}
+                style={{ width: `${tableWidths[6]}px` }}
               >
                 <span className="has-sorting">
                   <div className="d-flex">
-                    Submittal Heading{" "}
+                    Submittal Type{" "}
                     <span
                       style={{ cursor: "pointer", marginLeft: "6px" }}
                       onClick={() => handleSorting("type")}
@@ -695,10 +730,10 @@ export default function CombinedLogs(props) {
                 </span>
               </th>
             )}
-            <th className="small-font" style={{ width: `${tableWidths[6]}px` }}>
+            <th className="small-font" style={{ width: `${tableWidths[7]}px` }}>
               <span className="has-sorting">
                 <div className="d-flex">
-                  Submittal Type
+                  Submittal Title
                   <span
                     style={{ cursor: "pointer", marginLeft: "6px" }}
                     onClick={() => handleSorting("item_desc")}
@@ -771,7 +806,7 @@ export default function CombinedLogs(props) {
               </th> */}
                 <th
                   className="log-description small-font"
-                  style={{ width: `${tableWidths[7]}px` }}
+                  style={{ width: `${tableWidths[8]}px` }}
                 >
                   <span className="has-sorting">
                     <div className="d-flex">
@@ -1009,8 +1044,10 @@ export default function CombinedLogs(props) {
                                 textLoc: {},
                                 index: "",
                                 docId: null,
+                                submittalId: null,
                                 additionalTextLocations: [],
-                              })
+                              });
+                              props.setSubmittalIdParam(null);
                             }}
                           >
                             Close Pdf
@@ -1026,6 +1063,7 @@ export default function CombinedLogs(props) {
                                     log.text_loc,
                                     index,
                                     log.doc_id,
+                                    log.id,
                                     log.additional_text_locations,
                                   );
                                   props.setLogInViewer(log);
@@ -1115,6 +1153,14 @@ export default function CombinedLogs(props) {
                   className={`${
                     editRow === index ? "activeTh" : ""
                   } reduce-height`}
+                >
+                  {formatSubmittalNumber(log.submittal_number)}
+                </td>
+
+                <td
+                  className={`${
+                    editRow === index ? "activeTh" : ""
+                  } reduce-height`}
                  
                 >
                   {editRow === index ? (
@@ -1135,9 +1181,14 @@ export default function CombinedLogs(props) {
                   )}
                   {/* {log.spec_section} */}
                 </td>
-                {props.projectType !== "ufgs" && (
-                  <td className="reduce-height">
-                    {log.section_title} <br /> {log.id}
+
+                {props.projectType !== 'ufgs' && (
+                  <td
+                    className={`${
+                      editRow === index ? 'activeTh' : ''
+                    } reduce-height`}
+                  >
+                    {log.section_title}
                   </td>
                 )}
                 {props.projectType === "ufgs" && (

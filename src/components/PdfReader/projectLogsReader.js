@@ -10,6 +10,7 @@ const ProjectLogsReader = ({
   docId,
   additionalTextLocations,
   setPdfData,
+  setSubmittalIdParam,
   handleAddNewRow,
   handleAppendToSelectedRow,
   setLogInViewer,
@@ -50,8 +51,10 @@ const ProjectLogsReader = ({
       textLoc: {},
       index: "",
       docId: null,
+      submittalId: null,
       additionalTextLocations: [],
     });
+    setSubmittalIdParam(null);
   };
 
   const handleDocumentLoaded = async (annotationManager) => {
