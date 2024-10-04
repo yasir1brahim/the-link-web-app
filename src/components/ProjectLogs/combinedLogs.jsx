@@ -206,6 +206,7 @@ export default function CombinedLogs(props) {
         textLoc: {},
         index: "",
         docId: null,
+        submittalId: null,
         additionalTextLocations: [],
       });
     } catch (error) {
@@ -308,7 +309,8 @@ export default function CombinedLogs(props) {
     pdfUrl,
     textLocation,
     rowIndex,
-    id,
+    docId,
+    submittalId,
     additionalTextLocations
   ) => {
     props.setPdfData({
@@ -316,9 +318,11 @@ export default function CombinedLogs(props) {
       url: pdfUrl,
       textLoc: textLocation,
       index: rowIndex,
-      docId: id,
+      docId: docId,
+      submittalId: submittalId,
       additionalTextLocations: additionalTextLocations,
     });
+    props.setSubmittalIdParam(submittalId);
   };
   const insertElement = (arr, index, newItem) => [
     // part of the array before the specified index
@@ -1124,14 +1128,6 @@ export default function CombinedLogs(props) {
                                   : 'Cannot edit while combining'}
                               </Tooltip>
                             </span>
-
-                            {/* <Link
-                              style={{ fontWeight: 'normal' }}
-                              className="btn btn-secondary btn-sm"
-                              to={{ pathname: `/pdf-view`, search: `?url=${log?.doc_link}&textLoc=${log.text_loc}` }}
-                              target="_blank" >
-                              Pdf
-                            </Link> */}
 
                             {pdfIndex === index ? (
                               <button

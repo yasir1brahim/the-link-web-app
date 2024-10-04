@@ -80,6 +80,7 @@ const ProjectLogs = () => {
     textLoc: {},
     index: "",
     docId: null,
+    submittalId: null,
     additionalTextLocations: [],
   });
   const [newRowIndex, setNewRowIndex] = useState(null);
@@ -124,17 +125,18 @@ const ProjectLogs = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const projectDetails = searchParams.get("projectDetails")?.split(",");
-  const projectId = projectDetails?.length
+  const submittalId = searchParams.get("submittal_id")
+  const [projectId, setProjectId] = useState(projectDetails?.length
     ? JSON.parse(projectDetails[0])
-    : null;
-  const customerId =
-    projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
+    : null);
+  const [customerId, setCustomerId] = useState(
+    projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null);
   // const projectName = searchParams.get('projectName');
-  const logType = projectDetails?.length >= 3 ? projectDetails[2] : null;
-  const projectName =
+  const [logType, setLogType] = useState(projectDetails?.length >= 3 ? projectDetails[2] : null);
+  const [projectName, setProjectName] = useState(
     projectDetails?.length >= 4
       ? projectDetails[3].replace(/_space/g, " ")
-      : null;
+      : null);
   const authCode = searchParams.get("code");
   const procoreClientId = window.location.href.includes(
     "https://app.thelink.ai"
@@ -149,7 +151,7 @@ const ProjectLogs = () => {
   const procoreBaseUrl = window.location.href.includes("https://app.thelink.ai")
     ? "https://procore.com"
     : "https://sandbox.procore.com";
-  const procoreAuthUrl = `${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName.replace(
+  const procoreAuthUrl = `${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName === null ? '' : projectName.replace(
     / /g,
     "_space"
   )}`;
@@ -224,15 +226,38 @@ const ProjectLogs = () => {
     }
   };
 
+  const getLogByDocId = async (docId) => {
+    try {
+      const response = await axiosInstance({
+        method: "get",
+        url: `/get_log/${docId}`,
+      });
+      
+      // Extract project id from log.
+      const submittals = response.data.message;
+      if (submittals.length > 0) {
+        setProjectId(submittals[0].project_id);
+        localStorage.setItem("projectId", submittals[0].project_id);
+      }
+    } catch (error) {
+      console.error('Error fetching log by document ID:', error);
+    }
+  }
+
   useEffect(() => {
     const initLoading = async () => {
       setInitLoading(true);
+      if (submittalId) {
+        await getLogByDocId(submittalId);
+      }
       await getProcoreAccessTokenData();
       await getProcoreAuthUser();
-      await checkProjectMapping();
+      if (projectId !== null) {
+        await checkProjectMapping();
+      }
       setInitLoading(false);
     };
-    if (customerId.toString() !== localStorage.getItem("userId")) {
+    if (localStorage.getItem("userId")) {
       if (localStorage.getItem("roleId") > 1) {
         setIsAssociatedUser(false);
         history({
@@ -614,13 +639,6 @@ const ProjectLogs = () => {
     setLoading(true);
     setLoadingView(true);
     setLogInViewer(null);
-    setPdfData({
-      url: "",
-      textLoc: {},
-      index: "",
-      docId: null,
-      additionalTextLocations: [],
-    });
 
     let filters = {};
     if (_filters === null) {
@@ -656,6 +674,30 @@ const ProjectLogs = () => {
 
     const submittalLogs = response.data.message;
     setLogData(submittalLogs);
+
+    if(submittalId) {
+      const submittalIdx = submittalLogs.findIndex((log) => log.id.toString() === submittalId);
+      if (submittalIdx !== -1) {
+        setPdfData({
+          url: submittalLogs[submittalIdx].doc_link,
+          textLoc: submittalLogs[submittalIdx].text_loc,
+          index: submittalIdx,
+          docId: submittalLogs[submittalIdx].doc_id,
+          submittalId: submittalLogs[submittalIdx].id,
+          additionalTextLocations: submittalLogs[submittalIdx].additional_text_locations,
+        });
+      }
+    } else {
+      setPdfData({
+        url: "",
+        textLoc: {},
+        index: "",
+        docId: null,
+        submittalId: null,
+        additionalTextLocations: [],
+      });
+    }
+
     localStorage.setItem(
       "filteredIds",
       submittalLogs?.map((item) => item?.id)
@@ -682,10 +724,12 @@ const ProjectLogs = () => {
     setTotalCount(response?.data?.total_count);
   };
   useEffect(() => {
-    fetchLogData(0, rowsPerPage).catch((error) => {
-      setLoading(false);
-      handleError(error);
-    });
+    if (projectId !== null) {
+      fetchLogData(0, rowsPerPage).catch((error) => {
+        setLoading(false);
+        handleError(error);
+      });
+    }
   }, [state, pageRefresh, projectId]);
 
   // useEffect(()=>{
@@ -714,9 +758,9 @@ const ProjectLogs = () => {
       // console.log(response.data.message);
     };
 
-    fetchData().catch((error) => {
-      handleError(error);
-    });
+    // fetchData().catch((error) => {
+    //   handleError(error);
+    // });
   }, [state, pageRefresh, customerId]);
 
   useEffect(() => {
@@ -732,7 +776,7 @@ const ProjectLogs = () => {
     }
   };
 
-  const documentIsProcessing = (documents) =>
+  const documentIsProcessing = (documents = []) =>
     documents.some((doc) =>
       ["PENDING_PROCESSING", "PROCESSING", "SUBSECTIONS_EXTRACTED"].includes(
         doc.document_status
@@ -829,10 +873,25 @@ const ProjectLogs = () => {
         textLoc: data.text_loc,
         index: pIndex,
         docId: data.doc_id,
+        submittalId: data.id,
         additionalTextLocations: data.additional_text_locations,
       });
+      setSubmittalIdParam(data.id);
     }
   };
+
+  const setSubmittalIdParam = (submittal_id) => {
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    if (submittal_id) {
+      params.set('submittal_id', submittal_id);
+    } else {
+      params.delete('submittal_id');
+    }
+  
+    url.search = params.toString();
+    window.history.pushState({}, '', url);
+  }
 
   const handleListSubmit = async (e) => {
     e.preventDefault();
@@ -1210,8 +1269,10 @@ const ProjectLogs = () => {
                               textLoc: {},
                               index: "",
                               docId: null,
+                              submittalId: null,
                               additionalTextLocations: [],
-                            })
+                            });
+                            setSubmittalIdParam(null);
                           }}
                         >
                           <span>Close PDF Viewer</span>
@@ -1319,6 +1380,7 @@ const ProjectLogs = () => {
                     projectId={state?.projectId || projectId}
                     listId={listId}
                     setPdfData={setPdfData}
+                    setSubmittalIdParam={setSubmittalIdParam}
                     pdfData={pdfData}
                     completeLogData={logData}
                     newRowIndex={newRowIndex}
@@ -1394,6 +1456,7 @@ const ProjectLogs = () => {
                       <PdfWrapper
                         pdfData={pdfData}
                         setPdfData={setPdfData}
+                        setSubmittalIdParam={setSubmittalIdParam}
                         handleAddNewRow={handleAddNewRow}
                         handleAppendToSelectedRow={handleAppendToSelectedRow}
                         setLogInViewer={setLogInViewer}
