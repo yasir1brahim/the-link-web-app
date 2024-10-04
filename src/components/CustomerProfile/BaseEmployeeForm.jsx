@@ -125,7 +125,7 @@ const BaseEmployeeForm = ({
                   Cancel
                 </Button>
                 <Button color="primary" onClick={handleSubmit}>
-                  Create
+                  Save
                 </Button>{' '}
               </ModalFooter>
             </form>

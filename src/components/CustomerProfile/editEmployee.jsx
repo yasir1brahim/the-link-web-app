@@ -44,7 +44,7 @@ const EditEmployee = ({
     let errors = validate();
     if (!errors) {
       try {
-        const response = await updateUserTeamMembership(employee?.id, customerID, 'member');
+        const response = await updateUserTeamMembership(employee?.id, 'member');
         if (response.data) {
           console.log(response.data);
           setPageRefresh(!pageRefresh);
@@ -76,7 +76,7 @@ const EditEmployee = ({
   };
   return (
     <BaseEmployeeForm
-      formTitle="Add Employee"
+      formTitle="Edit Employee"
       toggleModal={toggleModal}
       modal={modal}
       handleSubmit={handleSubmit}

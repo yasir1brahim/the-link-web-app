@@ -77,8 +77,14 @@ const getUserTeams = async (accessToken) => {
     }
 }
 
-const updateUserTeamMembership = async (userId, teamId, role) => {
-    // TODO
+const updateUserTeamMembership = async (membershipId, role) => {
+    return await axiosInstance({
+        method: 'patch',
+        url: `/teams/api/memberships/${membershipId}/`,
+        data: {
+            role: role
+        }
+    });
 }
 
 const sendInvitation = async (email, teamId, role = 'member') => {
