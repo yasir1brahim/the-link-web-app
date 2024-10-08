@@ -1397,39 +1397,6 @@ const ProjectLogs = () => {
                     />
                   </div>
                 </div>
-                {/* {state.project?.type === 'Submittal' && (
-                 
-                  <SubmittalTable
-                    logData={logData}
-                    selected={selected}
-                    handleSelect={handleSelect}
-                    handleSelectAll={handleSelectAll}
-                  />
-                )}
-                {state.project?.type === 'Testing' && (
-                  <TestingTable
-                    logData={logData}
-                    selected={selected}
-                    handleSelect={handleSelect}
-                    handleSelectAll={handleSelectAll}
-                  />
-                )}
-                {state.project?.type === 'Meeting' && (
-                  <MeetingTable
-                    logData={logData}
-                    selected={selected}
-                    handleSelect={handleSelect}
-                    handleSelectAll={handleSelectAll}
-                  />
-                )}
-                {state.project?.type === 'Closeout' && (
-                  <CloseOutTable
-                    logData={logData}
-                    selected={selected}
-                    handleSelect={handleSelect}
-                    handleSelectAll={handleSelectAll}
-                  />
-                )}{' '} */}
               </>
               {/* )} */}
             </div>
@@ -1550,7 +1517,7 @@ const ProjectLogs = () => {
         toggle={toggleViewSavedList}
         className="new-customer modal-md"
       >
-        <ModalHeader>Saved List</ModalHeader>
+        <ModalHeader>Saved Lists</ModalHeader>
         <ModalBody>
           <div className="save-list-name save-list">
             {viewList?.length

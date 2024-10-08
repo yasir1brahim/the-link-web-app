@@ -569,167 +569,67 @@ export default function CombinedLogs(props) {
                 </div>
               </span>
             </th>
-            {props.projectType !== "ufgs" && (
-              <th
-                className="para-no small-font"
-                style={{ width: `${tableWidths[4]}px` }}
-              >
+            <th
+              className="para-no small-font"
+              style={{ width: `${tableWidths[4]}px` }}
+            >
+              <div className="d-flex">
+                <span>Section Title</span>
+                <div
+                  className="resizer"
+                  onMouseDown={(e) => handleMouseDown(e, 3)}
+                >
+                  |
+                </div>
+              </div>
+            </th>
+            <th
+              className="para-no small-font"
+              style={{ width: `${tableWidths[5]}px` }}
+            >
+              <div className="d-flex">
+                <span>Paragraph</span>
+                <div
+                  className="resizer"
+                  onMouseDown={(e) => handleMouseDown(e, 4)}
+                >
+                  |
+                </div>
+              </div>
+            </th>
+            <th
+              className="small-font"
+              style={{ width: `${tableWidths[6]}px` }}
+            >
+              <span className="has-sorting">
                 <div className="d-flex">
-                  <span>Section Title</span>
+                  Submittal Type{" "}
+                  <span
+                    style={{ cursor: "pointer", marginLeft: "6px" }}
+                    onClick={() => handleSorting("type")}
+                  >
+                    <SortIcon />
+                  </span>
+                  <span
+                    className="ml-1"
+                    onClick={() => {
+                      setFilterModal(true);
+                      setFilterColumn("type");
+                    }}
+                  >
+                    <FilterIcon
+                      isActive={filterValues.type.length > 0 ? true : false}
+                    />
+                  </span>
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 3)}
+                    onMouseDown={(e) => handleMouseDown(e, 5)}
                   >
                     |
                   </div>
                 </div>
-              </th>
-            )}
-            {props.projectType === "ufgs" && (
-              <>
-                <th className="small-font">
-                  <span className="has-sorting">
-                    Div #{" "}
-                    <i
-                      className={
-                        sorting.column === "div_no"
-                          ? sorting.order === "asc"
-                            ? "sort-i"
-                            : "sort-d"
-                          : ""
-                      }
-                      onClick={() => handleSorting("div_no")}
-                    ></i>
-                    {/* <i className='has-filter' onClick={() => { setFilterModal(true); setFilterColumn('div_no') }} /> */}
-                  </span>
-                </th>
-                <th className="small-font">
-                  <span className="has-sorting">
-                    SD #{" "}
-                    <i
-                      className={
-                        sorting.column === "sd_no"
-                          ? sorting.order === "asc"
-                            ? "sort-i"
-                            : "sort-d"
-                          : ""
-                      }
-                      onClick={() => handleSorting("sd_no")}
-                    ></i>
-                    {/* <i className='has-filter' onClick={() => { setFilterModal(true); setFilterColumn('sd_no') }} /> */}
-                  </span>
-                </th>
-              </>
-            )}
-            {props.projectType !== "ufgs" && (
-              <th
-                className="para-no small-font"
-                style={{ width: `${tableWidths[5]}px` }}
-              >
-                <div className="d-flex">
-                  <span>Paragraph</span>
-                  <div
-                    className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 4)}
-                  >
-                    |
-                  </div>
-                </div>
-              </th>
-            )}
-            {props.projectType !== "ufgs" && (
-              <th
-                className="small-font"
-                style={{ width: `${tableWidths[6]}px` }}
-              >
-                <span className="has-sorting">
-                  <div className="d-flex">
-                    Submittal Type{" "}
-                    <span
-                      style={{ cursor: "pointer", marginLeft: "6px" }}
-                      onClick={() => handleSorting("type")}
-                    >
-                      <SortIcon />
-                    </span>
-                    <span
-                      className="ml-1"
-                      onClick={() => {
-                        setFilterModal(true);
-                        setFilterColumn("type");
-                      }}
-                    >
-                      <FilterIcon
-                        isActive={filterValues.type.length > 0 ? true : false}
-                      />
-                    </span>
-                    <div
-                      className="resizer"
-                      onMouseDown={(e) => handleMouseDown(e, 5)}
-                    >
-                      |
-                    </div>
-                  </div>
-                </span>
-              </th>
-            )}
-            {props.qaDashboard && (
-              <th className="small-font">
-                <span className="has-sorting">
-                  <div className="d-flex">
-                    Owner/Contractor{" "}
-                    <span
-                      style={{ cursor: "pointer", marginLeft: "6px" }}
-                      onClick={() => handleSorting("owner_contractor")}
-                    >
-                      <SortIcon />
-                    </span>
-                    <span
-                      className="ml-1"
-                      onClick={() => {
-                        setFilterModal(true);
-                        setFilterColumn("owner_contractor");
-                      }}
-                    >
-                      <FilterIcon
-                        isActive={
-                          filterValues.owner_contractor.length > 0
-                            ? true
-                            : false
-                        }
-                      />
-                    </span>
-                  </div>
-                </span>
-              </th>
-            )}
-            {props.projectType === "ufgs" && (
-              <th className="small-font">
-                <span className="has-sorting">
-                  <div className="d-flex">
-                    SD Title{" "}
-                    <span
-                      style={{ cursor: "pointer", marginLeft: "6px" }}
-                      onClick={() => handleSorting("sd_title")}
-                    >
-                      <SortIcon />
-                    </span>
-                    <span
-                      className="ml-1"
-                      onClick={() => {
-                        setFilterModal(true);
-                        setFilterColumn("sd_title");
-                      }}
-                    >
-                      <FilterIcon
-                        isActive={
-                          filterValues.sd_title.length > 0 ? true : false
-                        }
-                      />
-                    </span>
-                  </div>
-                </span>
-              </th>
-            )}
+              </span>
+            </th>
             <th className="small-font" style={{ width: `${tableWidths[7]}px` }}>
               <span className="has-sorting">
                 <div className="d-flex">
@@ -762,91 +662,29 @@ export default function CombinedLogs(props) {
                 </div>
               </span>
             </th>
-            {/* {props.projectType === 'ufgs' &&
-              <th>
-                <span className="has-sorting" >
-                  Phase <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
-                </span>
-              </th>
-            } */}
-            {props.projectType === "ufgs" && (
-              <th className="small-font">
-                <span className="has-sorting">
-                  <div className="d-flex">
-                    Classification{" "}
-                    <span
-                      style={{ cursor: "pointer", marginLeft: "6px" }}
-                      onClick={() => handleSorting("classification")}
-                    >
-                      <SortIcon />
-                    </span>
-                    <span
-                      className="ml-1"
-                      onClick={() => {
-                        setFilterModal(true);
-                        setFilterColumn("classification");
-                      }}
-                    >
-                      <FilterIcon
-                        isActive={
-                          filterValues.classification.length > 0 ? true : false
-                        }
-                      />
-                    </span>
-                  </div>
-                </span>
-              </th>
-            )}
-            {props.projectType !== "ufgs" && (
-              <>
-                {/* <th className='small-font'>
-                <span className="has-sorting" >
-                  Grouping <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
-                </span>
-              </th> */}
-                <th
-                  className="log-description small-font"
-                  style={{ width: `${tableWidths[8]}px` }}
-                >
-                  <span className="has-sorting">
-                    <div className="d-flex">
-                      Submittal Description{" "}
-                      <span
-                        style={{ cursor: "pointer", marginLeft: "6px" }}
-                        onClick={() => handleSorting("para_context")}
-                      >
-                        <SortIcon />
-                      </span>
-                      <div
-                        className="resizer"
-                        onMouseDown={(e) => handleMouseDown(e, 7)}
-                      >
-                        |
-                      </div>
-                    </div>
+            
+            <th
+              className="log-description small-font"
+              style={{ width: `${tableWidths[8]}px` }}
+            >
+              <span className="has-sorting">
+                <div className="d-flex">
+                  Submittal Description{" "}
+                  <span
+                    style={{ cursor: "pointer", marginLeft: "6px" }}
+                    onClick={() => handleSorting("para_context")}
+                  >
+                    <SortIcon />
                   </span>
-                </th>
-              </>
-            )}
-
-            {/* <th>
-              <span className="has-sorting" >
-                Status <i className={sorting.column === 'status' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('status')}></i>
+                  <div
+                    className="resizer"
+                    onMouseDown={(e) => handleMouseDown(e, 7)}
+                  >
+                    |
+                  </div>
+                </div>
               </span>
             </th>
-            <th>
-              <span className="has-sorting" >
-                Date Issued <i className={sorting.column === 'date_issued' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('date_issued')}></i>
-              </span>
-            </th>
-            <th>
-              <span className="has-sorting" >
-                Date Approved <i className={sorting.column === 'date_approved' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('date_approved')}></i>
-              </span>
-            </th>
-            <th className="log-description">
-              <span>Comments</span>
-            </th> */}
           </tr>
         </thead>
         <tbody style={{ fontSize: "12px" }}>
