@@ -15,10 +15,11 @@ export const AuthProvider = ({ children }) => {
         let userBack;
         try {
           userBack = await getCurrentUserData();
+          console.log('userBack', userBack);
           // token was still good. we have a valid user session
           setToken(storedToken);
           setIsAuthenticated(true);
-          setUser(userBack);
+          setUser(userBack.data);
         } catch (error) {
           // token didn't work. Invalidate it and try to use a refresh token to get a new one.
           localStorage.removeItem('token');
@@ -31,7 +32,7 @@ export const AuthProvider = ({ children }) => {
               setToken(refreshData.data.access);
               userBack = await getCurrentUserData();
               setIsAuthenticated(true);
-              setUser(userBack);
+              setUser(userBack.data);
             } catch (error) {
               // Refresh token also failed. The user will have to login again.
               localStorage.removeItem('refresh_token');

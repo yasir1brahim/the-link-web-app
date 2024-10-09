@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import Header from "../shared/Header/Header";
 import NavbarTop from "../shared/NavbarTop/NavbarTop";
 
@@ -28,6 +28,9 @@ import ProjectLogsHeader from "../shared/Header/ProjectLogsHeader";
 import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { AuthContext } from '../../auth/authcontext';
+import { getProjectDetails } from "../../api/Projects/api";
+
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -123,12 +126,7 @@ const ProjectLogs = () => {
     : null);
   const [customerId, setCustomerId] = useState(
     projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null);
-  // const projectName = searchParams.get('projectName');
-  const [logType, setLogType] = useState(projectDetails?.length >= 3 ? projectDetails[2] : null);
-  const [projectName, setProjectName] = useState(
-    projectDetails?.length >= 4
-      ? projectDetails[3].replace(/_space/g, " ")
-      : null);
+  const [projectName, setProjectName] = useState("");
   const authCode = searchParams.get("code");
   const procoreClientId = window.location.href.includes(
     "https://app.thelink.ai"
@@ -143,10 +141,7 @@ const ProjectLogs = () => {
   const procoreBaseUrl = window.location.href.includes("https://app.thelink.ai")
     ? "https://procore.com"
     : "https://sandbox.procore.com";
-  const procoreAuthUrl = `${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName === null ? '' : projectName.replace(
-    / /g,
-    "_space"
-  )}`;
+  const procoreAuthUrl = `${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId}`;
   const procoreAccessToken = localStorage.getItem("procore_access_token");
   const [loadingView, setLoadingView] = useState(false);
   const [procoreAuthUserInfo, setProcoreAuthUserInfo] = useState(null);
@@ -177,11 +172,9 @@ const ProjectLogs = () => {
   const history = useNavigate();
   const [isAssociatedUser, setIsAssociatedUser] = useState(true);
 
-  useEffect(() => {
-    if (!modal) {
-      setPdfFile({});
-    }
-  }, [modal]);
+  const [userRole, setUserRole] = useState('');
+
+  const { user, isAuthenticated } = useContext(AuthContext);
 
   const getProcoreAccessTokenData = async () => {
     try {
@@ -218,30 +211,22 @@ const ProjectLogs = () => {
     }
   };
 
-  const getLogByDocId = async (docId) => {
-    try {
-      const response = await axiosInstance({
-        method: "get",
-        url: `/get_log/${docId}`,
-      });
-      
-      // Extract project id from log.
-      const submittals = response.data.message;
-      if (submittals.length > 0) {
-        setProjectId(submittals[0].project_id);
-        localStorage.setItem("projectId", submittals[0].project_id);
-      }
-    } catch (error) {
-      console.error('Error fetching log by document ID:', error);
+  const getUserRoleInProject = async (projectData) => {
+    console.log('user', user);
+    console.log('projectData', projectData);
+    if (user.is_superuser) {
+      return 'Admin';
+    } 
+    const membership = projectData.members.find((member) => member.user_id === user.id);
+    if (membership) {
+      return membership.role === 'admin' ? 'Admin' : 'Member';
     }
+    return 'Unauthorized';
   }
 
   useEffect(() => {
     const initLoading = async () => {
       setInitLoading(true);
-      if (submittalId) {
-        await getLogByDocId(submittalId);
-      }
       await getProcoreAccessTokenData();
       await getProcoreAuthUser();
       if (projectId !== null) {
@@ -249,64 +234,38 @@ const ProjectLogs = () => {
       }
       setInitLoading(false);
     };
-    if (localStorage.getItem("userId")) {
-      if (localStorage.getItem("roleId") > 1) {
-        setIsAssociatedUser(false);
-        history({
-          pathname:
-            localStorage.getItem("roleId") === "0"
-              ? "/admin-landing"
-              : "/project-list",
-        });
-        toast.warn("You are not authorized to view this project.", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }
-      initLoading();
-    }
-  }, []);
-
-  // get the number of documents uploaded
-  useEffect(() => {
-    const fetchData = async () => {
+    const fetchProjectData = async () => {
       setLoading(true);
-      const response = await axiosInstance({
-        method: "get",
-        url: `/project_data/${projectId || state.project?.project_id}`,
-      });
+      const response = await getProjectDetails(projectId);
+      console.log('projectData', response.data);
+      setProjectName(response.data.name);
       setDocParsed(response.data.doc_parsed);
       setDocumentData(response.data.document_details);
+      setUserRole(getUserRoleInProject(response.data));
       setLoading(false);
     };
 
-    fetchData().catch((error) => {
+    fetchProjectData().catch((error) => {
       setLoading(false);
       handleError(error);
     });
-  }, [state, pageRefresh, projectId]);
+
+    initLoading();
+  }, [user, projectId]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (documentIsProcessing(documentData)) {
-        axiosInstance({
-          method: "get",
-          url: `/project_data/${projectId || state.project?.project_id}`,
-        })
-          .then((response) => {
-            setDocumentData(response.data.document_details);
-            if (!documentIsProcessing(response.data.document_details)) {
-              fetchLogData(0, rowsPerPage);
-            }
-          })
-          .catch((error) => {
-            handleError(error);
-          });
+        const fetchDocumentData = async () => {
+          const response = await getProjectDetails(projectId);
+          setDocumentData(response.data.document_details);
+          if (!documentIsProcessing(response.data.document_details)) {
+            fetchLogData(0, rowsPerPage);
+          }
+        };
+        fetchDocumentData().catch((error) => {
+          handleError(error);
+        });
       }
     }, 10000); // 10000 milliseconds = 10 seconds
 
@@ -394,10 +353,7 @@ const ProjectLogs = () => {
           url: "/procore/access_token",
           data: {
             code: authCode,
-            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId},${logType},${projectName.replace(
-              / /g,
-              "_space"
-            )}`,
+            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId}`,
           },
         });
         localStorage.setItem(
@@ -423,7 +379,6 @@ const ProjectLogs = () => {
   }, [
     authCode,
     customerId,
-    logType,
     projectId,
     selectedRows,
     searchParams,
@@ -444,7 +399,6 @@ const ProjectLogs = () => {
         get(res, "data.data.procore_company_id")
       );
       localStorage.setItem("projectId", projectId);
-      localStorage.setItem("logType", logType);
       localStorage.setItem("customerId", customerId);
       localStorage.setItem("projectName", projectName);
       setProcoreProjectName(get(res, "data.data.procore_project_name"));
@@ -482,7 +436,6 @@ const ProjectLogs = () => {
         get(res, "data.data.procore_company_id")
       );
       localStorage.setItem("projectId", projectId);
-      localStorage.setItem("logType", logType);
       localStorage.setItem("customerId", customerId);
       localStorage.setItem("projectName", projectName);
       setProcoreProjectName(get(res, "data.data.procore_project_name"));

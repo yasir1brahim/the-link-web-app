@@ -12,4 +12,15 @@ const getSavedLogs = async (listId) => {
     }
 }
 
-export {getSavedLogs}
+const getSubmittalItemById = async (projectId, submittalId) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/${projectId}/${submittalId}`,
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+export {getSavedLogs, getSubmittalItemById}

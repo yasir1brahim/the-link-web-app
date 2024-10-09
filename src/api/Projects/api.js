@@ -15,6 +15,17 @@ const listProjects = async (teamId) => {
     }
 }
 
+const getProjectDetails = async (projectId) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/projects/${projectId}/`,
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
 const updateProject = async (projectId, projectName, leadContact, listOfMemberUserIds, listOfAdminUserIds, startDate, endDate) => {
     const payload = {}
     if (projectName) {
@@ -95,4 +106,4 @@ const createProject = async (projectName, teamId, leadContact, listOfMemberUserI
 }
 
 
-export {listProjects, updateProject, createProject}
+export {listProjects, updateProject, createProject, getProjectDetails}
