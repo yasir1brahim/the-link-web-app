@@ -1120,213 +1120,79 @@ export default function CombinedLogs(props) {
                     log.item_desc
                   )}
                 </td>
-                {props.projectType === "ufgs" && (
+                <>
                   <td
-                    className={`${editRow === index ? "activeTh" : ""}`}
-                    style={{ textAlign: "center" }}
+                    className={`${
+                      editRow === index ? "activeTh" : ""
+                    } reduce-height`}
                   >
-                    {/* {editRow === index ? (
-                    <div
-                      className="form-group log-datepicker"
-                      style={{ minWidth: '240px' }}
-                    >
-                      <SelectDropdown
-                        label={'Phase'}
-                        // labelKey="name"
-                        setSelected={setGroupingValue}
-                        // value={leadContact.label}
-                        selected={groupingValue?.label}
-                        options={props.groupingData}
-                        searchValue={searchValue}
-                        setSearchValue={setSearchValue}
-                      // onInputChange={}
+                    {editRow === index && JSON.parse(log.full_edit) ? (
+                      <input
+                        placeholder="Enter"
+                        className={`form-control ${
+                          formValid.para_context ? "" : "form-required"
+                        }`}
+                        type="text"
+                        value={rowData.para_context}
+                        // style={{ border: 'none' }}
+                        onChange={(e) =>
+                          setRowData({
+                            ...rowData,
+                            para_context: e.target.value,
+                          })
+                        }
                       />
-                    </div>
-                  ) : ( */}
-                    {log.classification}
-                    {/* )} */}
-                  </td>
-                )}
-                {props.projectType !== "ufgs" && (
-                  <>
-                    {/* <td>
-                    {editRow === index ? (
-                      <div
-                        className="form-group log-datepicker"
-                        style={{ minWidth: '240px' }}
-                      >
-                        <SelectDropdown
-                          label={'Grouping'}
-                          // labelKey="name"
-                          setSelected={setGroupingValue}
-                          // value={leadContact.label}
-                          selected={groupingValue?.label}
-                          options={props.groupingData}
-                          searchValue={searchValue}
-                          setSearchValue={setSearchValue}
-                        // onInputChange={}
-                        />
-                      </div>
+                    ) : editRow === index ? (
+                      <input
+                        placeholder="Enter"
+                        className={`form-control ${
+                          formValid.para_context ? "" : "form-required"
+                        }`}
+                        type="text"
+                        value={rowData.para_context}
+                        // style={{ border: 'none' }}
+                        onChange={(e) =>
+                          setRowData({
+                            ...rowData,
+                            para_context: e.target.value,
+                          })
+                        }
+                      />
                     ) : (
-                      log.package
+                      <div
+                        className={
+                          "log-desc " +
+                          (showMore[index] ? "show-content" : "text-overflow")
+                        }
+                        ref={(element) => rowRefs.current.push(element)}
+                      >
+                        {log.para_context}
+                        {shouldShowExpansionButton[index] && (
+                          <span
+                            className="showmore-wrap"
+                            onClick={() =>
+                              setShowMore(
+                                showMore.with(index, !showMore[index])
+                              )
+                            }
+                          >
+                            {showMore[index] ? (
+                              <CollapseButton />
+                            ) : (
+                              <ExpandButton />
+                            )}
+                          </span>
+                        )}
+                      </div>
                     )}
-                  </td> */}
-                    <td
-                      className={`${
-                        editRow === index ? "activeTh" : ""
-                      } reduce-height`}
-                    >
-                      {editRow === index && JSON.parse(log.full_edit) ? (
-                        <input
-                          placeholder="Enter"
-                          className={`form-control ${
-                            formValid.para_context ? "" : "form-required"
-                          }`}
-                          type="text"
-                          value={rowData.para_context}
-                          // style={{ border: 'none' }}
-                          onChange={(e) =>
-                            setRowData({
-                              ...rowData,
-                              para_context: e.target.value,
-                            })
-                          }
-                        />
-                      ) : editRow === index ? (
-                        <input
-                          placeholder="Enter"
-                          className={`form-control ${
-                            formValid.para_context ? "" : "form-required"
-                          }`}
-                          type="text"
-                          value={rowData.para_context}
-                          // style={{ border: 'none' }}
-                          onChange={(e) =>
-                            setRowData({
-                              ...rowData,
-                              para_context: e.target.value,
-                            })
-                          }
-                        />
-                      ) : (
-                        <div
-                          className={
-                            "log-desc " +
-                            (showMore[index] ? "show-content" : "text-overflow")
-                          }
-                          ref={(element) => rowRefs.current.push(element)}
-                        >
-                          {log.para_context}
-                          {shouldShowExpansionButton[index] && (
-                            <span
-                              className="showmore-wrap"
-                              onClick={() =>
-                                setShowMore(
-                                  showMore.with(index, !showMore[index])
-                                )
-                              }
-                            >
-                              {showMore[index] ? (
-                                <CollapseButton />
-                              ) : (
-                                <ExpandButton />
-                              )}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                  </>
-                )}
-                {/* <td className="reduce-height">
-                  {editRow === index ? (
-                    <div
-                      className="form-group log-datepicker"
-                      style={{ minWidth: '240px' }}
-                    >
-                      <SelectDropdown
-                        label={'Status'}
-                        // labelKey="name"
-                        setSelected={setStatus}
-                        // value={leadContact.label}
-                        selected={statusValue?.label}
-                        options={[
-                          { value: 'not issued', label: 'Not Issued' },
-                          { value: 'in progress', label: 'In Progress' },
-                          { value: 'Completed', label: 'Completed' },
-                        ]}
-                      />
-                    </div>
-                  ) : (
-                    log.status
-                  )}
-                </td>
-                <td className="reduce-height">
-                  {editRow === index ? (
-                    <div className="log-datepicker form-group">
-                      <DateSelector
-                        isClearable={false}
-                        placeholderText="Date Issued"
-                        labelText="Date Issued"
-                        onChange={setDateIssued}
-                        selected={
-                          !dateIssued
-                            ? log.date_issued &&
-                              log.date_issued !== '00-00-0000'
-                              ? new Date(log.date_issued.replaceAll('-', '/'))
-                              : null
-                            : dateIssued
-                        }
-                      />
-                    </div>
-                  ) : log.date_issued === '00-00-0000' ? null : (
-                    log.date_issued
-                  )}
-                </td>
-                <td className="reduce-height">
-                  {editRow === index ? (
-                    <div className="log-datepicker form-group">
-                      <DateSelector
-                        isClearable={false}
-                        placeholderText="Date Approved"
-                        labelText="Date Approved"
-                        onChange={setDateApproved}
-                        selected={
-                          !dateApproved
-                            ? log.date_approved &&
-                              log.date_approved !== '00-00-0000'
-                              ? new Date(log.date_approved.replaceAll('-', '/'))
-                              : null
-                            : dateApproved
-                        }
-                      />
-                    </div>
-                  ) : log.date_approved === '00-00-0000' ? null : (
-                    log.date_approved
-                  )}
-                </td>
-                <td className="reduce-height">
-                  {editRow === index ? (
-                    <input
-                      placeholder="Enter"
-                      className="form-control"
-                      type="text"
-                      value={rowData.comments}
-                      // style={{ border: 'none' }}
-                      onChange={(e) =>
-                        setRowData({ ...rowData, comments: e.target.value })
-                      }
-                    />
-                  ) : (
-                    log.comments
-                  )}
-                </td> */}
+                  </td>
+                </>
               </tr>
             );
           })}
         </tbody>
       </table>
-      <FilterTable
+      {/* <FilterTable
         modal={filterModal}
         setFilterModal={() => setFilterModal(!filterModal)}
         selectedFilterValue={props?.selectedFilterValue}
@@ -1344,7 +1210,7 @@ export default function CombinedLogs(props) {
         rowsPerPage={props?.rowsPerPage}
         setLogIdList={props?.setLogIdList}
         setSelected={props?.setSelected}
-      />
+      /> */}
       {errorMessage && (
         <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
           <span className="d-flex align-items-center justify-content-center">

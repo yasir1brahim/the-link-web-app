@@ -30,7 +30,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails } from "../../api/Projects/api";
-
+import { getSubmittalItems } from "../../api/ProjectLogs/api";
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -64,11 +64,7 @@ const ProjectLogs = () => {
   );
   const [pageRefresh, setPageRefresh] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  // const [currentItems, setCurrentItems] = useState([]);
-  // const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setLoading] = useState(false);
-  const [groupingData, setGroupingData] = useState([]);
-  const [selectedLogData, setSelectedLogData] = useState([]);
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({
     url: "",
@@ -538,6 +534,17 @@ const ProjectLogs = () => {
     setLoadingView(true);
     setLogInViewer(null);
 
+    const submittalItems = await getSubmittalItems(
+      projectId,
+      search,
+      filterValues,
+      "",
+      "",
+      page || 0,
+      itemsPerPage,
+      "",
+    );
+
     let filters = {};
     if (_filters === null) {
       if (
@@ -553,25 +560,28 @@ const ProjectLogs = () => {
       }
     }
 
-    const response = await axiosInstance({
-      method: "post",
-      url: "/filter_logs",
-      data: {
-        project_id: state?.projectId || projectId,
-        search: search || "",
-        filters: { ...filters },
-        order_col: "",
-        order: "",
-        page_number: page || 0,
-        limit: itemsPerPage,
-        list_id: listId,
-      },
-    });
+    // const response = await axiosInstance({
+    //   method: "post",
+    //   url: "/filter_logs",
+    //   data: {
+    //     project_id: state?.projectId || projectId,
+    //     search: search || "",
+    //     filters: { ...filters },
+    //     order_col: "",
+    //     order: "",
+    //     page_number: page || 0,
+    //     limit: itemsPerPage,
+    //     list_id: listId,
+    //   },
+    // });
+    
     // setLogData(response.data.message);
-    setSelectedFilterValue(response.data.all_filter_vals);
+    console.log("responseData", submittalItems.data);
+    setSelectedFilterValue(submittalItems.data.all_filter_vals);
 
-    const submittalLogs = response.data.message;
+    const submittalLogs = submittalItems.data.message;
     setLogData(submittalLogs);
+    console.log("submittalLogs", submittalLogs);
 
     if(submittalId) {
       const submittalIdx = submittalLogs.findIndex((log) => log.id.toString() === submittalId);
@@ -600,11 +610,11 @@ const ProjectLogs = () => {
       "filteredIds",
       submittalLogs?.map((item) => item?.id)
     );
-    setLogIdList(response.data.log_id_list);
+    setLogIdList(submittalItems.data.log_id_list);
     setLoading(false);
     setLoadingView(false);
     setErrorMessage("");
-    if (response.data.message?.length === 0) {
+    if (submittalItems.data.message?.length === 0) {
       if (search) {
         setErrorMessage("Sorry, no results found for your search query.");
       } else {
@@ -619,7 +629,7 @@ const ProjectLogs = () => {
         }
       }
     }
-    setTotalCount(response?.data?.total_count);
+    setTotalCount(submittalItems?.data?.total_count);
   };
   useEffect(() => {
     if (projectId !== null) {
@@ -628,38 +638,8 @@ const ProjectLogs = () => {
         handleError(error);
       });
     }
-  }, [state, pageRefresh, projectId]);
+  }, [state, pageRefresh, projectId, documentData]);
 
-  // useEffect(()=>{
-  //   Afer edit of a column in the selected view below code updates the value of the field
-  //   if(selectedLogData.length) {
-  //     let logIds = selectedLogData.map((log)=> log.id)
-  //     let newSelectedData = logData.filter((log) => { return logIds?.includes(log.id) ? log : null })
-  //     setSelectedLogData(newSelectedData);
-  //   }
-  // },[logData, selectedLogData])
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await axiosInstance({
-        method: "get",
-        url: `/getPackages/${state?.customerId || customerId}`,
-      });
-      setGroupingData(
-        response.data.message.map((packageData) => {
-          return {
-            value: packageData.id,
-            label: packageData.name,
-          };
-        })
-      );
-
-      // console.log(response.data.message);
-    };
-
-    // fetchData().catch((error) => {
-    //   handleError(error);
-    // });
-  }, [state, pageRefresh, customerId]);
 
   useEffect(() => {
     setFilteredLogData(logData);
@@ -1239,7 +1219,6 @@ const ProjectLogs = () => {
                     pageRefresh={pageRefresh}
                     setPageRefresh={setPageRefresh}
                     customerId={state?.customerId || customerId}
-                    groupingData={groupingData}
                     setLogData={setLogData}
                     projectId={state?.projectId || projectId}
                     listId={listId}
