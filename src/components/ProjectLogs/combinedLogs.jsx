@@ -454,7 +454,7 @@ export default function CombinedLogs(props) {
 
   const formatSpecSection = (specSection) => {
     if (typeof specSection !== "string") return specSection;
-    return specSection.slice(0, 2) + " " + specSection.slice(2);
+    return specSection.slice(0, 2) + " " + specSection.slice(2, 4) + " " + specSection.slice(4);
   };
 
   const formatSubmittalNumber = (number) => {
