@@ -12,7 +12,7 @@ import { ReactComponent as CancelButton } from "../../assets/images/label-reject
 import { ReactComponent as ExpandButton } from "../../assets/images/down-arrow.svg";
 import { ReactComponent as CollapseButton } from "../../assets/images/up-arrow.svg";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
-import { Tooltip } from "reactstrap";
+import { Tooltip } from "@mui/material";
 import handleError from "../../config/errorHandler";
 import { SortIcon } from "../shared/icons/sortIcon";
 import { FilterIcon } from "../shared/icons/filterIcon";
@@ -42,9 +42,6 @@ export default function CombinedLogs(props) {
   const [filterModal, setFilterModal] = useState(false);
   const [filterColumn, setFilterColumn] = useState("");
 
-  const [addRowTooltip, setaddRowTooltip] = useState(null);
-  const [editRowTooltip, setEditRowTooltip] = useState(null);
-  const [pdfTooltip, setPdfTooltip] = useState(null);
   // const navigate = useNavigate();
 
   const [formValid, setFormValid] = useState({
@@ -986,44 +983,28 @@ export default function CombinedLogs(props) {
                           </>
                         ) : (
                           <>
-                            <span
-                              onClick={() => handleEditToggle(log, index)}
-                              style={{ cursor: "pointer" }}
-                            >
-                              <svg
-                                id={"Edit-Tooltip-" + index + 1}
-                                width="16"
-                                height="16"
-                                viewBox="0 0 18 18"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
+                            <Tooltip title="Edit Row" arrow>
+                              <span
+                                onClick={() => handleEditToggle(log, index)}
+                                style={{ cursor: "pointer" }}
                               >
-                                <path
-                                  fillRule="evenodd"
-                                  clipRule="evenodd"
-                                  d="M0.666748 2.33332C0.666748 1.41285 1.41294 0.666657 2.33341 0.666657H8.16675C8.62698 0.666657 9.00008 1.03975 9.00008 1.49999C9.00008 1.96023 8.62698 2.33332 8.16675 2.33332H2.33341V15.6667H15.6667V9.83332C15.6667 9.37308 16.0398 8.99999 16.5001 8.99999C16.9603 8.99999 17.3334 9.37308 17.3334 9.83332V15.6667C17.3334 16.5871 16.5872 17.3333 15.6667 17.3333H2.33341C1.41295 17.3333 0.666748 16.5871 0.666748 15.6667V2.33332ZM13.4562 0.666657C13.6773 0.666614 13.8894 0.754465 14.0458 0.910863L17.0895 3.9559C17.4147 4.28131 17.4147 4.80875 17.0895 5.13416L8.47163 13.7558C8.31534 13.9121 8.10332 14 7.88225 14H4.83341C4.37318 14 4.00008 13.6269 4.00008 13.1667V10.1333C4.00008 9.91244 4.08774 9.70063 4.24381 9.54438L12.8668 0.911087C13.023 0.75463 13.2351 0.666699 13.4562 0.666657ZM13.4566 2.67898L5.66675 10.4782V12.3333H7.53696L15.3218 4.54503L13.4566 2.67898Z"
-                                  fill="#36454F"
-                                />
-                              </svg>
-                            </span>
-                            <span>
-                              <Tooltip
-                                placement="left"
-                                target={"Edit-Tooltip-" + index + 1}
-                                isOpen={editRowTooltip === index + 1}
-                                toggle={() =>
-                                  setEditRowTooltip(
-                                    editRowTooltip
-                                      ? editRowTooltip === index + 1
-                                        ? null
-                                        : index + 1
-                                      : index + 1
-                                  )
-                                }
-                              >
-                                Edit Row
-                              </Tooltip>
-                            </span>
+                                <svg
+                                  id={"Edit-Tooltip-" + index + 1}
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 18 18"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M0.666748 2.33332C0.666748 1.41285 1.41294 0.666657 2.33341 0.666657H8.16675C8.62698 0.666657 9.00008 1.03975 9.00008 1.49999C9.00008 1.96023 8.62698 2.33332 8.16675 2.33332H2.33341V15.6667H15.6667V9.83332C15.6667 9.37308 16.0398 8.99999 16.5001 8.99999C16.9603 8.99999 17.3334 9.37308 17.3334 9.83332V15.6667C17.3334 16.5871 16.5872 17.3333 15.6667 17.3333H2.33341C1.41295 17.3333 0.666748 16.5871 0.666748 15.6667V2.33332ZM13.4562 0.666657C13.6773 0.666614 13.8894 0.754465 14.0458 0.910863L17.0895 3.9559C17.4147 4.28131 17.4147 4.80875 17.0895 5.13416L8.47163 13.7558C8.31534 13.9121 8.10332 14 7.88225 14H4.83341C4.37318 14 4.00008 13.6269 4.00008 13.1667V10.1333C4.00008 9.91244 4.08774 9.70063 4.24381 9.54438L12.8668 0.911087C13.023 0.75463 13.2351 0.666699 13.4562 0.666657ZM13.4566 2.67898L5.66675 10.4782V12.3333H7.53696L15.3218 4.54503L13.4566 2.67898Z"
+                                    fill="#36454F"
+                                  />
+                                </svg>
+                              </span>
+                            </Tooltip>
                           </>
                         )}
                         {/* <Link
@@ -1034,7 +1015,6 @@ export default function CombinedLogs(props) {
                         Pdf
                       </Link> */}
                         {pdfIndex === index ? (
-                          <>
                           <div
                             onClick={() => {
                               props.setLogInViewer(null);
@@ -1051,52 +1031,35 @@ export default function CombinedLogs(props) {
                             style={{ cursor: "pointer" }}
                             className="pdf-button"
                           >
-                            <svg id={"Pdf-Tooltip-" + index + 1} width="18px" height="18px" viewBox="0 0 1.08 1.08" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path width="48" height="48" fill="white" fill-opacity="0.01" d="M0 0H1.08V1.08H0V0z"/>
-                              <path d="M1.08 0H0v1.08h1.08z" fill="white" fill-opacity="0.01"/>
-                              <path d="M0.225 0.09h0.45l0.225 0.225v0.63a0.045 0.045 0 0 1 -0.045 0.045H0.225a0.045 0.045 0 0 1 -0.045 -0.045V0.135a0.045 0.045 0 0 1 0.045 -0.045Z" fill="#36454F" stroke="#000000" stroke-width="0.09" stroke-linejoin="round"/>
-                              <path fill-rule="evenodd" clip-rule="evenodd" d="M0.405 0.405h0.27v0.18L0.405 0.585z" stroke="white" stroke-width="0.09" stroke-linecap="round" stroke-linejoin="round"/>
-                              <path d="M0.405 0.405v0.36" stroke="white" stroke-width="0.07" stroke-linecap="round"/>
-                            </svg>
-                          </div>
-                          <div>
-                            <Tooltip
-                              placement="right"
-                              target={"Pdf-Tooltip-" + index + 1}
-                              isOpen={pdfTooltip === index + 1}
-                              toggle={() =>
-                                setPdfTooltip(
-                                  pdfTooltip
-                                    ? pdfTooltip === index + 1
-                                      ? null
-                                      : index + 1
-                                    : index + 1,
-                                )
-                              }
-                            >
-                              Close Pdf
+                            <Tooltip title="Close Pdf" arrow>
+                              <svg id={"Pdf-Tooltip-" + index + 1} width="18px" height="18px" viewBox="0 0 1.08 1.08" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path width="48" height="48" fill="white" fill-opacity="0.01" d="M0 0H1.08V1.08H0V0z"/>
+                                <path d="M1.08 0H0v1.08h1.08z" fill="white" fill-opacity="0.01"/>
+                                <path d="M0.225 0.09h0.45l0.225 0.225v0.63a0.045 0.045 0 0 1 -0.045 0.045H0.225a0.045 0.045 0 0 1 -0.045 -0.045V0.135a0.045 0.045 0 0 1 0.045 -0.045Z" fill="#36454F" stroke="#000000" stroke-width="0.09" stroke-linejoin="round"/>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M0.405 0.405h0.27v0.18L0.405 0.585z" stroke="white" stroke-width="0.09" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M0.405 0.405v0.36" stroke="white" stroke-width="0.07" stroke-linecap="round"/>
+                              </svg>
                             </Tooltip>
                           </div>
-                          </>
                         ) : (
                           newRowIndex !== index &&
                           showPdf && (
-                            <>
-                              <span
-                                onClick={() => {
-                                  handleViewPdf(
-                                    log.doc_link,
-                                    log.text_loc,
-                                    index,
-                                    log.doc_id,
-                                    log.id,
-                                    log.additional_text_locations,
-                                  );
-                                  props.setLogInViewer(log);
-                                }}
-                                style={{ cursor: "pointer" }}
-                                className="pdf-button"
-                              >
+                            <span
+                              onClick={() => {
+                                handleViewPdf(
+                                  log.doc_link,
+                                  log.text_loc,
+                                  index,
+                                  log.doc_id,
+                                  log.id,
+                                  log.additional_text_locations,
+                                );
+                                props.setLogInViewer(log);
+                              }}
+                              style={{ cursor: "pointer" }}
+                              className="pdf-button"
+                            >
+                              <Tooltip title="View Pdf" arrow>
                                 <svg id={"Pdf-Tooltip-" + index + 1} width="18px" height="18px" viewBox="0 0 1.08 1.08" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path width="48" height="48" fill="white" fill-opacity="0.01" d="M0 0H1.08V1.08H0V0z"/>
                                   <path d="M1.08 0H0v1.08h1.08z" fill="white" fill-opacity="0.01"/>
@@ -1104,30 +1067,12 @@ export default function CombinedLogs(props) {
                                   <path fill-rule="evenodd" clip-rule="evenodd" d="M0.405 0.405h0.27v0.18L0.405 0.585z" stroke="#36454F" stroke-width="0.09" stroke-linecap="round" stroke-linejoin="round"/>
                                   <path d="M0.405 0.405v0.36" stroke="#36454F" stroke-width="0.09" stroke-linecap="round"/>
                                 </svg>
-                              </span>
-                              <span>
-                                <Tooltip
-                                  placement="right"
-                                  target={"Pdf-Tooltip-" + index + 1}
-                                  isOpen={pdfTooltip === index + 1}
-                                  toggle={() =>
-                                    setPdfTooltip(
-                                      pdfTooltip
-                                        ? pdfTooltip === index + 1
-                                          ? null
-                                          : index + 1
-                                        : index + 1,
-                                    )
-                                  }
-                                >
-                                  View Pdf
-                                </Tooltip>
-                              </span>
-                            </>
+                              </Tooltip>
+                            </span>
                           )
                         )}
                         {props.listId === null && editRow !== index && (
-                          <>
+                          <Tooltip title="Add Row below" arrow>
                             <AddButton
                               onClick={() => {
                                 if (!newRowIndex) {
@@ -1138,25 +1083,7 @@ export default function CombinedLogs(props) {
                               }}
                               id={"Tooltip-" + index + 1}
                             />
-                            <span>
-                              <Tooltip
-                                placement="right"
-                                target={"Tooltip-" + index + 1}
-                                isOpen={addRowTooltip === index + 1}
-                                toggle={() =>
-                                  setaddRowTooltip(
-                                    addRowTooltip
-                                      ? addRowTooltip === index + 1
-                                        ? null
-                                        : index + 1
-                                      : index + 1
-                                  )
-                                }
-                              >
-                                Add Row below
-                              </Tooltip>
-                            </span>
-                          </>
+                          </Tooltip>
                         )}
                         {log.parsing_method === "AI_SUBMITTAL" ? (
                           <Sparkles />
