@@ -23,6 +23,7 @@ const EditProject = ({
   const [projectType, setProjectType] = useState("commercial");
   const typeaheadRef = useRef(null);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
+  const [projectNumber, setProjectNumber] = useState({ value: null, errors: "" });
   const [leadContact, setLeadContact] = useState({
     value: "",
     label: "",
@@ -37,6 +38,7 @@ const EditProject = ({
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: "", errors: "" });
+      setProjectNumber({ value: null, errors: "" });
       setLeadContact({
         value: "",
         label: "",
@@ -108,6 +110,7 @@ const EditProject = ({
           url: "/updateProject",
           data: {
             project_name: projectName.value || project?.project_name,
+            project_number: projectNumber.value || project?.project_number,
             lead_contact: leadContact[0]
               ? leadContact[0].value
               : employeeList.find(
@@ -274,24 +277,45 @@ const EditProject = ({
                 )}
               </div>
               <div className="create-project-content">
-                <div className="form-group">
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="customerProjectName"
-                    aria-describedby="customerProjectName"
-                    placeholder="Enter"
-                    defaultValue={project?.project_name}
-                    onChange={(e) => {
-                      setProjectName({
-                        ...projectName,
-                        value: e.target.value,
-                      });
-                    }}
-                  />
-                  <label className="text-label" htmlFor="customerProjectName">
-                    Project Name
-                  </label>
+                <div style={{ gap: "25px" }} className="d-flex">
+                  <div className="form-group">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="customerProjectName"
+                      aria-describedby="customerProjectName"
+                      placeholder="Enter"
+                      defaultValue={project?.project_name}
+                      onChange={(e) => {
+                        setProjectName({
+                          ...projectName,
+                          value: e.target.value,
+                        });
+                      }}
+                    />
+                    <label className="text-label" htmlFor="customerProjectName">
+                      Project Name
+                    </label>
+                  </div>
+                  <div className="form-group">
+                    <input
+                      type="number"
+                      className="form-control"
+                      id="customerProjectNumber"
+                      aria-describedby="customerProjectNumber"
+                      placeholder="Enter"
+                      defaultValue={project?.project_number}
+                      onChange={(e) => {
+                        setProjectNumber({
+                          ...projectNumber,
+                          value: e.target.value,
+                        });
+                      }}
+                    />
+                    <label className="text-label" htmlFor="customerProjectNumber">
+                      Project Number
+                    </label>
+                  </div>
                 </div>
                 <div style={{ gap: "25px" }} className="d-flex">
                   <div className="form-group">
