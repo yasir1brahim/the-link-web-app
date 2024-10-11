@@ -528,7 +528,9 @@ const ProjectLogs = () => {
     itemsPerPage,
     search,
     listId = null,
-    _filters = null
+    _filters = null,
+    orderCol = "",
+    order = "",
   ) => {
     setLoading(true);
     setLoadingView(true);
@@ -538,44 +540,13 @@ const ProjectLogs = () => {
       projectId,
       search,
       filterValues,
-      "",
-      "",
+      orderCol,
+      order,
       page || 0,
       itemsPerPage,
-      "",
+      listId
     );
 
-    let filters = {};
-    if (_filters === null) {
-      if (
-        Object.values(filterValues)
-          .map((value) => (value?.length ? true : false))
-          .includes(true)
-      ) {
-        Object.keys(filterValues).forEach((key) =>
-          filterValues[key]?.length
-            ? (filters = { ...filters, [key]: filterValues[key] })
-            : null
-        );
-      }
-    }
-
-    // const response = await axiosInstance({
-    //   method: "post",
-    //   url: "/filter_logs",
-    //   data: {
-    //     project_id: state?.projectId || projectId,
-    //     search: search || "",
-    //     filters: { ...filters },
-    //     order_col: "",
-    //     order: "",
-    //     page_number: page || 0,
-    //     limit: itemsPerPage,
-    //     list_id: listId,
-    //   },
-    // });
-    
-    // setLogData(response.data.message);
     console.log("responseData", submittalItems.data);
     setSelectedFilterValue(submittalItems.data.all_filter_vals);
 
@@ -1247,6 +1218,7 @@ const ProjectLogs = () => {
                     isSelectAll={isSelectAll}
                     setSelected={setSelected}
                     loading={loadingView}
+                    fetchLogData={fetchLogData}
                   />
                   {pdfData.url && (
                     <div style={{ display: "flex", gap: 10 }}>

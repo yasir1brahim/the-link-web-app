@@ -40,6 +40,12 @@ const getSubmittalItems = async (
         return await axiosInstance({
             method: 'get',
             url: `/api/deliverables/${projectId}/submittal-items`,
+            params: {
+                ...(search && { search }),
+                ...(filtersString && { filters: filtersString }),
+                ...(order_col && { order_col }),
+                ...(order && { order }),
+            }
         });
     } catch (error) {
         handleError(error);

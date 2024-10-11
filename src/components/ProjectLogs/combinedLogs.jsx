@@ -218,47 +218,16 @@ export default function CombinedLogs(props) {
 
   const handleSorting = async (columnName) => {
     let sortingOrder = sorting.column === columnName ? sorting.order : "desc";
-    let a = {};
-    if (
-      Object.values(filterValues)
-        .map((value) => (value.length ? true : false))
-        .includes(true)
-    ) {
-      Object.keys(filterValues).forEach((key) =>
-        filterValues[key].length
-          ? (a = { ...a, [key]: filterValues[key] })
-          : null
-      );
-    }
     try {
-      // const response = await axiosInstance({
-      //   method: 'get',
-      //   url: props.selectedLogData.length ?
-      //     `/sort_saved_logs/${props.listId}/${columnName}/${sortingOrder === 'desc' ? 'asc' : 'desc'}` :
-      //     `/sort_logs/${props.projectId}/${columnName}/${sortingOrder === 'desc' ? 'asc' : 'desc'}`,
-
-      // });
-      const response = await axiosInstance({
-        method: "post",
-        url: props.qaDashboard ? "qa_dashboard_logs" : "/filter_logs",
-        data: {
-          project_id: props.projectId,
-          search: "",
-          // filters: Object.values(filterValues).map(value => value.length ? true : false).includes(true) ? a : {},
-          filters: a,
-          order_col: columnName || "",
-          order: sortingOrder === "desc" ? "asc" : "desc" || "",
-          list_id: props.listId,
-          page_number: props?.page - 1,
-          limit: props?.rowsPerPage,
-        },
-      });
-      localStorage.setItem(
-        "filteredIds",
-        response.data?.message?.map((item) => item?.id)
+      props.fetchLogData(
+        props.page,
+        props.rowsPerPage,
+        props.searchValue,
+        props.listId,
+        filterValues,
+        columnName,
+        sortingOrder === "desc" ? "asc" : "desc"
       );
-      props.setLogData(response.data.message);
-      props.setLogIdList(response.data.log_id_list);
       setSorting({
         ...sorting,
         column: columnName,

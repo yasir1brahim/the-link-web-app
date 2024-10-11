@@ -46,7 +46,7 @@ const Signin = (props) => {
         if (teams.data.results.length === 1) {
           localStorage.setItem('currentTeamId', teams.data.results[0].id);
           localStorage.setItem('currentTeamSlug', teams.data.results[0].slug);
-          const teamId = teams.data[0].id;
+          const teamId = teams.data.results[0].id;
           return history({ pathname: `/project-list/${teamId}` });
         }
         return history({ pathname: '/companies' });
