@@ -90,7 +90,7 @@ const ProjectLogs = () => {
     classification: "",
   });
   const customerData = state?.customerData;
-  const projectType = state?.project.project_type;
+  // const projectType = state?.project.project_type;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const baseUrl = window.location.href.includes("https://app.thelink.ai")
     ? `https://app.thelink.ai/`
@@ -330,7 +330,7 @@ const ProjectLogs = () => {
       setUploadLoading(true);
       const data = new FormData();
       data.append("project_id", projectId || state.project?.project_id);
-      projectType === "ufgs" && data.append("project_type", projectType);
+      // projectType === "ufgs" && data.append("project_type", projectType);
       Object.values(pdfFile)?.forEach((file) => data.append("files", file));
       const response = await axiosInstance({
         method: "post",
@@ -1069,7 +1069,6 @@ const ProjectLogs = () => {
             navBtn={"logs"}
           />
           <ProjectLogsHeader
-            centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
             getList={getList}
             totalCount={totalCount}
             dropdownOpen={dropdownOpen}
@@ -1297,7 +1296,7 @@ const ProjectLogs = () => {
                     newRowIndex={newRowIndex}
                     setNewRowIndex={setNewRowIndex}
                     searchValue={searchValue}
-                    projectType={projectType}
+                    projectCategory={null}
                     qaDashboard={state?.qaDashboard}
                     selectedFilterValue={selectedFilterValue}
                     filterValues={filterValues}
