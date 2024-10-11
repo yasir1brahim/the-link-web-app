@@ -228,7 +228,7 @@ const EditProject = ({
                       </div> */}
                       <Box component="form">
                         <Grid container spacing={3} alignItems="center">
-                          <Grid item xs={6}>
+                          {customer?.address && (<Grid item xs={6}>
                             <TextField 
                               variant="outlined" 
                               fullWidth 
@@ -237,8 +237,8 @@ const EditProject = ({
                               defaultValue={customer?.address}
                               disabled
                             />
-                          </Grid>
-                          <Grid item xs={6}>
+                          </Grid>)}
+                          {customer?.contact_number && (<Grid item xs={6}>
                             <TextField 
                               variant="outlined" 
                               fullWidth 
@@ -247,7 +247,7 @@ const EditProject = ({
                               defaultValue={customer?.contact_number}
                               disabled
                             />
-                          </Grid>
+                          </Grid>)}
                         </Grid>
                       </Box>
                       {/* <div className="col-6">
