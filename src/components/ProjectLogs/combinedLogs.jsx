@@ -566,7 +566,7 @@ export default function CombinedLogs(props) {
                 </div>
               </span>
             </th>
-            {props.projectType !== "ufgs" && (
+            {props.projectCategory !== "ufgs" && (
               <th
                 className="para-no small-font"
                 style={{ width: `${tableWidths[4]}px` }}
@@ -582,7 +582,7 @@ export default function CombinedLogs(props) {
                 </div>
               </th>
             )}
-            {props.projectType === "ufgs" && (
+            {props.projectCategory === "ufgs" && (
               <>
                 <th className="small-font">
                   <span className="has-sorting">
@@ -618,7 +618,7 @@ export default function CombinedLogs(props) {
                 </th>
               </>
             )}
-            {props.projectType !== "ufgs" && (
+            {props.projectCategory !== "ufgs" && (
               <th
                 className="para-no small-font"
                 style={{ width: `${tableWidths[5]}px` }}
@@ -634,7 +634,7 @@ export default function CombinedLogs(props) {
                 </div>
               </th>
             )}
-            {props.projectType !== "ufgs" && (
+            {props.projectCategory !== "ufgs" && (
               <th
                 className="small-font"
                 style={{ width: `${tableWidths[6]}px` }}
@@ -699,7 +699,7 @@ export default function CombinedLogs(props) {
                 </span>
               </th>
             )}
-            {props.projectType === "ufgs" && (
+            {props.projectCategory === "ufgs" && (
               <th className="small-font">
                 <span className="has-sorting">
                   <div className="d-flex">
@@ -759,14 +759,14 @@ export default function CombinedLogs(props) {
                 </div>
               </span>
             </th>
-            {/* {props.projectType === 'ufgs' &&
+            {/* {props.projectCategory === 'ufgs' &&
               <th>
                 <span className="has-sorting" >
                   Phase <i className={sorting.column === 'package' ? sorting.order === 'asc' ? 'sort-i' : 'sort-d' : ''} onClick={() => handleSorting('package')}></i>
                 </span>
               </th>
             } */}
-            {props.projectType === "ufgs" && (
+            {props.projectCategory === "ufgs" && (
               <th className="small-font">
                 <span className="has-sorting">
                   <div className="d-flex">
@@ -794,7 +794,7 @@ export default function CombinedLogs(props) {
                 </span>
               </th>
             )}
-            {props.projectType !== "ufgs" && (
+            {props.projectCategory !== "ufgs" && (
               <>
                 {/* <th className='small-font'>
                 <span className="has-sorting" >
@@ -1128,7 +1128,7 @@ export default function CombinedLogs(props) {
                   {/* {log.spec_section} */}
                 </td>
 
-                {props.projectType !== 'ufgs' && (
+                {props.projectCategory !== 'ufgs' && (
                   <td
                     className={`${
                       editRow === index ? 'activeTh' : ''
@@ -1137,7 +1137,7 @@ export default function CombinedLogs(props) {
                     {log.section_title}
                   </td>
                 )}
-                {props.projectType === "ufgs" && (
+                {props.projectCategory === "ufgs" && (
                   <>
                     <td
                       className={`${
@@ -1155,7 +1155,7 @@ export default function CombinedLogs(props) {
                     </td>
                   </>
                 )}
-                {props.projectType !== "ufgs" && (
+                {props.projectCategory !== "ufgs" && (
                   <td
                     className={`${
                       editRow === index ? "activeTh" : ""
@@ -1179,7 +1179,7 @@ export default function CombinedLogs(props) {
                     )}
                   </td>
                 )}
-                {props.projectType !== "ufgs" && (
+                {props.projectCategory !== "ufgs" && (
                   <td
                     className={`${
                       editRow === index ? "activeTh" : ""
@@ -1203,7 +1203,7 @@ export default function CombinedLogs(props) {
                     )}
                   </td>
                 )}
-                {props.projectType === "ufgs" && (
+                {props.projectCategory === "ufgs" && (
                   <td className="reduce-height"> {log.sd_title} </td>
                 )}
                 <td
@@ -1228,7 +1228,7 @@ export default function CombinedLogs(props) {
                     log.item_desc
                   )}
                 </td>
-                {props.projectType === "ufgs" && (
+                {props.projectCategory === "ufgs" && (
                   <td
                     className={`${editRow === index ? "activeTh" : ""}`}
                     style={{ textAlign: "center" }}
@@ -1255,7 +1255,7 @@ export default function CombinedLogs(props) {
                     {/* )} */}
                   </td>
                 )}
-                {props.projectType !== "ufgs" && (
+                {props.projectCategory !== "ufgs" && (
                   <>
                     {/* <td>
                     {editRow === index ? (

@@ -8,7 +8,7 @@ import moment from "moment";
 import handleError from "../../config/errorHandler";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, TextField, Grid, Box, Typography } from "@mui/material";
 
 const EditProject = ({
   modal,
@@ -20,7 +20,7 @@ const EditProject = ({
   isAdminUser,
   customerID,
 }) => {
-  const [projectType, setProjectType] = useState("commercial");
+  const [projectType, setProjectType] = useState({ value: "", label: "" });
   const typeaheadRef = useRef(null);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
   const [projectNumber, setProjectNumber] = useState({ value: null, errors: "" });
@@ -211,46 +211,45 @@ const EditProject = ({
                         </div>
                       </div>
                     </div> */}
-                    <div className="customer-profile">
-                      <div className="project-type">
-                        <p className="">Project type</p>
-                      </div>
-                      <div className="radio-selector">
-                        <input
-                          type="radio"
-                          name="ticketHeading"
-                          id="ticketHeading"
-                          onClick={() => setProjectType("commercial")}
-                          checked={projectType === "commercial"}
-                          onChange={() => {}}
-                        />
-                        <label htmlFor="ticketHeading">Commercial Project</label>
-                      </div>
-                      <div className="col-6">
+                    <div className="customer-profile mb-0">
+                      {/* <div className="col-6">
                         <div className="text-label-value">
-                          <div className="text-label">{customer?.address}</div>
+                          <div className="text-label">
+                            {"Address: " + customer?.address}
+                          </div>
                         </div>
-                      </div>
-                      <div className="radio-selector">
-                        <input
-                          type="radio"
-                          name="ticketHeading"
-                          id="ticketHeading"
-                          onClick={() => setProjectType("ufgs")}
-                          checked={projectType === "ufgs"}
-                          onChange={() => {}}
-                        />
-                        <label htmlFor="ticketHeading">
-                          Military/Gov Project(UFGS Specs)
-                        </label>
                       </div>
                       <div className="col-6">
                         <div className="text-label-value">
                           <div className="text-label">
-                            {customer?.contact_number}
+                            {"Contact: " + customer?.contact_number}
                           </div>
                         </div>
-                      </div>
+                      </div> */}
+                      <Box component="form">
+                        <Grid container spacing={3} alignItems="center">
+                          <Grid item xs={6}>
+                            <TextField 
+                              variant="outlined" 
+                              fullWidth 
+                              label="Address" 
+                              size="small"
+                              defaultValue={customer?.address}
+                              disabled
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField 
+                              variant="outlined" 
+                              fullWidth 
+                              label="Contact Number" 
+                              size="small"
+                              defaultValue={customer?.contact_number}
+                              disabled
+                            />
+                          </Grid>
+                        </Grid>
+                      </Box>
                       {/* <div className="col-6">
                       <div className="custom-control custom-checkbox">
                         <input
@@ -409,11 +408,35 @@ const EditProject = ({
                     />
                   </div>
                 </div>
-                {/* <div className="col-4">
-                    <div className="form-group">
-                      <SelectDropdown label={'Project Type'} labelKey="name" />
+                <div style={{ gap: "25px" }} className="d-flex">
+                  <div className="form-group">
+                    <div className={`has-typehead`}>
+                      <Typeahead
+                        id="employee-list"
+                        ref={typeaheadRef}
+                        options={employeeList.map((project) => {
+                          return {
+                            value: project?.emp_id,
+                            label: project?.name,
+                            email: project?.emp_email,
+                          };
+                        })}
+                        onChange={(e) => setLeadContact(e)}
+                        selected={leadContact?.label}
+                      />
+
+                      <label className="text-label">{"Project Type"}</label>
+                      <i className="has-icon icon-dropdown"></i>
                     </div>
-                  </div> */}
+                    {!leadContact[0]?.label ? (
+                      <label className="text-label typehead-label">
+                        {project?.lead_contact}
+                      </label>
+                    ) : null}
+                  </div>
+                  <div className="form-group">
+                  </div>
+                </div>
                 <div className="users-section">
                   <div className="form-group">
                     <Typeahead
