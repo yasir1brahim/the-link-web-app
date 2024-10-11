@@ -16,6 +16,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   // const [email, setEmail] = useState({ value: '', errors: '' });
   // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
+  const [projectNumber, setProjectNumber] = useState({ value: null, errors: "" });
   const [leadContact, setLeadContact] = useState({
     value: "",
     label: "",
@@ -36,6 +37,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: "", errors: "" });
+      setProjectNumber({ value: null, errors: "" });
       setLeadContact({ value: "", errors: "", email: "" });
       setStartDate("");
       setEndDate("");
@@ -104,6 +106,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
           url: "/createProject",
           data: {
             project_name: projectName.value,
+            project_number: projectNumber.value,
             lead_contact: leadContact[0]?.value || "",
             start_date: startDate ? moment(startDate).format("YYYY-MM-DD") : "",
             end_date: endDate ? moment(endDate).format("YYYY-MM-DD") : "",
@@ -181,30 +184,57 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
                 </div>
               </div>
               <div className="create-project-content" style={{ marginTop: "0px" }}>
-                <div className="form-group">
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="customerProjectName"
-                    aria-describedby="customerProjectName"
-                    placeholder="Enter"
-                    required
-                    value={projectName.value}
-                    onChange={(e) => {
-                      setProjectName({
-                        ...projectName,
-                        value: e.target.value,
-                      });
-                    }}
-                  />
-                  <label className="text-label" htmlFor="customerProjectName">
-                    Project Name
-                  </label>
-                  {projectName.errors && (
-                    <small className="form-error" style={{ color: "red" }}>
-                      {projectName.errors}
-                    </small>
-                  )}
+                <div style={{ gap: "25px" }} className="d-flex">
+                  <div className="form-group">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="customerProjectName"
+                      aria-describedby="customerProjectName"
+                      placeholder="Enter"
+                      required
+                      value={projectName.value}
+                      onChange={(e) => {
+                        setProjectName({
+                          ...projectName,
+                          value: e.target.value,
+                        });
+                      }}
+                    />
+                    <label className="text-label" htmlFor="customerProjectName">
+                      Project Name
+                    </label>
+                    {projectName.errors && (
+                      <small className="form-error" style={{ color: "red" }}>
+                        {projectName.errors}
+                      </small>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <input
+                      type="number"
+                      className="form-control"
+                      id="customerProjectNumber"
+                      aria-describedby="customerProjectNumber"
+                      placeholder="Enter"
+                      required
+                      value={projectNumber.value}
+                      onChange={(e) => {
+                        setProjectNumber({
+                          ...projectNumber,
+                          value: e.target.value,
+                        });
+                      }}
+                    />
+                    <label className="text-label" htmlFor="customerProjectNumber">
+                      Project Number
+                    </label>
+                    {projectNumber.errors && (
+                      <small className="form-error" style={{ color: "red" }}>
+                        {projectNumber.errors}
+                      </small>
+                    )}
+                  </div>
                 </div>
                 <div style={{ gap: "25px" }} className="d-flex">
                   <div className="form-group">
