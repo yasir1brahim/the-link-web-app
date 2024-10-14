@@ -1071,7 +1071,7 @@ export default function CombinedLogs(props) {
                             </span>
                           )
                         )}
-                        {props.listId === null && editRow !== index && (
+                        {props.listId === null && editRow === "" && (
                           <Tooltip title="Add Row below" arrow>
                             <AddButton
                               onClick={() => {
