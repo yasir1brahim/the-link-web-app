@@ -620,23 +620,24 @@ const CustomerProjects = ({
             pageRefresh={pageRefresh}
             setPageRefresh={setPageRefresh}
           />
-          <CreateProject
+          {createProjectModal ? (<CreateProject
             modal={createProjectModal}
             toggleModal={toggleCreateProjectModal}
             customer={state || customerData}
             pageRefresh={pageRefresh}
             setPageRefresh={setPageRefresh}
             customerID={customerId}
-          />
-          <EditProject
+          />) : ''}
+          {editModal ? (<EditProject
             modal={editModal}
             toggleModal={toggleEditModal}
             customer={state || customerData}
             project={project}
+            defaultProjectType={project.project_type}
             pageRefresh={pageRefresh}
             setPageRefresh={setPageRefresh}
             customerID={customerId}
-          />
+          />) : ''}
         </div>
       </div>
       <Loader showComponentLoader={isLoading} />

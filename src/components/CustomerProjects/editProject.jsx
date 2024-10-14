@@ -8,19 +8,22 @@ import moment from "moment";
 import handleError from "../../config/errorHandler";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, TextField, Grid, Box } from "@mui/material";
+import { PROJECT_TYPES } from "../../constants";
+import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 
 const EditProject = ({
   modal,
   toggleModal,
   customer,
   project,
+  defaultProjectType,
   pageRefresh,
   setPageRefresh,
   isAdminUser,
   customerID,
 }) => {
-  const [projectType, setProjectType] = useState("commercial");
+  const [projectType, setProjectType] = useState([{ value: "", label: "" }]);
   const typeaheadRef = useRef(null);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
   const [projectNumber, setProjectNumber] = useState({ value: null, errors: "" });
@@ -39,6 +42,7 @@ const EditProject = ({
     if (!modal) {
       setProjectName({ value: "", errors: "" });
       setProjectNumber({ value: null, errors: "" });
+      setProjectType([{ value: "", label: "" }]);
       setLeadContact({
         value: "",
         label: "",
@@ -56,6 +60,13 @@ const EditProject = ({
     if (modal) {
       const preSelectEmployeesForProject = async () => {
         setIsLoading(true);
+        const project_type_list = PROJECT_TYPES.filter((project_type) => project_type.name === project.project_type);
+        if (project_type_list.length > 0) {
+          setProjectType([{
+            value: project_type_list[0].id,
+            label: project_type_list[0].name
+          }]);
+        }
         // fetch employees for customer
         const resp_employees_by_customer = await axiosInstance({
           method: "get",
@@ -111,6 +122,7 @@ const EditProject = ({
           data: {
             project_name: projectName.value || project?.project_name,
             project_number: projectNumber.value || project?.project_number,
+            project_type: projectType[0].label,
             lead_contact: leadContact[0]
               ? leadContact[0].value
               : employeeList.find(
@@ -211,46 +223,45 @@ const EditProject = ({
                         </div>
                       </div>
                     </div> */}
-                    <div className="customer-profile">
-                      <div className="project-type">
-                        <p className="">Project type</p>
-                      </div>
-                      <div className="radio-selector">
-                        <input
-                          type="radio"
-                          name="ticketHeading"
-                          id="ticketHeading"
-                          onClick={() => setProjectType("commercial")}
-                          checked={projectType === "commercial"}
-                          onChange={() => {}}
-                        />
-                        <label htmlFor="ticketHeading">Commercial Project</label>
-                      </div>
-                      <div className="col-6">
+                    <div className="customer-profile mb-0">
+                      {/* <div className="col-6">
                         <div className="text-label-value">
-                          <div className="text-label">{customer?.address}</div>
+                          <div className="text-label">
+                            {"Address: " + customer?.address}
+                          </div>
                         </div>
-                      </div>
-                      <div className="radio-selector">
-                        <input
-                          type="radio"
-                          name="ticketHeading"
-                          id="ticketHeading"
-                          onClick={() => setProjectType("ufgs")}
-                          checked={projectType === "ufgs"}
-                          onChange={() => {}}
-                        />
-                        <label htmlFor="ticketHeading">
-                          Military/Gov Project(UFGS Specs)
-                        </label>
                       </div>
                       <div className="col-6">
                         <div className="text-label-value">
                           <div className="text-label">
-                            {customer?.contact_number}
+                            {"Contact: " + customer?.contact_number}
                           </div>
                         </div>
-                      </div>
+                      </div> */}
+                      <Box component="form">
+                        <Grid container spacing={3} alignItems="center">
+                          {customer?.address && (<Grid item xs={6}>
+                            <TextField 
+                              variant="outlined" 
+                              fullWidth 
+                              label="Address" 
+                              size="small"
+                              defaultValue={customer?.address}
+                              disabled
+                            />
+                          </Grid>)}
+                          {customer?.contact_number && (<Grid item xs={6}>
+                            <TextField 
+                              variant="outlined" 
+                              fullWidth 
+                              label="Contact Number" 
+                              size="small"
+                              defaultValue={customer?.contact_number}
+                              disabled
+                            />
+                          </Grid>)}
+                        </Grid>
+                      </Box>
                       {/* <div className="col-6">
                       <div className="custom-control custom-checkbox">
                         <input
@@ -409,11 +420,24 @@ const EditProject = ({
                     />
                   </div>
                 </div>
-                {/* <div className="col-4">
-                    <div className="form-group">
-                      <SelectDropdown label={'Project Type'} labelKey="name" />
-                    </div>
-                  </div> */}
+                <div style={{ gap: "25px" }} className="d-flex">
+                  <div className="form-group">
+                    <SelectDropdown
+                      label={'Project Type'}
+                      setSelected={setProjectType}
+                      defaultInputValue={defaultProjectType}
+                      options={PROJECT_TYPES.map((project_type) => {
+                        return {
+                          value: project_type?.id,
+                          label: project_type?.name,
+                        };
+                      })}
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="form-group">
+                  </div>
+                </div>
                 <div className="users-section">
                   <div className="form-group">
                     <Typeahead
