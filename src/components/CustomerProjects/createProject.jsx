@@ -18,7 +18,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
   const [projectType, setProjectType] = useState({ value: "", label: "" });
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
-  const [projectNumber, setProjectNumber] = useState({ value: null, errors: "" });
+  const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [dateError, setDateError] = useState({ startError: "", endError: "" });
@@ -34,7 +34,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: "", errors: "" });
-      setProjectNumber({ value: null, errors: "" });
+      setProjectNumber({ value: "", errors: "" });
       setProjectType([{ value: "", label: "" }]);
       setStartDate("");
       setEndDate("");
@@ -208,7 +208,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
                   </div>
                   <div className="form-group">
                     <input
-                      type="number"
+                      type="text"
                       className="form-control"
                       id="customerProjectNumber"
                       aria-describedby="customerProjectNumber"

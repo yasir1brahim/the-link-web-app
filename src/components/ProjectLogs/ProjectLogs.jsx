@@ -249,27 +249,28 @@ const ProjectLogs = () => {
       }
       setInitLoading(false);
     };
-    if (localStorage.getItem("userId")) {
-      if (localStorage.getItem("roleId") > 1) {
-        setIsAssociatedUser(false);
-        history({
-          pathname:
-            localStorage.getItem("roleId") === "0"
-              ? "/admin-landing"
-              : "/project-list",
-        });
-        toast.warn("You are not authorized to view this project.", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }
-      initLoading();
-    }
+    initLoading();
+    // if (localStorage.getItem("userId")) {
+    //   if (localStorage.getItem("roleId") > 1) {
+    //     setIsAssociatedUser(false);
+    //     history({
+    //       pathname:
+    //         localStorage.getItem("roleId") === "0"
+    //           ? "/admin-landing"
+    //           : "/project-list",
+    //     });
+    //     toast.warn("You are not authorized to view this project.", {
+    //       position: "bottom-center",
+    //       autoClose: 5000,
+    //       hideProgressBar: true,
+    //       closeOnClick: true,
+    //       pauseOnHover: true,
+    //       draggable: true,
+    //       progress: undefined,
+    //     });
+    //   }
+    //   initLoading();
+    // }
   }, []);
 
   // get the number of documents uploaded

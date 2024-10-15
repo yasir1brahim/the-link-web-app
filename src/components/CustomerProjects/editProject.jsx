@@ -26,7 +26,7 @@ const EditProject = ({
   const [projectType, setProjectType] = useState([{ value: "", label: "" }]);
   const typeaheadRef = useRef(null);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
-  const [projectNumber, setProjectNumber] = useState({ value: null, errors: "" });
+  const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [employeeList, setEmployeeList] = useState([]);
@@ -36,7 +36,7 @@ const EditProject = ({
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: "", errors: "" });
-      setProjectNumber({ value: null, errors: "" });
+      setProjectNumber({ value: "", errors: "" });
       setProjectType([{ value: "", label: "" }]);
       typeaheadRef?.current?.clear();
       setStartDate("");
@@ -295,7 +295,7 @@ const EditProject = ({
                   </div>
                   <div className="form-group">
                     <input
-                      type="number"
+                      type="text"
                       className="form-control"
                       id="customerProjectNumber"
                       aria-describedby="customerProjectNumber"
