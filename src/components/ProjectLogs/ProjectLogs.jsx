@@ -30,7 +30,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails } from "../../api/Projects/api";
-import { getSubmittalItems } from "../../api/ProjectLogs/api";
+import { getSubmittalItems, getProjectLists, createSubmittalList } from "../../api/ProjectLogs/api";
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -743,15 +743,7 @@ const ProjectLogs = () => {
     let errors = validate();
     if (!errors) {
       try {
-        await axiosInstance({
-          method: "post",
-          url: "/save_list",
-          data: {
-            project_id: state?.projectId || projectId,
-            records: selected,
-            view_name: listName.value,
-          },
-        });
+        await createSubmittalList(state?.projectId || projectId, listName.value, localStorage.getItem("userId"), selected);
         setToggleSaveListNameModal(false);
         toast.success("List created successfully", {
           position: "bottom-center",
@@ -762,13 +754,10 @@ const ProjectLogs = () => {
       }
     }
   };
-  const getList = async () => {
+  const getSavedListsForProjects = async () => {
     try {
-      const response = await axiosInstance({
-        method: "get",
-        url: `/get_list/${state?.projectId || projectId}`,
-      });
-      setList(response.data.message);
+      const response = await getProjectLists(state?.projectId || projectId);
+      setList(response.data.results);
       setToggleViewSavedList(true);
     } catch (error) {
       handleError(error);
@@ -974,7 +963,7 @@ const ProjectLogs = () => {
           />
           <ProjectLogsHeader
             centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
-            getList={getList}
+            getProjectLists={getSavedListsForProjects}
             totalCount={totalCount}
             dropdownOpen={dropdownOpen}
             toggle={toggle}
@@ -1427,10 +1416,10 @@ const ProjectLogs = () => {
             {viewList?.length
               ? viewList?.map((list) => {
                   return (
-                    JSON.parse(list.records)?.length !== 0 && (
+                    list.submittals?.length !== 0 && (
                       <div className="row">
                         <div className="col-6">
-                          <h5 className="">{list.view_name}</h5>
+                          <h5 className="">{list.name}</h5>
                         </div>
                         <div className="col-6">
                           <div className="d-flex align-item-center justify-content-flex-end">
@@ -1450,8 +1439,8 @@ const ProjectLogs = () => {
                                 style={{ textTransform: "none" }}
                                 onClick={() =>
                                   handleExportExcel(
-                                    list.records,
-                                    list.view_name
+                                    list.submittals,
+                                    list.name
                                   )
                                 }
                               >

@@ -65,7 +65,7 @@ const ProjectLogsHeader = ({ ...props }) => {
           <button
             type="button"
             className="table-top-btn ml-1"
-            onClick={props.getList}
+            onClick={props.getProjectLists}
           >
             <svg
               width="18"

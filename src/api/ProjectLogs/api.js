@@ -12,11 +12,40 @@ const getSavedLogs = async (listId) => {
     }
 }
 
+const getProjectLists = async (projectId) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/${projectId}/submittal-lists/`,
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
 const getSubmittalItemById = async (projectId, submittalId) => {
     try {
         return await axiosInstance({
             method: 'get',
             url: `/api/deliverables/${projectId}/${submittalId}`,
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+const createSubmittalList = async (projectId, listName, userId, submittalIds) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/${projectId}/submittal-lists/`,
+            data: {
+                name: listName,
+                description: "",
+                project: projectId,
+                created_by: userId,
+                submittals: submittalIds
+            },
         });
     } catch (error) {
         handleError(error);
@@ -50,6 +79,7 @@ const getSubmittalItems = async (
                 ...(order && { order }),
                 ...(page_number && { page_number }),
                 ...(limit && { limit }),
+                ...(list_id && { list_id }),
             }
         });
     } catch (error) {
@@ -57,4 +87,4 @@ const getSubmittalItems = async (
     }
 }
 
-export {getSavedLogs, getSubmittalItemById, getSubmittalItems}
+export {getSavedLogs, getSubmittalItemById, getSubmittalItems, getProjectLists, createSubmittalList}
