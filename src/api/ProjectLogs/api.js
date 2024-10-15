@@ -34,17 +34,22 @@ const getSubmittalItems = async (
     list_id
 ) => {
     const nonEmptyFilters = Object.keys(filters_object).filter(key => filters_object[key].length > 0);
-    const filtersString = nonEmptyFilters.map(key => `filters[${key}]=${filters_object[key].join(',')}`).join('&');
-    console.log("filtersString", filtersString);
+    var filtersObject = {}
+    nonEmptyFilters.forEach(key => {
+        filtersObject[`filters[${key}]`] = filters_object[key].join(',')
+    })
+    console.log("filtersObject", filtersObject);
     try {
         return await axiosInstance({
             method: 'get',
             url: `/api/deliverables/${projectId}/submittal-items`,
             params: {
                 ...(search && { search }),
-                ...(filtersString && { filters: filtersString }),
+                ...filtersObject,
                 ...(order_col && { order_col }),
                 ...(order && { order }),
+                ...(page_number && { page_number }),
+                ...(limit && { limit }),
             }
         });
     } catch (error) {

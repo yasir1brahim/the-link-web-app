@@ -41,39 +41,19 @@ export const FilterTable = (props) => {
   };
 
   const handleApplyFilter = async (toggleFilter) => {
-    let filter = {};
-    Object.keys(props.filterValues).forEach((key) =>
-      props.filterValues[key].length
-        ? (filter = { ...filter, [key]: props.filterValues[key] })
-        : null
-    );
     try {
       console.log(props.filterValues);
-      const response = await axiosInstance({
-        method: 'post',
-        url: props.qaDashboard ? 'qa_dashboard_logs' : '/filter_logs',
-        data: {
-          project_id: props.projectId,
-          search: '',
-          // filters: {...a, type: ["Submittal"]},
-          filters: filter,
-          order_col: props.orderColumn,
-          order: props.order,
-          list_id: props.listId,
-          page_number: props?.page - 1,
-          limit: props?.rowsPerPage,
-          list_id: props.listId
-        }
-      });
-      localStorage.setItem(
-        'filteredIds',
-        response.data?.message?.map((item) => item?.id)
+      props.fetchLogData(
+        props.page,
+        props.rowsPerPage,
+        props.searchValue,
+        props.listId,
+        props.filterValues,
+        props.orderColumn,
+        props.order,
       );
-      props.setLogData(response.data.message);
-      props.setLogIdList(response.data.log_id_list);
       props.setSelected([]);
       toggleFilter && props.setFilterModal();
-      props.setTotalCount(response.data.total_count);
       setSearchValue('')
     } catch (error) {
       console.log(error.message);
@@ -121,22 +101,9 @@ export const FilterTable = (props) => {
                   >
                     Search {props?.filterColumn.replaceAll('_', ' ')} Values
                   </label>
-                  {/* {listName.errors && (
-                                        <small className="form-error">{listName.errors}</small>
-                                    )} */}
                 </div>
                 <div style={{ marginBottom: '20px', float: 'right' }}>
-                  {/* <span
-                    style={{
-                      textDecoration: 'underline',
-                      color: 'blue',
-                      cursor: 'pointer',
-                      marginRight: '10px'
-                    }}
-                    onClick={handleSelectAll}
-                  >
-                    Select all
-                  </span> */}
+                  
                   <span
                     style={{
                       textDecoration: 'underline',
@@ -148,7 +115,9 @@ export const FilterTable = (props) => {
                     Clear
                   </span>
                 </div>
-                {Object.values(props.selectedFilterValue).length
+                {console.log("Selected Filter Value", props?.selectedFilterValue)}
+                {console.log(props?.filterColumn)}
+                {Object.values(props?.selectedFilterValue).length
                   ? props?.selectedFilterValue[props?.filterColumn]
                       ?.filter((value) =>
                         value?.toString().includes(searchValue)

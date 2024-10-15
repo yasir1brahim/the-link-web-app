@@ -1161,10 +1161,11 @@ export default function CombinedLogs(props) {
           })}
         </tbody>
       </table>
-      {/* <FilterTable
+      <FilterTable
         modal={filterModal}
         setFilterModal={() => setFilterModal(!filterModal)}
         selectedFilterValue={props?.selectedFilterValue}
+        fetchLogData={props?.fetchLogData}
         filterColumn={filterColumn}
         setFilterValues={setFilterValues}
         filterValues={filterValues}
@@ -1179,7 +1180,7 @@ export default function CombinedLogs(props) {
         rowsPerPage={props?.rowsPerPage}
         setLogIdList={props?.setLogIdList}
         setSelected={props?.setSelected}
-      /> */}
+      />
       {errorMessage && (
         <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
           <span className="d-flex align-items-center justify-content-center">
