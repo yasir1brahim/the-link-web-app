@@ -121,9 +121,8 @@ const CustomerProjects = ({
           url: "/updateProject",
           data: {
             project_name: archiveProject.project_name,
-            lead_contact: employeeList.find(
-              (employee) => employee.name === archiveProject.lead_contact,
-            )?.emp_id,
+            project_number: archiveProject.project_number,
+            project_type: archiveProject.project_type,
             start_date: archiveProject?.start_date
               ? moment(
                   new Date((archiveProject?.start_date).replaceAll("-", "/")),
@@ -166,15 +165,13 @@ const CustomerProjects = ({
           }`,
         });
         const emps_by_p = resp_employees_by_project.data.message;
-        const employeeList = await getEmployeeList(restoreProject);
         const response = await axiosInstance({
           method: "put",
           url: "/updateProject",
           data: {
             project_name: restoreProject.project_name,
-            lead_contact: employeeList.find(
-              (employee) => employee.name === restoreProject.lead_contact,
-            )?.emp_id,
+            project_number: restoreProject.project_number,
+            project_type: restoreProject.project_type,
             employee_list: emps_by_p,
             start_date: restoreProject?.start_date
               ? moment(
@@ -342,11 +339,6 @@ const CustomerProjects = ({
                   </th>
                   <th>
                     <span>
-                      Lead Contact<i className="sort-i"></i>
-                    </span>
-                  </th>
-                  <th>
-                    <span>
                       Users<i className="sort-i"></i>
                     </span>
                   </th>
@@ -424,20 +416,6 @@ const CustomerProjects = ({
                             </span>
                             <p className="content">{project.status}</p>
                           </div>{" "}
-                        </td>
-                        <td>
-                          {!!project.lead_contact ? (
-                            <div className="icon-wrap">
-                              <div className="icon">
-                                <p className="content">
-                                  {generateInitials(project.lead_contact)}
-                                </p>
-                              </div>
-                              <p className="content">{project.lead_contact}</p>
-                            </div>
-                          ) : (
-                            ""
-                          )}
                         </td>
                         <td>{project.users}</td>
                         <td>{project.start_date}</td>

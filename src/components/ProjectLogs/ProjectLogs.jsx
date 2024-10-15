@@ -325,7 +325,6 @@ const ProjectLogs = () => {
   };
 
   const handleSubmit = async () => {
-    // console.log(pdfFile);
     try {
       setUploadLoading(true);
       const data = new FormData();
@@ -1592,7 +1591,7 @@ const ProjectLogs = () => {
                     )
                   );
                 })
-              : null}
+              : <div className="p-2">No Saved Lists</div>}
           </div>
           <ModalFooter>
             <Button

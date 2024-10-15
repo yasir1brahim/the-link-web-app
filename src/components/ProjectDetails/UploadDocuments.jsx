@@ -165,8 +165,9 @@ export const UploadDocuments = (props) => {
                 color="primary"
                 onClick={handleSubmit}
                 className="submit-accent"
+                disabled={pdfFile.length > 0 ? false : true}
               >
-                Get Log
+                Create Log
               </Button>
             </ModalFooter>
           </form>
@@ -233,7 +234,7 @@ export const UploadDocuments = (props) => {
               >
                 Close
               </button>
-              <button
+              {logScreenUrl && <button
                 type="button"
                 onClick={() => {
                   toggleSuccessModal(false);
@@ -244,7 +245,7 @@ export const UploadDocuments = (props) => {
                 className="d-inline-block btn btn-primary"
               >
                 Go to Project Details
-              </button>
+              </button>}
             </div>
           </div>
         </ModalBody>
