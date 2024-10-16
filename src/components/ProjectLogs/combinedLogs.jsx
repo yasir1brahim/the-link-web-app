@@ -154,40 +154,14 @@ export default function CombinedLogs(props) {
           method: "put",
           url: "/v2/update_logs",
           data: {
-            // customer_id: props.customerId,
-            // comments: rowData.comments,
             record: rowData.id,
             submittal_type: rowData.item_desc,
-            // package: groupingValue?.length
-            //   ? groupingValue[0].label
-            //   : searchValue
-            //     ? searchValue
-            //     : rowData.package,
             submittal_description: rowData.para_context,
-            // classification: rowData?.classification,
-            // phase: null,
-            // sd_no: rowData?.sd_no,
-            // div_no: rowData?.div_no,
             para_no: rowData.para_no,
             project_id: rowData.project_id,
             spec_section: rowData.spec_section,
-            // status: statusValue?.length ? statusValue[0].value : '',
             submittal_heading: rowData.type,
             para_context: rowData.para_context,
-            // date_issued: !dateIssued
-            //   ? rowData?.date_issued
-            //     ? moment(
-            //       new Date((rowData?.date_issued).replaceAll('-', '/'))
-            //     ).format('YYYY-MM-DD')
-            //     : null
-            //   : moment(dateIssued).format('YYYY-MM-DD'),
-            // date_approved: !dateApproved
-            //   ? rowData?.date_approved
-            //     ? moment(
-            //       new Date((rowData?.date_approved).replaceAll('-', '/'))
-            //     ).format('YYYY-MM-DD')
-            //     : null
-            //   : moment(dateApproved).format('YYYY-MM-DD'),
           },
         });
       }

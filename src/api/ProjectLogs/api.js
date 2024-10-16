@@ -52,6 +52,39 @@ const createSubmittalList = async (projectId, listName, userId, submittalIds) =>
     }
 }
 
+const addSubmittalItem = async (projectId, submittalId, submittalType, submittalDescription, paraNo, specSection) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/${projectId}/${submittalId}`,
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+const updateSubmittalItem = async (projectId, submittalId, submittalType, submittalDescription, paraNo, specSection) => {
+    try {
+        return await axiosInstance({
+            method: 'put',
+            url: `/api/deliverables/${projectId}/${submittalId}`,
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+const deleteSubmittalItem = async (projectId, submittalId) => {
+    try {
+        return await axiosInstance({
+            method: 'delete',
+            url: `/api/deliverables/${projectId}/${submittalId}`,
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
 const getSubmittalItems = async (
     projectId,
     search,
