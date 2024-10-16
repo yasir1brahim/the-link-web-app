@@ -1173,21 +1173,10 @@ export default function CombinedLogs(props) {
                             </span>
                           )
                         )}
-<<<<<<< HEAD
-                        {props.listId === null && editRow !== index && (
-                          <Tooltip title={newRowIndex
-                            ? 'Finish adding the row ' +
-                              (newRowIndex > index
-                                ? 'below'
-                                : 'above') +
-                              ' before adding another one'
-                            : isCombining
-                            ? 'Cannot add new row while combining rows'
-                            : 'Add Row'} arrow>
-=======
                         {props.listId === null && editRow === "" && (
-                          <Tooltip title="Add Row below" arrow>
->>>>>>> main
+                          <Tooltip title={isCombining
+                            ? 'Cannot add new row while combining rows'
+                            : 'Add Row Below'} arrow>
                             <AddButton
                               onClick={() => {
                                 if (isCombining) return;
@@ -1251,11 +1240,7 @@ export default function CombinedLogs(props) {
                     {log.section_title}
                   </td>
                 )}
-<<<<<<< HEAD
-                {props.projectType === 'ufgs' && (
-=======
                 {props.projectCategory === "ufgs" && (
->>>>>>> main
                   <>
                     <td
                       className={`${
@@ -1273,11 +1258,7 @@ export default function CombinedLogs(props) {
                     </td>
                   </>
                 )}
-<<<<<<< HEAD
-                {props.projectType !== 'ufgs' && (
-=======
                 {props.projectCategory !== "ufgs" && (
->>>>>>> main
                   <td
                     className={`${
                       editRow === index ? 'activeTh' : ''
@@ -1306,11 +1287,7 @@ export default function CombinedLogs(props) {
                     )}
                   </td>
                 )}
-<<<<<<< HEAD
-                {props.projectType !== 'ufgs' && (
-=======
                 {props.projectCategory !== "ufgs" && (
->>>>>>> main
                   <td
                     className={`${
                       editRow === index ? 'activeTh' : ''
@@ -1349,11 +1326,7 @@ export default function CombinedLogs(props) {
                     )}
                   </td>
                 )}
-<<<<<<< HEAD
-                {props.projectType === 'ufgs' && (
-=======
                 {props.projectCategory === "ufgs" && (
->>>>>>> main
                   <td className="reduce-height"> {log.sd_title} </td>
                 )}
                 <td
@@ -1393,11 +1366,7 @@ export default function CombinedLogs(props) {
                     log.item_desc
                   )}
                 </td>
-<<<<<<< HEAD
-                {props.projectType === 'ufgs' && (
-=======
                 {props.projectCategory === "ufgs" && (
->>>>>>> main
                   <td
                     className={`${editRow === index ? 'activeTh' : ''}`}
                     style={{ textAlign: 'center' }}
@@ -1424,11 +1393,7 @@ export default function CombinedLogs(props) {
                     {/* )} */}
                   </td>
                 )}
-<<<<<<< HEAD
-                {props.projectType !== 'ufgs' && (
-=======
                 {props.projectCategory !== "ufgs" && (
->>>>>>> main
                   <>
                     {/* <td>
                     {editRow === index ? (
