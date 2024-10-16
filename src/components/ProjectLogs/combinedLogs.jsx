@@ -32,6 +32,12 @@ export default function CombinedLogs(props) {
     rowData,
     setRowData,
     loading,
+    isCombining,
+    setIsCombining,
+    combiningQueue,
+    combiningResult,
+    setCombiningResult,
+    areSameValues,
   } = props;
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
@@ -43,6 +49,7 @@ export default function CombinedLogs(props) {
   const [filterColumn, setFilterColumn] = useState("");
 
   // const navigate = useNavigate();
+
 
   const [formValid, setFormValid] = useState({
     spec_section: true,
@@ -495,6 +502,7 @@ export default function CombinedLogs(props) {
                     id="ticketHeading"
                     onChange={props.handleSelectAll}
                     checked={props.isSelectAll}
+                    disabled={isCombining}
                   />
                   <label
                     className="custom-control-label"
@@ -850,21 +858,36 @@ export default function CombinedLogs(props) {
           {logData.map((log, index) => {
             let pdfIndex = props.pdfData?.index;
             const showPdf = !(pdfIndex && pdfIndex !== index) && pdfIndex !== 0;
+            const isCombineTarget = combiningQueue[0]?.index === index;
+
             return (
               <tr
                 className={
-                  log.user_id !== 1 || index % 2 !== 0 ? "highlight-row" : ""
+                  log.user_id !== 1 || index % 2 !== 0 ? 'highlight-row' : ''
                 }
                 style={{
                   lineHeight: 1.2,
-                  backgroundColor: pdfIndex === index ? "#f8f8fa" : "white",
+                  backgroundColor: pdfIndex === index ? '#f8f8fa' : 'white',
+
+                  // Adjust the row style when the row is being combined
+                  ...(isCombining
+                    ? {
+                        opacity: props.selected.includes(log.id) ? null : 0.4,
+                        backgroundColor: isCombineTarget ? '#f8f8fa' : 'white',
+                        textDecoration:
+                          // Only mark selected items that are not the "main" row
+                          combiningQueue.findIndex((item) => item.index === index) > 0
+                            ? 'line-through'
+                            : null
+                      }
+                    : {}),
                 }}
                 key={index}
-                ref={el => (logRowRefs.current[index] = el)}
+                ref={(el) => (logRowRefs.current[index] = el)}
               >
                 <td
                   className={`${
-                    editRow === index ? "activeTh" : ""
+                    editRow === index ? 'activeTh' : ''
                   } ticket-checkbox reduce-height`}
                   onClick={handleIgnorePdfView}
                 >
@@ -892,18 +915,70 @@ export default function CombinedLogs(props) {
 
                 <td
                   className={`${
-                    editRow === index ? "activeTh" : ""
+                    editRow === index ? 'activeTh' : ''
                   } reduce-height actions-td padding-0`}
                   onClick={handleIgnorePdfView}
                 >
                   <div className="action-items">
                     {
                       <>
-                        {editRow === index ? (
+                        {isCombining ? (
+                          isCombineTarget && (combiningQueue.length > 1) && (
+                            // If the row is being combined
+                            <>
+                              <div
+                                onClick={() => props.handleCombineRows()}
+                                style={{
+                                  marginRight: '5px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 14 14"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M12.4162 3.84491L5.51162 10.7497L1.58325 6.82137"
+                                    stroke="#2F5AA3"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              </div>
+                              <div
+                                style={{
+                                  marginRight: '5px',
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => setIsCombining(false)}
+                              >
+                                <svg
+                                  width="10"
+                                  height="10"
+                                  viewBox="0 0 10 10"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M0.244078 0.244078C0.569515 -0.0813592 1.09715 -0.0813592 1.42259 0.244078L5 3.82149L8.57741 0.244078C8.90285 -0.0813592 9.43049 -0.0813592 9.75592 0.244078C10.0814 0.569515 10.0814 1.09715 9.75592 1.42259L6.17851 5L9.75592 8.57741C10.0814 8.90285 10.0814 9.43049 9.75592 9.75592C9.43049 10.0814 8.90285 10.0814 8.57741 9.75592L5 6.17851L1.42259 9.75592C1.09715 10.0814 0.569515 10.0814 0.244078 9.75592C-0.0813592 9.43049 -0.0813592 8.90285 0.244078 8.57741L3.82149 5L0.244078 1.42259C-0.0813592 1.09715 -0.0813592 0.569515 0.244078 0.244078Z"
+                                    fill="#A32F2F"
+                                  />
+                                </svg>
+                              </div>
+                            </>
+                          )
+                        ) : editRow === index ? (
+                          // If the row is being edited
                           <>
                             <div
                               onClick={() => handleUpdateLog()}
-                              style={{ marginRight: "5px", cursor: "pointer" }}
+                              style={{ marginRight: '5px', cursor: 'pointer' }}
                             >
                               <svg
                                 width="14"
@@ -922,29 +997,29 @@ export default function CombinedLogs(props) {
                               </svg>
                             </div>
                             <div
-                              style={{ marginRight: "5px", cursor: "pointer" }}
+                              style={{ marginRight: '5px', cursor: 'pointer' }}
                               onClick={() => {
-                                setEditRow("");
+                                setEditRow('');
                                 setFormValid({
                                   spec_section: true,
                                   para_no: true,
                                   para_context: true,
                                   type: true,
-                                  item_desc: true,
+                                  item_desc: true
                                 });
                                 setRowData({
-                                  comments: "",
-                                  date_approved: "",
-                                  date_issued: "",
+                                  comments: '',
+                                  date_approved: '',
+                                  date_issued: '',
                                   // id: 1,
-                                  item_desc: "",
-                                  package: "",
-                                  para_context: "",
-                                  para_no: "",
-                                  project_id: "",
-                                  spec_section: "",
-                                  status: "",
-                                  type: "",
+                                  item_desc: '',
+                                  package: '',
+                                  para_context: '',
+                                  para_no: '',
+                                  project_id: '',
+                                  spec_section: '',
+                                  status: '',
+                                  type: ''
                                 });
                                 // setDateApproved('');
                                 // setDateIssued('');
@@ -961,7 +1036,7 @@ export default function CombinedLogs(props) {
                                 newRowIndex === index + 1 &&
                                   props.setPdfData({
                                     ...props.pdfData,
-                                    index: props.pdfData?.index - 1,
+                                    index: props.pdfData?.index - 1
                                   });
                               }}
                             >
@@ -982,10 +1057,13 @@ export default function CombinedLogs(props) {
                             </div>
                           </>
                         ) : (
+                          // If the row is not being edited
                           <>
-                            <Tooltip title="Edit Row" arrow>
+                            <Tooltip title={!isCombining
+                              ? 'Edit Row'
+                              : 'Cannot edit while combining'} arrow>
                               <span
-                                onClick={() => handleEditToggle(log, index)}
+                                onClick={() => !isCombining && handleEditToggle(log, index)}
                                 style={{ cursor: "pointer" }}
                               >
                                 <svg
@@ -1007,14 +1085,7 @@ export default function CombinedLogs(props) {
                             </Tooltip>
                           </>
                         )}
-                        {/* <Link
-                        style={{ fontWeight: 'normal' }}
-                        className="btn btn-secondary btn-sm"
-                        to={{ pathname: `/pdf-view`, search: `?url=${log?.doc_link}&textLoc=${log.text_loc}` }}
-                        target="_blank" >
-                        Pdf
-                      </Link> */}
-                        {pdfIndex === index ? (
+                        {pdfIndex === index && !isCombining ? (
                           <div
                             onClick={() => {
                               props.setLogInViewer(null);
@@ -1043,6 +1114,7 @@ export default function CombinedLogs(props) {
                           </div>
                         ) : (
                           newRowIndex !== index &&
+                          !isCombining &&
                           showPdf && (
                             <span
                               onClick={() => {
@@ -1071,13 +1143,14 @@ export default function CombinedLogs(props) {
                             </span>
                           )
                         )}
-                        {props.listId === null && editRow === "" && (
-                          <Tooltip title="Add Row below" arrow>
+                        {props.listId === null && editRow === "" && !isCombining && (
+                          <Tooltip title={isCombining
+                            ? 'Cannot add new row while combining rows'
+                            : 'Add Row Below'} arrow>
                             <AddButton
                               onClick={() => {
+                                if (isCombining) return;
                                 if (!newRowIndex) {
-                                  handleAddRow(log);
-                                } else if (newRowIndex === index + 1) {
                                   handleAddRow(log);
                                 }
                               }}
@@ -1085,11 +1158,8 @@ export default function CombinedLogs(props) {
                             />
                           </Tooltip>
                         )}
-                        {log.parsing_method === "AI_SUBMITTAL" ? (
-                          <Sparkles />
-                        ) : (
-                          ""
-                        )}
+
+                        {log.parsing_method === 'AI_SUBMITTAL' && <Sparkles />}
                       </>
                     }
                   </div>
@@ -1097,7 +1167,7 @@ export default function CombinedLogs(props) {
 
                 <td
                   className={`${
-                    editRow === index ? "activeTh" : ""
+                    editRow === index ? 'activeTh' : ''
                   } reduce-height`}
                 >
                   {formatSubmittalNumber(log.submittal_number)}
@@ -1105,15 +1175,14 @@ export default function CombinedLogs(props) {
 
                 <td
                   className={`${
-                    editRow === index ? "activeTh" : ""
+                    editRow === index ? 'activeTh' : ''
                   } reduce-height`}
-                 
                 >
                   {editRow === index ? (
                     <input
                       placeholder="Enter"
                       className={`form-control ${
-                        formValid.spec_section ? "" : "form-required"
+                        formValid.spec_section ? '' : 'form-required'
                       }`}
                       type="text"
                       value={rowData.spec_section}
@@ -1124,8 +1193,12 @@ export default function CombinedLogs(props) {
                     />
                   ) : (
                     formatSpecSection(log.spec_section)
+                    + (isCombining &&
+                       isCombineTarget &&
+                       !areSameValues('spec_section')
+                      ? '+' : ''
+                    )
                   )}
-                  {/* {log.spec_section} */}
                 </td>
 
                 {props.projectCategory !== 'ufgs' && (
@@ -1141,14 +1214,14 @@ export default function CombinedLogs(props) {
                   <>
                     <td
                       className={`${
-                        editRow === index ? "activeTh" : ""
+                        editRow === index ? 'activeTh' : ''
                       } reduce-height`}
                     >
                       {log.div_no}
                     </td>
                     <td
                       className={`${
-                        editRow === index ? "activeTh" : ""
+                        editRow === index ? 'activeTh' : ''
                       } reduce-height`}
                     >
                       {log.sd_no}
@@ -1158,14 +1231,14 @@ export default function CombinedLogs(props) {
                 {props.projectCategory !== "ufgs" && (
                   <td
                     className={`${
-                      editRow === index ? "activeTh" : ""
+                      editRow === index ? 'activeTh' : ''
                     } reduce-height`}
                   >
                     {editRow === index ? (
                       <input
                         placeholder="Enter"
                         className={`form-control ${
-                          formValid.para_no ? "" : "form-required"
+                          formValid.para_no ? '' : 'form-required'
                         }`}
                         type="text"
                         value={rowData.para_no}
@@ -1176,20 +1249,40 @@ export default function CombinedLogs(props) {
                       />
                     ) : (
                       log.para_no
+                      + (isCombining &&
+                         isCombineTarget &&
+                         combiningQueue.length > 1
+                        ? '+' : ''
+                      )
                     )}
                   </td>
                 )}
                 {props.projectCategory !== "ufgs" && (
                   <td
                     className={`${
-                      editRow === index ? "activeTh" : ""
+                      editRow === index ? 'activeTh' : ''
                     } reduce-height`}
                   >
-                    {editRow === index ? (
+                    {isCombining && isCombineTarget ? (
+                      // Combining rows with different spec section values
+                      <>
+                        <input
+                          placeholder="Enter"
+                          type="text"
+                          value={combiningResult.type}
+                          className="form-control"
+                          onChange={(e) =>
+                            setCombiningResult((value) => {
+                              return { ...value, type: e.target.value };
+                            })
+                          }
+                        />
+                      </>
+                    ) : editRow === index ? (
                       <input
                         placeholder="Enter"
                         className={`form-control ${
-                          formValid.type ? "" : "form-required"
+                          formValid.type ? '' : 'form-required'
                         }`}
                         type="text"
                         value={rowData.type}
@@ -1208,14 +1301,29 @@ export default function CombinedLogs(props) {
                 )}
                 <td
                   className={`reduce-height ${
-                    editRow === index ? "activeTh" : ""
+                    editRow === index ? 'activeTh' : ''
                   }`}
                 >
-                  {editRow === index ? (
+                  {isCombining && isCombineTarget ? (
+                    // Combining rows with different spec section values
+                    <>
+                      <input
+                        placeholder="Enter"
+                        type="text"
+                        value={combiningResult.item_desc}
+                        className="form-control"
+                        onChange={(e) =>
+                          setCombiningResult((value) => {
+                            return { ...value, item_desc: e.target.value };
+                          })
+                        }
+                      />
+                    </>
+                  ) : editRow === index ? (
                     <input
                       placeholder="Enter"
                       className={`form-control ${
-                        formValid.item_desc ? "" : "form-required"
+                        formValid.item_desc ? '' : 'form-required'
                       }`}
                       type="text"
                       value={rowData.item_desc}
@@ -1230,8 +1338,8 @@ export default function CombinedLogs(props) {
                 </td>
                 {props.projectCategory === "ufgs" && (
                   <td
-                    className={`${editRow === index ? "activeTh" : ""}`}
-                    style={{ textAlign: "center" }}
+                    className={`${editRow === index ? 'activeTh' : ''}`}
+                    style={{ textAlign: 'center' }}
                   >
                     {/* {editRow === index ? (
                     <div
@@ -1281,14 +1389,47 @@ export default function CombinedLogs(props) {
                   </td> */}
                     <td
                       className={`${
-                        editRow === index ? "activeTh" : ""
+                        editRow === index ? 'activeTh' : ''
                       } reduce-height`}
                     >
-                      {editRow === index && JSON.parse(log.full_edit) ? (
+                      {isCombining && isCombineTarget ? (
+                        <div
+                          className={
+                            'log-desc ' +
+                            (
+                              isCombineTarget
+                                ? 'show-content'
+                                : showMore[index]
+                                  ? 'show-content'
+                                  : 'text-overflow'
+                            )
+                          }
+                          style={{ whiteSpace: 'pre-wrap' }}
+                          ref={(element) => rowRefs.current.push(element)}
+                        >
+                          {combiningResult.para_context}
+                          {shouldShowExpansionButton[index] && (
+                            <span
+                              className="showmore-wrap"
+                              onClick={() =>
+                                setShowMore(
+                                  showMore.with(index, !showMore[index])
+                                )
+                              }
+                            >
+                              {showMore[index] ? (
+                                <CollapseButton />
+                              ) : (
+                                <ExpandButton />
+                              )}
+                            </span>
+                          )}
+                        </div>
+                      ) : editRow === index && JSON.parse(log.full_edit) ? (
                         <input
                           placeholder="Enter"
                           className={`form-control ${
-                            formValid.para_context ? "" : "form-required"
+                            formValid.para_context ? '' : 'form-required'
                           }`}
                           type="text"
                           value={rowData.para_context}
@@ -1296,7 +1437,7 @@ export default function CombinedLogs(props) {
                           onChange={(e) =>
                             setRowData({
                               ...rowData,
-                              para_context: e.target.value,
+                              para_context: e.target.value
                             })
                           }
                         />
@@ -1304,7 +1445,7 @@ export default function CombinedLogs(props) {
                         <input
                           placeholder="Enter"
                           className={`form-control ${
-                            formValid.para_context ? "" : "form-required"
+                            formValid.para_context ? '' : 'form-required'
                           }`}
                           type="text"
                           value={rowData.para_context}
@@ -1312,17 +1453,18 @@ export default function CombinedLogs(props) {
                           onChange={(e) =>
                             setRowData({
                               ...rowData,
-                              para_context: e.target.value,
+                              para_context: e.target.value
                             })
                           }
                         />
                       ) : (
                         <div
                           className={
-                            "log-desc " +
-                            (showMore[index] ? "show-content" : "text-overflow")
+                            'log-desc ' +
+                            (showMore[index] ? 'show-content' : 'text-overflow')
                           }
                           ref={(element) => rowRefs.current.push(element)}
+                          style={{ whiteSpace: 'pre-wrap' }}
                         >
                           {log.para_context}
                           {shouldShowExpansionButton[index] && (
