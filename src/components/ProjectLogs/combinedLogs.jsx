@@ -220,30 +220,6 @@ export default function CombinedLogs(props) {
     }
   };
 
-  const handleCombineRows = async () => {
-    props.setLoading(true)
-
-    const payload = {
-      prepared_object: combiningResult,
-      project_id: props.projectId,
-      lst_all_logs: combiningQueue,
-    }
-
-    try {
-      await axiosInstance({
-        method: 'POST',
-        url: '/combine_rows',
-        data: payload,
-      })
-    } finally {
-      props.setLoading(false)
-    }
-
-    setIsCombining(false)
-    props.setSelected([])
-    props.setPageRefresh(!props.pageRefresh);
-  }
-
   const handleSorting = async (columnName) => {
     let sortingOrder = sorting.column === columnName ? sorting.order : "desc";
     let a = {};
@@ -951,7 +927,7 @@ export default function CombinedLogs(props) {
                             // If the row is being combined
                             <>
                               <div
-                                onClick={() => handleCombineRows()}
+                                onClick={() => props.handleCombineRows()}
                                 style={{
                                   marginRight: '5px',
                                   cursor: 'pointer'
@@ -1109,14 +1085,7 @@ export default function CombinedLogs(props) {
                             </Tooltip>
                           </>
                         )}
-                        {/* <Link
-                        style={{ fontWeight: 'normal' }}
-                        className="btn btn-secondary btn-sm"
-                        to={{ pathname: `/pdf-view`, search: `?url=${log?.doc_link}&textLoc=${log.text_loc}` }}
-                        target="_blank" >
-                        Pdf
-                      </Link> */}
-                        {pdfIndex === index ? (
+                        {pdfIndex === index && !isCombining ? (
                           <div
                             onClick={() => {
                               props.setLogInViewer(null);
@@ -1145,6 +1114,7 @@ export default function CombinedLogs(props) {
                           </div>
                         ) : (
                           newRowIndex !== index &&
+                          !isCombining &&
                           showPdf && (
                             <span
                               onClick={() => {
@@ -1173,7 +1143,7 @@ export default function CombinedLogs(props) {
                             </span>
                           )
                         )}
-                        {props.listId === null && editRow === "" && (
+                        {props.listId === null && editRow === "" && !isCombining && (
                           <Tooltip title={isCombining
                             ? 'Cannot add new row while combining rows'
                             : 'Add Row Below'} arrow>

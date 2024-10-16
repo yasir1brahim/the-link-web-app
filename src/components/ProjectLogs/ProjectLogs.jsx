@@ -29,6 +29,7 @@ import ProjectLogsHeader from "../shared/Header/ProjectLogsHeader";
 import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { Check } from "@mui/icons-material";
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -1037,6 +1038,30 @@ const ProjectLogs = () => {
     }
   };
 
+  const handleCombineRows = async () => {
+    setLoading(true)
+
+    const payload = {
+      prepared_object: combiningResult,
+      project_id: projectId,
+      lst_all_logs: combiningQueue,
+    }
+
+    try {
+      await axiosInstance({
+        method: 'POST',
+        url: '/combine_rows',
+        data: payload,
+      })
+    } finally {
+      setLoading(false)
+    }
+
+    setIsCombining(false)
+    setSelected([])
+    setPageRefresh(!pageRefresh);
+  }
+
   useEffect(() => {
     Object.keys(filterValues).forEach((key) =>
       filterValues[key]?.length ? setShowClearFilters(true) : null
@@ -1201,35 +1226,37 @@ const ProjectLogs = () => {
 
                       {listId === null && selected?.length > 0 && (
                       <div className="d-flex">
-                        <button
-                          type="button"
-                          className="table-top-btn btn-disabled selection-btn"
-                          onClick={toggleSaveListName}
-                          disabled={selected?.length === 0}
-                        >
-                          <svg
-                            width="14"
-                            height="18"
-                            viewBox="0 0 14 18"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
+                        {!isCombining && (
+                          <button
+                            type="button"
+                            className="table-top-btn btn-disabled selection-btn"
+                            onClick={toggleSaveListName}
+                            disabled={selected?.length === 0}
                           >
-                            <path
-                              d="M1.16683 0.666748H12.8335C13.0545 0.666748 13.2665 0.754545 13.4228 0.910826C13.579 1.06711 13.6668 1.27907 13.6668 1.50008V17.4526C13.6669 17.5271 13.647 17.6003 13.6092 17.6645C13.5715 17.7287 13.5171 17.7816 13.4519 17.8176C13.3868 17.8537 13.3131 17.8717 13.2386 17.8696C13.1641 17.8675 13.0916 17.8456 13.0285 17.8059L7.00016 14.0251L0.971829 17.8051C0.908803 17.8447 0.836319 17.8667 0.761914 17.8688C0.68751 17.8709 0.613901 17.853 0.548742 17.817C0.483583 17.781 0.429252 17.7283 0.391398 17.6642C0.353545 17.6001 0.333551 17.527 0.333496 17.4526V1.50008C0.333496 1.27907 0.421294 1.06711 0.577574 0.910826C0.733854 0.754545 0.945816 0.666748 1.16683 0.666748ZM12.0002 2.33341H2.00016V15.1934L7.00016 12.0592L12.0002 15.1934V2.33341Z"
-                              fill={
-                                selected?.length === 0
-                                  ? '#374151'
-                                  : '#0E2332'
-                              }
-                            />
-                          </svg>
-                          <span>Save Selection</span>
-                        </button>
+                            <svg
+                              width="14"
+                              height="18"
+                              viewBox="0 0 14 18"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M1.16683 0.666748H12.8335C13.0545 0.666748 13.2665 0.754545 13.4228 0.910826C13.579 1.06711 13.6668 1.27907 13.6668 1.50008V17.4526C13.6669 17.5271 13.647 17.6003 13.6092 17.6645C13.5715 17.7287 13.5171 17.7816 13.4519 17.8176C13.3868 17.8537 13.3131 17.8717 13.2386 17.8696C13.1641 17.8675 13.0916 17.8456 13.0285 17.8059L7.00016 14.0251L0.971829 17.8051C0.908803 17.8447 0.836319 17.8667 0.761914 17.8688C0.68751 17.8709 0.613901 17.853 0.548742 17.817C0.483583 17.781 0.429252 17.7283 0.391398 17.6642C0.353545 17.6001 0.333551 17.527 0.333496 17.4526V1.50008C0.333496 1.27907 0.421294 1.06711 0.577574 0.910826C0.733854 0.754545 0.945816 0.666748 1.16683 0.666748ZM12.0002 2.33341H2.00016V15.1934L7.00016 12.0592L12.0002 15.1934V2.33341Z"
+                                fill={
+                                  selected?.length === 0
+                                    ? '#374151'
+                                    : '#0E2332'
+                                }
+                              />
+                            </svg>
+                            <span>Save Selection</span>
+                          </button>
+                        )}
 
                         {!isSelectAll && (
                           <button
                             type="button"
-                            className="table-top-btn btn-disabled selection-btn ml-2"
+                            className={`table-top-btn btn-disabled selection-btn ${isCombining ? '' : 'ml-2'}`}
                             onClick={() => {
                               // PDF reader won't be available with row combining for now
                               if (logInViewer) {
@@ -1252,6 +1279,18 @@ const ProjectLogs = () => {
                             <span>
                               {isCombining ? 'Stop Combining' : 'Combine Rows'}
                             </span>
+                          </button>
+                        )}
+                        {isCombining && (
+                          <button
+                            type="button"
+                            className="table-top-btn btn-disabled selection-btn ml-2"
+                            onClick={() => {
+                              handleCombineRows();
+                            }}
+                          >
+                            <Check />
+                            <span>Combine</span>
                           </button>
                         )}
                       </div>)}
@@ -1410,6 +1449,7 @@ const ProjectLogs = () => {
                     updateCombiningQueue={updateCombiningQueue}
                     combiningResult={combiningResult}
                     setCombiningResult={setCombiningResult}
+                    handleCombineRows={handleCombineRows}
                     areSameValues={areSameValues}
                   />
                   {pdfData.url && (
