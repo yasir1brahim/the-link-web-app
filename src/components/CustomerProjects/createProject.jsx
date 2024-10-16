@@ -11,17 +11,14 @@ import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import moment from "moment";
 import { AddNewEmp } from "./addNewEmp";
+import { PROJECT_TYPES } from "../../constants";
 
 const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefresh, projects, isPersonalProject = false, customerID }) => {
   // const [email, setEmail] = useState({ value: '', errors: '' });
   // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
+  const [projectType, setProjectType] = useState({ value: "", label: "" });
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
-  const [projectNumber, setProjectNumber] = useState({ value: null, errors: "" });
-  const [leadContact, setLeadContact] = useState({
-    value: "",
-    label: "",
-    email: "",
-  });
+  const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [dateError, setDateError] = useState({ startError: "", endError: "" });
@@ -37,8 +34,8 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: "", errors: "" });
-      setProjectNumber({ value: null, errors: "" });
-      setLeadContact({ value: "", errors: "", email: "" });
+      setProjectNumber({ value: "", errors: "" });
+      setProjectType([{ value: "", label: "" }]);
       setStartDate("");
       setEndDate("");
       setEmployeeList([]);
@@ -107,13 +104,12 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
           data: {
             project_name: projectName.value,
             project_number: projectNumber.value,
-            lead_contact: leadContact[0]?.value || "",
+            project_type: projectType[0].label,
             start_date: startDate ? moment(startDate).format("YYYY-MM-DD") : "",
             end_date: endDate ? moment(endDate).format("YYYY-MM-DD") : "",
             customer_id: customer?.customer_id || customerID || localStorage.getItem("userId"),
             status: "Open",
             employee_list: selectedEmployeeList.map((employee) => employee.value),
-            project_type: "commercial",
             visibility_type: visibilityType,
           },
         });
@@ -212,7 +208,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
                   </div>
                   <div className="form-group">
                     <input
-                      type="number"
+                      type="text"
                       className="form-control"
                       id="customerProjectNumber"
                       aria-describedby="customerProjectNumber"
@@ -254,11 +250,23 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
                     )}
                   </div>
                 </div>
-                {/* <div className="col-4">
-                    <div className="form-group">
-                      <SelectDropdown label={'Project Type'} labelKey="name" />
-                    </div>
-                  </div> */}
+                <div style={{ gap: "25px" }} className="d-flex">
+                  <div className="form-group">
+                    <SelectDropdown
+                      label={'Project Type'}
+                      setSelected={setProjectType}
+                      options={PROJECT_TYPES.map((project_type) => {
+                        return {
+                          value: project_type?.id,
+                          label: project_type?.name,
+                        };
+                      })}
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="form-group">
+                  </div>
+                </div>
                 <div className="users-section">
                   <div className="">
                     <Typeahead

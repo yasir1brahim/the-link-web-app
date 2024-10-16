@@ -114,18 +114,7 @@ const ContractTile = ({
         </div>
       </div>
       <div className="lower-card">
-        {!!project.lead_contact ? (
-          <div className="icon-wrap">
-            <div className="icon">
-              <p className="content">
-                {generateInitials(project.lead_contact)}
-              </p>
-            </div>
-            <p className="content">{project.lead_contact}</p>
-          </div>
-        ) : (
-          <div className="icon-wrap empty"></div>
-        )}
+        <div className="icon-wrap empty"></div>
         <div className="icons-wrap">
           <span
             onClick={() => handleLaunch(project)}

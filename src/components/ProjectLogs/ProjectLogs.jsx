@@ -98,7 +98,7 @@ const ProjectLogs = () => {
     classification: "",
   });
   const customerData = state?.customerData;
-  const projectType = state?.project.project_type;
+  // const projectType = state?.project.project_type;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const baseUrl = window.location.href.includes("https://app.thelink.ai")
     ? `https://app.thelink.ai/`
@@ -257,27 +257,28 @@ const ProjectLogs = () => {
       }
       setInitLoading(false);
     };
-    if (localStorage.getItem("userId")) {
-      if (localStorage.getItem("roleId") > 1) {
-        setIsAssociatedUser(false);
-        history({
-          pathname:
-            localStorage.getItem("roleId") === "0"
-              ? "/admin-landing"
-              : "/project-list",
-        });
-        toast.warn("You are not authorized to view this project.", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-      }
-      initLoading();
-    }
+    initLoading();
+    // if (localStorage.getItem("userId")) {
+    //   if (localStorage.getItem("roleId") > 1) {
+    //     setIsAssociatedUser(false);
+    //     history({
+    //       pathname:
+    //         localStorage.getItem("roleId") === "0"
+    //           ? "/admin-landing"
+    //           : "/project-list",
+    //     });
+    //     toast.warn("You are not authorized to view this project.", {
+    //       position: "bottom-center",
+    //       autoClose: 5000,
+    //       hideProgressBar: true,
+    //       closeOnClick: true,
+    //       pauseOnHover: true,
+    //       draggable: true,
+    //       progress: undefined,
+    //     });
+    //   }
+    //   initLoading();
+    // }
   }, []);
 
   // get the number of documents uploaded
@@ -333,12 +334,11 @@ const ProjectLogs = () => {
   };
 
   const handleSubmit = async () => {
-    // console.log(pdfFile);
     try {
       setUploadLoading(true);
       const data = new FormData();
       data.append("project_id", projectId || state.project?.project_id);
-      projectType === "ufgs" && data.append("project_type", projectType);
+      // projectType === "ufgs" && data.append("project_type", projectType);
       Object.values(pdfFile)?.forEach((file) => data.append("files", file));
       const response = await axiosInstance({
         method: "post",
@@ -1128,7 +1128,6 @@ const ProjectLogs = () => {
             navBtn={"logs"}
           />
           <ProjectLogsHeader
-            centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
             getList={getList}
             totalCount={totalCount}
             dropdownOpen={dropdownOpen}
@@ -1386,7 +1385,7 @@ const ProjectLogs = () => {
                     newRowIndex={newRowIndex}
                     setNewRowIndex={setNewRowIndex}
                     searchValue={searchValue}
-                    projectType={projectType}
+                    projectCategory={null}
                     qaDashboard={state?.qaDashboard}
                     selectedFilterValue={selectedFilterValue}
                     filterValues={filterValues}
@@ -1690,7 +1689,7 @@ const ProjectLogs = () => {
                     )
                   );
                 })
-              : null}
+              : <div className="p-2">No Saved Lists</div>}
           </div>
           <ModalFooter>
             <Button
