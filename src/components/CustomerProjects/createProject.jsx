@@ -19,11 +19,6 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   const [projectType, setProjectType] = useState({ value: "", label: "" });
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
   const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
-  const [leadContact, setLeadContact] = useState({
-    value: "",
-    label: "",
-    email: "",
-  });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [dateError, setDateError] = useState({ startError: "", endError: "" });
@@ -41,7 +36,6 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       setProjectName({ value: "", errors: "" });
       setProjectNumber({ value: "", errors: "" });
       setProjectType([{ value: "", label: "" }]);
-      setLeadContact({ value: "", errors: "", email: "" });
       setStartDate("");
       setEndDate("");
       setEmployeeList([]);
@@ -111,7 +105,6 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
             project_name: projectName.value,
             project_number: projectNumber.value,
             project_type: projectType[0].label,
-            lead_contact: leadContact[0]?.value || "",
             start_date: startDate ? moment(startDate).format("YYYY-MM-DD") : "",
             end_date: endDate ? moment(endDate).format("YYYY-MM-DD") : "",
             customer_id: customer?.customer_id || customerID || localStorage.getItem("userId"),

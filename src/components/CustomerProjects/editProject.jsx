@@ -27,11 +27,6 @@ const EditProject = ({
   const typeaheadRef = useRef(null);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
   const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
-  const [leadContact, setLeadContact] = useState({
-    value: "",
-    label: "",
-    email: "",
-  });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [employeeList, setEmployeeList] = useState([]);
@@ -43,11 +38,6 @@ const EditProject = ({
       setProjectName({ value: "", errors: "" });
       setProjectNumber({ value: "", errors: "" });
       setProjectType([{ value: "", label: "" }]);
-      setLeadContact({
-        value: "",
-        label: "",
-        email: "",
-      });
       typeaheadRef?.current?.clear();
       setStartDate("");
       setEndDate("");
@@ -123,11 +113,6 @@ const EditProject = ({
             project_name: projectName.value || project?.project_name,
             project_number: projectNumber.value || project?.project_number,
             project_type: projectType[0].label,
-            lead_contact: leadContact[0]
-              ? leadContact[0].value
-              : employeeList.find(
-                  (employee) => employee.name === project?.lead_contact,
-                )?.emp_id,
             employee_list: selectedEmployeeList.map(
               (employee) => employee.value,
             ),
@@ -200,9 +185,9 @@ const EditProject = ({
           </div>
           <div className="lproject-body">
             <form className="create-project-form">
-              <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
+              {/* <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
                 {!isAdminUser && (
-                  <>
+                  <> */}
                     {/* <div className="customer-dp-container"><img src={WhitingTurner} alt="Company Logo" /></div> */}
                     {/* <div className="customer-profile">
                       <div className="row">
@@ -223,7 +208,7 @@ const EditProject = ({
                         </div>
                       </div>
                     </div> */}
-                    <div className="customer-profile mb-0">
+                    {/* <div className="customer-profile mb-0"> */}
                       {/* <div className="col-6">
                         <div className="text-label-value">
                           <div className="text-label">
@@ -238,7 +223,7 @@ const EditProject = ({
                           </div>
                         </div>
                       </div> */}
-                      <Box component="form">
+                      {/* <Box component="form">
                         <Grid container spacing={3} alignItems="center">
                           {customer?.address && (<Grid item xs={6}>
                             <TextField 
@@ -261,7 +246,7 @@ const EditProject = ({
                             />
                           </Grid>)}
                         </Grid>
-                      </Box>
+                      </Box> */}
                       {/* <div className="col-6">
                       <div className="custom-control custom-checkbox">
                         <input
@@ -283,10 +268,10 @@ const EditProject = ({
                         >Personal Project</label>
                       </div>
                     </div> */}
-                    </div>
+                    {/* </div>
                   </>
                 )}
-              </div>
+              </div> */}
               <div className="create-project-content">
                 <div style={{ gap: "25px" }} className="d-flex">
                   <div className="form-group">
@@ -325,56 +310,6 @@ const EditProject = ({
                     />
                     <label className="text-label" htmlFor="customerProjectNumber">
                       Project Number
-                    </label>
-                  </div>
-                </div>
-                <div style={{ gap: "25px" }} className="d-flex">
-                  <div className="form-group">
-                    <div className={`has-typehead`}>
-                      <Typeahead
-                        id="employee-list"
-                        ref={typeaheadRef}
-                        options={employeeList.map((project) => {
-                          return {
-                            value: project?.emp_id,
-                            label: project?.name,
-                            email: project?.emp_email,
-                          };
-                        })}
-                        onChange={(e) => setLeadContact(e)}
-                        selected={leadContact?.label}
-                      />
-
-                      <label className="text-label">{"Lead Contact"}</label>
-                      <i className="has-icon icon-dropdown"></i>
-                    </div>
-                    {!leadContact[0]?.label ? (
-                      <label className="text-label typehead-label">
-                        {project?.lead_contact}
-                      </label>
-                    ) : null}
-                  </div>
-                  <div className="form-group">
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="projectLeadEmail"
-                      aria-describedby="projectLeadEmail"
-                      placeholder="Enter"
-                      value={
-                        leadContact[0]
-                          ? leadContact[0].email
-                          : employeeList.length
-                          ? employeeList?.find(
-                              (employee) =>
-                                employee.name === project?.lead_contact,
-                            )?.emp_email
-                          : leadContact.label
-                      }
-                      disabled
-                    />
-                    <label className="text-label" htmlFor="projectLeadEmail">
-                      Email Address(Lead Contact)
                     </label>
                   </div>
                 </div>

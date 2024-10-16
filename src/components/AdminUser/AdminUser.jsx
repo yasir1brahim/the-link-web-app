@@ -264,7 +264,8 @@ const AdminUser = (props) => {
           url: '/updateProject',
           data: {
             project_name: project.project_name,
-            lead_contact: project.lead_contact,
+            project_number: project.project_number,
+            project_type: project.project_type,
             start_date: project?.start_date
               ? moment(
                   new Date((project?.start_date).replaceAll('-', '/'))
