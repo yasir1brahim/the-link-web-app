@@ -30,7 +30,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails } from "../../api/Projects/api";
-import { getSubmittalItems, getProjectLists, createSubmittalList } from "../../api/ProjectLogs/api";
+import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems } from "../../api/ProjectLogs/api";
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -488,15 +488,7 @@ const ProjectLogs = () => {
   const handleDeleteLogs = async () => {
     if (selected?.length !== 0) {
       try {
-        await axiosInstance({
-          method: "delete",
-          url: "/delete_logs",
-          data: {
-            project_id: state?.projectId || projectId,
-            records: selected,
-            type: "Submittal",
-          },
-        });
+        await deleteSubmittalItems(state?.projectId || projectId, selected);
         setPageRefresh(!pageRefresh);
         setSelected([]);
         toast.success("Successfully Deleted Logs!", {

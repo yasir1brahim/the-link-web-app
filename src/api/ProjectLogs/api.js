@@ -88,11 +88,14 @@ const updateSubmittalItem = async (projectId, submittalId, specSection, paraNo, 
     }
 }
 
-const deleteSubmittalItem = async (projectId, submittalId) => {
+const deleteSubmittalItems = async (projectId, submittalIds) => {
     try {
         return await axiosInstance({
             method: 'delete',
-            url: `/api/deliverables/${projectId}/${submittalId}/`,
+            url: `/api/deliverables/${projectId}/submittal-items/${submittalIds[0]}/`,
+            data: {
+                ids: submittalIds
+            },
         });
     } catch (error) {
         handleError(error);
@@ -142,5 +145,5 @@ export {
     createSubmittalList,
     addSubmittalItem,
     updateSubmittalItem,
-    deleteSubmittalItem
+    deleteSubmittalItems
 }
