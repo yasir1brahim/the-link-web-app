@@ -17,6 +17,7 @@ import handleError from "../../config/errorHandler";
 import { SortIcon } from "../shared/icons/sortIcon";
 import { FilterIcon } from "../shared/icons/filterIcon";
 import { useRef } from "react";
+import { updateSubmittalItem, addSubmittalItem } from "../../api/ProjectLogs/api";
 
 export default function CombinedLogs(props) {
   const {
@@ -140,30 +141,24 @@ export default function CombinedLogs(props) {
 
       setEditRow("");
       if (newRowIndex) {
-        await axiosInstance({
-          method: "post",
-          url: "/addRecord",
-          data: {
-            ...rowData,
-            customer_id: props.customerId,
-            user_id: localStorage.getItem("userId"),
-          },
-        });
+        await addSubmittalItem(
+          props.projectId,
+          rowData.spec_section, 
+          rowData.para_no, 
+          rowData.para_context, 
+          rowData.item_desc, 
+          rowData.type, 
+        );
       } else {
-        await axiosInstance({
-          method: "put",
-          url: "/v2/update_logs",
-          data: {
-            record: rowData.id,
-            submittal_type: rowData.item_desc,
-            submittal_description: rowData.para_context,
-            para_no: rowData.para_no,
-            project_id: rowData.project_id,
-            spec_section: rowData.spec_section,
-            submittal_heading: rowData.type,
-            para_context: rowData.para_context,
-          },
-        });
+        await updateSubmittalItem(
+          props.projectId,
+          rowData.id, 
+          rowData.spec_section, 
+          rowData.para_no, 
+          rowData.para_context, 
+          rowData.item_desc, 
+          rowData.type, 
+        );
       }
       setNewRowIndex(null);
       props.setPageRefresh(!props.pageRefresh);

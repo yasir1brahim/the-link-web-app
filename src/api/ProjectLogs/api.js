@@ -52,22 +52,36 @@ const createSubmittalList = async (projectId, listName, userId, submittalIds) =>
     }
 }
 
-const addSubmittalItem = async (projectId, submittalId, submittalType, submittalDescription, paraNo, specSection) => {
+const addSubmittalItem = async (projectId, specSection, paraNo, paraContext, submittalHeading, submittalType) => {
     try {
         return await axiosInstance({
             method: 'post',
-            url: `/api/deliverables/${projectId}/${submittalId}`,
+            url: `/api/deliverables/${projectId}/submittal-items/`,
+            data: {
+                spec_section: specSection,
+                para_no: paraNo,
+                para_context: paraContext,
+                item_desc: submittalHeading,
+                type: submittalType,
+            },
         });
     } catch (error) {
         handleError(error);
     }
 }
 
-const updateSubmittalItem = async (projectId, submittalId, submittalType, submittalDescription, paraNo, specSection) => {
+const updateSubmittalItem = async (projectId, submittalId, specSection, paraNo, paraContext, submittalHeading, submittalType) => {
     try {
         return await axiosInstance({
             method: 'put',
-            url: `/api/deliverables/${projectId}/${submittalId}`,
+            url: `/api/deliverables/${projectId}/submittal-items/${submittalId}/`,
+            data: {
+                spec_section: specSection,
+                para_no: paraNo,
+                para_context: paraContext,
+                item_desc: submittalHeading,
+                type: submittalType,
+            },
         });
     } catch (error) {
         handleError(error);
@@ -78,7 +92,7 @@ const deleteSubmittalItem = async (projectId, submittalId) => {
     try {
         return await axiosInstance({
             method: 'delete',
-            url: `/api/deliverables/${projectId}/${submittalId}`,
+            url: `/api/deliverables/${projectId}/${submittalId}/`,
         });
     } catch (error) {
         handleError(error);
@@ -120,4 +134,13 @@ const getSubmittalItems = async (
     }
 }
 
-export {getSavedLogs, getSubmittalItemById, getSubmittalItems, getProjectLists, createSubmittalList}
+export {
+    getSavedLogs,
+    getSubmittalItemById,
+    getSubmittalItems,
+    getProjectLists,
+    createSubmittalList,
+    addSubmittalItem,
+    updateSubmittalItem,
+    deleteSubmittalItem
+}
