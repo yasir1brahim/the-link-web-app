@@ -20,7 +20,7 @@ const LogsPagination = ({
   const onClickChangePage = (e, page) => {
     e.preventDefault();
     setPage(page);
-    fetchData(page - 1, rowsPerPage, searchValue, listId);
+    fetchData(page, rowsPerPage, searchValue, listId);
   };
   const handleChangeRowsPerPage = (event) => {
     let rowsCount = parseInt(event.target.value, 10);
