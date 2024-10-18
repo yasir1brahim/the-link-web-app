@@ -30,7 +30,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails } from "../../api/Projects/api";
-import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems } from "../../api/ProjectLogs/api";
+import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles } from "../../api/ProjectLogs/api";
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -287,11 +287,7 @@ const ProjectLogs = () => {
       data.append("project_id", projectId || state.project?.project_id);
       projectType === "ufgs" && data.append("project_type", projectType);
       Object.values(pdfFile)?.forEach((file) => data.append("files", file));
-      const response = await axiosInstance({
-        method: "post",
-        url: "/upload_file",
-        data,
-      });
+      const response = await uploadFiles(data)
       if (response.data) {
         // console.log(response.data);
         setUploadLoading(false);

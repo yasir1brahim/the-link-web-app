@@ -137,6 +137,19 @@ const getSubmittalItems = async (
     }
 }
 
+
+const uploadFiles = async (data) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/upload-file/`,
+            data: data
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
 export {
     getSavedLogs,
     getSubmittalItemById,
@@ -145,5 +158,6 @@ export {
     createSubmittalList,
     addSubmittalItem,
     updateSubmittalItem,
-    deleteSubmittalItems
+    deleteSubmittalItems,
+    uploadFiles,
 }
