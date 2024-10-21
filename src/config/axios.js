@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { getAuthTokenFromRefreshToken } from '../api/Authentication/api';
 
-const baseURL = window.location.href.includes('https://app.thelink.ai') 
-? 'https://log-manager-api-prod.thelink.ai'
+const baseURL = window.location.href.includes('https://app-dj.thelink.ai') 
+? 'https://app-dj-qa-api.thelink.ai'
 : 'http://localhost:8000';
 
 const axiosInstance = axios.create({
