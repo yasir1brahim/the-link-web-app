@@ -101,8 +101,8 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       try {
         const response = await createProject(
           projectName.value,
-          leadContact[0].value || localStorage.getItem("userId"),
           customer?.customer_id || customerID,
+          leadContact[0].value || localStorage.getItem("userId"),
           selectedStandardMembersList.map((emp) => emp.value),
           selectedAdminMembersList.map((emp) => emp.value),
           startDate,
