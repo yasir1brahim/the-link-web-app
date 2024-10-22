@@ -117,6 +117,12 @@ const NavbarTop = ({...props}) => {
                         {(props.initLoading || props.loadingProjectDetails) && <CircularProgress size={12} />}
                       </div>
                     )}
+                    <div
+                      className="navlist"
+                      onClick={props.handleManageExcelExportButtonClick}
+                    >
+                      <div>Manage Excel Export</div>
+                    </div>
                     {localStorage.getItem('roleId') === '2' && (
                       <a
                         href="/customer-profile"
