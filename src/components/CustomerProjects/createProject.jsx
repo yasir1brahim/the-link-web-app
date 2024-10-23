@@ -81,7 +81,6 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       });
       error = true;
     }
-    console.log(projectType)
     if (projectType.length === 0) {
       setProjectType([{ value: "", label: "", errors: "Project Type is required." }]);
       error = true;
