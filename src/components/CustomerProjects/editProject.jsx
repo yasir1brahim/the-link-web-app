@@ -23,10 +23,10 @@ const EditProject = ({
   isAdminUser,
   customerID,
 }) => {
-  const [projectType, setProjectType] = useState([{ value: "", label: "" }]);
+  const [projectType, setProjectType] = useState([{ value: "", label: "", errors: "" }]);
   const typeaheadRef = useRef(null);
-  const [projectName, setProjectName] = useState({ value: "", errors: "" });
-  const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
+  const [projectName, setProjectName] = useState({ value: project?.project_name, errors: "" });
+  const [projectNumber, setProjectNumber] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [employeeList, setEmployeeList] = useState([]);
@@ -36,8 +36,8 @@ const EditProject = ({
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: "", errors: "" });
-      setProjectNumber({ value: "", errors: "" });
-      setProjectType([{ value: "", label: "" }]);
+      setProjectNumber("");
+      setProjectType([{ value: "", label: "", errors: "" }]);
       typeaheadRef?.current?.clear();
       setStartDate("");
       setEndDate("");
@@ -102,8 +102,27 @@ const EditProject = ({
     }
   }, [customer, modal, project?.customer_id, customerID]);
 
+  const validate = () => {
+    let error = false;
+    if (projectName.value === "") {
+      setProjectName({ ...projectName, errors: "Project Name is required." });
+      error = true;
+    }
+    if (projectType.length === 0) {
+      setProjectType([{ value: "", label: "", errors: "Project Type is required." }]);
+      error = true;
+    }else if (projectType[0] === undefined) {
+      setProjectType([{ value: "", label: "", errors: "Project Type is required." }]);
+      error = true;
+    } else if (projectType[0].label === "") {
+      setProjectType([{ ...projectType, errors: "Project Type is required."}]);
+      error = true;
+    }
+    return error;
+  };
+
   const handleSubmit = async () => {
-    let errors = false;
+    let errors = validate();
     if (!errors) {
       try {
         const response = await axiosInstance({
@@ -111,7 +130,7 @@ const EditProject = ({
           url: "/updateProject",
           data: {
             project_name: projectName.value || project?.project_name,
-            project_number: projectNumber.value || project?.project_number,
+            project_number: projectNumber || project?.project_number,
             project_type: projectType[0].label,
             employee_list: selectedEmployeeList.map(
               (employee) => employee.value,
@@ -164,7 +183,7 @@ const EditProject = ({
       >
         <div className="lproject-backdrop"></div>
         <div className="lproject-content">
-          <div className="lproject-header">
+          <div className="lproject-header" style={{ marginBottom: "0px" }}>
             <h5>Edit Project</h5>
             <span className="close" onClick={toggleModal}>
               <svg
@@ -185,93 +204,6 @@ const EditProject = ({
           </div>
           <div className="lproject-body">
             <form className="create-project-form">
-              {/* <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
-                {!isAdminUser && (
-                  <> */}
-                    {/* <div className="customer-dp-container"><img src={WhitingTurner} alt="Company Logo" /></div> */}
-                    {/* <div className="customer-profile">
-                      <div className="row">
-                        <div className="col-12">
-                          <div className="text-label-value">
-                            <div className="text-value">{customer?.customer_name}</div>
-                          </div>
-                        </div>
-                        <div className="col-12">
-                          <div className="text-label-value">
-                            <div className="text-label">{customer?.address}</div>
-                          </div>
-                        </div>
-                        <div className="col-12">
-                          <div className="text-label-value">
-                            <div className="text-label">{customer?.contact_number}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div> */}
-                    {/* <div className="customer-profile mb-0"> */}
-                      {/* <div className="col-6">
-                        <div className="text-label-value">
-                          <div className="text-label">
-                            {"Address: " + customer?.address}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-6">
-                        <div className="text-label-value">
-                          <div className="text-label">
-                            {"Contact: " + customer?.contact_number}
-                          </div>
-                        </div>
-                      </div> */}
-                      {/* <Box component="form">
-                        <Grid container spacing={3} alignItems="center">
-                          {customer?.address && (<Grid item xs={6}>
-                            <TextField 
-                              variant="outlined" 
-                              fullWidth 
-                              label="Address" 
-                              size="small"
-                              defaultValue={customer?.address}
-                              disabled
-                            />
-                          </Grid>)}
-                          {customer?.contact_number && (<Grid item xs={6}>
-                            <TextField 
-                              variant="outlined" 
-                              fullWidth 
-                              label="Contact Number" 
-                              size="small"
-                              defaultValue={customer?.contact_number}
-                              disabled
-                            />
-                          </Grid>)}
-                        </Grid>
-                      </Box> */}
-                      {/* <div className="col-6">
-                      <div className="custom-control custom-checkbox">
-                        <input
-                          type="checkbox"
-                          name="ticketHeading"
-                          id="ticketHeading"
-                          onClick={()=> 
-                            {
-                              if(visibilityType === "Personal")
-                              { setVisibilityType("Contract") } else {
-                                setVisibilityType("Personal")
-                              }
-                            }}
-                          checked={visibilityType === "Personal"}
-                        />
-                        <label
-                          style={{color: 'green', marginLeft: '5px'}}
-                          for="ticketHeading"
-                        >Personal Project</label>
-                      </div>
-                    </div> */}
-                    {/* </div>
-                  </>
-                )}
-              </div> */}
               <div className="create-project-content">
                 <div style={{ gap: "25px" }} className="d-flex">
                   <div className="form-group">
@@ -290,8 +222,13 @@ const EditProject = ({
                       }}
                     />
                     <label className="text-label" htmlFor="customerProjectName">
-                      Project Name
+                      Project Name*
                     </label>
+                    {projectName.errors && (
+                      <small className="form-error" style={{ color: "red" }}>
+                        {projectName.errors}
+                      </small>
+                    )}
                   </div>
                   <div className="form-group">
                     <input
@@ -302,10 +239,7 @@ const EditProject = ({
                       placeholder="Enter"
                       defaultValue={project?.project_number}
                       onChange={(e) => {
-                        setProjectNumber({
-                          ...projectNumber,
-                          value: e.target.value,
-                        });
+                        setProjectNumber(e.target.value);
                       }}
                     />
                     <label className="text-label" htmlFor="customerProjectNumber">
@@ -358,7 +292,7 @@ const EditProject = ({
                 <div style={{ gap: "25px" }} className="d-flex">
                   <div className="form-group">
                     <SelectDropdown
-                      label={'Project Type'}
+                      label={'Project Type*'}
                       setSelected={setProjectType}
                       defaultInputValue={defaultProjectType}
                       options={PROJECT_TYPES.map((project_type) => {
@@ -369,6 +303,11 @@ const EditProject = ({
                       })}
                       className="form-control"
                     />
+                    {projectType[0] !== undefined ? projectType[0].errors && (
+                      <small className="form-error" style={{ color: "red" }}>
+                        {projectType[0].errors}
+                      </small>
+                    ) : ''}
                   </div>
                   <div className="form-group">
                   </div>
@@ -425,26 +364,32 @@ const EditProject = ({
                 </div>
               </div>
               <div className="lproject-footer">
-                <button
-                  style={{ background: "#D5E73E", color: "#0E2332" }}
-                  className="btn btn-primary"
-                  type="button"
-                  onClick={handleSubmit}
-                >
-                  Save
-                </button>{" "}
-                <button
-                  style={{
-                    border: "1px solid #D1D5DB",
-                    color: "#36454F",
-                    background: "white",
-                  }}
-                  className="btn btn-secondary"
-                  type="button"
-                  onClick={toggleModal}
-                >
-                  Cancel
-                </button>
+                <div style={{ margin: "10px", fontSize: "14px", color: "#374151" }}>
+                  * required field
+                </div>
+                <div>
+                  <button
+                      style={{ background: "#D5E73E", color: "#0E2332" }}
+                      className="btn btn-primary"
+                      type="button"
+                      onClick={handleSubmit}
+                    >
+                      Save
+                    </button>{" "}
+                    <button
+                      style={{
+                        border: "1px solid #D1D5DB",
+                        color: "#36454F",
+                        background: "white",
+                      }}
+                      className="btn btn-secondary"
+                      type="button"
+                      onClick={toggleModal}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                
               </div>
             </form>
           </div>
