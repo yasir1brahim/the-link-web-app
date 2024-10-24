@@ -9,6 +9,7 @@ import axiosInstance from "../../config/axios";
 import handleError from "../../config/errorHandler";
 import HeaderTabs from "../shared/HeaderTabs/HeaderTabs";
 import { listProjects } from "../../api/Projects/api";
+import { uploadFiles } from "../../api/ProjectLogs/api";
 import { useParams } from 'react-router-dom';
 
 const ProjectsPage = () => {
@@ -20,83 +21,17 @@ const ProjectsPage = () => {
   const [createProjectModal, setCreateProjectModal] = useState(false);
   const [pageRefresh, setPageRefresh] = useState(false);
   const [projectData, setProjectData] = useState([]);
-  const [pdfFile, setPdfFile] = useState({});
-  const [isUploadLoading, setUploadLoading] = useState(false);
-  const [errorModal, toggleErrorModal] = useState(false);
-  const [successModal, toggleSuccessModal] = useState(false);
-  const [fileData, setFileData] = useState({});
-  const [specUploadProject, setSpecUploadProject] = useState({});
   const roleId = localStorage.getItem("roleId");
   const { state } = useLocation();
   const [isArchived, toggleArchive] = useState(false);
   const toggleCreateProjectModal = () =>
     setCreateProjectModal(!createProjectModal);
-  const toggleUploadSpecsModal = () => setUploadSpecsModal(!uploadSpecsModal);
   const toggleArchiveProjectModal = () => setArchiveProjectModal(!archiveProjectModal);
   const toggleRestoreProjectModal = () => setRestoreProjectModal(!restoreProjectModal);
-  const [toggleUploadSpecsButton, setToggleUploadSpecsButton] = useState(true);
   const { teamId } = useParams();
 
   const customerId = teamId;
 
-  useEffect(() => {
-    if (!uploadSpecsModal) {
-      setPdfFile({});
-    }
-    if (roleId === "7") {
-      setToggleUploadSpecsButton(false);
-    }
-  }, [uploadSpecsModal, toggleUploadSpecsButton, roleId]);
-
-  // function related to upload specs
-  const backToUpload = () => {
-    toggleErrorModal(false);
-    setUploadSpecsModal(true);
-  };
-
-  // handle to upload specs, submit
-  const handleUploadSubmit = async () => {
-    try {
-      setUploadLoading(true);
-      const data = new FormData();
-      data.append("project_id", specUploadProject?.project_id);
-      specUploadProject?.project_type === "ufgs" &&
-        data.append("project_type", specUploadProject?.project_type);
-      Object.values(pdfFile)?.forEach((file) => data.append("files", file));
-      const response = await axiosInstance({
-        method: "post",
-        url: "/upload_file",
-        data,
-      });
-      if (response.data) {
-        // console.log(response.data);
-        setUploadLoading(false);
-        setFileData(response.data.message);
-        setUploadSpecsModal(false);
-        toggleSuccessModal(true);
-        setPageRefresh(!pageRefresh);
-      }
-      axiosInstance({
-        method: "get",
-        url: "/collab/create_spec_index",
-        params: {
-          project_id: specUploadProject?.project_id,
-        },
-      });
-      axiosInstance({
-        method: "post",
-        url: `/spec-gpt/load_doc`,
-        data: {
-          project_id: specUploadProject?.project_id,
-        },
-      });
-    } catch (error) {
-      setUploadLoading(false);
-      toggleErrorModal(true);
-      setUploadSpecsModal(false);
-      handleError(error);
-    }
-  };
 
   // function used in the project tiles to navigate to project details
   const custId =
@@ -161,34 +96,11 @@ const ProjectsPage = () => {
             projectData={projectData}
             setProjectData={setProjectData}
             handleLaunch={handleLaunch}
-            toggleUploadSpecsModal={toggleUploadSpecsModal}
-            toggleUploadSpecsButton={toggleUploadSpecsButton}
-            setSpecUploadProject={setSpecUploadProject}
             isArchived={isArchived}
             toggleArchive={toggleArchive}
             customerId={customerId}
           />
         </div>
-        <UploadDocuments
-          modal={uploadSpecsModal}
-          toggleModal={toggleUploadSpecsModal}
-          setPdfFile={setPdfFile}
-          pdfFile={pdfFile}
-          handleSubmit={handleUploadSubmit}
-          isUploadLoading={isUploadLoading}
-          errorModal={errorModal}
-          toggleErrorModal={toggleErrorModal}
-          backToUpload={backToUpload}
-          successModal={successModal}
-          toggleSuccessModal={toggleSuccessModal}
-          fileData={fileData}
-          project={specUploadProject}
-          logScreenUrl={
-            localStorage.getItem("isSpecGptUser") === "true"
-              ? `/spec-gpt?projectDetails=${specUploadProject?.project_id},${custId},Classified,${specUploadProject?.project_name}`
-              : `/project-logs?projectDetails=${specUploadProject?.project_id},${custId},Classified,${specUploadProject?.project_name}`
-          }
-        />
       </div>
     </>
   );

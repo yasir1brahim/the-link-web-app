@@ -43,9 +43,6 @@ const ProjectsTable = ({
   isArchived,
   toggleArchive,
   customerId,
-  toggleUploadSpecsModal,
-  setSpecUploadProject,
-  toggleUploadSpecsButton,
 }) => {
   const [employeeModal, setEmployeeModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
@@ -54,7 +51,6 @@ const ProjectsTable = ({
   const [archiveProject, setArchiveProject] = useState(null);
   const [restoreProject, setRestoreProject] = useState(null);
   const [launchTooltip, setLaunchTooltip] = useState(null);
-  const [uploadTooltip, setUploadTooltip] = useState(null);
   const [editTooltip, setEditTooltip] = useState(null);
   const [archiveTooltip, setArchiveTooltip] = useState(null);
   const [restoreTooltip, setRestoreTooltip] = useState(null);
@@ -385,38 +381,6 @@ const ProjectsTable = ({
                                 Launch Project
                               </Tooltip>
                             </span>
-                            {toggleUploadSpecsButton ? (
-                              project.status !== "Archived" && <>
-                                <span
-                                  onClick={() => {
-                                    toggleUploadSpecsModal();
-                                    setSpecUploadProject(project);
-                                  }}
-                                  style={{ cursor: "pointer" }}
-                                  id={"upload-tooltip" + index + 1}
-                                >
-                                  <UploadIcon />
-                                </span>
-                                <span>
-                                  <Tooltip
-                                    placement="left"
-                                    target={"upload-tooltip" + index + 1}
-                                    isOpen={uploadTooltip === index + 1}
-                                    toggle={() =>
-                                      setUploadTooltip(
-                                        uploadTooltip
-                                          ? uploadTooltip === index + 1
-                                            ? null
-                                            : index + 1
-                                          : index + 1,
-                                      )
-                                    }
-                                  >
-                                    Upload Document
-                                  </Tooltip>
-                                </span>
-                              </>
-                            ) : null}
                             {(
                               project.status === "Archived" ? (
                                 <>
