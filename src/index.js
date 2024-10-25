@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.scss';
-import App from './App';
+import './App.scss';
 import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from './auth/authprovider';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -48,7 +48,7 @@ const router = createBrowserRouter([
     element: <Forgotpwd />,
   },
   {
-    path: "/reset-password",
+    path: "/password-reset/confirm/:uidb64/:token",
     element: <Resetpwd />,
   },
   {

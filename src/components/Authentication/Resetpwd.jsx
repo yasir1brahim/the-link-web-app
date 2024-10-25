@@ -8,6 +8,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../config/axios';
 import handleError from '../../config/errorHandler';
+import { useParams } from 'react-router-dom';
+import { resetPassword } from '../../api/Authentication/api';
 
 const Resetpwd = () => {
   const [showNPwd, setShowNPwd] = useState(false);
@@ -15,6 +17,9 @@ const Resetpwd = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
   const [error, setError] = useState('');
+
+  const { uidb64, token } = useParams();
+  console.log(uidb64, token);
 
   const toggleNType = () => setShowNPwd(!showNPwd);
   const toggleCType = () => setShowCPwd(!showCPwd);
@@ -48,13 +53,7 @@ const Resetpwd = () => {
     let errors = validate();
     if (!errors) {
       try {
-        await axiosInstance({
-          method: 'post',
-          url: `/reset_password`,
-          data: {
-            password: newPassword
-          }
-        });
+        await resetPassword(uidb64, token, newPassword, confirmedPassword);
         toast.success('Password changed successfully.', {
           position: 'bottom-center',
           autoClose: 5000,

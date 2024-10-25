@@ -5,8 +5,8 @@ import { ReactComponent as ArrowLeft } from '../../assets/images/arrow-left.svg'
 import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../config/axios';
 import { toast, ToastContainer } from 'react-toastify';
+import { forgotPassword } from '../../api/Authentication/api';
 
 const Forgotpwd = (props) => {
   const [email, setEmail] = useState({ value: '', errors: '' });
@@ -24,13 +24,7 @@ const Forgotpwd = (props) => {
 
     if (!errors) {
       try {
-        const response = await axiosInstance({
-          method: 'post',
-          url: '/forgot_password',
-          data: {
-            email: email.value
-          }
-        });
+        const response = await forgotPassword(email.value);
         if (response.data) {
           console.log(response.data);
         }

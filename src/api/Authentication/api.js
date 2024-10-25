@@ -28,6 +28,29 @@ const register = async (email, password1, password2) => {
     });
 }
 
+const forgotPassword = async (email) => {
+    return await axiosInstance({
+        method: 'post',
+        url: '/api/auth/password/reset/',
+        data: {
+            email: email
+        }
+    });
+}
+
+const resetPassword = async (uid, token, new_password1, new_password2) => {
+    return await axiosInstance({
+        method: 'post',
+        url: '/api/auth/password/reset/confirm/',
+        data: {
+            uid: uid,
+            token: token,
+            new_password1: new_password1,
+            new_password2: new_password2
+        }
+    });
+}
+
 const getAuthTokenFromRefreshToken = async (refreshToken) => {
     return await axiosInstance({
         method: 'post',
@@ -125,4 +148,6 @@ export {
     getInvitation, 
     acceptInvitation,
     register,
+    forgotPassword,
+    resetPassword
 }
