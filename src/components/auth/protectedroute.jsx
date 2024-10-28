@@ -1,7 +1,7 @@
 import {ReactNode, useContext, useEffect} from 'react';
 import {AuthContext} from "../../auth/authcontext.jsx";
 import {useNavigate} from "react-router-dom";
-
+import Loader from '../shared/Loader/Loader.jsx';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useContext(AuthContext);
@@ -18,7 +18,7 @@ const ProtectedRoute = ({ children }) => {
   }
   else if (isLoading) {
     return (
-      <div>Loading...</div>
+        <Loader showComponentLoader={isLoading} />
     );
   } else {
     // just return null or a fragment, navigation will be handled by useEffect
