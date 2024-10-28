@@ -89,7 +89,7 @@ const ProjectLogs = () => {
     classification: "",
   });
   const customerData = state?.customerData;
-  const projectType = state?.project.project_type;
+  const projectType = state?.project?.project_type;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const baseUrl = window.location.href.includes("https://app.thelink.ai")
     ? `https://app.thelink.ai/`

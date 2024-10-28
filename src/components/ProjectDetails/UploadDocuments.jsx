@@ -233,18 +233,6 @@ export const UploadDocuments = (props) => {
               >
                 Close
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  toggleSuccessModal(false);
-                  navigate(logScreenUrl, {
-                    state: { project, projectName: project?.project_name },
-                  });
-                }}
-                className="d-inline-block btn btn-primary"
-              >
-                Go to Project Details
-              </button>
             </div>
           </div>
         </ModalBody>
