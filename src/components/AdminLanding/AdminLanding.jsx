@@ -93,7 +93,6 @@ const Adminlanding = (props) => {
           <Header
             title={'Customers'}
             toggleModal={toggleModal}
-            showBtn={'Create New Customer'}
           />
 
           <div className="admin-landing-content">
