@@ -16,9 +16,9 @@ import { PROJECT_TYPES } from "../../constants";
 const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefresh, projects, isPersonalProject = false, customerID }) => {
   // const [email, setEmail] = useState({ value: '', errors: '' });
   // const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
-  const [projectType, setProjectType] = useState({ value: "", label: "" });
+  const [projectType, setProjectType] = useState([{ value: "", label: "", errors: "" }]);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
-  const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
+  const [projectNumber, setProjectNumber] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [dateError, setDateError] = useState({ startError: "", endError: "" });
@@ -34,8 +34,8 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: "", errors: "" });
-      setProjectNumber({ value: "", errors: "" });
-      setProjectType([{ value: "", label: "" }]);
+      setProjectNumber("");
+      setProjectType([{ value: "", label: "", errors: "" }]);
       setStartDate("");
       setEndDate("");
       setEmployeeList([]);
@@ -81,6 +81,16 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       });
       error = true;
     }
+    if (projectType.length === 0) {
+      setProjectType([{ value: "", label: "", errors: "Project Type is required." }]);
+      error = true;
+    }else if (projectType[0] === undefined) {
+      setProjectType([{ value: "", label: "", errors: "Project Type is required." }]);
+      error = true;
+    } else if (projectType[0].label === "") {
+      setProjectType([{ ...projectType, errors: "Project Type is required."}]);
+      error = true;
+    }
     setDateError({ startError: "", endError: "" });
     // if (startDate === '') {
     //   setDateError({ ...dateError, startError: 'Start Date is required.' });
@@ -103,7 +113,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
           url: "/createProject",
           data: {
             project_name: projectName.value,
-            project_number: projectNumber.value,
+            project_number: projectNumber,
             project_type: projectType[0].label,
             start_date: startDate ? moment(startDate).format("YYYY-MM-DD") : "",
             end_date: endDate ? moment(endDate).format("YYYY-MM-DD") : "",
@@ -154,32 +164,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
           </div>
           <div className="lproject-body">
             <form className="create-project-form">
-              <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
-                <div className="customer-profile">
-                  {/* <div className="col-6">
-                      <div className="custom-control custom-checkbox">
-                        <input
-                          type="checkbox"
-                          name="ticketHeading"
-                          id="ticketHeading"
-                          onClick={()=> 
-                            {
-                              if(visibilityType === "Personal")
-                              { setVisibilityType("Contract") } else {
-                                setVisibilityType("Personal")
-                              }
-                            }}
-                          checked={visibilityType === "Personal"}
-                        />
-                        <label
-                          style={{color: 'green', marginLeft: '5px'}}
-                          for="ticketHeading"
-                        >Personal Project</label>
-                      </div>
-                    </div> */}
-                </div>
-              </div>
-              <div className="create-project-content" style={{ marginTop: "0px" }}>
+              <div className="create-project-content">
                 <div style={{ gap: "25px" }} className="d-flex">
                   <div className="form-group">
                     <input
@@ -198,7 +183,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
                       }}
                     />
                     <label className="text-label" htmlFor="customerProjectName">
-                      Project Name
+                      Project Name*
                     </label>
                     {projectName.errors && (
                       <small className="form-error" style={{ color: "red" }}>
@@ -214,22 +199,14 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
                       aria-describedby="customerProjectNumber"
                       placeholder="Enter"
                       required
-                      value={projectNumber.value}
+                      value={projectNumber}
                       onChange={(e) => {
-                        setProjectNumber({
-                          ...projectNumber,
-                          value: e.target.value,
-                        });
+                        setProjectNumber(e.target.value);
                       }}
                     />
                     <label className="text-label" htmlFor="customerProjectNumber">
                       Project Number
                     </label>
-                    {projectNumber.errors && (
-                      <small className="form-error" style={{ color: "red" }}>
-                        {projectNumber.errors}
-                      </small>
-                    )}
                   </div>
                 </div>
                 <div style={{ gap: "25px" }} className="d-flex">
@@ -253,7 +230,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
                 <div style={{ gap: "25px" }} className="d-flex">
                   <div className="form-group">
                     <SelectDropdown
-                      label={'Project Type'}
+                      label={'Project Type*'}
                       setSelected={setProjectType}
                       options={PROJECT_TYPES.map((project_type) => {
                         return {
@@ -263,6 +240,11 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
                       })}
                       className="form-control"
                     />
+                    {projectType[0] !== undefined ? projectType[0].errors && (
+                      <small className="form-error" style={{ color: "red" }}>
+                        {projectType[0].errors}
+                      </small>
+                    ) : ''}
                   </div>
                   <div className="form-group">
                   </div>
@@ -327,12 +309,17 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
                 )}
               </div>
               <div className="lproject-footer">
-                <button style={{ background: "#D5E73E", color: "#0E2332" }} className="" type="button" onClick={handleSubmit}>
-                  Create
-                </button>{" "}
-                <button style={{ border: "1px solid #D1D5DB", color: "#36454F",background:"white" }} className="" type="button" onClick={toggleModal}>
-                  Cancel
-                </button>
+                <div style={{ margin: "10px", fontSize: "14px", color: "#374151" }}>
+                  * required field
+                </div>
+                <div>
+                  <button style={{ background: "#D5E73E", color: "#0E2332" }} className="" type="button" onClick={handleSubmit}>
+                    Create
+                  </button>{" "}
+                  <button style={{ border: "1px solid #D1D5DB", color: "#36454F",background:"white" }} className="" type="button" onClick={toggleModal}>
+                    Cancel
+                  </button>
+                </div>
               </div>
             </form>
           </div>

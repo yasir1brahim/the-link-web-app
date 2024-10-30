@@ -28,3 +28,36 @@ export const PROJECT_TYPES = [
   { id: 27, name: 'Warehouses' },
   { id: 28, name: 'Water/Waste Management' }
 ];
+
+export const EXCEL_HEADER_OPTIONS = [
+  { id: 1, name: 'Submittal #', default: true },
+  { id: 2, name: 'Spec Section', default: true },
+  { id: 3, name: 'Section Title', default: true },
+  { id: 4, name: 'Paragraph', default: true },
+  { id: 5, name: 'Submittal Type', default: true },
+  { id: 6, name: 'Submittal Title', default: true },
+  { id: 7, name: 'Submittal Description', default: true },
+  { id: 8, name: 'Spec Section #', default: false },
+  { id: 9, name: 'Submittal Heading', default: false },
+  { id: 10, name: 'Clause', default: false },
+  { id: 11, name: 'Revision', default: false },
+  { id: 12, name: 'Scope', default: false },
+  { id: 13, name: 'Submission #', default: false },
+  { id: 14, name: 'Trade', default: false },
+  { id: 15, name: 'Planned Submission Date', default: false },
+  { id: 16, name: 'Actual Submission Date', default: false },
+  { id: 17, name: 'Internal Review Date', default: false },
+  { id: 18, name: 'Priority', default: false },
+  { id: 19, name: 'External Review Due Date', default: false },
+  { id: 20, name: 'External Review Return Date', default: false },
+  { id: 21, name: 'Duration of External Review', default: false },
+  { id: 22, name: 'Lead Time', default: false },
+  { id: 23, name: 'Expected Delivery Date', default: false },
+  { id: 24, name: 'Review Status', default: false },
+  { id: 25, name: 'Submitted By', default: false },
+  { id: 26, name: 'Comments', default: false },
+  { id: 27, name: 'Reference Section', default: false },
+  { id: 28, name: 'Planeed Order Date', default: false },
+  { id: 29, name: 'Actual Order Date', default: false },
+  { id: 30, name: 'On Site Installation Date', default: false }
+]

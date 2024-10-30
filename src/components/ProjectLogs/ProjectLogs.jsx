@@ -30,6 +30,7 @@ import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Check } from "@mui/icons-material";
+import ManageExcelExport from "./manageExcelExport";
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -112,6 +113,9 @@ const ProjectLogs = () => {
   const [manageProcoreModal, setManageProcoreModal] = useState(false);
   const toggleManageProcoreModal = () =>
     setManageProcoreModal(!manageProcoreModal);
+  const [manageExcelExportModal, setManageExcelExportModal] = useState(false);
+  const toggleManageExcelExportModal = () =>
+    setManageExcelExportModal(!manageExcelExportModal);
   const [changeProcoreAccountModal, setChangeProcoreAccountModal] =
     useState(false);
   const toggleChangeProcoreAccountModal = () =>
@@ -834,6 +838,7 @@ const ProjectLogs = () => {
               ?.map((item) => Number(item)),
           filters: { ...filters },
           page_number: -1,
+          user_id: localStorage.getItem("userId"),
         },
       });
       let blob = new Blob([response.data], {
@@ -1129,12 +1134,17 @@ const ProjectLogs = () => {
     link.click();
   };
 
+  const handleManageExcelExportButtonClick = async () => {
+    setManageExcelExportModal(true);
+  };
+
   return (
     <div className="page-wrap">
       <NavbarTop
         qaDashboard={state?.qaDashboard}
         projectTitle={state?.projectName || projectName || ""}
         handleManageProcoreButtonClick={handleManageProcoreButtonClick}
+        handleManageExcelExportButtonClick={handleManageExcelExportButtonClick}
         initLoading={initLoading}
         loadingProjectDetails={loadingProjectDetails}
         customerData={customerData}
@@ -1854,6 +1864,11 @@ const ProjectLogs = () => {
           </form>
         </ModalBody>
       </Modal>
+
+      {manageExcelExportModal && <ManageExcelExport
+        manageExcelExportModal={manageExcelExportModal}
+        toggleManageExcelExportModal={toggleManageExcelExportModal}
+      />}
     </div>
   );
 };
