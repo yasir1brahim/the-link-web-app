@@ -255,6 +255,7 @@ const ProjectLogs = () => {
         const fetchDocumentData = async () => {
           const response = await getProjectDetails(projectId);
           setDocumentData(response.data.document_details);
+          console.log('documentIsProcessing', documentIsProcessing(response.data.document_details));
           if (!documentIsProcessing(response.data.document_details)) {
             fetchLogData(0, rowsPerPage);
           }
@@ -554,15 +555,6 @@ const ProjectLogs = () => {
           additionalTextLocations: submittalLogs[submittalIdx].additional_text_locations,
         });
       }
-    } else {
-      setPdfData({
-        url: "",
-        textLoc: {},
-        index: "",
-        docId: null,
-        submittalId: null,
-        additionalTextLocations: [],
-      });
     }
 
     localStorage.setItem(
@@ -597,7 +589,7 @@ const ProjectLogs = () => {
         handleError(error);
       });
     }
-  }, [state, pageRefresh, projectId, documentData]);
+  }, [state, pageRefresh, projectId]);
 
 
   useEffect(() => {
@@ -609,12 +601,13 @@ const ProjectLogs = () => {
     setSelected(isSelectAll ? [] : logIdList);
   };
 
-  const documentIsProcessing = (documents = []) =>
-    documents.some((doc) =>
+  const documentIsProcessing = (documents = []) => {
+    return documents.some((doc) =>
       ["PENDING_PROCESSING", "PROCESSING", "SUBSECTIONS_EXTRACTED"].includes(
         doc.document_status
       )
     );
+  }
 
   // useEffect(() => {
   //   const retriveSelected = localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
