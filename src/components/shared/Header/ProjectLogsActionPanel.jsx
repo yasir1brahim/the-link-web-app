@@ -231,7 +231,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
       </div>
       <div className="col-6 row justify-content-end">
         <div className="col-3">
-          {!props.documentIsProcessing(props.documentData) && (
+          {props.documentIsProcessing(props.documentData) && (
             <button
               type="button"
               className="table-top-btn m-auto"
