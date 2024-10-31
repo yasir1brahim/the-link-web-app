@@ -26,13 +26,10 @@ const getProjectDetails = async (projectId) => {
     }
 }
 
-const updateProject = async (projectId, projectName, leadContact, listOfMemberUserIds, listOfAdminUserIds, startDate, endDate) => {
+const updateProject = async (projectId, projectName, listOfMemberUserIds, listOfAdminUserIds, startDate, endDate) => {
     const payload = {}
     if (projectName) {
         payload.name = projectName
-    }
-    if (leadContact) {
-        payload.owner = leadContact
     }
     if (listOfMemberUserIds) {
         payload.members = listOfMemberUserIds.map((emp_id) => {
@@ -67,10 +64,9 @@ const updateProject = async (projectId, projectName, leadContact, listOfMemberUs
     }
 }
 
-const createProject = async (projectName, teamId, leadContact, listOfMemberUserIds, listOfAdminUserIds, startDate, endDate) => {
+const createProject = async (projectName, teamId, listOfMemberUserIds, listOfAdminUserIds, startDate, endDate) => {
     const payload = {}
     payload.name = projectName
-    payload.owner = leadContact
     payload.team = teamId
     if (listOfMemberUserIds) {
         payload.members = listOfMemberUserIds.map((emp_id) => {
