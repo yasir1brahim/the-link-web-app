@@ -8,10 +8,6 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   const typeaheadRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
-  const [leadContact, setLeadContact] = useState([{
-    value: "",
-    label: "",
-  }]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -22,10 +18,6 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: "", errors: "" });
-      setLeadContact([{
-        value: "",
-        label: "",
-      }]);
       typeaheadRef?.current?.clear();
       setStartDate("");
       setEndDate("");
@@ -62,7 +54,6 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
             label: member.display_name,
           }
         }))
-        setLeadContact([{label: "", value: ""}])
         setIsLoading(false);
       };
       preSelectEmployeesForProject().catch(console.error);
@@ -102,7 +93,6 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
         const response = await createProject(
           projectName.value,
           customer?.customer_id || customerID,
-          leadContact[0].value || localStorage.getItem("userId"),
           selectedStandardMembersList.map((emp) => emp.value),
           selectedAdminMembersList.map((emp) => emp.value),
           startDate,
@@ -134,8 +124,6 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       setStartDate={setStartDate}
       endDate={endDate}
       setEndDate={setEndDate}
-      setLeadContact={setLeadContact}
-      leadContact={leadContact}
       handleSubmit={handleSubmit}
       formTitle="Create New Project"
       toggleModal={toggleModal}

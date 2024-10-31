@@ -27,10 +27,6 @@ const EditProject = ({
 
   const typeaheadRef = useRef(null);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
-  const [leadContact, setLeadContact] = useState([{
-    value: "",
-    label: "",
-  }]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -42,10 +38,6 @@ const EditProject = ({
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: "", errors: "" });
-      setLeadContact([{
-        value: "",
-        label: "",
-      }]);
       typeaheadRef?.current?.clear();
       setStartDate("");
       setEndDate("");
@@ -83,7 +75,6 @@ const EditProject = ({
             label: member.display_name,
           }
         }))
-        setLeadContact([{label: project?.owner?.get_display_name ?? "", value: project?.owner?.id ?? ""}])
         setIsLoading(false);
       };
       console.log("fullEmployeeList", fullEmployeeList)
@@ -98,7 +89,6 @@ const EditProject = ({
         const response = await updateProject(
           project?.id,
           projectName.value || project?.project_name, 
-          leadContact[0] ? leadContact[0].value : project?.owner, 
           selectedStandardMembersList.map((emp) => emp.value), 
           selectedAdminMembersList.map((emp) => emp.value), 
           startDate, 
@@ -131,8 +121,6 @@ const EditProject = ({
       setStartDate={setStartDate}
       endDate={endDate}
       setEndDate={setEndDate}
-      setLeadContact={setLeadContact}
-      leadContact={leadContact}
       handleSubmit={handleSubmit}
       formTitle="Edit Project"
       toggleModal={toggleModal}

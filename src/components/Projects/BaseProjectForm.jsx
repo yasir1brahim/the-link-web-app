@@ -18,8 +18,6 @@ const BaseProjectForm = ({
     setStartDate,
     endDate,
     setEndDate,
-    setLeadContact,
-    leadContact,
     handleSubmit,
     formTitle,
     toggleModal,
@@ -78,30 +76,6 @@ const BaseProjectForm = ({
                             <label className="text-label" htmlFor="customerProjectName">
                                 Project Name
                             </label>
-                            </div>
-                            <div style={{ gap: "25px" }} className="d-flex">
-                            <div className="form-group">
-                                <div className={`has-typehead`}>
-                                <Typeahead
-                                    id="employee-list"
-                                    ref={typeaheadRef}
-                                    options={fullEmployeeList}
-                                    placeholder="Select Lead Contact"
-                                    onChange={(e) => setLeadContact(e)}
-                                    selected={leadContact}
-                                    filterBy={["label"]} // Use only string fields for filtering
-                                    labelKey="label"
-                                />
-
-                                <label className="text-label">{"Lead Contact"}</label>
-                                <i className="has-icon icon-dropdown"></i>
-                                </div>
-                                {!leadContact[0]?.label ? (
-                                <label className="text-label typehead-label">
-                                    {project?.owner?.display_name}
-                                </label>
-                                ) : null}
-                            </div>
                             </div>
                             <div style={{ gap: "25px" }} className="d-flex">
                             <div className="form-group">
