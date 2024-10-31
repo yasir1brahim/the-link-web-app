@@ -65,7 +65,7 @@
   background-color: #F4F7FB;
   padding: 5px 10px;
   color: #231F20;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 24px;
 }
@@ -73,7 +73,8 @@
   background-color: #e0eaf7;
 }
 .selection-btn {
-  min-width: 160px;
+  min-width: 154px!important;
+  justify-content: center;
 }
 .close-pdf-btn {
   min-width: 90px;
@@ -115,7 +116,7 @@
   float: right;
   .search-icon {
     background-color: #F4F7FB;
-    padding: 5px 8px;
+    padding: 5px 6px;
     border-radius: 4px;
   }
 }

@@ -17,7 +17,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
     <div className="header-wrapper-swap row mx-0">
       <div className="col-6 row">
         <div className="d-flex p-0">
-          <div className="mr-2">
+          <div className="mr-2 mb-1">
             {localStorage.getItem('roleId') !== '7' && (
               <button
                 type="button"
@@ -42,7 +42,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
               </button>
             )}
           </div>
-          <div className="">
+          <div className="mr-2 mb-1">
             {localStorage.getItem('roleId') !== '7' && (
               <Dropdown isOpen={props.dropdownOpen} toggle={props.toggle}>
                 <DropdownToggle caret className="export-btn">
@@ -72,7 +72,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
           <div className="header-swap">
             <button
               type="button"
-              className="table-top-btn ml-2"
+              className="table-top-btn selection-btn mr-2 mb-1"
               onClick={props.getList}
             >
               <svg
@@ -101,7 +101,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
           {props.listId === null && props.selected?.length > 0 && !props.isCombining && (
             <button
               type="button"
-              className="table-top-btn btn-disabled selection-btn ml-2"
+              className="table-top-btn btn-disabled selection-btn mr-2 mb-1"
               onClick={props.toggleSaveListName}
               disabled={props.selected?.length === 0}
             >
@@ -127,7 +127,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
           {props.listId === null && props.selected?.length > 0 && props.isCombining && (
             <button
               type="button"
-              className="table-top-btn btn-disabled selection-btn ml-2"
+              className="table-top-btn btn-disabled selection-btn mr-2 mb-1"
               onClick={() => {
                 props.handleCombineRows();
               }}
@@ -139,7 +139,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
           {props.listId !== null ? (
             <button
               type="button"
-              className="table-top-btn selection-btn"
+              className="table-top-btn selection-btn mr-2 mb-1"
               onClick={() => {
                 props.handleClearSelection();
               }}
@@ -171,10 +171,19 @@ const ProjectLogsActionPanel = ({ ...props }) => {
           ) : null}
         </div>
         <div className="p-0 d-flex">
+          {props.showClearFilters && <div className="clear-filters">
+            <button
+              type="button"
+              className="table-top-btn selection-btn mr-2 mb-1"
+              onClick={props.clearFilters}
+            >
+              <span>Clear Filters</span>
+            </button>
+          </div>}
           {!props.logInViewer && props.listId === null && props.selected?.length > 0 && !props.isSelectAll && (
             <button
               type="button"
-              className={`table-top-btn btn-disabled selection-btn ${props.isCombining ? '' : 'ml-2'}`}
+              className={`table-top-btn btn-disabled selection-btn mr-2 mb-1`}
               onClick={() => {
                 // PDF reader won't be available with row combining for now
                 if (props.logInViewer) {
@@ -198,19 +207,10 @@ const ProjectLogsActionPanel = ({ ...props }) => {
               </span>
             </button>
           )}
-          {props.showClearFilters && <div className="clear-filters">
-            <button
-              type="button"
-              className="table-top-btn ml-2"
-              onClick={props.clearFilters}
-            >
-              <span>Clear Filters</span>
-            </button>
-          </div>}
           {props.logInViewer &&
             <button
               type="button"
-              className="table-top-btn btn-disabled close-pdf-btn ml-2"
+              className="table-top-btn btn-disabled selection-btn close-pdf-btn mr-2 mb-1"
               onClick={() => {
                 props.setLogInViewer(null);
                 props.setPdfData({
@@ -234,10 +234,10 @@ const ProjectLogsActionPanel = ({ ...props }) => {
           {props.documentIsProcessing(props.documentData) && (
             <button
               type="button"
-              className="table-top-btn m-auto"
+              className="table-top-btn selection-btn m-auto"
               onClick={props.toggleDocumentStatusModal}
             >
-              <span>Check Document Status</span>
+              <span>Document Status</span>
             </button>
           )}
         </div>

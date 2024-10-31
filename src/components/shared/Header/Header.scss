@@ -139,7 +139,7 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 5px;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
   .header-swap {
     .main-wrapper {
       display: flex;
@@ -180,7 +180,7 @@
       background-color: #F4F7FB;
       padding: 5px 10px;
       color: #231F20;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       line-height: 24px;
     }
@@ -190,12 +190,12 @@
   }
   .light-btn {
     border-radius: 6px;
-    padding: 6px 10px;
+    // padding: 5px 8px;
     background: #d5e73e;
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     line-height: 24px;
     box-shadow: rgba(0, 0, 0, 0.05);
@@ -221,7 +221,7 @@
       background-color: #F4F7FB;
       padding: 5px 10px !important;
       color: #231F20;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       line-height: 24px;
     }
@@ -246,7 +246,7 @@
     background-color: #F4F7FB;
     padding: 5px 10px !important;
     color: #231F20;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     line-height: 24px;
   }
