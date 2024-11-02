@@ -501,23 +501,27 @@ const ProjectsTable = ({
             pageRefresh={pageRefresh}
             setPageRefresh={setPageRefresh}
           />
-          <CreateProject
-            modal={createProjectModal}
-            toggleModal={toggleCreateProjectModal}
-            customer={state || customerData}
-            pageRefresh={pageRefresh}
-            setPageRefresh={setPageRefresh}
-            customerID={customerId}
-          />
-          <EditProject
-            modal={editModal}
-            toggleModal={toggleEditModal}
-            customer={state || customerData}
-            project={activeProject}
-            pageRefresh={pageRefresh}
-            setPageRefresh={setPageRefresh}
-            customerID={customerId}
-          />
+          {createProjectModal && (
+            <CreateProject
+              modal={createProjectModal}
+              toggleModal={toggleCreateProjectModal}
+              customer={state || customerData}
+              pageRefresh={pageRefresh}
+              setPageRefresh={setPageRefresh}
+              customerID={customerId}
+            />
+          )}
+          {editModal && (
+            <EditProject
+              modal={editModal}
+              toggleModal={toggleEditModal}
+              customer={state || customerData}
+              project={activeProject}
+              pageRefresh={pageRefresh}
+              setPageRefresh={setPageRefresh}
+              customerID={customerId}
+            />
+          )}
       <Loader showComponentLoader={isLoading} />
 
       <ArchiveProjectModal

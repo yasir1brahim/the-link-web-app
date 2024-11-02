@@ -146,7 +146,8 @@ const BaseProjectForm = ({
                                     <SelectDropdown
                                     label={'Project Type'}
                                     setSelected={setProjectType}
-                                    multiple={false}
+                                    selected={projectType}
+                                    defaultInputValue={projectType.value}
                                     options={PROJECT_TYPES.map((project_type) => {
                                         return {
                                             value: project_type?.name,

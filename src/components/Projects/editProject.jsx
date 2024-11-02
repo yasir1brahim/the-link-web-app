@@ -26,11 +26,11 @@ const EditProject = ({
   console.log("project", project)
 
   const typeaheadRef = useRef(null);
-  const [projectName, setProjectName] = useState({ value: "", errors: "" });
-  const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
-  const [projectType, setProjectType] = useState({ value: "", label: "" });
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [projectName, setProjectName] = useState({ value: project?.name || "", errors: "" });
+  const [projectNumber, setProjectNumber] = useState({ value: project?.project_number || "", errors: "" });
+  const [projectType, setProjectType] = useState([{ value: project?.project_type || "", label: project?.project_type || "" }]);
+  const [startDate, setStartDate] = useState(project?.start_date || "");
+  const [endDate, setEndDate] = useState(project?.end_date || "");
 
   const [fullEmployeeList, setFullEmployeeList] = useState([]);
   const [selectedStandardMembersList, setSelectedStandardMembersList] = useState([]);
@@ -41,19 +41,13 @@ const EditProject = ({
     if (!modal) {
       setProjectName({ value: "", errors: "" });
       setProjectNumber({ value: "", errors: "" });
-      setProjectType({ value: "", label: "" });
+      setProjectType([{ value: "", label: "" }]);
       typeaheadRef?.current?.clear();
       setStartDate("");
       setEndDate("");
       setFullEmployeeList([]);
       setSelectedStandardMembersList([]);
       setSelectedAdminMembersList([]);
-    } else if (project) {
-      setProjectName({ value: project?.name || "", errors: "" });
-      setProjectNumber({ value: project?.project_number || "", errors: "" });
-      setProjectType({ value: project?.project_type || "", label: project?.project_type || "" });
-      setStartDate(project?.start_date || "");
-      setEndDate(project?.end_date || "");
     }
   }, [modal, project, typeaheadRef]);
 
@@ -108,8 +102,6 @@ const EditProject = ({
 
   const handleSubmit = async () => {
     let errors = validate();
-    console.log("projectType.label", projectType.label)
-    console.log("projectType", projectType)
     if (!errors) {
       try {
         const response = await updateProject(

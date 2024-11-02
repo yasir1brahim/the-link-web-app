@@ -46,6 +46,7 @@ const SelectDropdown = ({ ...props }) => {
         id={`select-dropdown${props.label.replace(/\s+/g, '')}`}
         ref={typeaheadRef}
         onChange={(e) => {
+          console.log("e", e)
           props.setSelected(e);
           if (props.onChange) {
             props.onChange(e[0]);
@@ -55,7 +56,6 @@ const SelectDropdown = ({ ...props }) => {
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         onInputChange={(e) => {
-          props.setSelected({});
           props.setSearchValue && props.setSearchValue(e);
         }}
         options={props.options}
