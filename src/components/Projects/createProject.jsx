@@ -8,6 +8,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   const typeaheadRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
+  const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -18,6 +19,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   useEffect(() => {
     if (!modal) {
       setProjectName({ value: "", errors: "" });
+      setProjectNumber({ value: "", errors: "" });
       typeaheadRef?.current?.clear();
       setStartDate("");
       setEndDate("");
@@ -66,6 +68,10 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       setProjectName({ ...projectName, errors: "Project Name is required." });
       error = true;
     }
+    if (projectNumber.value === "") {
+      setProjectNumber({ ...projectNumber, errors: "Project Number is required." });
+      error = true;
+    }
     if (projects?.find((item) => item?.project_name === projectName?.value)) {
       setProjectName({
         ...projectName,
@@ -92,6 +98,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       try {
         const response = await createProject(
           projectName.value,
+          projectNumber.value,
           customer?.customer_id || customerID,
           selectedStandardMembersList.map((emp) => emp.value),
           selectedAdminMembersList.map((emp) => emp.value),
@@ -115,6 +122,8 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       project={null}
       setProjectName={setProjectName}
       projectName={projectName}
+      setProjectNumber={setProjectNumber}
+      projectNumber={projectNumber}
       fullEmployeeList={fullEmployeeList}
       selectedAdminMembersList={selectedAdminMembersList}
       setSelectedAdminMembersList={setSelectedAdminMembersList}
