@@ -26,8 +26,9 @@ const EditProject = ({
   console.log("project", project)
 
   const typeaheadRef = useRef(null);
-  const [projectName, setProjectName] = useState({ value: project?.name || "", errors: "" });
-  const [projectNumber, setProjectNumber] = useState({ value: project?.project_number || "", errors: "" });
+  const [projectName, setProjectName] = useState({ value: "", errors: "" });
+  const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
+  const [projectType, setProjectType] = useState({ value: "", label: "" });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -40,14 +41,21 @@ const EditProject = ({
     if (!modal) {
       setProjectName({ value: "", errors: "" });
       setProjectNumber({ value: "", errors: "" });
+      setProjectType({ value: "", label: "" });
       typeaheadRef?.current?.clear();
       setStartDate("");
       setEndDate("");
       setFullEmployeeList([]);
       setSelectedStandardMembersList([]);
       setSelectedAdminMembersList([]);
+    } else if (project) {
+      setProjectName({ value: project?.name || "", errors: "" });
+      setProjectNumber({ value: project?.project_number || "", errors: "" });
+      setProjectType({ value: project?.project_type || "", label: project?.project_type || "" });
+      setStartDate(project?.start_date || "");
+      setEndDate(project?.end_date || "");
     }
-  }, [modal, typeaheadRef]);
+  }, [modal, project, typeaheadRef]);
 
 
   useEffect(() => {
@@ -100,12 +108,15 @@ const EditProject = ({
 
   const handleSubmit = async () => {
     let errors = validate();
+    console.log("projectType.label", projectType.label)
+    console.log("projectType", projectType)
     if (!errors) {
       try {
         const response = await updateProject(
           project?.id,
-          projectName.value || project?.project_name, 
+          projectName.value || project?.name, 
           projectNumber.value || project?.project_number,
+          projectType[0].label || project?.project_type,
           selectedStandardMembersList.map((emp) => emp.value), 
           selectedAdminMembersList.map((emp) => emp.value), 
           startDate, 
@@ -126,11 +137,12 @@ const EditProject = ({
 
   return (
     <BaseProjectForm
-      project={project}
       setProjectName={setProjectName}
       projectName={projectName}
       setProjectNumber={setProjectNumber}
       projectNumber={projectNumber}
+      projectType={projectType}
+      setProjectType={setProjectType}
       fullEmployeeList={fullEmployeeList}
       selectedAdminMembersList={selectedAdminMembersList}
       setSelectedAdminMembersList={setSelectedAdminMembersList}

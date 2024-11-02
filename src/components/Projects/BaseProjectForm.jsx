@@ -2,15 +2,18 @@ import { ToastContainer } from "react-toastify";
 import UserSelector from "./UserSelector";
 import DateSelector from "../shared/DateSelector/DateSelector";
 import "react-bootstrap-typeahead/css/Typeahead.css";
+import { PROJECT_TYPES } from "../../constants";
+import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { CircularProgress } from "@mui/material";
 
 const BaseProjectForm = ({
-    project,
     setProjectName,
     projectName,
     setProjectNumber,
     projectNumber,
+    projectType,
+    setProjectType,
     fullEmployeeList,
     selectedAdminMembersList,
     setSelectedAdminMembersList,
@@ -68,7 +71,7 @@ const BaseProjectForm = ({
                                         id="customerProjectName"
                                         aria-describedby="customerProjectName"
                                         placeholder="Enter"
-                                        defaultValue={project?.name}
+                                        defaultValue={projectName?.value}
                                         onChange={(e) => {
                                         setProjectName({
                                             ...projectName,
@@ -92,7 +95,7 @@ const BaseProjectForm = ({
                                         id="customerProjectNumber"
                                         aria-describedby="customerProjectNumber"
                                         placeholder="Enter"
-                                        defaultValue={project?.project_number}
+                                        defaultValue={projectNumber?.value}
                                         onChange={(e) => {
                                         setProjectNumber({
                                             ...projectNumber,
@@ -111,46 +114,50 @@ const BaseProjectForm = ({
                                 </div>
                             </div>
                             <div style={{ gap: "25px" }} className="d-flex">
-                            <div className="form-group">
-                                <DateSelector
-                                isClearable={false}
-                                placeholderText="Start Date"
-                                labelText="Start Date"
-                                onChange={setStartDate}
-                                // selected={
-                                //   project.start_date
-                                //     ? moment(project.start_date, 'DD-MM-YYYY')
-                                //     : null
-                                // }
-                                selected={
-                                    startDate
-                                    ? startDate
-                                    : project?.start_date
-                                    ? new Date((project?.start_date).replaceAll("-", "/"))
-                                    : ""
-                                }
-                                />
+                                <div className="form-group">
+                                    <DateSelector
+                                    isClearable={false}
+                                    placeholderText="Start Date"
+                                    labelText="Start Date"
+                                    onChange={setStartDate}
+                                    selected={
+                                        startDate
+                                        ? startDate
+                                        : ""
+                                    }
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <DateSelector
+                                    isClearable={false}
+                                    placeholderText="End Date"
+                                    labelText="End Date"
+                                    onChange={setEndDate}
+                                    selected={
+                                        endDate
+                                        ? endDate
+                                        : ""
+                                    }
+                                    />
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <DateSelector
-                                isClearable={false}
-                                placeholderText="End Date"
-                                labelText="End Date"
-                                onChange={setEndDate}
-                                // selected={
-                                //   project.end_date
-                                //     ? moment(project.end_date, 'DD-MM-YYYY')
-                                //     : null
-                                // }
-                                selected={
-                                    endDate
-                                    ? endDate
-                                    : project?.end_date
-                                    ? new Date((project?.end_date).replaceAll("-", "/"))
-                                    : ""
-                                }
-                                />
-                            </div>
+                            <div style={{ gap: "25px" }} className="d-flex">
+                                <div className="form-group">
+                                    <SelectDropdown
+                                    label={'Project Type'}
+                                    setSelected={setProjectType}
+                                    multiple={false}
+                                    options={PROJECT_TYPES.map((project_type) => {
+                                        return {
+                                            value: project_type?.name,
+                                            label: project_type?.name,
+                                        };
+                                    })}
+                                    className="form-control"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                </div>
                             </div>
                             <h6>Project Admins</h6>
                             <UserSelector selectedUsers={selectedAdminMembersList} setSelectedUsers={setSelectedAdminMembersList} employeeList={fullEmployeeList} isLoading={isLoading} placeholderText={"Add Project Admins"} />

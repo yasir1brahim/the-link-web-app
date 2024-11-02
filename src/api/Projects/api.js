@@ -26,13 +26,16 @@ const getProjectDetails = async (projectId) => {
     }
 }
 
-const updateProject = async (projectId, projectName, projectNumber, listOfMemberUserIds, listOfAdminUserIds, startDate, endDate) => {
+const updateProject = async (projectId, projectName, projectNumber, projectType, listOfMemberUserIds, listOfAdminUserIds, startDate, endDate) => {
     const payload = {}
     if (projectName) {
         payload.name = projectName
     }
     if (projectNumber) {
         payload.project_number = projectNumber
+    }
+    if (projectType) {
+        payload.project_type = projectType
     }
     if (listOfMemberUserIds) {
         payload.members = listOfMemberUserIds.map((emp_id) => {
@@ -56,6 +59,7 @@ const updateProject = async (projectId, projectName, projectNumber, listOfMember
     if (endDate) {
         payload.end_date = moment(endDate).format("YYYY-MM-DD")
     }
+    console.log("project update payload", payload)
     try {
         return await axiosInstance({
             method: 'patch',
@@ -67,10 +71,11 @@ const updateProject = async (projectId, projectName, projectNumber, listOfMember
     }
 }
 
-const createProject = async (projectName, projectNumber, teamId, listOfMemberUserIds, listOfAdminUserIds, startDate, endDate) => {
+const createProject = async (projectName, projectNumber, projectType, teamId, listOfMemberUserIds, listOfAdminUserIds, startDate, endDate) => {
     const payload = {}
     payload.name = projectName
     payload.project_number = projectNumber
+    payload.project_type = projectType
     payload.team = teamId
     if (listOfMemberUserIds) {
         payload.members = listOfMemberUserIds.map((emp_id) => {
