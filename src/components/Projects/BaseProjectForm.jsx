@@ -9,6 +9,8 @@ const BaseProjectForm = ({
     project,
     setProjectName,
     projectName,
+    setProjectNumber,
+    projectNumber,
     fullEmployeeList,
     selectedAdminMembersList,
     setSelectedAdminMembersList,
@@ -58,24 +60,55 @@ const BaseProjectForm = ({
                     <form className="create-project-form">
                     
                         <div className="create-project-content">
-                            <div className="form-group">
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="customerProjectName"
-                                aria-describedby="customerProjectName"
-                                placeholder="Enter"
-                                defaultValue={project?.name}
-                                onChange={(e) => {
-                                setProjectName({
-                                    ...projectName,
-                                    value: e.target.value,
-                                });
-                                }}
-                            />
-                            <label className="text-label" htmlFor="customerProjectName">
-                                Project Name
-                            </label>
+                            <div style={{ gap: "25px" }} className="d-flex">
+                                <div className="form-group">
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="customerProjectName"
+                                        aria-describedby="customerProjectName"
+                                        placeholder="Enter"
+                                        defaultValue={project?.name}
+                                        onChange={(e) => {
+                                        setProjectName({
+                                            ...projectName,
+                                            value: e.target.value,
+                                        });
+                                        }}
+                                    />
+                                    <label className="text-label" htmlFor="customerProjectName">
+                                        Project Name*
+                                    </label>
+                                    {projectName.errors && (
+                                        <small className="form-error" style={{ color: "red" }}>
+                                            {projectName.errors}
+                                        </small>
+                                    )}
+                                </div>
+                                <div className="form-group">
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="customerProjectNumber"
+                                        aria-describedby="customerProjectNumber"
+                                        placeholder="Enter"
+                                        defaultValue={project?.project_number}
+                                        onChange={(e) => {
+                                        setProjectNumber({
+                                            ...projectNumber,
+                                            value: e.target.value,
+                                        });
+                                        }}
+                                    />
+                                    <label className="text-label" htmlFor="customerProjectNumber">
+                                        Project Number*
+                                    </label>
+                                    {projectNumber.errors && (
+                                        <small className="form-error" style={{ color: "red" }}>
+                                            {projectNumber.errors}
+                                        </small>
+                                    )}
+                                </div>
                             </div>
                             <div style={{ gap: "25px" }} className="d-flex">
                             <div className="form-group">
@@ -124,6 +157,9 @@ const BaseProjectForm = ({
 
                             <h6>Project Members</h6>
                             <UserSelector selectedUsers={selectedStandardMembersList} setSelectedUsers={setSelectedStandardMembersList} employeeList={fullEmployeeList} isLoading={isLoading} placeholderText={"Add Project Members"} />
+                        </div>
+                        <div style={{ margin: "10px", fontSize: "14px", color: "#374151" }}>
+                            * required field
                         </div>
                         <div className="lproject-footer">
                             <button
