@@ -28,8 +28,9 @@ const EditProject = ({
   const typeaheadRef = useRef(null);
   const [projectName, setProjectName] = useState({ value: project?.name || "", errors: "" });
   const [projectNumber, setProjectNumber] = useState({ value: project?.project_number || "", errors: "" });
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [projectType, setProjectType] = useState([{ value: project?.project_type || "", label: project?.project_type || "" }]);
+  const [startDate, setStartDate] = useState(project?.start_date || "");
+  const [endDate, setEndDate] = useState(project?.end_date || "");
 
   const [fullEmployeeList, setFullEmployeeList] = useState([]);
   const [selectedStandardMembersList, setSelectedStandardMembersList] = useState([]);
@@ -40,6 +41,7 @@ const EditProject = ({
     if (!modal) {
       setProjectName({ value: "", errors: "" });
       setProjectNumber({ value: "", errors: "" });
+      setProjectType([{ value: "", label: "" }]);
       typeaheadRef?.current?.clear();
       setStartDate("");
       setEndDate("");
@@ -47,7 +49,7 @@ const EditProject = ({
       setSelectedStandardMembersList([]);
       setSelectedAdminMembersList([]);
     }
-  }, [modal, typeaheadRef]);
+  }, [modal, project, typeaheadRef]);
 
 
   useEffect(() => {
@@ -104,8 +106,9 @@ const EditProject = ({
       try {
         const response = await updateProject(
           project?.id,
-          projectName.value || project?.project_name, 
+          projectName.value || project?.name, 
           projectNumber.value || project?.project_number,
+          projectType[0].label || project?.project_type,
           selectedStandardMembersList.map((emp) => emp.value), 
           selectedAdminMembersList.map((emp) => emp.value), 
           startDate, 
@@ -126,11 +129,12 @@ const EditProject = ({
 
   return (
     <BaseProjectForm
-      project={project}
       setProjectName={setProjectName}
       projectName={projectName}
       setProjectNumber={setProjectNumber}
       projectNumber={projectNumber}
+      projectType={projectType}
+      setProjectType={setProjectType}
       fullEmployeeList={fullEmployeeList}
       selectedAdminMembersList={selectedAdminMembersList}
       setSelectedAdminMembersList={setSelectedAdminMembersList}

@@ -9,6 +9,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   const [isLoading, setIsLoading] = useState(false);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
   const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
+  const [projectType, setProjectType] = useState({ value: "", label: "" });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -20,6 +21,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
     if (!modal) {
       setProjectName({ value: "", errors: "" });
       setProjectNumber({ value: "", errors: "" });
+      setProjectType({ value: "", label: "" });
       typeaheadRef?.current?.clear();
       setStartDate("");
       setEndDate("");
@@ -99,6 +101,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
         const response = await createProject(
           projectName.value,
           projectNumber.value,
+          projectType.value,
           customer?.customer_id || customerID,
           selectedStandardMembersList.map((emp) => emp.value),
           selectedAdminMembersList.map((emp) => emp.value),
@@ -119,11 +122,12 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
 
   return (
     <BaseProjectForm
-      project={null}
       setProjectName={setProjectName}
       projectName={projectName}
       setProjectNumber={setProjectNumber}
       projectNumber={projectNumber}
+      setProjectType={setProjectType}
+      projectType={projectType}
       fullEmployeeList={fullEmployeeList}
       selectedAdminMembersList={selectedAdminMembersList}
       setSelectedAdminMembersList={setSelectedAdminMembersList}

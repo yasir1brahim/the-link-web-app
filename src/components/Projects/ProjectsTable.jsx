@@ -54,7 +54,7 @@ const ProjectsTable = ({
   const [editTooltip, setEditTooltip] = useState(null);
   const [archiveTooltip, setArchiveTooltip] = useState(null);
   const [restoreTooltip, setRestoreTooltip] = useState(null);
-  const [project, setProject] = useState({});
+  const [activeProject, setActiveProject] = useState({});
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setLoading] = useState(false);
@@ -64,7 +64,7 @@ const ProjectsTable = ({
 
 
   const handleEdit = (project) => {
-    setProject(project);
+    setActiveProject(project);
     toggleEditModal();
   };
 
@@ -281,7 +281,7 @@ const ProjectsTable = ({
                   <th>Action</th>
                 </tr>
               </thead>
-              {project ? (
+              {activeProject ? (
                 <tbody>
                   {currentItems.map((project, index) => {
                     return (
@@ -501,23 +501,27 @@ const ProjectsTable = ({
             pageRefresh={pageRefresh}
             setPageRefresh={setPageRefresh}
           />
-          <CreateProject
-            modal={createProjectModal}
-            toggleModal={toggleCreateProjectModal}
-            customer={state || customerData}
-            pageRefresh={pageRefresh}
-            setPageRefresh={setPageRefresh}
-            customerID={customerId}
-          />
-          <EditProject
-            modal={editModal}
-            toggleModal={toggleEditModal}
-            customer={state || customerData}
-            project={project}
-            pageRefresh={pageRefresh}
-            setPageRefresh={setPageRefresh}
-            customerID={customerId}
-          />
+          {createProjectModal && (
+            <CreateProject
+              modal={createProjectModal}
+              toggleModal={toggleCreateProjectModal}
+              customer={state || customerData}
+              pageRefresh={pageRefresh}
+              setPageRefresh={setPageRefresh}
+              customerID={customerId}
+            />
+          )}
+          {editModal && (
+            <EditProject
+              modal={editModal}
+              toggleModal={toggleEditModal}
+              customer={state || customerData}
+              project={activeProject}
+              pageRefresh={pageRefresh}
+              setPageRefresh={setPageRefresh}
+              customerID={customerId}
+            />
+          )}
       <Loader showComponentLoader={isLoading} />
 
       <ArchiveProjectModal
