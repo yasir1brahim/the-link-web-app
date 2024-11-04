@@ -82,52 +82,45 @@ const ProjectsTable = ({
     }
   };
 
-  const handleArchiveProject = async () => {
-    let errors = false;
-    if (!errors) {
-        try {
-            const response = await toggleArchiveProject(archiveProject.id);
-            
-            if (response?.data) {
-                console.log('Project archived successfully:', response.data);
-                
-                // Refresh the page or project data as needed
-                setPageRefresh(!pageRefresh);
-                
-                // Close the archive project modal
-                toggleArchiveProjectModal();
-            } else {
-                console.log('Failed to archive/unarchive project');
-            }
-        } catch (error) {
-            console.error('Error while toggling project archive status:', error);
-            handleError(error);
-        }
-    }
+const handleArchiveProject = async () => {
+  let errors = false;
+  if (!errors) {
+      try {
+          const response = await toggleArchiveProject(archiveProject.id, 'archive');
+          
+          if (response?.data) {
+              console.log('Project archived successfully:', response.data);
+              
+              setPageRefresh(!pageRefresh);
+              toggleArchiveProjectModal();
+          } else {
+              console.log('Failed to archive/unarchive project');
+          }
+      } catch (error) {
+          console.error('Error while toggling project archive status:', error);
+          handleError(error);
+      }
+  }
 };
 
-  const handleRestoreProject = async () => {
-    let errors = false;
-    if (!errors) {
-        try {
-            const response = await toggleArchiveProject(restoreProject.id);
+const handleRestoreProject = async () => {
+  let errors = false;
+  if (!errors) {
+      try {
+          const response = await toggleArchiveProject(restoreProject.id, 'restore');
 
-            if (response?.data) {
-                console.log('Project restored successfully:', response.data);
-
-                // Refresh the page or project data as needed
-                setPageRefresh(!pageRefresh);
-
-                // Close the restore project modal
-                toggleRestoreProjectModal();
-            } else {
-                console.log('Failed to restore project');
-            }
-        } catch (error) {
-            console.error('Error while restoring project:', error);
-            handleError(error);
-        }
-    }
+          if (response?.data) {
+              console.log('Project restored successfully:', response.data);
+              setPageRefresh(!pageRefresh);
+              toggleRestoreProjectModal();
+          } else {
+              console.log('Failed to restore project');
+          }
+      } catch (error) {
+          console.error('Error while restoring project:', error);
+          handleError(error);
+      }
+  }
 };
 
   const generateInitials = (name) => {
@@ -292,7 +285,7 @@ const ProjectsTable = ({
                                 </svg>
                               )}
                             </span>
-                            <p className="content">{project.status === "open" ? "Open" : "Closed"}</p>
+                            <p className="content">{project.status === "open" ? "Open" : "Archived"}</p>
                           </div>{" "}
                         </td>
                         <td>

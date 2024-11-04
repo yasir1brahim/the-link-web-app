@@ -53,32 +53,30 @@ const ProjectsPage = () => {
     );
   };
 
-  useEffect(() => {
-    let isMounted = true; // Track component mounted state
-    
-    const fetchData = async () => {
-      try {
+  const fetchData = async () => {
+    try {
         const response = await listProjects(teamId);
         
-        // Check if response.data is structured as expected
         const dataToSet = isArchived 
-        ? response.data.results.filter(project => project.is_archived === true) 
-        : response.data.results.filter(project => project.is_archived === false) || [];
-          
-        if (isMounted) { // Only update state if component is still mounted
-          setProjectData(dataToSet);
-        }
-      } catch (error) {
-        handleError(error); // Handle error appropriately
-      }
-    };
-  
-    fetchData();
-  
-    return () => {
-      isMounted = false; // Cleanup function sets isMounted to false
-    };
-  }, [state, pageRefresh, isArchived, roleId, customerId]);
+            ? response.data.results.filter(project => project.is_archived === true) 
+            : response.data.results.filter(project => project.is_archived === false) || [];
+            
+        setProjectData(dataToSet);
+    } catch (error) {
+        handleError(error);
+    }
+};
+
+
+useEffect(() => {
+  let isMounted = true;
+
+  fetchData(); 
+
+  return () => {
+      isMounted = false;
+  };
+}, [state, pageRefresh, isArchived, roleId, customerId]);
 
   return (
     <>
