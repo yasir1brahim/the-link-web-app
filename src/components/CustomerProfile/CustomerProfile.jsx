@@ -19,8 +19,7 @@ import handleError from '../../config/errorHandler';
 import { get } from 'lodash';
 import Procore from '../ProjectLogs/procore';
 import Loader from '../shared/Loader/Loader';
-import { getTeamDetails, getUserRoleInTeam } from '../../api/Authentication/api';
-
+import { getTeamDetails, getUserRoleInTeam, updateTeamDetails, uploadTeamLogo } from '../../api/Authentication/api';
 
 const CustomerProfile = (props) => {
   const [currentUserRole, setCurrentUserRole] = useState('member');
@@ -39,7 +38,7 @@ const CustomerProfile = (props) => {
     value: undefined,
     errors: ''
   });
-  const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
+
   const [employee, setEmployee] = useState({});
   const [customerData, setCustomerData] = useState({});
   const [currentItems, setCurrentItems] = useState([]);
@@ -51,6 +50,13 @@ const CustomerProfile = (props) => {
   const [searchParams] = useSearchParams();
   const customerId = searchParams.get('id');
   const authCode = searchParams.get('code');
+  const [email, setEmail] = useState({ value: '', errors: '' });
+  const [accountOwnerName, setAccountOwnerName] = useState({ value: '', errors: '' });
+  const [address, setAddress] = useState({ value: '', errors: '' });
+  const [profilePicture, setProfilePicture] = useState({ value: '', errors: '' });
+  const [accountId, setAccountID] = useState({ value: '', errors: '' });
+  const [phone, setPhone] = useState({ value: '', errors: '' })
+  const [teamId, setTeamId] = useState('');
 
   const redirectUri = window.location.href.includes('https://app.thelink.ai')
     ? `https://app.thelink.ai/customer-profile?id=${customerId}`
@@ -110,21 +116,98 @@ const CustomerProfile = (props) => {
     }
   }, [authCode, customerId, navigate, redirectUri]);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = async (
+    customerId,
+    setCustomerData,
+    setEmployeeData,
+    setTeamId,
+    setCompanyName,
+    setEmail,
+    setAccountOwnerName,
+    setAddress,
+    setProfilePicture,
+    setAccountID,
+    setPhone,
+    setCurrentUserRole,
+    handleError
+  ) => {
+    let isMounted = true;
+    try {
       const response = await getTeamDetails(customerId);
 
-      setCustomerData(response.data);
-      setEmployeeData(response.data.members);
-      console.log('customerData', response.data);
-      const userRole = await getUserRoleInTeam(localStorage.getItem('userId'), customerId);
-      console.log('userRole', userRole);
-      setCurrentUserRole(userRole);
-    };
+      if (isMounted) {
+        setCustomerData(response.data);
+        setEmployeeData(response.data.members);
+        console.log('customerData', response.data);
+        setTeamId(response.data.id);
 
-    fetchData().catch((error) => {
+        // Profile data
+        setCompanyName((prevState) => ({
+          ...prevState,
+          value: response.data.name
+        }));
+        setEmail((prevState) => ({
+          ...prevState,
+          value: response.data.profile.email_id
+        }));
+        setAccountOwnerName((prevState) => ({
+          ...prevState,
+          value: response.data.profile.account_owner_name
+        }));
+        setAddress((prevState) => ({
+          ...prevState,
+          value: response.data.profile.address
+        }));
+        setProfilePicture((prevState) => ({
+          ...prevState,
+          value: response.data.legacy_logo_url
+        }));
+        setAccountID((prevState) => ({
+          ...prevState,
+          value: response.data.profile.account_id
+        }));
+        setPhone((prevState) => ({
+          ...prevState,
+          value: response.data.profile.phone
+        }));
+
+        const userRole = await getUserRoleInTeam(
+          localStorage.getItem('userId'),
+          customerId
+        );
+        console.log('userRole', userRole);
+
+        if (isMounted) {
+          setCurrentUserRole(userRole);
+        }
+      }
+    } catch (error) {
       handleError(error);
-    });
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  };
+
+  useEffect(() => {
+    const cleanup = fetchData(
+      customerId,
+      setCustomerData,
+      setEmployeeData,
+      setTeamId,
+      setCompanyName,
+      setEmail,
+      setAccountOwnerName,
+      setAddress,
+      setProfilePicture,
+      setAccountID,
+      setPhone,
+      setCurrentUserRole,
+      handleError
+    );
+  
+    return cleanup;
   }, [pageRefresh, customerId]);
 
 
@@ -161,6 +244,65 @@ const CustomerProfile = (props) => {
     toggleEditModal();
   };
 
+  const handleSubmit = async () => {
+    const data = {
+      profile: {
+        account_owner_name: accountOwnerName.value,
+        email_id: email.value,
+        address: address.value,
+        phone: phone.value,
+      },
+      name: companyName.value,
+      legacy_logo_url: profilePicture.value,
+    };
+  
+    try {
+      const response = await updateTeamDetails(teamId, data);
+      console.log("Team updated successfully:", response);
+      toggleEditProfile()
+    } catch (error) {
+      console.error("Failed to save team details:", error);
+      toggleEditProfile()
+    }
+  };
+
+  const handleContactNumberChange = (e) => {
+    const input = e.target.value;
+    const sanitizedValue = input.replace(/[^0-9]/g, ''); 
+
+    setPhone((prev) => ({
+      ...prev,
+      value: input,
+      sanitizedValue: sanitizedValue
+    }));
+  };
+
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    
+    if (!file) {
+      console.error('No file selected');
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append('file', file);
+  
+    try {
+      const response = await uploadTeamLogo(teamId, formData);
+      const { file_url } = response.data;
+  
+      setProfilePicture((prevProfile) => ({
+        ...prevProfile,
+        value: file_url,
+      }));
+  
+      console.log('Logo uploaded successfully:', file_url);
+    } catch (error) {
+      console.error('Error uploading logo:', error.response?.data || error.message);
+    }
+  };
   
   return (
     <div className="page-wrap">
@@ -169,6 +311,274 @@ const CustomerProfile = (props) => {
         <Header title={customerData.name} breadcrumb={'Customer Details'} />
 
         <div className="customer-profile-content">
+          <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
+            {!editProfile ? (
+              <>
+                <div className="customer-dp-container">
+                  <img src={profilePicture.value} alt="Company Logo" />
+                </div>
+                <div className="customer-profile">
+                  <div className="row">
+                    <div className="col-6">
+                      <div className="text-label-value">
+                        <div className="text-label">Company Name: </div>
+                        <div className="text-value">{companyName.value}</div>
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="text-label-value">
+                        <div className="text-label">Account ID: </div>
+                        <div className="text-value">
+                          {accountId.value}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="text-label-value">
+                        <div className="text-label">Account Owner: </div>
+                        <div className="text-value">
+                          {accountOwnerName.value}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="text-label-value">
+                        <div className="text-label">Password: </div>
+                        <div className="text-value">**********</div>
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="text-label-value">
+                        <div className="text-label">Email ID: </div>
+                        <div className="text-value">
+                          {email.value}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="text-label-value">
+                        <div className="text-label">Phone: </div>
+                        <div className="text-value">
+                          {phone.value}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="text-label-value">
+                        <div className="text-label">Address: </div>
+                        <div className="text-value">
+                          {address.value}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="customer-edit-container">
+                  <button
+                    type="button"
+                    onClick={toggleEditProfile}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </>
+            ) : (
+              <form className="edit-customer-form w-100">
+                <div className="edit-customer-content">
+                  <div className="ec-left">
+                    <div className="upload-documents">
+                      <div className="image-holder">
+                        <img
+                          src={
+                            profilePicture.value
+                              ? typeof profilePicture.value === 'string'
+                                ? profilePicture.value
+                                : URL.createObjectURL(profilePicture.value)
+                              : ProfilePhoto
+                          }
+                          alt="Profile"
+                          className="dummy-image"
+                        />
+                      </div>
+                      <div className="select-File">
+                        <input
+                          className="d-none"
+                          type="file"
+                          name="files[]"
+                          id="uploadDocs"
+                          onChange={handleFileChange}
+                        />
+                        <label htmlFor="uploadDocs">
+                          <div className="upload-text d-flex align-items-center justify-content-center">
+                            <Camera />
+                            <span>Upload Logo</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="ec-right">
+                    <div className="row">
+                      <div className="col-4">
+                        <div className="form-group">
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="companyName"
+                            aria-describedby="companyName"
+                            placeholder="Enter"
+                            required
+                            defaultValue={customerData.name}
+                            onChange={(e) =>
+                              setCompanyName((prev) => ({
+                                ...prev,
+                                value: e.target.value
+                              }))
+                            }
+                          />
+                          <label className="text-label" htmlFor="companyName">
+                            Company Name
+                          </label>
+                          {companyName.errors && (
+                            <small
+                              className="form-error"
+                              style={{ color: 'red' }}
+                            >
+                              {companyName.errors}
+                            </small>
+                          )}
+                        </div>
+                      </div>
+                      <div className="col-4">
+                        <div className="form-group">
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="accountId"
+                            aria-describedby="accountId"
+                            placeholder="Enter"
+                            required
+                            disabled
+                            value={accountId.value}
+                          />
+                          <label className="text-label" htmlFor="accountId">
+                            Account Id
+                          </label>
+                        </div>
+                      </div>
+                      <div className="col-4">
+                        <div className="form-group">
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="accountOwner"
+                            aria-describedby="accountOwner"
+                            placeholder="Enter"
+                            required
+                            defaultValue={accountOwnerName.value}
+                            onChange={(e) =>
+                              setAccountOwnerName((prev) => ({
+                                ...prev,
+                                value: e.target.value
+                              }))
+                            }
+                          />
+                          <label className="text-label" htmlFor="accountOwner">
+                            Account Owner
+                          </label>
+                        </div>
+                      </div>
+                      <div className="col-4">
+                        <div className="form-group">
+                          <input
+                            type="email"
+                            className="form-control"
+                            id="accountEmail"
+                            aria-describedby="accountEmail"
+                            placeholder="Enter"
+                            required
+                            defaultValue={email.value}
+                            onChange={(e) =>
+                              setEmail((prev) => ({
+                                ...prev,
+                                value: e.target.value
+                              }))
+                            }
+                          />
+                          <label className="text-label" htmlFor="accountEmail">
+                            Email Address
+                          </label>
+                        </div>
+                      </div>
+                      <div className="col-4">
+                        <div className="form-group">
+                          <MaskedInput
+                            defaultValue={phone.value}
+                            onChange={handleContactNumberChange}
+                            name="contactNumber"
+                            error={phone.errors}
+                            mask={[
+                              '(',
+                              /[1-9]/,
+                              /\d/,
+                              /\d/,
+                              ')',
+                              ' ',
+                              /\d/,
+                              /\d/,
+                              /\d/,
+                              '-',
+                              /\d/,
+                              /\d/,
+                              /\d/,
+                              /\d/
+                            ]}
+                            labelClass={'text-label'}
+                            label={'Phone'}
+                          />
+                        </div>
+                      </div>
+                      <div className="col-8">
+                        <div className="form-group">
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="accountAddress"
+                            aria-describedby="accountAddress"
+                            placeholder="Enter"
+                            required
+                            defaultValue={address.value}
+                            onChange={(e) =>
+                              setAddress((prev) => ({
+                                ...prev,
+                                value: e.target.value
+                              }))
+                            }
+                          />
+                          <label
+                            className="text-label"
+                            htmlFor="accountAddress"
+                          >
+                            Address
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="ec-footerbtns d-flex align-items-center justify-content-end">
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSubmit}
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
           <div className="customer-users-details">
             {employeeData.length === 0 ? (
               <>
@@ -276,36 +686,33 @@ const CustomerProfile = (props) => {
                     <tbody>
                       {currentItems.map((employee) => {
                         return (
-                          <tr>
+                          <tr key={employee.id}>
                             <td>{employee.display_name}</td>
                             <td>{employee.email}</td>
-                            <td>
-                              {roleDisplayMap[employee.role]}
-                            </td>
-                            {currentUserRole === 'admin' && <td>
-                              <div className="action-wrapper">
-                                <button
-                                  type="button"
-                                  className="btn btn-secondary btn-sm"
-                                  onClick={() => handleEdit(employee)}
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn btn-secondary btn-sm"
-                                  // onClick={() =>
-                                  //   handleDeleteEmployee(employee.emp_id)
-                                  // }
-                                  onClick={() => {
-                                    setEmpId(employee.emp_id);
-                                    toggleConfirmModal();
-                                  }}
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            </td>}
+                            <td>{roleDisplayMap[employee.role]}</td>
+                            {currentUserRole === 'admin' && (
+                              <td>
+                                <div className="action-wrapper">
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => handleEdit(employee)}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => {
+                                      setEmpId(employee.emp_id);
+                                      toggleConfirmModal();
+                                    }}
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </td>
+                            )}
                           </tr>
                         );
                       })}

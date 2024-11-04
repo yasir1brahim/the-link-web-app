@@ -136,12 +136,29 @@ const acceptInvitation = async (teamId, invitationId) => {
     });
 }
 
+const updateTeamDetails = async (teamId, data) => {
+    return await axiosInstance({
+        method: 'put',
+        url: `/teams/api/teams/${teamId}/`,
+        data
+    });
+}
+
+const uploadTeamLogo = async (teamId, formData) => {
+    return await axiosInstance({
+        method: 'post',
+        url: `/teams/api/teams/${teamId}/upload-logo/`,
+        data: formData
+    });
+}
+
 export {
     login, 
     getAuthTokenFromRefreshToken, 
     getCurrentUserData,
     getUserRoleInTeam,
-    getTeamDetails, 
+    getTeamDetails,
+    updateTeamDetails, 
     getUserTeams, 
     updateUserTeamMembership,
     sendInvitation, 
@@ -149,5 +166,6 @@ export {
     acceptInvitation,
     register,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    uploadTeamLogo,
 }
