@@ -10,8 +10,8 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
   const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
   const [projectType, setProjectType] = useState([{ value: "", label: "" }]);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const [fullEmployeeList, setFullEmployeeList] = useState([]);
   const [selectedStandardMembersList, setSelectedStandardMembersList] = useState([]);
@@ -23,8 +23,8 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       setProjectNumber({ value: "", errors: "" });
       setProjectType([{ value: "", label: "" }]);
       typeaheadRef?.current?.clear();
-      setStartDate("");
-      setEndDate("");
+      setStartDate(null);
+      setEndDate(null);
       setFullEmployeeList([]);
       setSelectedStandardMembersList([]);
       setSelectedAdminMembersList([]);

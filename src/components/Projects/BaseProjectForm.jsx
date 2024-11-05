@@ -121,7 +121,7 @@ const BaseProjectForm = ({
                                     labelText="Start Date"
                                     onChange={setStartDate}
                                     dateFormat="yyyy-MM-dd"
-                                    selected={startDate ? new Date(startDate + "T00:00:00") : ""}
+                                    selected={startDate ? new Date(startDate) : null}
                                     />
                                 </div>
                                 <div className="form-group">
@@ -131,9 +131,7 @@ const BaseProjectForm = ({
                                     labelText="End Date"
                                     onChange={setEndDate}
                                     dateFormat="yyyy-MM-dd"
-                                    selected={
-                                        endDate ? new Date(endDate + "T00:00:00") : ""
-                                    }
+                                    selected={endDate ? new Date(endDate) : null}
                                     />
                                 </div>
                             </div>
@@ -157,10 +155,27 @@ const BaseProjectForm = ({
                                 </div>
                             </div>
                             <h6>Project Admins</h6>
-                            <UserSelector selectedUsers={selectedAdminMembersList} setSelectedUsers={setSelectedAdminMembersList} employeeList={fullEmployeeList} isLoading={isLoading} placeholderText={"Add Project Admins"} />
+                            <UserSelector selectedUsers={selectedAdminMembersList}
+                                    setSelectedUsers={setSelectedAdminMembersList}
+                                    // Filter out employees already selected as members
+                                    employeeList={fullEmployeeList.filter(
+                                        employee => !selectedStandardMembersList.includes(employee)
+                                    )}
+                                    isLoading={isLoading}
+                                    placeholderText={"Add Project Admins"}
+                                />
 
                             <h6>Project Members</h6>
-                            <UserSelector selectedUsers={selectedStandardMembersList} setSelectedUsers={setSelectedStandardMembersList} employeeList={fullEmployeeList} isLoading={isLoading} placeholderText={"Add Project Members"} />
+                            <UserSelector
+                                selectedUsers={selectedStandardMembersList}
+                                setSelectedUsers={setSelectedStandardMembersList}
+                                // Filter out employees already selected as admins
+                                employeeList={fullEmployeeList.filter(
+                                    employee => !selectedAdminMembersList.includes(employee)
+                                )}
+                                isLoading={isLoading}
+                                placeholderText={"Add Project Members"}
+                            />
                         </div>
                         <div style={{ margin: "10px", fontSize: "14px", color: "#374151" }}>
                             * required field
