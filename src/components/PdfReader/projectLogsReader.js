@@ -188,7 +188,7 @@ const ProjectLogsReader = ({
       setLoading(true);
       const pdfViewer = document.createElement("div");
       pdfViewer.setAttribute("class", "full-window-div h-screen"); // Setting the class attribute
-      pdfViewer.style.height = "calc(100vh - 270px)";
+      pdfViewer.style.height = "calc(100vh - 240px)";
       pdfViewer.style.position = "relative";
 
       const viewer = document.getElementById("pdf-div").appendChild(pdfViewer);

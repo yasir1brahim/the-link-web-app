@@ -23,10 +23,17 @@
     }
     .title-wrap{
       margin: auto;
+      .title-label {
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 16px;
+        color: #676f74 !important;
+        text-align: start;
+      }
       .title-content{
-        font-size: 24px;
-        line-height: 22px;
-        font-weight: 600;
+        font-size: 16px;
+        line-height: 24px;
+        font-weight: 500;
         color: #f3f3f3;
         letter-spacing: -1%;
         margin-bottom: 0px;
@@ -98,7 +105,9 @@
             }
           }
           &.support {
-            margin-right: 25px;
+            margin-right: 16px;
+            padding-right: 16px;
+            border-right: 1px solid rgba(174, 184, 198, 0.25);
           }
         }
         .nav-dropdown {

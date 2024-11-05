@@ -57,6 +57,69 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.table-top-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background-color: #F4F7FB;
+  padding: 5px 10px;
+  color: #231F20;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;
+}
+.table-top-btn:hover {
+  background-color: #e0eaf7;
+}
+.selection-btn {
+  min-width: 154px!important;
+  justify-content: center;
+}
+.close-pdf-btn {
+  min-width: 90px;
+}
+.log-search {
+  position: relative;
+  display: flex;
+  .search-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 8px;
+    cursor: pointer;
+  }
+  .clear-icon {
+    padding: 2px;
+    cursor: pointer;
+  }
+  &-input {
+    height: 32px;
+    border-width: 0px 0px 2px 0px;
+    border-color: #e2e2e2;
+    outline: none !important;
+    border-radius: 3px 3px 0px 0px;
+    font-size: 14px;
+    color: #676f74;
+    background-color: #ffffff !important;
+    padding: 8px;
+    padding-left: 40px;
+    transition: all 0.3s ease;
+    &:focus {
+      border-color: $primary;
+    }
+  }
+}
+.search-disable {
+  height: 32px;
+  width: 40px;
+  float: right;
+  .search-icon {
+    background-color: #F4F7FB;
+    padding: 5px 6px;
+    border-radius: 4px;
+  }
+}
 .project-logs-wrapper {
   .project-logs-content {
     .project-logs {
@@ -67,24 +130,6 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        .table-top-btn {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          border: 1px solid #d1d5db;
-          box-shadow: 0px 1px 2px 0px #0000000d;
-          background-color: #f8f8fa;
-          padding: 5px 10px;
-          color: #0e2332;
-          font-size: 14px;
-          font-weight: 600;
-        }
-        .selection-btn {
-          min-width: 160px;
-        }
-        .close-pdf-btn {
-          min-width: 90px;
-        }
         .table-heading {
           display: flex;
           align-items: center;
@@ -113,37 +158,6 @@
           width: 1px;
           height: 14px;
           background-color: #e2e2e2;
-        }
-        .log-search {
-          position: relative;
-          display: flex;
-          .search-icon {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            left: 14px;
-            cursor: pointer;
-          }
-          .clear-icon {
-            padding: 8px;
-            cursor: pointer;
-          }
-          &-input {
-            height: 40px;
-            border-width: 0px 0px 2px 0px;
-            border-color: #e2e2e2;
-            outline: none !important;
-            border-radius: 3px 3px 0px 0px;
-            font-size: 14px;
-            color: #676f74;
-            background-color: #ffffff !important;
-            padding: 8px;
-            padding-left: 40px;
-            transition: all 0.3s ease;
-            &:focus {
-              border-color: $primary;
-            }
-          }
         }
       }
       .highlight-row {
