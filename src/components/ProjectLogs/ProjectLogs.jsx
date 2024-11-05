@@ -950,6 +950,7 @@ const ProjectLogs = () => {
             docParsed={docParsed}
             qaDashboard={state?.qaDashboard}
             navBtn={"logs"}
+            teamId={teamId}
           />
           <ProjectLogsHeader
             centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
