@@ -37,6 +37,8 @@ const NavbarTop = ({...props}) => {
     return initials.toUpperCase();
   }
 
+  const isOnProjectPage = window.location.pathname.includes('project-logs');
+
   const handleLogout = () => {
     localStorage.clear();
     setNavDrop(!navDrop);
@@ -69,8 +71,8 @@ const NavbarTop = ({...props}) => {
           </div>
           <div className='col-4 text-center d-flex justify-content-center'>
             <div className="title-wrap">
-              <div className="title-label">Project Name</div>
-              <h1 className="title-content">{props.projectTitle}</h1>
+              {isOnProjectPage && <div className="title-label">Project Name</div>}
+              {isOnProjectPage && <h1 className="title-content">{props.projectTitle}</h1>}
             </div>
           </div>
           <div className='col-4 d-flex justify-content-end'>
