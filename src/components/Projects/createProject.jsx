@@ -9,7 +9,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
   const [isLoading, setIsLoading] = useState(false);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
   const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
-  const [projectType, setProjectType] = useState({ value: "", label: "" });
+  const [projectType, setProjectType] = useState([{ value: "", label: "" }]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -21,7 +21,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
     if (!modal) {
       setProjectName({ value: "", errors: "" });
       setProjectNumber({ value: "", errors: "" });
-      setProjectType({ value: "", label: "" });
+      setProjectType([{ value: "", label: "" }]);
       typeaheadRef?.current?.clear();
       setStartDate("");
       setEndDate("");
@@ -101,7 +101,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
         const response = await createProject(
           projectName.value,
           projectNumber.value,
-          projectType.value,
+          projectType[0].value,
           customer?.customer_id || customerID,
           selectedStandardMembersList.map((emp) => emp.value),
           selectedAdminMembersList.map((emp) => emp.value),
