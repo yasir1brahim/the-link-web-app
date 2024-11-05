@@ -121,7 +121,7 @@ const BaseProjectForm = ({
                                     labelText="Start Date"
                                     onChange={setStartDate}
                                     dateFormat="yyyy-MM-dd"
-                                    selected={startDate ? new Date(startDate + "T00:00:00") : ""}
+                                    selected={startDate}
                                     />
                                 </div>
                                 <div className="form-group">
@@ -131,9 +131,7 @@ const BaseProjectForm = ({
                                     labelText="End Date"
                                     onChange={setEndDate}
                                     dateFormat="yyyy-MM-dd"
-                                    selected={
-                                        endDate ? new Date(endDate + "T00:00:00") : ""
-                                    }
+                                    selected={endDate}
                                     />
                                 </div>
                             </div>

@@ -29,8 +29,8 @@ const EditProject = ({
   const [projectName, setProjectName] = useState({ value: project?.name || "", errors: "" });
   const [projectNumber, setProjectNumber] = useState({ value: project?.project_number || "", errors: "" });
   const [projectType, setProjectType] = useState([{ value: project?.project_type || "", label: project?.project_type || "" }]);
-  const [startDate, setStartDate] = useState(project?.start_date || "");
-  const [endDate, setEndDate] = useState(project?.end_date || "");
+  const [startDate, setStartDate] = useState(project?.start_date ? new Date(project?.start_date + "T00:00:00") : new Date());
+  const [endDate, setEndDate] = useState(project?.end_date ? new Date(project?.end_date + "T00:00:00") : new Date());
 
   const [fullEmployeeList, setFullEmployeeList] = useState([]);
   const [selectedStandardMembersList, setSelectedStandardMembersList] = useState([]);
@@ -43,8 +43,8 @@ const EditProject = ({
       setProjectNumber({ value: "", errors: "" });
       setProjectType([{ value: "", label: "" }]);
       typeaheadRef?.current?.clear();
-      setStartDate("");
-      setEndDate("");
+      setStartDate(new Date());
+      setEndDate(new Date());
       setFullEmployeeList([]);
       setSelectedStandardMembersList([]);
       setSelectedAdminMembersList([]);
