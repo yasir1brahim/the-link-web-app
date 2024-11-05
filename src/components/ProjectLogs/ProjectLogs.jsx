@@ -169,6 +169,7 @@ const ProjectLogs = () => {
   const [isAssociatedUser, setIsAssociatedUser] = useState(true);
 
   const [userRole, setUserRole] = useState('');
+  const [teamId, setTeamId] = useState(null);
 
   const { user, isAuthenticated } = useContext(AuthContext);
 
@@ -234,6 +235,7 @@ const ProjectLogs = () => {
       setLoading(true);
       const response = await getProjectDetails(projectId);
       console.log('projectData', response.data);
+      setTeamId(response.data.team);
       setProjectName(response.data.name);
       setDocParsed(response.data.doc_parsed);
       setDocumentData(response.data.document_details);
@@ -933,7 +935,7 @@ const ProjectLogs = () => {
         <div className="project-logs-wrapper log-table-width">
           <ProjectLogsHeaderTop
             breadcrumb={"View Projects"}
-            breadcrumbUrl={`/project-list?id=${customerId}`}
+            breadcrumbUrl={`/project-list/${teamId}`}
             breadcrumb2={"Submittal Log"}
             showBtn={"Upload Documents"}
             toggleModal={toggleModal}
