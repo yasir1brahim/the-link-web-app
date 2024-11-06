@@ -175,7 +175,6 @@ const CustomerProfile = (props) => {
           localStorage.getItem('userId'),
           customerId
         );
-        console.log('userRole', userRole);
 
         if (isMounted) {
           setCurrentUserRole(userRole);
@@ -259,10 +258,10 @@ const CustomerProfile = (props) => {
     try {
       const response = await updateTeamDetails(teamId, data);
       console.log("Team updated successfully:", response);
-      toggleEditProfile()
     } catch (error) {
       console.error("Failed to save team details:", error);
-      toggleEditProfile()
+    } finally {
+      toggleEditProfile();
     }
   };
 
