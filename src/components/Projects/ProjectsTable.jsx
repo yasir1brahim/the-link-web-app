@@ -25,7 +25,7 @@ import { ArchiveProjectModal } from "./archiveProjectModal";
 import { Tooltip } from "reactstrap";
 import { RestoreProjectModal } from "./restoreProjectModal";
 import { RestoreIcon } from "../shared/icons/restoreIcon";
-import { toggleArchiveProject } from "../../api/Projects/api";
+import { toggleProjectStatus } from "../../api/Projects/api";
 
 const ProjectsTable = ({
   customerData,
@@ -86,7 +86,7 @@ const handleArchiveProject = async () => {
   let errors = false;
   if (!errors) {
       try {
-          const response = await toggleArchiveProject(archiveProject.id, 'archive');
+          const response = await toggleProjectStatus(archiveProject.id, 'archive');
           
           if (response?.data) {
               console.log('Project archived successfully:', response.data);
@@ -107,7 +107,7 @@ const handleRestoreProject = async () => {
   let errors = false;
   if (!errors) {
       try {
-          const response = await toggleArchiveProject(restoreProject.id, 'restore');
+          const response = await toggleProjectStatus(restoreProject.id, 'restore');
 
           if (response?.data) {
               console.log('Project restored successfully:', response.data);
