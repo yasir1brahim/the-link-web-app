@@ -11,12 +11,12 @@ const NotFoundPage = () => {
 
   return (
     <div className="not-found-container">
-      <h1 className="not-found-title">404</h1>
+      <h1 className="not-found-title">Page Not Found</h1>
       <p className="not-found-message">
-        Oops! The page you're looking for doesn't exist.
+        Unfortunately, the page you are trying to find is either no longer available or has moved.
       </p>
       <button className="back-home-button" onClick={handleBackToHome}>
-        BACK to Home PAGE
+        Back to Home Page
       </button>
     </div>
   );
