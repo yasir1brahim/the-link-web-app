@@ -23,13 +23,14 @@ import ProjectLogs from './components/ProjectLogs/ProjectLogs';
 import ProtectedRoute from './components/auth/protectedroute';
 import Companies from './components/Companies/Companies';
 import AcceptInvitation from './components/Authentication/AcceptInvitation';
+import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
       <Signin/>
     ),
-    errorElement: <ErrorPage />,
+    errorElement: <NotFoundPage />,
   },
   {
     path: "/login",
