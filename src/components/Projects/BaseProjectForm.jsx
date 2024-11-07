@@ -6,6 +6,7 @@ import { PROJECT_TYPES } from "../../constants";
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { CircularProgress } from "@mui/material";
+import { useEffect, useState } from 'react';
 
 const BaseProjectForm = ({
     setProjectName,
@@ -28,8 +29,34 @@ const BaseProjectForm = ({
     toggleModal,
     modal,
     typeaheadRef,
-    isLoading,
+    isLoading
 }) => {
+
+    const [filteredEmployeeListForAdmins, setFilteredEmployeeListForAdmins] = useState([]);
+    const [filteredEmployeeListForMembers, setFilteredEmployeeListForMembers] = useState([]);
+
+    useEffect(() => {
+        const selectedAdminValues = selectedAdminMembersList?.map(admin => admin.value) || [];
+        const selectedMemberValues = selectedStandardMembersList?.map(member => member.value) || [];
+
+        // Filter list for admin selection
+        const availableForAdmin = fullEmployeeList.filter(employee => {
+            const isNotAdmin = !selectedAdminValues.includes(employee.value);
+            const isNotMember = !selectedMemberValues.includes(employee.value);
+            return isNotAdmin && isNotMember;
+        });
+        setFilteredEmployeeListForAdmins(availableForAdmin);
+
+        // Filter list for member selection
+        const availableForMember = fullEmployeeList.filter(employee => {
+            const isNotAdmin = !selectedAdminValues.includes(employee.value);
+            const isNotMember = !selectedMemberValues.includes(employee.value);
+            return isNotAdmin && isNotMember;
+        });
+        setFilteredEmployeeListForMembers(availableForMember);
+    }, [fullEmployeeList, selectedAdminMembersList, selectedStandardMembersList]);
+
+
     return (
         <>
             <div
@@ -155,10 +182,22 @@ const BaseProjectForm = ({
                                 </div>
                             </div>
                             <h6>Project Admins</h6>
-                            <UserSelector selectedUsers={selectedAdminMembersList} setSelectedUsers={setSelectedAdminMembersList} employeeList={fullEmployeeList} isLoading={isLoading} placeholderText={"Add Project Admins"} />
-
-                            <h6>Project Members</h6>
-                            <UserSelector selectedUsers={selectedStandardMembersList} setSelectedUsers={setSelectedStandardMembersList} employeeList={fullEmployeeList} isLoading={isLoading} placeholderText={"Add Project Members"} />
+                                <UserSelector
+                                    selectedUsers={selectedAdminMembersList}
+                                    setSelectedUsers={setSelectedAdminMembersList}
+                                    employeeList={filteredEmployeeListForAdmins}
+                                    isLoading={isLoading}
+                                    placeholderText="Add Project Admins"
+                                />
+                                
+                                <h6>Project Members</h6>
+                                <UserSelector
+                                    selectedUsers={selectedStandardMembersList}
+                                    setSelectedUsers={setSelectedStandardMembersList}
+                                    employeeList={filteredEmployeeListForMembers}
+                                    isLoading={isLoading}
+                                    placeholderText="Add Project Members"
+                                />
                         </div>
                         <div style={{ margin: "10px", fontSize: "14px", color: "#374151" }}>
                             * required field
