@@ -33,6 +33,7 @@ export default function CombinedLogs(props) {
     rowData,
     setRowData,
     loading,
+    applyFilters
   } = props;
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
@@ -1149,6 +1150,7 @@ export default function CombinedLogs(props) {
         rowsPerPage={props?.rowsPerPage}
         setLogIdList={props?.setLogIdList}
         setSelected={props?.setSelected}
+        applyFilters={applyFilters}
       />
       {errorMessage && (
         <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
