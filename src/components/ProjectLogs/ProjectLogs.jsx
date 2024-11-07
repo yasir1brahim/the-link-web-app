@@ -160,6 +160,7 @@ const ProjectLogs = () => {
   };
   const [filterValues, setFilterValues] = useState(initFilter);
   const [showClearFilters, setShowClearFilters] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState(initFilter);
   const [rowsPerPage, setRowsPerPage] = React.useState(50);
   const [page, setPage] = React.useState(1);
 
@@ -855,15 +856,21 @@ const ProjectLogs = () => {
   };
 
   useEffect(() => {
-    Object.keys(filterValues).forEach((key) =>
-      filterValues[key]?.length ? setShowClearFilters(true) : null
+    const hasActiveFilters = Object.keys(appliedFilters).some(
+      (key) => appliedFilters[key]?.length
     );
-  }, [filterValues]);
+    setShowClearFilters(hasActiveFilters);
 
-  const clearFilters = async () => {
-    setFilterValues(initFilter);
-    await fetchLogData(0, rowsPerPage, "", listId, {});
-    setShowClearFilters(false);
+    fetchLogData(0, rowsPerPage, "", listId, appliedFilters);
+  }, [appliedFilters]);
+
+  const clearFilters = () => {
+    setFilterValues({ ...initFilter });
+    setAppliedFilters({ ...initFilter });
+  };
+
+  const applyFilters = (newFilters) => {
+    setAppliedFilters(newFilters);
   };
 
   const handleProceedWithExport = () => {
@@ -1191,6 +1198,7 @@ const ProjectLogs = () => {
                     setSelected={setSelected}
                     loading={loadingView}
                     fetchLogData={fetchLogData}
+                    applyFilters={applyFilters}
                   />
                   {pdfData.url && (
                     <div style={{ display: "flex", gap: 10 }}>

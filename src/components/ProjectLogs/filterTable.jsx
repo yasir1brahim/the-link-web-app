@@ -40,21 +40,12 @@ export const FilterTable = (props) => {
     // handleApplyFilter(false)
   };
 
-  const handleApplyFilter = async (toggleFilter) => {
+  const handleApplyFilter = (toggleFilter) => {
     try {
       console.log(props.filterValues);
-      props.fetchLogData(
-        props.page,
-        props.rowsPerPage,
-        props.searchValue,
-        props.listId,
-        props.filterValues,
-        props.orderColumn,
-        props.order,
-      );
-      props.setSelected([]);
+      props.applyFilters(props.filterValues);
       toggleFilter && props.setFilterModal();
-      setSearchValue('')
+      setSearchValue('');
     } catch (error) {
       console.log(error.message);
       handleError(error);
