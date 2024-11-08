@@ -852,6 +852,52 @@ const ProjectLogs = () => {
       handleError(error);
     }
   };
+
+  const handleExportJetBuild = async (recordData) => {
+    try {
+      let filters = {};
+      if (
+        Object.values(filterValues)
+          .map((value) => (value?.length ? true : false))
+          .includes(true)
+      ) {
+        Object.keys(filterValues).forEach((key) =>
+          filterValues[key]?.length
+            ? (filters = { ...filters, [key]: filterValues[key] })
+            : null
+        );
+      }
+      const response = await axiosInstance({
+        method: "post",
+        url: "/exportLogsJetBuild",
+        responseType: "arraybuffer",
+        data: {
+          project_id: state?.projectId || projectId,
+          records:
+            recordData ||
+            localStorage
+              .getItem("filteredIds")
+              ?.split(",")
+              ?.map((item) => Number(item)),
+          filters: { ...filters },
+          page_number: -1,
+          user_id: localStorage.getItem("userId"),
+        },
+      });
+      let blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      FileDownload(
+        blob,
+        `${
+          state?.project.project_name || `Project`
+        }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`
+      );
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
   const validate = () => {
     let error = false;
     if (listName.value === "") {
@@ -1160,6 +1206,7 @@ const ProjectLogs = () => {
             toggle={toggle}
             dropdownOpen={dropdownOpen}
             handleExportExcel={handleExportExcel}
+            handleExportJetBuild={handleExportJetBuild}
             procoreAccessToken={procoreAccessToken}
             procoreAuthUrl={procoreAuthUrl}
             handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}

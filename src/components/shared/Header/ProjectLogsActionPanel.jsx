@@ -9,6 +9,7 @@ import {
 import { ReactComponent as Logo } from "../../../assets/images/procore-vector-logo.svg";
 import { ReactComponent as ExcelLogo } from "../../../assets/images/excel.svg";
 import { ReactComponent as MergeIcon } from "../../../assets/images/merge.svg";
+import { ReactComponent as JetBuildLogo} from "../../../assets/images/jet_build.svg";
 import { Check } from '@mui/icons-material';
 
 // @ts-ignore
@@ -49,10 +50,10 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                   Export
                 </DropdownToggle>
                 <DropdownMenu>
-                  <DropdownItem onClick={() => props.handleExportExcel('All')}>
+                  <DropdownItem className="text-center" onClick={() => props.handleExportExcel('All')}>
                     <ExcelLogo style={{ height: '90px' }} />
                   </DropdownItem>
-                  <DropdownItem>
+                  <DropdownItem className="text-center">
                     {props.procoreAccessToken === 'null' ? (
                       <a href={props.procoreAuthUrl} className="breadcrumb-text">
                         <Logo style={{ height: '90px' }} />
@@ -62,6 +63,9 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                         <Logo style={{ height: '90px' }} />
                       </div>
                     )}
+                  </DropdownItem>
+                  <DropdownItem className="text-center" onClick={() => props.handleExportJetBuild('All')}>
+                    <JetBuildLogo style={{ height: '90px' }} />
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
