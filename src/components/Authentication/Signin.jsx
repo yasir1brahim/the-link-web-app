@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ReactComponent as Mail } from '../../assets/images/mail.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
 import { login, getUserTeams } from '../../api/Authentication/api'
@@ -37,19 +37,27 @@ const Signin = (props) => {
     e.preventDefault();
     let errors = validate();
     if (!errors) {
-      const response = await login(email.value, password.value);
-      console.log(response);
-      if (response.data.status === 'success') {
-        setUserDetails(response.data.jwt);
-        const teams = await getUserTeams();
-        console.log(teams);
-        if (teams.data.results.length === 1) {
-          localStorage.setItem('currentTeamId', teams.data.results[0].id);
-          localStorage.setItem('currentTeamSlug', teams.data.results[0].slug);
-          const teamId = teams.data.results[0].id;
-          return history({ pathname: `/project-list/${teamId}` });
+      try {
+        const response = await login(email.value, password.value);
+        console.log(response);
+        if (response.data.status === 'success') {
+          setUserDetails(response.data.jwt);
+          const teams = await getUserTeams();
+          console.log(teams);
+          if (teams.data.results.length === 1) {
+            localStorage.setItem('currentTeamId', teams.data.results[0].id);
+            localStorage.setItem('currentTeamSlug', teams.data.results[0].slug);
+            const teamId = teams.data.results[0].id;
+            return history({ pathname: `/project-list/${teamId}` });
+          }
+          return history({ pathname: '/companies' });
         }
-        return history({ pathname: '/companies' });
+      } catch (error) {
+        if (error.response && error.response.status === 400) {
+          toast.error('Incorrect email or password');
+        } else {
+          toast.error(`Error: ${error.response.statusText}`);
+        }
       }
     }
   };

@@ -12,7 +12,7 @@ const login = async (email,password) => {
             }
         });
     } catch (error) {
-        handleError(error);
+        return Promise.reject(error);
     }
 }
 
