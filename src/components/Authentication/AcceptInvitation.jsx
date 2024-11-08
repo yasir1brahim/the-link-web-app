@@ -25,8 +25,8 @@ const AcceptInvitation = (props) => {
   const [email, setEmail] = useState('');
   const [teamName, setTeamName] = useState('');
   const [invitedBy, setInvitedBy] = useState('');
-  const [password1, setPassword1] = useState('');
-  const [password2, setPassword2] = useState('');
+  const [newPassword, setNewPassword] = useState({ value: '', errors: '' });
+  const [confirmPassword, setConfirmPassword] = useState({ value: '', errors: '' });
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const toggleType = () => setShowPwd(!showPwd);
@@ -34,12 +34,17 @@ const AcceptInvitation = (props) => {
 
   const validate = () => {
     let error = false;
-    if (password1.value === '') {
-      setPassword1({ ...password1, errors: 'Password is required.' });
+    if (newPassword.value === '') {
+      setNewPassword({ ...newPassword, errors: 'Password is required.' });
       error = true;
     }
-    if (password2.value === '') {
-      setPassword2({ ...password2, errors: 'Password is required.' });
+    if (confirmPassword.value === '') {
+      setConfirmPassword({ ...confirmPassword, errors: 'Password is required.' });
+      error = true;
+    }
+
+    if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+      toast.error("Passwords do not match.");
       error = true;
     }
     return error;
@@ -67,29 +72,32 @@ const AcceptInvitation = (props) => {
     }
   }, [teamId, invitationId]);
 
-  const acceptInvitationAndRedirect = async () => {
-    const invitationResponse = await acceptInvitation(teamId, invitationId);
-    console.log("accept invitation response", invitationResponse);
-    // show success toast
-    toast.success("Registration successful");
-    // redirect to login page
-    return history({ pathname: `/project-list/${teamId}` });
-  }
+    const acceptInvitationAndRedirect = async () => {
+        try {
+          const invitationResponse = await acceptInvitation(teamId, invitationId);
+          console.log("accept invitation response", invitationResponse);
+          toast.success("Registration successful");
+          history({ pathname: `/project-list/${teamId}` });
+        } catch (error) {
+          console.log("error", error);
+          toast.error("Failed to accept invitation.");
+        }
+      };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    let errors = validate();
-    console.log("errors", errors);
-    if (!errors) {
-      const response = await register(email, password1, password2).catch((error) => {
-        console.log("error", error);
-        toast.error("Registration failed");
-      });
-      console.log("register response", response);
-      setUserDetails(response.data);
-      acceptInvitationAndRedirect();
-    }
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validate()) {
+          try {
+            const response = await register(email, newPassword, confirmPassword);
+            setUserDetails(response.data);
+            acceptInvitationAndRedirect();
+          } catch (error) {
+            console.log("error", error);
+            toast.error(error.response?.data?.message || "Registration failed");
+          }
+        }
+    };
+
 
   return (
     <section className="authentication-content-wrapper">
@@ -165,9 +173,9 @@ const AcceptInvitation = (props) => {
               aria-describedby="password"
               placeholder="Password"
               required
-              value={password1}
+              value={newPassword}
               onChange={(e) => {
-                setPassword1(e.target.value);
+                setNewPassword(e.target.value);
               }}
             />
             <div className="iconinput inputpwd" onClick={toggleType}>
@@ -183,9 +191,9 @@ const AcceptInvitation = (props) => {
               aria-describedby="confirmPassword"
               placeholder="Confirm Password"
               required
-              value={password2}
+              value={confirmPassword}
               onChange={(e) => {
-                setPassword2(e.target.value);
+                setConfirmPassword(e.target.value);
               }}
             />
             <div className="iconinput inputpwd" onClick={toggleType}>
