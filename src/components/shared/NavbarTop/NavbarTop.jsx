@@ -1,13 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { ReactComponent as Logo } from '../../../assets/images/logo-dark-v7.svg';
 import { ReactComponent as Down } from '../../../assets/images/chevron-bottom.svg';
 import HelpOutlineSharpIcon from '@mui/icons-material/HelpOutlineSharp';
 // import { ReactComponent as Notification } from '../../../assets/images/notificat.svg';
 import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
 import { CircularProgress } from "@mui/material";
+import {AuthContext} from '../../../auth/authcontext'
+import { getUserTeams } from '../../../api/Authentication/api';
+import { getHomeUrl } from '../../../utils/navigation';
+import { useNavigate } from 'react-router-dom';
 
 const NavbarTop = ({...props}) => {
   const [navDrop, setNavDrop] = useState(false);
+  const { user, isAuthenticated } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const toggleDrop = () => {
     setNavDrop(!navDrop);
@@ -42,6 +48,8 @@ const NavbarTop = ({...props}) => {
     localStorage.clear();
     setNavDrop(!navDrop);
   }
+
+
   return (
     <section className="navigation-wrapper d-flex align-items-center justify-content-center">
       <Navbar
@@ -50,14 +58,7 @@ const NavbarTop = ({...props}) => {
       >
         <div className='row w-100 m-0'>
           <div className='col-4 d-flex'>
-            <a
-            href={
-              localStorage.getItem('roleId') === '0'
-                ? '/admin-landing'
-                : '/project-list'
-            }
-            className="navbar-brand"
-          >
+          <a href="#" onClick={(e) => getHomeUrl(e, isAuthenticated, user, getUserTeams, navigate)} className="navbar-brand">
             <Logo />
           </a>
           {props?.customerData &&

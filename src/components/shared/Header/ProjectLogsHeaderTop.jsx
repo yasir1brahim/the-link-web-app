@@ -1,10 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {AuthContext} from '../../../auth/authcontext'
+import { getUserTeams } from '../../../api/Authentication/api';
+import { getHomeUrl } from '../../../utils/navigation';
 
 // @ts-ignore
-const ProjectLogsHeaderTop = ({ ...props }) => {
+const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useContext(AuthContext);
+
+
   return (
     <div className="header-wrapper-swap row mx-0">
       <div className="col-4 px-0">
@@ -12,11 +18,8 @@ const ProjectLogsHeaderTop = ({ ...props }) => {
           <div className="main-wrapper">
             <div className="breadcrumb-wrap">
               <a
-                href={
-                  localStorage.getItem('roleId') === '0'
-                    ? '/admin-landing'
-                    : '/project-list'
-                }
+                href="#"
+                onClick={(e) => getHomeUrl(e, isAuthenticated, user, getUserTeams, navigate)}
                 className="main-link"
               >
                 Home

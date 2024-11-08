@@ -1,8 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axiosInstance from "../../../config/axios";
 import { Tooltip } from "@mui/material";
+import {AuthContext} from '../../../auth/authcontext'
+import { getUserTeams } from "../../../api/Authentication/api";
+import { getHomeUrl } from "../../../utils/navigation";
 
 // @ts-ignore
 const Header = ({ ...props }) => {
@@ -14,6 +17,8 @@ const Header = ({ ...props }) => {
   const [docsLoaded, setDocsLoaded] = useState(true);
   const specGptUser = localStorage.getItem("isSpecGptUser") === "true";
 
+  const { user, isAuthenticated } = useContext(AuthContext);
+  
   const checkDocsStatus = async () => {
     if ((props.breadcrumb2 === "Submittal Log" || props.breadcrumb2 === "Collab Hub" || props.breadcrumb2 === "Spec GPT") && !specGptUser) {
       try {
@@ -51,7 +56,7 @@ const Header = ({ ...props }) => {
       <div className="header-swap">
         <div className="main-wrapper">
           <div className="breadcrumb-wrap">
-            <a href={localStorage.getItem("roleId") === "0" ? "/admin-landing" : "/project-list"} className="main-link">
+            <a href="#" onClick={(e) => getHomeUrl(e, isAuthenticated, user, getUserTeams, navigate)} className="main-link">
               Home
             </a>
             {props.breadcrumb && (
