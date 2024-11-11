@@ -252,13 +252,11 @@ const handleRestoreProject = async () => {
                           {" "}
                           <div
                             className={`content-wrapper-secondary ${
-                              project.status === "open" 
-                                ? "open-theme"
-                                : "complete-theme"
+                              project.is_archived ? "complete-theme" : "open-theme"
                             }`}
                           >
                             <span className="">
-                              {project.status === "open" ? (
+                              {!project.is_archived ? (
                                 <svg
                                   width="6"
                                   height="6"
@@ -285,7 +283,7 @@ const handleRestoreProject = async () => {
                                 </svg>
                               )}
                             </span>
-                            <p className="content">{project.status === "open" ? "Open" : "Archived"}</p>
+                            <p className="content">{!project.is_archived ? "Open" : "Archived"}</p>
                           </div>{" "}
                         </td>
                         <td>
