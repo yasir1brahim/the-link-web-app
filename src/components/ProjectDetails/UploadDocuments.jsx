@@ -101,6 +101,8 @@ export const UploadDocuments = (props) => {
     });
   };
 
+  const isPdfFileEmpty = Object.keys(pdfFile).length === 0;
+
   return (
     <>
       <Modal
@@ -163,8 +165,9 @@ export const UploadDocuments = (props) => {
               </Button>
               <Button
                 color="primary"
-                onClick={handleSubmit}
-                className="submit-accent"
+                onClick={isPdfFileEmpty ? null : handleSubmit} 
+                className={`submit-accent ${isPdfFileEmpty ? 'disabled-button' : ''}`} 
+                disabled={isPdfFileEmpty} 
               >
                 Get Log
               </Button>
