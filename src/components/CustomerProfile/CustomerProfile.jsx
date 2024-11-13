@@ -50,12 +50,7 @@ const CustomerProfile = (props) => {
   const [searchParams] = useSearchParams();
   const customerId = searchParams.get('id');
   const authCode = searchParams.get('code');
-  const [email, setEmail] = useState({ value: '', errors: '' });
-  const [accountOwnerName, setAccountOwnerName] = useState({ value: '', errors: '' });
-  const [address, setAddress] = useState({ value: '', errors: '' });
   const [profilePicture, setProfilePicture] = useState({ value: '', errors: '' });
-  const [accountId, setAccountID] = useState({ value: '', errors: '' });
-  const [phone, setPhone] = useState({ value: '', errors: '' })
   const [teamId, setTeamId] = useState('');
 
   const redirectUri = window.location.href.includes('https://app.thelink.ai')
@@ -122,12 +117,7 @@ const CustomerProfile = (props) => {
     setEmployeeData,
     setTeamId,
     setCompanyName,
-    setEmail,
-    setAccountOwnerName,
-    setAddress,
     setProfilePicture,
-    setAccountID,
-    setPhone,
     setCurrentUserRole,
     handleError
   ) => {
@@ -146,31 +136,10 @@ const CustomerProfile = (props) => {
           ...prevState,
           value: response.data.name
         }));
-        setEmail((prevState) => ({
-          ...prevState,
-          value: response.data.profile.email_id
-        }));
-        setAccountOwnerName((prevState) => ({
-          ...prevState,
-          value: response.data.profile.account_owner_name
-        }));
-        setAddress((prevState) => ({
-          ...prevState,
-          value: response.data.profile.address
-        }));
         setProfilePicture((prevState) => ({
           ...prevState,
-          value: response.data.legacy_logo_url
+          value: response.data?.legacy_logo_url
         }));
-        setAccountID((prevState) => ({
-          ...prevState,
-          value: response.data.profile.account_id
-        }));
-        setPhone((prevState) => ({
-          ...prevState,
-          value: response.data.profile.phone
-        }));
-
         const userRole = await getUserRoleInTeam(
           localStorage.getItem('userId'),
           customerId
@@ -178,6 +147,21 @@ const CustomerProfile = (props) => {
 
         if (isMounted) {
           setCurrentUserRole(userRole);
+          if (userRole !== 'admin') {
+            toast.error('Unauthorized access. Admins only.', {
+              position: 'bottom-center',
+              autoClose: 5000,
+              hideProgressBar: true,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
+  
+            setTimeout(() => {
+              navigate({ pathname: `/project-list/${customerId}` });
+            }, 1000);
+          }
         }
       }
     } catch (error) {
@@ -196,14 +180,10 @@ const CustomerProfile = (props) => {
       setEmployeeData,
       setTeamId,
       setCompanyName,
-      setEmail,
-      setAccountOwnerName,
-      setAddress,
       setProfilePicture,
-      setAccountID,
-      setPhone,
       setCurrentUserRole,
-      handleError
+      handleError,
+      navigate,
     );
   
     return cleanup;
@@ -245,12 +225,6 @@ const CustomerProfile = (props) => {
 
   const handleSubmit = async () => {
     const data = {
-      profile: {
-        account_owner_name: accountOwnerName.value,
-        email_id: email.value,
-        address: address.value,
-        phone: phone.value,
-      },
       name: companyName.value,
       legacy_logo_url: profilePicture.value,
     };
@@ -263,17 +237,6 @@ const CustomerProfile = (props) => {
     } finally {
       toggleEditProfile();
     }
-  };
-
-  const handleContactNumberChange = (e) => {
-    const input = e.target.value;
-    const sanitizedValue = input.replace(/[^0-9]/g, ''); 
-
-    setPhone((prev) => ({
-      ...prev,
-      value: input,
-      sanitizedValue: sanitizedValue
-    }));
   };
 
 
@@ -322,52 +285,6 @@ const CustomerProfile = (props) => {
                       <div className="text-label-value">
                         <div className="text-label">Company Name: </div>
                         <div className="text-value">{companyName.value}</div>
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="text-label-value">
-                        <div className="text-label">Account ID: </div>
-                        <div className="text-value">
-                          {accountId.value}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="text-label-value">
-                        <div className="text-label">Account Owner: </div>
-                        <div className="text-value">
-                          {accountOwnerName.value}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="text-label-value">
-                        <div className="text-label">Password: </div>
-                        <div className="text-value">**********</div>
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="text-label-value">
-                        <div className="text-label">Email ID: </div>
-                        <div className="text-value">
-                          {email.value}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="text-label-value">
-                        <div className="text-label">Phone: </div>
-                        <div className="text-value">
-                          {phone.value}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="text-label-value">
-                        <div className="text-label">Address: </div>
-                        <div className="text-value">
-                          {address.value}
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -447,120 +364,6 @@ const CustomerProfile = (props) => {
                               {companyName.errors}
                             </small>
                           )}
-                        </div>
-                      </div>
-                      <div className="col-4">
-                        <div className="form-group">
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="accountId"
-                            aria-describedby="accountId"
-                            placeholder="Enter"
-                            required
-                            disabled
-                            value={accountId.value}
-                          />
-                          <label className="text-label" htmlFor="accountId">
-                            Account Id
-                          </label>
-                        </div>
-                      </div>
-                      <div className="col-4">
-                        <div className="form-group">
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="accountOwner"
-                            aria-describedby="accountOwner"
-                            placeholder="Enter"
-                            required
-                            defaultValue={accountOwnerName.value}
-                            onChange={(e) =>
-                              setAccountOwnerName((prev) => ({
-                                ...prev,
-                                value: e.target.value
-                              }))
-                            }
-                          />
-                          <label className="text-label" htmlFor="accountOwner">
-                            Account Owner
-                          </label>
-                        </div>
-                      </div>
-                      <div className="col-4">
-                        <div className="form-group">
-                          <input
-                            type="email"
-                            className="form-control"
-                            id="accountEmail"
-                            aria-describedby="accountEmail"
-                            placeholder="Enter"
-                            required
-                            defaultValue={email.value}
-                            onChange={(e) =>
-                              setEmail((prev) => ({
-                                ...prev,
-                                value: e.target.value
-                              }))
-                            }
-                          />
-                          <label className="text-label" htmlFor="accountEmail">
-                            Email Address
-                          </label>
-                        </div>
-                      </div>
-                      <div className="col-4">
-                        <div className="form-group">
-                          <MaskedInput
-                            defaultValue={phone.value}
-                            onChange={handleContactNumberChange}
-                            name="contactNumber"
-                            error={phone.errors}
-                            mask={[
-                              '(',
-                              /[1-9]/,
-                              /\d/,
-                              /\d/,
-                              ')',
-                              ' ',
-                              /\d/,
-                              /\d/,
-                              /\d/,
-                              '-',
-                              /\d/,
-                              /\d/,
-                              /\d/,
-                              /\d/
-                            ]}
-                            labelClass={'text-label'}
-                            label={'Phone'}
-                          />
-                        </div>
-                      </div>
-                      <div className="col-8">
-                        <div className="form-group">
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="accountAddress"
-                            aria-describedby="accountAddress"
-                            placeholder="Enter"
-                            required
-                            defaultValue={address.value}
-                            onChange={(e) =>
-                              setAddress((prev) => ({
-                                ...prev,
-                                value: e.target.value
-                              }))
-                            }
-                          />
-                          <label
-                            className="text-label"
-                            htmlFor="accountAddress"
-                          >
-                            Address
-                          </label>
                         </div>
                       </div>
                     </div>

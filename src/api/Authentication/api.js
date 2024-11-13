@@ -152,6 +152,23 @@ const uploadTeamLogo = async (teamId, formData) => {
     });
 }
 
+const updateUserStatus = async (userId, isActive) => {
+    try {
+        const response = await axiosInstance({
+            method: 'patch',
+            url: `/api/auth/user/update-status/`,
+            data: {
+                user_id: userId,
+                is_active: isActive,
+            }
+        });
+        return response.data; // Return the response data for further use
+    } catch (error) {
+        console.error("Error updating user status", error);
+        throw error; // Optionally, throw the error to handle it in the calling component
+    }
+};
+
 export {
     login, 
     getAuthTokenFromRefreshToken, 
@@ -168,4 +185,5 @@ export {
     forgotPassword,
     resetPassword,
     uploadTeamLogo,
+    updateUserStatus,
 }
