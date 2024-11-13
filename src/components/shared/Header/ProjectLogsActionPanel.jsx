@@ -51,21 +51,21 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                 </DropdownToggle>
                 <DropdownMenu>
                   <DropdownItem className="text-center" onClick={() => props.handleExportExcel('All')}>
-                    <ExcelLogo style={{ height: '40px' }} />
+                    <ExcelLogo style={{ height: '40px', margin: '20px 0' }} />
                   </DropdownItem>
                   <DropdownItem className="text-center">
                     {props.procoreAccessToken === 'null' ? (
                       <a href={props.procoreAuthUrl} className="breadcrumb-text">
-                        <Logo style={{ height: '40px' }} />
+                        <Logo style={{ height: '40px', margin: '20px 0' }} />
                       </a>
                     ) : (
                       <div onClick={props.handleExportToProcoreButtonClick}>
-                        <Logo style={{ height: '40px' }} />
+                        <Logo style={{ height: '40px', margin: '20px 0' }} />
                       </div>
                     )}
                   </DropdownItem>
                   <DropdownItem className="text-center" onClick={() => props.handleExportJetBuild('All')}>
-                    <JetBuildLogo style={{ height: '40px' }} />
+                    <JetBuildLogo style={{ height: '40px', margin: '20px 0' }} />
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
