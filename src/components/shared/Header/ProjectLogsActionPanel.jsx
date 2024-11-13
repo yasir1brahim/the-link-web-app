@@ -51,7 +51,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                 </DropdownToggle>
                 <DropdownMenu>
                   <DropdownItem className="text-center" onClick={() => props.handleExportExcel('All')}>
-                    <ExcelLogo style={{ height: '40px', margin: '20px 0' }} />
+                    <ExcelLogo style={{ height: '60px', margin: '5px 0' }} />
                   </DropdownItem>
                   <DropdownItem className="text-center">
                     {props.procoreAccessToken === 'null' ? (
