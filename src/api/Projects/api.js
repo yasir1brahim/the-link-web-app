@@ -110,5 +110,16 @@ const createProject = async (projectName, projectNumber, projectType, teamId, li
     }
 }
 
+const toggleProjectStatus = async (projectId, action = 'archive') => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/projects/${projectId}/archive/`,
+            data: { action }
+        });
+    } catch (error) {
+        handleError(error);
+    }
+};
 
-export {listProjects, updateProject, createProject, getProjectDetails}
+export {listProjects, updateProject, createProject, getProjectDetails, toggleProjectStatus}
