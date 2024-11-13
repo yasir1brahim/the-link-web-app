@@ -138,12 +138,91 @@ const getSubmittalItems = async (
 }
 
 
+const getExportExcelData = async (
+    projectId,
+    records,
+    filters_object
+) => {
+    const nonEmptyFilters = Object.keys(filters_object).filter(key => filters_object[key].length > 0);
+    var filtersObject = {}
+    nonEmptyFilters.forEach(key => {
+        filtersObject[`filters[${key}]`] = filters_object[key].join(',')
+    })
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/${projectId}/submittal-items/export/`,
+            responseType: 'arraybuffer',
+            params: {
+                ...filtersObject,
+                ...(records && { records })
+            }
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+
+const getExportJetBuildData = async (
+    projectId,
+    records,
+    filters_object
+) => {
+    const nonEmptyFilters = Object.keys(filters_object).filter(key => filters_object[key].length > 0);
+    var filtersObject = {}
+    nonEmptyFilters.forEach(key => {
+        filtersObject[`filters[${key}]`] = filters_object[key].join(',')
+    })
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/${projectId}/submittal-items/export-jet-build/`,
+            responseType: 'arraybuffer',
+            params: {
+                ...filtersObject,
+                ...(records && { records })
+            }
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+
 const uploadFiles = async (data) => {
     try {
         return await axiosInstance({
             method: 'post',
             url: `/api/deliverables/upload-file/`,
             data: data
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+
+const getExcelExportHeader = async () => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: 'api/deliverables/excel-export-header/'
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+
+const upsertExcelExportHeader = async (items) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: 'api/deliverables/excel-export-header/upsert/',
+            data: {
+                options: items
+            }
         });
     } catch (error) {
         handleError(error);
@@ -160,4 +239,8 @@ export {
     updateSubmittalItem,
     deleteSubmittalItems,
     uploadFiles,
+    getExportExcelData,
+    getExportJetBuildData,
+    getExcelExportHeader,
+    upsertExcelExportHeader,
 }

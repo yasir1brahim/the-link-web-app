@@ -22,7 +22,7 @@ import { ReactComponent as SearchIcon } from "../../assets/images/search.svg";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
-import { getSavedLogs } from "../../api/ProjectLogs/api";
+import { getExportJetBuildData, getSavedLogs } from "../../api/ProjectLogs/api";
 import DocumentStatus from "./documentStatus";
 import ProjectLogsHeader from "../shared/Header/ProjectLogsHeader";
 import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
@@ -30,7 +30,9 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails } from "../../api/Projects/api";
-import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles } from "../../api/ProjectLogs/api";
+import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData } from "../../api/ProjectLogs/api";
+import ManageExcelExport from "./manageExcelExport";
+
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -102,6 +104,9 @@ const ProjectLogs = () => {
   const [manageProcoreModal, setManageProcoreModal] = useState(false);
   const toggleManageProcoreModal = () =>
     setManageProcoreModal(!manageProcoreModal);
+  const [manageExcelExportModal, setManageExcelExportModal] = useState(false);
+  const toggleManageExcelExportModal = () =>
+    setManageExcelExportModal(!manageExcelExportModal);
   const [changeProcoreAccountModal, setChangeProcoreAccountModal] =
     useState(false);
   const toggleChangeProcoreAccountModal = () =>
@@ -636,35 +641,13 @@ const ProjectLogs = () => {
 
   const handleExportExcel = async (recordData, fileName) => {
     try {
-      let filters = {};
-      if (
-        Object.values(filterValues)
-          .map((value) => (value?.length ? true : false))
-          .includes(true)
-      ) {
-        Object.keys(filterValues).forEach((key) =>
-          filterValues[key]?.length
-            ? (filters = { ...filters, [key]: filterValues[key] })
-            : null
-        );
-      }
-      const response = await axiosInstance({
-        method: "post",
-        url: "/exportLogs",
-        responseType: "arraybuffer",
-        data: {
-          project_id: state?.projectId || projectId,
-          records:
-            recordData ||
-            localStorage
-              .getItem("filteredIds")
-              ?.split(",")
-              ?.map((item) => Number(item)),
-          filters: { ...filters },
-          page_number: -1,
-        },
-      });
-      let blob = new Blob([response.data], {
+      const exportExcelData = await getExportExcelData(
+        state?.projectId || projectId,
+        recordData || localStorage.getItem("filteredIds")?.split(",")?.map((item) => Number(item)),
+        filterValues
+      );
+
+      let blob = new Blob([exportExcelData.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
       FileDownload(
@@ -677,6 +660,29 @@ const ProjectLogs = () => {
       handleError(error);
     }
   };
+
+  const handleExportJetBuild = async (recordData) => {
+    try {
+      const exportExcelData = await getExportJetBuildData(
+        state?.projectId || projectId,
+        recordData || localStorage.getItem("filteredIds")?.split(",")?.map((item) => Number(item)),
+        filterValues
+      );
+
+      let blob = new Blob([exportExcelData.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      FileDownload(
+        blob,
+        `${
+          state?.project.project_name || `Project`
+        }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`
+      );
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
   const validate = () => {
     let error = false;
     if (listName.value === "") {
@@ -928,12 +934,17 @@ const ProjectLogs = () => {
     link.click();
   };
 
+  const handleManageExcelExportButtonClick = async () => {
+    setManageExcelExportModal(true);
+  };
+
   return (
     <div className="page-wrap">
       <NavbarTop
         qaDashboard={state?.qaDashboard}
         projectTitle={state?.projectName || projectName || ""}
         handleManageProcoreButtonClick={handleManageProcoreButtonClick}
+        handleManageExcelExportButtonClick={handleManageExcelExportButtonClick}
         initLoading={initLoading}
         loadingProjectDetails={loadingProjectDetails}
         customerData={customerData}
@@ -959,6 +970,7 @@ const ProjectLogs = () => {
             dropdownOpen={dropdownOpen}
             toggle={toggle}
             handleExportExcel={handleExportExcel}
+            handleExportJetBuild={handleExportJetBuild}
             procoreAccessToken={procoreAccessToken}
             procoreAuthUrl={procoreAuthUrl}
             handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
@@ -1570,6 +1582,11 @@ const ProjectLogs = () => {
           </form>
         </ModalBody>
       </Modal>
+
+      {manageExcelExportModal && <ManageExcelExport
+        manageExcelExportModal={manageExcelExportModal}
+        toggleManageExcelExportModal={toggleManageExcelExportModal}
+      />}
     </div>
   );
 };
