@@ -53,19 +53,30 @@ const ProjectsPage = () => {
     );
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await listProjects(teamId);
-      setProjectData(
-        isArchived ? response.data.archived_projects : response.data.results,
-      );
-      console.log(response.data.results);
-    };
+  const fetchData = async () => {
+    try {
+        const response = await listProjects(teamId);
+        
+        const dataToSet = isArchived 
+            ? response.data.results.filter(project => project.is_archived === true) 
+            : response.data.results.filter(project => project.is_archived === false) || [];
+            
+        setProjectData(dataToSet);
+    } catch (error) {
+        handleError(error);
+    }
+};
 
-    fetchData().catch((error) => {
-      handleError(error);
-    });
-  }, [state, pageRefresh, isArchived, roleId, setProjectData, customerId]);
+
+useEffect(() => {
+  let isMounted = true;
+
+  fetchData(); 
+
+  return () => {
+      isMounted = false;
+  };
+}, [state, pageRefresh, isArchived, roleId, customerId]);
 
   return (
     <>

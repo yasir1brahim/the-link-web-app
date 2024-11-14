@@ -7,24 +7,25 @@ import Loader from '../shared/Loader/Loader';
 // import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 // import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
 // import DateSelector from '../shared/DateSelector/DateSelector';
-import PaginatedItems from '../shared/Pagination/Pagination';
-import axiosInstance from '../../config/axios';
-import { useLocation } from 'react-router-dom';
-import CreateProject from './createProject';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import EditProject from './editProject';
-import CreateEmployee from '../CustomerProfile/createEmployee';
-import moment from 'moment';
-import handleError from '../../config/errorHandler';
-import { ArchiveIcon } from '../shared/icons/archiveIcon';
-import { EditIcon } from '../shared/icons/editIcon';
-import { UploadIcon } from '../shared/icons/uploadIcon';
-import { LaunchIcon } from '../shared/icons/launchIcon';
-import { ArchiveProjectModal } from './archiveProjectModal';
-import { Tooltip } from 'reactstrap';
-import { RestoreProjectModal } from './restoreProjectModal';
-import { RestoreIcon } from '../shared/icons/restoreIcon';
+import PaginatedItems from "../shared/Pagination/Pagination";
+import axiosInstance from "../../config/axios";
+import { useLocation } from "react-router-dom";
+import CreateProject from "./createProject";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import EditProject from "./editProject";
+import CreateEmployee from "../CustomerProfile/createEmployee";
+import moment from "moment";
+import handleError from "../../config/errorHandler";
+import { ArchiveIcon } from "../shared/icons/archiveIcon";
+import { EditIcon } from "../shared/icons/editIcon";
+import { UploadIcon } from "../shared/icons/uploadIcon";
+import { LaunchIcon } from "../shared/icons/launchIcon";
+import { ArchiveProjectModal } from "./archiveProjectModal";
+import { Tooltip } from "reactstrap";
+import { RestoreProjectModal } from "./restoreProjectModal";
+import { RestoreIcon } from "../shared/icons/restoreIcon";
+import { toggleProjectStatus } from "../../api/Projects/api";
 
 const ProjectsTable = ({
   customerData,
@@ -81,97 +82,46 @@ const ProjectsTable = ({
     }
   };
 
-  const handleArchiveProject = async () => {
-    let errors = false;
-    if (!errors) {
+const handleArchiveProject = async () => {
+  let errors = false;
+  if (!errors) {
       try {
-        const employeeList = await getEmployeeList(archiveProject);
-        const response = await axiosInstance({
-          method: 'put',
-          url: '/updateProject',
-          data: {
-            project_name: archiveProject.project_name,
-            lead_contact: employeeList.find(
-              (employee) => employee.name === archiveProject.lead_contact
-            )?.emp_id,
-            start_date: archiveProject?.start_date
-              ? moment(
-                  new Date((archiveProject?.start_date).replaceAll('-', '/'))
-                ).format('YYYY-MM-DD')
-              : '',
-            end_date: archiveProject?.end_date
-              ? moment(
-                  new Date((archiveProject?.end_date).replaceAll('-', '/'))
-                ).format('YYYY-MM-DD')
-              : '',
-            customer_id:
-              localStorage.getItem('roleId') === '0'
-                ? customerId || state.customer_id
-                : localStorage.getItem('userId'),
-            status: isArchived ? 'Active' : 'Archived',
-            project_id: archiveProject.project_id
+          const response = await toggleProjectStatus(archiveProject.id, 'archive');
+          
+          if (response?.data) {
+              console.log('Project archived successfully:', response.data);
+              
+              setPageRefresh(!pageRefresh);
+              toggleArchiveProjectModal();
+          } else {
+              console.log('Failed to archive/unarchive project');
           }
-        });
-        if (response.data) {
-          console.log(response.data);
-          setPageRefresh(!pageRefresh);
-          toggleArchiveProjectModal();
-        }
       } catch (error) {
-        console.log(error.message);
-        handleError(error);
+          console.error('Error while toggling project archive status:', error);
+          handleError(error);
       }
-    }
-  };
+  }
+};
 
-  const handleRestoreProject = async () => {
-    let errors = false;
-    if (!errors) {
+const handleRestoreProject = async () => {
+  let errors = false;
+  if (!errors) {
       try {
-        // fetch employees for project
-        const resp_employees_by_project = await axiosInstance({
-          method: 'get',
-          url: `/employees_by_project/${restoreProject?.project_id}`
-        });
-        const emps_by_p = resp_employees_by_project.data.message;
-        const employeeList = await getEmployeeList(restoreProject);
-        const response = await axiosInstance({
-          method: 'put',
-          url: '/updateProject',
-          data: {
-            project_name: restoreProject.project_name,
-            lead_contact: employeeList.find(
-              (employee) => employee.name === restoreProject.lead_contact
-            )?.emp_id,
-            employee_list: emps_by_p,
-            start_date: restoreProject?.start_date
-              ? moment(
-                  new Date((restoreProject?.start_date).replaceAll('-', '/'))
-                ).format('YYYY-MM-DD')
-              : '',
-            end_date: restoreProject?.end_date
-              ? moment(
-                  new Date((restoreProject?.end_date).replaceAll('-', '/'))
-                ).format('YYYY-MM-DD')
-              : '',
-            customer_id:
-              localStorage.getItem('roleId') === '0'
-                ? customerId || state.customer_id
-                : localStorage.getItem('userId'),
-            status: 'Open',
-            project_id: restoreProject.project_id
+          const response = await toggleProjectStatus(restoreProject.id, 'restore');
+
+          if (response?.data) {
+              console.log('Project restored successfully:', response.data);
+              setPageRefresh(!pageRefresh);
+              toggleRestoreProjectModal();
+          } else {
+              console.log('Failed to restore project');
           }
-        });
-        if (response.data) {
-          console.log(response.data);
-          setPageRefresh(!pageRefresh);
-          toggleRestoreProjectModal();
-        }
       } catch (error) {
-        console.log(error.message);
+          console.error('Error while restoring project:', error);
+          handleError(error);
       }
-    }
-  };
+  }
+};
 
   const generateInitials = (name) => {
     // Split the name into words
@@ -297,230 +247,225 @@ const ProjectsTable = ({
                                 </div>
                               </div>
                             </td> */}
-                      <td>{project.name}</td>
-                      <td>
-                        {' '}
-                        <div
-                          className={`content-wrapper-secondary ${
-                            project.status === 'open'
-                              ? 'open-theme'
-                              : 'complete-theme'
-                          }`}
-                        >
-                          <span className="">
-                            {project.status === 'open' ? (
-                              <svg
-                                width="6"
-                                height="6"
-                                viewBox="0 0 6 6"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <circle cx="3" cy="3" r="3" fill="#3B82F6" />
-                              </svg>
-                            ) : (
-                              <svg
-                                width="7"
-                                height="6"
-                                viewBox="0 0 7 6"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <circle
-                                  cx="3.33334"
-                                  cy="3"
-                                  r="3"
-                                  fill="#DC2626"
-                                />
-                              </svg>
-                            )}
-                          </span>
-                          <p className="content">
-                            {project.status === 'open' ? 'Open' : 'Closed'}
-                          </p>
-                        </div>{' '}
-                      </td>
-                      <td>
-                        {!!project.owner ? (
-                          <div className="icon-wrap">
-                            <p className="content">
-                              {project.owner.get_display_name}
-                            </p>
-                          </div>
-                        ) : (
-                          ''
-                        )}
-                      </td>
-                      <td>{project.members.length}</td>
-                      <td>{project.start_date}</td>
-                      <td>{project.end_date}</td>
-                      <td>
-                        <div className="action-wrapper">
-                          <span
-                            onClick={() => handleLaunch(project)}
-                            id={'launch-tooltip' + index + 1}
+                        <td>{project.name}</td>
+                        <td>
+                          {" "}
+                          <div
+                            className={`content-wrapper-secondary ${
+                              project.is_archived ? "complete-theme" : "open-theme"
+                            }`}
                           >
-                            <LaunchIcon />
-                          </span>
-                          <span>
-                            <Tooltip
-                              placement="left"
-                              target={'launch-tooltip' + index + 1}
-                              isOpen={launchTooltip === index + 1}
-                              toggle={() =>
-                                setLaunchTooltip(
-                                  launchTooltip
-                                    ? launchTooltip === index + 1
-                                      ? null
-                                      : index + 1
-                                    : index + 1
-                                )
-                              }
-                            >
-                              Launch Project
-                            </Tooltip>
-                          </span>
-                          {project.status === 'Archived' ? (
-                            <>
-                              <span
-                                onClick={() => {
-                                  toggleRestoreProjectModal();
-                                  setRestoreProject(project);
-                                }}
-                                style={{ cursor: 'pointer' }}
-                                id={'restore-tooltip' + index + 1}
-                              >
-                                <RestoreIcon />
-                              </span>
-                              <span>
-                                <Tooltip
-                                  placement="left"
-                                  target={'restore-tooltip' + index + 1}
-                                  isOpen={restoreTooltip === index + 1}
-                                  toggle={() =>
-                                    setRestoreTooltip(
-                                      restoreTooltip
-                                        ? restoreTooltip === index + 1
-                                          ? null
-                                          : index + 1
-                                        : index + 1
-                                    )
-                                  }
+                            <span className="">
+                              {!project.is_archived ? (
+                                <svg
+                                  width="6"
+                                  height="6"
+                                  viewBox="0 0 6 6"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
                                 >
-                                  Restore Project
-                                </Tooltip>
-                              </span>
-                            </>
+                                  <circle cx="3" cy="3" r="3" fill="#3B82F6" />
+                                </svg>
+                              ) : (
+                                <svg
+                                  width="7"
+                                  height="6"
+                                  viewBox="0 0 7 6"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <circle
+                                    cx="3.33334"
+                                    cy="3"
+                                    r="3"
+                                    fill="#DC2626"
+                                  />
+                                </svg>
+                              )}
+                            </span>
+                            <p className="content">{!project.is_archived ? "Open" : "Archived"}</p>
+                          </div>{" "}
+                        </td>
+                        <td>
+                          {!!project.owner ? (
+                            <div className="icon-wrap">
+                              <p className="content">{project.owner.get_display_name}</p>
+                            </div>
                           ) : (
-                            <>
-                              <span
-                                onClick={() => handleEdit(project)}
-                                id={'edit-tooltip' + index + 1}
-                              >
-                                <EditIcon />
-                              </span>
-                              <span>
-                                <Tooltip
-                                  placement="left"
-                                  target={'edit-tooltip' + index + 1}
-                                  isOpen={editTooltip === index + 1}
-                                  toggle={() =>
-                                    setEditTooltip(
-                                      editTooltip
-                                        ? editTooltip === index + 1
-                                          ? null
-                                          : index + 1
-                                        : index + 1
-                                    )
-                                  }
-                                >
-                                  Edit Project
-                                </Tooltip>
-                              </span>
-                              <span
-                                onClick={() => {
-                                  toggleArchiveProjectModal();
-                                  setArchiveProject(project);
-                                }}
-                                id={'archive-tooltip' + index + 1}
-                              >
-                                <ArchiveIcon />
-                              </span>
-                              <span>
-                                <Tooltip
-                                  placement="left"
-                                  target={'archive-tooltip' + index + 1}
-                                  isOpen={archiveTooltip === index + 1}
-                                  toggle={() =>
-                                    setArchiveTooltip(
-                                      archiveTooltip
-                                        ? archiveTooltip === index + 1
-                                          ? null
-                                          : index + 1
-                                        : index + 1
-                                    )
-                                  }
-                                >
-                                  Archive Project
-                                </Tooltip>
-                              </span>
-                            </>
+                            ""
                           )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            ) : (
-              <tbody>
-                <tr>
-                  <td className="text-center" colSpan={7}>
-                    No data
-                  </td>
-                </tr>
-              </tbody>
-            )}
-          </table>
-        </div>
-        <div className="table-footer-content">
-          <PaginatedItems
-            items={projectData}
-            setCurrentItems={setCurrentItems}
-            itemsPerPage={itemsPerPage}
-            setItemsPerPage={setItemsPerPage}
-          />
-        </div>
-        <CreateEmployee
-          modal={employeeModal}
-          toggleModal={toggleEmployeeModal}
-          customer={state || customerData}
-          customerID={customerId}
-          pageRefresh={pageRefresh}
-          setPageRefresh={setPageRefresh}
-        />
-        {createProjectModal && (
-          <CreateProject
-            modal={createProjectModal}
-            toggleModal={toggleCreateProjectModal}
+                        </td>
+                        <td>{project.members.length}</td>
+                        <td>{project.start_date}</td>
+                        <td>{project.end_date}</td>
+                        <td>
+                          <div className="action-wrapper">
+                            <span
+                              onClick={() => handleLaunch(project)}
+                              id={"launch-tooltip" + index + 1}
+                            >
+                              <LaunchIcon />
+                            </span>
+                            <span>
+                              <Tooltip
+                                placement="left"
+                                target={"launch-tooltip" + index + 1}
+                                isOpen={launchTooltip === index + 1}
+                                toggle={() =>
+                                  setLaunchTooltip(
+                                    launchTooltip
+                                      ? launchTooltip === index + 1
+                                        ? null
+                                        : index + 1
+                                      : index + 1,
+                                  )
+                                }
+                              >
+                                Launch Project
+                              </Tooltip>
+                            </span>
+                            {(
+                              isArchived ? (
+                                <>
+                                  <span
+                                    onClick={() => {
+                                      toggleRestoreProjectModal()
+                                      setRestoreProject(project)
+                                    }}
+                                    style={{ cursor: "pointer" }}
+                                    id={"restore-tooltip" + index + 1}
+                                  >
+                                    <RestoreIcon />
+                                  </span>
+                                  <span>
+                                    <Tooltip
+                                      placement="left"
+                                      target={"restore-tooltip" + index + 1}
+                                      isOpen={restoreTooltip === index + 1}
+                                      toggle={() =>
+                                        setRestoreTooltip(
+                                          restoreTooltip
+                                            ? restoreTooltip === index + 1
+                                              ? null
+                                              : index + 1
+                                            : index + 1,
+                                        )
+                                      }
+                                    >
+                                      Restore Project
+                                    </Tooltip>
+                                  </span>
+                                </>
+                              ) :
+                              <>
+                                <span
+                                  onClick={() => handleEdit(project)}
+                                  id={"edit-tooltip" + index + 1}
+                                >
+                                  <EditIcon />
+                                </span>
+                                <span>
+                                  <Tooltip
+                                    placement="left"
+                                    target={"edit-tooltip" + index + 1}
+                                    isOpen={editTooltip === index + 1}
+                                    toggle={() =>
+                                      setEditTooltip(
+                                        editTooltip
+                                          ? editTooltip === index + 1
+                                            ? null
+                                            : index + 1
+                                          : index + 1,
+                                      )
+                                    }
+                                  >
+                                    Edit Project
+                                  </Tooltip>
+                                </span>
+                                <span
+                                  onClick={() => {
+                                    toggleArchiveProjectModal()
+                                    setArchiveProject(project)
+                                  }}
+                                  id={"archive-tooltip" + index + 1}
+                                >
+                                  <ArchiveIcon />
+                                </span>
+                                <span>
+                                  <Tooltip
+                                    placement="left"
+                                    target={"archive-tooltip" + index + 1}
+                                    isOpen={archiveTooltip === index + 1}
+                                    toggle={() =>
+                                      setArchiveTooltip(
+                                        archiveTooltip
+                                          ? archiveTooltip === index + 1
+                                            ? null
+                                            : index + 1
+                                          : index + 1,
+                                      )
+                                    }
+                                  >
+                                    Archive Project
+                                  </Tooltip>
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              ) : (
+                <tbody>
+                  <tr>
+                    <td className="text-center" colSpan={7}>
+                      No data
+                    </td>
+                  </tr>
+                </tbody>
+              )}
+            </table>
+          </div>
+          <div className="table-footer-content">
+            <PaginatedItems
+              items={projectData}
+              setCurrentItems={setCurrentItems}
+              itemsPerPage={itemsPerPage}
+              setItemsPerPage={setItemsPerPage}
+            />
+          </div>
+          <CreateEmployee
+            modal={employeeModal}
+            toggleModal={toggleEmployeeModal}
             customer={state || customerData}
+            customerID={customerId}
             pageRefresh={pageRefresh}
             setPageRefresh={setPageRefresh}
-            customerID={customerId}
           />
-        )}
-        {editModal && (
-          <EditProject
-            modal={editModal}
-            toggleModal={toggleEditModal}
-            customer={state || customerData}
-            project={activeProject}
-            pageRefresh={pageRefresh}
-            setPageRefresh={setPageRefresh}
-            customerID={customerId}
-          />
-        )}
-        <Loader showComponentLoader={isLoading} />
+          {createProjectModal && (
+            <CreateProject
+              modal={createProjectModal}
+              toggleModal={toggleCreateProjectModal}
+              customer={state || customerData}
+              pageRefresh={pageRefresh}
+              setPageRefresh={setPageRefresh}
+              customerID={customerId}
+            />
+          )}
+          {editModal && (
+            <EditProject
+              modal={editModal}
+              toggleModal={toggleEditModal}
+              customer={state || customerData}
+              project={activeProject}
+              pageRefresh={pageRefresh}
+              setPageRefresh={setPageRefresh}
+              customerID={customerId}
+            />
+          )}
+      <Loader showComponentLoader={isLoading} />
 
         <ArchiveProjectModal
           modal={archiveProjectModal}
