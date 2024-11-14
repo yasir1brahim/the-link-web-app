@@ -86,7 +86,7 @@ const handleArchiveProject = async () => {
   let errors = false;
   if (!errors) {
       try {
-          const response = await toggleProjectStatus(archiveProject.id, 'archive');
+        const response = await toggleProjectStatus(archiveProject.id, 'archive', archiveProject.team);
           
           if (response?.data) {
               console.log('Project archived successfully:', response.data);
@@ -107,7 +107,7 @@ const handleRestoreProject = async () => {
   let errors = false;
   if (!errors) {
       try {
-          const response = await toggleProjectStatus(restoreProject.id, 'restore');
+        const response = await toggleProjectStatus(restoreProject.id, 'restore', archiveProject.team);
 
           if (response?.data) {
               console.log('Project restored successfully:', response.data);
