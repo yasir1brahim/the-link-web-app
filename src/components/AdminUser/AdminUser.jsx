@@ -15,6 +15,8 @@ import { ExternalUsers } from './externalUsers';
 import handleError from '../../config/errorHandler';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
+import { listProjects } from '../../api/Projects/api';
+import { getUserTeams, getTeamDetails, updateUserStatus } from '../../api/Authentication/api';
 
 const AdminUser = (props) => {
   const [modal, setModal] = useState(false);
@@ -60,11 +62,8 @@ const AdminUser = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const response = await axiosInstance({
-        method: 'get',
-        url: `/customers/${localStorage.getItem('userId')}`
-      });
-      setCustomerData(response.data.message);
+      const response = await getUserTeams();
+      setCustomerData(response.data.results);
 
       const preferredCustomer = await axiosInstance({
         method: 'get',
@@ -88,14 +87,8 @@ const AdminUser = (props) => {
         }`
       });
       setEmployeeData(employeeResponse.data.message);
-
-      const projectResponse = await axiosInstance({
-        method: 'get',
-        url: `/admin/projects/${
-          custObject[0].customer_id || response.data.message[0].customer_id
-        }`
-      });
-      setProjectData(projectResponse.data.message);
+      const projectResponse = await listProjects();
+      setProjectData(projectResponse.data.results);
 
       const externalResponse = await axiosInstance({
         method: 'get',
@@ -127,16 +120,10 @@ const AdminUser = (props) => {
   const handleSearch = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance({
-        method: 'get',
-        url: `/admin/employees/${selectedCustomer[0].id}`
-      });
-      setEmployeeData(response.data.message);
-      const projectResponse = await axiosInstance({
-        method: 'get',
-        url: `/admin/projects/${selectedCustomer[0].id}`
-      });
-      setProjectData(projectResponse.data.message);
+      const response = await getTeamDetails(selectedCustomer[0].id);
+      setEmployeeData(response.data.members);
+      const projectResponse = await listProjects();
+      setProjectData(projectResponse.data.results);
       await axiosInstance({
         method: 'put',
         url: `/admin/${localStorage.getItem('userId')}/preferred_customer`,
@@ -161,10 +148,9 @@ const AdminUser = (props) => {
 
   const handleStatus = async (id, status) => {
     try {
-      await axiosInstance({
-        method: 'put',
-        url: `/employees/${id}/${status}`
-      });
+      const result = await updateUserStatus(id, status === 'activate');
+      console.log(result.message);
+      
       setPageRefresh(!pageRefresh);
     } catch (error) {
       setLoading(false);
@@ -314,8 +300,8 @@ const AdminUser = (props) => {
                         id="customer-name"
                         options={customerData.map((customer) => {
                           return {
-                            id: customer.customer_id,
-                            label: customer.customer_name
+                            id: customer.id,
+                            label: customer.name
                           };
                         })}
                         onChange={(e) => setSelectedCustomer(e)}
@@ -412,7 +398,7 @@ const AdminUser = (props) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {employeeData.map((employee) => {
+                        {customerData[0]?.members?.map((employee) => {
                           return (
                             <tr>
                               <td>
@@ -420,24 +406,29 @@ const AdminUser = (props) => {
                                   // href={() => false}
                                   onClick={() => toggleDetailInfo(employee)}
                                 >
-                                  {employee.full_name}
+                                  {employee.display_name}
                                 </a>
                               </td>
                               <td>
-                                <span className="item-status item-status-active">{`${employee.employee_status[0].toUpperCase()}${employee.employee_status.substring(
-                                  1
-                                )}`}</span>
+                                <span className="item-status item-status-active">
+                                  {employee.is_active ? 'Active' : 'Inactive'}
+                                </span>
                               </td>
                               <td>
                                 <div className="tags-wrapper">
-                                  {employee.projects?.map((project) => {
-                                    return (
-                                      <span className="item-tag">
+                                {customerData[0].projects?.map((project) => {
+                                  const isMemberOfProject = project.members.some(
+                                    (projectMember) => projectMember.user_id === employee.user_id
+                                  );
+
+                                  return (
+                                    isMemberOfProject && (
+                                      <span key={project.id} className="item-tag">
                                         {project.name}
-                                        {/* <a className="icon-close"></a> */}
                                       </span>
-                                    );
-                                  })}
+                                    )
+                                  );
+                                })}
                                 </div>
                               </td>
                               <td>{employee.is_gpt_user ? 'Yes' : 'No'}</td>
@@ -474,16 +465,12 @@ const AdminUser = (props) => {
                                     className="btn btn-secondary btn-sm"
                                     onClick={() =>
                                       handleStatus(
-                                        employee.id,
-                                        employee.employee_status === 'active'
-                                          ? 'deactivate'
-                                          : 'activate'
+                                        employee.user_id,
+                                        employee.is_active ? 'deactivate' : 'activate'
                                       )
                                     }
                                   >
-                                    {employee.employee_status === 'active'
-                                      ? 'Deactivate'
-                                      : 'Activate'}
+                                    {employee.is_active ? 'Deactivate' : 'Activate'}
                                   </button>
                                   <button
                                     type="button"
@@ -556,7 +543,7 @@ const AdminUser = (props) => {
                                     toggleProjectModal(project);
                                   }}
                                 >
-                                  {project.project_name}
+                                  {project.name}
                                 </a>
                               </td>
                               <td>
@@ -566,10 +553,10 @@ const AdminUser = (props) => {
                               </td>
                               <td>
                                 <div className="tags-wrapper">
-                                  {project.employees?.map((emp) => {
+                                  {project.members?.map((emp) => {
                                     return (
                                       <span className="item-tag">
-                                        {emp.name}
+                                        {emp.display_name}
                                         {/* <a className="icon-close"></a> */}
                                       </span>
                                     );
@@ -667,18 +654,18 @@ const AdminUser = (props) => {
         setPageRefresh={setPageRefresh}
         employee={modalData}
       />
-      <EditProject
+      { !projectModal &&  (<EditProject
         modal={projectModal}
         toggleModal={toggleProjectModal}
-        customer={customerData.filter(
-          (cust) => cust?.customer_id === modalData?.customer_id
+        customer={customerData?.filter(
+          (cust) => modalData?.members?.map(member => member.user_id).includes(cust?.user_id)
         )}
         // project={modalData}
         project={modalData}
         pageRefresh={pageRefresh}
         setPageRefresh={setPageRefresh}
         isAdminUser={true}
-      />
+      />)}
       <ToastContainer
         position="bottom-center"
         autoClose={5000}

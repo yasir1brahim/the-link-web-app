@@ -19,8 +19,7 @@ import handleError from '../../config/errorHandler';
 import { get } from 'lodash';
 import Procore from '../ProjectLogs/procore';
 import Loader from '../shared/Loader/Loader';
-import { getTeamDetails, getUserRoleInTeam } from '../../api/Authentication/api';
-
+import { getTeamDetails, getUserRoleInTeam, updateTeamDetails, uploadTeamLogo } from '../../api/Authentication/api';
 
 const CustomerProfile = (props) => {
   const [currentUserRole, setCurrentUserRole] = useState('member');
@@ -39,7 +38,7 @@ const CustomerProfile = (props) => {
     value: undefined,
     errors: ''
   });
-  const [contactNumber, setContactNumber] = useState({ value: '', errors: '' });
+
   const [employee, setEmployee] = useState({});
   const [customerData, setCustomerData] = useState({});
   const [currentItems, setCurrentItems] = useState([]);
@@ -51,6 +50,8 @@ const CustomerProfile = (props) => {
   const [searchParams] = useSearchParams();
   const customerId = searchParams.get('id');
   const authCode = searchParams.get('code');
+  const [profilePicture, setProfilePicture] = useState({ value: '', errors: '' });
+  const [teamId, setTeamId] = useState('');
 
   const redirectUri = window.location.href.includes('https://app.thelink.ai')
     ? `https://app.thelink.ai/customer-profile?id=${customerId}`
@@ -110,21 +111,82 @@ const CustomerProfile = (props) => {
     }
   }, [authCode, customerId, navigate, redirectUri]);
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchData = async (
+    customerId,
+    setCustomerData,
+    setEmployeeData,
+    setTeamId,
+    setCompanyName,
+    setProfilePicture,
+    setCurrentUserRole,
+    handleError
+  ) => {
+    let isMounted = true;
+    try {
       const response = await getTeamDetails(customerId);
 
-      setCustomerData(response.data);
-      setEmployeeData(response.data.members);
-      console.log('customerData', response.data);
-      const userRole = await getUserRoleInTeam(localStorage.getItem('userId'), customerId);
-      console.log('userRole', userRole);
-      setCurrentUserRole(userRole);
-    };
+      if (isMounted) {
+        setCustomerData(response.data);
+        setEmployeeData(response.data.members);
+        console.log('customerData', response.data);
+        setTeamId(response.data.id);
 
-    fetchData().catch((error) => {
+        // Profile data
+        setCompanyName((prevState) => ({
+          ...prevState,
+          value: response.data.name
+        }));
+        setProfilePicture((prevState) => ({
+          ...prevState,
+          value: response.data?.legacy_logo_url
+        }));
+        const userRole = await getUserRoleInTeam(
+          localStorage.getItem('userId'),
+          customerId
+        );
+
+        if (isMounted) {
+          setCurrentUserRole(userRole);
+          if (userRole !== 'admin') {
+            toast.error('Unauthorized access. Admins only.', {
+              position: 'bottom-center',
+              autoClose: 5000,
+              hideProgressBar: true,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
+  
+            setTimeout(() => {
+              navigate({ pathname: `/project-list/${customerId}` });
+            }, 1000);
+          }
+        }
+      }
+    } catch (error) {
       handleError(error);
-    });
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  };
+
+  useEffect(() => {
+    const cleanup = fetchData(
+      customerId,
+      setCustomerData,
+      setEmployeeData,
+      setTeamId,
+      setCompanyName,
+      setProfilePicture,
+      setCurrentUserRole,
+      handleError,
+      navigate,
+    );
+  
+    return cleanup;
   }, [pageRefresh, customerId]);
 
 
@@ -161,6 +223,48 @@ const CustomerProfile = (props) => {
     toggleEditModal();
   };
 
+  const handleSubmit = async () => {
+    const data = {
+      name: companyName.value,
+      legacy_logo_url: profilePicture.value,
+    };
+  
+    try {
+      const response = await updateTeamDetails(teamId, data);
+      console.log("Team updated successfully:", response);
+    } catch (error) {
+      console.error("Failed to save team details:", error);
+    } finally {
+      toggleEditProfile();
+    }
+  };
+
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    
+    if (!file) {
+      console.error('No file selected');
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append('file', file);
+  
+    try {
+      const response = await uploadTeamLogo(teamId, formData);
+      const { file_url } = response.data;
+  
+      setProfilePicture((prevProfile) => ({
+        ...prevProfile,
+        value: file_url,
+      }));
+  
+      console.log('Logo uploaded successfully:', file_url);
+    } catch (error) {
+      console.error('Error uploading logo:', error.response?.data || error.message);
+    }
+  };
   
   return (
     <div className="page-wrap">
@@ -169,6 +273,114 @@ const CustomerProfile = (props) => {
         <Header title={customerData.name} breadcrumb={'Customer Details'} />
 
         <div className="customer-profile-content">
+          <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
+            {!editProfile ? (
+              <>
+                <div className="customer-dp-container">
+                  <img src={profilePicture.value} alt="Company Logo" />
+                </div>
+                <div className="customer-profile">
+                  <div className="row">
+                    <div className="col-6">
+                      <div className="text-label-value">
+                        <div className="text-label">Company Name: </div>
+                        <div className="text-value">{companyName.value}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="customer-edit-container">
+                  <button
+                    type="button"
+                    onClick={toggleEditProfile}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </>
+            ) : (
+              <form className="edit-customer-form w-100">
+                <div className="edit-customer-content">
+                  <div className="ec-left">
+                    <div className="upload-documents">
+                      <div className="image-holder">
+                        <img
+                          src={
+                            profilePicture.value
+                              ? typeof profilePicture.value === 'string'
+                                ? profilePicture.value
+                                : URL.createObjectURL(profilePicture.value)
+                              : ProfilePhoto
+                          }
+                          alt="Profile"
+                          className="dummy-image"
+                        />
+                      </div>
+                      <div className="select-File">
+                        <input
+                          className="d-none"
+                          type="file"
+                          name="files[]"
+                          id="uploadDocs"
+                          onChange={handleFileChange}
+                        />
+                        <label htmlFor="uploadDocs">
+                          <div className="upload-text d-flex align-items-center justify-content-center">
+                            <Camera />
+                            <span>Upload Logo</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="ec-right">
+                    <div className="row">
+                      <div className="col-4">
+                        <div className="form-group">
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="companyName"
+                            aria-describedby="companyName"
+                            placeholder="Enter"
+                            required
+                            defaultValue={customerData.name}
+                            onChange={(e) =>
+                              setCompanyName((prev) => ({
+                                ...prev,
+                                value: e.target.value
+                              }))
+                            }
+                          />
+                          <label className="text-label" htmlFor="companyName">
+                            Company Name
+                          </label>
+                          {companyName.errors && (
+                            <small
+                              className="form-error"
+                              style={{ color: 'red' }}
+                            >
+                              {companyName.errors}
+                            </small>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="ec-footerbtns d-flex align-items-center justify-content-end">
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSubmit}
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
           <div className="customer-users-details">
             {employeeData.length === 0 ? (
               <>
@@ -276,36 +488,33 @@ const CustomerProfile = (props) => {
                     <tbody>
                       {currentItems.map((employee) => {
                         return (
-                          <tr>
+                          <tr key={employee.id}>
                             <td>{employee.display_name}</td>
                             <td>{employee.email}</td>
-                            <td>
-                              {roleDisplayMap[employee.role]}
-                            </td>
-                            {currentUserRole === 'admin' && <td>
-                              <div className="action-wrapper">
-                                <button
-                                  type="button"
-                                  className="btn btn-secondary btn-sm"
-                                  onClick={() => handleEdit(employee)}
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn btn-secondary btn-sm"
-                                  // onClick={() =>
-                                  //   handleDeleteEmployee(employee.emp_id)
-                                  // }
-                                  onClick={() => {
-                                    setEmpId(employee.emp_id);
-                                    toggleConfirmModal();
-                                  }}
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            </td>}
+                            <td>{roleDisplayMap[employee.role]}</td>
+                            {currentUserRole === 'admin' && (
+                              <td>
+                                <div className="action-wrapper">
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => handleEdit(employee)}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => {
+                                      setEmpId(employee.emp_id);
+                                      toggleConfirmModal();
+                                    }}
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </td>
+                            )}
                           </tr>
                         );
                       })}

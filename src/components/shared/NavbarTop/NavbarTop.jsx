@@ -97,7 +97,7 @@ const NavbarTop = ({...props}) => {
                 </NavLink>
                 {navDrop ? (
                   <div className="nav-dropdown" ref={ref}>
-                    {localStorage.getItem('roleId') === '0' &&
+                    {user?.is_superuser &&
                       !window.location.pathname.includes('admin-user') && (
                       <a
                         href="/admin-user"

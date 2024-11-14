@@ -136,12 +136,46 @@ const acceptInvitation = async (teamId, invitationId) => {
     });
 }
 
+const updateTeamDetails = async (teamId, data) => {
+    return await axiosInstance({
+        method: 'put',
+        url: `/teams/api/teams/${teamId}/`,
+        data
+    });
+}
+
+const uploadTeamLogo = async (teamId, formData) => {
+    return await axiosInstance({
+        method: 'post',
+        url: `/teams/api/teams/${teamId}/upload-logo/`,
+        data: formData
+    });
+}
+
+const updateUserStatus = async (userId, isActive) => {
+    try {
+        const response = await axiosInstance({
+            method: 'patch',
+            url: `/api/auth/user/update-status/`,
+            data: {
+                user_id: userId,
+                is_active: isActive,
+            }
+        });
+        return response.data; // Return the response data for further use
+    } catch (error) {
+        console.error("Error updating user status", error);
+        throw error; // Optionally, throw the error to handle it in the calling component
+    }
+};
+
 export {
     login, 
     getAuthTokenFromRefreshToken, 
     getCurrentUserData,
     getUserRoleInTeam,
-    getTeamDetails, 
+    getTeamDetails,
+    updateTeamDetails, 
     getUserTeams, 
     updateUserTeamMembership,
     sendInvitation, 
@@ -149,5 +183,7 @@ export {
     acceptInvitation,
     register,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    uploadTeamLogo,
+    updateUserStatus,
 }
