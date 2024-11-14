@@ -293,7 +293,8 @@ const ProjectLogs = () => {
       Object.values(pdfFile)?.forEach((file) => data.append("files", file));
       const response = await uploadFiles(data)
       if (response.data) {
-        // console.log(response.data);
+        const check_response = await getProjectDetails(projectId);
+        setDocumentData(check_response.data.document_details);
         setUploadLoading(false);
         setAlreadyExistingFiles(response.data.already_exist);
         setModal(false);
