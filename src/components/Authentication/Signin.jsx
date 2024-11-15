@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReactComponent as Mail } from '../../assets/images/mail.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
@@ -19,6 +19,15 @@ const Signin = (props) => {
   const [password, setPassword] = useState({ value: '', errors: '' });
   const toggleType = () => setShowPwd(!showPwd);
   const history = useNavigate();
+
+
+  useEffect(() => {
+    const token = localStorage.getItem('jwt');
+    const teamId = localStorage.getItem('currentTeamId'); 
+    if (token && teamId) {
+      history(`/project-list/${teamId}`); 
+    }
+  }, [history]);
 
   const validate = () => {
     let error = false;
@@ -42,6 +51,11 @@ const Signin = (props) => {
         console.log(response);
         if (response.data.status === 'success') {
           setUserDetails(response.data.jwt);
+
+
+          localStorage.setItem('jwt', response.data.jwt);
+
+
           const teams = await getUserTeams();
           console.log(teams);
           if (teams.data.results.length === 1) {
