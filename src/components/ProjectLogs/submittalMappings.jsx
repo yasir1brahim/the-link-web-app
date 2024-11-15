@@ -88,7 +88,7 @@ const SubmittalMappings = () => {
         return res;
       });
       setLoading(false);
-      navigate(`/customer-profile?id=${customerId}`);
+      navigate(`/company-profile/${customerId}`);
     } catch (error) {
       handleError(error);
     }

@@ -6,12 +6,13 @@ import HelpOutlineSharpIcon from '@mui/icons-material/HelpOutlineSharp';
 import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
 import { CircularProgress } from "@mui/material";
 import {AuthContext} from '../../../auth/authcontext'
-import { getUserTeams } from '../../../api/Authentication/api';
+import { getUserTeams, getUserRoleInTeam } from '../../../api/Authentication/api';
 import { getHomeUrl } from '../../../utils/navigation';
 import { useNavigate } from 'react-router-dom';
 
 const NavbarTop = ({...props}) => {
   const [navDrop, setNavDrop] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { user, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -49,6 +50,28 @@ const NavbarTop = ({...props}) => {
     setNavDrop(!navDrop);
   }
 
+  useEffect(() => {
+    const checkAdminRole = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const response = await getUserTeams(accessToken);
+        const teams = response.data.results;
+        const userId = localStorage.getItem('userId');
+  
+        const roles = await Promise.all(
+          teams.map((team) => getUserRoleInTeam(userId, team.id))
+        );
+  
+        if (roles.includes('admin')) {
+          setIsAdmin(true);
+        }
+      } catch (error) {
+        console.error('Error checking admin role:', error);
+      }
+    };
+  
+    checkAdminRole();
+  }, []);
 
   return (
     <section className="navigation-wrapper d-flex align-items-center justify-content-center">
@@ -126,9 +149,9 @@ const NavbarTop = ({...props}) => {
                         <div>Manage Excel Export</div>
                       </div>
                     )}
-                    {localStorage.getItem('roleId') === '2' && (
+                    {isAdmin && (
                       <a
-                        href="/customer-profile"
+                        href="/company-profile"
                         className="navlist"
                         onClick={toggleDrop}
                       >

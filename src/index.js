@@ -93,9 +93,9 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><AdminLanding /></ProtectedRoute>,
   },
   {
-    path: "/customer-profile",
+    path: "/company-profile/:id",
     element: <ProtectedRoute><CustomerProfile /></ProtectedRoute>,
-  },
+  }
 ])
 
 

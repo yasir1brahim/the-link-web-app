@@ -19,6 +19,7 @@ import handleError from '../../config/errorHandler';
 import { get } from 'lodash';
 import Procore from '../ProjectLogs/procore';
 import Loader from '../shared/Loader/Loader';
+import { useParams } from 'react-router-dom';
 import { getTeamDetails, getUserRoleInTeam, updateTeamDetails, uploadTeamLogo } from '../../api/Authentication/api';
 
 const CustomerProfile = (props) => {
@@ -48,7 +49,7 @@ const CustomerProfile = (props) => {
   const [companyList, setCompanyList] = useState([]);
   const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [searchParams] = useSearchParams();
-  const customerId = searchParams.get('id');
+  const { id: customerId } = useParams(); 
   const authCode = searchParams.get('code');
   const [profilePicture, setProfilePicture] = useState({ value: '', errors: '' });
   const [teamId, setTeamId] = useState('');
@@ -56,7 +57,7 @@ const CustomerProfile = (props) => {
   const redirectUri = window.location.href.includes('https://app.thelink.ai')
     ? `https://app.thelink.ai/customer-profile?id=${customerId}`
     : window.location.href.includes('http://localhost:3000')
-    ? `http://localhost:3000/customer-profile?id=${customerId}`
+    ? `http://localhost:3000/company-profile/${customerId}`
     : `https://app-sl.thelink.ai/customer-profile?id=${customerId}`;
   const clientId = window.location.href.includes('https://app.thelink.ai')
     ? '974cb8bfa7aaadc4759a6d60a2d8427387d32db0c4fa4dfbe1da15b5ce3abfc5'

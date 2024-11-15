@@ -77,7 +77,7 @@ const Companies = () => {
                           <tr key={company?.id}>
                             <td>
                               <a
-                                href={`/customer-profile?id=${company.id}`}
+                                href={`/company-profile/${company.id}`}
                               >
                                 {company.name}
                               </a>
