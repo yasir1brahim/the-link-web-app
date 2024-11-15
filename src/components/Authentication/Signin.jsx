@@ -20,7 +20,6 @@ const Signin = (props) => {
   const toggleType = () => setShowPwd(!showPwd);
   const history = useNavigate();
 
-
   useEffect(() => {
     const token = localStorage.getItem('jwt');
     const teamId = localStorage.getItem('currentTeamId'); 
@@ -51,11 +50,7 @@ const Signin = (props) => {
         console.log(response);
         if (response.data.status === 'success') {
           setUserDetails(response.data.jwt);
-
-
           localStorage.setItem('jwt', response.data.jwt);
-
-
           const teams = await getUserTeams();
           console.log(teams);
           if (teams.data.results.length === 1) {
