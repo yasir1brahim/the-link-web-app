@@ -17,7 +17,7 @@ import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 import { ConfirmationModal } from './confirmationModal';
 import handleError from '../../config/errorHandler';
 import { get } from 'lodash';
-import Procore from '../ProjectLogs/procore';
+// import Procore from '../ProjectLogs/procore';
 import Loader from '../shared/Loader/Loader';
 import { getTeamDetails, getUserRoleInTeam, updateTeamDetails, uploadTeamLogo } from '../../api/Authentication/api';
 
@@ -44,9 +44,9 @@ const CustomerProfile = (props) => {
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setLoading] = useState(false);
-  const [procoreModal, setProcoreModal] = useState(false);
-  const [companyList, setCompanyList] = useState([]);
-  const toggleProcoreModal = () => setProcoreModal(!procoreModal);
+  // const [procoreModal, setProcoreModal] = useState(false);
+  // const [companyList, setCompanyList] = useState([]);
+  // const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [searchParams] = useSearchParams();
   const customerId = searchParams.get('id');
   const authCode = searchParams.get('code');
@@ -71,45 +71,45 @@ const CustomerProfile = (props) => {
   }
 
 
-  useEffect(() => {
-    if (authCode) {
-      const fetchData = async () => {
-        const accessTokenData = await axiosInstance({
-          method: 'post',
-          url: '/procore/access_token',
-          data: {
-            code: authCode,
-            redirect_uri: redirectUri
-          }
-        });
-        localStorage.setItem(
-          'procore_access_token',
-          accessTokenData?.data.data.access_token
-        );
-        const res = await axiosInstance({
-          method: 'get',
-          url: `/procore/company_mapping/${customerId}`
-        });
+  // useEffect(() => {
+  //   if (authCode) {
+  //     const fetchData = async () => {
+  //       const accessTokenData = await axiosInstance({
+  //         method: 'post',
+  //         url: '/procore/access_token',
+  //         data: {
+  //           code: authCode,
+  //           redirect_uri: redirectUri
+  //         }
+  //       });
+  //       localStorage.setItem(
+  //         'procore_access_token',
+  //         accessTokenData?.data.data.access_token
+  //       );
+  //       const res = await axiosInstance({
+  //         method: 'get',
+  //         url: `/procore/company_mapping/${customerId}`
+  //       });
 
-        if (get(res, 'status') === 200) {
-          navigate(`/submital-mappings?customerId=${customerId}`);
-        }
+  //       if (get(res, 'status') === 200) {
+  //         navigate(`/submital-mappings?customerId=${customerId}`);
+  //       }
 
-        if (get(res, 'status') === 204) {
-          setProcoreModal(true);
-          const companyResp = await axiosInstance({
-            method: 'get',
-            url: '/procore/companies'
-          });
-          setCompanyList(companyResp?.data.data);
-        }
-      };
+  //       if (get(res, 'status') === 204) {
+  //         setProcoreModal(true);
+  //         const companyResp = await axiosInstance({
+  //           method: 'get',
+  //           url: '/procore/companies'
+  //         });
+  //         setCompanyList(companyResp?.data.data);
+  //       }
+  //     };
 
-      fetchData().catch((error) => {
-        handleError(error);
-      });
-    }
-  }, [authCode, customerId, navigate, redirectUri]);
+  //     fetchData().catch((error) => {
+  //       handleError(error);
+  //     });
+  //   }
+  // }, [authCode, customerId, navigate, redirectUri]);
 
   const fetchData = async (
     customerId,
@@ -384,7 +384,7 @@ const CustomerProfile = (props) => {
           <div className="customer-users-details">
             {employeeData.length === 0 ? (
               <>
-                <div style={{ float: 'right' }}>
+                {/* <div style={{ float: 'right' }}>
                   <div className="table-bulk-changes">
                     <button
                       type="button"
@@ -403,7 +403,7 @@ const CustomerProfile = (props) => {
                     <b>Procore users </b>: be sure to click the Procore
                     submittal mappings button.
                   </label>
-                </div>
+                </div> */}
                 <div
                   onClick={toggleModal}
                   className="nouser-wrapper d-flex align-items-center justify-content-center w-100"
@@ -438,7 +438,7 @@ const CustomerProfile = (props) => {
                   </div>
                   <div>
                     <div className="table-bulk-changes">
-                      <button
+                      {/* <button
                         type="button"
                         className="btn btn-secondary btn-sm"
                       >
@@ -448,7 +448,7 @@ const CustomerProfile = (props) => {
                         >
                           Procore Submittal Mappings
                         </a>
-                      </button>
+                      </button> */}
                       <button
                         type="button"
                         className="btn btn-secondary btn-sm btn-gap"
@@ -457,10 +457,10 @@ const CustomerProfile = (props) => {
                         + Add Employee
                       </button>
                     </div>
-                    <label className="table-entries">
+                    {/* <label className="table-entries">
                       <b>Procore users </b>: be sure to click the Procore
                       submittal mappings button.
-                    </label>
+                    </label> */}
                   </div>
                 </div>
                 <div className="l-table-wrapper">
@@ -568,7 +568,7 @@ const CustomerProfile = (props) => {
         pauseOnHover
       />
       {isLoading && <Loader showComponentLoader={true} />}
-      <Procore
+      {/* <Procore
         companyId={customerId}
         companyList={companyList}
         procoreModal={procoreModal}
@@ -576,7 +576,7 @@ const CustomerProfile = (props) => {
         toggleProcoreModal={toggleProcoreModal}
         setProcoreModal={setProcoreModal}
         isFromCustomerScreen={true}
-      />
+      /> */}
     </div>
   );
 };

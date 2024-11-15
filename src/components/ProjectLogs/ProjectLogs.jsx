@@ -16,8 +16,8 @@ import PdfWrapper from "../../pdfWrapper";
 import FileDownload from "js-file-download";
 import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
 import { useSearchParams } from "react-router-dom";
-import Procore from "./procore";
-import ManageProcore from "./manageProcore";
+// import Procore from "./procore";
+// import ManageProcore from "./manageProcore";
 import { ReactComponent as SearchIcon } from "../../assets/images/search.svg";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
@@ -49,7 +49,7 @@ const ProjectLogs = () => {
   const [isUploadLoading, setUploadLoading] = useState(false);
 
   const [saveListName, setToggleSaveListNameModal] = useState(false);
-  const [exportToProcoreModal, setExportToProcoreModal] = useState(false);
+  // const [exportToProcoreModal, setExportToProcoreModal] = useState(false);
   const toggleSaveListName = () => setToggleSaveListNameModal(!saveListName);
   const [listName, setListName] = useState({ value: "", errors: "" });
   const [viewList, setList] = useState([]);
@@ -99,18 +99,18 @@ const ProjectLogs = () => {
     ? `http://localhost:3000/`
     : `https://app-sl.thelink.ai/`;
   //Procore states
-  const [procoreModal, setProcoreModal] = useState(false);
-  const toggleProcoreModal = () => setProcoreModal(!procoreModal);
-  const [manageProcoreModal, setManageProcoreModal] = useState(false);
-  const toggleManageProcoreModal = () =>
-    setManageProcoreModal(!manageProcoreModal);
+  // const [procoreModal, setProcoreModal] = useState(false);
+  // const toggleProcoreModal = () => setProcoreModal(!procoreModal);
+  // const [manageProcoreModal, setManageProcoreModal] = useState(false);
+  // const toggleManageProcoreModal = () =>
+  //   setManageProcoreModal(!manageProcoreModal);
   const [manageExcelExportModal, setManageExcelExportModal] = useState(false);
   const toggleManageExcelExportModal = () =>
     setManageExcelExportModal(!manageExcelExportModal);
-  const [changeProcoreAccountModal, setChangeProcoreAccountModal] =
-    useState(false);
-  const toggleChangeProcoreAccountModal = () =>
-    setChangeProcoreAccountModal(!changeProcoreAccountModal);
+  // const [changeProcoreAccountModal, setChangeProcoreAccountModal] =
+  //   useState(false);
+  // const toggleChangeProcoreAccountModal = () =>
+  //   setChangeProcoreAccountModal(!changeProcoreAccountModal);
   const [initLoading, setInitLoading] = useState(false);
   const [loadingProjectDetails, setLoadingProjectDetails] = useState(false);
   const [companyList, setCompanyList] = useState([]);
@@ -129,30 +129,30 @@ const ProjectLogs = () => {
     projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null);
   const [projectName, setProjectName] = useState("");
   const authCode = searchParams.get("code");
-  const procoreClientId = window.location.href.includes(
-    "https://app.thelink.ai"
-  )
-    ? "974cb8bfa7aaadc4759a6d60a2d8427387d32db0c4fa4dfbe1da15b5ce3abfc5"
-    : "ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9";
-  const procoreAuthBaseUrl = window.location.href.includes(
-    "https://app.thelink.ai"
-  )
-    ? "https://login.procore.com"
-    : "https://login-sandbox.procore.com";
-  const procoreBaseUrl = window.location.href.includes("https://app.thelink.ai")
-    ? "https://procore.com"
-    : "https://sandbox.procore.com";
-  const procoreAuthUrl = `${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId}`;
-  const procoreAccessToken = localStorage.getItem("procore_access_token");
+  // const procoreClientId = window.location.href.includes(
+  //   "https://app.thelink.ai"
+  // )
+  //   ? "974cb8bfa7aaadc4759a6d60a2d8427387d32db0c4fa4dfbe1da15b5ce3abfc5"
+  //   : "ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9";
+  // const procoreAuthBaseUrl = window.location.href.includes(
+  //   "https://app.thelink.ai"
+  // )
+  //   ? "https://login.procore.com"
+  //   : "https://login-sandbox.procore.com";
+  // const procoreBaseUrl = window.location.href.includes("https://app.thelink.ai")
+  //   ? "https://procore.com"
+  //   : "https://sandbox.procore.com";
+  // const procoreAuthUrl = `${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId}`;
+  // const procoreAccessToken = localStorage.getItem("procore_access_token");
   const [loadingView, setLoadingView] = useState(false);
-  const [procoreAuthUserInfo, setProcoreAuthUserInfo] = useState(null);
-  const [procoreCompanyName, setProcoreCompanyName] = useState("");
-  const [procoreProjectName, setProcoreProjectName] = useState("");
-  const [procoreProjectId, setProcoreProjectId] = useState(null);
-  const [procoreSubmittalManagerId, setProcoreSubmittalManagerId] =
-    useState(null);
-  const [procoreSubmittalManagerName, setProcoreSubmittalManagerName] =
-    useState("");
+  // const [procoreAuthUserInfo, setProcoreAuthUserInfo] = useState(null);
+  // const [procoreCompanyName, setProcoreCompanyName] = useState("");
+  // const [procoreProjectName, setProcoreProjectName] = useState("");
+  // const [procoreProjectId, setProcoreProjectId] = useState(null);
+  // const [procoreSubmittalManagerId, setProcoreSubmittalManagerId] =
+  //   useState(null);
+  // const [procoreSubmittalManagerName, setProcoreSubmittalManagerName] =
+  //   useState("");
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [totalCount, setTotalCount] = useState(0);
@@ -179,40 +179,40 @@ const ProjectLogs = () => {
 
   const { user, isAuthenticated } = useContext(AuthContext);
 
-  const getProcoreAccessTokenData = async () => {
-    try {
-      const accessTokenData = await axiosInstance({
-        method: "get",
-        url: "/procore/refresh_token",
-        params: {
-          user_id: localStorage.getItem("userId"),
-        },
-      });
-      if (accessTokenData?.status === 200) {
-        localStorage.setItem(
-          "procore_access_token",
-          accessTokenData?.data.data.access_token
-        );
-      }
-    } catch (error) {
-      console.log(error);
-      localStorage.setItem("procore_access_token", null);
-    }
-  };
+  // const getProcoreAccessTokenData = async () => {
+  //   try {
+  //     const accessTokenData = await axiosInstance({
+  //       method: "get",
+  //       url: "/procore/refresh_token",
+  //       params: {
+  //         user_id: localStorage.getItem("userId"),
+  //       },
+  //     });
+  //     if (accessTokenData?.status === 200) {
+  //       localStorage.setItem(
+  //         "procore_access_token",
+  //         accessTokenData?.data.data.access_token
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //     localStorage.setItem("procore_access_token", null);
+  //   }
+  // };
 
-  const getProcoreAuthUser = async () => {
-    if (procoreAccessToken !== "null") {
-      const resp = await axiosInstance({
-        method: "get",
-        url: "/procore/me",
-      });
-      if (resp?.status === 200) {
-        setProcoreAuthUserInfo(resp?.data.data);
-      } else {
-        setProcoreAuthUserInfo(null);
-      }
-    }
-  };
+  // const getProcoreAuthUser = async () => {
+  //   if (procoreAccessToken !== "null") {
+  //     const resp = await axiosInstance({
+  //       method: "get",
+  //       url: "/procore/me",
+  //     });
+  //     if (resp?.status === 200) {
+  //       setProcoreAuthUserInfo(resp?.data.data);
+  //     } else {
+  //       setProcoreAuthUserInfo(null);
+  //     }
+  //   }
+  // };
 
   const getUserRoleInProject = async (projectData) => {
     console.log('user', user);
@@ -228,15 +228,15 @@ const ProjectLogs = () => {
   }
 
   useEffect(() => {
-    const initLoading = async () => {
-      setInitLoading(true);
-      await getProcoreAccessTokenData();
-      await getProcoreAuthUser();
-      if (projectId !== null) {
-        await checkProjectMapping();
-      }
-      setInitLoading(false);
-    };
+    // const initLoading = async () => {
+    //   setInitLoading(true);
+    //   await getProcoreAccessTokenData();
+    //   await getProcoreAuthUser();
+    //   if (projectId !== null) {
+    //     await checkProjectMapping();
+    //   }
+    //   setInitLoading(false);
+    // };
     const fetchProjectData = async () => {
       setLoading(true);
       const response = await getProjectDetails(projectId);
@@ -254,7 +254,7 @@ const ProjectLogs = () => {
       handleError(error);
     });
 
-    initLoading();
+    // initLoading();
   }, [user, projectId]);
 
   useEffect(() => {
@@ -347,149 +347,149 @@ const ProjectLogs = () => {
   // ?.map((row) => JSON.parse(row));
 
   // onClick export Procore, we redirect to the same page and POST access token // gets called first
-  useEffect(() => {
-    if (authCode) {
-      const fetchData = async () => {
-        const accessTokenData = await axiosInstance({
-          method: "post",
-          url: "/procore/access_token",
-          data: {
-            code: authCode,
-            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId}`,
-          },
-        });
-        localStorage.setItem(
-          "procore_access_token",
-          accessTokenData?.data.data.access_token
-        );
+  // useEffect(() => {
+  //   if (authCode) {
+  //     const fetchData = async () => {
+  //       const accessTokenData = await axiosInstance({
+  //         method: "post",
+  //         url: "/procore/access_token",
+  //         data: {
+  //           code: authCode,
+  //           redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId}`,
+  //         },
+  //       });
+  //       localStorage.setItem(
+  //         "procore_access_token",
+  //         accessTokenData?.data.data.access_token
+  //       );
 
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.delete("code");
-        setSearchParams(newSearchParams);
-        if (localStorage.getItem("change_procore_account") === "true") {
-          localStorage.setItem("change_procore_account", false);
-          return;
-        }
-        await checkProjectMappingBeforeExport();
-        await getProcoreAuthUser();
-      };
+  //       const newSearchParams = new URLSearchParams(searchParams);
+  //       newSearchParams.delete("code");
+  //       setSearchParams(newSearchParams);
+  //       if (localStorage.getItem("change_procore_account") === "true") {
+  //         localStorage.setItem("change_procore_account", false);
+  //         return;
+  //       }
+  //       await checkProjectMappingBeforeExport();
+  //       await getProcoreAuthUser();
+  //     };
 
-      fetchData().catch((error) => {
-        handleError(error);
-      });
-    }
-  }, [
-    authCode,
-    customerId,
-    projectId,
-    selectedRows,
-    searchParams,
-    baseUrl,
-  ]);
+  //     fetchData().catch((error) => {
+  //       handleError(error);
+  //     });
+  //   }
+  // }, [
+  //   authCode,
+  //   customerId,
+  //   projectId,
+  //   selectedRows,
+  //   searchParams,
+  //   baseUrl,
+  // ]);
 
-  const checkProjectMappingBeforeExport = async () => {
-    const res = await axiosInstance({
-      method: "get",
-      url: `/procore/project_mapping/${projectId}`,
-    });
+  // const checkProjectMappingBeforeExport = async () => {
+  //   const res = await axiosInstance({
+  //     method: "get",
+  //     url: `/procore/project_mapping/${projectId}`,
+  //   });
 
-    if (get(res, "status") === 200) {
-      setCompanyId(get(res, "data.data.procore_company_id"));
-      setProcoreCompanyName(get(res, "data.data.procore_company_name"));
-      localStorage.setItem(
-        "companyId",
-        get(res, "data.data.procore_company_id")
-      );
-      localStorage.setItem("projectId", projectId);
-      localStorage.setItem("customerId", customerId);
-      localStorage.setItem("projectName", projectName);
-      setProcoreProjectName(get(res, "data.data.procore_project_name"));
-      setProcoreProjectId(get(res, "data.data.procore_project_id"));
-      setProcoreSubmittalManagerId(get(res, "data.data.submittal_manager_id"));
-      setProcoreSubmittalManagerName(
-        get(res, "data.data.procore_submittal_manager_name")
-      );
-      setExportToProcoreModal(true);
-    }
-    if (get(res, "status") === 204) {
-      setProcoreModal(true);
-      const companyResp = await axiosInstance({
-        method: "get",
-        url: "/procore/companies",
-      });
-      setCompanyList(companyResp?.data.data);
-    }
-  };
+  //   if (get(res, "status") === 200) {
+  //     setCompanyId(get(res, "data.data.procore_company_id"));
+  //     setProcoreCompanyName(get(res, "data.data.procore_company_name"));
+  //     localStorage.setItem(
+  //       "companyId",
+  //       get(res, "data.data.procore_company_id")
+  //     );
+  //     localStorage.setItem("projectId", projectId);
+  //     localStorage.setItem("customerId", customerId);
+  //     localStorage.setItem("projectName", projectName);
+  //     setProcoreProjectName(get(res, "data.data.procore_project_name"));
+  //     setProcoreProjectId(get(res, "data.data.procore_project_id"));
+  //     setProcoreSubmittalManagerId(get(res, "data.data.submittal_manager_id"));
+  //     setProcoreSubmittalManagerName(
+  //       get(res, "data.data.procore_submittal_manager_name")
+  //     );
+  //     setExportToProcoreModal(true);
+  //   }
+  //   if (get(res, "status") === 204) {
+  //     setProcoreModal(true);
+  //     const companyResp = await axiosInstance({
+  //       method: "get",
+  //       url: "/procore/companies",
+  //     });
+  //     setCompanyList(companyResp?.data.data);
+  //   }
+  // };
 
-  const checkProjectMapping = async () => {
-    const res = await axiosInstance({
-      method: "get",
-      url: `/procore/project_mapping/${projectId}`,
-    });
+  // const checkProjectMapping = async () => {
+  //   const res = await axiosInstance({
+  //     method: "get",
+  //     url: `/procore/project_mapping/${projectId}`,
+  //   });
 
-    if (get(res, "status") === 500) {
-      return;
-    }
-    if (get(res, "status") === 200) {
-      setCompanyId(get(res, "data.data.procore_company_id"));
-      setProcoreCompanyName(get(res, "data.data.procore_company_name"));
-      localStorage.setItem(
-        "companyId",
-        get(res, "data.data.procore_company_id")
-      );
-      localStorage.setItem("projectId", projectId);
-      localStorage.setItem("customerId", customerId);
-      localStorage.setItem("projectName", projectName);
-      setProcoreProjectName(get(res, "data.data.procore_project_name"));
-      setProcoreProjectId(get(res, "data.data.procore_project_id"));
-      setProcoreSubmittalManagerId(get(res, "data.data.submittal_manager_id"));
-      setProcoreSubmittalManagerName(
-        get(res, "data.data.procore_submittal_manager_name")
-      );
-    }
-  };
+  //   if (get(res, "status") === 500) {
+  //     return;
+  //   }
+  //   if (get(res, "status") === 200) {
+  //     setCompanyId(get(res, "data.data.procore_company_id"));
+  //     setProcoreCompanyName(get(res, "data.data.procore_company_name"));
+  //     localStorage.setItem(
+  //       "companyId",
+  //       get(res, "data.data.procore_company_id")
+  //     );
+  //     localStorage.setItem("projectId", projectId);
+  //     localStorage.setItem("customerId", customerId);
+  //     localStorage.setItem("projectName", projectName);
+  //     setProcoreProjectName(get(res, "data.data.procore_project_name"));
+  //     setProcoreProjectId(get(res, "data.data.procore_project_id"));
+  //     setProcoreSubmittalManagerId(get(res, "data.data.submittal_manager_id"));
+  //     setProcoreSubmittalManagerName(
+  //       get(res, "data.data.procore_submittal_manager_name")
+  //     );
+  //   }
+  // };
 
-  const handleExportToProcoreButtonClick = async () => {
-    await checkProjectMappingBeforeExport();
-  };
+  // const handleExportToProcoreButtonClick = async () => {
+  //   await checkProjectMappingBeforeExport();
+  // };
 
-  const handleExportToProcore = async () => {
-    try {
-      // setStatus(get(statusResp, 'data.data'));
-      setLoading(true);
-      const resp = await axiosInstance({
-        method: "post",
-        url: "/procore/create_submittals",
-        data: {
-          project_id: Number(projectId),
-          records: selectedRows, // array of ids
-          // status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
-        },
-      });
-      if (resp.status === 200) {
-        // setProjectMappingsNoContent(false)
-        setLoading(false);
-        toast.success("Successfully exported to Procore!", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        localStorage.setItem("selectedRows", "");
-        setSelected([]);
-      }
-      // setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      console.log("error", error);
-      localStorage.setItem("selectedRows", "");
-      setSelected([]);
-      handleError(error);
-    }
-  };
+  // const handleExportToProcore = async () => {
+  //   try {
+  //     // setStatus(get(statusResp, 'data.data'));
+  //     setLoading(true);
+  //     const resp = await axiosInstance({
+  //       method: "post",
+  //       url: "/procore/create_submittals",
+  //       data: {
+  //         project_id: Number(projectId),
+  //         records: selectedRows, // array of ids
+  //         // status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
+  //       },
+  //     });
+  //     if (resp.status === 200) {
+  //       // setProjectMappingsNoContent(false)
+  //       setLoading(false);
+  //       toast.success("Successfully exported to Procore!", {
+  //         position: "bottom-center",
+  //         autoClose: 5000,
+  //         hideProgressBar: true,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //       });
+  //       localStorage.setItem("selectedRows", "");
+  //       setSelected([]);
+  //     }
+  //     // setLoading(false);
+  //   } catch (error) {
+  //     setLoading(false);
+  //     console.log("error", error);
+  //     localStorage.setItem("selectedRows", "");
+  //     setSelected([]);
+  //     handleError(error);
+  //   }
+  // };
 
   const handleDeleteLogs = async () => {
     if (selected?.length !== 0) {
@@ -880,60 +880,60 @@ const ProjectLogs = () => {
     setAppliedFilters(newFilters);
   };
 
-  const handleProceedWithExport = () => {
-    handleExportToProcore();
-    setExportToProcoreModal(false);
-    toast.info(
-      `Exporting ${
-        selectedRows === "All"
-          ? logIdList.length
-          : JSON.parse(selectedRows).length
-      } submittals to ${procoreProjectName} project in Procore...`,
-      {
-        position: "bottom-center",
-        autoClose: 6000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      }
-    );
-  };
+  // const handleProceedWithExport = () => {
+  //   handleExportToProcore();
+  //   setExportToProcoreModal(false);
+  //   toast.info(
+  //     `Exporting ${
+  //       selectedRows === "All"
+  //         ? logIdList.length
+  //         : JSON.parse(selectedRows).length
+  //     } submittals to ${procoreProjectName} project in Procore...`,
+  //     {
+  //       position: "bottom-center",
+  //       autoClose: 6000,
+  //       hideProgressBar: true,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //       progress: undefined,
+  //     }
+  //   );
+  // };
 
-  const handleManageProcoreButtonClick = async () => {
-    setManageProcoreModal(true);
-  };
+  // const handleManageProcoreButtonClick = async () => {
+  //   setManageProcoreModal(true);
+  // };
 
-  const deleteProcoreToken = async () => {
-    try {
-      const resp = await axiosInstance({
-        method: "get",
-        url: "/procore/delete_token",
-        params: {
-          user_id: localStorage.getItem("userId"),
-        },
-      });
-      console.log(resp);
-    } catch (error) {
-      handleError(error);
-    }
-  };
+  // const deleteProcoreToken = async () => {
+  //   try {
+  //     const resp = await axiosInstance({
+  //       method: "get",
+  //       url: "/procore/delete_token",
+  //       params: {
+  //         user_id: localStorage.getItem("userId"),
+  //       },
+  //     });
+  //     console.log(resp);
+  //   } catch (error) {
+  //     handleError(error);
+  //   }
+  // };
 
-  const handleChangeProcoreAccount = async () => {
-    setManageProcoreModal(false);
-    localStorage.setItem("change_procore_account", true);
-    await deleteProcoreToken();
-    window.location.href = `${procoreAuthUrl}`;
-  };
+  // const handleChangeProcoreAccount = async () => {
+  //   setManageProcoreModal(false);
+  //   localStorage.setItem("change_procore_account", true);
+  //   await deleteProcoreToken();
+  //   window.location.href = `${procoreAuthUrl}`;
+  // };
 
-  const handleProcoreLogout = async () => {
-    const link = document.createElement("a");
-    link.href = procoreBaseUrl;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.click();
-  };
+  // const handleProcoreLogout = async () => {
+  //   const link = document.createElement("a");
+  //   link.href = procoreBaseUrl;
+  //   link.target = "_blank";
+  //   link.rel = "noopener noreferrer";
+  //   link.click();
+  // };
 
   const handleManageExcelExportButtonClick = async () => {
     setManageExcelExportModal(true);
@@ -944,7 +944,7 @@ const ProjectLogs = () => {
       <NavbarTop
         qaDashboard={state?.qaDashboard}
         projectTitle={state?.projectName || projectName || ""}
-        handleManageProcoreButtonClick={handleManageProcoreButtonClick}
+        // handleManageProcoreButtonClick={handleManageProcoreButtonClick}
         handleManageExcelExportButtonClick={handleManageExcelExportButtonClick}
         initLoading={initLoading}
         loadingProjectDetails={loadingProjectDetails}
@@ -972,9 +972,9 @@ const ProjectLogs = () => {
             toggle={toggle}
             handleExportExcel={handleExportExcel}
             handleExportJetBuild={handleExportJetBuild}
-            procoreAccessToken={procoreAccessToken}
-            procoreAuthUrl={procoreAuthUrl}
-            handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
+            // procoreAccessToken={procoreAccessToken}
+            // procoreAuthUrl={procoreAuthUrl}
+            // handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
             handleDeleteLogs={handleDeleteLogs}
             showClearFilters={showClearFilters}
             clearFilters={clearFilters}
@@ -1326,7 +1326,7 @@ const ProjectLogs = () => {
         toggleSuccessModal={toggleSuccessModal}
         alreadyExistingFiles={alreadyExistingFiles}
       />
-      <Procore
+      {/* <Procore
         companyId={companyId}
         companyList={companyList}
         procoreModal={procoreModal}
@@ -1334,8 +1334,8 @@ const ProjectLogs = () => {
         toggleProcoreModal={toggleProcoreModal}
         setProcoreModal={setProcoreModal}
         setExportToProcoreModal={setExportToProcoreModal}
-      />
-      <ManageProcore
+      /> */}
+      {/* <ManageProcore
         procoreAuthUserInfo={procoreAuthUserInfo}
         companyId={companyId}
         procoreCompanyName={procoreCompanyName}
@@ -1355,7 +1355,7 @@ const ProjectLogs = () => {
         setProcoreProjectName={setProcoreProjectName}
         setProcoreSubmittalManagerId={setProcoreSubmittalManagerId}
         setProcoreSubmittalManagerName={setProcoreSubmittalManagerName}
-      />
+      /> */}
       <Modal
         isOpen={saveListName}
         fade={false}
@@ -1486,7 +1486,7 @@ const ProjectLogs = () => {
         </ModalBody>
       </Modal>
 
-      <Modal
+      {/* <Modal
         isOpen={exportToProcoreModal}
         fade={false}
         toggle={() => setExportToProcoreModal(!exportToProcoreModal)}
@@ -1532,9 +1532,9 @@ const ProjectLogs = () => {
             </ModalFooter>
           </form>
         </ModalBody>
-      </Modal>
+      </Modal> */}
 
-      <Modal
+      {/* <Modal
         isOpen={changeProcoreAccountModal}
         fade={false}
         toggle={toggleChangeProcoreAccountModal}
@@ -1582,7 +1582,7 @@ const ProjectLogs = () => {
             </ModalFooter>
           </form>
         </ModalBody>
-      </Modal>
+      </Modal> */}
 
       {manageExcelExportModal && <ManageExcelExport
         manageExcelExportModal={manageExcelExportModal}

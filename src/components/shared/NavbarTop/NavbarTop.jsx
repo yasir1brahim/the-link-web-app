@@ -107,7 +107,7 @@ const NavbarTop = ({...props}) => {
                         View Admin Portal
                       </a>
                     )}
-                    {localStorage.getItem("roleId") !== "7" &&
+                    {/* {localStorage.getItem("roleId") !== "7" &&
                       props.handleManageProcoreButtonClick && (
                       <div
                         className="navlist flex"
@@ -117,7 +117,7 @@ const NavbarTop = ({...props}) => {
                         <div>Manage Procore Integration</div>
                         {(props.initLoading || props.loadingProjectDetails) && <CircularProgress size={12} />}
                       </div>
-                    )}
+                    )} */}
                     {props.handleManageExcelExportButtonClick && (
                       <div
                         className="navlist"
