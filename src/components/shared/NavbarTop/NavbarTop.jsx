@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { ReactComponent as Logo } from '../../../assets/images/logo-dark-v7.svg';
 import { ReactComponent as Down } from '../../../assets/images/chevron-bottom.svg';
 import HelpOutlineSharpIcon from '@mui/icons-material/HelpOutlineSharp';
-// import { ReactComponent as Notification } from '../../../assets/images/notificat.svg';
 import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
 import { CircularProgress } from "@mui/material";
 import {AuthContext} from '../../../auth/authcontext'
@@ -107,17 +106,6 @@ const NavbarTop = ({...props}) => {
                         View Admin Portal
                       </a>
                     )}
-                    {/* {localStorage.getItem("roleId") !== "7" &&
-                      props.handleManageProcoreButtonClick && (
-                      <div
-                        className="navlist flex"
-                        onClick={props.handleManageProcoreButtonClick}
-                        disabled={props.initLoading || props.loadingProjectDetails}
-                      >
-                        <div>Manage Procore Integration</div>
-                        {(props.initLoading || props.loadingProjectDetails) && <CircularProgress size={12} />}
-                      </div>
-                    )} */}
                     {props.handleManageExcelExportButtonClick && (
                       <div
                         className="navlist"

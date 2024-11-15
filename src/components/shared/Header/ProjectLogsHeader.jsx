@@ -8,7 +8,6 @@ import {
   DropdownToggle,
   DropdownItem,
 } from "reactstrap";
-// import { ReactComponent as Logo } from "../../../assets/images/procore-vector-logo.svg";
 import { ReactComponent as ExcelLogo } from "../../../assets/images/excel.svg";
 import { ReactComponent as JetBuildLogo} from "../../../assets/images/jet_build.svg";
 
@@ -119,15 +118,6 @@ const ProjectLogsHeader = ({ ...props }) => {
                   <ExcelLogo style={{ height: '90px' }} />
                 </DropdownItem>
                 <DropdownItem className="text-center">
-                  {/* {props.procoreAccessToken === 'null' ? (
-                    <a href={props.procoreAuthUrl} className="breadcrumb-text">
-                      <Logo style={{ height: '90px' }} />
-                    </a>
-                  ) : (
-                    <div onClick={props.handleExportToProcoreButtonClick}>
-                      <Logo style={{ height: '90px' }} />
-                    </div>
-                  )} */}
                 </DropdownItem>
                 <DropdownItem className="text-center" onClick={() => props.handleExportJetBuild(['All'])}>
                   <JetBuildLogo style={{ height: '90px' }} />
