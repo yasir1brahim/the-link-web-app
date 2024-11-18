@@ -50,7 +50,10 @@ const ProjectLogs = () => {
 
   const [saveListName, setToggleSaveListNameModal] = useState(false);
   const [exportToProcoreModal, setExportToProcoreModal] = useState(false);
-  const toggleSaveListName = () => setToggleSaveListNameModal(!saveListName);
+  const toggleSaveListName = () => {
+    setListName({ ...listName, errors: "" });
+    setToggleSaveListNameModal(!saveListName);
+  }
   const [listName, setListName] = useState({ value: "", errors: "" });
   const [viewList, setList] = useState([]);
   const [viewSavedList, setToggleViewSavedList] = useState(false);
@@ -1378,7 +1381,7 @@ const ProjectLogs = () => {
                       required
                       value={listName.value}
                       onChange={(e) => {
-                        setListName({ ...listName, value: e.target.value });
+                        setListName({ ...listName, value: e.target.value, errors: "" });
                       }}
                     />
                     <label className="text-label" htmlFor="saveSelectionName">
