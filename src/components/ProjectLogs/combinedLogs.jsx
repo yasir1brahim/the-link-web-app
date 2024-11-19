@@ -884,7 +884,7 @@ export default function CombinedLogs(props) {
                             </>
                           )
                         )}
-                        {props.listId === null && (
+                        {props.listId === null && editRow === "" && (
                           <>
                             <AddButton
                               onClick={() => {

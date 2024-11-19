@@ -107,7 +107,7 @@ const handleRestoreProject = async () => {
   let errors = false;
   if (!errors) {
       try {
-        const response = await toggleProjectStatus(restoreProject.id, 'restore', archiveProject.team);
+        const response = await toggleProjectStatus(restoreProject.id, 'restore', restoreProject.team);
 
           if (response?.data) {
               console.log('Project restored successfully:', response.data);
