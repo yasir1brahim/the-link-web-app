@@ -1369,7 +1369,7 @@ const ProjectLogs = () => {
         isOpen={saveListName}
         fade={false}
         toggle={toggleSaveListName}
-        onClosed={resetListName}  // Add this line
+        onClosed={resetListName}
         className="new-customer modal-md"
       >
         <ModalHeader>Save Selection</ModalHeader>
