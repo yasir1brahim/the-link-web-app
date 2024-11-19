@@ -8,11 +8,12 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
 import { login, getUserTeams } from '../../api/Authentication/api'
 import { AuthContext } from '../../auth/authcontext';
+import { getHomeUrl } from '../../utils/navigation';
 
 
 
 const Signin = (props) => {
-  const { setUserDetails } = useContext(AuthContext);
+  const { setUserDetails, isAuthenticated, user } = useContext(AuthContext);
 
   const [showPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState({ value: '', errors: '' });
@@ -22,11 +23,17 @@ const Signin = (props) => {
 
   useEffect(() => {
     const token = localStorage.getItem('jwt');
-    const teamId = localStorage.getItem('currentTeamId'); 
-    if (token && teamId) {
-      history(`/project-list/${teamId}`); 
+    if (token) {
+      const fetchData = async () => {
+        try {
+          await getHomeUrl(null, isAuthenticated, user, getUserTeams, history);
+        } catch (error) {
+          console.error("Error in fetching home urls:", error);
+        }
+      };
+      fetchData();
     }
-  }, [history]);
+  }, [history, isAuthenticated, user, getUserTeams]);
 
   const validate = () => {
     let error = false;
@@ -51,15 +58,7 @@ const Signin = (props) => {
         if (response.data.status === 'success') {
           setUserDetails(response.data.jwt);
           localStorage.setItem('jwt', response.data.jwt);
-          const teams = await getUserTeams();
-          console.log(teams);
-          if (teams.data.results.length === 1) {
-            localStorage.setItem('currentTeamId', teams.data.results[0].id);
-            localStorage.setItem('currentTeamSlug', teams.data.results[0].slug);
-            const teamId = teams.data.results[0].id;
-            return history({ pathname: `/project-list/${teamId}` });
-          }
-          return history({ pathname: '/companies' });
+          await getHomeUrl(e, isAuthenticated, user, getUserTeams, history);
         }
       } catch (error) {
         if (error.response && error.response.status === 400) {
