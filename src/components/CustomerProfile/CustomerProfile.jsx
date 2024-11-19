@@ -17,7 +17,6 @@ import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 import { ConfirmationModal } from './confirmationModal';
 import handleError from '../../config/errorHandler';
 import { get } from 'lodash';
-import Procore from '../ProjectLogs/procore';
 import Loader from '../shared/Loader/Loader';
 import { getTeamDetails, getUserRoleInTeam, updateTeamDetails, uploadTeamLogo } from '../../api/Authentication/api';
 
@@ -44,9 +43,6 @@ const CustomerProfile = (props) => {
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setLoading] = useState(false);
-  const [procoreModal, setProcoreModal] = useState(false);
-  const [companyList, setCompanyList] = useState([]);
-  const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [searchParams] = useSearchParams();
   const customerId = searchParams.get('id');
   const authCode = searchParams.get('code');
@@ -69,47 +65,6 @@ const CustomerProfile = (props) => {
     'member': 'Company Member',
     'admin': 'Company Admin',
   }
-
-
-  useEffect(() => {
-    if (authCode) {
-      const fetchData = async () => {
-        const accessTokenData = await axiosInstance({
-          method: 'post',
-          url: '/procore/access_token',
-          data: {
-            code: authCode,
-            redirect_uri: redirectUri
-          }
-        });
-        localStorage.setItem(
-          'procore_access_token',
-          accessTokenData?.data.data.access_token
-        );
-        const res = await axiosInstance({
-          method: 'get',
-          url: `/procore/company_mapping/${customerId}`
-        });
-
-        if (get(res, 'status') === 200) {
-          navigate(`/submital-mappings?customerId=${customerId}`);
-        }
-
-        if (get(res, 'status') === 204) {
-          setProcoreModal(true);
-          const companyResp = await axiosInstance({
-            method: 'get',
-            url: '/procore/companies'
-          });
-          setCompanyList(companyResp?.data.data);
-        }
-      };
-
-      fetchData().catch((error) => {
-        handleError(error);
-      });
-    }
-  }, [authCode, customerId, navigate, redirectUri]);
 
   const fetchData = async (
     customerId,
@@ -384,26 +339,6 @@ const CustomerProfile = (props) => {
           <div className="customer-users-details">
             {employeeData.length === 0 ? (
               <>
-                <div style={{ float: 'right' }}>
-                  <div className="table-bulk-changes">
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      style={{ marginBottom: '2px', float: 'right' }}
-                    >
-                      <a
-                        href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`}
-                        className="breadcrumb-text"
-                      >
-                        Procore Submittal Mappings
-                      </a>
-                    </button>
-                  </div>
-                  <label className="information-message">
-                    <b>Procore users </b>: be sure to click the Procore
-                    submittal mappings button.
-                  </label>
-                </div>
                 <div
                   onClick={toggleModal}
                   className="nouser-wrapper d-flex align-items-center justify-content-center w-100"
@@ -440,27 +375,12 @@ const CustomerProfile = (props) => {
                     <div className="table-bulk-changes">
                       <button
                         type="button"
-                        className="btn btn-secondary btn-sm"
-                      >
-                        <a
-                          href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`}
-                          className="breadcrumb-text"
-                        >
-                          Procore Submittal Mappings
-                        </a>
-                      </button>
-                      <button
-                        type="button"
                         className="btn btn-secondary btn-sm btn-gap"
                         onClick={toggleModal}
                       >
                         + Add Employee
                       </button>
                     </div>
-                    <label className="table-entries">
-                      <b>Procore users </b>: be sure to click the Procore
-                      submittal mappings button.
-                    </label>
                   </div>
                 </div>
                 <div className="l-table-wrapper">
@@ -568,15 +488,6 @@ const CustomerProfile = (props) => {
         pauseOnHover
       />
       {isLoading && <Loader showComponentLoader={true} />}
-      <Procore
-        companyId={customerId}
-        companyList={companyList}
-        procoreModal={procoreModal}
-        projectId={null}
-        toggleProcoreModal={toggleProcoreModal}
-        setProcoreModal={setProcoreModal}
-        isFromCustomerScreen={true}
-      />
     </div>
   );
 };
