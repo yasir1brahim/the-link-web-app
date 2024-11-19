@@ -303,6 +303,7 @@ const ProjectLogs = () => {
       if (response.data) {
         const check_response = await getProjectDetails(projectId);
         setDocumentData(check_response.data.document_details);
+        setDocParsed(check_response.data.doc_parsed);
         setUploadLoading(false);
         setAlreadyExistingFiles(response.data.already_exist);
         setModal(false);
