@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
 import { login, getUserTeams } from '../../api/Authentication/api'
 import { AuthContext } from '../../auth/authcontext';
+import Loader from '../shared/Loader/Loader';
 
 
 
@@ -19,6 +20,7 @@ const Signin = (props) => {
   const [password, setPassword] = useState({ value: '', errors: '' });
   const toggleType = () => setShowPwd(!showPwd);
   const history = useNavigate();
+  const [isLoading, setLoading] = useState(false);
 
   const validate = () => {
     let error = false;
@@ -36,7 +38,8 @@ const Signin = (props) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     let errors = validate();
-    if (!errors) {
+    if (!errors) {  
+      setLoading(true); 
       try {
         const response = await login(email.value, password.value);
         console.log(response);
@@ -58,6 +61,8 @@ const Signin = (props) => {
         } else {
           toast.error(`Error: ${error.response.statusText}`);
         }
+      } finally {
+        setLoading(false); 
       }
     }
   };
@@ -152,6 +157,7 @@ const Signin = (props) => {
         draggable
         pauseOnHover
       />
+      <Loader showComponentLoader={isLoading} />
     </section>
   );
 };
