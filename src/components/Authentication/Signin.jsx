@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ReactComponent as Mail } from '../../assets/images/mail.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
@@ -8,17 +8,32 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
 import { login, getUserTeams } from '../../api/Authentication/api'
 import { AuthContext } from '../../auth/authcontext';
+import { getHomeUrl } from '../../utils/navigation';
 
 
 
 const Signin = (props) => {
-  const { setUserDetails } = useContext(AuthContext);
+  const { setUserDetails, isAuthenticated, user } = useContext(AuthContext);
 
   const [showPwd, setShowPwd] = useState(false);
   const [email, setEmail] = useState({ value: '', errors: '' });
   const [password, setPassword] = useState({ value: '', errors: '' });
   const toggleType = () => setShowPwd(!showPwd);
   const history = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('jwt');
+    if (token) {
+      const fetchData = async () => {
+        try {
+          await getHomeUrl(null, isAuthenticated, user, getUserTeams, history);
+        } catch (error) {
+          console.error("Error in fetching home urls:", error);
+        }
+      };
+      fetchData();
+    }
+  }, [history, isAuthenticated, user, getUserTeams]);
 
   const validate = () => {
     let error = false;
@@ -42,15 +57,8 @@ const Signin = (props) => {
         console.log(response);
         if (response.data.status === 'success') {
           setUserDetails(response.data.jwt);
-          const teams = await getUserTeams();
-          console.log(teams);
-          if (teams.data.results.length === 1) {
-            localStorage.setItem('currentTeamId', teams.data.results[0].id);
-            localStorage.setItem('currentTeamSlug', teams.data.results[0].slug);
-            const teamId = teams.data.results[0].id;
-            return history({ pathname: `/project-list/${teamId}` });
-          }
-          return history({ pathname: '/companies' });
+          localStorage.setItem('jwt', response.data.jwt);
+          await getHomeUrl(e, isAuthenticated, user, getUserTeams, history);
         }
       } catch (error) {
         if (error.response && error.response.status === 400) {
