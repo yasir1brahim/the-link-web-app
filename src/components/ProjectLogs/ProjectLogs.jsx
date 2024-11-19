@@ -53,6 +53,7 @@ const ProjectLogs = () => {
   const toggleSaveListName = () => {
     setListName({ ...listName, errors: "" });
     setToggleSaveListNameModal(!saveListName);
+    resetListName();
   }
   const [listName, setListName] = useState({ value: "", errors: "" });
   const [viewList, setList] = useState([]);
@@ -289,6 +290,10 @@ const ProjectLogs = () => {
   const backToUpload = () => {
     toggleErrorModal(false);
     setModal(true);
+  };
+
+  const resetListName = () => {
+  setListName({ value: '', errors: '' });
   };
 
   const handleSubmit = async () => {
@@ -738,6 +743,7 @@ const ProjectLogs = () => {
     if (!errors) {
       try {
         await createSubmittalList(state?.projectId || projectId, listName.value, localStorage.getItem("userId"), selected);
+        resetListName();
         setToggleSaveListNameModal(false);
         toast.success("List created successfully", {
           position: "bottom-center",
@@ -1363,6 +1369,7 @@ const ProjectLogs = () => {
         isOpen={saveListName}
         fade={false}
         toggle={toggleSaveListName}
+        onClosed={resetListName}
         className="new-customer modal-md"
       >
         <ModalHeader>Save Selection</ModalHeader>
