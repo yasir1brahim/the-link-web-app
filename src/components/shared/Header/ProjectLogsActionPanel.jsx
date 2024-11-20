@@ -316,7 +316,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
             >
               <span className="">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12ZM11.25 17.75V17V12.75H7H6.25V11.25H7H11.25V7V6.25H12.75V7V11.25H17H17.75V12.75H17H12.75V17V17.75H11.25Z" fill="#231F20" />
+                  <path fill-rule="evenodd" clipRule="evenodd" d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12ZM11.25 17.75V17V12.75H7H6.25V11.25H7H11.25V7V6.25H12.75V7V11.25H17H17.75V12.75H17H12.75V17V17.75H11.25Z" fill="#231F20" />
                 </svg>
               </span>
               {props.showBtn}

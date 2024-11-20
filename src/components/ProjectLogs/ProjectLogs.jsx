@@ -20,9 +20,8 @@ import { ReactComponent as SearchIcon } from "../../assets/images/search.svg";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
-import { getExportJetBuildData, getSavedLogs } from "../../api/ProjectLogs/api";
+import { combineRows, getExportJetBuildData, getSavedLogs } from "../../api/ProjectLogs/api";
 import DocumentStatus from "./documentStatus";
-import ProjectLogsHeader from "../shared/Header/ProjectLogsHeader";
 import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -710,13 +709,8 @@ const ProjectLogs = () => {
       project_id: projectId,
       lst_all_logs: combiningQueue,
     }
-
     try {
-      await axiosInstance({
-        method: 'POST',
-        url: '/combine_rows',
-        data: payload,
-      })
+      await combineRows(payload);
     } finally {
       setLoading(false)
     }
@@ -781,7 +775,7 @@ const ProjectLogs = () => {
             dropdownOpen={dropdownOpen}
             handleExportExcel={handleExportExcel}
             handleExportJetBuild={handleExportJetBuild}
-            getProjectLists={getProjectLists}
+            getProjectLists={getSavedListsForProjects}
 
             listId={listId}
             selected={selected}
