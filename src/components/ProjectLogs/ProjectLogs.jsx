@@ -285,7 +285,6 @@ const ProjectLogs = () => {
     }
 
     // Reset values to default if they become homogenous again
-    console.log('-------------', newQueue)
     if (newQueue) {
       const newValue = {...combiningResult};
 
@@ -782,9 +781,6 @@ const ProjectLogs = () => {
             dropdownOpen={dropdownOpen}
             handleExportExcel={handleExportExcel}
             handleExportJetBuild={handleExportJetBuild}
-            procoreAccessToken={procoreAccessToken}
-            procoreAuthUrl={procoreAuthUrl}
-            handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
             getProjectLists={getProjectLists}
 
             listId={listId}
