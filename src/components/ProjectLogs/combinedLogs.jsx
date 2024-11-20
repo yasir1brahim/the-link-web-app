@@ -64,6 +64,7 @@ export default function CombinedLogs(props) {
   const rowRefs = useRef([]);
   const logRowRefs = useRef([]);
   const stickyHeaderRef = useRef(null);
+  const targetRef = useRef(null);
 
   useEffect(() => {
     setShowMore(Array(props.logData.length).fill(false));
@@ -786,7 +787,7 @@ export default function CombinedLogs(props) {
                             <span>
                               <Tooltip
                                 placement="left"
-                                target={"Edit-Tooltip-" + index + 1}
+                                target={targetRef}
                                 isOpen={editRowTooltip === index + 1}
                                 toggle={() =>
                                   setEditRowTooltip(
