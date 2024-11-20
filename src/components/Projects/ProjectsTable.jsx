@@ -205,11 +205,6 @@ const handleRestoreProject = async () => {
                 </th>
                 <th>
                   <span>
-                    Lead Contact<i className="sort-i"></i>
-                  </span>
-                </th>
-                <th>
-                  <span>
                     Users<i className="sort-i"></i>
                   </span>
                 </th>
@@ -285,15 +280,6 @@ const handleRestoreProject = async () => {
                             </span>
                             <p className="content">{!project.is_archived ? "Open" : "Archived"}</p>
                           </div>{" "}
-                        </td>
-                        <td>
-                          {!!project.owner ? (
-                            <div className="icon-wrap">
-                              <p className="content">{project.owner.get_display_name}</p>
-                            </div>
-                          ) : (
-                            ""
-                          )}
                         </td>
                         <td>{project.members.length}</td>
                         <td>{project.start_date}</td>
@@ -420,7 +406,7 @@ const handleRestoreProject = async () => {
               ) : (
                 <tbody>
                   <tr>
-                    <td className="text-center" colSpan={7}>
+                    <td className="text-center" colSpan={6}>
                       No data
                     </td>
                   </tr>

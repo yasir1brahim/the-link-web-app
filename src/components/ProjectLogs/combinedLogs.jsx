@@ -67,6 +67,7 @@ export default function CombinedLogs(props) {
   const rowRefs = useRef([]);
   const logRowRefs = useRef([]);
   const stickyHeaderRef = useRef(null);
+  const targetRef = useRef(null);
 
   useEffect(() => {
     setShowMore(Array(props.logData.length).fill(false));
