@@ -703,16 +703,19 @@ const ProjectLogs = () => {
 
   const handleCombineRows = async () => {
     setLoading(true)
-
-    const payload = {
-      prepared_object: combiningResult,
-      project_id: projectId,
-      lst_all_logs: combiningQueue,
-    }
-    try {
-      await combineRows(payload);
-    } finally {
-      setLoading(false)
+    if (true) {
+      alert("Not yet implemented. To be completed in TBL-306")
+    } else {
+      const payload = {
+        prepared_object: combiningResult,
+        project_id: projectId,
+        lst_all_logs: combiningQueue,
+      }
+      try {
+        await combineRows(payload);
+      } finally {
+        setLoading(false)
+      }
     }
 
     setIsCombining(false)
