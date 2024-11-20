@@ -20,9 +20,8 @@ import { ReactComponent as SearchIcon } from "../../assets/images/search.svg";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
-import { getExportJetBuildData, getSavedLogs } from "../../api/ProjectLogs/api";
+import { combineRows, getExportJetBuildData, getSavedLogs } from "../../api/ProjectLogs/api";
 import DocumentStatus from "./documentStatus";
-import ProjectLogsHeader from "../shared/Header/ProjectLogsHeader";
 import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -30,6 +29,7 @@ import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails } from "../../api/Projects/api";
 import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
+import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
 
 
 const ProjectLogs = () => {
@@ -65,8 +65,12 @@ const ProjectLogs = () => {
       ? []
       : JSON.parse(localStorage?.getItem("selectedRows"))
   );
+  const [isCombining, setIsCombining] = useState(false);
+  const [combiningQueue, setCombiningQueue] = useState([]);
+  const [combiningResult, setCombiningResult] = useState({_meta: {}});
   const [pageRefresh, setPageRefresh] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({
@@ -257,13 +261,59 @@ const ProjectLogs = () => {
     [setSearchValue, logData, newRowIndex]
   );
 
-  const handleSelect = (id) => {
-    if (selected.includes(id)) {
-      let selectedLogs = selected.filter((logId) => logId !== id);
-      setSelected(selectedLogs);
-    } else {
-      setSelected([...selected, id]);
+  const areSameValues = (key) => {
+    return combiningQueue.every((log) => log[key] === combiningQueue[0][key]);
+  }
+
+  const updateCombiningQueue = (selectedIds, force = false) => {
+    const newQueue = [];
+    console.log(selectedIds, isCombining)
+    if (isCombining || force) {
+      selectedIds.forEach((id) => {
+        const index = logData.findIndex((log) => log.id === id);
+        const queueItem = {...logData[index], index}
+        newQueue.push(queueItem);
+      });
+
+      newQueue.sort((a, b) => a.index - b.index);
     }
+
+    setCombiningQueue(newQueue)
+    if (!newQueue.length) {
+      setCombiningResult({})
+    }
+
+    // Reset values to default if they become homogenous again
+    if (newQueue) {
+      const newValue = {...combiningResult};
+
+      // Submittal Type & Submittal Title should have the top value as default
+      ['type', 'item_desc', 'para_no', 'spec_section'].forEach((key) => {
+        newValue[key] = newQueue[0][key];
+      })
+
+      // Submittal Description should just be joined with newlines
+      newValue['para_context'] = newQueue.map((log) => log.para_context);
+
+      setCombiningResult(newValue);
+    }
+  }
+
+  const handleSelect = (id) => {
+    let selectedLogs;
+    if (selected.includes(id)) {
+      selectedLogs = selected.filter((logId) => logId !== id);
+    } else {
+      selectedLogs = [...selected, id];
+    }
+    setSelected(selectedLogs);
+
+    // If the user was combining, and then unselected everything, get out of
+    // the combining mode
+    if (selectedLogs.length === 0) {
+      setIsCombining(false);
+    }
+    updateCombiningQueue(selectedLogs);
   };
 
   const selectedRows =
@@ -391,6 +441,10 @@ const ProjectLogs = () => {
   const handleSelectAll = () => {
     setIsSelectAll(!isSelectAll);
     setSelected(isSelectAll ? [] : logIdList);
+
+    if (selected?.length === 0) {
+      setIsCombining(false);
+    }
   };
 
   const documentIsProcessing = (documents = []) => {
@@ -539,7 +593,8 @@ const ProjectLogs = () => {
     }
   };
 
-  const heandleSearchClick = () => {
+  const handleSearchClick = () => {
+    setShowSearch(true);
     fetchLogData(0, rowsPerPage, searchValue, listId);
   };
 
@@ -557,13 +612,13 @@ const ProjectLogs = () => {
 
   const handleEnterKeyPress = (event) => {
     if (event.key === "Enter") {
-      heandleSearchClick();
+      handleSearchClick();
     }
   };
 
   const handleClearSearch = () => {
     setSearchValue("");
-
+    setShowSearch(false);
     fetchLogData(0, rowsPerPage, "", listId);
   };
 
@@ -646,6 +701,28 @@ const ProjectLogs = () => {
     }
   };
 
+  const handleCombineRows = async () => {
+    setLoading(true)
+    if (true) {
+      alert("Not yet implemented. To be completed in TBL-306")
+    } else {
+      const payload = {
+        prepared_object: combiningResult,
+        project_id: projectId,
+        lst_all_logs: combiningQueue,
+      }
+      try {
+        await combineRows(payload);
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    setIsCombining(false)
+    setSelected([])
+    setPageRefresh(!pageRefresh);
+  }
+
   useEffect(() => {
     const hasActiveFilters = Object.keys(appliedFilters).some(
       (key) => appliedFilters[key]?.length
@@ -667,6 +744,8 @@ const ProjectLogs = () => {
   const handleManageExcelExportButtonClick = async () => {
     setManageExcelExportModal(true);
   };
+
+
 
   return (
     <div className="page-wrap">
@@ -692,17 +771,53 @@ const ProjectLogs = () => {
             navBtn={"logs"}
             teamId={teamId}
           />
-          <ProjectLogsHeader
-            centerText={`${projectType === "ufgs" ? "UFGS" : "Commercial"}`}
-            getProjectLists={getSavedListsForProjects}
-            totalCount={totalCount}
-            dropdownOpen={dropdownOpen}
+          <ProjectLogsActionPanel
+            handleDeleteLogs={handleDeleteLogs}
+
             toggle={toggle}
+            dropdownOpen={dropdownOpen}
             handleExportExcel={handleExportExcel}
             handleExportJetBuild={handleExportJetBuild}
-            handleDeleteLogs={handleDeleteLogs}
+            getProjectLists={getSavedListsForProjects}
+
+            listId={listId}
+            selected={selected}
+            isCombining={isCombining}
+            toggleSaveListName={toggleSaveListName}
+
+            isSelectAll={isSelectAll}
+            logInViewer={logInViewer}
+            setLogInViewer={setLogInViewer}
+            setPdfData={setPdfData}
+            pdfData={pdfData}
+            setIsCombining={setIsCombining}
+            updateCombiningQueue={updateCombiningQueue}
+            editRow={editRow}
+            handleCombineRows={handleCombineRows}
+
+            handleClearSelection={handleClearSelection}
+
+            setSubmittalIdParam={setSubmittalIdParam}
+
+            documentIsProcessing={documentIsProcessing}
+            documentData={documentData}
+            toggleDocumentStatusModal={toggleDocumentStatusModal}
+            
             showClearFilters={showClearFilters}
             clearFilters={clearFilters}
+
+            showSearch={showSearch}
+            searchValue={searchValue}
+            handleSearchChange={handleSearchChange}
+            handleEnterKeyPress={handleEnterKeyPress}
+            handleSearchClick={handleSearchClick}
+            handleClearSearch={handleClearSearch}
+
+            docParsed={docParsed}
+            totalCount={totalCount}
+            showBtn={"Upload Documents"}
+            toggleModal={toggleModal}
+            btnSize={"small"}
           />
           {documentIsProcessing(documentData) && (
             <div
@@ -716,312 +831,138 @@ const ProjectLogs = () => {
 
           <div className="project-logs-content">
             <div className="project-logs">
-              {/* {logData.length === 0 ? (
-              <div className="nologs-wrapper d-flex align-items-center justify-content-center w-100">
-                <span className="d-flex align-items-center justify-content-center">
-                  {errorMessage
-                    ? `Please upload documents, before seeing the logs`
-                    : `Refreshing data...`}
-                </span>
-              </div>
-            ) : ( */}
-              <>
-                <div className="table-top-content row">
-                  <div className="col-4 p-0 d-flex">
-                    <div className="col-6 p-0">
-                      {listId !== null ? (
-                        <button
-                          type="button"
-                          className="table-top-btn selection-btn"
-                          onClick={() => {
-                            handleClearSelection();
-                          }}
-                        >
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M5 5L15 15"
-                              stroke="#0E2332"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <path
-                              d="M15 5L5 15"
-                              stroke="#0E2332"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                          <span>Clear Selection</span>
-                        </button>
-                      ) : null}
-                      {listId === null
-                        ? selected?.length > 0 && (
-                          <button
-                            type="button"
-                            className="table-top-btn btn-disabled selection-btn"
-                            onClick={toggleSaveListName}
-                            disabled={selected?.length === 0}
-                          >
-                            <svg
-                              width="14"
-                              height="18"
-                              viewBox="0 0 14 18"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M1.16683 0.666748H12.8335C13.0545 0.666748 13.2665 0.754545 13.4228 0.910826C13.579 1.06711 13.6668 1.27907 13.6668 1.50008V17.4526C13.6669 17.5271 13.647 17.6003 13.6092 17.6645C13.5715 17.7287 13.5171 17.7816 13.4519 17.8176C13.3868 17.8537 13.3131 17.8717 13.2386 17.8696C13.1641 17.8675 13.0916 17.8456 13.0285 17.8059L7.00016 14.0251L0.971829 17.8051C0.908803 17.8447 0.836319 17.8667 0.761914 17.8688C0.68751 17.8709 0.613901 17.853 0.548742 17.817C0.483583 17.781 0.429252 17.7283 0.391398 17.6642C0.353545 17.6001 0.333551 17.527 0.333496 17.4526V1.50008C0.333496 1.27907 0.421294 1.06711 0.577574 0.910826C0.733854 0.754545 0.945816 0.666748 1.16683 0.666748ZM12.0002 2.33341H2.00016V15.1934L7.00016 12.0592L12.0002 15.1934V2.33341Z"
-                                fill={
-                                  selected?.length === 0
-                                    ? "#374151"
-                                    : "#0E2332"
-                                }
-                              />
-                            </svg>
-                            <span>Save Selection</span>
-                          </button>
-                          )
-                        : null}
-                    </div>
-                    <div className="col-6 p-0">
-                      {logInViewer &&
-                        <button
-                          type="button"
-                          className="table-top-btn btn-disabled close-pdf-btn ml-2"
-                          onClick={() => {
-                            setLogInViewer(null);
-                            setPdfData({
-                              url: "",
-                              textLoc: {},
-                              index: "",
-                              docId: null,
-                              submittalId: null,
-                              additionalTextLocations: [],
-                            });
-                            setSubmittalIdParam(null);
-                          }}
-                        >
-                          <span>Close PDF Viewer</span>
-                        </button>
-                      }
-                    </div>
-                  </div>
-                  <div className="col-4 d-flex row">
-                    {documentIsProcessing(documentData) && (
+              <div className={pdfData.url && "side-by-side"}>
+                <CombinedLogs
+                  logData={filteredLogData}
+                  setFilteredLogData={setFilteredLogData}
+                  selected={selected}
+                  handleSelect={handleSelect}
+                  handleSelectAll={handleSelectAll}
+                  pageRefresh={pageRefresh}
+                  setPageRefresh={setPageRefresh}
+                  setLoading={setLoading}
+                  customerId={state?.customerId || customerId}
+                  setLogData={setLogData}
+                  projectId={state?.projectId || projectId}
+                  listId={listId}
+                  setPdfData={setPdfData}
+                  setSubmittalIdParam={setSubmittalIdParam}
+                  pdfData={pdfData}
+                  completeLogData={logData}
+                  newRowIndex={newRowIndex}
+                  setNewRowIndex={setNewRowIndex}
+                  searchValue={searchValue}
+                  projectType={projectType}
+                  qaDashboard={state?.qaDashboard}
+                  selectedFilterValue={selectedFilterValue}
+                  filterValues={filterValues}
+                  setFilterValues={setFilterValues}
+                  setTotalCount={setTotalCount}
+                  errorMessage={errorMessage}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  setLogInViewer={setLogInViewer}
+                  editRow={editRow}
+                  setEditRow={setEditRow}
+                  rowData={rowData}
+                  setRowData={setRowData}
+                  setLogIdList={setLogIdList}
+                  isSelectAll={isSelectAll}
+                  setSelected={setSelected}
+                  loading={loadingView}
+                  fetchLogData={fetchLogData}
+                  applyFilters={applyFilters}
+                  isCombining={isCombining}
+                  setIsCombining={setIsCombining}
+                  combiningQueue={combiningQueue}
+                  setCombiningQueue={setCombiningQueue}
+                  updateCombiningQueue={updateCombiningQueue}
+                  combiningResult={combiningResult}
+                  setCombiningResult={setCombiningResult}
+                  handleCombineRows={handleCombineRows}
+                  areSameValues={areSameValues}
+                />
+                {pdfData.url && (
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 24,
+                        justifyContent: "center",
+                      }}
+                    >
                       <button
-                        type="button"
-                        className="table-top-btn m-auto"
-                        onClick={toggleDocumentStatusModal}
-                      >
-                        <span>Check Document Status</span>
-                      </button>
-                    )}
-                  </div>
-                  <div className="col-4 d-flex row">
-                    {localStorage.getItem("roleId") !== "7" ? (
-                      <div className="header-right-swap header-right w-100">
-                        <div className="log-search">
-                          <input
-                            type="text"
-                            placeholder="Find In Log"
-                            className="log-search-input w-100"
-                            value={searchValue}
-                            onChange={(e) => handleSearchChange(e.target.value)}
-                            onKeyPress={handleEnterKeyPress}
-                          />
-                          <span
-                            className="search-icon"
-                            onClick={heandleSearchClick}
-                          >
-                            <svg
-                              width="20"
-                              height="20"
-                              viewBox="0 0 20 20"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M17.5001 17.4998L12.9165 12.9167"
-                                stroke="#CBCBCB"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <circle
-                                cx="8.75"
-                                cy="8.75"
-                                r="5.5"
-                                stroke="#CBCBCB"
-                                strokeWidth="1.5"
-                              />
-                            </svg>
-                          </span>
-                          <span
-                            className="clear-icon"
-                            onClick={handleClearSearch}
-                          >
-                            <svg
-                              width="20"
-                              height="20"
-                              viewBox="0 0 20 20"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M5 5L15 15"
-                                stroke="#cbcbcb"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                              <path
-                                d="M15 5L5 15"
-                                stroke="#cbcbcb"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                  </div>
-                </div>
-                <div className={pdfData.url && "side-by-side"}>
-                  <CombinedLogs
-                    logData={filteredLogData}
-                    setFilteredLogData={setFilteredLogData}
-                    selected={selected}
-                    handleSelect={handleSelect}
-                    handleSelectAll={handleSelectAll}
-                    pageRefresh={pageRefresh}
-                    setPageRefresh={setPageRefresh}
-                    customerId={state?.customerId || customerId}
-                    setLogData={setLogData}
-                    projectId={state?.projectId || projectId}
-                    listId={listId}
-                    setPdfData={setPdfData}
-                    setSubmittalIdParam={setSubmittalIdParam}
-                    pdfData={pdfData}
-                    completeLogData={logData}
-                    newRowIndex={newRowIndex}
-                    setNewRowIndex={setNewRowIndex}
-                    searchValue={searchValue}
-                    projectType={projectType}
-                    qaDashboard={state?.qaDashboard}
-                    selectedFilterValue={selectedFilterValue}
-                    filterValues={filterValues}
-                    setFilterValues={setFilterValues}
-                    setTotalCount={setTotalCount}
-                    errorMessage={errorMessage}
-                    page={page}
-                    rowsPerPage={rowsPerPage}
-                    setLogInViewer={setLogInViewer}
-                    editRow={editRow}
-                    setEditRow={setEditRow}
-                    rowData={rowData}
-                    setRowData={setRowData}
-                    setLogIdList={setLogIdList}
-                    isSelectAll={isSelectAll}
-                    setSelected={setSelected}
-                    loading={loadingView}
-                    fetchLogData={fetchLogData}
-                    applyFilters={applyFilters}
-                  />
-                  {pdfData.url && (
-                    <div style={{ display: "flex", gap: 10 }}>
-                      <div
+                        disabled={pdfData && pdfData.index > 0 ? false : true}
+                        onClick={() => {
+                          handleUpDownView(-1);
+                        }}
                         style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 24,
-                          justifyContent: "center",
+                          borderColor: "#E2E2E2",
+                          borderWidth: "thin",
                         }}
                       >
-                        <button
-                          disabled={pdfData && pdfData.index > 0 ? false : true}
-                          onClick={() => {
-                            handleUpDownView(-1);
-                          }}
-                          style={{
-                            borderColor: "#E2E2E2",
-                            borderWidth: "thin",
-                          }}
-                        >
-                          <ArrowDropUpIcon/>
-                        </button>
-                        <button
-                          disabled={
-                            pdfData &&
-                            pdfData.index < filteredLogData.length - 1
-                              ? false
-                              : true
-                          }
-                          onClick={() => {
-                            handleUpDownView(1);
-                          }}
-                          style={{
-                            borderColor: "#E2E2E2",
-                            borderWidth: "thin",
-                          }}
-                        >
-                          <ArrowDropDownIcon />
-                        </button>
-                      </div>
-                      <PdfWrapper
-                        pdfData={pdfData}
-                        setPdfData={setPdfData}
-                        setSubmittalIdParam={setSubmittalIdParam}
-                        handleAddNewRow={handleAddNewRow}
-                        handleAppendToSelectedRow={handleAppendToSelectedRow}
-                        setLogInViewer={setLogInViewer}
-                        loading={loadingView}
-                        setLoading={setLoadingView}
-                      />
+                        <ArrowDropUpIcon/>
+                      </button>
+                      <button
+                        disabled={
+                          pdfData &&
+                          pdfData.index < filteredLogData.length - 1
+                            ? false
+                            : true
+                        }
+                        onClick={() => {
+                          handleUpDownView(1);
+                        }}
+                        style={{
+                          borderColor: "#E2E2E2",
+                          borderWidth: "thin",
+                        }}
+                      >
+                        <ArrowDropDownIcon />
+                      </button>
                     </div>
-                  )}
-                </div>
-                <div style={{ position: "relative" }}>
-                  <div
-                    style={{
-                      position: "absolute",
-                      marginTop: "10px",
-                      fontStyle: "italic",
-                      fontSize: "14px",
-                    }}
-                  >
-                    <strong>Note: </strong>
-                    <span role="img" aria-label="sparkle">
-                      <Sparkles />
-                    </span>{" "}
-                    indicates this submittal was extracted by our AI.
-                  </div>
-                  <div className="table-footer-content logs-pagination">
-                    <Pagination
-                      totalItems={totalCount}
-                      fetchData={fetchLogData}
-                      rowsPerPage={rowsPerPage}
-                      setRowsPerPage={setRowsPerPage}
-                      page={page}
-                      setPage={setPage}
-                      listId={listId}
-                      searchValue={searchValue}
+                    <PdfWrapper
+                      pdfData={pdfData}
+                      setPdfData={setPdfData}
+                      setSubmittalIdParam={setSubmittalIdParam}
+                      handleAddNewRow={handleAddNewRow}
+                      handleAppendToSelectedRow={handleAppendToSelectedRow}
+                      setLogInViewer={setLogInViewer}
+                      loading={loadingView}
+                      setLoading={setLoadingView}
                     />
                   </div>
+                )}
+              </div>
+              <div style={{ position: "relative" }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    marginTop: "10px",
+                    fontStyle: "italic",
+                    fontSize: "14px",
+                  }}
+                >
+                  <strong>Note: </strong>
+                  <span role="img" aria-label="sparkle">
+                    <Sparkles />
+                  </span>{" "}
+                  indicates this submittal was extracted by our AI.
                 </div>
-              </>
-              {/* )} */}
+                <div className="table-footer-content logs-pagination">
+                  <Pagination
+                    totalItems={totalCount}
+                    fetchData={fetchLogData}
+                    rowsPerPage={rowsPerPage}
+                    setRowsPerPage={setRowsPerPage}
+                    page={page}
+                    setPage={setPage}
+                    listId={listId}
+                    searchValue={searchValue}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

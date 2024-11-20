@@ -12,7 +12,7 @@ import { ReactComponent as CancelButton } from "../../assets/images/label-reject
 import { ReactComponent as ExpandButton } from "../../assets/images/down-arrow.svg";
 import { ReactComponent as CollapseButton } from "../../assets/images/up-arrow.svg";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
-import { Tooltip } from "reactstrap";
+import { Tooltip } from "@mui/material";
 import handleError from "../../config/errorHandler";
 import { SortIcon } from "../shared/icons/sortIcon";
 import { FilterIcon } from "../shared/icons/filterIcon";
@@ -33,7 +33,13 @@ export default function CombinedLogs(props) {
     rowData,
     setRowData,
     loading,
-    applyFilters
+    applyFilters,
+    isCombining,
+    setIsCombining,
+    combiningQueue,
+    combiningResult,
+    setCombiningResult,
+    areSameValues,
   } = props;
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
@@ -44,9 +50,6 @@ export default function CombinedLogs(props) {
   const [filterModal, setFilterModal] = useState(false);
   const [filterColumn, setFilterColumn] = useState("");
 
-  const [addRowTooltip, setaddRowTooltip] = useState(null);
-  const [editRowTooltip, setEditRowTooltip] = useState(null);
-  const [pdfTooltip, setPdfTooltip] = useState(null);
   // const navigate = useNavigate();
 
   const [formValid, setFormValid] = useState({
@@ -323,7 +326,7 @@ export default function CombinedLogs(props) {
   });
 
   const minWidths = {
-    1: 155,
+    1: 105,
     2: 85,
     3: 145,
     4: 150,
@@ -336,7 +339,7 @@ export default function CombinedLogs(props) {
     if (parentRef.current !== null) {
       setTableWidths({
         1: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.074),
+          Math.round(parentRef.current.offsetWidth * 0.06),
           minWidths[1]
         ),
         2: Math.max(
@@ -363,7 +366,7 @@ export default function CombinedLogs(props) {
           Math.round(parentRef.current.offsetWidth * 0.1),
           minWidths[7]
         ),
-        8: parentRef.current.offsetWidth - 953,
+        8: parentRef.current.offsetWidth - 993,
       });
     }
   }, [parentRef.current]);
@@ -394,7 +397,7 @@ export default function CombinedLogs(props) {
 
   const formatSpecSection = (specSection) => {
     if (typeof specSection !== "string") return specSection;
-    return specSection.slice(0, 2) + " " + specSection.slice(2);
+    return specSection.slice(0, 2) + " " + specSection.slice(2, 4) + " " + specSection.slice(4);
   };
 
   const formatSubmittalNumber = (number) => {
@@ -421,7 +424,7 @@ export default function CombinedLogs(props) {
     <div
       className="l-table-wrapper"
       style={{
-        maxHeight: "calc(100vh - 270px)",
+        maxHeight: "calc(100vh - 240px)",
       }}
       ref={parentRef}
     >
@@ -438,6 +441,7 @@ export default function CombinedLogs(props) {
                     id="ticketHeading"
                     onChange={props.handleSelectAll}
                     checked={props.isSelectAll}
+                    disabled={isCombining}
                   />
                   <label
                     className="custom-control-label"
@@ -602,7 +606,7 @@ export default function CombinedLogs(props) {
                 </div>
               </span>
             </th>
-            
+
             <th
               className="log-description small-font"
               style={{ width: `${tableWidths[8]}px` }}
@@ -631,21 +635,34 @@ export default function CombinedLogs(props) {
           {logData.map((log, index) => {
             let pdfIndex = props.pdfData?.index;
             const showPdf = !(pdfIndex && pdfIndex !== index) && pdfIndex !== 0;
+            const isCombineTarget = combiningQueue[0]?.index === index;
             return (
               <tr
                 className={
-                  log.user_id !== 1 || index % 2 !== 0 ? "highlight-row" : ""
+                  log.user_id !== 1 || index % 2 !== 0 ? 'highlight-row' : ''
                 }
                 style={{
                   lineHeight: 1.2,
-                  backgroundColor: pdfIndex === index ? "#f8f8fa" : "white",
+                  backgroundColor: pdfIndex === index ? '#f8f8fa' : 'white',
+                  // Adjust the row style when the row is being combined
+                  ...(isCombining
+                    ? {
+                        opacity: props.selected.includes(log.id) ? null : 0.4,
+                        backgroundColor: isCombineTarget ? '#f8f8fa' : 'white',
+                        textDecoration:
+                          // Only mark selected items that are not the "main" row
+                          combiningQueue.findIndex((item) => item.index === index) > 0
+                            ? 'line-through'
+                            : null
+                      }
+                    : {})
                 }}
                 key={index}
-                ref={el => (logRowRefs.current[index] = el)}
+                ref={(el) => (logRowRefs.current[index] = el)}
               >
                 <td
                   className={`${
-                    editRow === index ? "activeTh" : ""
+                    editRow === index ? 'activeTh' : ''
                   } ticket-checkbox reduce-height`}
                   onClick={handleIgnorePdfView}
                 >
@@ -673,18 +690,70 @@ export default function CombinedLogs(props) {
 
                 <td
                   className={`${
-                    editRow === index ? "activeTh" : ""
-                  } reduce-height actions-td`}
+                    editRow === index ? 'activeTh' : ''
+                  } reduce-height actions-td padding-0`}
                   onClick={handleIgnorePdfView}
                 >
                   <div className="action-items">
                     {
                       <>
-                        {editRow === index ? (
+                        {isCombining ? (
+                          isCombineTarget && (combiningQueue.length > 1) && (
+                            // If the row is being combined
+                            <>
+                              <div
+                                onClick={() => props.handleCombineRows()}
+                                style={{
+                                  marginRight: '5px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 14 14"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M12.4162 3.84491L5.51162 10.7497L1.58325 6.82137"
+                                    stroke="#2F5AA3"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              </div>
+                              <div
+                                style={{
+                                  marginRight: '5px',
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => setIsCombining(false)}
+                              >
+                                <svg
+                                  width="10"
+                                  height="10"
+                                  viewBox="0 0 10 10"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M0.244078 0.244078C0.569515 -0.0813592 1.09715 -0.0813592 1.42259 0.244078L5 3.82149L8.57741 0.244078C8.90285 -0.0813592 9.43049 -0.0813592 9.75592 0.244078C10.0814 0.569515 10.0814 1.09715 9.75592 1.42259L6.17851 5L9.75592 8.57741C10.0814 8.90285 10.0814 9.43049 9.75592 9.75592C9.43049 10.0814 8.90285 10.0814 8.57741 9.75592L5 6.17851L1.42259 9.75592C1.09715 10.0814 0.569515 10.0814 0.244078 9.75592C-0.0813592 9.43049 -0.0813592 8.90285 0.244078 8.57741L3.82149 5L0.244078 1.42259C-0.0813592 1.09715 -0.0813592 0.569515 0.244078 0.244078Z"
+                                    fill="#A32F2F"
+                                  />
+                                </svg>
+                              </div>
+                            </>
+                          )
+                        ) : editRow === index ? (
+                          // If the row is being edited
                           <>
                             <div
                               onClick={() => handleUpdateLog()}
-                              style={{ marginRight: "5px", cursor: "pointer" }}
+                              style={{ marginRight: '5px', cursor: 'pointer' }}
                             >
                               <svg
                                 width="14"
@@ -703,29 +772,29 @@ export default function CombinedLogs(props) {
                               </svg>
                             </div>
                             <div
-                              style={{ marginRight: "5px", cursor: "pointer" }}
+                              style={{ marginRight: '5px', cursor: 'pointer' }}
                               onClick={() => {
-                                setEditRow("");
+                                setEditRow('');
                                 setFormValid({
                                   spec_section: true,
                                   para_no: true,
                                   para_context: true,
                                   type: true,
-                                  item_desc: true,
+                                  item_desc: true
                                 });
                                 setRowData({
-                                  comments: "",
-                                  date_approved: "",
-                                  date_issued: "",
+                                  comments: '',
+                                  date_approved: '',
+                                  date_issued: '',
                                   // id: 1,
-                                  item_desc: "",
-                                  package: "",
-                                  para_context: "",
-                                  para_no: "",
-                                  project_id: "",
-                                  spec_section: "",
-                                  status: "",
-                                  type: "",
+                                  item_desc: '',
+                                  package: '',
+                                  para_context: '',
+                                  para_no: '',
+                                  project_id: '',
+                                  spec_section: '',
+                                  status: '',
+                                  type: ''
                                 });
                                 // setDateApproved('');
                                 // setDateIssued('');
@@ -742,7 +811,7 @@ export default function CombinedLogs(props) {
                                 newRowIndex === index + 1 &&
                                   props.setPdfData({
                                     ...props.pdfData,
-                                    index: props.pdfData?.index - 1,
+                                    index: props.pdfData?.index - 1
                                   });
                               }}
                             >
@@ -763,58 +832,36 @@ export default function CombinedLogs(props) {
                             </div>
                           </>
                         ) : (
+                          // If the row is not being edited
                           <>
-                            <span
-                              onClick={() => handleEditToggle(log, index)}
-                              style={{ cursor: "pointer" }}
-                            >
-                              <svg
-                                id={"Edit-Tooltip-" + index + 1}
-                                width="16"
-                                height="16"
-                                viewBox="0 0 18 18"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
+                            <Tooltip title={!isCombining
+                              ? 'Edit Row'
+                              : 'Cannot edit while combining'} arrow>
+                              <span
+                                onClick={() => !isCombining && handleEditToggle(log, index)}
+                                style={{ cursor: "pointer" }}
                               >
-                                <path
-                                  fillRule="evenodd"
-                                  clipRule="evenodd"
-                                  d="M0.666748 2.33332C0.666748 1.41285 1.41294 0.666657 2.33341 0.666657H8.16675C8.62698 0.666657 9.00008 1.03975 9.00008 1.49999C9.00008 1.96023 8.62698 2.33332 8.16675 2.33332H2.33341V15.6667H15.6667V9.83332C15.6667 9.37308 16.0398 8.99999 16.5001 8.99999C16.9603 8.99999 17.3334 9.37308 17.3334 9.83332V15.6667C17.3334 16.5871 16.5872 17.3333 15.6667 17.3333H2.33341C1.41295 17.3333 0.666748 16.5871 0.666748 15.6667V2.33332ZM13.4562 0.666657C13.6773 0.666614 13.8894 0.754465 14.0458 0.910863L17.0895 3.9559C17.4147 4.28131 17.4147 4.80875 17.0895 5.13416L8.47163 13.7558C8.31534 13.9121 8.10332 14 7.88225 14H4.83341C4.37318 14 4.00008 13.6269 4.00008 13.1667V10.1333C4.00008 9.91244 4.08774 9.70063 4.24381 9.54438L12.8668 0.911087C13.023 0.75463 13.2351 0.666699 13.4562 0.666657ZM13.4566 2.67898L5.66675 10.4782V12.3333H7.53696L15.3218 4.54503L13.4566 2.67898Z"
-                                  fill="#36454F"
-                                />
-                              </svg>
-                            </span>
-                            <span>
-                              <Tooltip
-                                placement="left"
-                                target={targetRef}
-                                isOpen={editRowTooltip === index + 1}
-                                toggle={() =>
-                                  setEditRowTooltip(
-                                    editRowTooltip
-                                      ? editRowTooltip === index + 1
-                                        ? null
-                                        : index + 1
-                                      : index + 1
-                                  )
-                                }
-                              >
-                                Edit Row
-                              </Tooltip>
-                            </span>
+                                <svg
+                                  id={"Edit-Tooltip-" + index + 1}
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 18 18"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M0.666748 2.33332C0.666748 1.41285 1.41294 0.666657 2.33341 0.666657H8.16675C8.62698 0.666657 9.00008 1.03975 9.00008 1.49999C9.00008 1.96023 8.62698 2.33332 8.16675 2.33332H2.33341V15.6667H15.6667V9.83332C15.6667 9.37308 16.0398 8.99999 16.5001 8.99999C16.9603 8.99999 17.3334 9.37308 17.3334 9.83332V15.6667C17.3334 16.5871 16.5872 17.3333 15.6667 17.3333H2.33341C1.41295 17.3333 0.666748 16.5871 0.666748 15.6667V2.33332ZM13.4562 0.666657C13.6773 0.666614 13.8894 0.754465 14.0458 0.910863L17.0895 3.9559C17.4147 4.28131 17.4147 4.80875 17.0895 5.13416L8.47163 13.7558C8.31534 13.9121 8.10332 14 7.88225 14H4.83341C4.37318 14 4.00008 13.6269 4.00008 13.1667V10.1333C4.00008 9.91244 4.08774 9.70063 4.24381 9.54438L12.8668 0.911087C13.023 0.75463 13.2351 0.666699 13.4562 0.666657ZM13.4566 2.67898L5.66675 10.4782V12.3333H7.53696L15.3218 4.54503L13.4566 2.67898Z"
+                                    fill="#36454F"
+                                  />
+                                </svg>
+                              </span>
+                            </Tooltip>
                           </>
                         )}
-                        {/* <Link
-                        style={{ fontWeight: 'normal' }}
-                        className="btn btn-secondary btn-sm"
-                        to={{ pathname: `/pdf-view`, search: `?url=${log?.doc_link}&textLoc=${log.text_loc}` }}
-                        target="_blank" >
-                        Pdf
-                      </Link> */}
-                        {pdfIndex === index ? (
-                          <button
-                            type="button"
-                            className="btn btn-secondary close-button"
+                        {pdfIndex === index && !isCombining ? (
+                          <div
                             onClick={() => {
                               props.setLogInViewer(null);
                               props.setPdfData({
@@ -827,101 +874,67 @@ export default function CombinedLogs(props) {
                               });
                               props.setSubmittalIdParam(null);
                             }}
+                            style={{ cursor: "pointer" }}
+                            className="pdf-button"
                           >
-                            Close Pdf
-                          </button>
+                            <Tooltip title="Close Pdf" arrow>
+                              <svg id={"Pdf-Tooltip-" + index + 1} width="18px" height="18px" viewBox="0 0 1.08 1.08" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path width="48" height="48" fill="white" fill-opacity="0.01" d="M0 0H1.08V1.08H0V0z"/>
+                                <path d="M1.08 0H0v1.08h1.08z" fill="white" fill-opacity="0.01"/>
+                                <path d="M0.225 0.09h0.45l0.225 0.225v0.63a0.045 0.045 0 0 1 -0.045 0.045H0.225a0.045 0.045 0 0 1 -0.045 -0.045V0.135a0.045 0.045 0 0 1 0.045 -0.045Z" fill="#36454F" stroke="#000000" stroke-width="0.09" stroke-linejoin="round"/>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M0.405 0.405h0.27v0.18L0.405 0.585z" stroke="white" stroke-width="0.09" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M0.405 0.405v0.36" stroke="white" stroke-width="0.07" stroke-linecap="round"/>
+                              </svg>
+                            </Tooltip>
+                          </div>
                         ) : (
                           newRowIndex !== index &&
+                          !isCombining &&
                           showPdf && (
-                            <>
-                              <span
-                                onClick={() => {
-                                  handleViewPdf(
-                                    log.doc_link,
-                                    log.text_loc,
-                                    index,
-                                    log.doc_id,
-                                    log.id,
-                                    log.additional_text_locations,
-                                  );
-                                  props.setLogInViewer(log);
-                                }}
-                                style={{ cursor: "pointer" }}
-                              >
-                                <svg
-                                  id={"Pdf-Tooltip-" + index + 1}
-                                  width="16"
-                                  height="18"
-                                  viewBox="0 0 16 20"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    clipRule="evenodd"
-                                    d="M0.5 2.50001C0.5 1.57954 1.24619 0.833344 2.16667 0.833344H10.5C10.721 0.833344 10.933 0.921141 11.0893 1.07742L15.2559 5.24409C15.4122 5.40037 15.5 5.61233 15.5 5.83334V17.5C15.5 18.4205 14.7538 19.1667 13.8333 19.1667H2.16667C1.2462 19.1667 0.5 18.4205 0.5 17.5V2.50001ZM10.1548 2.50001H2.16667V17.5H13.8333V6.17852L10.1548 2.50001ZM4.66667 7.50001C4.66667 7.03977 5.03976 6.66668 5.5 6.66668H10.5C10.9602 6.66668 11.3333 7.03977 11.3333 7.50001V10.8299C11.3333 11.2899 10.9606 11.6629 10.5006 11.6632L6.33333 11.6661V14.1667C6.33333 14.6269 5.96024 15 5.5 15C5.03976 15 4.66667 14.6269 4.66667 14.1667V7.50001ZM6.33593 9.99943L9.66667 9.99713V8.33334H6.3342L6.33593 9.99943Z"
-                                    fill="#36454F"
-                                  />
+                            <span
+                              onClick={() => {
+                                handleViewPdf(
+                                  log.doc_link,
+                                  log.text_loc,
+                                  index,
+                                  log.doc_id,
+                                  log.id,
+                                  log.additional_text_locations,
+                                );
+                                props.setLogInViewer(log);
+                              }}
+                              style={{ cursor: "pointer" }}
+                              className="pdf-button"
+                            >
+                              <Tooltip title="View Pdf" arrow>
+                                <svg id={"Pdf-Tooltip-" + index + 1} width="18px" height="18px" viewBox="0 0 1.08 1.08" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path width="48" height="48" fill="white" fill-opacity="0.01" d="M0 0H1.08V1.08H0V0z"/>
+                                  <path d="M1.08 0H0v1.08h1.08z" fill="white" fill-opacity="0.01"/>
+                                  <path d="M0.225 0.09h0.45l0.225 0.225v0.63a0.045 0.045 0 0 1 -0.045 0.045H0.225a0.045 0.045 0 0 1 -0.045 -0.045V0.135a0.045 0.045 0 0 1 0.045 -0.045Z" fill="white" stroke="#000000" stroke-width="0.07" stroke-linejoin="round"/>
+                                  <path fill-rule="evenodd" clip-rule="evenodd" d="M0.405 0.405h0.27v0.18L0.405 0.585z" stroke="#36454F" stroke-width="0.09" stroke-linecap="round" stroke-linejoin="round"/>
+                                  <path d="M0.405 0.405v0.36" stroke="#36454F" stroke-width="0.09" stroke-linecap="round"/>
                                 </svg>
-                              </span>
-                              <span>
-                                <Tooltip
-                                  placement="right"
-                                  target={"Pdf-Tooltip-" + index + 1}
-                                  isOpen={pdfTooltip === index + 1}
-                                  toggle={() =>
-                                    setPdfTooltip(
-                                      pdfTooltip
-                                        ? pdfTooltip === index + 1
-                                          ? null
-                                          : index + 1
-                                        : index + 1,
-                                    )
-                                  }
-                                >
-                                  View Pdf
-                                </Tooltip>
-                              </span>
-                            </>
+                              </Tooltip>
+                            </span>
                           )
                         )}
-                        {props.listId === null && editRow === "" && (
-                          <>
+                        {props.listId === null && editRow === "" && !isCombining && (
+                          <Tooltip title={isCombining
+                            ? 'Cannot add new row while combining rows'
+                            : 'Add Row Below'} arrow>
                             <AddButton
                               onClick={() => {
+                                if (isCombining) return;
                                 if (!newRowIndex) {
-                                  handleAddRow(log);
-                                } else if (newRowIndex === index + 1) {
                                   handleAddRow(log);
                                 }
                               }}
                               id={"Tooltip-" + index + 1}
                             />
-                            <span>
-                              <Tooltip
-                                placement="right"
-                                target={"Tooltip-" + index + 1}
-                                isOpen={addRowTooltip === index + 1}
-                                toggle={() =>
-                                  setaddRowTooltip(
-                                    addRowTooltip
-                                      ? addRowTooltip === index + 1
-                                        ? null
-                                        : index + 1
-                                      : index + 1
-                                  )
-                                }
-                              >
-                                Add Row below
-                              </Tooltip>
-                            </span>
-                          </>
+                          </Tooltip>
                         )}
-                        {log.parsing_method === "AI_SUBMITTAL" ? (
-                          <Sparkles />
-                        ) : (
-                          ""
-                        )}
+
+                        {log.parsing_method === 'AI_SUBMITTAL' && <Sparkles />}
                       </>
                     }
                   </div>
@@ -929,7 +942,7 @@ export default function CombinedLogs(props) {
 
                 <td
                   className={`${
-                    editRow === index ? "activeTh" : ""
+                    editRow === index ? 'activeTh' : ''
                   } reduce-height`}
                 >
                   {formatSubmittalNumber(log.submittal_number)}
@@ -937,15 +950,14 @@ export default function CombinedLogs(props) {
 
                 <td
                   className={`${
-                    editRow === index ? "activeTh" : ""
+                    editRow === index ? 'activeTh' : ''
                   } reduce-height`}
-                 
                 >
                   {editRow === index ? (
                     <input
                       placeholder="Enter"
                       className={`form-control ${
-                        formValid.spec_section ? "" : "form-required"
+                        formValid.spec_section ? '' : 'form-required'
                       }`}
                       type="text"
                       value={rowData.spec_section}
@@ -956,8 +968,12 @@ export default function CombinedLogs(props) {
                     />
                   ) : (
                     formatSpecSection(log.spec_section)
+                    + (isCombining &&
+                       isCombineTarget &&
+                       !areSameValues('spec_section')
+                      ? '+' : ''
+                    )
                   )}
-                  {/* {log.spec_section} */}
                 </td>
 
                 {props.projectType !== 'ufgs' && (
@@ -969,35 +985,17 @@ export default function CombinedLogs(props) {
                     {log.section_title}
                   </td>
                 )}
-                {props.projectType === "ufgs" && (
-                  <>
-                    <td
-                      className={`${
-                        editRow === index ? "activeTh" : ""
-                      } reduce-height`}
-                    >
-                      {log.div_no}
-                    </td>
-                    <td
-                      className={`${
-                        editRow === index ? "activeTh" : ""
-                      } reduce-height`}
-                    >
-                      {log.sd_no}
-                    </td>
-                  </>
-                )}
                 {props.projectType !== "ufgs" && (
                   <td
                     className={`${
-                      editRow === index ? "activeTh" : ""
+                      editRow === index ? 'activeTh' : ''
                     } reduce-height`}
                   >
                     {editRow === index ? (
                       <input
                         placeholder="Enter"
                         className={`form-control ${
-                          formValid.para_no ? "" : "form-required"
+                          formValid.para_no ? '' : 'form-required'
                         }`}
                         type="text"
                         value={rowData.para_no}
@@ -1008,20 +1006,40 @@ export default function CombinedLogs(props) {
                       />
                     ) : (
                       log.para_no
+                      + (isCombining &&
+                         isCombineTarget &&
+                         combiningQueue.length > 1
+                        ? '+' : ''
+                      )
                     )}
                   </td>
                 )}
                 {props.projectType !== "ufgs" && (
                   <td
                     className={`${
-                      editRow === index ? "activeTh" : ""
+                      editRow === index ? 'activeTh' : ''
                     } reduce-height`}
                   >
-                    {editRow === index ? (
+                    {isCombining && isCombineTarget ? (
+                      // Combining rows with different spec section values
+                      <>
+                        <input
+                          placeholder="Enter"
+                          type="text"
+                          value={combiningResult.type}
+                          className="form-control"
+                          onChange={(e) =>
+                            setCombiningResult((value) => {
+                              return { ...value, type: e.target.value };
+                            })
+                          }
+                        />
+                      </>
+                    ) : editRow === index ? (
                       <input
                         placeholder="Enter"
                         className={`form-control ${
-                          formValid.type ? "" : "form-required"
+                          formValid.type ? '' : 'form-required'
                         }`}
                         type="text"
                         value={rowData.type}
@@ -1035,19 +1053,31 @@ export default function CombinedLogs(props) {
                     )}
                   </td>
                 )}
-                {props.projectType === "ufgs" && (
-                  <td className="reduce-height"> {log.sd_title} </td>
-                )}
                 <td
                   className={`reduce-height ${
-                    editRow === index ? "activeTh" : ""
+                    editRow === index ? 'activeTh' : ''
                   }`}
                 >
-                  {editRow === index ? (
+                  {isCombining && isCombineTarget ? (
+                    // Combining rows with different spec section values
+                    <>
+                      <input
+                        placeholder="Enter"
+                        type="text"
+                        value={combiningResult.item_desc}
+                        className="form-control"
+                        onChange={(e) =>
+                          setCombiningResult((value) => {
+                            return { ...value, item_desc: e.target.value };
+                          })
+                        }
+                      />
+                    </>
+                  ) : editRow === index ? (
                     <input
                       placeholder="Enter"
                       className={`form-control ${
-                        formValid.item_desc ? "" : "form-required"
+                        formValid.item_desc ? '' : 'form-required'
                       }`}
                       type="text"
                       value={rowData.item_desc}
@@ -1063,14 +1093,47 @@ export default function CombinedLogs(props) {
                 <>
                   <td
                     className={`${
-                      editRow === index ? "activeTh" : ""
+                      editRow === index ? 'activeTh' : ''
                     } reduce-height`}
                   >
-                    {editRow === index && JSON.parse(log.full_edit) ? (
+                    {isCombining && isCombineTarget ? (
+                      <div
+                        className={
+                          'log-desc ' +
+                          (
+                            isCombineTarget
+                              ? 'show-content'
+                              : showMore[index]
+                                ? 'show-content'
+                                : 'text-overflow'
+                          )
+                        }
+                        style={{ whiteSpace: 'pre-wrap' }}
+                        ref={(element) => rowRefs.current.push(element)}
+                      >
+                        {combiningResult.para_context}
+                        {shouldShowExpansionButton[index] && (
+                          <span
+                            className="showmore-wrap"
+                            onClick={() =>
+                              setShowMore(
+                                showMore.with(index, !showMore[index])
+                              )
+                            }
+                          >
+                            {showMore[index] ? (
+                              <CollapseButton />
+                            ) : (
+                              <ExpandButton />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    ) : editRow === index && JSON.parse(log.full_edit) ? (
                       <input
                         placeholder="Enter"
                         className={`form-control ${
-                          formValid.para_context ? "" : "form-required"
+                          formValid.para_context ? '' : 'form-required'
                         }`}
                         type="text"
                         value={rowData.para_context}
@@ -1078,7 +1141,7 @@ export default function CombinedLogs(props) {
                         onChange={(e) =>
                           setRowData({
                             ...rowData,
-                            para_context: e.target.value,
+                            para_context: e.target.value
                           })
                         }
                       />
@@ -1086,7 +1149,7 @@ export default function CombinedLogs(props) {
                       <input
                         placeholder="Enter"
                         className={`form-control ${
-                          formValid.para_context ? "" : "form-required"
+                          formValid.para_context ? '' : 'form-required'
                         }`}
                         type="text"
                         value={rowData.para_context}
@@ -1094,17 +1157,18 @@ export default function CombinedLogs(props) {
                         onChange={(e) =>
                           setRowData({
                             ...rowData,
-                            para_context: e.target.value,
+                            para_context: e.target.value
                           })
                         }
                       />
                     ) : (
                       <div
                         className={
-                          "log-desc " +
-                          (showMore[index] ? "show-content" : "text-overflow")
+                          'log-desc ' +
+                          (showMore[index] ? 'show-content' : 'text-overflow')
                         }
                         ref={(element) => rowRefs.current.push(element)}
+                        style={{ whiteSpace: 'pre-wrap' }}
                       >
                         {log.para_context}
                         {shouldShowExpansionButton[index] && (
@@ -1136,7 +1200,6 @@ export default function CombinedLogs(props) {
         modal={filterModal}
         setFilterModal={() => setFilterModal(!filterModal)}
         selectedFilterValue={props?.selectedFilterValue}
-        fetchLogData={props?.fetchLogData}
         filterColumn={filterColumn}
         setFilterValues={setFilterValues}
         filterValues={filterValues}

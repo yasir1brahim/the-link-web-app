@@ -130,11 +130,16 @@
   }
 }
 
+.spliter {
+  border-right: 1px solid rgba(174, 184, 198, 0.25);
+}
+
 .header-wrapper-swap {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 5px;
+  margin-bottom: 5px;
   .header-swap {
     .main-wrapper {
       display: flex;
@@ -171,25 +176,27 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      border: 1px solid #d1d5db;
-      box-shadow: 0px 1px 2px 0px #0000000d;
-      background-color: #f8f8fa;
+      border: none;
+      background-color: #F4F7FB;
       padding: 5px 10px;
-      color: #0e2332;
-      font-size: 14px;
-      font-weight: 600;
+      color: #231F20;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 24px;
+    }
+    .table-top-btn:hover {
+      background-color: #e0eaf7;
     }
   }
   .light-btn {
     border-radius: 6px;
-    padding: 6px 10px;
     background: #d5e73e;
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    line-height: 20px;
-    font-weight: 600;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 24px;
     box-shadow: rgba(0, 0, 0, 0.05);
     border: none;
   }
@@ -208,39 +215,41 @@
     margin-top: 10px;
   }
   .dropdown {
-    margin-right: 10px;
     button {
-      border: 1px solid #d1d5db !important;
+      border: none;
+      background-color: #F4F7FB;
       padding: 5px 10px !important;
-      font-size: 14px !important;
-      color: #0e2332 !important;
-      font-weight: 600 !important;
-      background-color: #f8f8fa !important;
-      box-shadow: 0px 1px 2px 0px #0000000d;
-      line-height: 21px;
+      color: #231F20;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 24px;
+    }
+    button:hover {
+      background-color: #e0eaf7;
     }
     .export-btn {
-      min-width: 132px;
+      min-width: 110px;
     }
   }
   .trash-icon {
-    background-color: #f8f8fa;
-    border: 1px solid #d1d5db;
-    box-shadow: 0px 1px 2px 0px #0000000d;
-    border-radius: 6px;
+    background-color: #F4F7FB;
+    border: none;
     padding: 5px 10px;
-    line-height: 21px;
+    line-height: 24px;
+  }
+  .trash-icon:hover {
+    background-color: #e0eaf7;
   }
   .clear-filters button {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid #d1d5db;
-    box-shadow: 0px 1px 2px 0px #0000000d;
-    background-color: #f8f8fa;
-    padding: 5px 10px;
-    color: #0e2332;
-    font-size: 14px;
-    font-weight: 600;
+    border: none;
+    background-color: #F4F7FB;
+    padding: 5px 10px !important;
+    color: #231F20;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 24px;
+  }
+  .clear-filters button:hover {
+    background-color: #e0eaf7;
   }
 }
