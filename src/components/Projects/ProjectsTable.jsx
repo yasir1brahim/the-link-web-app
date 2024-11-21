@@ -107,7 +107,7 @@ const handleRestoreProject = async () => {
   let errors = false;
   if (!errors) {
       try {
-        const response = await toggleProjectStatus(restoreProject.id, 'restore', archiveProject.team);
+        const response = await toggleProjectStatus(restoreProject.id, 'restore', restoreProject.team);
 
           if (response?.data) {
               console.log('Project restored successfully:', response.data);
@@ -142,6 +142,8 @@ const handleRestoreProject = async () => {
           {/* <a className='noprojects-wrapper d-flex align-items-center justify-content-center w-100' href='javascript:void(0);'>
                             <span className='d-flex align-items-center justify-content-center'><AddUser /> Create Users/Employees, then Add a Project</span>
                         </a> */}
+          
+        
           <div className="table-top-content">
             <div className="table-heading">
               <label className="table-entries">
@@ -188,7 +190,6 @@ const handleRestoreProject = async () => {
               </div>
             </div>
           </div>
-        </div>
         <div className="l-table-wrapper">
           <table className="table">
             <thead>
@@ -201,11 +202,6 @@ const handleRestoreProject = async () => {
                 <th>
                   <span>
                     Status<i className="sort-d"></i>
-                  </span>
-                </th>
-                <th>
-                  <span>
-                    Lead Contact<i className="sort-i"></i>
                   </span>
                 </th>
                 <th>
@@ -285,15 +281,6 @@ const handleRestoreProject = async () => {
                             </span>
                             <p className="content">{!project.is_archived ? "Open" : "Archived"}</p>
                           </div>{" "}
-                        </td>
-                        <td>
-                          {!!project.owner ? (
-                            <div className="icon-wrap">
-                              <p className="content">{project.owner.get_display_name}</p>
-                            </div>
-                          ) : (
-                            ""
-                          )}
                         </td>
                         <td>{project.members.length}</td>
                         <td>{project.start_date}</td>
@@ -420,7 +407,7 @@ const handleRestoreProject = async () => {
               ) : (
                 <tbody>
                   <tr>
-                    <td className="text-center" colSpan={7}>
+                    <td className="text-center" colSpan={6}>
                       No data
                     </td>
                   </tr>
@@ -490,6 +477,7 @@ const handleRestoreProject = async () => {
           draggable
           pauseOnHover
         />
+      </div>
       </div>
     </>
   );

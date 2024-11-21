@@ -1,5 +1,5 @@
 export const getHomeUrl = async (e, isAuthenticated, user, getUserTeams, navigate) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
   
     if (isAuthenticated && user?.is_superuser) {
       navigate({ pathname: '/companies' });

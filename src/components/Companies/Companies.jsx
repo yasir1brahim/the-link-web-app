@@ -6,7 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Loader from '../shared/Loader/Loader';
 import handleError from '../../config/errorHandler';
-import { getUserTeams } from '../../api/Authentication/api';
+import { getUserTeams, getUserRoleInTeam } from '../../api/Authentication/api';
 
 const Companies = () => {
     const [companies, setCompanies] = useState([]);
@@ -14,20 +14,36 @@ const Companies = () => {
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [isLoading, setLoading] = useState(false);
     const [pageRefresh, setPageRefresh] = useState(false);
-
+    const [roles, setRoles] = useState({});
 
     useEffect(() => {
-        const fetchCompanies = async () => {
-            setLoading(true);
-            const response = await getUserTeams();
-            setCompanies(response.data.results);
-            setLoading(false);
-        };
-        fetchCompanies().catch((error) => {
-            setLoading(false);
-            handleError(error);
-        });
-    }, [pageRefresh]);
+      const fetchCompaniesAndRoles = async () => {
+          try {
+              setLoading(true);
+  
+              const response = await getUserTeams();
+              const fetchedCompanies = response.data.results;
+              setCompanies(fetchedCompanies);
+  
+              const userId = localStorage.getItem('userId');
+              const rolesPromises = fetchedCompanies.map(async (company) => {
+                  const role = await getUserRoleInTeam(userId, company.id);
+                  return { [company.id]: role };
+              });
+  
+              const rolesArray = await Promise.all(rolesPromises);
+              const rolesMap = rolesArray.reduce((acc, roleObj) => ({ ...acc, ...roleObj }), {});
+  
+              setRoles(rolesMap);
+          } catch (error) {
+              handleError(error);
+          } finally {
+              setLoading(false);
+          }
+      };
+  
+      fetchCompaniesAndRoles();
+  }, [pageRefresh]);
 
     return (
         <div>
@@ -72,15 +88,20 @@ const Companies = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {companies.map((company) => {
+                      {companies.map((company)  => {
+                        const role = roles[company.id];
+                        const isMember = role === 'member';
+
                         return (
                           <tr key={company?.id}>
                             <td>
-                              <a
-                                href={`/company-profile/${company.id}`}
-                              >
-                                {company.name}
-                              </a>
+                              {isMember ? (
+                                <span>{company.name}</span>
+                              ) : (
+                                <a href={`/company-profile/${company.id}`}>
+                                  {company.name}
+                                </a>
+                              )}
                             </td>
                             <td>{company.project_count}</td>
                             <td>{company.members.length}</td>

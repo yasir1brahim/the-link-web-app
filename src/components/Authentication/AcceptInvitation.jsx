@@ -44,7 +44,7 @@ const AcceptInvitation = (props) => {
     }
 
     if (newPassword && confirmPassword && newPassword !== confirmPassword) {
-      toast.error("Passwords do not match.");
+      toast.error("Passwords are not the same");
       error = true;
     }
     return error;
