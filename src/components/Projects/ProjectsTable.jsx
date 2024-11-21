@@ -142,6 +142,8 @@ const handleRestoreProject = async () => {
           {/* <a className='noprojects-wrapper d-flex align-items-center justify-content-center w-100' href='javascript:void(0);'>
                             <span className='d-flex align-items-center justify-content-center'><AddUser /> Create Users/Employees, then Add a Project</span>
                         </a> */}
+          
+        
           <div className="table-top-content">
             <div className="table-heading">
               <label className="table-entries">
@@ -188,7 +190,6 @@ const handleRestoreProject = async () => {
               </div>
             </div>
           </div>
-        </div>
         <div className="l-table-wrapper">
           <table className="table">
             <thead>
@@ -476,6 +477,7 @@ const handleRestoreProject = async () => {
           draggable
           pauseOnHover
         />
+      </div>
       </div>
     </>
   );
