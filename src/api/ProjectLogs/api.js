@@ -229,6 +229,19 @@ const upsertExcelExportHeader = async (items) => {
     }
 }
 
+
+const combineRows = async (data) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: 'api/deliverables/combine-rows/',
+            data: data
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
 export {
     getSavedLogs,
     getSubmittalItemById,
@@ -243,4 +256,5 @@ export {
     getExportJetBuildData,
     getExcelExportHeader,
     upsertExcelExportHeader,
+    combineRows,
 }
