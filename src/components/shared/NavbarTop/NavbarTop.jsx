@@ -11,7 +11,8 @@ import { useNavigate } from 'react-router-dom';
 
 const NavbarTop = ({...props}) => {
   const [navDrop, setNavDrop] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [showCompanyProfile, setShowCompanyProfile] = useState(false);
+  const [teamId, setTeamId] = useState(null);
   const { user, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -54,15 +55,17 @@ const NavbarTop = ({...props}) => {
       try {
         const accessToken = localStorage.getItem('accessToken');
         const response = await getUserTeams(accessToken);
-        const teams = response.data.results;
-        const userId = localStorage.getItem('userId');
-  
-        const roles = await Promise.all(
-          teams.map((team) => getUserRoleInTeam(userId, team.id))
-        );
-  
-        if (roles.includes('admin')) {
-          setIsAdmin(true);
+        const teams = response.data;
+        if (teams?.results?.length === 1) {
+          const singleTeam = teams.results[0];
+          setTeamId(singleTeam.id);
+          const userId = Number(localStorage.getItem('userId'));
+          const isAdmin = singleTeam.members.some(
+            (member) => member.user_id === userId && member.role === 'admin'
+          );    
+          if (isAdmin) {
+            setShowCompanyProfile(true);
+          }
         }
       } catch (error) {
         console.error('Error checking admin role:', error);
@@ -141,9 +144,9 @@ const NavbarTop = ({...props}) => {
                         <div>Manage Excel Export</div>
                       </div>
                     )}
-                    {isAdmin && (
+                    {showCompanyProfile && (
                       <a
-                        href="/company-profile"
+                        href={`/company-profile/${teamId}`}
                         className="navlist"
                         onClick={toggleDrop}
                       >

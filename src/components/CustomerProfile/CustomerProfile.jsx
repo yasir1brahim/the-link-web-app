@@ -75,16 +75,31 @@ const CustomerProfile = (props) => {
     setCompanyName,
     setProfilePicture,
     setCurrentUserRole,
-    handleError
+    handleError,
+    navigate,
+    setLoading
   ) => {
     let isMounted = true;
     try {
+      setLoading(true);
+      const userRole = await getUserRoleInTeam(
+        localStorage.getItem('userId'),
+        customerId
+      );
+      setCurrentUserRole(userRole);
+      if (userRole !== 'admin') {
+        setLoading(false);
+        navigate('/not-found', { 
+          state: { statusCode: 403, message: 'You do not have permission to view this page.' } 
+        });
+        return; 
+      }
+
       const response = await getTeamDetails(customerId);
 
       if (isMounted) {
         setCustomerData(response.data);
         setEmployeeData(response.data.members);
-        console.log('customerData', response.data);
         setTeamId(response.data.id);
 
         // Profile data
@@ -96,32 +111,11 @@ const CustomerProfile = (props) => {
           ...prevState,
           value: response.data?.legacy_logo_url
         }));
-        const userRole = await getUserRoleInTeam(
-          localStorage.getItem('userId'),
-          customerId
-        );
-
-        if (isMounted) {
-          setCurrentUserRole(userRole);
-          if (userRole !== 'admin') {
-            toast.error('Unauthorized access. Admins only.', {
-              position: 'bottom-center',
-              autoClose: 5000,
-              hideProgressBar: true,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-            });
-  
-            setTimeout(() => {
-              navigate({ pathname: `/project-list/${customerId}` });
-            }, 1000);
-          }
-        }
+        setLoading(false);
       }
     } catch (error) {
       handleError(error);
+      setLoading(false);
     }
 
     return () => {
@@ -140,6 +134,7 @@ const CustomerProfile = (props) => {
       setCurrentUserRole,
       handleError,
       navigate,
+      setLoading,
     );
   
     return cleanup;
