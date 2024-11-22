@@ -96,7 +96,6 @@ const ProjectLogs = () => {
     classification: "",
   });
   const customerData = state?.customerData;
-  const projectType = state?.project?.project_type;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const baseUrl = window.location.href.includes("https://app.thelink.ai")
     ? `https://app.thelink.ai/`
@@ -225,7 +224,6 @@ const ProjectLogs = () => {
       setUploadLoading(true);
       const data = new FormData();
       data.append("project_id", projectId || state.project?.project_id);
-      projectType === "ufgs" && data.append("project_type", projectType);
       Object.values(pdfFile)?.forEach((file) => data.append("files", file));
       const response = await uploadFiles(data)
       if (response.data) {
@@ -852,7 +850,6 @@ const ProjectLogs = () => {
                   newRowIndex={newRowIndex}
                   setNewRowIndex={setNewRowIndex}
                   searchValue={searchValue}
-                  projectType={projectType}
                   qaDashboard={state?.qaDashboard}
                   selectedFilterValue={selectedFilterValue}
                   filterValues={filterValues}
@@ -1095,7 +1092,7 @@ const ProjectLogs = () => {
                     )
                   );
                 })
-              : null}
+              : <div className="p-2">No Saved Lists</div>}
           </div>
           <ModalFooter>
             <Button

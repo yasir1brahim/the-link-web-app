@@ -169,7 +169,7 @@ export const UploadDocuments = (props) => {
                 className={`submit-accent ${isPdfFileEmpty ? 'disabled-button' : ''}`} 
                 disabled={isPdfFileEmpty} 
               >
-                Get Log
+                Create Log
               </Button>
             </ModalFooter>
           </form>

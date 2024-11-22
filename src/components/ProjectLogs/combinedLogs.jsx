@@ -975,84 +975,77 @@ export default function CombinedLogs(props) {
                     )
                   )}
                 </td>
-
-                {props.projectType !== 'ufgs' && (
-                  <td
-                    className={`${
-                      editRow === index ? 'activeTh' : ''
-                    } reduce-height`}
-                  >
-                    {log.section_title}
-                  </td>
-                )}
-                {props.projectType !== "ufgs" && (
-                  <td
-                    className={`${
-                      editRow === index ? 'activeTh' : ''
-                    } reduce-height`}
-                  >
-                    {editRow === index ? (
+                <td
+                  className={`${
+                    editRow === index ? 'activeTh' : ''
+                  } reduce-height`}
+                >
+                  {log.section_title}
+                </td>
+                <td
+                  className={`${
+                    editRow === index ? 'activeTh' : ''
+                  } reduce-height`}
+                >
+                  {editRow === index ? (
+                    <input
+                      placeholder="Enter"
+                      className={`form-control ${
+                        formValid.para_no ? '' : 'form-required'
+                      }`}
+                      type="text"
+                      value={rowData.para_no}
+                      // style={{ border: 'none' }}
+                      onChange={(e) =>
+                        setRowData({ ...rowData, para_no: e.target.value })
+                      }
+                    />
+                  ) : (
+                    log.para_no
+                    + (isCombining &&
+                        isCombineTarget &&
+                        combiningQueue.length > 1
+                      ? '+' : ''
+                    )
+                  )}
+                </td>
+                <td
+                  className={`${
+                    editRow === index ? 'activeTh' : ''
+                  } reduce-height`}
+                >
+                  {isCombining && isCombineTarget ? (
+                    // Combining rows with different spec section values
+                    <>
                       <input
                         placeholder="Enter"
-                        className={`form-control ${
-                          formValid.para_no ? '' : 'form-required'
-                        }`}
                         type="text"
-                        value={rowData.para_no}
-                        // style={{ border: 'none' }}
+                        value={combiningResult.type}
+                        className="form-control"
                         onChange={(e) =>
-                          setRowData({ ...rowData, para_no: e.target.value })
+                          setCombiningResult((value) => {
+                            return { ...value, type: e.target.value };
+                          })
                         }
                       />
-                    ) : (
-                      log.para_no
-                      + (isCombining &&
-                         isCombineTarget &&
-                         combiningQueue.length > 1
-                        ? '+' : ''
-                      )
-                    )}
-                  </td>
-                )}
-                {props.projectType !== "ufgs" && (
-                  <td
-                    className={`${
-                      editRow === index ? 'activeTh' : ''
-                    } reduce-height`}
-                  >
-                    {isCombining && isCombineTarget ? (
-                      // Combining rows with different spec section values
-                      <>
-                        <input
-                          placeholder="Enter"
-                          type="text"
-                          value={combiningResult.type}
-                          className="form-control"
-                          onChange={(e) =>
-                            setCombiningResult((value) => {
-                              return { ...value, type: e.target.value };
-                            })
-                          }
-                        />
-                      </>
-                    ) : editRow === index ? (
-                      <input
-                        placeholder="Enter"
-                        className={`form-control ${
-                          formValid.type ? '' : 'form-required'
-                        }`}
-                        type="text"
-                        value={rowData.type}
-                        // style={{ border: 'none' }}
-                        onChange={(e) =>
-                          setRowData({ ...rowData, type: e.target.value })
-                        }
-                      />
-                    ) : (
-                      log.type
-                    )}
-                  </td>
-                )}
+                    </>
+                  ) : editRow === index ? (
+                    <input
+                      placeholder="Enter"
+                      className={`form-control ${
+                        formValid.type ? '' : 'form-required'
+                      }`}
+                      type="text"
+                      value={rowData.type}
+                      // style={{ border: 'none' }}
+                      onChange={(e) =>
+                        setRowData({ ...rowData, type: e.target.value })
+                      }
+                    />
+                  ) : (
+                    log.type
+                  )}
+                </td>
                 <td
                   className={`reduce-height ${
                     editRow === index ? 'activeTh' : ''
