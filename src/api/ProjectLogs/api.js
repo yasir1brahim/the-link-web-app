@@ -242,6 +242,21 @@ const combineRows = async (data) => {
     }
 }
 
+
+const getProjectIdBySubmittalId = async (submittalId) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: 'api/deliverables/projects/project-id-by-submittal-id/',
+            params: {
+                'submittal_id': submittalId
+            }
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
 export {
     getSavedLogs,
     getSubmittalItemById,
@@ -257,4 +272,5 @@ export {
     getExcelExportHeader,
     upsertExcelExportHeader,
     combineRows,
+    getProjectIdBySubmittalId
 }
