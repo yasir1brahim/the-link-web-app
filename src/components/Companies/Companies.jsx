@@ -98,7 +98,7 @@ const Companies = () => {
                               {isMember ? (
                                 <span>{company.name}</span>
                               ) : (
-                                <a href={`/customer-profile?id=${company.id}`}>
+                                <a href={`/company-profile/${company.id}`}>
                                   {company.name}
                                 </a>
                               )}
