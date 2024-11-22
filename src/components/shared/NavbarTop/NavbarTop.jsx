@@ -100,16 +100,6 @@ const NavbarTop = ({...props}) => {
                 </NavLink>
                 {navDrop ? (
                   <div className="nav-dropdown" ref={ref}>
-                    {user?.is_superuser &&
-                      !window.location.pathname.includes('admin-user') && (
-                      <a
-                        href="/admin-user"
-                        className="navlist"
-                        onClick={toggleDrop}
-                      >
-                        View Admin Portal
-                      </a>
-                    )}
                     {props.handleManageExcelExportButtonClick && (
                       <div
                         className="navlist"

@@ -13,7 +13,6 @@ import Resetpwd from './components/Authentication/Resetpwd';
 import Resetsuccess from './components/Authentication/Resetsuccess';
 import Checkemail from './components/Authentication/Checkemail';
 import PdfWrapper from './pdfWrapper';
-import AdminUser from './components/AdminUser/AdminUser';
 import SubmittalMappings from './components/ProjectLogs/submittalMappings';
 import ProjectsPage from './components/Projects/ProjectsPage';
 import CollaborationHub from './components/CollaborationHub';
@@ -63,10 +62,6 @@ const router = createBrowserRouter([
   {
     path: "/pdf-view",
     element: <ProtectedRoute><PdfWrapper /></ProtectedRoute>,
-  },
-  {
-    path: "/admin-user",
-    element: <ProtectedRoute><AdminUser /></ProtectedRoute>,
   },
   { 
     path: "/submital-mappings",
