@@ -20,7 +20,7 @@ import { ReactComponent as SearchIcon } from "../../assets/images/search.svg";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
-import { combineRows, getExportJetBuildData, getSavedLogs } from "../../api/ProjectLogs/api";
+import { combineRows, getExportJetBuildData, getProjectIdBySubmittalId, getSavedLogs } from "../../api/ProjectLogs/api";
 import DocumentStatus from "./documentStatus";
 import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
@@ -105,7 +105,6 @@ const ProjectLogs = () => {
   const [manageExcelExportModal, setManageExcelExportModal] = useState(false);
   const toggleManageExcelExportModal = () =>
     setManageExcelExportModal(!manageExcelExportModal);
-  const [initLoading, setInitLoading] = useState(false);
   const [loadingProjectDetails, setLoadingProjectDetails] = useState(false);
   const [companyList, setCompanyList] = useState([]);
   const [companyId, setCompanyId] = useState();
@@ -163,6 +162,26 @@ const ProjectLogs = () => {
     return 'Unauthorized';
   }
 
+  const handleGetProjectId = async (submittalId) => {
+    try {
+      const response = await getProjectIdBySubmittalId(submittalId);
+      setProjectId(response.data.project_id);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  useEffect(() => {
+    const initLoading = async () => {
+      setLoading(true);
+      if (submittalId && projectId === null) {
+        await handleGetProjectId(submittalId);
+      }
+      setLoading(false);
+    }
+    initLoading();
+  }, []);
+
   useEffect(() => {
     const fetchProjectData = async () => {
       setLoading(true);
@@ -176,11 +195,12 @@ const ProjectLogs = () => {
       setLoading(false);
     };
 
-    fetchProjectData().catch((error) => {
-      setLoading(false);
-      handleError(error);
-    });
-
+    if (projectId !== null) {
+      fetchProjectData().catch((error) => {
+        setLoading(false);
+        handleError(error);
+      });
+    }
   }, [user, projectId]);
 
   useEffect(() => {
@@ -361,6 +381,7 @@ const ProjectLogs = () => {
     orderCol = "",
     order = "",
   ) => {
+    if (projectId === null) return;
     setLoading(true);
     setLoadingView(true);
     setLogInViewer(null);
@@ -751,7 +772,6 @@ const ProjectLogs = () => {
         qaDashboard={state?.qaDashboard}
         projectTitle={state?.projectName || projectName || ""}
         handleManageExcelExportButtonClick={handleManageExcelExportButtonClick}
-        initLoading={initLoading}
         loadingProjectDetails={loadingProjectDetails}
         customerData={customerData}
       />
