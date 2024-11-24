@@ -75,6 +75,8 @@ const NavbarTop = ({...props}) => {
     checkAdminRole();
   }, []);
 
+  const isOnProjectPage = window.location.pathname.includes('project-logs');
+
   return (
     <section className="navigation-wrapper d-flex align-items-center justify-content-center">
       <Navbar
@@ -96,8 +98,8 @@ const NavbarTop = ({...props}) => {
           </div>
           <div className='col-4 text-center d-flex justify-content-center'>
             <div className="title-wrap">
-              <div className="title-label">Project Name</div>
-              <h1 className="title-content">{props.projectTitle}</h1>
+              {isOnProjectPage && <div className="title-label">Project Name</div>}
+              {isOnProjectPage && <h1 className="title-content">{props.projectTitle}</h1>}
             </div>
           </div>
           <div className='col-4 d-flex justify-content-end'>
