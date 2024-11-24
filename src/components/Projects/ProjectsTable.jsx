@@ -196,12 +196,12 @@ const handleRestoreProject = async () => {
               <tr>
                 <th>
                   <span>
-                    Existing Projects <i className=""></i>
+                    Project Name<i className=""></i>
                   </span>
                 </th>
                 <th>
                   <span>
-                    Status<i className="sort-d"></i>
+                    Project Number<i className="sort-d"></i>
                   </span>
                 </th>
                 <th>
@@ -244,44 +244,7 @@ const handleRestoreProject = async () => {
                               </div>
                             </td> */}
                         <td>{project.name}</td>
-                        <td>
-                          {" "}
-                          <div
-                            className={`content-wrapper-secondary ${
-                              project.is_archived ? "complete-theme" : "open-theme"
-                            }`}
-                          >
-                            <span className="">
-                              {!project.is_archived ? (
-                                <svg
-                                  width="6"
-                                  height="6"
-                                  viewBox="0 0 6 6"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <circle cx="3" cy="3" r="3" fill="#3B82F6" />
-                                </svg>
-                              ) : (
-                                <svg
-                                  width="7"
-                                  height="6"
-                                  viewBox="0 0 7 6"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <circle
-                                    cx="3.33334"
-                                    cy="3"
-                                    r="3"
-                                    fill="#DC2626"
-                                  />
-                                </svg>
-                              )}
-                            </span>
-                            <p className="content">{!project.is_archived ? "Open" : "Archived"}</p>
-                          </div>{" "}
-                        </td>
+                        <td>{project.project_number}</td>
                         <td>{project.members.length}</td>
                         <td>{project.start_date}</td>
                         <td>{project.end_date}</td>
