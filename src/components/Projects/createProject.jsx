@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { AddEmployee } from "./AddEmployee";
 import BaseProjectForm from "./BaseProjectForm";
 import { createProject } from "../../api/Projects/api";
 import { getTeamDetails } from "../../api/Authentication/api";

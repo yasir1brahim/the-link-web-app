@@ -18,12 +18,14 @@ const CreateEmployee = ({
   const [email, setEmail] = useState({ value: '', errors: '' });
   const [firstName, setFirstName] = useState({ value: '', errors: '' });
   const [lastName, setLastName] = useState({ value: '', errors: '' });
+  const [role, setRole] = useState([{ value: 'member', label: 'Member' }]);
 
   useEffect(() => {
     if (!modal) {
       setEmail({ value: '', errors: '' });
       setFirstName({ value: '', errors: '' });
       setLastName({ value: '', errors: '' });
+      setRole([{ value: 'member', label: 'Member' }]);
     }
   }, [modal]);
 
@@ -40,10 +42,11 @@ const CreateEmployee = ({
     let errors = validate();
     if (!errors) {
       try {
+        console.log("selected role", role);
         const response = await sendInvitation(
           email.value,
           customerID,
-          'member'
+          role[0].value
         );
         if (response?.data) {
           console.log(response?.data);
@@ -73,6 +76,8 @@ const CreateEmployee = ({
       setLastName={setLastName}
       email={email}
       setEmail={setEmail}
+      role={role}
+      setRole={setRole}
     />
   );
 };
