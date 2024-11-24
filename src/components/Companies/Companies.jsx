@@ -51,7 +51,7 @@ const Companies = () => {
             <NavbarTop />
             <div className="page-wrap-content admin-landing-wrapper">
               <Header
-                title={'Customers'}
+                title={'Companies'}
               />
     
               <div className="admin-landing-content">
