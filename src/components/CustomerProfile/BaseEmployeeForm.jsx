@@ -1,6 +1,6 @@
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
-
+import SelectDropdownNoFilter from '../shared/SelectDropdown/SelectDropdownNoFilter';
 
 const BaseEmployeeForm = ({
     formTitle,
@@ -14,6 +14,8 @@ const BaseEmployeeForm = ({
     setLastName,
     email,
     setEmail,
+    role,
+    setRole
 }) => {
     return (
         <Modal
@@ -100,22 +102,18 @@ const BaseEmployeeForm = ({
                   </div>
                   <div className="col-4">
                     <div className="form-group">
-                      {/* <input
-                        type="text"
+                      <SelectDropdownNoFilter
+                        label={'Role'}
+                        setSelected={setRole}
+                        selected={role}
+                        options={['member', 'admin'].map((role) => {
+                            return {
+                                value: role,
+                                label: role === 'member' ? 'Member' : 'Admin',
+                            };
+                        })}
                         className="form-control"
-                        id="userPhone"
-                        aria-describedby="userPhone"
-                        placeholder="Enter"
-                        required
-                        value={contactNumber.value}
-                        onChange={(e) => {
-                          setContactNumber({
-                            ...contactNumber,
-                            value: e.target.value,
-                          });
-                        }}
-                      /> */}
-                      
+                      />
                     </div>
                   </div>
                 </div>

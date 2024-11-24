@@ -18,20 +18,19 @@ const EditEmployee = ({
   });
   const [firstName, setFirstName] = useState({ value: employee?.first_name || '', errors: '' });
   const [lastName, setLastName] = useState({ value: employee?.last_name || '', errors: '' });
+  const [role, setRole] = useState([{ value: employee?.role || 'member', label: employee?.role === 'admin' ? 'Admin' : 'Member' }]);
 
   useEffect(() => {
     setEmail({ value: employee?.email || '', errors: '' });
     setFirstName({ value: employee?.first_name || '', errors: '' });
     setLastName({ value: employee?.last_name || '', errors: '' });
+    setRole([{ value: employee?.role || 'member', label: employee?.role === 'admin' ? 'Admin' : 'Member' }]);
   }, [modal, employee]);
 
   const validate = () => {
     let error = false;
     if (email?.value === '') {
       setEmail({ ...email, errors: 'Email is required.' });
-      error = true;
-    } else if (empData?.find((item) => item?.email === email?.value)) {
-      setEmail({ ...email, errors: 'Email already exists' });
       error = true;
     } else {
       setEmail({ ...email, errors: '' });
@@ -44,7 +43,7 @@ const EditEmployee = ({
     let errors = validate();
     if (!errors) {
       try {
-        const response = await updateUserTeamMembership(employee?.id, 'member');
+        const response = await updateUserTeamMembership(employee?.id, role[0].value);
         if (response.data) {
           console.log(response.data);
           setPageRefresh(!pageRefresh);
@@ -87,6 +86,8 @@ const EditEmployee = ({
       setLastName={setLastName}
       email={email}
       setEmail={setEmail}
+      role={role}
+      setRole={setRole}
     />
   );
 };
