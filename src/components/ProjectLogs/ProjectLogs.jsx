@@ -16,7 +16,6 @@ import PdfWrapper from "../../pdfWrapper";
 import FileDownload from "js-file-download";
 import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
 import { useSearchParams } from "react-router-dom";
-import { ReactComponent as SearchIcon } from "../../assets/images/search.svg";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
@@ -172,19 +171,11 @@ const ProjectLogs = () => {
   }
 
   useEffect(() => {
-    const initLoading = async () => {
+    const fetchProjectData = async () => {
       setLoading(true);
       if (submittalId && projectId === null) {
         await handleGetProjectId(submittalId);
       }
-      setLoading(false);
-    }
-    initLoading();
-  }, []);
-
-  useEffect(() => {
-    const fetchProjectData = async () => {
-      setLoading(true);
       const response = await getProjectDetails(projectId);
       console.log('projectData', response.data);
       setTeamId(response.data.team);
@@ -1144,6 +1135,7 @@ const ProjectLogs = () => {
         manageExcelExportModal={manageExcelExportModal}
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
+      <Loader showComponentLoader={isLoading} />
     </div>
   );
 };
