@@ -18,12 +18,14 @@ const CreateEmployee = ({
   const [email, setEmail] = useState({ value: '', errors: '' });
   const [firstName, setFirstName] = useState({ value: '', errors: '' });
   const [lastName, setLastName] = useState({ value: '', errors: '' });
+  const [role, setRole] = useState([{ value: 'member', label: 'Member' }]);
 
   useEffect(() => {
     if (!modal) {
       setEmail({ value: '', errors: '' });
       setFirstName({ value: '', errors: '' });
       setLastName({ value: '', errors: '' });
+      setRole([{ value: 'member', label: 'Member' }]);
     }
   }, [modal]);
 
@@ -114,6 +116,8 @@ const CreateEmployee = ({
       setLastName={setLastName}
       email={email}
       setEmail={setEmail}
+      role={role}
+      setRole={setRole}
     />
   );
 };

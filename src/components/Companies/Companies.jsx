@@ -51,7 +51,7 @@ const Companies = () => {
             <NavbarTop />
             <div className="page-wrap-content admin-landing-wrapper">
               <Header
-                title={'Customers'}
+                title={'Companies'}
               />
     
               <div className="admin-landing-content">
@@ -98,7 +98,7 @@ const Companies = () => {
                               {isMember ? (
                                 <span>{company.name}</span>
                               ) : (
-                                <a href={`/customer-profile?id=${company.id}`}>
+                                <a href={`/company-profile/${company.id}`}>
                                   {company.name}
                                 </a>
                               )}

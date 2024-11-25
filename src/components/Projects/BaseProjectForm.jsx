@@ -44,7 +44,8 @@ const BaseProjectForm = ({
             const isNotAdmin = !selectedAdminValues.includes(employee.value);
             const isNotMember = !selectedMemberValues.includes(employee.value);
             return isNotAdmin && isNotMember;
-        });
+        })
+        .sort((a, b) => a.label.localeCompare(b.label));
         setFilteredEmployeeListForAdmins(availableForAdmin);
 
         // Filter list for member selection
@@ -52,7 +53,8 @@ const BaseProjectForm = ({
             const isNotAdmin = !selectedAdminValues.includes(employee.value);
             const isNotMember = !selectedMemberValues.includes(employee.value);
             return isNotAdmin && isNotMember;
-        });
+        })
+        .sort((a, b) => a.label.localeCompare(b.label));
         setFilteredEmployeeListForMembers(availableForMember);
     }, [fullEmployeeList, selectedAdminMembersList, selectedStandardMembersList]);
 

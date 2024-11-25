@@ -4,17 +4,16 @@ import ProjectsTable from "./ProjectsTable";
 import Header from "../shared/Header/Header";
 import NavbarTop from "../shared/NavbarTop/NavbarTop";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
-import axiosInstance from "../../config/axios";
+import Loader from "../shared/Loader/Loader";
 import handleError from "../../config/errorHandler";
 import HeaderTabs from "../shared/HeaderTabs/HeaderTabs";
 import { listProjects } from "../../api/Projects/api";
-import { uploadFiles } from "../../api/ProjectLogs/api";
 import { useParams } from 'react-router-dom';
 
 const ProjectsPage = () => {
   const navigate = useNavigate();
   const [uploadSpecsModal, setUploadSpecsModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [archiveProjectModal, setArchiveProjectModal] = useState(false);
   const [restoreProjectModal, setRestoreProjectModal] = useState(false);
   const [customerData, setCustomerData] = useState({});
@@ -55,6 +54,7 @@ const ProjectsPage = () => {
 
   const fetchData = async () => {
     try {
+        setIsLoading(true);
         const response = await listProjects(teamId);
         
         const dataToSet = isArchived 
@@ -64,6 +64,8 @@ const ProjectsPage = () => {
         setProjectData(dataToSet);
     } catch (error) {
         handleError(error);
+    } finally {
+        setIsLoading(false);
     }
 };
 
@@ -113,6 +115,7 @@ useEffect(() => {
           />
         </div>
       </div>
+      <Loader showComponentLoader={isLoading} />
     </>
   );
 };

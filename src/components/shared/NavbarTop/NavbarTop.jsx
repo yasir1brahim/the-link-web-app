@@ -5,12 +5,14 @@ import { ReactComponent as Down } from '../../../assets/images/chevron-bottom.sv
 import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
 import { CircularProgress } from "@mui/material";
 import {AuthContext} from '../../../auth/authcontext'
-import { getUserTeams } from '../../../api/Authentication/api';
+import { getUserTeams, getUserRoleInTeam } from '../../../api/Authentication/api';
 import { getHomeUrl } from '../../../utils/navigation';
 import { useNavigate } from 'react-router-dom';
 
 const NavbarTop = ({...props}) => {
   const [navDrop, setNavDrop] = useState(false);
+  const [showCompanyProfile, setShowCompanyProfile] = useState(false);
+  const [teamId, setTeamId] = useState(null);
   const { user, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -48,6 +50,32 @@ const NavbarTop = ({...props}) => {
     setNavDrop(!navDrop);
   }
 
+  useEffect(() => {
+    const checkAdminRole = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const response = await getUserTeams(accessToken);
+        const teams = response.data;
+        if (teams?.results?.length === 1) {
+          const singleTeam = teams.results[0];
+          setTeamId(singleTeam.id);
+          const userId = Number(localStorage.getItem('userId'));
+          const isAdmin = singleTeam.members.some(
+            (member) => member.user_id === userId && member.role === 'admin'
+          );    
+          if (isAdmin) {
+            setShowCompanyProfile(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking admin role:', error);
+      }
+    };
+  
+    checkAdminRole();
+  }, []);
+
+  const isOnProjectPage = window.location.pathname.includes('project-logs');
 
   return (
     <section className="navigation-wrapper d-flex align-items-center justify-content-center">
@@ -70,8 +98,8 @@ const NavbarTop = ({...props}) => {
           </div>
           <div className='col-4 text-center d-flex justify-content-center'>
             <div className="title-wrap">
-              <div className="title-label">Project Name</div>
-              <h1 className="title-content">{props.projectTitle}</h1>
+              {isOnProjectPage && <div className="title-label">Project Name</div>}
+              {isOnProjectPage && <h1 className="title-content">{props.projectTitle}</h1>}
             </div>
           </div>
           <div className='col-4 d-flex justify-content-end'>
@@ -118,9 +146,9 @@ const NavbarTop = ({...props}) => {
                         <div>Manage Excel Export</div>
                       </div>
                     )}
-                    {localStorage.getItem('roleId') === '2' && (
+                    {showCompanyProfile && (
                       <a
-                        href="/customer-profile"
+                        href={`/company-profile/${teamId}`}
                         className="navlist"
                         onClick={toggleDrop}
                       >
