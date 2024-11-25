@@ -4,7 +4,7 @@ import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
 // import { Typeahead } from 'react-bootstrap-typeahead';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
-import { sendInvitation } from '../../api/Authentication/api';
+import { handleUserInvitation } from '../../api/Authentication/api';
 import handleError from "../../config/errorHandler";
 import BaseEmployeeForm from './BaseEmployeeForm';
 
@@ -36,22 +36,63 @@ const CreateEmployee = ({
     return error;
   };
 
+  const resetForm = () => {
+    setEmail({ value: "", errors: "" });
+    setFirstName({ value: "", errors: "" });
+    setLastName({ value: "", errors: "" });
+  };
+
+  const showToast = (message, type = 'success') => {
+    const toastConfig = {
+      position: "bottom-center",
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    };
+    if (type === 'success') {
+      toast.success(message, toastConfig);
+    } else if (type === 'info') {
+      toast.info(message, toastConfig);
+    } else {
+      toast.error(message, toastConfig);
+    }
+  };
+  
+  const handleError = (error) => {
+    if (error?.response?.data?.message) {
+      showToast(error.response.data.message, 'error');
+    } else {
+      showToast("An unexpected error occurred.", 'error');
+    }
+  };
+  
+  const handleSuccess = () => {
+    setPageRefresh(!pageRefresh);
+    showToast("User created and password reset email sent.");
+  };
+
   const handleSubmit = async () => {
-    let errors = validate();
+    const errors = validate();
     if (!errors) {
       try {
-        const response = await sendInvitation(
+        const response = await handleUserInvitation(
           email.value,
+          firstName.value,
+          lastName.value,
           customerID,
-          'member'
+          "member"
         );
         if (response?.data) {
-          console.log(response?.data);
-          setPageRefresh(!pageRefresh);
-          toggleModal();
-          toast.success('Invite sent', {
-            position: 'bottom-center'
-          });
+          if (response?.data?.message === "User already exists.") {
+            showToast("This user has already been invited. A new invitation has been sent.", 'info');
+            resetForm();
+            toggleModal();
+          } else {
+            handleSuccess()
+            toggleModal();
+          }
         }
       } catch (error) {
         handleError(error);

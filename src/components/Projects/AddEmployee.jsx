@@ -3,7 +3,7 @@ import { Button, ModalFooter } from "reactstrap";
 import axiosInstance from "../../config/axios";
 import { toast } from "react-toastify";
 import Loader from "../shared/Loader/Loader";
-import { sendInvitation } from "../../api/Authentication/api";
+import { handleUserInvitation } from "../../api/Authentication/api";
 
 export const AddEmployee = (props) => {
   const [email, setEmail] = useState({ value: "", errors: "" });
@@ -19,39 +19,73 @@ export const AddEmployee = (props) => {
     return error;
   };
 
+  const resetForm = () => {
+    setEmail({ value: "", errors: "" });
+    setFirstName({ value: "", errors: "" });
+    setLastName({ value: "", errors: "" });
+  };
+  
+  const showToast = (message, type = 'success') => {
+    const toastConfig = {
+      position: "bottom-center",
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    };
+    if (type === 'success') {
+      toast.success(message, toastConfig);
+    } else if (type === 'info') {
+      toast.info(message, toastConfig);
+    } else {
+      toast.error(message, toastConfig);
+    }
+  };
+  
+  const handleInviteSuccess = (data) => {
+    const employee_id = data.user_id;
+    props.setSelectedEmployeeList([
+      ...props.selectedEmployeeList,
+      { label: `${firstName.value} ${lastName.value}`, value: employee_id },
+    ]);
+    resetForm();
+    props.openEmpForm(false);
+    props.setRefetchEmp(true);
+    showToast("Added a new employee and sent password reset email.");
+  };
+  
   const handleSubmit = async () => {
-    let errors = validate();
+    const errors = validate();
     if (!errors) {
       try {
         setIsLoading(true);
-        const response = await sendInvitation(email.value, props.customerID || localStorage.getItem("currentTeamId"));
-        if (response.data) {
-          console.log(response.data);
-          const employee_id = response.data.data.user_id;
-          //   setPageRefresh(!pageRefresh);
-          //   toggleModal();
-          setIsLoading(false);
-          setEmail({ value: "", errors: "" });
-          setFirstName({ value: "", errors: "" });
-          setLastName({ value: "", errors: "" });
-          props.setSelectedEmployeeList([...props.selectedEmployeeList, {label: `${firstName.value}  ${lastName.value}`, value: employee_id}])
-          props.openEmpForm(false);
-          props.setRefetchEmp(true);
-          toast.success("Added a new employee.");
+        const customerID = customerID || localStorage.getItem("currentTeamId");
+        if (!customerID) {
+          showToast("Customer ID is missing.", 'error');
+          return;
+        }
+        const response = await handleUserInvitation(
+          email.value,
+          firstName.value,
+          lastName.value,
+          customerID,
+          "member"
+        );
+        if (response?.data) {
+          if (response?.data?.message === "User already exists."){
+            showToast("This user has already been invited, a new invitation has been sent.", 'info');
+            resetForm();
+            props.openEmpForm(false);
+            props.setRefetchEmp(true);
+          } else {
+            handleInviteSuccess(response.data);
+          }
         }
       } catch (error) {
+          showToast(error.response?.data?.message || "Failed to add employee.", 'error');
+      } finally {
         setIsLoading(false);
-        console.log(error.message);
-        toast.error(error.response.data.message, {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        // toggleModal();
       }
     }
   };
