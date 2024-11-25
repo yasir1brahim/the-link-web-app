@@ -42,6 +42,7 @@ const CreateEmployee = ({
     setEmail({ value: "", errors: "" });
     setFirstName({ value: "", errors: "" });
     setLastName({ value: "", errors: "" });
+    setRole([{ value: 'member', label: 'Member' }]);
   };
 
   const showToast = (message, type = 'success') => {
@@ -84,7 +85,7 @@ const CreateEmployee = ({
           firstName.value,
           lastName.value,
           customerID,
-          "member"
+          role[0].value
         );
         if (response?.data) {
           if (response?.data?.message === "User already exists.") {
