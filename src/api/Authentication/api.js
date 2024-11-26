@@ -51,6 +51,20 @@ const resetPassword = async (uid, token, new_password1, new_password2) => {
     });
 }
 
+const handleUserInvitation = async (email, firstName, lastName, teamId, role = "member") => {
+    return await axiosInstance({
+        method: 'post',
+        url: '/teams/api/invited-user/',
+        data: {
+            email: email,
+            first_name: firstName,
+            last_name: lastName,
+            team_id: teamId,
+            role: role
+        }
+    });
+};
+
 const getAuthTokenFromRefreshToken = async (refreshToken) => {
     return await axiosInstance({
         method: 'post',
@@ -186,4 +200,5 @@ export {
     resetPassword,
     uploadTeamLogo,
     updateUserStatus,
+    handleUserInvitation,
 }
