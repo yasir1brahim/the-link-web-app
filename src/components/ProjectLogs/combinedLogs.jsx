@@ -1122,7 +1122,7 @@ export default function CombinedLogs(props) {
                           </span>
                         )}
                       </div>
-                    ) : editRow === index && JSON.parse(log.full_edit) ? (
+                    ) : editRow === index ? (
                       <input
                         placeholder="Enter"
                         className={`form-control ${
