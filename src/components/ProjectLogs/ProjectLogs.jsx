@@ -418,7 +418,10 @@ const ProjectLogs = () => {
     setLoadingView(false);
     setErrorMessage("");
     if (submittalItems.data.message?.length === 0) {
-      if (search) {
+      const filterHasValues = Object.values(filterValues).some(arr => arr.length > 0);
+      if (docParsed > 0 && !filterHasValues) {
+        setErrorMessage("No submittals were detected in the uploaded document(s)");
+      } else if (search || filterHasValues) {
         setErrorMessage("Sorry, no results found for your search query.");
       } else {
         if (documentData?.length === 0) {
