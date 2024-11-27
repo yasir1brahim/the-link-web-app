@@ -227,9 +227,6 @@ const CustomerProfile = (props) => {
           <div className="customer-profile-details d-flex align-items-start justify-content-start flex-wrap">
             {!editProfile ? (
               <>
-                <div className="customer-dp-container">
-                  <img src={profilePicture.value} alt="Company Logo" />
-                </div>
                 <div className="customer-profile">
                   <div className="row">
                     <div className="col-6">
@@ -254,36 +251,7 @@ const CustomerProfile = (props) => {
               <form className="edit-customer-form w-100">
                 <div className="edit-customer-content">
                   <div className="ec-left">
-                    <div className="upload-documents">
-                      <div className="image-holder">
-                        <img
-                          src={
-                            profilePicture.value
-                              ? typeof profilePicture.value === 'string'
-                                ? profilePicture.value
-                                : URL.createObjectURL(profilePicture.value)
-                              : ProfilePhoto
-                          }
-                          alt="Profile"
-                          className="dummy-image"
-                        />
-                      </div>
-                      <div className="select-File">
-                        <input
-                          className="d-none"
-                          type="file"
-                          name="files[]"
-                          id="uploadDocs"
-                          onChange={handleFileChange}
-                        />
-                        <label htmlFor="uploadDocs">
-                          <div className="upload-text d-flex align-items-center justify-content-center">
-                            <Camera />
-                            <span>Upload Logo</span>
-                          </div>
-                        </label>
-                      </div>
-                    </div>
+                    
                   </div>
                   <div className="ec-right">
                     <div className="row">
@@ -417,16 +385,6 @@ const CustomerProfile = (props) => {
                                     onClick={() => handleEdit(employee)}
                                   >
                                     Edit
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="btn btn-secondary btn-sm"
-                                    onClick={() => {
-                                      setEmpId(employee.emp_id);
-                                      toggleConfirmModal();
-                                    }}
-                                  >
-                                    Delete
                                   </button>
                                 </div>
                               </td>
