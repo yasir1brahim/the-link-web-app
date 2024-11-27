@@ -114,8 +114,15 @@ const CustomerProfile = (props) => {
         setLoading(false);
       }
     } catch (error) {
-      handleError(error);
-      setLoading(false);
+      if (error.response && error.response.status === 404) {
+        setLoading(false);
+        navigate('/not-found', { 
+          state: { statusCode: 404, message: 'Team not found.' } 
+        });
+      } else {
+        handleError(error);
+        setLoading(false);
+      }
     }
 
     return () => {
