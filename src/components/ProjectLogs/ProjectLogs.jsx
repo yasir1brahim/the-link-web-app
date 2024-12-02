@@ -183,6 +183,7 @@ const ProjectLogs = () => {
       setDocParsed(response.data.doc_parsed);
       setDocumentData(response.data.document_details);
       setUserRole(getUserRoleInProject(response.data));
+      localStorage.setItem("docParsed", response.data.doc_parsed);
       setLoading(false);
     };
 
@@ -418,18 +419,23 @@ const ProjectLogs = () => {
     setLoadingView(false);
     setErrorMessage("");
     if (submittalItems.data.message?.length === 0) {
-      if (search) {
+      const filterHasValues = Object.values(filterValues).some(arr => arr.length > 0);
+      const localDocParsed = parseInt(localStorage.getItem("docParsed"));
+      if (localDocParsed > 0 && !filterHasValues) {
+        setErrorMessage("No submittals were detected in the uploaded document(s)");
+        return;
+      }
+      if (search || filterHasValues) {
         setErrorMessage("Sorry, no results found for your search query.");
-      } else {
-        if (documentData?.length === 0) {
-          setErrorMessage("Upload spec documents to generate submittal log");
-        } else if (documentIsProcessing(documentData)) {
-          setErrorMessage("Documents are being processed...");
-        } else {
-          setErrorMessage(
-            "No submittals were detected in the uploaded document(s)"
-          );
-        }
+        return;
+      }
+      if (documentData?.length === 0) {
+        setErrorMessage("Upload spec documents to generate submittal log");
+        return;
+      }
+      if (documentIsProcessing(documentData)) {
+        setErrorMessage("Documents are being processed...");
+        return;
       }
     }
     setTotalCount(submittalItems?.data?.total_count);
