@@ -122,4 +122,21 @@ const toggleProjectStatus = async (projectId, action = 'archive', teamId) => {
     }
 };
 
-export {listProjects, updateProject, createProject, getProjectDetails, toggleProjectStatus}
+
+const getUserRoleInProject = async (userId, teamId) => {
+    const projects = await listProjects(teamId);
+    const userIdInt = parseInt(userId);
+
+    const allRoles = projects.data.results.flatMap((project) => 
+        project.members
+            .filter((member) => member.user_id === userIdInt)
+            .map((member) => ({
+                projectId: project.id,
+                role: member.role
+            }))
+    );
+
+    return allRoles.length > 0 ? allRoles : null;
+};
+
+export {listProjects, updateProject, createProject, getProjectDetails, toggleProjectStatus, getUserRoleInProject}
