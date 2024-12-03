@@ -7,8 +7,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Loader from "../shared/Loader/Loader";
 import handleError from "../../config/errorHandler";
 import HeaderTabs from "../shared/HeaderTabs/HeaderTabs";
-import { listProjects } from "../../api/Projects/api";
+import { listProjects, getUserRoleInProject } from "../../api/Projects/api";
 import { useParams } from 'react-router-dom';
+import { getUserRoleInTeam } from "../../api/Authentication/api";
 
 const ProjectsPage = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const ProjectsPage = () => {
   const roleId = localStorage.getItem("roleId");
   const { state } = useLocation();
   const [isArchived, toggleArchive] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState('member');
   const toggleCreateProjectModal = () =>
     setCreateProjectModal(!createProjectModal);
   const toggleArchiveProjectModal = () => setArchiveProjectModal(!archiveProjectModal);
@@ -55,6 +57,11 @@ const ProjectsPage = () => {
   const fetchData = async () => {
     try {
         setIsLoading(true);
+        const userRole = await getUserRoleInTeam(
+          localStorage.getItem("userId"),
+          customerId
+        );
+        setCurrentUserRole(userRole);
         const response = await listProjects(teamId);
         
         const dataToSet = isArchived 
@@ -85,12 +92,12 @@ useEffect(() => {
       <div className="page-wrap">
         <NavbarTop />
         <div className="page-wrap-content personal-projects-wrapper">
-          <Header
+          {currentUserRole === 'admin' && <Header
             toggleModal={toggleCreateProjectModal}
             title={state?.customer_name || customerData?.customer_name}
             showBtn={"Create New Project"}
             breadcrumb={"View Projects"}
-          />
+          />}
           <div style={{ marginTop: "32px" }} className="">
             <HeaderTabs isArchived={isArchived}
               toggleArchive={toggleArchive} />

@@ -25,7 +25,8 @@ import { ArchiveProjectModal } from "./archiveProjectModal";
 import { Tooltip } from "reactstrap";
 import { RestoreProjectModal } from "./restoreProjectModal";
 import { RestoreIcon } from "../shared/icons/restoreIcon";
-import { toggleProjectStatus } from "../../api/Projects/api";
+import { toggleProjectStatus, getUserRoleInProject } from "../../api/Projects/api";
+import { getUserRoleInTeam } from '../../api/Authentication/api';
 
 const ProjectsTable = ({
   customerData,
@@ -59,9 +60,34 @@ const ProjectsTable = ({
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setLoading] = useState(false);
+  const [userRoles, setUserRoles] = useState([]);
+  const [userRoleInTeam, setUserRoleInTeam] = useState('member');
   const { state } = useLocation();
   // const customer = state;
   const roleId = localStorage.getItem('roleId');
+  const userId = localStorage.getItem('userId');
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      const roles = await getUserRoleInProject(userId, customerId);
+      setUserRoles(roles);
+    };
+    const fetchUserRoleInTeam = async () => {
+      const roleInTeam = await getUserRoleInTeam(
+        userId, customerId
+      );
+      setUserRoleInTeam(roleInTeam);
+    }
+
+    fetchUserRole();
+    fetchUserRoleInTeam();
+  }, [userId, customerId]);
+
+  
+  const getUserRoleForProject = (projectId) => {
+    const roleForProject = userRoles.find((role) => role.projectId === projectId);
+    return roleForProject?.role || "project_member";
+  };
 
   const handleEdit = (project) => {
     setActiveProject(project);
@@ -142,8 +168,7 @@ const handleRestoreProject = async () => {
           {/* <a className='noprojects-wrapper d-flex align-items-center justify-content-center w-100' href='javascript:void(0);'>
                             <span className='d-flex align-items-center justify-content-center'><AddUser /> Create Users/Employees, then Add a Project</span>
                         </a> */}
-          
-        
+
           <div className="table-top-content">
             <div className="table-heading">
               <label className="table-entries">
@@ -151,7 +176,7 @@ const handleRestoreProject = async () => {
                 <span className="showing-strong">{currentItems.length}</span>
               </label>
             </div>
-
+          { userRoleInTeam === 'admin' &&
             <div className="grid-list-toggle">
               <div
                 className="table-bulk-changes"
@@ -189,60 +214,46 @@ const handleRestoreProject = async () => {
                 </span>
               </div>
             </div>
+          }
           </div>
-        <div className="l-table-wrapper">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>
-                  <span>
-                    Project Name<i className=""></i>
-                  </span>
-                </th>
-                <th>
-                  <span>
-                    Project Number<i className="sort-d"></i>
-                  </span>
-                </th>
-                <th>
-                  <span>
-                    Users<i className="sort-i"></i>
-                  </span>
-                </th>
-                <th>
-                  <span>
-                    Start Date<i className="sort-d"></i>
-                  </span>
-                </th>
-                <th>
-                  <span>
-                    End Date<i className="sort-d"></i>
-                  </span>
-                </th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            {activeProject ? (
-              <tbody>
-                {currentItems.map((project, index) => {
-                  return (
-                    <tr key={index}>
-                      {/* <td className="ticket-checkbox">
-                              <div className="form-group">
-                                <div className="custom-control custom-checkbox">
-                                  <input
-                                    type="checkbox"
-                                    className="custom-control-input"
-                                    name="ticketRow1"
-                                    id="ticketRow1"
-                                  />
-                                  <label
-                                    className="custom-control-label"
-                                    for="ticketRow1"
-                                  ></label>
-                                </div>
-                              </div>
-                            </td> */}
+          <div className="l-table-wrapper">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>
+                    <span>
+                      Project Name<i className=""></i>
+                    </span>
+                  </th>
+                  <th>
+                    <span>
+                      Project Number<i className="sort-d"></i>
+                    </span>
+                  </th>
+                  <th>
+                    <span>
+                      Users<i className="sort-i"></i>
+                    </span>
+                  </th>
+                  <th>
+                    <span>
+                      Start Date<i className="sort-d"></i>
+                    </span>
+                  </th>
+                  <th>
+                    <span>
+                      End Date<i className="sort-d"></i>
+                    </span>
+                  </th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              {activeProject ? (
+                <tbody>
+                  {currentItems.map((project, index) => {
+                    const userRole = getUserRoleForProject(project.id);
+                    return (
+                      <tr key={index}>
                         <td>{project.name}</td>
                         <td>{project.project_number}</td>
                         <td>{project.members.length}</td>
@@ -274,91 +285,94 @@ const handleRestoreProject = async () => {
                                 Launch Project
                               </Tooltip>
                             </span>
-                            {(
-                              isArchived ? (
-                                <>
-                                  <span
-                                    onClick={() => {
-                                      toggleRestoreProjectModal()
-                                      setRestoreProject(project)
-                                    }}
-                                    style={{ cursor: "pointer" }}
-                                    id={"restore-tooltip" + index + 1}
-                                  >
-                                    <RestoreIcon />
-                                  </span>
-                                  <span>
-                                    <Tooltip
-                                      placement="left"
-                                      target={"restore-tooltip" + index + 1}
-                                      isOpen={restoreTooltip === index + 1}
-                                      toggle={() =>
-                                        setRestoreTooltip(
-                                          restoreTooltip
-                                            ? restoreTooltip === index + 1
-                                              ? null
-                                              : index + 1
-                                            : index + 1,
-                                        )
-                                      }
-                                    >
-                                      Restore Project
-                                    </Tooltip>
-                                  </span>
-                                </>
-                              ) :
+                            {isArchived ? (
                               <>
                                 <span
-                                  onClick={() => handleEdit(project)}
-                                  id={"edit-tooltip" + index + 1}
-                                >
-                                  <EditIcon />
-                                </span>
-                                <span>
-                                  <Tooltip
-                                    placement="left"
-                                    target={"edit-tooltip" + index + 1}
-                                    isOpen={editTooltip === index + 1}
-                                    toggle={() =>
-                                      setEditTooltip(
-                                        editTooltip
-                                          ? editTooltip === index + 1
-                                            ? null
-                                            : index + 1
-                                          : index + 1,
-                                      )
-                                    }
-                                  >
-                                    Edit Project
-                                  </Tooltip>
-                                </span>
-                                <span
                                   onClick={() => {
-                                    toggleArchiveProjectModal()
-                                    setArchiveProject(project)
+                                    toggleRestoreProjectModal()
+                                    setRestoreProject(project)
                                   }}
-                                  id={"archive-tooltip" + index + 1}
+                                  style={{ cursor: "pointer" }}
+                                  id={"restore-tooltip" + index + 1}
                                 >
-                                  <ArchiveIcon />
+                                  <RestoreIcon />
                                 </span>
                                 <span>
                                   <Tooltip
                                     placement="left"
-                                    target={"archive-tooltip" + index + 1}
-                                    isOpen={archiveTooltip === index + 1}
+                                    target={"restore-tooltip" + index + 1}
+                                    isOpen={restoreTooltip === index + 1}
                                     toggle={() =>
-                                      setArchiveTooltip(
-                                        archiveTooltip
-                                          ? archiveTooltip === index + 1
+                                      setRestoreTooltip(
+                                        restoreTooltip
+                                          ? restoreTooltip === index + 1
                                             ? null
                                             : index + 1
                                           : index + 1,
                                       )
                                     }
                                   >
-                                    Archive Project
+                                    Restore Project
                                   </Tooltip>
                                 </span>
+                              </>
+                            ) : (
+                              <>
+                                {userRole === 'project_admin' && (
+                                  <>
+                                    <span
+                                      onClick={() => handleEdit(project)}
+                                      id={"edit-tooltip" + index + 1}
+                                    >
+                                      <EditIcon />
+                                    </span>
+                                    <span>
+                                      <Tooltip
+                                        placement="left"
+                                        target={"edit-tooltip" + index + 1}
+                                        isOpen={editTooltip === index + 1}
+                                        toggle={() =>
+                                          setEditTooltip(
+                                            editTooltip
+                                              ? editTooltip === index + 1
+                                                ? null
+                                                : index + 1
+                                              : index + 1,
+                                          )
+                                        }
+                                      >
+                                        Edit Project
+                                      </Tooltip>
+                                    </span>
+                                    <span
+                                      onClick={() => {
+                                        toggleArchiveProjectModal()
+                                        setArchiveProject(project)
+                                      }}
+                                      id={'archive-tooltip' + index + 1}
+                                    >
+                                      <ArchiveIcon />
+                                    </span>
+                                    <span>
+                                      <Tooltip
+                                        placement="left"
+                                        target={'archive-tooltip' + index + 1}
+                                        isOpen={archiveTooltip === index + 1}
+                                        toggle={() =>
+                                          setArchiveTooltip(
+                                            archiveTooltip
+                                              ? archiveTooltip === index + 1
+                                                ? null
+                                                : index + 1
+                                              : index + 1
+                                          )
+                                        }
+                                      >
+                                        Archive Project
+                                      </Tooltip>
+                                    </span>
+                                  </>
+                                )}
                               </>
                             )}
                           </div>
@@ -415,32 +429,32 @@ const handleRestoreProject = async () => {
               customerID={customerId}
             />
           )}
-      <Loader showComponentLoader={isLoading} />
+          <Loader showComponentLoader={isLoading} />
 
-        <ArchiveProjectModal
-          modal={archiveProjectModal}
-          toggleModal={toggleArchiveProjectModal}
-          handleSubmit={handleArchiveProject}
-        />
+          <ArchiveProjectModal
+            modal={archiveProjectModal}
+            toggleModal={toggleArchiveProjectModal}
+            handleSubmit={handleArchiveProject}
+          />
 
-        <RestoreProjectModal
-          modal={restoreProjectModal}
-          toggleModal={toggleRestoreProjectModal}
-          handleSubmit={handleRestoreProject}
-        />
+          <RestoreProjectModal
+            modal={restoreProjectModal}
+            toggleModal={toggleRestoreProjectModal}
+            handleSubmit={handleRestoreProject}
+          />
 
-        <ToastContainer
-          position="bottom-center"
-          autoClose={5000}
-          hideProgressBar
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-      </div>
+          <ToastContainer
+            position="bottom-center"
+            autoClose={5000}
+            hideProgressBar
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
+        </div>
       </div>
     </>
   );
