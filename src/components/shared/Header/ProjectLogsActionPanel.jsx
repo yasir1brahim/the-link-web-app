@@ -18,7 +18,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
       <div className="col-6 row">
         <div className="d-flex p-0">
           <div className="mr-2 mb-1">
-            {localStorage.getItem('roleId') !== '7' && (
+            {localStorage.getItem('roleId') !== '7' && !!props.handleDeleteLogs && (
               <button
                 type="button"
                 className="trash-icon"
@@ -43,7 +43,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
             )}
           </div>
           <div className="mr-2 mb-1">
-            {localStorage.getItem('roleId') !== '7' && (
+            {localStorage.getItem('roleId') !== '7' && !!props.handleExportExcel && (
               <Dropdown isOpen={props.dropdownOpen} toggle={props.toggle}>
                 <DropdownToggle caret className="export-btn">
                   Export
@@ -62,7 +62,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
         </div>
         <div className="p-0">
           <div className="header-swap">
-            <button
+            {!!props.getProjectLists && <button
               type="button"
               className="table-top-btn selection-btn mr-2 mb-1"
               onClick={props.getProjectLists}
@@ -86,11 +86,11 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                 />
               </svg>
               <span>View Saved Lists</span>
-            </button>
+            </button>}
           </div>
         </div>
         <div className="p-0">
-          {props.listId === null && props.selected?.length > 0 && !props.isCombining && (
+          {props.listId === null && props.selected?.length > 0 && !props.isCombining  && !!props.toggleSaveListName && (
             <button
               type="button"
               className="table-top-btn btn-disabled selection-btn mr-2 mb-1"
@@ -116,7 +116,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
               <span>Save Selection</span>
             </button>
           )}
-          {props.listId === null && props.selected?.length > 0 && props.isCombining && (
+          {props.listId === null && props.selected?.length > 0 && props.isCombining && !!props.handleCombineRows && (
             <button
               type="button"
               className="table-top-btn btn-disabled selection-btn mr-2 mb-1"
@@ -172,7 +172,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
               <span>Clear Filters</span>
             </button>
           </div>}
-          {!props.logInViewer && props.listId === null && props.selected?.length > 0 && !props.isSelectAll && (
+          {!props.logInViewer && props.listId === null && props.selected?.length > 0 && !props.isSelectAll && !!props.setIsCombining && (
             <button
               type="button"
               className={`table-top-btn btn-disabled selection-btn mr-2 mb-1`}
@@ -191,7 +191,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                 props.setIsCombining(value => !value);
                 props.updateCombiningQueue(props.selected, true);
               }}
-              disabled={props.editRow}
+              disabled={!!props.editRow}
             >
               <MergeIcon />
               <span>

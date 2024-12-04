@@ -23,6 +23,7 @@ import ProtectedRoute from './components/auth/protectedroute';
 import Companies from './components/Companies/Companies';
 import AcceptInvitation from './components/Authentication/AcceptInvitation';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
+import NoticesPage from './components/Notices/NoticesPage';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -86,6 +87,10 @@ const router = createBrowserRouter([
   {
     path: "/project-logs",
     element: <ProtectedRoute><ProjectLogs /></ProtectedRoute>,
+  },
+  {
+    path: "/notices",
+    element: <ProtectedRoute><NoticesPage /></ProtectedRoute>,
   },
   {
     path: "/admin-landing",

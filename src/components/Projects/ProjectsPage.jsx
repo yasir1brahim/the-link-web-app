@@ -8,9 +8,10 @@ import Loader from "../shared/Loader/Loader";
 import handleError from "../../config/errorHandler";
 import HeaderTabs from "../shared/HeaderTabs/HeaderTabs";
 import { listProjects, getUserRoleInProject } from "../../api/Projects/api";
+import { isFeatureFlagActive } from "../../utils/featureFlags";
 import { useParams } from 'react-router-dom';
 import { getUserRoleInTeam } from "../../api/Authentication/api";
-
+import { NOTICES_FEATURE_FLAG_NAME } from "../../constants";
 const ProjectsPage = () => {
   const navigate = useNavigate();
   const [uploadSpecsModal, setUploadSpecsModal] = useState(false);
@@ -29,6 +30,7 @@ const ProjectsPage = () => {
     setCreateProjectModal(!createProjectModal);
   const toggleArchiveProjectModal = () => setArchiveProjectModal(!archiveProjectModal);
   const toggleRestoreProjectModal = () => setRestoreProjectModal(!restoreProjectModal);
+  const [noticesFeatureFlagActive, setNoticesFeatureFlagActive] = useState(false);
   const { teamId } = useParams();
 
   const customerId = teamId;
@@ -53,6 +55,17 @@ const ProjectsPage = () => {
       },
     );
   };
+
+  const onClickNotices = (project) => {
+    navigate(`/notices?projectDetails=${project?.id}`, {
+      state: {
+        project,
+        projectName: project?.name,
+        userId: localStorage.getItem("userId"),
+        customerData,
+      },
+    })
+  }
 
   const fetchData = async () => {
     try {
@@ -81,6 +94,9 @@ useEffect(() => {
   let isMounted = true;
 
   fetchData(); 
+  isFeatureFlagActive(NOTICES_FEATURE_FLAG_NAME).then(isActive => {
+    setNoticesFeatureFlagActive(isActive)
+  })
 
   return () => {
       isMounted = false;
@@ -91,6 +107,7 @@ useEffect(() => {
     <>
       <div className="page-wrap">
         <NavbarTop />
+        <p>{noticesFeatureFlagActive ? "Notices feature flag is active" : "Notices feature flag is inactive"}</p>
         <div className="page-wrap-content personal-projects-wrapper">
           {currentUserRole === 'admin' && <Header
             toggleModal={toggleCreateProjectModal}
@@ -119,6 +136,8 @@ useEffect(() => {
             isArchived={isArchived}
             toggleArchive={toggleArchive}
             customerId={customerId}
+            noticesFeatureFlagActive={noticesFeatureFlagActive}
+            onClickNotices={onClickNotices}
           />
         </div>
       </div>
