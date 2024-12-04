@@ -97,83 +97,6 @@ export default function NoticesLog(props) {
     // };
   }, [rowRefs, props.noticesData]);
 
-  const handleEditToggle = (log, index) => {
-    setRowData(log);
-    // setDateIssued('');
-    // setDateApproved('');
-  };
-
-  const handleUpdateLog = async () => {
-    try {
-      setFormValid({
-        spec_section: true,
-        para_no: true,
-        para_context: true,
-        type: true,
-        item_desc: true,
-      });
-      if (
-        rowData.spec_section === "" ||
-        rowData.para_no === "" ||
-        rowData.para_context === "" ||
-        rowData.type === "" ||
-        rowData.item_desc === ""
-      ) {
-        setFormValid({
-          ...formValid,
-          spec_section: rowData.spec_section === "" ? false : true,
-          para_no: rowData.para_no === "" ? false : true,
-          para_context: rowData.para_context === "" ? false : true,
-          type: rowData.type === "" ? false : true,
-          item_desc: rowData.item_desc === "" ? false : true,
-        });
-        return;
-      }
-
-      if (newRowIndex) {
-        await addSubmittalItem(
-          props.projectId,
-          rowData.spec_section, 
-          rowData.para_no, 
-          rowData.para_context, 
-          rowData.item_desc, 
-          rowData.type, 
-        );
-      } else {
-        await updateSubmittalItem(
-          props.projectId,
-          rowData.id, 
-          rowData.spec_section, 
-          rowData.para_no, 
-          rowData.para_context, 
-          rowData.item_desc, 
-          rowData.type, 
-        );
-      }
-      setNewRowIndex(null);
-      props.setPageRefresh(!props.pageRefresh);
-      props.setLogInViewer(null);
-      props.setPdfData({
-        url: "",
-        textLoc: {},
-        index: "",
-        docId: null,
-        submittalId: null,
-        additionalTextLocations: [],
-      });
-    } catch (error) {
-      console.log(error.message);
-      // toast.error(error?.response?.data?.message || error?.message, {
-      //   position: 'bottom-center',
-      //   autoClose: 5000,
-      //   hideProgressBar: true,
-      //   closeOnClick: true,
-      //   pauseOnHover: true,
-      //   draggable: true,
-      //   progress: undefined,
-      // });
-    }
-  };
 
   const handleSorting = async (columnName) => {
     let sortingOrder = sorting.column === columnName ? sorting.order : "desc";
@@ -221,20 +144,6 @@ export default function NoticesLog(props) {
     });
     props.setSubmittalIdParam(submittalId);
   };
-  const insertElement = (arr, index, newItem) => [
-    // part of the array before the specified index
-    ...arr.slice(0, index),
-    // inserted item
-    newItem,
-    // part of the array after the specified index
-    ...arr.slice(index),
-  ];
-  const deleteElement = (arr, index) => [
-    // part of the array before the specified index
-    ...arr.slice(0, index),
-    // part of the array after the specified index
-    ...arr.slice(index + 1),
-  ];
 
   const tableRef = useRef(null);
   const parentRef = useRef(null);
@@ -596,86 +505,6 @@ export default function NoticesLog(props) {
                   <div className="action-items">
                     {
                       <>
-                          <>
-                            <div
-                              onClick={() => handleUpdateLog()}
-                              style={{ marginRight: '5px', cursor: 'pointer' }}
-                            >
-                              <svg
-                                width="14"
-                                height="14"
-                                viewBox="0 0 14 14"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M12.4162 3.84491L5.51162 10.7497L1.58325 6.82137"
-                                  stroke="#2F5AA3"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            </div>
-                            <div
-                              style={{ marginRight: '5px', cursor: 'pointer' }}
-                              onClick={() => {
-                                setFormValid({
-                                  spec_section: true,
-                                  para_no: true,
-                                  para_context: true,
-                                  type: true,
-                                  item_desc: true
-                                });
-                                setRowData({
-                                  comments: '',
-                                  date_approved: '',
-                                  date_issued: '',
-                                  // id: 1,
-                                  item_desc: '',
-                                  package: '',
-                                  para_context: '',
-                                  para_no: '',
-                                  project_id: '',
-                                  spec_section: '',
-                                  status: '',
-                                  type: ''
-                                });
-                                // setDateApproved('');
-                                // setDateIssued('');
-                                // setStatus({});
-                                setNewRowIndex(null);
-                                newRowIndex === index &&
-                                  props.setNoticesData(
-                                    deleteElement(props.noticesData, index)
-                                  );
-                                newRowIndex === index + 1 &&
-                                  props.setNoticesData(
-                                    deleteElement(props.noticesData, index)
-                                  );
-                                newRowIndex === index + 1 &&
-                                  props.setPdfData({
-                                    ...props.pdfData,
-                                    index: props.pdfData?.index - 1
-                                  });
-                              }}
-                            >
-                              <svg
-                                width="10"
-                                height="10"
-                                viewBox="0 0 10 10"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  clipRule="evenodd"
-                                  d="M0.244078 0.244078C0.569515 -0.0813592 1.09715 -0.0813592 1.42259 0.244078L5 3.82149L8.57741 0.244078C8.90285 -0.0813592 9.43049 -0.0813592 9.75592 0.244078C10.0814 0.569515 10.0814 1.09715 9.75592 1.42259L6.17851 5L9.75592 8.57741C10.0814 8.90285 10.0814 9.43049 9.75592 9.75592C9.43049 10.0814 8.90285 10.0814 8.57741 9.75592L5 6.17851L1.42259 9.75592C1.09715 10.0814 0.569515 10.0814 0.244078 9.75592C-0.0813592 9.43049 -0.0813592 8.90285 0.244078 8.57741L3.82149 5L0.244078 1.42259C-0.0813592 1.09715 -0.0813592 0.569515 0.244078 0.244078Z"
-                                  fill="#A32F2F"
-                                />
-                              </svg>
-                            </div>
-                          </>
                         {pdfIndex === index ? (
                           <div
                             onClick={() => {
