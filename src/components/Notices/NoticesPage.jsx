@@ -25,7 +25,8 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails } from "../../api/Projects/api";
-import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData } from "../../api/ProjectLogs/api";
+import { uploadFiles } from "../../api/ProjectLogs/api";
+import { getNotices } from "../../api/Notices/api";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
 
 
@@ -44,8 +45,8 @@ const NoticesPage = () => {
   const [isUploadLoading, setUploadLoading] = useState(false);
 
   const { state } = useLocation();
-  const [logData, setLogData] = useState([]);
-  const [filteredLogData, setFilteredLogData] = useState([]);
+  const [noticesData, setNoticesData] = useState([]);
+  const [filteredNoticesData, setFilteredNoticesData] = useState([]);
   const [selected, setSelected] = useState(
     localStorage?.getItem("selectedRows") === "" ||
       localStorage?.getItem("selectedRows") === null
@@ -154,25 +155,25 @@ const NoticesPage = () => {
     }
   }, [user, projectId]);
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (documentIsProcessing(documentData)) {
-        const fetchDocumentData = async () => {
-          const response = await getProjectDetails(projectId);
-          setDocumentData(response.data.document_details);
-          console.log('documentIsProcessing', documentIsProcessing(response.data.document_details));
-          if (!documentIsProcessing(response.data.document_details)) {
-            fetchLogData(0, rowsPerPage);
-          }
-        };
-        fetchDocumentData().catch((error) => {
-          handleError(error);
-        });
-      }
-    }, 10000); // 10000 milliseconds = 10 seconds
+//   useEffect(() => {
+//     const intervalId = setInterval(() => {
+//       if (documentIsProcessing(documentData)) {
+//         const fetchDocumentData = async () => {
+//           const response = await getProjectDetails(projectId);
+//           setDocumentData(response.data.document_details);
+//           console.log('documentIsProcessing', documentIsProcessing(response.data.document_details));
+//           if (!documentIsProcessing(response.data.document_details)) {
+//             fetchNoticesData(0, rowsPerPage);
+//           }
+//         };
+//         fetchDocumentData().catch((error) => {
+//           handleError(error);
+//         });
+//       }
+// //     }, 10000); // 10000 milliseconds = 10 seconds
 
-    return () => clearInterval(intervalId); // This will clear the interval when the component unmounts
-  }, [projectId, state, documentData]); // Dependencies array, re-run the effect if these values change
+//     return () => clearInterval(intervalId); // This will clear the interval when the component unmounts
+//   }, [projectId, state, documentData]); // Dependencies array, re-run the effect if these values change
 
   useEffect(() => {
     if (!modal) {
@@ -192,6 +193,7 @@ const NoticesPage = () => {
       setUploadLoading(true);
       const data = new FormData();
       data.append("project_id", projectId || state.project?.project_id);
+      data.append('extract_notices', true);
       Object.values(pdfFile)?.forEach((file) => data.append("files", file));
       const response = await uploadFiles(data)
       if (response.data) {
@@ -217,14 +219,14 @@ const NoticesPage = () => {
       debounce(
         setSearchValue(value),
         newRowIndex &&
-          setLogData([
-            ...logData.slice(0, newRowIndex),
-            ...logData.slice(newRowIndex + 1),
+          setNoticesData([
+            ...noticesData.slice(0, newRowIndex),
+            ...noticesData.slice(newRowIndex + 1),
           ]),
         setNewRowIndex(null),
         200
       ),
-    [setSearchValue, logData, newRowIndex]
+    [setSearchValue, noticesData, newRowIndex]
   );
 
 
@@ -243,11 +245,9 @@ const NoticesPage = () => {
     localStorage?.getItem("selectedRows") === null
       ? "All"
       : localStorage?.getItem("selectedRows");
-  // ?.split(',')
-  // ?.map((row) => JSON.parse(row));
 
   
-  const fetchLogData = async (
+  const fetchNoticesData = async (
     page,
     itemsPerPage,
     search,
@@ -255,38 +255,26 @@ const NoticesPage = () => {
     orderCol = "",
     order = "",
   ) => {
+    console.log("Fetching notice data for projectId: ", projectId);
     if (projectId === null) return;
     setLoading(true);
     setLoadingView(true);
     setLogInViewer(null);
 
-    const submittalItems = await getSubmittalItems(
-      projectId,
-      search,
-      filterValues,
-      orderCol,
-      order,
-      page || 0,
-      itemsPerPage,
-    );
+    const noticesResponse = await getNotices(projectId);
 
-    console.log("responseData", submittalItems.data);
-    setSelectedFilterValue(submittalItems.data.all_filter_vals);
+    console.log("responseData", noticesResponse);
 
-    const submittalLogs = submittalItems.data.message;
-    setLogData(submittalLogs);
-    console.log("submittalLogs", submittalLogs);
+    const notices = noticesResponse.data.results;
+    setNoticesData(notices);
+    console.log("notices", notices);
 
 
-    localStorage.setItem(
-      "filteredIds",
-      submittalLogs?.map((item) => item?.id)
-    );
-    setLogIdList(submittalItems.data.log_id_list);
+   
     setLoading(false);
     setLoadingView(false);
     setErrorMessage("");
-    if (submittalItems.data.message?.length === 0) {
+    if (notices.data.message?.length === 0) {
       const filterHasValues = Object.values(filterValues).some(arr => arr.length > 0);
       const localDocParsed = parseInt(localStorage.getItem("docParsed"));
       if (localDocParsed > 0 && !filterHasValues) {
@@ -306,11 +294,11 @@ const NoticesPage = () => {
         return;
       }
     }
-    setTotalCount(submittalItems?.data?.total_count);
+    setTotalCount(notices?.data?.total_count);
   };
   useEffect(() => {
     if (projectId !== null) {
-      fetchLogData(0, rowsPerPage).catch((error) => {
+      fetchNoticesData(0, rowsPerPage).catch((error) => {
         setLoading(false);
         handleError(error);
       });
@@ -319,8 +307,8 @@ const NoticesPage = () => {
 
 
   useEffect(() => {
-    setFilteredLogData(logData);
-  }, [logData, searchValue, setFilteredLogData]);
+    setFilteredNoticesData(noticesData);
+  }, [noticesData, searchValue, setFilteredNoticesData]);
 
   const handleSelectAll = () => {
     setIsSelectAll(!isSelectAll);
@@ -363,11 +351,11 @@ const NoticesPage = () => {
     if (!pdfData || loadingView) return;
 
     if (
-      (direction > 0 && pdfData.index < filteredLogData.length - 1) ||
+      (direction > 0 && pdfData.index < filteredNoticesData.length - 1) ||
       (direction < 0 && pdfData.index > 0)
     ) {
       const pIndex = pdfData.index + direction;
-      const data = filteredLogData[pIndex];
+      const data = filteredNoticesData[pIndex];
       
       setPdfData({
         ...pdfData,
@@ -382,7 +370,7 @@ const NoticesPage = () => {
 
   const handleSearchClick = () => {
     setShowSearch(true);
-    fetchLogData(0, rowsPerPage, searchValue);
+    fetchNoticesData(0, rowsPerPage, searchValue);
   };
 
   const handleEnterKeyPress = (event) => {
@@ -394,11 +382,11 @@ const NoticesPage = () => {
   const handleClearSearch = () => {
     setSearchValue("");
     setShowSearch(false);
-    fetchLogData(0, rowsPerPage, "");
+    fetchNoticesData(0, rowsPerPage, "");
   };
 
   const handleClearSelection = async () => {
-    await fetchLogData(0, rowsPerPage, searchValue, null);
+    await fetchNoticesData(0, rowsPerPage, searchValue, null);
     setSelected([]);
   };
 
@@ -408,7 +396,7 @@ const NoticesPage = () => {
     );
     setShowClearFilters(hasActiveFilters);
 
-    fetchLogData(0, rowsPerPage, "", appliedFilters);
+    fetchNoticesData(0, rowsPerPage, "", appliedFilters);
   }, [appliedFilters]);
 
   const clearFilters = () => {
@@ -493,8 +481,8 @@ const NoticesPage = () => {
             <div className="project-logs">
               <div className={pdfData.url && "side-by-side"}>
                 <NoticesLog
-                  logData={filteredLogData}
-                  setFilteredLogData={setFilteredLogData}
+                  noticesData={noticesData}
+                  setFilteredNoticesData={setNoticesData}
                   selected={selected}
                   handleSelect={handleSelect}
                   handleSelectAll={handleSelectAll}
@@ -502,11 +490,11 @@ const NoticesPage = () => {
                   setPageRefresh={setPageRefresh}
                   setLoading={setLoading}
                   customerId={state?.customerId || customerId}
-                  setLogData={setLogData}
+                  setNoticesData={setNoticesData}
                   projectId={state?.projectId || projectId}
                   setPdfData={setPdfData}
                   pdfData={pdfData}
-                  completeLogData={logData}
+                  completeNoticesData={noticesData}
                   newRowIndex={newRowIndex}
                   setNewRowIndex={setNewRowIndex}
                   searchValue={searchValue}
@@ -525,7 +513,7 @@ const NoticesPage = () => {
                   isSelectAll={isSelectAll}
                   setSelected={setSelected}
                   loading={loadingView}
-                  fetchLogData={fetchLogData}
+                  fetchNoticesData={fetchNoticesData}
                   applyFilters={applyFilters}
                 />
                 {pdfData.url && (
@@ -553,7 +541,7 @@ const NoticesPage = () => {
                       <button
                         disabled={
                           pdfData &&
-                          pdfData.index < filteredLogData.length - 1
+                          pdfData.index < filteredNoticesData.length - 1
                             ? false
                             : true
                         }
@@ -596,7 +584,7 @@ const NoticesPage = () => {
                 <div className="table-footer-content logs-pagination">
                   <Pagination
                     totalItems={totalCount}
-                    fetchData={fetchLogData}
+                    fetchData={fetchNoticesData}
                     rowsPerPage={rowsPerPage}
                     setRowsPerPage={setRowsPerPage}
                     page={page}

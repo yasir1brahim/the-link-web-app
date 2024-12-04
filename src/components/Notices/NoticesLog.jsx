@@ -21,7 +21,7 @@ import { updateSubmittalItem, addSubmittalItem } from "../../api/ProjectLogs/api
 
 export default function NoticesLog(props) {
   const {
-    logData,
+    noticesData,
     newRowIndex,
     filterValues,
     setFilterValues,
@@ -31,7 +31,7 @@ export default function NoticesLog(props) {
     rowData,
     setRowData,
     applyFilters,
-    isCombining,
+    fetchNoticesData,
   } = props;
   const [sorting, setSorting] = useState({ column: "", order: "desc" });
   const [filterModal, setFilterModal] = useState(false);
@@ -57,8 +57,8 @@ export default function NoticesLog(props) {
   const targetRef = useRef(null);
 
   useEffect(() => {
-    setShowMore(Array(props.logData.length).fill(false));
-  }, [props.logData]);
+    setShowMore(Array(props.noticesData.length).fill(false));
+  }, [props.noticesData]);
 
   useEffect(() => {
     const hasClamping = (el) => {
@@ -95,7 +95,7 @@ export default function NoticesLog(props) {
     // return () => {
     //   window.removeEventListener("resize", debouncedCheck);
     // };
-  }, [rowRefs, props.logData]);
+  }, [rowRefs, props.noticesData]);
 
   const handleEditToggle = (log, index) => {
     setRowData(log);
@@ -178,7 +178,7 @@ export default function NoticesLog(props) {
   const handleSorting = async (columnName) => {
     let sortingOrder = sorting.column === columnName ? sorting.order : "desc";
     try {
-      props.fetchLogData(
+      props.fetchNoticesData(
         props.page,
         props.rowsPerPage,
         props.searchValue,
@@ -236,64 +236,6 @@ export default function NoticesLog(props) {
     ...arr.slice(index + 1),
   ];
 
-  const handleAddRow = async (log) => {
-    try {
-      let index = props.logData?.findIndex((item) => item === log);
-      const dashIndex = log.para_no.search("-");
-      // Below we are making an array of para_nos then filtering them like if log.para_no = 1.04, paraNos will have all entries of 1.04 i.e. 1.04-a, 1.04-b etc.
-      const paraNos = props.logData
-        ?.map((log) => log.para_no)
-        .filter((paraNo) =>
-          paraNo.includes(
-            dashIndex !== -1 ? log.para_no.slice(0, dashIndex) : log.para_no
-          )
-        );
-      //Now we are making an array containing the ascii character values of elements after '-' in paraNos
-      const charArray = paraNos.map((paraNo) =>
-        paraNo.search("-") !== -1
-          ? paraNo.codePointAt(paraNo.search("-") + 1)
-          : 96
-      );
-      const logObj = {
-        ...log,
-        //Here we are checking if para_no already contains a character after '-'.
-        // If yes, we are increasing the ascii value of the character by 1 for ex.- if it's a it will make it b.
-        // If No, it will add '-a' to para_no
-        para_no:
-          dashIndex !== -1
-            ? log.para_no.slice(0, dashIndex + 1) +
-              String.fromCharCode(Math.max(...charArray) + 1)
-            : `${log.para_no}-${String.fromCharCode(
-                Math.max(...charArray) + 1
-              )}`,
-        // customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
-        submittal_number: null,
-
-        // Only used to help BE determine what to do when inserted
-        added_under_log_id: log.id,
-      };
-      const result = insertElement(props.logData, index + 1, logObj);
-      props.setFilteredLogData(result);
-
-      setNewRowIndex(index + 1);
-      handleEditToggle(logObj, index + 1);
-      if (props.pdfData?.url) {
-        let docElement = document.getElementsByClassName("l-table-wrapper");
-        docElement[0].scrollTo(890, 0);
-      }
-    } catch (error) {
-      // toast.error(error?.response?.data?.message || error?.message, {
-      //   position: 'bottom-center',
-      //   autoClose: 5000,
-      //   hideProgressBar: true,
-      //   closeOnClick: true,
-      //   pauseOnHover: true,
-      //   draggable: true,
-      //   progress: undefined,
-      // });
-    }
-  };
-
   const tableRef = useRef(null);
   const parentRef = useRef(null);
   const [tableWidths, setTableWidths] = useState({
@@ -304,18 +246,16 @@ export default function NoticesLog(props) {
     5: 0,
     6: 0,
     7: 0,
-    8: 0,
   });
 
   const minWidths = {
     1: 105,
-    2: 85,
-    3: 145,
-    4: 150,
-    5: 85,
+    2: 145,
+    3: 150,
+    4: 85,
+    5: 190,
     6: 190,
-    7: 190,
-    8: 520,
+    7: 520,
   };
   useEffect(() => {
     if (parentRef.current !== null) {
@@ -326,29 +266,25 @@ export default function NoticesLog(props) {
         ),
         2: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.045),
-          minWidths[2]
+          minWidths[3]
         ),
         3: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.045),
-          minWidths[3]
+          minWidths[4]
         ),
         4: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.045),
-          minWidths[4]
-        ),
-        5: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.045),
           minWidths[5]
         ),
-        6: Math.max(
+        5: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.1),
           minWidths[6]
         ),
-        7: Math.max(
+        6: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.1),
           minWidths[7]
         ),
-        8: parentRef.current.offsetWidth - 993,
+        7: parentRef.current.offsetWidth - 993,
       });
     }
   }, [parentRef.current]);
@@ -382,11 +318,25 @@ export default function NoticesLog(props) {
     return specSection.slice(0, 2) + " " + specSection.slice(2, 4) + " " + specSection.slice(4);
   };
 
-  const formatSubmittalNumber = (number) => {
-    const nonNullNumber = number ?? "";
-    const str = nonNullNumber.toString();
-    return str.endsWith('.0') ? str.slice(0, -2) : str;
+  const formatParagraphNumber = (listOfParagraphElements) => {
+    var formattedNumber = "";
+    for (const element of listOfParagraphElements) {
+      formattedNumber += element;
+      if (element.slice(-1) !== ".") {
+        formattedNumber += ".";
+      }
+    }
+    return formattedNumber;
   };
+
+  const formatDiscriminators = (listOfDiscriminators) => {
+    return listOfDiscriminators.join(", ");
+  };
+
+  const formatNoticeText = (noticeLines) => {
+    const texts = noticeLines.map((line) => line.text);
+    return texts.join(" ");
+  }
 
   useEffect(() => {
     if (logRowRefs.current[props.pdfData.index]) {
@@ -423,7 +373,6 @@ export default function NoticesLog(props) {
                     id="ticketHeading"
                     onChange={props.handleSelectAll}
                     checked={props.isSelectAll}
-                    disabled={isCombining}
                   />
                   <label
                     className="custom-control-label"
@@ -599,7 +548,7 @@ export default function NoticesLog(props) {
           </tr>
         </thead>
         <tbody style={{ fontSize: "12px" }}>
-          {logData.map((log, index) => {
+          {noticesData.map((log, index) => {
             let pdfIndex = props.pdfData?.index;
             const showPdf = !(pdfIndex && pdfIndex !== index) && pdfIndex !== 0;
             return (
@@ -610,13 +559,6 @@ export default function NoticesLog(props) {
                 style={{
                   lineHeight: 1.2,
                   backgroundColor: pdfIndex === index ? '#f8f8fa' : 'white',
-                  // Adjust the row style when the row is being combined
-                  ...(isCombining
-                    ? {
-                        opacity: props.selected.includes(log.id) ? null : 0.4,
-                        backgroundColor: 'white',
-                      }
-                    : {})
                 }}
                 key={index}
                 ref={(el) => (logRowRefs.current[index] = el)}
@@ -704,12 +646,12 @@ export default function NoticesLog(props) {
                                 // setStatus({});
                                 setNewRowIndex(null);
                                 newRowIndex === index &&
-                                  props.setLogData(
-                                    deleteElement(props.logData, index)
+                                  props.setNoticesData(
+                                    deleteElement(props.noticesData, index)
                                   );
                                 newRowIndex === index + 1 &&
-                                  props.setLogData(
-                                    deleteElement(props.logData, index)
+                                  props.setNoticesData(
+                                    deleteElement(props.noticesData, index)
                                   );
                                 newRowIndex === index + 1 &&
                                   props.setPdfData({
@@ -734,7 +676,7 @@ export default function NoticesLog(props) {
                               </svg>
                             </div>
                           </>
-                        {pdfIndex === index && !isCombining ? (
+                        {pdfIndex === index ? (
                           <div
                             onClick={() => {
                               props.setLogInViewer(null);
@@ -763,7 +705,6 @@ export default function NoticesLog(props) {
                           </div>
                         ) : (
                           newRowIndex !== index &&
-                          !isCombining &&
                           showPdf && (
                             <span
                               onClick={() => {
@@ -802,27 +743,27 @@ export default function NoticesLog(props) {
                 <td
                   className={`reduce-height`}
                 >
-                  {formatSpecSection(log.spec_section)}
+                  {formatSpecSection(log.spec_section ?? "")}
                 </td>
                 <td
                   className={`reduce-height`}
                 >
-                  {log.section_title}
+                  {log.section_title ?? ""}
                 </td>
                 <td
                   className={`reduce-height`}
                 >
-                  {log.para_no}
+                  {formatParagraphNumber(log['excerpt_anchors'][0]['anchor'] ?? [])}
                 </td>
                 <td
                   className={`reduce-height`}
                 >
-                  {log.notice_type}
+                  {log.notice_type ?? ""}
                 </td>
                 <td
                   className={`reduce-height`}
                 >
-                  {log.highlight_heuristic_match}
+                  {log.highlight_heuristic_match ? log.highlight_heuristic_match : formatDiscriminators(log.highlight_discriminators)}
                 </td>
                 <>
                   <td
@@ -836,7 +777,7 @@ export default function NoticesLog(props) {
                         ref={(element) => rowRefs.current.push(element)}
                         style={{ whiteSpace: 'pre-wrap' }}
                       >
-                        {log.notice_type_match}
+                        {formatNoticeText(log['excerpt_anchors'][0]['lines'] ?? [])}
                         {shouldShowExpansionButton[index] && (
                           <span
                             className="showmore-wrap"
@@ -869,7 +810,7 @@ export default function NoticesLog(props) {
         setFilterValues={setFilterValues}
         filterValues={filterValues}
         projectId={props.projectId}
-        setLogData={props.setLogData}
+        setNoticesData={props.setNoticesData}
         orderColumn={sorting.column || ""}
         order={sorting.order === "desc" ? "asc" : "desc" || ""}
         listId={props.listId}
