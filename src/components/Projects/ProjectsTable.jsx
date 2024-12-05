@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Loader from '../shared/Loader/Loader';
-// import WhitingTurner from '../../assets/images/whiting-turner.svg';
-// import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
-// import ProfilePhoto from '../../assets/images/dummy-profile.svg';
-// import { ReactComponent as Camera } from '../../assets/images/camera.svg';
-// import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-// import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
-// import DateSelector from '../shared/DateSelector/DateSelector';
+import { Button } from 'reactstrap';
 import PaginatedItems from "../shared/Pagination/Pagination";
 import axiosInstance from "../../config/axios";
 import { useLocation } from "react-router-dom";
@@ -44,7 +38,9 @@ const ProjectsTable = ({
   handleLaunch,
   isArchived,
   toggleArchive,
-  customerId
+  customerId,
+  noticesFeatureFlagActive,
+  onClickNotices
 }) => {
   const [employeeModal, setEmployeeModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
@@ -78,15 +74,17 @@ const ProjectsTable = ({
       );
       setUserRoleInTeam(roleInTeam);
     }
-
-    fetchUserRole();
     fetchUserRoleInTeam();
+    fetchUserRole();
   }, [userId, customerId]);
 
   
   const getUserRoleForProject = (projectId) => {
-    const roleForProject = userRoles.find((role) => role.projectId === projectId);
-    return roleForProject?.role || "project_member";
+    if (userRoles?.length > 0) {
+      const roleForProject = userRoles.find((role) => role.projectId === projectId);
+      return roleForProject?.role || "project_member";
+    }
+    return "project_member";
   };
 
   const handleEdit = (project) => {
@@ -266,6 +264,12 @@ const handleRestoreProject = async () => {
                               id={"launch-tooltip" + index + 1}
                             >
                               <LaunchIcon />
+                            </span>
+                            {/* {noticesFeatureFlagActive && <span> */}
+                            <span>
+                              <Button onClick={() => onClickNotices(project)}>
+                                Notices
+                              </Button>
                             </span>
                             <span>
                               <Tooltip

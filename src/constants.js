@@ -61,3 +61,5 @@ export const EXCEL_HEADER_OPTIONS = [
     { id: 29, name: 'Actual Order Date', default: false },
     { id: 30, name: 'On Site Installation Date', default: false }
 ];
+
+export const NOTICES_FEATURE_FLAG_NAME = "notices"
