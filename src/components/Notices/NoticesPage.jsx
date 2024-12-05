@@ -274,27 +274,7 @@ const NoticesPage = () => {
     setLoading(false);
     setLoadingView(false);
     setErrorMessage("");
-    if (notices.data.message?.length === 0) {
-      const filterHasValues = Object.values(filterValues).some(arr => arr.length > 0);
-      const localDocParsed = parseInt(localStorage.getItem("docParsed"));
-      if (localDocParsed > 0 && !filterHasValues) {
-        setErrorMessage("No submittals were detected in the uploaded document(s)");
-        return;
-      }
-      if (search || filterHasValues) {
-        setErrorMessage("Sorry, no results found for your search query.");
-        return;
-      }
-      if (documentData?.length === 0) {
-        setErrorMessage("Upload spec documents to generate submittal log");
-        return;
-      }
-      if (documentIsProcessing(documentData)) {
-        setErrorMessage("Documents are being processed...");
-        return;
-      }
-    }
-    setTotalCount(notices?.data?.total_count);
+    setTotalCount(notices.length);
   };
   useEffect(() => {
     if (projectId !== null) {
@@ -466,6 +446,7 @@ const NoticesPage = () => {
             showBtn={"Upload Documents"}
             toggleModal={toggleModal}
             btnSize={"small"}
+            isNotices={true}
           />
           {documentIsProcessing(documentData) && (
             <div

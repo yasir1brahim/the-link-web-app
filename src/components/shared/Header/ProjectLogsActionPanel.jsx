@@ -246,7 +246,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
           </div>
           <div className={props.showSearch ? "col-12 d-flex justify-content-end" : "pr-0 col-6 d-flex justify-content-between"}>
             <div className={props.showSearch ? "d-none" : "total-count-submittals"}>
-              {`${props.totalCount} submittals`}
+              {`${props.totalCount} ${!!props.isNotices ? 'notices' : 'submittals'}`}
             </div>
             {localStorage.getItem("roleId") !== "7" ? (
               <div className={`header-right-swap header-right ${props.showSearch ? "w-100" : ""}`}>
