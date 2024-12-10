@@ -248,7 +248,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
             <div className={props.showSearch ? "d-none" : "total-count-submittals"}>
               {`${props.totalCount} ${!!props.isNotices ? 'notices' : 'submittals'}`}
             </div>
-            {localStorage.getItem("roleId") !== "7" ? (
+            {props.searchEnabled ? (
               <div className={`header-right-swap header-right ${props.showSearch ? "w-100" : ""}`}>
                 <div className={props.showSearch ? "log-search w-100" : "log-search search-disable"}>
                   {props.showSearch && (

@@ -371,10 +371,10 @@ const NoticesPage = () => {
       setPdfData({
         ...pdfData,
         url: data.document.document_link,
-        textLoc: formatPrimaryTextLocation(data),
+        textLoc: data.text_loc,
         index: pIndex,
-        docId: data.document.document_id,
-        additionalTextLocations: formatAdditionalTextLocations(data),
+        docId: data.doc_id,
+        additionalTextLocations: data.additional_text_locations,
       });
     }
   };
@@ -463,6 +463,7 @@ const NoticesPage = () => {
             showClearFilters={showClearFilters}
             clearFilters={clearFilters}
 
+            searchEnabled={false}
             showSearch={showSearch}
             searchValue={searchValue}
             handleSearchChange={handleSearchChange}

@@ -321,25 +321,6 @@ export default function NoticesLog(props) {
               <span className="has-sorting">
                 <div className="d-flex">
                   Spec Section{" "}
-                  <span
-                    style={{ cursor: "pointer", marginLeft: "6px" }}
-                    onClick={() => handleSorting("spec_section")}
-                  >
-                    <SortIcon />
-                  </span>
-                  <span
-                    className="ml-1"
-                    onClick={() => {
-                      setFilterModal(true);
-                      setFilterColumn("spec_section");
-                    }}
-                  >
-                    <FilterIcon
-                      isActive={
-                        filterValues.spec_section.length > 0 ? true : false
-                      }
-                    />
-                  </span>
                   <div
                     className="resizer"
                     onMouseDown={(e) => handleMouseDown(e, 2)}
@@ -384,23 +365,6 @@ export default function NoticesLog(props) {
               <span className="has-sorting">
                 <div className="d-flex">
                   Notice Type{" "}
-                  <span
-                    style={{ cursor: "pointer", marginLeft: "6px" }}
-                    onClick={() => handleSorting("type")}
-                  >
-                    <SortIcon />
-                  </span>
-                  <span
-                    className="ml-1"
-                    onClick={() => {
-                      setFilterModal(true);
-                      setFilterColumn("type");
-                    }}
-                  >
-                    <FilterIcon
-                      isActive={filterValues.type.length > 0 ? true : false}
-                    />
-                  </span>
                   <div
                     className="resizer"
                     onMouseDown={(e) => handleMouseDown(e, 5)}
@@ -413,26 +377,7 @@ export default function NoticesLog(props) {
             <th className="small-font" style={{ width: `${tableWidths[6]}px` }}>
               <span className="has-sorting">
                 <div className="d-flex">
-                  Highlights
-                  <span
-                    style={{ cursor: "pointer", marginLeft: "6px" }}
-                    onClick={() => handleSorting("item_desc")}
-                  >
-                    <SortIcon />
-                  </span>
-                  <span
-                    className="ml-1"
-                    onClick={() => {
-                      setFilterModal(true);
-                      setFilterColumn("item_desc");
-                    }}
-                  >
-                    <FilterIcon
-                      isActive={
-                        filterValues.item_desc.length > 0 ? true : false
-                      }
-                    />
-                  </span>
+                  Time Keywords
                   <div
                     className="resizer"
                     onMouseDown={(e) => handleMouseDown(e, 6)}
@@ -450,12 +395,6 @@ export default function NoticesLog(props) {
               <span className="has-sorting">
                 <div className="d-flex">
                   Notice Text{" "}
-                  <span
-                    style={{ cursor: "pointer", marginLeft: "6px" }}
-                    onClick={() => handleSorting("para_context")}
-                  >
-                    <SortIcon />
-                  </span>
                   <div
                     className="resizer"
                     onMouseDown={(e) => handleMouseDown(e, 7)}
