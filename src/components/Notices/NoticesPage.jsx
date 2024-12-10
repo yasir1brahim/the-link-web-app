@@ -326,20 +326,51 @@ const NoticesPage = () => {
   }, [selected]);
 
 
+  const formatPrimaryTextLocation = (notice) => {
+    const primaryLine = notice.excerpt_anchors[0].lines[0];
+    return {
+      x: primaryLine.x_start,
+      y: primaryLine.y_start,
+      end_x: primaryLine.x_end,
+      end_y: primaryLine.y_end,
+      page_no: primaryLine.page_no,
+    }
+  }
+
+  const formatAdditionalTextLocations = (notice) => {
+    const additionalLinesFromPrimaryAnchor = notice.excerpt_anchors[0].lines.slice(1);
+    const additionalLinesFromOtherAnchors = notice.excerpt_anchors.slice(1).map((anchor) => anchor.lines);
+    const additionalLines = [...additionalLinesFromPrimaryAnchor];
+    for (const lines of additionalLinesFromOtherAnchors) {
+      additionalLines.push(...lines);
+    }
+
+    const additionalTextLocations = additionalLines.map((line) => ({
+      x: line.x_start,
+      y: line.y_start,
+      end_x: line.x_end,
+      end_y: line.y_end,
+      page_no: line.page_no,
+    }));
+
+    return additionalTextLocations;
+  }
+
+
 
   const handleUpDownView = (direction) => {
     if (!pdfData || loadingView) return;
 
     if (
-      (direction > 0 && pdfData.index < filteredNoticesData.length - 1) ||
+      (direction > 0 && pdfData.index < noticesData.length - 1) ||
       (direction < 0 && pdfData.index > 0)
     ) {
       const pIndex = pdfData.index + direction;
-      const data = filteredNoticesData[pIndex];
+      const data = noticesData[pIndex];
       
       setPdfData({
         ...pdfData,
-        url: data.doc_link,
+        url: data.document.document_link,
         textLoc: data.text_loc,
         index: pIndex,
         docId: data.doc_id,
@@ -425,8 +456,6 @@ const NoticesPage = () => {
             setPdfData={setPdfData}
             pdfData={pdfData}
 
-            handleClearSelection={handleClearSelection}
-
             documentIsProcessing={documentIsProcessing}
             documentData={documentData}
             toggleDocumentStatusModal={toggleDocumentStatusModal}
@@ -434,6 +463,7 @@ const NoticesPage = () => {
             showClearFilters={showClearFilters}
             clearFilters={clearFilters}
 
+            searchEnabled={false}
             showSearch={showSearch}
             searchValue={searchValue}
             handleSearchChange={handleSearchChange}

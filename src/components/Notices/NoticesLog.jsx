@@ -158,9 +158,9 @@ export default function NoticesLog(props) {
   });
 
   const minWidths = {
-    1: 105,
-    2: 145,
-    3: 150,
+    1: 100,
+    2: 100,
+    3: 100,
     4: 85,
     5: 190,
     6: 190,
@@ -175,25 +175,25 @@ export default function NoticesLog(props) {
         ),
         2: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.045),
-          minWidths[3]
+          minWidths[2]
         ),
         3: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.045),
-          minWidths[4]
+          minWidths[3]
         ),
         4: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.045),
-          minWidths[5]
+          minWidths[4]
         ),
         5: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.1),
-          minWidths[6]
+          Math.round(parentRef.current.offsetWidth * 0.045),
+          minWidths[5]
         ),
         6: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.1),
-          minWidths[7]
+          minWidths[6]
         ),
-        7: parentRef.current.offsetWidth - 993,
+        7: parentRef.current.offsetWidth - 800,
       });
     }
   }, [parentRef.current]);
@@ -247,6 +247,36 @@ export default function NoticesLog(props) {
     return texts.join(" ");
   }
 
+  const formatPrimaryTextLocation = (notice) => {
+    const primaryLine = notice.excerpt_anchors[0].lines[0];
+    return {
+      x: primaryLine.x_start,
+      y: primaryLine.y_start,
+      end_x: primaryLine.x_end,
+      end_y: primaryLine.y_end,
+      page_no: primaryLine.page_no,
+    }
+  }
+
+  const formatAdditionalTextLocations = (notice) => {
+    const additionalLinesFromPrimaryAnchor = notice.excerpt_anchors[0].lines.slice(1);
+    const additionalLinesFromOtherAnchors = notice.excerpt_anchors.slice(1).map((anchor) => anchor.lines);
+    const additionalLines = [...additionalLinesFromPrimaryAnchor];
+    for (const lines of additionalLinesFromOtherAnchors) {
+      additionalLines.push(...lines);
+    }
+
+    const additionalTextLocations = additionalLines.map((line) => ({
+      x: line.x_start,
+      y: line.y_start,
+      end_x: line.x_end,
+      end_y: line.y_end,
+      page_no: line.page_no,
+    }));
+
+    return additionalTextLocations;
+  }
+
   useEffect(() => {
     if (logRowRefs.current[props.pdfData.index]) {
       const rowElement = logRowRefs.current[props.pdfData.index];
@@ -272,25 +302,6 @@ export default function NoticesLog(props) {
       <table className="table logs-table" ref={tableRef}>
         <thead>
           <tr ref={stickyHeaderRef}>
-            <th className="ticket-checkbox small-font">
-              <div className="form-group">
-                <div className="custom-control custom-checkbox">
-                  <input
-                    type="checkbox"
-                    className="custom-control-input"
-                    name="ticketHeading"
-                    id="ticketHeading"
-                    onChange={props.handleSelectAll}
-                    checked={props.isSelectAll}
-                  />
-                  <label
-                    className="custom-control-label"
-                    htmlFor="ticketHeading"
-                  ></label>
-                </div>
-              </div>
-            </th>
-
             <th
               className="text-center small-font"
               style={{ width: `${tableWidths[1]}px` }}
@@ -299,7 +310,7 @@ export default function NoticesLog(props) {
                 <span className="w-100">Actions</span>
                 <div
                   className="resizer"
-                  onMouseDown={(e) => handleMouseDown(e, 1)}
+                  onMouseDown={(e) => handleMouseDown(e, 0)}
                 >
                   |
                 </div>
@@ -310,28 +321,9 @@ export default function NoticesLog(props) {
               <span className="has-sorting">
                 <div className="d-flex">
                   Spec Section{" "}
-                  <span
-                    style={{ cursor: "pointer", marginLeft: "6px" }}
-                    onClick={() => handleSorting("spec_section")}
-                  >
-                    <SortIcon />
-                  </span>
-                  <span
-                    className="ml-1"
-                    onClick={() => {
-                      setFilterModal(true);
-                      setFilterColumn("spec_section");
-                    }}
-                  >
-                    <FilterIcon
-                      isActive={
-                        filterValues.spec_section.length > 0 ? true : false
-                      }
-                    />
-                  </span>
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 2)}
+                    onMouseDown={(e) => handleMouseDown(e, 1)}
                   >
                     |
                   </div>
@@ -346,7 +338,7 @@ export default function NoticesLog(props) {
                 <span>Section Title</span>
                 <div
                   className="resizer"
-                  onMouseDown={(e) => handleMouseDown(e, 3)}
+                  onMouseDown={(e) => handleMouseDown(e, 2)}
                 >
                   |
                 </div>
@@ -360,7 +352,7 @@ export default function NoticesLog(props) {
                 <span>Paragraph</span>
                 <div
                   className="resizer"
-                  onMouseDown={(e) => handleMouseDown(e, 4)}
+                  onMouseDown={(e) => handleMouseDown(e, 3)}
                 >
                   |
                 </div>
@@ -373,26 +365,9 @@ export default function NoticesLog(props) {
               <span className="has-sorting">
                 <div className="d-flex">
                   Notice Type{" "}
-                  <span
-                    style={{ cursor: "pointer", marginLeft: "6px" }}
-                    onClick={() => handleSorting("type")}
-                  >
-                    <SortIcon />
-                  </span>
-                  <span
-                    className="ml-1"
-                    onClick={() => {
-                      setFilterModal(true);
-                      setFilterColumn("type");
-                    }}
-                  >
-                    <FilterIcon
-                      isActive={filterValues.type.length > 0 ? true : false}
-                    />
-                  </span>
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 5)}
+                    onMouseDown={(e) => handleMouseDown(e, 4)}
                   >
                     |
                   </div>
@@ -402,29 +377,10 @@ export default function NoticesLog(props) {
             <th className="small-font" style={{ width: `${tableWidths[6]}px` }}>
               <span className="has-sorting">
                 <div className="d-flex">
-                  Highlights
-                  <span
-                    style={{ cursor: "pointer", marginLeft: "6px" }}
-                    onClick={() => handleSorting("item_desc")}
-                  >
-                    <SortIcon />
-                  </span>
-                  <span
-                    className="ml-1"
-                    onClick={() => {
-                      setFilterModal(true);
-                      setFilterColumn("item_desc");
-                    }}
-                  >
-                    <FilterIcon
-                      isActive={
-                        filterValues.item_desc.length > 0 ? true : false
-                      }
-                    />
-                  </span>
+                  Time Keywords
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 6)}
+                    onMouseDown={(e) => handleMouseDown(e, 5)}
                   >
                     |
                   </div>
@@ -439,15 +395,9 @@ export default function NoticesLog(props) {
               <span className="has-sorting">
                 <div className="d-flex">
                   Notice Text{" "}
-                  <span
-                    style={{ cursor: "pointer", marginLeft: "6px" }}
-                    onClick={() => handleSorting("para_context")}
-                  >
-                    <SortIcon />
-                  </span>
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 7)}
+                    onMouseDown={(e) => handleMouseDown(e, 6)}
                   >
                     |
                   </div>
@@ -459,6 +409,7 @@ export default function NoticesLog(props) {
         <tbody style={{ fontSize: "12px" }}>
           {noticesData.map((log, index) => {
             let pdfIndex = props.pdfData?.index;
+            console.log("row:", log);
             const showPdf = !(pdfIndex && pdfIndex !== index) && pdfIndex !== 0;
             return (
               <tr
@@ -468,36 +419,11 @@ export default function NoticesLog(props) {
                 style={{
                   lineHeight: 1.2,
                   backgroundColor: pdfIndex === index ? '#f8f8fa' : 'white',
+                  height: '35px',
                 }}
                 key={index}
                 ref={(el) => (logRowRefs.current[index] = el)}
               >
-                <td
-                  className={`ticket-checkbox reduce-height`}
-                  onClick={handleIgnorePdfView}
-                >
-                  <div className="form-group">
-                    <div className="custom-control custom-checkbox">
-                      <input
-                        type="checkbox"
-                        className="custom-control-input"
-                        name={`ticketRow-${index}`}
-                        id={`ticketRow-${index}`}
-                        checked={
-                          !!props.selected
-                            ? props.selected?.includes(log.id)
-                            : false
-                        }
-                        onChange={() => props?.handleSelect(log.id)}
-                      />
-                      <label
-                        className="custom-control-label"
-                        htmlFor={`ticketRow-${index}`}
-                      ></label>
-                    </div>
-                  </div>
-                </td>
-
                 <td
                   className={`reduce-height actions-td padding-0`}
                   onClick={handleIgnorePdfView}
@@ -538,12 +464,12 @@ export default function NoticesLog(props) {
                             <span
                               onClick={() => {
                                 handleViewPdf(
-                                  log.doc_link,
-                                  log.text_loc,
+                                  log.document.document_link,
+                                  formatPrimaryTextLocation(log),
                                   index,
-                                  log.doc_id,
+                                  log.document.document_id,
                                   log.id,
-                                  log.additional_text_locations,
+                                  formatAdditionalTextLocations(log),
                                 );
                                 props.setLogInViewer(log);
                               }}
