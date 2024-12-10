@@ -247,6 +247,36 @@ export default function NoticesLog(props) {
     return texts.join(" ");
   }
 
+  const formatPrimaryTextLocation = (notice) => {
+    const primaryLine = notice.excerpt_anchors[0].lines[0];
+    return {
+      x: primaryLine.x_start,
+      y: primaryLine.y_start,
+      end_x: primaryLine.x_end,
+      end_y: primaryLine.y_end,
+      page_no: primaryLine.page_no,
+    }
+  }
+
+  const formatAdditionalTextLocations = (notice) => {
+    const additionalLinesFromPrimaryAnchor = notice.excerpt_anchors[0].lines.slice(1);
+    const additionalLinesFromOtherAnchors = notice.excerpt_anchors.slice(1).map((anchor) => anchor.lines);
+    const additionalLines = [...additionalLinesFromPrimaryAnchor];
+    for (const lines of additionalLinesFromOtherAnchors) {
+      additionalLines.push(...lines);
+    }
+
+    const additionalTextLocations = additionalLines.map((line) => ({
+      x: line.x_start,
+      y: line.y_start,
+      end_x: line.x_end,
+      end_y: line.y_end,
+      page_no: line.page_no,
+    }));
+
+    return additionalTextLocations;
+  }
+
   useEffect(() => {
     if (logRowRefs.current[props.pdfData.index]) {
       const rowElement = logRowRefs.current[props.pdfData.index];
@@ -272,25 +302,6 @@ export default function NoticesLog(props) {
       <table className="table logs-table" ref={tableRef}>
         <thead>
           <tr ref={stickyHeaderRef}>
-            <th className="ticket-checkbox small-font">
-              <div className="form-group">
-                <div className="custom-control custom-checkbox">
-                  <input
-                    type="checkbox"
-                    className="custom-control-input"
-                    name="ticketHeading"
-                    id="ticketHeading"
-                    onChange={props.handleSelectAll}
-                    checked={props.isSelectAll}
-                  />
-                  <label
-                    className="custom-control-label"
-                    htmlFor="ticketHeading"
-                  ></label>
-                </div>
-              </div>
-            </th>
-
             <th
               className="text-center small-font"
               style={{ width: `${tableWidths[1]}px` }}
@@ -459,6 +470,7 @@ export default function NoticesLog(props) {
         <tbody style={{ fontSize: "12px" }}>
           {noticesData.map((log, index) => {
             let pdfIndex = props.pdfData?.index;
+            console.log("row:", log);
             const showPdf = !(pdfIndex && pdfIndex !== index) && pdfIndex !== 0;
             return (
               <tr
@@ -468,36 +480,11 @@ export default function NoticesLog(props) {
                 style={{
                   lineHeight: 1.2,
                   backgroundColor: pdfIndex === index ? '#f8f8fa' : 'white',
+                  height: '35px',
                 }}
                 key={index}
                 ref={(el) => (logRowRefs.current[index] = el)}
               >
-                <td
-                  className={`ticket-checkbox reduce-height`}
-                  onClick={handleIgnorePdfView}
-                >
-                  <div className="form-group">
-                    <div className="custom-control custom-checkbox">
-                      <input
-                        type="checkbox"
-                        className="custom-control-input"
-                        name={`ticketRow-${index}`}
-                        id={`ticketRow-${index}`}
-                        checked={
-                          !!props.selected
-                            ? props.selected?.includes(log.id)
-                            : false
-                        }
-                        onChange={() => props?.handleSelect(log.id)}
-                      />
-                      <label
-                        className="custom-control-label"
-                        htmlFor={`ticketRow-${index}`}
-                      ></label>
-                    </div>
-                  </div>
-                </td>
-
                 <td
                   className={`reduce-height actions-td padding-0`}
                   onClick={handleIgnorePdfView}
@@ -538,12 +525,12 @@ export default function NoticesLog(props) {
                             <span
                               onClick={() => {
                                 handleViewPdf(
-                                  log.doc_link,
-                                  log.text_loc,
+                                  log.document.document_link,
+                                  formatPrimaryTextLocation(log),
                                   index,
-                                  log.doc_id,
+                                  log.document.document_id,
                                   log.id,
-                                  log.additional_text_locations,
+                                  formatAdditionalTextLocations(log),
                                 );
                                 props.setLogInViewer(log);
                               }}

@@ -128,7 +128,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
               <span>Combine</span>
             </button>
           )}
-          {props.listId !== null ? (
+          {props.listId !== null && !!props.handleClearSelection ? (
             <button
               type="button"
               className="table-top-btn selection-btn mr-2 mb-1"
