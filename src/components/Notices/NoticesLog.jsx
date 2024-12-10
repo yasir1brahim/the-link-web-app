@@ -158,9 +158,9 @@ export default function NoticesLog(props) {
   });
 
   const minWidths = {
-    1: 105,
-    2: 145,
-    3: 150,
+    1: 100,
+    2: 100,
+    3: 100,
     4: 85,
     5: 190,
     6: 190,
@@ -175,25 +175,25 @@ export default function NoticesLog(props) {
         ),
         2: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.045),
-          minWidths[3]
+          minWidths[2]
         ),
         3: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.045),
-          minWidths[4]
+          minWidths[3]
         ),
         4: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.045),
-          minWidths[5]
+          minWidths[4]
         ),
         5: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.1),
-          minWidths[6]
+          Math.round(parentRef.current.offsetWidth * 0.045),
+          minWidths[5]
         ),
         6: Math.max(
           Math.round(parentRef.current.offsetWidth * 0.1),
-          minWidths[7]
+          minWidths[6]
         ),
-        7: parentRef.current.offsetWidth - 993,
+        7: parentRef.current.offsetWidth - 800,
       });
     }
   }, [parentRef.current]);
@@ -310,7 +310,7 @@ export default function NoticesLog(props) {
                 <span className="w-100">Actions</span>
                 <div
                   className="resizer"
-                  onMouseDown={(e) => handleMouseDown(e, 1)}
+                  onMouseDown={(e) => handleMouseDown(e, 0)}
                 >
                   |
                 </div>
@@ -323,7 +323,7 @@ export default function NoticesLog(props) {
                   Spec Section{" "}
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 2)}
+                    onMouseDown={(e) => handleMouseDown(e, 1)}
                   >
                     |
                   </div>
@@ -338,7 +338,7 @@ export default function NoticesLog(props) {
                 <span>Section Title</span>
                 <div
                   className="resizer"
-                  onMouseDown={(e) => handleMouseDown(e, 3)}
+                  onMouseDown={(e) => handleMouseDown(e, 2)}
                 >
                   |
                 </div>
@@ -352,7 +352,7 @@ export default function NoticesLog(props) {
                 <span>Paragraph</span>
                 <div
                   className="resizer"
-                  onMouseDown={(e) => handleMouseDown(e, 4)}
+                  onMouseDown={(e) => handleMouseDown(e, 3)}
                 >
                   |
                 </div>
@@ -367,7 +367,7 @@ export default function NoticesLog(props) {
                   Notice Type{" "}
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 5)}
+                    onMouseDown={(e) => handleMouseDown(e, 4)}
                   >
                     |
                   </div>
@@ -380,7 +380,7 @@ export default function NoticesLog(props) {
                   Time Keywords
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 6)}
+                    onMouseDown={(e) => handleMouseDown(e, 5)}
                   >
                     |
                   </div>
@@ -397,7 +397,7 @@ export default function NoticesLog(props) {
                   Notice Text{" "}
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 7)}
+                    onMouseDown={(e) => handleMouseDown(e, 6)}
                   >
                     |
                   </div>
