@@ -123,7 +123,7 @@ const toggleProjectStatus = async (projectId, action = 'archive', teamId) => {
 };
 
 
-const getUserRoleInProject = async (userId, teamId) => {
+const getUserRoleInAllProjects = async (userId, teamId) => {
     const projects = await listProjects(teamId);
     const userIdInt = parseInt(userId);
 
@@ -139,4 +139,4 @@ const getUserRoleInProject = async (userId, teamId) => {
     return allRoles.length > 0 ? allRoles : null;
 };
 
-export {listProjects, updateProject, createProject, getProjectDetails, toggleProjectStatus, getUserRoleInProject}
+export {listProjects, updateProject, createProject, getProjectDetails, toggleProjectStatus, getUserRoleInAllProjects}
