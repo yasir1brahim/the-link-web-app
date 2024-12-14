@@ -62,4 +62,4 @@ export const EXCEL_HEADER_OPTIONS = [
     { id: 30, name: 'On Site Installation Date', default: false }
 ];
 
-export const NOTICES_FEATURE_FLAG_NAME = "notices"
+export const NOTICES_FEATURE_FLAG_NAME = "notices";

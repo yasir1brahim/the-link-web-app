@@ -19,7 +19,7 @@ import { ArchiveProjectModal } from "./archiveProjectModal";
 import { Tooltip } from "reactstrap";
 import { RestoreProjectModal } from "./restoreProjectModal";
 import { RestoreIcon } from "../shared/icons/restoreIcon";
-import { toggleProjectStatus, getUserRoleInProject } from "../../api/Projects/api";
+import { toggleProjectStatus, getUserRoleInAllProjects } from "../../api/Projects/api";
 import { getUserRoleInTeam } from '../../api/Authentication/api';
 
 const ProjectsTable = ({
@@ -56,7 +56,7 @@ const ProjectsTable = ({
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setLoading] = useState(false);
-  const [userRoles, setUserRoles] = useState([]);
+  const [userProjectToRolesMap, setUserProjectToRolesMap] = useState({});
   const [userRoleInTeam, setUserRoleInTeam] = useState('member');
   const { state } = useLocation();
   // const customer = state;
@@ -64,9 +64,15 @@ const ProjectsTable = ({
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      const roles = await getUserRoleInProject(userId, customerId);
-      setUserRoles(roles);
+    console.log('projectData', projectData);
+    const fetchUserProjectRoles = async () => {
+      const roles = await getUserRoleInAllProjects(userId, customerId);
+      console.log('roles', roles);
+      const projectToRolesMap = {};
+      roles.forEach((role) => {
+        projectToRolesMap[role.projectId] = role.role;
+      });
+      setUserProjectToRolesMap(projectToRolesMap);
     };
     const fetchUserRoleInTeam = async () => {
       const roleInTeam = await getUserRoleInTeam(
@@ -75,21 +81,20 @@ const ProjectsTable = ({
       setUserRoleInTeam(roleInTeam);
     }
     fetchUserRoleInTeam();
-    fetchUserRole();
+    fetchUserProjectRoles();
   }, [userId, customerId]);
 
-  
-  const getUserRoleForProject = (projectId) => {
-    if (userRoles?.length > 0) {
-      const roleForProject = userRoles.find((role) => role.projectId === projectId);
-      return roleForProject?.role || "project_member";
-    }
-    return "project_member";
-  };
 
   const handleEdit = (project) => {
     setActiveProject(project);
     toggleEditModal();
+  };
+
+  const getUserRoleForProject = (projectId) => {
+    if (userRoleInTeam === 'admin') {
+      return "project_admin";
+    }
+    return userProjectToRolesMap[projectId] || "project_member";
   };
 
   const getEmployeeList = async (project) => {
@@ -106,58 +111,47 @@ const ProjectsTable = ({
     }
   };
 
-const handleArchiveProject = async () => {
-  let errors = false;
-  if (!errors) {
-      try {
-        const response = await toggleProjectStatus(archiveProject.id, 'archive', archiveProject.team);
-          
-          if (response?.data) {
-              console.log('Project archived successfully:', response.data);
-              
-              setPageRefresh(!pageRefresh);
-              toggleArchiveProjectModal();
-          } else {
-              console.log('Failed to archive/unarchive project');
-          }
-      } catch (error) {
-          console.error('Error while toggling project archive status:', error);
-          handleError(error);
-      }
-  }
-};
-
-const handleRestoreProject = async () => {
-  let errors = false;
-  if (!errors) {
-      try {
-        const response = await toggleProjectStatus(restoreProject.id, 'restore', restoreProject.team);
-
-          if (response?.data) {
-              console.log('Project restored successfully:', response.data);
-              setPageRefresh(!pageRefresh);
-              toggleRestoreProjectModal();
-          } else {
-              console.log('Failed to restore project');
-          }
-      } catch (error) {
-          console.error('Error while restoring project:', error);
-          handleError(error);
-      }
-  }
-};
-
-  const generateInitials = (name) => {
-    // Split the name into words
-    const words = name.split(' ');
-
-    const initials = words
-      .map((word) => word.charAt(0))
-      .join('')
-      .substring(0, 2);
-
-    return initials.toUpperCase();
+  const handleArchiveProject = async () => {
+    let errors = false;
+    if (!errors) {
+        try {
+          const response = await toggleProjectStatus(archiveProject.id, 'archive', archiveProject.team);
+            
+            if (response?.data) {
+                console.log('Project archived successfully:', response.data);
+                
+                setPageRefresh(!pageRefresh);
+                toggleArchiveProjectModal();
+            } else {
+                console.log('Failed to archive/unarchive project');
+            }
+        } catch (error) {
+            console.error('Error while toggling project archive status:', error);
+            handleError(error);
+        }
+    }
   };
+
+  const handleRestoreProject = async () => {
+    let errors = false;
+    if (!errors) {
+        try {
+          const response = await toggleProjectStatus(restoreProject.id, 'restore', restoreProject.team);
+
+            if (response?.data) {
+                console.log('Project restored successfully:', response.data);
+                setPageRefresh(!pageRefresh);
+                toggleRestoreProjectModal();
+            } else {
+                console.log('Failed to restore project');
+            }
+        } catch (error) {
+            console.error('Error while restoring project:', error);
+            handleError(error);
+        }
+    }
+  };
+
   return (
     <>
       <div className="customer-projects-content">
@@ -265,12 +259,6 @@ const handleRestoreProject = async () => {
                             >
                               <LaunchIcon />
                             </span>
-                            {/* {noticesFeatureFlagActive && <span> */}
-                            <span>
-                              <Button onClick={() => onClickNotices(project)}>
-                                Notices
-                              </Button>
-                            </span>
                             <span>
                               <Tooltip
                                 placement="left"
@@ -288,6 +276,11 @@ const handleRestoreProject = async () => {
                               >
                                 Launch Project
                               </Tooltip>
+                            </span>
+                            <span>
+                              <Button onClick={() => onClickNotices(project)}>
+                                Notices
+                              </Button>
                             </span>
                             {isArchived ? (
                               <>
