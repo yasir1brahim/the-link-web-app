@@ -21,6 +21,7 @@ import { useRef } from "react";
 export default function CombinedLogs(props) {
   const {
     logData,
+    hasAiSubmittals,
     newRowIndex,
     filterValues,
     setFilterValues,
@@ -462,6 +463,9 @@ export default function CombinedLogs(props) {
   };
 
   const formatSubmittalNumber = (number) => {
+    if (props.hasAiSubmittals) {
+      return "";
+    }
     const nonNullNumber = number ?? "";
     const str = nonNullNumber.toString();
     return str.endsWith('.0') ? str.slice(0, -2) : str;

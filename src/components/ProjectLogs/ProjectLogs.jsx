@@ -182,6 +182,7 @@ const ProjectLogs = () => {
   const [showClearFilters, setShowClearFilters] = useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(50);
   const [page, setPage] = React.useState(1);
+  const [hasAiSubmittals, setHasAiSubmittals] = useState(false);
 
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
@@ -293,6 +294,7 @@ const ProjectLogs = () => {
         url: `/project_data/${projectId || state.project?.project_id}`,
       });
       setDocParsed(response.data.doc_parsed);
+      setHasAiSubmittals(response.data.has_ai_submittals || false);
       setDocumentData(response.data.document_details);
       setLoading(false);
     };
@@ -1265,6 +1267,7 @@ const ProjectLogs = () => {
               <div className={pdfData.url && "side-by-side"}>
                 <CombinedLogs
                   logData={filteredLogData}
+                  hasAiSubmittals={hasAiSubmittals}
                   setFilteredLogData={setFilteredLogData}
                   selected={selected}
                   handleSelect={handleSelect}
