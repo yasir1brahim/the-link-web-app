@@ -6,6 +6,7 @@ import {
   DropdownToggle,
   DropdownItem,
 } from "reactstrap";
+import { ReactComponent as Logo } from "../../../assets/images/procore-vector-logo.svg";
 import { ReactComponent as ExcelLogo } from "../../../assets/images/excel.svg";
 import { ReactComponent as MergeIcon } from "../../../assets/images/merge.svg";
 import { ReactComponent as JetBuildLogo } from "../../../assets/images/jet_build.svg";
@@ -51,6 +52,17 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                 <DropdownMenu style={{ maxWidth: '200px' }}>
                   <DropdownItem className="text-center" onClick={() => props.handleExportExcel(['All'])}>
                     <ExcelLogo style={{ height: '45px', margin: '5px 0' }} />
+                  </DropdownItem>
+                  <DropdownItem className="text-center">
+                    {props.procoreAccessToken === 'null' ? (
+                      <a href={props.procoreAuthUrl} className="breadcrumb-text">
+                        <Logo style={{ height: '90px' }} />
+                      </a>
+                    ) : (
+                      <div onClick={props.handleExportToProcoreButtonClick}>
+                        <Logo style={{ height: '90px' }} />
+                      </div>
+                    )}
                   </DropdownItem>
                   <DropdownItem className="text-center" onClick={() => props.handleExportJetBuild(['All'])}>
                     <JetBuildLogo style={{ height: '40px', maxWidth: '100%', margin: '20px auto' }} />

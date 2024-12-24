@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 const NavbarTop = ({...props}) => {
   const [navDrop, setNavDrop] = useState(false);
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
+  const [showManageProcore, setShowManageProcore] = useState(false);
   const [teamId, setTeamId] = useState(null);
   const { user, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -65,6 +66,7 @@ const NavbarTop = ({...props}) => {
           );    
           if (isAdmin) {
             setShowCompanyProfile(true);
+            setShowManageProcore(true);
           }
         }
       } catch (error) {
@@ -144,6 +146,17 @@ const NavbarTop = ({...props}) => {
                       >
                         View Company Profile
                       </a>
+                    )}
+                    {showManageProcore &&
+                      props.handleManageProcoreButtonClick && (
+                      <div
+                        className="navlist flex"
+                        onClick={props.handleManageProcoreButtonClick}
+                        disabled={props.initLoading || props.loadingProjectDetails}
+                      >
+                        <div>Manage Procore Integration</div>
+                        {(props.initLoading || props.loadingProjectDetails) && <CircularProgress size={12} />}
+                      </div>
                     )}
                     <a
                       href="/"
