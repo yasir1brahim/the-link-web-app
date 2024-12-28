@@ -44,7 +44,7 @@ const Adminlanding = (props) => {
   }, [isArchived, pageRefresh]);
 
   const handleViewCustomer = (customer) => {
-    navigate(`/company-profile/${customer?.customer_id}`, {
+    navigate(`/company-profile?companyId=${customer?.customer_id}`, {
       state: customer
     });
   };

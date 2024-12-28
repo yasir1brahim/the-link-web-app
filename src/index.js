@@ -69,7 +69,7 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><PdfWrapper /></ProtectedRoute>,
   },
   { 
-    path: "/submital-mappings",
+    path: "/submittal-mappings",
     element: <ProtectedRoute><SubmittalMappings /></ProtectedRoute>,
   },
   {
@@ -97,7 +97,7 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><AdminLanding /></ProtectedRoute>,
   },
   {
-    path: "/company-profile/:id",
+    path: "/company-profile",
     element: <ProtectedRoute><CustomerProfile /></ProtectedRoute>,
   }
 ])

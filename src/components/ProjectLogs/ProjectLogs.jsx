@@ -149,7 +149,7 @@ const ProjectLogs = () => {
   const procoreBaseUrl = window.location.href.includes("https://app.thelink.ai")
     ? "https://procore.com"
     : "https://sandbox.procore.com";
-  const procoreAuthUrl = `${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId},${customerId}`;
+  const procoreAuthUrl = `${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${procoreClientId}&redirect_uri=${baseUrl}project-logs?projectDetails=${projectId}`;
   const procoreAccessToken = localStorage.getItem("procore_access_token");
 
   const [loadingView, setLoadingView] = useState(false);
@@ -191,7 +191,7 @@ const ProjectLogs = () => {
     try {
       const accessTokenData = await axiosInstance({
         method: "get",
-        url: "/procore/refresh_token",
+        url: "/api/deliverables/procore/refresh_token/",
         params: {
           user_id: localStorage.getItem("userId"),
         },
@@ -199,7 +199,7 @@ const ProjectLogs = () => {
       if (accessTokenData?.status === 200) {
         localStorage.setItem(
           "procore_access_token",
-          accessTokenData?.data.data.access_token
+          accessTokenData?.data.access_token
         );
       }
     } catch (error) {
@@ -212,10 +212,10 @@ const ProjectLogs = () => {
     if (procoreAccessToken !== "null") {
       const resp = await axiosInstance({
         method: "get",
-        url: "/procore/me",
+        url: "/api/deliverables/procore/me/",
       });
       if (resp?.status === 200) {
-        setProcoreAuthUserInfo(resp?.data.data);
+        setProcoreAuthUserInfo(resp?.data);
       } else {
         setProcoreAuthUserInfo(null);
       }
@@ -246,13 +246,11 @@ const ProjectLogs = () => {
 
   useEffect(() => {
     const initLoading = async () => {
-      setInitLoading(true);
       await getProcoreAccessTokenData();
       await getProcoreAuthUser();
       if (projectId !== null) {
         await checkProjectMapping();
       }
-      setInitLoading(false);
     };
     const fetchProjectData = async () => {
       setLoading(true);
@@ -424,15 +422,15 @@ const ProjectLogs = () => {
       const fetchData = async () => {
         const accessTokenData = await axiosInstance({
           method: "post",
-          url: "/procore/access_token",
+          url: "/api/deliverables/procore/access_token/",
           data: {
             code: authCode,
-            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId},${customerId}`,
+            redirect_uri: `${baseUrl}project-logs?projectDetails=${projectId}`,
           },
         });
         localStorage.setItem(
           "procore_access_token",
-          accessTokenData?.data.data.access_token
+          accessTokenData?.data.access_token
         );
 
         const newSearchParams = new URLSearchParams(searchParams);
@@ -462,7 +460,7 @@ const ProjectLogs = () => {
   const checkProjectMappingBeforeExport = async () => {
     const res = await axiosInstance({
       method: "get",
-      url: `/procore/project_mapping/${projectId}`,
+      url: `/api/deliverables/procore/project_mapping/${projectId}`,
     });
 
     if (get(res, "status") === 200) {
@@ -470,16 +468,16 @@ const ProjectLogs = () => {
       setProcoreCompanyName(get(res, "data.data.procore_company_name"));
       localStorage.setItem(
         "companyId",
-        get(res, "data.data.procore_company_id")
+        get(res, "data.procore_company_id")
       );
       localStorage.setItem("projectId", projectId);
       localStorage.setItem("customerId", customerId);
       localStorage.setItem("projectName", projectName);
-      setProcoreProjectName(get(res, "data.data.procore_project_name"));
-      setProcoreProjectId(get(res, "data.data.procore_project_id"));
-      setProcoreSubmittalManagerId(get(res, "data.data.submittal_manager_id"));
+      setProcoreProjectName(get(res, "data.procore_project_name"));
+      setProcoreProjectId(get(res, "data.procore_project_id"));
+      setProcoreSubmittalManagerId(get(res, "data.submittal_manager_id"));
       setProcoreSubmittalManagerName(
-        get(res, "data.data.procore_submittal_manager_name")
+        get(res, "data.procore_submittal_manager_name")
       );
       setExportToProcoreModal(true);
     }
@@ -487,36 +485,39 @@ const ProjectLogs = () => {
       setProcoreModal(true);
       const companyResp = await axiosInstance({
         method: "get",
-        url: "/procore/companies",
+        url: "/api/deliverables/procore/companies",
       });
-      setCompanyList(companyResp?.data.data);
+      setCompanyList(companyResp?.data);
+    }
+    if (get(res, "status") === 400 && get(res, "data.error") === "invalid_grant") {
+      window.location.href = procoreAuthUrl;
     }
   };
 
   const checkProjectMapping = async () => {
     const res = await axiosInstance({
       method: "get",
-      url: `/procore/project_mapping/${projectId}`,
+      url: `/api/deliverables/procore/project_mapping/${projectId}`,
     });
 
     if (get(res, "status") === 500) {
       return;
     }
     if (get(res, "status") === 200) {
-      setCompanyId(get(res, "data.data.procore_company_id"));
-      setProcoreCompanyName(get(res, "data.data.procore_company_name"));
+      setCompanyId(get(res, "data.procore_company_id"));
+      setProcoreCompanyName(get(res, "data.procore_company_name"));
       localStorage.setItem(
         "companyId",
-        get(res, "data.data.procore_company_id")
+        get(res, "data.procore_company_id")
       );
       localStorage.setItem("projectId", projectId);
       localStorage.setItem("customerId", customerId);
       localStorage.setItem("projectName", projectName);
-      setProcoreProjectName(get(res, "data.data.procore_project_name"));
-      setProcoreProjectId(get(res, "data.data.procore_project_id"));
-      setProcoreSubmittalManagerId(get(res, "data.data.submittal_manager_id"));
+      setProcoreProjectName(get(res, "data.procore_project_name"));
+      setProcoreProjectId(get(res, "data.procore_project_id"));
+      setProcoreSubmittalManagerId(get(res, "data.submittal_manager_id"));
       setProcoreSubmittalManagerName(
-        get(res, "data.data.procore_submittal_manager_name")
+        get(res, "data.procore_submittal_manager_name")
       );
     }
   };
@@ -531,10 +532,10 @@ const ProjectLogs = () => {
       setLoading(true);
       const resp = await axiosInstance({
         method: "post",
-        url: "/procore/create_submittals",
+        url: "/api/deliverables/procore/create_submittals/",
         data: {
           project_id: Number(projectId),
-          records: selectedRows, // array of ids
+          records: JSON.parse(selectedRows), // array of ids
           // status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
         },
       });
@@ -1011,7 +1012,7 @@ const ProjectLogs = () => {
     try {
       const resp = await axiosInstance({
         method: "get",
-        url: "/procore/delete_token",
+        url: "/api/deliverables/procore/delete_token/",
         params: {
           user_id: localStorage.getItem("userId"),
         },

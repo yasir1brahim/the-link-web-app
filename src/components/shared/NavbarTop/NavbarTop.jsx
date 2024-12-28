@@ -140,7 +140,7 @@ const NavbarTop = ({...props}) => {
                     )}
                     {showCompanyProfile && (
                       <a
-                        href={`/company-profile/${teamId}`}
+                        href={`/company-profile?companyId=${teamId}`}
                         className="navlist"
                         onClick={toggleDrop}
                       >

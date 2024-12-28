@@ -37,7 +37,7 @@ const ManageProcore = ({
   const getCompanyList = async () => {
     const companyResp = await axiosInstance({
       method: "get",
-      url: "/procore/companies",
+      url: "/api/deliverables/procore/companies/",
     });
     setCompanyList(companyResp?.data.data);
   }
@@ -47,9 +47,11 @@ const ManageProcore = ({
       const fetchData = async () => {
         const projectListResp = await axiosInstance({
           method: 'get',
-          url: `/procore/projects/${companyId_}`
+          url: `/api/deliverables/procore/projects/${companyId_}/`
         });
-        setProjectList(projectListResp?.data?.data);
+        console.log("projectListResp", projectListResp);
+        console.log("projectListResp?.data", projectListResp?.data);
+        setProjectList(projectListResp?.data?.data || []);
       };
       await fetchData().catch((error) => {
         handleError(error);
@@ -62,9 +64,11 @@ const ManageProcore = ({
       const fetchData = async () => {
         const submittalManagerResp = await axiosInstance({
           method: 'get',
-          url: `/procore/managers/${projectId_}`
+          url: `/api/deliverables/procore/managers/${projectId_}/`
         });
-        setSubmittalManagerList(submittalManagerResp?.data?.data);
+        console.log("submittalManagerResp", submittalManagerResp);
+        console.log("submittalManagerResp?.data", submittalManagerResp?.data);
+        setSubmittalManagerList(submittalManagerResp?.data?.data || []);
       };
 
       await fetchData().catch((error) => {
@@ -103,7 +107,7 @@ const ManageProcore = ({
     try {
       await axiosInstance({
         method: 'post',
-        url: '/procore/project_mapping',
+        url: '/api/deliverables/procore/project_mapping/',
         data: {
           project_id: projectId,
           procore_company_id: partnerCompany[0]?.value,
@@ -146,7 +150,7 @@ const ManageProcore = ({
     try {
       await axiosInstance({
         method: 'post',
-        url: '/procore/company_mapping',
+        url: '/api/deliverables/procore/company_mapping/',
         data: {
           link_company_id: companyId,
           procore_company_id: partnerCompany[0]?.value,

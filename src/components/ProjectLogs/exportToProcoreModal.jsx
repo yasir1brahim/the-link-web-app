@@ -31,7 +31,7 @@ const ExportToProcoreModal = (props) => {
       setLoading(true);
       await axiosInstance({
         method: 'post',
-        url: '/procore/create_submittals',
+        url: '/api/deliverables/procore/create_submittals/',
         data: {
           project_id: Number(projectId),
           records: selectedRows, // array of ids

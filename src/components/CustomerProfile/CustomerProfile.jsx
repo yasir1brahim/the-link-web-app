@@ -49,20 +49,22 @@ const CustomerProfile = (props) => {
   const [companyList, setCompanyList] = useState([]);
   const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [searchParams] = useSearchParams();
-  const { id: customerId } = useParams(); 
   const authCode = searchParams.get('code');
+  const customerId = searchParams.get('companyId');
   const [profilePicture, setProfilePicture] = useState({ value: '', errors: '' });
   const [teamId, setTeamId] = useState('');
 
   const redirectUri = window.location.href.includes('https://app.thelink.ai')
-    ? `https://app.thelink.ai/customer-profile?id=${customerId}`
+    ? `https://app.thelink.ai/company-profile?companyId=${customerId}`
     : window.location.href.includes('http://localhost:3000')
-    ? `http://localhost:3000/company-profile/${customerId}`
-    : `https://app-sl.thelink.ai/customer-profile?id=${customerId}`;
+    ? `http://localhost:3000/company-profile?companyId=${customerId}`
+    : `https://app-dj.thelink.ai/company-profile?companyId=${customerId}`;
   const clientId = window.location.href.includes('https://app.thelink.ai')
     ? '974cb8bfa7aaadc4759a6d60a2d8427387d32db0c4fa4dfbe1da15b5ce3abfc5'
     : 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9';
-
+  const procoreAuthBaseUrl = window.location.href.includes("https://app.thelink.ai")
+    ? "https://login.procore.com"
+    : "https://login-sandbox.procore.com";
   const navigate = useNavigate();
 
 
@@ -70,46 +72,6 @@ const CustomerProfile = (props) => {
     'member': 'Company Member',
     'admin': 'Company Admin',
   }
-
-  useEffect(() => {
-    if (authCode) {
-      const fetchData = async () => {
-        const accessTokenData = await axiosInstance({
-          method: 'post',
-          url: '/procore/access_token',
-          data: {
-            code: authCode,
-            redirect_uri: redirectUri
-          }
-        });
-        localStorage.setItem(
-          'procore_access_token',
-          accessTokenData?.data.data.access_token
-        );
-        const res = await axiosInstance({
-          method: 'get',
-          url: `/procore/company_mapping/${customerId}`
-        });
-
-        if (get(res, 'status') === 200) {
-          navigate(`/submital-mappings?customerId=${customerId}`);
-        }
-
-        if (get(res, 'status') === 204) {
-          setProcoreModal(true);
-          const companyResp = await axiosInstance({
-            method: 'get',
-            url: '/procore/companies'
-          });
-          setCompanyList(companyResp?.data.data);
-        }
-      };
-
-      fetchData().catch((error) => {
-        handleError(error);
-      });
-    }
-  }, [authCode, customerId, navigate, redirectUri]);
 
   const fetchData = async (
     customerId,
@@ -241,6 +203,52 @@ const CustomerProfile = (props) => {
     }
   };
 
+  useEffect(() => {
+    console.log("handleProcoreEffect")
+    console.log("authCode:", authCode)
+    if (authCode) {
+      const fetchData = async () => {
+        const accessTokenData = await axiosInstance({
+          method: 'post',
+          url: '/api/deliverables/procore/access_token/',
+          data: {
+            code: authCode,
+            redirect_uri: redirectUri
+          }
+        });
+        console.log("accessTokenData:", accessTokenData)
+        localStorage.setItem(
+          'procore_access_token',
+          accessTokenData?.data.access_token
+        );
+        const res = await axiosInstance({
+          method: 'get',
+          url: `/api/deliverables/procore/company_mapping/${customerId}/`
+        });
+        console.log("res:", res)
+
+        if (get(res, 'status') === 200) {
+          navigate(`/submittal-mappings?customerId=${customerId}`);
+        }
+
+        if (get(res, 'status') === 204) {
+          setProcoreModal(true);
+          const companyResp = await axiosInstance({
+            method: 'get',
+            url: '/api/deliverables/procore/companies/'
+          });
+          setCompanyList(companyResp.data || []);
+        }
+      };
+
+      fetchData().catch((error) => {
+        handleError(error);
+      });
+    }
+  }, [authCode, customerId, navigate, redirectUri]);
+
+
+
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -362,7 +370,7 @@ const CustomerProfile = (props) => {
                       style={{ marginBottom: '2px', float: 'right' }}
                     >
                       <a
-                        href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`}
+                        href={`${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`}
                         className="breadcrumb-text"
                       >
                         Procore Submittal Mappings
@@ -413,7 +421,7 @@ const CustomerProfile = (props) => {
                         className="btn btn-secondary btn-sm"
                       >
                         <a
-                          href={`https://login-sandbox.procore.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`}
+                          href={`${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`}
                           className="breadcrumb-text"
                         >
                           Procore Submittal Mappings

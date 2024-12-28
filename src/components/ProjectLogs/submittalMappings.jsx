@@ -35,7 +35,7 @@ const SubmittalMappings = () => {
         setLoading(true);
         await axiosInstance({
           method: 'get',
-          url: `procore/submittal_mapping/${customerId}`
+          url: `/api/deliverables/procore/submittal_mappings/${customerId}/`
         }).then((res) => {
           setLinkSubMappings(get(res, 'data.data.link_sub_mapping'));
           setProcoreSubTypes(get(res, 'data.data.procore_submittal_types'));
@@ -79,7 +79,7 @@ const SubmittalMappings = () => {
       setLoading(true);
       await axiosInstance({
         method: 'post',
-        url: `procore/submittal_mapping/${customerId}`,
+        url: `/api/deliverables/procore/submittal_mappings/${customerId}/`,
         data: mappingsobject
       }).then((res) => {
         // if (get(res, "status") === 200) {
@@ -88,7 +88,7 @@ const SubmittalMappings = () => {
         return res;
       });
       setLoading(false);
-      navigate(`/customer-profile?id=${customerId}`);
+      navigate(`/company-profile?companyId=${customerId}`);
     } catch (error) {
       handleError(error);
     }

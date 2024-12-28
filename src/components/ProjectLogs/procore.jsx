@@ -22,15 +22,19 @@ const Procore = ({
   const [projectList, setProjectList] = useState([]);
   const [submittalList, setSubmittalList] = useState([]);
 
+  console.log("companyList", companyList)
+
   // Once a user selects a partner company, it's respective project fetching API is called
   useEffect(() => {
     if (partnerCompany[0]?.value) {
       const fetchData = async () => {
         const projectListResp = await axiosInstance({
           method: 'get',
-          url: `/procore/projects/${partnerCompany[0]?.value}`
+          url: `/api/deliverables/procore/projects/${partnerCompany[0]?.value}/`
         });
-        setProjectList(projectListResp.data.data);
+        console.log("projectListResp", projectListResp);
+        console.log("projectListResp?.data", projectListResp?.data);
+        setProjectList(projectListResp?.data?.data || []);
       };
       fetchData().catch((error) => {
         handleError(error);
@@ -44,9 +48,9 @@ const Procore = ({
       const fetchData = async () => {
         const submittalManagerResp = await axiosInstance({
           method: 'get',
-          url: `/procore/managers/${projectName[0]?.value}`
+          url: `/api/deliverables/procore/managers/${projectName[0]?.value}/`
         });
-        setSubmittalList(submittalManagerResp?.data?.data);
+        setSubmittalList(submittalManagerResp?.data?.data || []);
       };
 
       fetchData().catch((error) => {
@@ -59,7 +63,7 @@ const Procore = ({
     try {
       await axiosInstance({
         method: 'post',
-        url: '/procore/project_mapping',
+        url: '/api/deliverables/procore/project_mapping/',
         data: {
           project_id: projectId,
           procore_company_id: partnerCompany[0]?.value,
@@ -92,7 +96,7 @@ const Procore = ({
     try {
       await axiosInstance({
         method: 'post',
-        url: '/procore/company_mapping',
+        url: '/api/deliverables/procore/company_mapping/',
         data: {
           link_company_id: companyId,
           procore_company_id: partnerCompany[0]?.value,
