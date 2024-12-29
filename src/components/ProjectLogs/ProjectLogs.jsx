@@ -1053,6 +1053,7 @@ const ProjectLogs = () => {
         handleManageExcelExportButtonClick={handleManageExcelExportButtonClick}
         loadingProjectDetails={loadingProjectDetails}
         customerData={customerData}
+        userRole={userRole}
       />
       {isAssociatedUser === true && (
         <div className="project-logs-wrapper log-table-width">
