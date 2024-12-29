@@ -103,7 +103,7 @@ const ProjectLogs = () => {
     ? `https://app.thelink.ai/`
     : window.location.href.includes("http://localhost:3000")
     ? `http://localhost:3000/`
-    : `https://app-sl.thelink.ai/`;
+    : `https://app-dj.thelink.ai/`;
   
   //Procore states
   const [procoreModal, setProcoreModal] = useState(false);
