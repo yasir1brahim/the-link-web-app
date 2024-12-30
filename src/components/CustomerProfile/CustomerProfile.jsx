@@ -17,6 +17,7 @@ import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 import { ConfirmationModal } from './confirmationModal';
 import handleError from '../../config/errorHandler';
 import { get } from 'lodash';
+import Procore from '../ProjectLogs/procore';
 import Loader from '../shared/Loader/Loader';
 import { useParams } from 'react-router-dom';
 import { getTeamDetails, getUserRoleInTeam, updateTeamDetails, uploadTeamLogo } from '../../api/Authentication/api';
@@ -44,21 +45,26 @@ const CustomerProfile = (props) => {
   const [currentItems, setCurrentItems] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setLoading] = useState(false);
+  const [procoreModal, setProcoreModal] = useState(false);
+  const [companyList, setCompanyList] = useState([]);
+  const toggleProcoreModal = () => setProcoreModal(!procoreModal);
   const [searchParams] = useSearchParams();
-  const { id: customerId } = useParams(); 
   const authCode = searchParams.get('code');
+  const customerId = searchParams.get('companyId');
   const [profilePicture, setProfilePicture] = useState({ value: '', errors: '' });
   const [teamId, setTeamId] = useState('');
 
   const redirectUri = window.location.href.includes('https://app.thelink.ai')
-    ? `https://app.thelink.ai/customer-profile?id=${customerId}`
+    ? `https://app.thelink.ai/company-profile?companyId=${customerId}`
     : window.location.href.includes('http://localhost:3000')
-    ? `http://localhost:3000/company-profile/${customerId}`
-    : `https://app-sl.thelink.ai/customer-profile?id=${customerId}`;
+    ? `http://localhost:3000/company-profile?companyId=${customerId}`
+    : `https://app-dj.thelink.ai/company-profile?companyId=${customerId}`;
   const clientId = window.location.href.includes('https://app.thelink.ai')
     ? '974cb8bfa7aaadc4759a6d60a2d8427387d32db0c4fa4dfbe1da15b5ce3abfc5'
     : 'ce62990f797459a3dd5005c1323a30beb75fafd0ac6304353101b44e809ddcc9';
-
+  const procoreAuthBaseUrl = window.location.href.includes("https://app.thelink.ai")
+    ? "https://login.procore.com"
+    : "https://login-sandbox.procore.com";
   const navigate = useNavigate();
 
 
@@ -197,6 +203,52 @@ const CustomerProfile = (props) => {
     }
   };
 
+  useEffect(() => {
+    console.log("handleProcoreEffect")
+    console.log("authCode:", authCode)
+    if (authCode) {
+      const fetchData = async () => {
+        const accessTokenData = await axiosInstance({
+          method: 'post',
+          url: '/api/deliverables/procore/access_token/',
+          data: {
+            code: authCode,
+            redirect_uri: redirectUri
+          }
+        });
+        console.log("accessTokenData:", accessTokenData)
+        localStorage.setItem(
+          'procore_access_token',
+          accessTokenData?.data.access_token
+        );
+        const res = await axiosInstance({
+          method: 'get',
+          url: `/api/deliverables/procore/company_mapping/${customerId}/`
+        });
+        console.log("res:", res)
+
+        if (get(res, 'status') === 200) {
+          navigate(`/submittal-mappings?customerId=${customerId}`);
+        }
+
+        if (get(res, 'status') === 204) {
+          setProcoreModal(true);
+          const companyResp = await axiosInstance({
+            method: 'get',
+            url: '/api/deliverables/procore/companies/'
+          });
+          setCompanyList(companyResp.data || []);
+        }
+      };
+
+      fetchData().catch((error) => {
+        handleError(error);
+      });
+    }
+  }, [authCode, customerId, navigate, redirectUri]);
+
+
+
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -310,6 +362,26 @@ const CustomerProfile = (props) => {
           <div className="customer-users-details">
             {employeeData.length === 0 ? (
               <>
+                <div style={{ float: 'right' }}>
+                  <div className="table-bulk-changes">
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      style={{ marginBottom: '2px', float: 'right' }}
+                    >
+                      <a
+                        href={`${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`}
+                        className="breadcrumb-text"
+                      >
+                        Procore Submittal Mappings
+                      </a>
+                    </button>
+                  </div>
+                  <label className="information-message">
+                    <b>Procore users </b>: be sure to click the Procore
+                    submittal mappings button.
+                  </label>
+                </div>
                 <div
                   onClick={toggleModal}
                   className="nouser-wrapper d-flex align-items-center justify-content-center w-100"
@@ -346,12 +418,27 @@ const CustomerProfile = (props) => {
                     <div className="table-bulk-changes">
                       <button
                         type="button"
+                        className="btn btn-secondary btn-sm"
+                      >
+                        <a
+                          href={`${procoreAuthBaseUrl}/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`}
+                          className="breadcrumb-text"
+                        >
+                          Procore Submittal Mappings
+                        </a>
+                      </button>
+                      <button
+                        type="button"
                         className="btn btn-secondary btn-sm btn-gap"
                         onClick={toggleModal}
                       >
                         + Add Employee
                       </button>
                     </div>
+                    <label className="table-entries">
+                      <b>Procore users </b>: be sure to click the Procore
+                      submittal mappings button.
+                    </label>
                   </div>
                 </div>
                 <div className="l-table-wrapper">
@@ -449,6 +536,15 @@ const CustomerProfile = (props) => {
         pauseOnHover
       />
       {isLoading && <Loader showComponentLoader={true} />}
+      <Procore
+        companyId={customerId}
+        companyList={companyList}
+        procoreModal={procoreModal}
+        projectId={null}
+        toggleProcoreModal={toggleProcoreModal}
+        setProcoreModal={setProcoreModal}
+        isFromCustomerScreen={true}
+      />
     </div>
   );
 };

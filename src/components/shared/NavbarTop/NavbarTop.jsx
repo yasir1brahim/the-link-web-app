@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 const NavbarTop = ({...props}) => {
   const [navDrop, setNavDrop] = useState(false);
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
+  const [showManageProcore, setShowManageProcore] = useState(false);
   const [teamId, setTeamId] = useState(null);
   const { user, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -53,19 +54,10 @@ const NavbarTop = ({...props}) => {
   useEffect(() => {
     const checkAdminRole = async () => {
       try {
-        const accessToken = localStorage.getItem('accessToken');
-        const response = await getUserTeams(accessToken);
-        const teams = response.data;
-        if (teams?.results?.length === 1) {
-          const singleTeam = teams.results[0];
-          setTeamId(singleTeam.id);
-          const userId = Number(localStorage.getItem('userId'));
-          const isAdmin = singleTeam.members.some(
-            (member) => member.user_id === userId && member.role === 'admin'
-          );    
-          if (isAdmin) {
-            setShowCompanyProfile(true);
-          }
+        console.log("props.userRole", props.userRole);
+        if (props.userRole === 'admin') {
+          setShowCompanyProfile(true);
+          setShowManageProcore(true);
         }
       } catch (error) {
         console.error('Error checking admin role:', error);
@@ -138,12 +130,22 @@ const NavbarTop = ({...props}) => {
                     )}
                     {showCompanyProfile && (
                       <a
-                        href={`/company-profile/${teamId}`}
+                        href={`/company-profile?companyId=${teamId}`}
                         className="navlist"
                         onClick={toggleDrop}
                       >
                         View Company Profile
                       </a>
+                    )}
+                    {props.handleManageProcoreButtonClick && (
+                      <div
+                        className="navlist flex"
+                        onClick={props.handleManageProcoreButtonClick}
+                        disabled={props.initLoading || props.loadingProjectDetails}
+                      >
+                        <div>Manage Procore Integration</div>
+                        {(props.initLoading || props.loadingProjectDetails) && <CircularProgress size={12} />}
+                      </div>
                     )}
                     <a
                       href="/"
