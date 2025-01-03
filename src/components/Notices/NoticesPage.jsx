@@ -28,7 +28,7 @@ import { getProjectDetails } from "../../api/Projects/api";
 import { uploadFiles } from "../../api/ProjectLogs/api";
 import { getNotices } from "../../api/Notices/api";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
-
+import { isNoticesFlagActive } from "../../api/FeatureFlags/api";
 
 const NoticesPage = () => {
   const [modal, setModal] = useState(false);
@@ -119,6 +119,7 @@ const NoticesPage = () => {
   const [teamId, setTeamId] = useState(null);
 
   const { user, isAuthenticated } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const getUserRoleInProject = async (projectData) => {
     console.log('user', user);
@@ -146,6 +147,12 @@ const NoticesPage = () => {
       localStorage.setItem("docParsed", response.data.doc_parsed);
       setLoading(false);
     };
+
+    isNoticesFlagActive(teamId).then(isActive => {
+      if (!isActive) {
+        navigate('/');
+      }
+    });
 
     if (projectId !== null) {
       fetchProjectData().catch((error) => {
