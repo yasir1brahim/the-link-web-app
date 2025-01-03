@@ -11,7 +11,8 @@ import { listProjects, getUserRoleInProject } from "../../api/Projects/api";
 import { isFeatureFlagActive } from "../../utils/featureFlags";
 import { useParams } from 'react-router-dom';
 import { getUserRoleInTeam } from "../../api/Authentication/api";
-import { NOTICES_FEATURE_FLAG_NAME } from "../../constants";
+import { isNoticesFlagActive } from "../../api/FeatureFlags/api";
+
 const ProjectsPage = () => {
   const navigate = useNavigate();
   const [uploadSpecsModal, setUploadSpecsModal] = useState(false);
@@ -94,9 +95,10 @@ useEffect(() => {
   let isMounted = true;
 
   fetchData(); 
-  isFeatureFlagActive(NOTICES_FEATURE_FLAG_NAME).then(isActive => {
+  isNoticesFlagActive(teamId).then(isActive => {
     setNoticesFeatureFlagActive(isActive)
-  })
+  });
+
 
   return () => {
       isMounted = false;
@@ -107,7 +109,6 @@ useEffect(() => {
     <>
       <div className="page-wrap">
         <NavbarTop />
-        <p>{noticesFeatureFlagActive ? "Notices feature flag is active" : "Notices feature flag is inactive"}</p>
         <div className="page-wrap-content personal-projects-wrapper">
           {currentUserRole === 'admin' && <Header
             toggleModal={toggleCreateProjectModal}

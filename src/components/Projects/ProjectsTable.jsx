@@ -19,6 +19,7 @@ import { ArchiveProjectModal } from "./archiveProjectModal";
 import { Tooltip } from "reactstrap";
 import { RestoreProjectModal } from "./restoreProjectModal";
 import { RestoreIcon } from "../shared/icons/restoreIcon";
+import { CalendarIcon } from "../shared/icons/calendarIcon";
 import { toggleProjectStatus, getUserRoleInAllProjects } from "../../api/Projects/api";
 import { getUserRoleInTeam } from '../../api/Authentication/api';
 
@@ -49,6 +50,7 @@ const ProjectsTable = ({
   const [archiveProject, setArchiveProject] = useState(null);
   const [restoreProject, setRestoreProject] = useState(null);
   const [launchTooltip, setLaunchTooltip] = useState(null);
+  const [noticesTooltip, setNoticesTooltip] = useState(null);
   const [editTooltip, setEditTooltip] = useState(null);
   const [archiveTooltip, setArchiveTooltip] = useState(null);
   const [restoreTooltip, setRestoreTooltip] = useState(null);
@@ -277,11 +279,35 @@ const ProjectsTable = ({
                                 Launch Project
                               </Tooltip>
                             </span>
-                            <span>
-                              <Button onClick={() => onClickNotices(project)}>
-                                Notices
-                              </Button>
-                            </span>
+                            {noticesFeatureFlagActive && (
+                              <>
+                              <span 
+                                id={"notices-tooltip" + index + 1}
+                                onClick={() => onClickNotices(project)}
+                                style={{ cursor: "pointer" }}
+                              >
+                                <CalendarIcon />
+                              </span>
+                              <span>
+                                <Tooltip
+                                  placement="left"
+                                  target={"notices-tooltip" + index + 1}
+                                  isOpen={noticesTooltip === index + 1}
+                                  toggle={() =>
+                                    setNoticesTooltip(
+                                      noticesTooltip
+                                        ? noticesTooltip === index + 1
+                                          ? null
+                                          : index + 1
+                                        : index + 1,
+                                    )
+                                  }
+                                >
+                                  Add Notices
+                                </Tooltip>
+                              </span>
+                              </>
+                            )}
                             {isArchived ? (
                               <>
                                 <span
