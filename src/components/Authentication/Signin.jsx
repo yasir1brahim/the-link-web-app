@@ -23,20 +23,6 @@ const Signin = (props) => {
   const history = useNavigate();
   const [isLoading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem('jwt');
-    if (token) {
-      const fetchData = async () => {
-        try {
-          await getHomeUrl(null, isAuthenticated, user, getUserTeams, history);
-        } catch (error) {
-          console.error("Error in fetching home urls:", error);
-        }
-      };
-      fetchData();
-    }
-  }, [history, isAuthenticated, user, getUserTeams]);
-
   const validate = () => {
     let error = false;
     if (email.value === '') {
