@@ -952,6 +952,9 @@ export default function CombinedLogs(props) {
                   className={`${
                     editRow === index ? 'activeTh' : ''
                   } reduce-height`}
+                  style={{
+                    fontWeight: `${log.parsing_method === 'PLACEHOLDER' ? 'bold' : 'normal'}`
+                  }}
                 >
                   {editRow === index ? (
                     <input
@@ -1088,6 +1091,9 @@ export default function CombinedLogs(props) {
                     className={`${
                       editRow === index ? 'activeTh' : ''
                     } reduce-height`}
+                    style={{
+                      fontWeight: `${log.parsing_method === 'PLACEHOLDER' ? 'bold' : 'normal'}`
+                    }}
                   >
                     {isCombining && isCombineTarget ? (
                       <div
