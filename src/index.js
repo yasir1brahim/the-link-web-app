@@ -24,11 +24,13 @@ import Companies from './components/Companies/Companies';
 import AcceptInvitation from './components/Authentication/AcceptInvitation';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 import NoticesPage from './components/Notices/NoticesPage';
+import LoadingPage from './components/LoadingPage';
+
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <Signin/>
+      <LoadingPage/>
     ),
     errorElement: <NotFoundPage />,
   },
