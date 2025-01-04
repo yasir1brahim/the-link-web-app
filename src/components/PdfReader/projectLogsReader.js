@@ -128,10 +128,6 @@ const ProjectLogsReader = ({
       }
 
       setAnnotations(_annotations);
-    } else {
-      if (!textLoc?.page_no || !textLoc?.x || textLoc?.y) {
-        setError({error: true, message: "Can't highlight text in PDF."})
-      }
     }
   };
 
