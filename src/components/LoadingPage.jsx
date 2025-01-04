@@ -14,17 +14,14 @@ const LoadingPage = () => {
 
 
     useEffect(() => {
-        const token = localStorage.getItem('jwt');
-        if (token) {
-            const fetchData = async () => {
+        const fetchData = async () => {
             try {
                 await getHomeUrl(null, isAuthenticated, user, getUserTeams, history);
             } catch (error) {
                 console.error("Error in fetching home urls:", error);
             }
-            };
-            fetchData();
-        }
+        };
+        fetchData();
     }, [history, isAuthenticated, user, getUserTeams]);
     
     return (

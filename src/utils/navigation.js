@@ -17,5 +17,5 @@ export const getHomeUrl = async (e, isAuthenticated, user, getUserTeams, navigat
       return;
     }
   
-    navigate({ pathname: '/' });
+    navigate({ pathname: '/login' });
 };
