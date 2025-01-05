@@ -55,8 +55,11 @@ const Forgotpwd = (props) => {
             <Keys />
           </span>
           <h1 className="form-heading heading-two">Forgot Password?</h1>
-          <p className="form-info">
+          <p className="form-info" style={{ marginBottom: '5px' }}>
             No worries, we’ll send you reset instructions.
+          </p>
+          <p className="form-info">
+            (be sure to check your spam folder for "noreply@tlsignup.com")
           </p>
           <div className="form-group">
             <label className="text-label" htmlFor="loginEmail">
