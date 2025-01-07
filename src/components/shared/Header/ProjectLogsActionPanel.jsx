@@ -251,17 +251,6 @@ const ProjectLogsActionPanel = ({ ...props }) => {
         </div>
       </div>
       <div className="col-6 row justify-content-end">
-        <div className="col-3">
-          {props.documentIsProcessing(props.documentData) && (
-            <button
-              type="button"
-              className="table-top-btn selection-btn m-auto"
-              onClick={props.toggleDocumentStatusModal}
-            >
-              <span>Document Status</span>
-            </button>
-          )}
-        </div>
         <div className="col-6 row">
           <div className={props.showSearch ? "d-none" : "col-6 d-flex justify-content-end spliter pl-0"}>
             {props?.docParsed ? (
