@@ -49,11 +49,22 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                 <DropdownToggle caret className="export-btn">
                   Export
                 </DropdownToggle>
-                <DropdownMenu style={{ maxWidth: '200px' }}>
-                  <DropdownItem className="text-center" onClick={() => props.handleExportExcel(['All'])}>
+                <DropdownMenu style={{ maxWidth: '200px', backgroundColor: 'white' }}>
+                  <DropdownItem 
+                    className="text-center" 
+                    style={{ backgroundColor: 'white' }} 
+                    onClick={() => props.handleExportExcel(['All'])}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                  >
                     <ExcelLogo style={{ height: '45px', margin: '5px 0' }} />
                   </DropdownItem>
-                  <DropdownItem className="text-center">
+                  <DropdownItem
+                    className="text-center"
+                    style={{ backgroundColor: 'white' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                  >
                     {props.procoreAccessToken === 'null' ? (
                       <a href={props.procoreAuthUrl} className="breadcrumb-text">
                         <Logo style={{ height: '90px' }} />
@@ -64,7 +75,13 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                       </div>
                     )}
                   </DropdownItem>
-                  <DropdownItem className="text-center" onClick={() => props.handleExportJetBuild(['All'])}>
+                  <DropdownItem
+                    className="text-center"
+                    style={{ backgroundColor: 'white' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    onClick={() => props.handleExportJetBuild(['All'])}
+                  >
                     <JetBuildLogo style={{ height: '40px', maxWidth: '100%', margin: '20px auto' }} />
                   </DropdownItem>
                 </DropdownMenu>
@@ -234,17 +251,6 @@ const ProjectLogsActionPanel = ({ ...props }) => {
         </div>
       </div>
       <div className="col-6 row justify-content-end">
-        <div className="col-3">
-          {props.documentIsProcessing(props.documentData) && (
-            <button
-              type="button"
-              className="table-top-btn selection-btn m-auto"
-              onClick={props.toggleDocumentStatusModal}
-            >
-              <span>Document Status</span>
-            </button>
-          )}
-        </div>
         <div className="col-6 row">
           <div className={props.showSearch ? "d-none" : "col-6 d-flex justify-content-end spliter pl-0"}>
             {props?.docParsed ? (
@@ -318,23 +324,22 @@ const ProjectLogsActionPanel = ({ ...props }) => {
             )}
           </div>
         </div>
-        <div className="col-3 px-0 d-flex justify-content-end">
-          {props.showBtn && localStorage.getItem('roleId') !== '7' ? (
+        <div className="px-0 d-flex justify-content-end align-items-center">
+          {props.showBtn && (
             <button
               type="button"
               className={`light-btn ${props.btnSize === 'small' ? 'btn-small' : ''
                 }`}
+              style={{ padding: '5px 10px' }}
               onClick={props.toggleModal}
             >
-              <span className="">
+              <span>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path fill-rule="evenodd" clipRule="evenodd" d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12ZM11.25 17.75V17V12.75H7H6.25V11.25H7H11.25V7V6.25H12.75V7V11.25H17H17.75V12.75H17H12.75V17V17.75H11.25Z" fill="#231F20" />
                 </svg>
               </span>
               {props.showBtn}
             </button>
-          ) : (
-            ''
           )}
         </div>
       </div>

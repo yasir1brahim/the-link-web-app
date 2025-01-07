@@ -1121,7 +1121,7 @@ const ProjectLogs = () => {
             toggleModal={toggleModal}
             btnSize={"small"}
           />
-          {documentIsProcessing(documentData) && (
+          {documentIsProcessing(documentData) && (<>
             <div
               className="alert"
               style={{ backgroundColor: "#D5E73E" }}
@@ -1129,6 +1129,18 @@ const ProjectLogs = () => {
             >
               Documents are being processed...
             </div>
+            <div style={{ display: 'flex', justifyContent: 'left' }}>
+              {documentIsProcessing(documentData) && (
+                <button
+                  type="button"
+                  className="table-top-btn selection-btn"
+                  style={{ marginTop: '10px', marginBottom: '20px' }}
+                  onClick={toggleDocumentStatusModal}
+                >
+                  <span>Document Status</span>
+                </button>
+              )}
+            </div></>
           )}
 
           <div className="project-logs-content">
@@ -1237,20 +1249,6 @@ const ProjectLogs = () => {
                 )}
               </div>
               <div style={{ position: "relative" }}>
-                <div
-                  style={{
-                    position: "absolute",
-                    marginTop: "10px",
-                    fontStyle: "italic",
-                    fontSize: "14px",
-                  }}
-                >
-                  <strong>Note: </strong>
-                  <span role="img" aria-label="sparkle">
-                    <Sparkles />
-                  </span>{" "}
-                  indicates this submittal was extracted by our AI.
-                </div>
                 <div className="table-footer-content logs-pagination">
                   <Pagination
                     totalItems={totalCount}
