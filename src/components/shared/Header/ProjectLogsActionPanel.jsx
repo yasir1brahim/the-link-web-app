@@ -49,11 +49,22 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                 <DropdownToggle caret className="export-btn">
                   Export
                 </DropdownToggle>
-                <DropdownMenu style={{ maxWidth: '200px' }}>
-                  <DropdownItem className="text-center" onClick={() => props.handleExportExcel(['All'])}>
+                <DropdownMenu style={{ maxWidth: '200px', backgroundColor: 'white' }}>
+                  <DropdownItem 
+                    className="text-center" 
+                    style={{ backgroundColor: 'white' }} 
+                    onClick={() => props.handleExportExcel(['All'])}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                  >
                     <ExcelLogo style={{ height: '45px', margin: '5px 0' }} />
                   </DropdownItem>
-                  <DropdownItem className="text-center">
+                  <DropdownItem
+                    className="text-center"
+                    style={{ backgroundColor: 'white' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                  >
                     {props.procoreAccessToken === 'null' ? (
                       <a href={props.procoreAuthUrl} className="breadcrumb-text">
                         <Logo style={{ height: '90px' }} />
@@ -64,7 +75,13 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                       </div>
                     )}
                   </DropdownItem>
-                  <DropdownItem className="text-center" onClick={() => props.handleExportJetBuild(['All'])}>
+                  <DropdownItem
+                    className="text-center"
+                    style={{ backgroundColor: 'white' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    onClick={() => props.handleExportJetBuild(['All'])}
+                  >
                     <JetBuildLogo style={{ height: '40px', maxWidth: '100%', margin: '20px auto' }} />
                   </DropdownItem>
                 </DropdownMenu>

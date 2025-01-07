@@ -1237,20 +1237,6 @@ const ProjectLogs = () => {
                 )}
               </div>
               <div style={{ position: "relative" }}>
-                <div
-                  style={{
-                    position: "absolute",
-                    marginTop: "10px",
-                    fontStyle: "italic",
-                    fontSize: "14px",
-                  }}
-                >
-                  <strong>Note: </strong>
-                  <span role="img" aria-label="sparkle">
-                    <Sparkles />
-                  </span>{" "}
-                  indicates this submittal was extracted by our AI.
-                </div>
                 <div className="table-footer-content logs-pagination">
                   <Pagination
                     totalItems={totalCount}
