@@ -47,9 +47,10 @@ const Signin = (props) => {
         if (response.data.status === 'success') {
           setUserDetails(response.data.jwt);
           localStorage.setItem('jwt', response.data.jwt);
-          await getHomeUrl(e, isAuthenticated, user, getUserTeams, history);
+          await getHomeUrl(e, true, user, getUserTeams, history);
         }
       } catch (error) {
+        console.log("Error in handleSubmit", error);
         if (error.response && error.response.status === 400) {
           toast.error('Incorrect email or password');
         } else {
