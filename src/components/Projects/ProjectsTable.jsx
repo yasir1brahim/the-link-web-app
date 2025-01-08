@@ -176,17 +176,15 @@ const ProjectsTable = ({
                 className="table-bulk-changes"
                 style={{ marginRight: '30px' }}
               >
-                {roleId !== '6' && roleId !== '7' && (
-                  <div style={{ marginLeft: '10px' }}>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm  add-employe"
-                      onClick={toggleEmployeeModal}
-                    >
-                      + Add Employee
-                    </button>
-                  </div>
-                )}
+                <div style={{ marginLeft: '10px' }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm  add-employe"
+                    onClick={toggleEmployeeModal}
+                  >
+                    + Add Employee
+                  </button>
+                </div>
               </div>
 
               <div className="icons-wrapper">
