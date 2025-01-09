@@ -49,7 +49,7 @@ const Companies = () => {
         <div>
           <div className="page-wrap">
             <NavbarTop />
-            <div className="page-wrap-content admin-landing-wrapper">
+            <div className="page-wrap-content admin-landing-wrapper" style={{ marginBottom: '20px' }}>
               <Header
                 title={'Companies'}
               />
@@ -57,10 +57,7 @@ const Companies = () => {
               <div className="admin-landing-content">
                 <div className="table-top-content">
                   <label className="table-entries">
-                    Showing entries
-                    <span className="showing-strong"> {currentItems.length} </span>
-                    of{' '}
-                    <span className="showing-strong"> {companies.length}</span>.
+                    Showing <span className="showing-strong"> {companies.length}</span> companies
                   </label>
                   <div className="table-bulk-changes">
                   </div>
@@ -121,14 +118,6 @@ const Companies = () => {
                       })}
                     </tbody>
                   </table>
-                </div>
-                <div className="table-footer-content">
-                  <PaginatedItems
-                    items={companies}
-                    setCurrentItems={setCurrentItems}
-                    itemsPerPage={itemsPerPage}
-                    setItemsPerPage={setItemsPerPage}
-                  />
                 </div>
               </div>
             </div>
