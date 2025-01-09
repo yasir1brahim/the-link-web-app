@@ -152,48 +152,33 @@ export default function NoticesLog(props) {
     2: 0,
     3: 0,
     4: 0,
-    5: 0,
-    6: 0,
-    7: 0,
   });
 
   const minWidths = {
     1: 100,
-    2: 100,
-    3: 100,
-    4: 85,
-    5: 190,
-    6: 190,
-    7: 520,
+    2: 805,
+    3: 190,
+    4: 190,
   };
   useEffect(() => {
     if (parentRef.current !== null) {
       setTableWidths({
         1: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.06),
+          Math.round(parentRef.current.offsetWidth * 0.05),
           minWidths[1]
         ),
         2: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.045),
+          Math.round(parentRef.current.offsetWidth * 0.75),
           minWidths[2]
         ),
         3: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.045),
+          Math.round(parentRef.current.offsetWidth * 0.1),
           minWidths[3]
         ),
         4: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.045),
+          Math.round(parentRef.current.offsetWidth * 0.1),
           minWidths[4]
         ),
-        5: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.045),
-          minWidths[5]
-        ),
-        6: Math.max(
-          Math.round(parentRef.current.offsetWidth * 0.1),
-          minWidths[6]
-        ),
-        7: parentRef.current.offsetWidth - 800,
       });
     }
   }, [parentRef.current]);
@@ -316,11 +301,13 @@ export default function NoticesLog(props) {
                 </div>
               </div>
             </th>
-
-            <th className="small-font" style={{ width: `${tableWidths[2]}px` }}>
+            <th
+              className="log-description small-font"
+              style={{ width: `${tableWidths[2]}px` }}
+            >
               <span className="has-sorting">
                 <div className="d-flex">
-                  Spec Section{" "}
+                  Notice Text{" "}
                   <div
                     className="resizer"
                     onMouseDown={(e) => handleMouseDown(e, 1)}
@@ -330,74 +317,30 @@ export default function NoticesLog(props) {
                 </div>
               </span>
             </th>
-            <th
-              className="para-no small-font"
-              style={{ width: `${tableWidths[3]}px` }}
-            >
-              <div className="d-flex">
-                <span>Section Title</span>
-                <div
-                  className="resizer"
-                  onMouseDown={(e) => handleMouseDown(e, 2)}
-                >
-                  |
-                </div>
-              </div>
-            </th>
-            <th
-              className="para-no small-font"
-              style={{ width: `${tableWidths[4]}px` }}
-            >
-              <div className="d-flex">
-                <span>Paragraph</span>
-                <div
-                  className="resizer"
-                  onMouseDown={(e) => handleMouseDown(e, 3)}
-                >
-                  |
-                </div>
-              </div>
-            </th>
+
             <th
               className="small-font"
-              style={{ width: `${tableWidths[5]}px` }}
+              style={{ width: `${tableWidths[3]}px` }}
             >
               <span className="has-sorting">
                 <div className="d-flex">
                   Notice Type{" "}
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 4)}
+                    onMouseDown={(e) => handleMouseDown(e, 2)}
                   >
                     |
                   </div>
                 </div>
               </span>
             </th>
-            <th className="small-font" style={{ width: `${tableWidths[6]}px` }}>
+            <th className="small-font" style={{ width: `${tableWidths[4]}px` }}>
               <span className="has-sorting">
                 <div className="d-flex">
                   Time Keywords
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 5)}
-                  >
-                    |
-                  </div>
-                </div>
-              </span>
-            </th>
-
-            <th
-              className="log-description small-font"
-              style={{ width: `${tableWidths[7]}px` }}
-            >
-              <span className="has-sorting">
-                <div className="d-flex">
-                  Notice Text{" "}
-                  <div
-                    className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 6)}
+                    onMouseDown={(e) => handleMouseDown(e, 3)}
                   >
                     |
                   </div>
@@ -498,17 +441,32 @@ export default function NoticesLog(props) {
                 <td
                   className={`reduce-height`}
                 >
-                  {formatSpecSection(log.spec_section ?? "")}
-                </td>
-                <td
-                  className={`reduce-height`}
-                >
-                  {log.section_title ?? ""}
-                </td>
-                <td
-                  className={`reduce-height`}
-                >
-                  {formatParagraphNumber(log['excerpt_anchors'][0]['anchor'] ?? [])}
+                    <div
+                      className={
+                        'log-desc ' +
+                        (showMore[index] ? 'show-content' : 'text-overflow')
+                      }
+                      ref={(element) => rowRefs.current.push(element)}
+                      style={{ whiteSpace: 'pre-wrap' }}
+                    >
+                      {formatNoticeText(log['excerpt_anchors'][0]['lines'] ?? [])}
+                      {shouldShowExpansionButton[index] && (
+                        <span
+                          className="showmore-wrap"
+                          onClick={() =>
+                            setShowMore(
+                              showMore.with(index, !showMore[index])
+                            )
+                          }
+                        >
+                          {showMore[index] ? (
+                            <CollapseButton />
+                          ) : (
+                            <ExpandButton />
+                          )}
+                        </span>
+                      )}
+                    </div>
                 </td>
                 <td
                   className={`reduce-height`}
@@ -520,38 +478,6 @@ export default function NoticesLog(props) {
                 >
                   {log.highlight_heuristic_match ? log.highlight_heuristic_match : formatDiscriminators(log.highlight_discriminators)}
                 </td>
-                <>
-                  <td
-                    className={`reduce-height`}
-                  >
-                      <div
-                        className={
-                          'log-desc ' +
-                          (showMore[index] ? 'show-content' : 'text-overflow')
-                        }
-                        ref={(element) => rowRefs.current.push(element)}
-                        style={{ whiteSpace: 'pre-wrap' }}
-                      >
-                        {formatNoticeText(log['excerpt_anchors'][0]['lines'] ?? [])}
-                        {shouldShowExpansionButton[index] && (
-                          <span
-                            className="showmore-wrap"
-                            onClick={() =>
-                              setShowMore(
-                                showMore.with(index, !showMore[index])
-                              )
-                            }
-                          >
-                            {showMore[index] ? (
-                              <CollapseButton />
-                            ) : (
-                              <ExpandButton />
-                            )}
-                          </span>
-                        )}
-                      </div>
-                  </td>
-                </>
               </tr>
             );
           })}
