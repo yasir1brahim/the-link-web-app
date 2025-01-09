@@ -145,14 +145,14 @@ const NoticesPage = () => {
       setDocumentData(response.data.document_details);
       setUserRole(getUserRoleInProject(response.data));
       localStorage.setItem("docParsed", response.data.doc_parsed);
+      isNoticesFlagActive(response.data.team).then(isActive => {
+        if (!isActive) {
+          navigate('/');
+        }
+      });
       setLoading(false);
     };
 
-    isNoticesFlagActive(teamId).then(isActive => {
-      if (!isActive) {
-        navigate('/');
-      }
-    });
 
     if (projectId !== null) {
       fetchProjectData().catch((error) => {
