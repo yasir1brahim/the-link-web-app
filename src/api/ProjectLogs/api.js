@@ -52,7 +52,15 @@ const createSubmittalList = async (projectId, listName, userId, submittalIds) =>
     }
 }
 
-const addSubmittalItem = async (projectId, specSection, paraNo, paraContext, submittalHeading, submittalType) => {
+const addSubmittalItem = async (
+    projectId, 
+    specSection, 
+    paraNo, 
+    paraContext, 
+    submittalHeading, 
+    submittalType,
+    addedUnderSubmittalId=null
+) => {
     try {
         return await axiosInstance({
             method: 'post',
@@ -63,6 +71,7 @@ const addSubmittalItem = async (projectId, specSection, paraNo, paraContext, sub
                 para_context: paraContext,
                 item_desc: submittalHeading,
                 type: submittalType,
+                added_under_submittal_id: addedUnderSubmittalId
             },
         });
     } catch (error) {
