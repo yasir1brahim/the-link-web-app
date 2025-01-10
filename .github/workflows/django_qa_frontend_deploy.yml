@@ -25,6 +25,9 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Try npm version
+        run: npm install -g npm@11.0.0 
+
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
