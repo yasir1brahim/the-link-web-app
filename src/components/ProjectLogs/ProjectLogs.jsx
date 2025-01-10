@@ -185,6 +185,8 @@ const ProjectLogs = () => {
   const [userRole, setUserRole] = useState('');
   const [teamId, setTeamId] = useState(null);
 
+  const [hasPlaceholderSubmittals, setHasPlaceholderSubmittals] = useState(false);
+
   const { user, isAuthenticated } = useContext(AuthContext);
 
   const getProcoreAccessTokenData = async () => {
@@ -624,6 +626,7 @@ const ProjectLogs = () => {
 
     const submittalLogs = submittalItems.data.message;
     setLogData(submittalLogs);
+    setHasPlaceholderSubmittals(submittalItems.data.has_placeholder_submittals || false);
     console.log("submittalLogs", submittalLogs);
 
     if(submittalId) {
@@ -1249,6 +1252,20 @@ const ProjectLogs = () => {
                 )}
               </div>
               <div style={{ position: "relative" }}>
+                {hasPlaceholderSubmittals && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      marginTop: "10px",
+                      fontStyle: "italic",
+                      fontSize: "14px",
+                      width: "30%"
+                    }}
+                  >
+                      <strong>Note: </strong>
+                      some specification sections were unclear or did not have submittals listed. Please find these at the end of the log.
+                  </div>
+                )}
                 <div className="table-footer-content logs-pagination">
                   <Pagination
                     totalItems={totalCount}

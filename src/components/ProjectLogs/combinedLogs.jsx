@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../../config/axios";
 // import DateSelector from '../shared/DateSelector/DateSelector';
 // import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
+import { toast } from "react-toastify";
 import { FilterTable } from "./filterTable";
 import { ReactComponent as EditButton } from "../../assets/images/edit-button.svg";
 import { ReactComponent as AddButton } from "../../assets/images/circle-add.svg";
@@ -146,6 +147,7 @@ export default function CombinedLogs(props) {
 
       setEditRow("");
       if (newRowIndex) {
+        console.log("rowData", rowData);
         await addSubmittalItem(
           props.projectId,
           rowData.spec_section, 
@@ -153,6 +155,7 @@ export default function CombinedLogs(props) {
           rowData.para_context, 
           rowData.item_desc, 
           rowData.type, 
+          rowData.added_under_submittal_id
         );
       } else {
         await updateSubmittalItem(
@@ -166,16 +169,12 @@ export default function CombinedLogs(props) {
         );
       }
       setNewRowIndex(null);
-      props.setPageRefresh(!props.pageRefresh);
-      props.setLogInViewer(null);
-      props.setPdfData({
-        url: "",
-        textLoc: {},
-        index: "",
-        docId: null,
-        submittalId: null,
-        additionalTextLocations: [],
-      });
+      props.fetchLogData(
+        props.page,
+        props.rowsPerPage,
+        props.searchValue,
+        props.listId,
+      );
     } catch (error) {
       console.log(error.message);
       // toast.error(error?.response?.data?.message || error?.message, {
@@ -285,7 +284,7 @@ export default function CombinedLogs(props) {
         submittal_number: null,
 
         // Only used to help BE determine what to do when inserted
-        added_under_log_id: log.id,
+        added_under_submittal_id: log.id,
       };
       const result = insertElement(props.logData, index + 1, logObj);
       props.setFilteredLogData(result);
@@ -297,15 +296,15 @@ export default function CombinedLogs(props) {
         docElement[0].scrollTo(890, 0);
       }
     } catch (error) {
-      // toast.error(error?.response?.data?.message || error?.message, {
-      //   position: 'bottom-center',
-      //   autoClose: 5000,
-      //   hideProgressBar: true,
-      //   closeOnClick: true,
-      //   pauseOnHover: true,
-      //   draggable: true,
-      //   progress: undefined,
-      // });
+      toast.error(error?.response?.data?.message || error?.message, {
+        position: 'bottom-center',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
   };
   useEffect(() => {
