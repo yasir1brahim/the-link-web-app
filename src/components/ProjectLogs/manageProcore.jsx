@@ -39,7 +39,8 @@ const ManageProcore = ({
       method: "get",
       url: "/api/deliverables/procore/companies/",
     });
-    setCompanyList(companyResp?.data.data);
+    console.log("procore company resp", companyResp)
+    setCompanyList(companyResp?.data || []);
   }
 
   const getProjectList = async (companyId_) => {
