@@ -1108,6 +1108,7 @@ const ProjectLogs = () => {
             clearFilters={clearFilters}
 
             showSearch={showSearch}
+            searchEnabled={true}
             searchValue={searchValue}
             handleSearchChange={handleSearchChange}
             handleEnterKeyPress={handleEnterKeyPress}
