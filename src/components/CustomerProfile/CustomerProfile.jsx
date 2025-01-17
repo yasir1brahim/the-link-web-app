@@ -35,6 +35,7 @@ const CustomerProfile = (props) => {
   const toggleConfirmModal = () => setConfirmModal(!confirmationModal);
   const [employeeData, setEmployeeData] = useState([]);
   const [empId, setEmpId] = useState('');
+  const [membershipId, setMembershipId] = useState('');
   const [companyName, setCompanyName] = useState({
     value: undefined,
     errors: ''
@@ -154,14 +155,11 @@ const CustomerProfile = (props) => {
   }, [pageRefresh, customerId]);
 
 
-  const handleDeleteEmployee = async (id) => {
+  const handleDeleteEmployee = async (membershipId) => {
     try {
       const response = await axiosInstance({
         method: 'DELETE',
-        url: `/deleteEmployee`,
-        data: {
-          employee_id: id
-        }
+        url: `/teams/api/memberships/${membershipId}/`,
       });
       console.log(response.data);
       toggleConfirmModal();
@@ -480,6 +478,16 @@ const CustomerProfile = (props) => {
                                   >
                                     Edit
                                   </button>
+                                  <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => {
+                                      setMembershipId(employee.id);
+                                      toggleConfirmModal();
+                                    }}
+                                  >
+                                    Delete
+                                  </button>
                                 </div>
                               </td>
                             )}
@@ -523,6 +531,7 @@ const CustomerProfile = (props) => {
         toggleModal={toggleConfirmModal}
         handleDeleteEmployee={handleDeleteEmployee}
         empId={empId}
+        membershipId={membershipId}
       />
       <ToastContainer
         position="bottom-center"

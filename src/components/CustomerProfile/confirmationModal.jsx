@@ -19,7 +19,7 @@ export const ConfirmationModal = (props) => {
         </Button>
         <Button
           color="primary"
-          onClick={() => props.handleDeleteEmployee(props.empId)}
+          onClick={() => props.handleDeleteEmployee(props.membershipId)}
         >
           Delete
         </Button>{' '}
