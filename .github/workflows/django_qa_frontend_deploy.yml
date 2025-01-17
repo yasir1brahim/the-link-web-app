@@ -1,7 +1,10 @@
-name: Deploy Django Frontend to QA
+name: Deploy Frontend to QA
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 env:
   AWS_REGION: us-east-1
