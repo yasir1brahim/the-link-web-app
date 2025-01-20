@@ -28,6 +28,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails } from "../../api/Projects/api";
+import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
@@ -183,6 +184,7 @@ const ProjectLogs = () => {
   const [isAssociatedUser, setIsAssociatedUser] = useState(true);
 
   const [userRole, setUserRole] = useState('');
+  const [userRoleInCompany, setUserRoleInCompany] = useState('member');
   const [teamId, setTeamId] = useState(null);
 
   const [hasPlaceholderSubmittals, setHasPlaceholderSubmittals] = useState(false);
@@ -266,6 +268,7 @@ const ProjectLogs = () => {
       setDocParsed(response.data.doc_parsed);
       setDocumentData(response.data.document_details);
       setUserRole(getUserRoleInProject(response.data));
+      setUserRoleInCompany(await getUserRoleInTeam(user.id, response.data.team));
       localStorage.setItem("docParsed", response.data.doc_parsed);
       setLoading(false);
     };
@@ -1056,7 +1059,8 @@ const ProjectLogs = () => {
         handleManageExcelExportButtonClick={handleManageExcelExportButtonClick}
         loadingProjectDetails={loadingProjectDetails}
         customerData={customerData}
-        userRole={userRole}
+        userRole={userRoleInCompany}
+        teamId={teamId}
       />
       {isAssociatedUser === true && (
         <div className="project-logs-wrapper log-table-width">

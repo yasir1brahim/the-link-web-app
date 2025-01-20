@@ -29,6 +29,7 @@ import { uploadFiles } from "../../api/ProjectLogs/api";
 import { getNotices } from "../../api/Notices/api";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
 import { isNoticesFlagActive } from "../../api/FeatureFlags/api";
+import { getUserRoleInTeam } from "../../api/Authentication/api";
 
 const NoticesPage = () => {
   const [modal, setModal] = useState(false);
@@ -116,6 +117,7 @@ const NoticesPage = () => {
   const [isAssociatedUser, setIsAssociatedUser] = useState(true);
 
   const [userRole, setUserRole] = useState('');
+  const [userRoleInCompany, setUserRoleInCompany] = useState('member');
   const [teamId, setTeamId] = useState(null);
 
   const { user, isAuthenticated } = useContext(AuthContext);
@@ -143,7 +145,8 @@ const NoticesPage = () => {
       setProjectName(response.data.name);
       setDocParsed(response.data.doc_parsed);
       setDocumentData(response.data.document_details);
-      setUserRole(getUserRoleInProject(response.data));
+      setUserRole(await getUserRoleInProject(response.data));
+      setUserRoleInCompany(await getUserRoleInTeam(user.id, response.data.team));
       localStorage.setItem("docParsed", response.data.doc_parsed);
       isNoticesFlagActive(response.data.team).then(isActive => {
         if (!isActive) {
@@ -436,6 +439,8 @@ const NoticesPage = () => {
         projectTitle={state?.projectName || projectName || ""}
         loadingProjectDetails={loadingProjectDetails}
         customerData={customerData}
+        userRole={userRoleInCompany}
+        teamId={teamId}
       />
       {isAssociatedUser === true && (
         <div className="project-logs-wrapper log-table-width">

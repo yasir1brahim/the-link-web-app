@@ -37,12 +37,6 @@ const ProjectsPage = () => {
   const customerId = teamId;
 
 
-  // function used in the project tiles to navigate to project details
-  const custId =
-    localStorage.getItem("roleId") === "0"
-      ? customerId
-      : localStorage.getItem("userId");
-
   const handleLaunch = (project) => {
     navigate(
       `/project-logs?projectDetails=${project?.id}`,
@@ -103,12 +97,15 @@ useEffect(() => {
   return () => {
       isMounted = false;
   };
-}, [state, pageRefresh, isArchived, roleId, customerId]);
+}, [state, pageRefresh, isArchived, customerId]);
 
   return (
     <>
       <div className="page-wrap">
-        <NavbarTop />
+        <NavbarTop
+          userRole={currentUserRole}
+          teamId={teamId}
+         />
         <div className="page-wrap-content personal-projects-wrapper">
           {currentUserRole === 'admin' && <Header
             toggleModal={toggleCreateProjectModal}

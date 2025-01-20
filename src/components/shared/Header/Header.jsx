@@ -94,7 +94,7 @@ const Header = ({ ...props }) => {
       <h1 className="page-title">{props.centerText?.toUpperCase()}</h1>
       </div> : ''} */}
       
-      {props.showBtn && localStorage.getItem("roleId") !== "7" ? (
+      {props.showBtn ? (
         <div className="header-right-swap header-right">
           {/* {props?.centerText ? <div className="header-docs-uploaded breadcrumb-text project-type">{props?.centerText}</div> : ""} */}
             {props?.docParsed ? <div className="header-docs-uploaded breadcrumb-text">{props?.docParsed} document{props?.docParsed > 1 ? 's' : ''} uploaded </div> : ""}
