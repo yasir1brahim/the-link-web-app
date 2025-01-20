@@ -15,7 +15,8 @@ const BaseEmployeeForm = ({
     email,
     setEmail,
     role,
-    setRole
+    setRole,
+    readOnlyEmail=false,
 }) => {
     return (
         <Modal
@@ -82,6 +83,7 @@ const BaseEmployeeForm = ({
                         aria-describedby="userEmailAddress"
                         placeholder="Enter"
                         required
+                        readOnly={readOnlyEmail}
                         value={email.value}
                         onChange={(e) => {
                           setEmail({

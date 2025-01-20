@@ -462,19 +462,19 @@ const CustomerProfile = (props) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {currentItems.map((employee) => {
+                      {currentItems.map((employeeMembership) => {
                         return (
-                          <tr key={employee.id}>
-                            <td>{employee.display_name}</td>
-                            <td>{employee.email}</td>
-                            <td>{roleDisplayMap[employee.role]}</td>
+                          <tr key={employeeMembership.id}>
+                            <td>{employeeMembership.display_name}</td>
+                            <td>{employeeMembership.email}</td>
+                            <td>{roleDisplayMap[employeeMembership.role]}</td>
                             {currentUserRole === 'admin' && (
                               <td>
                                 <div className="action-wrapper">
                                   <button
                                     type="button"
                                     className="btn btn-secondary btn-sm"
-                                    onClick={() => handleEdit(employee)}
+                                    onClick={() => handleEdit(employeeMembership)}
                                   >
                                     Edit
                                   </button>
@@ -482,7 +482,7 @@ const CustomerProfile = (props) => {
                                     type="button"
                                     className="btn btn-secondary btn-sm"
                                     onClick={() => {
-                                      setMembershipId(employee.id);
+                                      setMembershipId(employeeMembership.id);
                                       toggleConfirmModal();
                                     }}
                                   >
