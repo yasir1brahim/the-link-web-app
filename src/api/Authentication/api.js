@@ -114,12 +114,14 @@ const getUserTeams = async (accessToken) => {
     }
 }
 
-const updateUserTeamMembership = async (membershipId, role) => {
+const updateUserTeamMembership = async (membershipId, role, firstName, lastName) => {
     return await axiosInstance({
         method: 'patch',
         url: `/teams/api/memberships/${membershipId}/`,
         data: {
-            role: role
+            role: role,
+            first_name: firstName,
+            last_name: lastName
         }
     });
 }

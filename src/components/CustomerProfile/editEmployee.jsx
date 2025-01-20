@@ -43,7 +43,12 @@ const EditEmployee = ({
     let errors = validate();
     if (!errors) {
       try {
-        const response = await updateUserTeamMembership(employee?.id, role[0].value);
+        const response = await updateUserTeamMembership(
+          employee?.id,
+          role[0].value,
+          firstName.value,
+          lastName.value
+        );
         if (response.data) {
           console.log(response.data);
           setPageRefresh(!pageRefresh);
@@ -88,6 +93,7 @@ const EditEmployee = ({
       setEmail={setEmail}
       role={role}
       setRole={setRole}
+      readOnlyEmail={true}
     />
   );
 };
