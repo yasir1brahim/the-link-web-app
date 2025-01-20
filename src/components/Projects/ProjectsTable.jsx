@@ -9,12 +9,14 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import EditProject from "./editProject";
 import CreateEmployee from "../CustomerProfile/createEmployee";
+import AddUsersModal from "./addUsers";
 import moment from "moment";
 import handleError from "../../config/errorHandler";
 import { ArchiveIcon } from "../shared/icons/archiveIcon";
 import { EditIcon } from "../shared/icons/editIcon";
 import { UploadIcon } from "../shared/icons/uploadIcon";
 import { LaunchIcon } from "../shared/icons/launchIcon";
+import { AddUserIcon } from "../shared/icons/addUserIcon";
 import { ArchiveProjectModal } from "./archiveProjectModal";
 import { Tooltip } from "reactstrap";
 import { RestoreProjectModal } from "./restoreProjectModal";
@@ -47,9 +49,12 @@ const ProjectsTable = ({
   const [editModal, setEditModal] = useState(false);
   const toggleEditModal = () => setEditModal(!editModal);
   const toggleEmployeeModal = () => setEmployeeModal(!employeeModal);
+  const [addUsersModal, setAddUsersModal] = useState(false);
+  const toggleAddUsersModal = () => setAddUsersModal(!addUsersModal);
   const [archiveProject, setArchiveProject] = useState(null);
   const [restoreProject, setRestoreProject] = useState(null);
   const [launchTooltip, setLaunchTooltip] = useState(null);
+  const [addUsersTooltip, setAddUsersTooltip] = useState(null);
   const [noticesTooltip, setNoticesTooltip] = useState(null);
   const [editTooltip, setEditTooltip] = useState(null);
   const [archiveTooltip, setArchiveTooltip] = useState(null);
@@ -339,7 +344,7 @@ const ProjectsTable = ({
                               </>
                             ) : (
                               <>
-                                {userRole === 'project_admin' && (
+                                {userRole === 'project_admin' ? (
                                   <>
                                     <span
                                       onClick={() => handleEdit(project)}
@@ -390,6 +395,36 @@ const ProjectsTable = ({
                                         }
                                       >
                                         Archive Project
+                                      </Tooltip>
+                                    </span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span
+                                      onClick={() => {
+                                        toggleAddUsersModal()
+                                        setActiveProject(project)
+                                      }}
+                                      id={'add-users-tooltip' + index + 1}
+                                    >
+                                      <AddUserIcon />
+                                    </span>
+                                    <span>
+                                      <Tooltip
+                                        placement="left"
+                                        target={'add-users-tooltip' + index + 1}
+                                        isOpen={addUsersTooltip === index + 1}
+                                        toggle={() =>
+                                          setAddUsersTooltip(
+                                            addUsersTooltip
+                                              ? addUsersTooltip === index + 1
+                                                ? null
+                                                : index + 1
+                                              : index + 1
+                                          )
+                                        }
+                                      >
+                                        Add Users to Project
                                       </Tooltip>
                                     </span>
                                   </>
@@ -462,6 +497,15 @@ const ProjectsTable = ({
             modal={restoreProjectModal}
             toggleModal={toggleRestoreProjectModal}
             handleSubmit={handleRestoreProject}
+          />
+
+          <AddUsersModal
+            modal={addUsersModal}
+            toggleModal={toggleAddUsersModal}
+            customer={state || customerData}
+            project={activeProject}
+            pageRefresh={pageRefresh}
+            setPageRefresh={setPageRefresh}
           />
 
           <ToastContainer

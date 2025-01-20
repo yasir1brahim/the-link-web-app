@@ -71,6 +71,20 @@ const updateProject = async (projectId, projectName, projectNumber, projectType,
     }
 }
 
+const addUsersToProject = async (projectId, listOfMemberUserIds) => {
+    const payload = {}
+    payload.user_ids = listOfMemberUserIds
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/projects/${projectId}/members-add/`,
+            data: payload,
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
 const createProject = async (projectName, projectNumber, projectType, teamId, listOfMemberUserIds, listOfAdminUserIds, startDate, endDate) => {
     const payload = {}
     payload.name = projectName
@@ -139,4 +153,12 @@ const getUserRoleInAllProjects = async (userId, teamId) => {
     return allRoles.length > 0 ? allRoles : null;
 };
 
-export {listProjects, updateProject, createProject, getProjectDetails, toggleProjectStatus, getUserRoleInAllProjects}
+export {
+    listProjects, 
+    updateProject, 
+    createProject, 
+    getProjectDetails, 
+    toggleProjectStatus, 
+    getUserRoleInAllProjects,
+    addUsersToProject
+}
