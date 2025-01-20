@@ -96,7 +96,10 @@ const SubmittalMappings = () => {
 
   return (
     <div className="page-wrap">
-      <NavbarTop />
+      <NavbarTop 
+        userRole={'admin'}
+        teamId={customerId}
+      />
       {/* {openExportToProcoreModal && allMappings && (
         <ExportToProcoreModal mappings={allMappings} companyId={companyId}></ExportToProcoreModal>
       )} */}

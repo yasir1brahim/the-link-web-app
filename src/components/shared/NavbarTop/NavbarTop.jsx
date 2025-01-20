@@ -13,7 +13,6 @@ const NavbarTop = ({...props}) => {
   const [navDrop, setNavDrop] = useState(false);
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [showManageProcore, setShowManageProcore] = useState(false);
-  const [teamId, setTeamId] = useState(null);
   const { user, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -65,7 +64,7 @@ const NavbarTop = ({...props}) => {
     };
   
     checkAdminRole();
-  }, []);
+  }, [props.userRole]);
 
   const isOnProjectPage = window.location.pathname.includes('project-logs');
 
@@ -128,15 +127,6 @@ const NavbarTop = ({...props}) => {
                         <div>Manage Excel Export</div>
                       </div>
                     )}
-                    {showCompanyProfile && (
-                      <a
-                        href={`/company-profile?companyId=${teamId}`}
-                        className="navlist"
-                        onClick={toggleDrop}
-                      >
-                        View Company Profile
-                      </a>
-                    )}
                     {props.handleManageProcoreButtonClick && (
                       <div
                         className="navlist flex"
@@ -146,6 +136,15 @@ const NavbarTop = ({...props}) => {
                         <div>Manage Procore Integration</div>
                         {(props.initLoading || props.loadingProjectDetails) && <CircularProgress size={12} />}
                       </div>
+                    )}
+                    {showCompanyProfile && (
+                      <a
+                        href={`/company-profile?companyId=${props.teamId}`}
+                        className="navlist"
+                        onClick={toggleDrop}
+                      >
+                        View Company Profile
+                      </a>
                     )}
                     <a
                       href="/"

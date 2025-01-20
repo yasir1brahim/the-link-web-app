@@ -276,7 +276,10 @@ const CustomerProfile = (props) => {
   
   return (
     <div className="page-wrap">
-      <NavbarTop />
+      <NavbarTop
+        userRole={currentUserRole}
+        teamId={teamId}
+      />
       <div className="page-wrap-content customer-profile-wrapper">
         <Header title={customerData.name} breadcrumb={'Company Details'} />
 
