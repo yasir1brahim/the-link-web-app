@@ -63,3 +63,4 @@ export const EXCEL_HEADER_OPTIONS = [
 ];
 
 export const NOTICES_FEATURE_FLAG_NAME = "notices";
+export const VERSIONING_FEATURE_FLAG_NAME = "versioning";

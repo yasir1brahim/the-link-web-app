@@ -12,11 +12,14 @@ const getSavedLogs = async (listId) => {
     }
 }
 
-const getProjectLists = async (projectId) => {
+const getProjectLists = async (projectId, projectVersionId) => {
     try {
         return await axiosInstance({
             method: 'get',
             url: `/api/deliverables/${projectId}/submittal-lists/`,
+            params: {
+                ...(projectVersionId && { project_version_id: projectVersionId }),
+            }
         });
     } catch (error) {
         handleError(error);
@@ -113,6 +116,7 @@ const deleteSubmittalItems = async (projectId, submittalIds) => {
 
 const getSubmittalItems = async (
     projectId,
+    projectVersionId,
     search,
     filters_object,
     order_col,
@@ -132,6 +136,7 @@ const getSubmittalItems = async (
             method: 'get',
             url: `/api/deliverables/${projectId}/submittal-items`,
             params: {
+                ...(projectVersionId && { project_version_id: projectVersionId }),
                 ...(search && { search }),
                 ...filtersObject,
                 ...(order_col && { order_col }),
