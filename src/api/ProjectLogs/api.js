@@ -116,14 +116,14 @@ const deleteSubmittalItems = async (projectId, submittalIds) => {
 
 const getSubmittalItems = async (
     projectId,
-    projectVersionId,
     search,
     filters_object,
     order_col,
     order,
     page_number,
     limit,
-    list_id
+    list_id,
+    projectVersionId = null,
 ) => {
     const nonEmptyFilters = Object.keys(filters_object).filter(key => filters_object[key].length > 0);
     var filtersObject = {}

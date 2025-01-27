@@ -32,6 +32,7 @@ const ProjectsPage = () => {
   const toggleArchiveProjectModal = () => setArchiveProjectModal(!archiveProjectModal);
   const toggleRestoreProjectModal = () => setRestoreProjectModal(!restoreProjectModal);
   const [noticesFeatureFlagActive, setNoticesFeatureFlagActive] = useState(false);
+  const [versioningFeatureFlagActive, setVersioningFeatureFlagActive] = useState(false);
   const { teamId } = useParams();
 
   const customerId = teamId;
@@ -92,7 +93,6 @@ useEffect(() => {
   isNoticesFlagActive(teamId).then(isActive => {
     setNoticesFeatureFlagActive(isActive)
   });
-
 
   return () => {
       isMounted = false;

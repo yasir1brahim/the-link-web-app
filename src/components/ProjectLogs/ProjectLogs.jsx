@@ -32,6 +32,7 @@ import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
+import { isVersioningFlagActive } from "../../api/FeatureFlags/api";
 
 
 const ProjectLogs = () => {
@@ -177,6 +178,9 @@ const ProjectLogs = () => {
   const [appliedFilters, setAppliedFilters] = useState(initFilter);
   const [rowsPerPage, setRowsPerPage] = React.useState(50);
   const [page, setPage] = React.useState(1);
+  const [versioningFeatureFlagActive, setVersioningFeatureFlagActive] = useState(false);
+  const [availableVersions, setAvailableVersions] = useState([]);
+  const [projectVersionId, setProjectVersionId] = useState(searchParams.get("projectVersion"));
 
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
@@ -190,6 +194,12 @@ const ProjectLogs = () => {
   const [hasPlaceholderSubmittals, setHasPlaceholderSubmittals] = useState(false);
 
   const { user, isAuthenticated } = useContext(AuthContext);
+
+  useEffect(() => {
+    isVersioningFlagActive(teamId).then(isActive => {
+      setVersioningFeatureFlagActive(isActive)
+    });
+  }, [teamId, pageRefresh, projectId]);
 
   const getProcoreAccessTokenData = async () => {
     try {
@@ -269,6 +279,7 @@ const ProjectLogs = () => {
       setDocumentData(response.data.document_details);
       setUserRole(getUserRoleInProject(response.data));
       setUserRoleInCompany(await getUserRoleInTeam(user.id, response.data.team));
+      setAvailableVersions(response.data.project_versions);
       localStorage.setItem("docParsed", response.data.doc_parsed);
       setLoading(false);
     };
@@ -290,7 +301,7 @@ const ProjectLogs = () => {
           setDocumentData(response.data.document_details);
           console.log('documentIsProcessing', documentIsProcessing(response.data.document_details));
           if (!documentIsProcessing(response.data.document_details)) {
-            fetchLogData(0, rowsPerPage);
+            fetchLogData(0, rowsPerPage, null, null, null, null, null, projectVersionId);
           }
         };
         fetchDocumentData().catch((error) => {
@@ -607,6 +618,7 @@ const ProjectLogs = () => {
     _filters = null,
     orderCol = "",
     order = "",
+    projectVersionId = null,
   ) => {
     if (projectId === null) return;
     setLoading(true);
@@ -621,7 +633,8 @@ const ProjectLogs = () => {
       order,
       page || 0,
       itemsPerPage,
-      listId
+      listId,
+      projectVersionId
     );
 
     console.log("responseData", submittalItems.data);
@@ -678,12 +691,12 @@ const ProjectLogs = () => {
   };
   useEffect(() => {
     if (projectId !== null) {
-      fetchLogData(0, rowsPerPage).catch((error) => {
+      fetchLogData(0, rowsPerPage, null, null, null, null, null, projectVersionId).catch((error) => {
         setLoading(false);
         handleError(error);
       });
     }
-  }, [state, pageRefresh, projectId]);
+  }, [state, pageRefresh, projectId, projectVersionId]);
 
 
   useEffect(() => {
@@ -705,6 +718,10 @@ const ProjectLogs = () => {
         doc.document_status
       )
     );
+  }
+
+  const onClickVersion = (versionId) => {
+    setProjectVersionId(versionId);
   }
 
   // useEffect(() => {
@@ -847,14 +864,14 @@ const ProjectLogs = () => {
 
   const handleSearchClick = () => {
     setShowSearch(true);
-    fetchLogData(0, rowsPerPage, searchValue, listId);
+    fetchLogData(0, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
   };
 
   const handleOpenSaveList = async (listId) => {
     // const savedLogs = await getSavedLogs(listId);
     setFilterValues(initFilter);
 
-    await fetchLogData(0, rowsPerPage, "", listId, {});
+    await fetchLogData(0, rowsPerPage, "", listId, {}, null, null, projectVersionId);
 
     setListId(listId);
     setSearchValue("");
@@ -871,11 +888,11 @@ const ProjectLogs = () => {
   const handleClearSearch = () => {
     setSearchValue("");
     setShowSearch(false);
-    fetchLogData(0, rowsPerPage, "", listId);
+    fetchLogData(0, rowsPerPage, "", listId, null, null, null, projectVersionId);
   };
 
   const handleClearSelection = async () => {
-    await fetchLogData(0, rowsPerPage, searchValue, null);
+    await fetchLogData(0, rowsPerPage, searchValue, null, null, null, null, projectVersionId);
     setListId(null);
     setSelected([]);
   };
@@ -977,7 +994,7 @@ const ProjectLogs = () => {
     );
     setShowClearFilters(hasActiveFilters);
 
-    fetchLogData(0, rowsPerPage, "", listId, appliedFilters);
+    fetchLogData(0, rowsPerPage, "", listId, appliedFilters, null, null, projectVersionId);
   }, [appliedFilters]);
 
   const clearFilters = () => {
@@ -1075,6 +1092,10 @@ const ProjectLogs = () => {
             qaDashboard={state?.qaDashboard}
             navBtn={"logs"}
             teamId={teamId}
+            isVersioningEnabled={versioningFeatureFlagActive}
+            onClickVersion={onClickVersion}
+            projectVersionId={projectVersionId}
+            projectVersions={availableVersions}
           />
           <ProjectLogsActionPanel
             handleDeleteLogs={handleDeleteLogs}
@@ -1202,6 +1223,7 @@ const ProjectLogs = () => {
                   setCombiningResult={setCombiningResult}
                   handleCombineRows={handleCombineRows}
                   areSameValues={areSameValues}
+                  projectVersionId={projectVersionId}
                 />
                 {pdfData.url && (
                   <div style={{ display: "flex", gap: 10 }}>
@@ -1281,6 +1303,7 @@ const ProjectLogs = () => {
                     setPage={setPage}
                     listId={listId}
                     searchValue={searchValue}
+                    projectVersionId={projectVersionId}
                   />
                 </div>
               </div>
