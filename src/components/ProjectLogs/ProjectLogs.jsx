@@ -361,18 +361,17 @@ const ProjectLogs = () => {
       const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
       setProjectVersionId(activeVersion);
       if (versioningActive) {
-        setDocumentData(response.data.document_details.filter((doc) => doc.project_version.id === activeVersion));
-        console.log("set version filtered document data to:", response.data.document_details.filter((doc) => doc.project_version.id === activeVersion));
+        setDocumentData(response.data.document_details.filter((doc) => {
+          return doc.project_version.id === parseInt(activeVersion);
+        }));
       } else {
         setDocumentData(response.data.document_details);
-        console.log("set document data to:", response.data.document_details);
       }
       setUserRole(getUserRoleInProject(response.data, updatedUser));
       setUserRoleInCompany(await getUserRoleInTeam(updatedUser.id, response.data.team));
       console.log("response.data.project_versions", response.data.project_versions);
 
       setAvailableVersions(response.data.project_versions);
-      console.log('calling fetchLogData from main useEffect with activeVersion:', activeVersion);
       fetchLogData(0, rowsPerPage, null, null, null, null, null, activeVersion)
       setLoading(false);
     };
