@@ -10,7 +10,8 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useContext(AuthContext);
 
-
+  console.log("props.projectVersionId", props.projectVersionId)
+  console.log("props.projectVersions", props.projectVersions)
   return (
     <div className="header-wrapper-swap row mx-0 my-3">
       <div className="col-4 px-0">
@@ -74,7 +75,7 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
                   key={version.id} 
                   value={version.id} 
                   selected={version.id === props.projectVersionId}
-                  onChange={() => props.setProjectVersionId(version.id)}
+                  onChange={() => props.onClickVersion(version.id)}
                 >
                   {version.version_name}
                 </option>

@@ -134,7 +134,7 @@ const getSubmittalItems = async (
     try {
         return await axiosInstance({
             method: 'get',
-            url: `/api/deliverables/${projectId}/submittal-items`,
+            url: `/api/deliverables/${projectId}/submittal-items/`,
             params: {
                 ...(projectVersionId && { project_version_id: projectVersionId }),
                 ...(search && { search }),
