@@ -362,8 +362,10 @@ const ProjectLogs = () => {
       setProjectVersionId(activeVersion);
       if (versioningActive) {
         setDocumentData(response.data.document_details.filter((doc) => doc.project_version.id === activeVersion));
+        console.log("set version filtered document data to:", response.data.document_details.filter((doc) => doc.project_version.id === activeVersion));
       } else {
         setDocumentData(response.data.document_details);
+        console.log("set document data to:", response.data.document_details);
       }
       setUserRole(getUserRoleInProject(response.data, updatedUser));
       setUserRoleInCompany(await getUserRoleInTeam(updatedUser.id, response.data.team));
@@ -737,6 +739,7 @@ const ProjectLogs = () => {
   }
 
   const onClickVersion = (versionId) => {
+    setProjectVersionId(versionId);
     navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}`);
     window.location.reload();
   }
@@ -857,7 +860,7 @@ const ProjectLogs = () => {
     let errors = validate();
     if (!errors) {
       try {
-        await createSubmittalList(state?.projectId || projectId, listName.value, currentUser.id, selected);
+        await createSubmittalList(state?.projectId || projectId, listName.value, currentUser.id, selected, projectVersionId);
         resetListName();
         setToggleSaveListNameModal(false);
         toast.success("List created successfully", {
@@ -871,7 +874,7 @@ const ProjectLogs = () => {
   };
   const getSavedListsForProjects = async () => {
     try {
-      const response = await getProjectLists(state?.projectId || projectId);
+      const response = await getProjectLists(state?.projectId || projectId, projectVersionId);
       setList(response.data.results);
       setToggleViewSavedList(true);
     } catch (error) {

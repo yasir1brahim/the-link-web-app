@@ -65,18 +65,19 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
           </div>
         </div>
       </div>
-      <div className="col-8">
+      <div className="col-6"></div>
+      <div className="col-2">
         {props.isVersioningEnabled && (
           <div className="version-selector">
-            <span>Version: {props.projectVersionId ? props.projectVersionId : "Latest"}</span>
+            <span>Current Version: </span>
             <select
               onChange={(e) => props.onClickVersion(e.target.value)}
+              value={props.projectVersionId}
             >
               {props.projectVersions.map((version) => (
                 <option 
                   key={version.id} 
                   value={version.id} 
-                  selected={version.id === props.projectVersionId}
                 >
                   {version.version_name}
                 </option>

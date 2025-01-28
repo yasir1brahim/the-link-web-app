@@ -37,7 +37,7 @@ const getSubmittalItemById = async (projectId, submittalId) => {
     }
 }
 
-const createSubmittalList = async (projectId, listName, userId, submittalIds) => {
+const createSubmittalList = async (projectId, listName, userId, submittalIds, projectVersionId=null) => {
     try {
         return await axiosInstance({
             method: 'post',
@@ -47,7 +47,8 @@ const createSubmittalList = async (projectId, listName, userId, submittalIds) =>
                 description: "",
                 project: projectId,
                 created_by: userId,
-                submittals: submittalIds
+                submittals: submittalIds,
+                ...(projectVersionId && { project_version: projectVersionId })
             },
         });
     } catch (error) {
