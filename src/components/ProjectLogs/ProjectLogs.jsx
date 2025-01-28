@@ -737,7 +737,8 @@ const ProjectLogs = () => {
   }
 
   const onClickVersion = (versionId) => {
-    navigate(`/project-logs?projectDetails=${projectId}&projectVersionId=${versionId}`);
+    navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}`);
+    window.location.reload();
   }
 
   // useEffect(() => {
