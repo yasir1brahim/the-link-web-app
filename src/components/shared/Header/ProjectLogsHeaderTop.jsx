@@ -68,9 +68,8 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
         </div>
       </div>
       <div className="col-4"></div>
-      <div className="col-4">
+      <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end' }}>
         {props.isVersioningEnabled && (
-          <div className="row">
             <VersionDropdown
               availableVersions={props.projectVersions}
               currentVersionId={props.projectVersionId}
@@ -85,7 +84,6 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
               }
               onPressAddNewVersion={() => props.setShowVersionModal(true)}
             />
-          </div>
         )}
       </div>
     </div>

@@ -29,8 +29,6 @@ const VersionDropdown = ({
                         key={version.id} 
                         onClick={() => {}}
                         style={{ backgroundColor: 'white', cursor: 'default' }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                     >
                         <div className="row" style = {{width: '100%'}}>
                             <div className="col-10">{version.version_name}</div>
