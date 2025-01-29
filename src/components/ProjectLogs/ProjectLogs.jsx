@@ -27,10 +27,11 @@ import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
-import { getProjectDetails } from "../../api/Projects/api";
+import { getProjectDetails, createProjectVersion, updateProjectVersion } from "../../api/Projects/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
+import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
 import { isVersioningFlagActive } from "../../api/FeatureFlags/api";
 import { getCurrentUserData } from "../../api/Authentication/api";
@@ -178,9 +179,14 @@ const ProjectLogs = () => {
   const [appliedFilters, setAppliedFilters] = useState(initFilter);
   const [rowsPerPage, setRowsPerPage] = React.useState(50);
   const [page, setPage] = React.useState(1);
+
   const [versioningFeatureFlagActive, setVersioningFeatureFlagActive] = useState(false);
   const [availableVersions, setAvailableVersions] = useState([]);
   const [projectVersionId, setProjectVersionId] = useState(searchParams.get("projectVersion"));
+  const [showVersionModal, setShowVersionModal] = useState(false);
+  const toggleVersionModal = () => setShowVersionModal(!showVersionModal);
+  const [editingVersionId, setEditingVersionId] = useState(null);
+  const [editingVersionName, setEditingVersionName] = useState('');
 
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
@@ -249,6 +255,44 @@ const ProjectLogs = () => {
     try {
       const response = await getProjectIdBySubmittalId(submittalId);
       setProjectId(response.data.project_id);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  const handleCreateProjectVersion = async (versionName) => {
+    try {
+      const response = await createProjectVersion(projectId, versionName);
+      toast.success("New version created successfully", {
+        position: "bottom-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setShowVersionModal(false);
+      onClickVersion(response.data.id);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  const handleUpdateProjectVersion = async (versionId, updatedVersionName) => {
+    try {
+      const response = await updateProjectVersion(projectId, versionId, updatedVersionName);
+      toast.success("Version updated successfully", {
+        position: "bottom-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setAvailableVersions(availableVersions.map((version) => version.id === versionId ? response.data : version));
+      setShowVersionModal(false);
     } catch (error) {
       handleError(error);
     }
@@ -1115,6 +1159,10 @@ const ProjectLogs = () => {
             onClickVersion={onClickVersion}
             projectVersionId={projectVersionId}
             projectVersions={availableVersions}
+            setShowVersionModal={setShowVersionModal}
+            setEditingVersionId={setEditingVersionId}
+            setEditingVersionName={setEditingVersionName}
+
           />
           <ProjectLogsActionPanel
             handleDeleteLogs={handleDeleteLogs}
@@ -1613,6 +1661,15 @@ const ProjectLogs = () => {
           </form>
         </ModalBody>
       </Modal>
+
+      {showVersionModal && <ManageVersionModal
+        showVersionModal={showVersionModal}
+        toggleVersionModal={toggleVersionModal}
+        projectVersionIdToEdit={editingVersionId}
+        initialProjectVersionName={editingVersionName}
+        handleUpdateProjectVersion={handleUpdateProjectVersion}
+        handleCreateProjectVersion={handleCreateProjectVersion}
+      />}
 
       {manageExcelExportModal && <ManageExcelExport
         manageExcelExportModal={manageExcelExportModal}

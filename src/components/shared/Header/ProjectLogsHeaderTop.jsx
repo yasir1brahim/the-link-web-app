@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {AuthContext} from '../../../auth/authcontext'
 import { getUserTeams } from '../../../api/Authentication/api';
 import { getHomeUrl } from '../../../utils/navigation';
+import { Button } from 'reactstrap';
 
 // @ts-ignore
 const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
@@ -65,10 +66,10 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
           </div>
         </div>
       </div>
-      <div className="col-6"></div>
-      <div className="col-2">
+      <div className="col-4"></div>
+      <div className="col-4">
         {props.isVersioningEnabled && (
-          <div className="version-selector">
+          <div className="row">
             <span>Current Version: </span>
             <select
               onChange={(e) => props.onClickVersion(e.target.value)}
@@ -83,6 +84,13 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
                 </option>
               ))}
             </select>
+            <Button 
+              color="primary" 
+              onClick={() => props.setShowVersionModal(true)}
+              className="ml-2"
+            >
+              Create Version
+            </Button>
           </div>
         )}
       </div>
