@@ -14,16 +14,12 @@ const VersionDropdown = ({
 }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    const toggle = (e) => {
-        e.stopPropagation();
-        if (isOpen && (dropdownRef.current.contains(e.target))) return;
+    const toggle = () => {
         setIsOpen(!isOpen);
     }
 
-    const dropdownRef = useRef(null);
 
     return (
-        <div ref={dropdownRef}>
         <Dropdown isOpen={isOpen} toggle={toggle}>
             <DropdownToggle caret style={{ backgroundColor: 'white', border: '1px solid #e0eaf7', width: '350px' }}>
                 {currentVersionName}
@@ -33,6 +29,7 @@ const VersionDropdown = ({
                     <DropdownItem 
                         key={version.id} 
                         onClick={() => {}}
+                        toggle={false}
                         style={{ backgroundColor: 'white', cursor: 'default' }}
                     >
                         <div className="row" style = {{width: '100%'}}>
@@ -68,7 +65,6 @@ const VersionDropdown = ({
                 </DropdownItem>
             </DropdownMenu>
         </Dropdown>
-        </div>
     )
 }
 
