@@ -1,10 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {AuthContext} from '../../../auth/authcontext'
 import { getUserTeams } from '../../../api/Authentication/api';
 import { getHomeUrl } from '../../../utils/navigation';
 import { Button } from 'reactstrap';
+import VersionDropdown from '../../ProjectLogs/versionDropdown';
 
 // @ts-ignore
 const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
@@ -70,27 +71,20 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
       <div className="col-4">
         {props.isVersioningEnabled && (
           <div className="row">
-            <span>Current Version: </span>
-            <select
-              onChange={(e) => props.onClickVersion(e.target.value)}
-              value={props.projectVersionId}
-            >
-              {props.projectVersions.map((version) => (
-                <option 
-                  key={version.id} 
-                  value={version.id} 
-                >
-                  {version.version_name}
-                </option>
-              ))}
-            </select>
-            <Button 
-              color="primary" 
-              onClick={() => props.setShowVersionModal(true)}
-              className="ml-2"
-            >
-              Create Version
-            </Button>
+            <VersionDropdown
+              availableVersions={props.projectVersions}
+              currentVersionId={props.projectVersionId}
+              currentVersionName={props.projectVersions.find(version => parseInt(version.id) === parseInt(props.projectVersionId))?.version_name || ''}
+              onSelectVersion={props.onClickVersion}
+              onPressEdit={
+                (versionId) => {
+                  props.setEditingVersionId(versionId);
+                  props.setEditingVersionName(props.projectVersions.find(version => version.id === versionId).version_name);
+                  props.setShowVersionModal(true);
+                }
+              }
+              onPressAddNewVersion={() => props.setShowVersionModal(true)}
+            />
           </div>
         )}
       </div>

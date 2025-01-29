@@ -33,7 +33,7 @@ const ManageVersionModal = ({
                 <Label>Version Name</Label>
                 <Input type="text" value={versionName} onChange={(e) => setVersionName(e.target.value)} />
             </FormGroup>
-            <Button color="primary" onClick={handleSaveVersion}>Save</Button>
+            <Button color="primary" className="mb-3" onClick={handleSaveVersion}>Save</Button>
         </Form>
       </ModalBody>
     </Modal>

@@ -182,7 +182,7 @@ const ProjectLogs = () => {
 
   const [versioningFeatureFlagActive, setVersioningFeatureFlagActive] = useState(false);
   const [availableVersions, setAvailableVersions] = useState([]);
-  const [projectVersionId, setProjectVersionId] = useState(searchParams.get("projectVersion"));
+  const [projectVersionId, setProjectVersionId] = useState(searchParams.get("projectVersion") ? parseInt(searchParams.get("projectVersion")) : null);
   const [showVersionModal, setShowVersionModal] = useState(false);
   const toggleVersionModal = () => setShowVersionModal(!showVersionModal);
   const [editingVersionId, setEditingVersionId] = useState(null);
