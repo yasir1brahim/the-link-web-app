@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import { EditIcon } from "../shared/icons/editIcon";
 import { LaunchIcon } from '../shared/icons/launchIcon';
@@ -14,11 +14,16 @@ const VersionDropdown = ({
 }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    const toggle = () => {
+    const toggle = (e) => {
+        e.stopPropagation();
+        if (isOpen && (dropdownRef.current.contains(e.target))) return;
         setIsOpen(!isOpen);
     }
 
+    const dropdownRef = useRef(null);
+
     return (
+        <div ref={dropdownRef}>
         <Dropdown isOpen={isOpen} toggle={toggle}>
             <DropdownToggle caret style={{ backgroundColor: 'white', border: '1px solid #e0eaf7', width: '350px' }}>
                 {currentVersionName}
@@ -41,7 +46,10 @@ const VersionDropdown = ({
                                 </span>
                                 <span
                                     className="ml-2"
-                                    onClick={() => onPressEdit(version.id)}
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        onPressEdit(version.id)
+                                    }}
                                     style={{ cursor: 'pointer' }}
                                 >
                                     <EditIcon />
@@ -60,6 +68,7 @@ const VersionDropdown = ({
                 </DropdownItem>
             </DropdownMenu>
         </Dropdown>
+        </div>
     )
 }
 
