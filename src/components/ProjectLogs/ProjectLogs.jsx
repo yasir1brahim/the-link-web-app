@@ -27,11 +27,14 @@ import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
-import { getProjectDetails } from "../../api/Projects/api";
+import { getProjectDetails, createProjectVersion, updateProjectVersion } from "../../api/Projects/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
+import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
+import { isVersioningFlagActive } from "../../api/FeatureFlags/api";
+import { getCurrentUserData } from "../../api/Authentication/api";
 
 
 const ProjectLogs = () => {
@@ -123,7 +126,6 @@ const ProjectLogs = () => {
   const [loadingProjectDetails, setLoadingProjectDetails] = useState(false);
   const [companyList, setCompanyList] = useState([]);
   const [companyId, setCompanyId] = useState();
-  const [docParsed, setDocParsed] = useState(0);
   const [documentData, setDocumentData] = useState([]);
   const toggle = () => setDropdownOpen((prevState) => !prevState);
 
@@ -178,9 +180,17 @@ const ProjectLogs = () => {
   const [rowsPerPage, setRowsPerPage] = React.useState(50);
   const [page, setPage] = React.useState(1);
 
+  const [versioningFeatureFlagActive, setVersioningFeatureFlagActive] = useState(false);
+  const [availableVersions, setAvailableVersions] = useState([]);
+  const [projectVersionId, setProjectVersionId] = useState(searchParams.get("projectVersion") ? parseInt(searchParams.get("projectVersion")) : null);
+  const [showVersionModal, setShowVersionModal] = useState(false);
+  const toggleVersionModal = () => setShowVersionModal(!showVersionModal);
+  const [editingVersionId, setEditingVersionId] = useState(null);
+  const [editingVersionName, setEditingVersionName] = useState('');
+
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
-  const history = useNavigate();
+  const navigate = useNavigate();
   const [isAssociatedUser, setIsAssociatedUser] = useState(true);
 
   const [userRole, setUserRole] = useState('');
@@ -190,6 +200,8 @@ const ProjectLogs = () => {
   const [hasPlaceholderSubmittals, setHasPlaceholderSubmittals] = useState(false);
 
   const { user, isAuthenticated } = useContext(AuthContext);
+  const [currentUser, setCurrentUser] = useState(user);
+
 
   const getProcoreAccessTokenData = async () => {
     try {
@@ -197,7 +209,7 @@ const ProjectLogs = () => {
         method: "get",
         url: "/api/deliverables/procore/refresh_token/",
         params: {
-          user_id: localStorage.getItem("userId"),
+          user_id: currentUser.id,
         },
       });
       if (accessTokenData?.status === 200) {
@@ -226,13 +238,13 @@ const ProjectLogs = () => {
     }
   };
 
-  const getUserRoleInProject = async (projectData) => {
-    console.log('user', user);
+  const getUserRoleInProject = async (projectData, userArgument) => {
+    console.log('user', userArgument);
     console.log('projectData', projectData);
-    if (user.is_superuser) {
+    if (userArgument.is_superuser) {
       return 'Admin';
     } 
-    const membership = projectData.members.find((member) => member.user_id === user.id);
+    const membership = projectData.members.find((member) => member.user_id === userArgument.id);
     if (membership) {
       return membership.role === 'admin' ? 'Admin' : 'Member';
     }
@@ -248,6 +260,123 @@ const ProjectLogs = () => {
     }
   }
 
+  const handleCreateProjectVersion = async (versionName) => {
+    try {
+      const response = await createProjectVersion(projectId, versionName);
+      toast.success("New version created successfully", {
+        position: "bottom-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setShowVersionModal(false);
+      onClickVersion(response.data.id);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  const handleUpdateProjectVersion = async (versionId, updatedVersionName) => {
+    try {
+      const response = await updateProjectVersion(projectId, versionId, updatedVersionName);
+      toast.success("Version updated successfully", {
+        position: "bottom-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setAvailableVersions(availableVersions.map((version) => version.id === versionId ? response.data : version));
+      setShowVersionModal(false);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  const fetchLogData = async (
+    page,
+    itemsPerPage,
+    search,
+    listId = null,
+    _filters = null,
+    orderCol = "",
+    order = "",
+    projectVersionId = null,
+  ) => {
+    if (projectId === null) return;
+    setLoading(true);
+    setLoadingView(true);
+    setLogInViewer(null);
+
+    const submittalItems = await getSubmittalItems(
+      projectId,
+      search,
+      filterValues,
+      orderCol,
+      order,
+      page || 0,
+      itemsPerPage,
+      listId,
+      projectVersionId
+    );
+
+    console.log("responseData", submittalItems.data);
+    setSelectedFilterValue(submittalItems.data.all_filter_vals);
+
+    const submittalLogs = submittalItems.data.message;
+    setLogData(submittalLogs);
+    setHasPlaceholderSubmittals(submittalItems.data.has_placeholder_submittals || false);
+    console.log("submittalLogs", submittalLogs);
+
+    if(submittalId) {
+      const submittalIdx = submittalLogs.findIndex((log) => log.id.toString() === submittalId);
+      if (submittalIdx !== -1) {
+        setPdfData({
+          url: submittalLogs[submittalIdx].doc_link,
+          textLoc: submittalLogs[submittalIdx].text_loc,
+          index: submittalIdx,
+          docId: submittalLogs[submittalIdx].doc_id,
+          submittalId: submittalLogs[submittalIdx].id,
+          additionalTextLocations: submittalLogs[submittalIdx].additional_text_locations,
+        });
+      }
+    }
+
+    localStorage.setItem(
+      "filteredIds",
+      submittalLogs?.map((item) => item?.id)
+    );
+    setLogIdList(submittalItems.data.log_id_list);
+    setLoading(false);
+    setLoadingView(false);
+    setErrorMessage("");
+    if (submittalItems.data.message?.length === 0) {
+      const filterHasValues = Object.values(filterValues).some(arr => arr.length > 0);
+      if (documentData?.length > 0 && !filterHasValues) {
+        setErrorMessage("No submittals were detected in the uploaded document(s)");
+        return;
+      }
+      if (search || filterHasValues) {
+        setErrorMessage("Sorry, no results found for your search query.");
+        return;
+      }
+      if (documentData?.length === 0) {
+        setErrorMessage("Upload spec documents to generate submittal log");
+        return;
+      }
+      if (documentIsProcessing(documentData)) {
+        setErrorMessage("Documents are being processed...");
+        return;
+      }
+    }
+    setTotalCount(submittalItems?.data?.total_count);
+  };
+
   useEffect(() => {
     const initLoading = async () => {
       await getProcoreAccessTokenData();
@@ -257,40 +386,66 @@ const ProjectLogs = () => {
       }
     };
     const fetchProjectData = async () => {
+      console.log("fetching project data");
       setLoading(true);
       if (submittalId && projectId === null) {
         await handleGetProjectId(submittalId);
       }
+      var updatedUser = currentUser;
+      if (currentUser === null) {
+        updatedUser = (await getCurrentUserData()).data;
+        setCurrentUser(updatedUser);
+      }
       const response = await getProjectDetails(projectId);
       console.log('projectData', response.data);
       setTeamId(response.data.team);
+      const versioningActive = await isVersioningFlagActive(response.data.team);
+      setVersioningFeatureFlagActive(versioningActive);
       setProjectName(response.data.name);
-      setDocParsed(response.data.doc_parsed);
-      setDocumentData(response.data.document_details);
-      setUserRole(getUserRoleInProject(response.data));
-      setUserRoleInCompany(await getUserRoleInTeam(user.id, response.data.team));
-      localStorage.setItem("docParsed", response.data.doc_parsed);
+      const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
+      setProjectVersionId(activeVersion);
+      if (versioningActive) {
+        setDocumentData(response.data.document_details.filter((doc) => {
+          return doc.project_version.id === parseInt(activeVersion);
+        }));
+      } else {
+        setDocumentData(response.data.document_details);
+      }
+      setUserRole(getUserRoleInProject(response.data, updatedUser));
+      setUserRoleInCompany(await getUserRoleInTeam(updatedUser.id, response.data.team));
+      console.log("response.data.project_versions", response.data.project_versions);
+
+      setAvailableVersions(response.data.project_versions);
+      fetchLogData(0, rowsPerPage, null, null, null, null, null, activeVersion)
       setLoading(false);
     };
 
+    console.log("projectId", projectId);
     if (projectId !== null) {
       fetchProjectData().catch((error) => {
+        console.log("error", error);
         setLoading(false);
         handleError(error);
+      }).finally(() => {
+        initLoading();
       });
-      initLoading();
     }
-  }, [user, projectId]);
+  }, [projectId]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (documentIsProcessing(documentData)) {
         const fetchDocumentData = async () => {
           const response = await getProjectDetails(projectId);
-          setDocumentData(response.data.document_details);
-          console.log('documentIsProcessing', documentIsProcessing(response.data.document_details));
-          if (!documentIsProcessing(response.data.document_details)) {
-            fetchLogData(0, rowsPerPage);
+          let documentData = response.data.document_details;
+          if (versioningFeatureFlagActive) {
+            const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
+            documentData = documentData.filter((doc) => doc.project_version.id === activeVersion);
+          }
+          setDocumentData(documentData);  
+          console.log('documentIsProcessing', documentIsProcessing(documentData));
+          if (!documentIsProcessing(documentData)) {
+            fetchLogData(0, rowsPerPage, null, null, null, null, null, projectVersionId);
           }
         };
         fetchDocumentData().catch((error) => {
@@ -314,7 +469,7 @@ const ProjectLogs = () => {
   };
 
   const resetListName = () => {
-  setListName({ value: '', errors: '' });
+    setListName({ value: '', errors: '' });
   };
 
   const handleSubmit = async () => {
@@ -323,12 +478,17 @@ const ProjectLogs = () => {
       setUploadLoading(true);
       const data = new FormData();
       data.append("project_id", projectId || state.project?.project_id);
+      data.append("project_version_id", projectVersionId);
       Object.values(pdfFile)?.forEach((file) => data.append("files", file));
       const response = await uploadFiles(data)
       if (response.data) {
         const check_response = await getProjectDetails(projectId);
-        setDocumentData(check_response.data.document_details);
-        setDocParsed(check_response.data.doc_parsed);
+        if (versioningFeatureFlagActive) {
+          const activeVersion = projectVersionId || check_response.data.project_versions[check_response.data.project_versions.length - 1].id;
+          setDocumentData(check_response.data.document_details.filter((doc) => doc.project_version.id === activeVersion));
+        } else {
+          setDocumentData(check_response.data.document_details);
+        }
         setUploadLoading(false);
         setAlreadyExistingFiles(response.data.already_exist);
         setModal(false);
@@ -599,92 +759,6 @@ const ProjectLogs = () => {
       }
     }
   };
-  const fetchLogData = async (
-    page,
-    itemsPerPage,
-    search,
-    listId = null,
-    _filters = null,
-    orderCol = "",
-    order = "",
-  ) => {
-    if (projectId === null) return;
-    setLoading(true);
-    setLoadingView(true);
-    setLogInViewer(null);
-
-    const submittalItems = await getSubmittalItems(
-      projectId,
-      search,
-      filterValues,
-      orderCol,
-      order,
-      page || 0,
-      itemsPerPage,
-      listId
-    );
-
-    console.log("responseData", submittalItems.data);
-    setSelectedFilterValue(submittalItems.data.all_filter_vals);
-
-    const submittalLogs = submittalItems.data.message;
-    setLogData(submittalLogs);
-    setHasPlaceholderSubmittals(submittalItems.data.has_placeholder_submittals || false);
-    console.log("submittalLogs", submittalLogs);
-
-    if(submittalId) {
-      const submittalIdx = submittalLogs.findIndex((log) => log.id.toString() === submittalId);
-      if (submittalIdx !== -1) {
-        setPdfData({
-          url: submittalLogs[submittalIdx].doc_link,
-          textLoc: submittalLogs[submittalIdx].text_loc,
-          index: submittalIdx,
-          docId: submittalLogs[submittalIdx].doc_id,
-          submittalId: submittalLogs[submittalIdx].id,
-          additionalTextLocations: submittalLogs[submittalIdx].additional_text_locations,
-        });
-      }
-    }
-
-    localStorage.setItem(
-      "filteredIds",
-      submittalLogs?.map((item) => item?.id)
-    );
-    setLogIdList(submittalItems.data.log_id_list);
-    setLoading(false);
-    setLoadingView(false);
-    setErrorMessage("");
-    if (submittalItems.data.message?.length === 0) {
-      const filterHasValues = Object.values(filterValues).some(arr => arr.length > 0);
-      const localDocParsed = parseInt(localStorage.getItem("docParsed"));
-      if (localDocParsed > 0 && !filterHasValues) {
-        setErrorMessage("No submittals were detected in the uploaded document(s)");
-        return;
-      }
-      if (search || filterHasValues) {
-        setErrorMessage("Sorry, no results found for your search query.");
-        return;
-      }
-      if (documentData?.length === 0) {
-        setErrorMessage("Upload spec documents to generate submittal log");
-        return;
-      }
-      if (documentIsProcessing(documentData)) {
-        setErrorMessage("Documents are being processed...");
-        return;
-      }
-    }
-    setTotalCount(submittalItems?.data?.total_count);
-  };
-  useEffect(() => {
-    if (projectId !== null) {
-      fetchLogData(0, rowsPerPage).catch((error) => {
-        setLoading(false);
-        handleError(error);
-      });
-    }
-  }, [state, pageRefresh, projectId]);
-
 
   useEffect(() => {
     setFilteredLogData(logData);
@@ -705,6 +779,12 @@ const ProjectLogs = () => {
         doc.document_status
       )
     );
+  }
+
+  const onClickVersion = (versionId) => {
+    setProjectVersionId(versionId);
+    navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}`);
+    window.location.reload();
   }
 
   // useEffect(() => {
@@ -823,7 +903,7 @@ const ProjectLogs = () => {
     let errors = validate();
     if (!errors) {
       try {
-        await createSubmittalList(state?.projectId || projectId, listName.value, localStorage.getItem("userId"), selected);
+        await createSubmittalList(state?.projectId || projectId, listName.value, currentUser.id, selected, projectVersionId);
         resetListName();
         setToggleSaveListNameModal(false);
         toast.success("List created successfully", {
@@ -837,7 +917,7 @@ const ProjectLogs = () => {
   };
   const getSavedListsForProjects = async () => {
     try {
-      const response = await getProjectLists(state?.projectId || projectId);
+      const response = await getProjectLists(state?.projectId || projectId, projectVersionId);
       setList(response.data.results);
       setToggleViewSavedList(true);
     } catch (error) {
@@ -847,14 +927,14 @@ const ProjectLogs = () => {
 
   const handleSearchClick = () => {
     setShowSearch(true);
-    fetchLogData(0, rowsPerPage, searchValue, listId);
+    fetchLogData(0, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
   };
 
   const handleOpenSaveList = async (listId) => {
     // const savedLogs = await getSavedLogs(listId);
     setFilterValues(initFilter);
 
-    await fetchLogData(0, rowsPerPage, "", listId, {});
+    await fetchLogData(0, rowsPerPage, "", listId, {}, null, null, projectVersionId);
 
     setListId(listId);
     setSearchValue("");
@@ -871,11 +951,11 @@ const ProjectLogs = () => {
   const handleClearSearch = () => {
     setSearchValue("");
     setShowSearch(false);
-    fetchLogData(0, rowsPerPage, "", listId);
+    fetchLogData(0, rowsPerPage, "", listId, null, null, null, projectVersionId);
   };
 
   const handleClearSelection = async () => {
-    await fetchLogData(0, rowsPerPage, searchValue, null);
+    await fetchLogData(0, rowsPerPage, searchValue, null, null, null, null, projectVersionId);
     setListId(null);
     setSelected([]);
   };
@@ -977,7 +1057,7 @@ const ProjectLogs = () => {
     );
     setShowClearFilters(hasActiveFilters);
 
-    fetchLogData(0, rowsPerPage, "", listId, appliedFilters);
+    fetchLogData(0, rowsPerPage, "", listId, appliedFilters, null, null, projectVersionId);
   }, [appliedFilters]);
 
   const clearFilters = () => {
@@ -1020,7 +1100,7 @@ const ProjectLogs = () => {
         method: "get",
         url: "/api/deliverables/procore/delete_token/",
         params: {
-          user_id: localStorage.getItem("userId"),
+          user_id: currentUser.id,
         },
       });
       console.log(resp);
@@ -1071,10 +1151,18 @@ const ProjectLogs = () => {
             showBtn={"Upload Documents"}
             toggleModal={toggleModal}
             btnSize={"small"}
-            docParsed={docParsed}
+            docParsed={documentData?.length || 0}
             qaDashboard={state?.qaDashboard}
             navBtn={"logs"}
             teamId={teamId}
+            isVersioningEnabled={versioningFeatureFlagActive}
+            onClickVersion={onClickVersion}
+            projectVersionId={projectVersionId}
+            projectVersions={availableVersions}
+            setShowVersionModal={setShowVersionModal}
+            setEditingVersionId={setEditingVersionId}
+            setEditingVersionName={setEditingVersionName}
+
           />
           <ProjectLogsActionPanel
             handleDeleteLogs={handleDeleteLogs}
@@ -1123,7 +1211,7 @@ const ProjectLogs = () => {
             procoreAuthUrl={procoreAuthUrl}
             handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
 
-            docParsed={docParsed}
+            docParsed={documentData?.length || 0}
             totalCount={totalCount}
             showBtn={"Upload Documents"}
             toggleModal={toggleModal}
@@ -1202,6 +1290,7 @@ const ProjectLogs = () => {
                   setCombiningResult={setCombiningResult}
                   handleCombineRows={handleCombineRows}
                   areSameValues={areSameValues}
+                  projectVersionId={projectVersionId}
                 />
                 {pdfData.url && (
                   <div style={{ display: "flex", gap: 10 }}>
@@ -1281,6 +1370,7 @@ const ProjectLogs = () => {
                     setPage={setPage}
                     listId={listId}
                     searchValue={searchValue}
+                    projectVersionId={projectVersionId}
                   />
                 </div>
               </div>
@@ -1571,6 +1661,15 @@ const ProjectLogs = () => {
           </form>
         </ModalBody>
       </Modal>
+
+      {showVersionModal && <ManageVersionModal
+        showVersionModal={showVersionModal}
+        toggleVersionModal={toggleVersionModal}
+        projectVersionIdToEdit={editingVersionId}
+        initialProjectVersionName={editingVersionName}
+        handleUpdateProjectVersion={handleUpdateProjectVersion}
+        handleCreateProjectVersion={handleCreateProjectVersion}
+      />}
 
       {manageExcelExportModal && <ManageExcelExport
         manageExcelExportModal={manageExcelExportModal}

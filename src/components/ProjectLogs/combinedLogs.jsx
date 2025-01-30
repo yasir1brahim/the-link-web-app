@@ -174,6 +174,10 @@ export default function CombinedLogs(props) {
         props.rowsPerPage,
         props.searchValue,
         props.listId,
+        null,
+        null,
+        null,
+        props.projectVersionId
       );
     } catch (error) {
       console.log(error.message);
@@ -199,7 +203,8 @@ export default function CombinedLogs(props) {
         props.listId,
         filterValues,
         columnName,
-        sortingOrder === "desc" ? "asc" : "desc"
+        sortingOrder === "desc" ? "asc" : "desc",
+        props.projectVersionId
       );
       setSorting({
         ...sorting,

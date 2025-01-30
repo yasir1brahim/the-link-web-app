@@ -2,7 +2,7 @@ import axiosInstance from "../../config/axios";
 import handleError from "../../config/errorHandler";
 
 import { getCurrentUserData, getTeamDetails } from "../Authentication/api";
-import { NOTICES_FEATURE_FLAG_NAME } from "../../constants";
+import { NOTICES_FEATURE_FLAG_NAME, VERSIONING_FEATURE_FLAG_NAME } from "../../constants";
 
 
 const listFeatureFlags = async () => {
@@ -34,10 +34,19 @@ const isNoticesFlagActive = async (teamId) => {
     return activeFlagsForTeam.includes(NOTICES_FEATURE_FLAG_NAME) || activeFlagsForUser.includes(NOTICES_FEATURE_FLAG_NAME);
 }
 
+const isVersioningFlagActive = async (teamId) => {
+    const activeFlagsForTeam = await getActiveFlagsForTeam(teamId);
+    console.log('activeFlagsForTeam', activeFlagsForTeam);
+    const activeFlagsForUser = await getActiveFlagsForUser();
+    console.log('activeFlagsForUser', activeFlagsForUser);
+    return activeFlagsForTeam.includes(VERSIONING_FEATURE_FLAG_NAME) || activeFlagsForUser.includes(VERSIONING_FEATURE_FLAG_NAME);
+}
+
 
 export {
     listFeatureFlags,
     getActiveFlagsForUser,
     getActiveFlagsForTeam,
-    isNoticesFlagActive
+    isNoticesFlagActive,
+    isVersioningFlagActive
 }

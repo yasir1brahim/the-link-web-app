@@ -12,11 +12,14 @@ const getSavedLogs = async (listId) => {
     }
 }
 
-const getProjectLists = async (projectId) => {
+const getProjectLists = async (projectId, projectVersionId) => {
     try {
         return await axiosInstance({
             method: 'get',
             url: `/api/deliverables/${projectId}/submittal-lists/`,
+            params: {
+                ...(projectVersionId && { project_version_id: projectVersionId }),
+            }
         });
     } catch (error) {
         handleError(error);
@@ -34,7 +37,7 @@ const getSubmittalItemById = async (projectId, submittalId) => {
     }
 }
 
-const createSubmittalList = async (projectId, listName, userId, submittalIds) => {
+const createSubmittalList = async (projectId, listName, userId, submittalIds, projectVersionId=null) => {
     try {
         return await axiosInstance({
             method: 'post',
@@ -44,7 +47,8 @@ const createSubmittalList = async (projectId, listName, userId, submittalIds) =>
                 description: "",
                 project: projectId,
                 created_by: userId,
-                submittals: submittalIds
+                submittals: submittalIds,
+                ...(projectVersionId && { project_version: projectVersionId })
             },
         });
     } catch (error) {
@@ -119,7 +123,8 @@ const getSubmittalItems = async (
     order,
     page_number,
     limit,
-    list_id
+    list_id,
+    projectVersionId = null,
 ) => {
     const nonEmptyFilters = Object.keys(filters_object).filter(key => filters_object[key].length > 0);
     var filtersObject = {}
@@ -130,8 +135,9 @@ const getSubmittalItems = async (
     try {
         return await axiosInstance({
             method: 'get',
-            url: `/api/deliverables/${projectId}/submittal-items`,
+            url: `/api/deliverables/${projectId}/submittal-items/`,
             params: {
+                ...(projectVersionId && { project_version_id: projectVersionId }),
                 ...(search && { search }),
                 ...filtersObject,
                 ...(order_col && { order_col }),

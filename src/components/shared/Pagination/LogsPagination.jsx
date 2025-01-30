@@ -13,19 +13,20 @@ const LogsPagination = ({
   page,
   setPage,
   listId,
-  searchValue
+  searchValue,
+  projectVersionId
 }) => {
   const [pageCount, setPageCount] = useState(0);
 
   const onClickChangePage = (e, page) => {
     e.preventDefault();
     setPage(page);
-    fetchData(page, rowsPerPage, searchValue, listId);
+    fetchData(page, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
   };
   const handleChangeRowsPerPage = (event) => {
     let rowsCount = parseInt(event.target.value, 10);
     setRowsPerPage(rowsCount);
-    fetchData(0, rowsCount, searchValue, listId);
+    fetchData(0, rowsCount, searchValue, listId, null, null, null, projectVersionId);
     setPage(1);
   };
 
@@ -77,35 +78,3 @@ const LogsPagination = ({
 };
 
 export default LogsPagination;
-
-// import * as React from 'react';
-// import TablePagination from '@mui/material/TablePagination';
-
-// export default function LogsPagination({
-//   totalItems,
-//   fetchData
-// }) {
-//   const [page, setPage] = React.useState(0);
-//   const [rowsPerPage, setRowsPerPage] = React.useState(25);
-//   const onClickChangePage = (e, page) => {
-//     e.preventDefault();
-//     setPage(page);
-//     fetchData(page, rowsPerPage);
-//   };
-
-//   return (
-//     <TablePagination
-//       // component="div"
-//       count={totalItems}
-//       onPageChange={onClickChangePage}
-//       page={page}
-//       rowsPerPage={rowsPerPage}
-//       shape="rounded"
-//       onRowsPerPageChange={(e) => {
-//         setRowsPerPage(parseInt(e.target.value, 10));
-//         fetchData(page, parseInt(e.target.value, 10));
-//       }}
-//       size={'medium'}
-//     />
-//   );
-// }
