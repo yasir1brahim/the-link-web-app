@@ -82,6 +82,11 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
                   props.setShowVersionModal(true);
                 }
               }
+              onPressArchive={
+                (versionId) => {
+                  props.onPressArchive(versionId);
+                }
+              }
               onPressAddNewVersion={() => props.setShowVersionModal(true)}
             />
         )}

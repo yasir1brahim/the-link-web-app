@@ -27,7 +27,7 @@ import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
-import { getProjectDetails, createProjectVersion, updateProjectVersion } from "../../api/Projects/api";
+import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion } from "../../api/Projects/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
@@ -35,7 +35,7 @@ import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
 import { isVersioningFlagActive } from "../../api/FeatureFlags/api";
 import { getCurrentUserData } from "../../api/Authentication/api";
-
+import ArchiveConfirmationModal from "./archiveConfirmationModal";
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -185,6 +185,8 @@ const ProjectLogs = () => {
   const [projectVersionId, setProjectVersionId] = useState(searchParams.get("projectVersion") ? parseInt(searchParams.get("projectVersion")) : null);
   const [showVersionModal, setShowVersionModal] = useState(false);
   const toggleVersionModal = () => setShowVersionModal(!showVersionModal);
+  const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] = useState(false);
+  const toggleArchiveConfirmationModal = () => setShowArchiveConfirmationModal(!showArchiveConfirmationModal);
   const [editingVersionId, setEditingVersionId] = useState(null);
   const [editingVersionName, setEditingVersionName] = useState('');
 
@@ -1127,6 +1129,29 @@ const ProjectLogs = () => {
   const handleManageExcelExportButtonClick = async () => {
     setManageExcelExportModal(true);
   };
+  
+
+  const onPressArchive = async (versionId) => {
+    const versionName = availableVersions.find(version => version.id === versionId).version_name;
+    setEditingVersionName(versionName);
+    setEditingVersionId(versionId);
+    setShowArchiveConfirmationModal(true);
+  }
+
+  const onConfirmArchive = async (versionId) => {
+    try {
+      await archiveProjectVersion(projectId, versionId);
+      if (versionId === projectVersionId) {
+        navigate(`/project-logs?projectDetails=${projectId}`);
+        window.location.reload();
+      } else {
+        setShowArchiveConfirmationModal(false);
+        setAvailableVersions(availableVersions.filter(version => version.id !== versionId));
+      }
+    } catch (error) {
+      handleError(error);
+    }
+  }
 
 
 
@@ -1159,6 +1184,7 @@ const ProjectLogs = () => {
             onClickVersion={onClickVersion}
             projectVersionId={projectVersionId}
             projectVersions={availableVersions}
+            onPressArchive={onPressArchive}
             setShowVersionModal={setShowVersionModal}
             setEditingVersionId={setEditingVersionId}
             setEditingVersionName={setEditingVersionName}
@@ -1669,6 +1695,14 @@ const ProjectLogs = () => {
         initialProjectVersionName={editingVersionName}
         handleUpdateProjectVersion={handleUpdateProjectVersion}
         handleCreateProjectVersion={handleCreateProjectVersion}
+      />}
+
+      {showArchiveConfirmationModal && <ArchiveConfirmationModal
+        showArchiveConfirmationModal={showArchiveConfirmationModal}
+        toggleArchiveConfirmationModal={toggleArchiveConfirmationModal}
+        onConfirmArchive={onConfirmArchive}
+        versionId={editingVersionId}
+        versionName={editingVersionName}
       />}
 
       {manageExcelExportModal && <ManageExcelExport
