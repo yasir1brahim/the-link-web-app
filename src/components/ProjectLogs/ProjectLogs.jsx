@@ -265,38 +265,73 @@ const ProjectLogs = () => {
   const handleCreateProjectVersion = async (versionName) => {
     try {
       const response = await createProjectVersion(projectId, versionName);
-      toast.success("New version created successfully", {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      setShowVersionModal(false);
-      onClickVersion(response.data.id);
+      console.log("create version response", response);
+      if (response.status === 201) {
+        toast.success("New version created successfully", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        setShowVersionModal(false);
+        onClickVersion(response.data.id);
+      } else {
+        console.log("response.data", response.data);
+      }
     } catch (error) {
-      handleError(error);
+      console.log("Error response", error.response);
+      if (error.response.data[0] === "Version name must be different from all active and archived versions") {
+        toast.error("Version name must be different from all active and archived versions", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      } else {
+        handleError(error);
+      }
     }
   }
 
   const handleUpdateProjectVersion = async (versionId, updatedVersionName) => {
     try {
       const response = await updateProjectVersion(projectId, versionId, updatedVersionName);
-      toast.success("Version updated successfully", {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      setAvailableVersions(availableVersions.map((version) => version.id === versionId ? response.data : version));
-      setShowVersionModal(false);
+      if (response.status === 200) {
+        toast.success("Version updated successfully", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        setAvailableVersions(availableVersions.map((version) => version.id === versionId ? response.data : version));
+        setShowVersionModal(false);
+      } else {
+        handleError(response);
+      }
     } catch (error) {
-      handleError(error);
+      console.log("Error response", error);
+      if (error.response.data[0] === "Version name must be different from all active and archived versions") {
+        toast.error("Version name must be different from all active and archived versions", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      } else {
+        handleError(error);
+      }
     }
   }
 

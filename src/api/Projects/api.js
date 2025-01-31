@@ -125,27 +125,19 @@ const createProject = async (projectName, projectNumber, projectType, teamId, li
 }
 
 const createProjectVersion = async (projectId, versionName) => {
-    try {
-        return await axiosInstance({
-            method: 'post',
-            url: `/api/deliverables/${projectId}/project-versions/`,
-            data: { version_name: versionName },
-        });
-    } catch (error) {
-        handleError(error);
-    }
+    return await axiosInstance({
+        method: 'post',
+        url: `/api/deliverables/${projectId}/project-versions/`,
+        data: { version_name: versionName },
+    });
 }
 
 const updateProjectVersion = async (projectId, versionId, versionName) => {
-    try {
-        return await axiosInstance({
-            method: 'patch',
-            url: `/api/deliverables/${projectId}/project-versions/${versionId}/`,
-            data: { version_name: versionName },
-        });
-    } catch (error) {
-        handleError(error);
-    }
+    return await axiosInstance({
+        method: 'patch',
+        url: `/api/deliverables/${projectId}/project-versions/${versionId}/`,
+        data: { version_name: versionName },
+    });
 }
 
 const archiveProjectVersion = async (projectId, versionId) => {
