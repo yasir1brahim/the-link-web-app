@@ -30,9 +30,10 @@ const VersionDropdown = ({
                 {availableVersions.map(version => (
                     <DropdownItem 
                         key={version.id} 
-                        onClick={() => {}}
-                        toggle={false}
-                        style={{ backgroundColor: 'white', cursor: 'default' }}
+                        onClick={() => onSelectVersion(version.id)}
+                        style={{ backgroundColor: 'white', cursor: 'pointer' }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                     >
                         <div style = {{width: '100%', display: 'flex', justifyContent: 'space-between'}}>
                             <div>{version.version_name}</div>
@@ -45,7 +46,8 @@ const VersionDropdown = ({
                                 </span>
                                 <span
                                     className="ml-2"
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                        e.stopPropagation();
                                         setIsOpen(false);
                                         onPressEdit(version.id)
                                     }}
@@ -53,15 +55,17 @@ const VersionDropdown = ({
                                 >
                                     <EditIcon />
                                 </span>
-                                <span
+                                {availableVersions.length > 1 && <span
                                     className="ml-2"
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsOpen(false);
                                         onPressArchive(version.id)
                                     }}
                                     style={{ cursor: 'pointer' }}
                                 >
                                     <ArchiveIcon />
-                                </span>
+                                </span>}
                             </div>
                         </div>
                     </DropdownItem>

@@ -1141,8 +1141,13 @@ const ProjectLogs = () => {
   const onConfirmArchive = async (versionId) => {
     try {
       await archiveProjectVersion(projectId, versionId);
-      setShowArchiveConfirmationModal(false);
-      setAvailableVersions(availableVersions.filter(version => version.id !== versionId));
+      if (versionId === projectVersionId) {
+        navigate(`/project-logs?projectDetails=${projectId}`);
+        window.location.reload();
+      } else {
+        setShowArchiveConfirmationModal(false);
+        setAvailableVersions(availableVersions.filter(version => version.id !== versionId));
+      }
     } catch (error) {
       handleError(error);
     }
