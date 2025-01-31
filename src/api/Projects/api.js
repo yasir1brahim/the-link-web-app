@@ -148,6 +148,30 @@ const updateProjectVersion = async (projectId, versionId, versionName) => {
     }
 }
 
+const archiveProjectVersion = async (projectId, versionId) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/${projectId}/project-versions/${versionId}/archive/`,
+            data: { action: 'archive' }
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+const restoreProjectVersion = async (projectId, versionId) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/${projectId}/project-versions/${versionId}/restore/`,
+            data: { action: 'restore' }
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
 const toggleProjectStatus = async (projectId, action = 'archive', teamId) => {
     try {
         return await axiosInstance({
@@ -186,5 +210,7 @@ export {
     getUserRoleInAllProjects,
     addUsersToProject,
     createProjectVersion,
-    updateProjectVersion
+    updateProjectVersion,
+    archiveProjectVersion,
+    restoreProjectVersion
 }

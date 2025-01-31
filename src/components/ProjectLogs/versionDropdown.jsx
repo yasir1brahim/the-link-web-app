@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import { EditIcon } from "../shared/icons/editIcon";
 import { LaunchIcon } from '../shared/icons/launchIcon';
+import { ArchiveIcon } from '../shared/icons/archiveIcon';
 
 
 const VersionDropdown = ({ 
@@ -10,7 +11,8 @@ const VersionDropdown = ({
     currentVersionName,
     onSelectVersion, 
     onPressEdit,
-    onPressAddNewVersion
+    onPressAddNewVersion,
+    onPressArchive
 }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -21,10 +23,10 @@ const VersionDropdown = ({
 
     return (
         <Dropdown isOpen={isOpen} toggle={toggle}>
-            <DropdownToggle caret style={{ backgroundColor: 'white', border: '1px solid #e0eaf7', width: '350px' }}>
+            <DropdownToggle caret style={{ backgroundColor: 'white', border: '1px solid #e0eaf7', width: '400px' }}>
                 {currentVersionName}
             </DropdownToggle>
-            <DropdownMenu style={{ backgroundColor: 'white', width: '350px' }}>
+            <DropdownMenu style={{ backgroundColor: 'white', width: '400px' }}>
                 {availableVersions.map(version => (
                     <DropdownItem 
                         key={version.id} 
@@ -32,9 +34,9 @@ const VersionDropdown = ({
                         toggle={false}
                         style={{ backgroundColor: 'white', cursor: 'default' }}
                     >
-                        <div className="row" style = {{width: '100%'}}>
-                            <div className="col-10">{version.version_name}</div>
-                            <div className="col-2">
+                        <div style = {{width: '100%', display: 'flex', justifyContent: 'space-between'}}>
+                            <div>{version.version_name}</div>
+                            <div>
                                 <span
                                     onClick={() => onSelectVersion(version.id)}
                                     style={{ cursor: 'pointer' }}
@@ -50,6 +52,15 @@ const VersionDropdown = ({
                                     style={{ cursor: 'pointer' }}
                                 >
                                     <EditIcon />
+                                </span>
+                                <span
+                                    className="ml-2"
+                                    onClick={() => {
+                                        onPressArchive(version.id)
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <ArchiveIcon />
                                 </span>
                             </div>
                         </div>
