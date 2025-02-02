@@ -63,7 +63,8 @@ const addSubmittalItem = async (
     paraContext, 
     submittalHeading, 
     submittalType,
-    addedUnderSubmittalId=null
+    addedUnderSubmittalId=null,
+    projectVersionId=null
 ) => {
     try {
         return await axiosInstance({
@@ -75,7 +76,8 @@ const addSubmittalItem = async (
                 para_context: paraContext,
                 item_desc: submittalHeading,
                 type: submittalType,
-                added_under_submittal_id: addedUnderSubmittalId
+                added_under_submittal_id: addedUnderSubmittalId,
+                ...(projectVersionId && { project_version: projectVersionId })
             },
         });
     } catch (error) {
@@ -83,7 +85,7 @@ const addSubmittalItem = async (
     }
 }
 
-const updateSubmittalItem = async (projectId, submittalId, specSection, paraNo, paraContext, submittalHeading, submittalType) => {
+const updateSubmittalItem = async (projectId, submittalId, specSection, paraNo, paraContext, submittalHeading, submittalType, projectVersionId=null) => {
     try {
         return await axiosInstance({
             method: 'put',
@@ -94,6 +96,7 @@ const updateSubmittalItem = async (projectId, submittalId, specSection, paraNo, 
                 para_context: paraContext,
                 item_desc: submittalHeading,
                 type: submittalType,
+                ...(projectVersionId && { project_version: projectVersionId })
             },
         });
     } catch (error) {

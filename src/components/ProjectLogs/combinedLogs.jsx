@@ -155,7 +155,8 @@ export default function CombinedLogs(props) {
           rowData.para_context, 
           rowData.item_desc, 
           rowData.type, 
-          rowData.added_under_submittal_id
+          rowData.added_under_submittal_id,
+          props.projectVersionId
         );
       } else {
         await updateSubmittalItem(
@@ -166,6 +167,7 @@ export default function CombinedLogs(props) {
           rowData.para_context, 
           rowData.item_desc, 
           rowData.type, 
+          props.projectVersionId
         );
       }
       setNewRowIndex(null);
