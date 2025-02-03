@@ -15,6 +15,7 @@ const ExportToProcoreModal = (props) => {
   const navigate = useNavigate();
 
   const projectId = localStorage.getItem('projectId');
+  const projectVersionId = props.projectVersionId;
 
   const handleExportToProcore = async () => {
     var exportAll = false;
@@ -35,7 +36,8 @@ const ExportToProcoreModal = (props) => {
         data: {
           project_id: Number(projectId),
           records: selectedRows, // array of ids
-          export_all: exportAll
+          export_all: exportAll,
+          project_version_id: projectVersionId
         }
       }).then((resp) => {
         if (resp.status === 200) {

@@ -738,6 +738,7 @@ const ProjectLogs = () => {
         data: {
           project_id: Number(projectId),
           records: JSON.parse(selectedRows), // array of ids
+          project_version_id: projectVersionId,
           // status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
         },
       });
@@ -851,7 +852,8 @@ const ProjectLogs = () => {
       const exportExcelData = await getExportExcelData(
         state?.projectId || projectId,
         recordData || localStorage.getItem("filteredIds")?.split(",")?.map((item) => Number(item)),
-        filterValues
+        filterValues,
+        projectVersionId
       );
 
       let blob = new Blob([exportExcelData.data], {
@@ -861,7 +863,7 @@ const ProjectLogs = () => {
         blob,
         `${
           state?.project.project_name || `Project`
-        }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`
+        }_logs_${new Date().toLocaleDateString("en-US", { day: 'numeric' })}_${new Date().toLocaleDateString("en-US", { month: 'short' })}_${new Date().toLocaleDateString("en-US", { year: 'numeric' })}.xlsx`
       );
     } catch (error) {
       handleError(error);
@@ -873,7 +875,8 @@ const ProjectLogs = () => {
       const exportExcelData = await getExportJetBuildData(
         state?.projectId || projectId,
         recordData || localStorage.getItem("filteredIds")?.split(",")?.map((item) => Number(item)),
-        filterValues
+        filterValues,
+        projectVersionId
       );
 
       let blob = new Blob([exportExcelData.data], {
@@ -883,7 +886,7 @@ const ProjectLogs = () => {
         blob,
         `${
           state?.project.project_name || `Project`
-        }_logs_${new Date().getHours()}${new Date().getMinutes()}.xlsx`
+        }_logs_${new Date().toLocaleDateString("en-US", { day: 'numeric' })}_${new Date().toLocaleDateString("en-US", { month: 'short' })}_${new Date().toLocaleDateString("en-US", { year: 'numeric' })}.xlsx`
       );
     } catch (error) {
       handleError(error);
