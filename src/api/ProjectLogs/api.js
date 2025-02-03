@@ -159,19 +159,22 @@ const getSubmittalItems = async (
 const getExportExcelData = async (
     projectId,
     records,
-    filters_object
+    filters_object,
+    projectVersionId = null,
 ) => {
     const nonEmptyFilters = Object.keys(filters_object).filter(key => filters_object[key].length > 0);
     var filtersObject = {}
     nonEmptyFilters.forEach(key => {
         filtersObject[`filters[${key}]`] = filters_object[key].join(',')
     })
+    console.log("records", records);
     try {
         return await axiosInstance({
             method: 'get',
             url: `/api/deliverables/${projectId}/submittal-items/export/`,
             responseType: 'arraybuffer',
             params: {
+                ...(projectVersionId && { project_version_id: projectVersionId }),
                 ...filtersObject,
                 ...(records && { records })
             }
@@ -185,7 +188,8 @@ const getExportExcelData = async (
 const getExportJetBuildData = async (
     projectId,
     records,
-    filters_object
+    filters_object,
+    projectVersionId = null,
 ) => {
     const nonEmptyFilters = Object.keys(filters_object).filter(key => filters_object[key].length > 0);
     var filtersObject = {}
@@ -198,6 +202,7 @@ const getExportJetBuildData = async (
             url: `/api/deliverables/${projectId}/submittal-items/export-jet-build/`,
             responseType: 'arraybuffer',
             params: {
+                ...(projectVersionId && { project_version_id: projectVersionId }),
                 ...filtersObject,
                 ...(records && { records })
             }
