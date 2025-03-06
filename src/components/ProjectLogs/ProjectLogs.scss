@@ -564,3 +564,19 @@
     padding: 3px 0;
   }
 }
+
+.version-comparison-modal {
+  display: flex;
+  height: 95vh;
+}
+
+.version-comparison-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.version-comparison-modal .modal-body {
+  flex: 1;
+  overflow-y: auto;
+}
