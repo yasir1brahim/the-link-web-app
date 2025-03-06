@@ -104,7 +104,30 @@ const VersionComparisonModal = ({
             </thead>
             <tbody>
                 {deletions.map((deletion) => (
-                    <ComparisonItem key={deletion.id} submittalItem={deletion} isDeletion={true} dividerStyle={dividerStyle} />
+                    <ComparisonItem key={deletion.id} oldSubmittalItem={deletion} isDeletion={true} dividerStyle={dividerStyle} />
+                ))}
+                {additions.map((addition) => (
+                    <ComparisonItem key={addition.id} newSubmittalItem={addition} isAddition={true} dividerStyle={dividerStyle} />
+                ))}
+                {modifications.map((modification) => (
+                    <ComparisonItem 
+                        key={modification.id}
+                        oldSubmittalItem={modification.old_submittal} 
+                        newSubmittalItem={modification.new_submittal} 
+                        isModification={true} 
+                        dividerStyle={dividerStyle} 
+                        paragraphDifferences={modification.paragraph_number_differences}
+                        textDifferences={modification.content_differences}
+                    />
+                ))}
+                {unchanged.map((unchanged) => (
+                    <ComparisonItem 
+                        key={unchanged.id}
+                        oldSubmittalItem={unchanged}
+                        newSubmittalItem={unchanged}
+                        isUnchanged={true}
+                        dividerStyle={dividerStyle}
+                    />
                 ))}
             </tbody>
         </table>
