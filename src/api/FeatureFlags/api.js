@@ -2,7 +2,7 @@ import axiosInstance from "../../config/axios";
 import handleError from "../../config/errorHandler";
 
 import { getCurrentUserData, getTeamDetails } from "../Authentication/api";
-import { NOTICES_FEATURE_FLAG_NAME, VERSIONING_FEATURE_FLAG_NAME } from "../../constants";
+import { NOTICES_FEATURE_FLAG_NAME, VERSIONING_FEATURE_FLAG_NAME, VERSION_COMPARISON_FEATURE_FLAG_NAME } from "../../constants";
 
 
 const listFeatureFlags = async () => {
@@ -42,11 +42,20 @@ const isVersioningFlagActive = async (teamId) => {
     return activeFlagsForTeam.includes(VERSIONING_FEATURE_FLAG_NAME) || activeFlagsForUser.includes(VERSIONING_FEATURE_FLAG_NAME);
 }
 
+const isVersionComparisonFlagActive = async (teamId) => {
+    const activeFlagsForTeam = await getActiveFlagsForTeam(teamId);
+    console.log('activeFlagsForTeam', activeFlagsForTeam);
+    const activeFlagsForUser = await getActiveFlagsForUser();
+    console.log('activeFlagsForUser', activeFlagsForUser);
+    return activeFlagsForTeam.includes(VERSION_COMPARISON_FEATURE_FLAG_NAME) || activeFlagsForUser.includes(VERSION_COMPARISON_FEATURE_FLAG_NAME);
+}
+
 
 export {
     listFeatureFlags,
     getActiveFlagsForUser,
     getActiveFlagsForTeam,
     isNoticesFlagActive,
-    isVersioningFlagActive
+    isVersioningFlagActive,
+    isVersionComparisonFlagActive,
 }
