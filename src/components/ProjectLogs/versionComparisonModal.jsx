@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Form, FormGroup, Label, Input, Row, Col } from 'reactstrap';
 import { getVersionComparison } from '../../api/ProjectLogs/api';
-import ComparisonItem from './comparisonItem';
+import { TwoPaneComparisonItem, SinglePaneComparisonItem } from './comparisonItem';
 import CircularProgress from '@mui/material/CircularProgress';
 
 const VersionComparisonModal = ({
@@ -11,13 +11,16 @@ const VersionComparisonModal = ({
     availableMasterformatNumbers,
 }) => {
     const [oldVersion, setOldVersion] = useState(null);
+    const [oldVersionName, setOldVersionName] = useState('');
     const [newVersion, setNewVersion] = useState(null);
+    const [newVersionName, setNewVersionName] = useState('');
     const [masterformatNumber, setMasterformatNumber] = useState(null);
     const [deletions, setDeletions] = useState([]);
     const [additions, setAdditions] = useState([]);
     const [modifications, setModifications] = useState([]);
     const [unchanged, setUnchanged] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+
     const handleGetVersionComparison = async () => {
         if (!oldVersion || !newVersion || !masterformatNumber) {
             return;
@@ -31,12 +34,18 @@ const VersionComparisonModal = ({
         setUnchanged(response.data.unchanged);
         setIsLoading(false);
     }
+
+    useEffect(() => {
+        handleGetVersionComparison();
+    }, [oldVersion, newVersion, masterformatNumber]);
+
     const dividerStyle = {
-        width: '2px',
+        width: '10px',
         padding: '0px',
-        backgroundColor: '#333',
-        borderLeft: '2px solid #333',
-        borderRight: '2px solid #333'
+        backgroundColor: 'white',
+        border: 'none',
+        borderTop: 'none',
+        borderBottom: 'none',
     }
 
   return (
@@ -48,7 +57,7 @@ const VersionComparisonModal = ({
       className="new-user version-comparison-modal"
     >
       <ModalHeader toggle={toggleVersionComparisonModal}>Version Comparison</ModalHeader>
-      <ModalBody>
+      <ModalBody style={{maxHeight: '95vh', height: '95vh'}}>
         <Form>
             <Row>
                 <Col>
@@ -56,7 +65,7 @@ const VersionComparisonModal = ({
                         <Label>Old Version</Label>
                         <Input type="select" value={oldVersion || ''} onChange={(e) => {
                             setOldVersion(e.target.value);
-                            handleGetVersionComparison();
+                            setOldVersionName(e.target.options[e.target.selectedIndex].text);
                         }}>
                             <option value="">Select a version...</option>
                             {availableVersions.map((version) => (
@@ -70,7 +79,7 @@ const VersionComparisonModal = ({
                         <Label>New Version</Label>
                         <Input type="select" value={newVersion || ''} onChange={(e) => {
                             setNewVersion(e.target.value);
-                            handleGetVersionComparison();
+                            setNewVersionName(e.target.options[e.target.selectedIndex].text);
                         }}>
                             <option value="">Select a version...</option>
                             {availableVersions.map((version) => (
@@ -84,7 +93,6 @@ const VersionComparisonModal = ({
                 <Label>Masterformat Number</Label>
                 <Input type="select" value={masterformatNumber || ''} onChange={(e) => {
                     setMasterformatNumber(e.target.value);
-                    handleGetVersionComparison();
                 }}>
                     <option value="">Select a MasterFormat number...</option>
                     {availableMasterformatNumbers.map((number) => (
@@ -98,7 +106,17 @@ const VersionComparisonModal = ({
         )}
         {isLoading && <Row className="mt-5 mb-5 ml-5 mr-5"><CircularProgress style={{margin: 'auto'}}/></Row>}
         {oldVersion && newVersion && masterformatNumber && !isLoading && (
-            <TwoPaneComparison deletions={deletions} additions={additions} modifications={modifications} unchanged={unchanged} oldVersion={oldVersion} newVersion={newVersion} dividerStyle={dividerStyle} />
+            <TwoPaneComparison 
+                deletions={deletions} 
+                additions={additions} 
+                modifications={modifications} 
+                unchanged={unchanged} 
+                oldVersion={oldVersion} 
+                oldVersionName={oldVersionName}
+                newVersion={newVersion} 
+                newVersionName={newVersionName}
+                dividerStyle={dividerStyle} 
+            />
         )}
         
       </ModalBody>
@@ -107,16 +125,27 @@ const VersionComparisonModal = ({
 }
 
 
-const TwoPaneComparison = ({ deletions, additions, modifications, unchanged, oldVersion, newVersion, dividerStyle }) => {
+const TwoPaneComparison = ({ 
+    deletions, 
+    additions, 
+    modifications, 
+    unchanged, 
+    oldVersion, 
+    oldVersionName, 
+    newVersion, 
+    newVersionName, 
+    dividerStyle 
+}) => {
     const empty = !deletions.length && !additions.length && !modifications.length && !unchanged.length;
     return (
         <>
-        <div className="d-flex justify-content-between">
-            <div className="d-flex flex-column">
-                <h5>{oldVersion?.version_name || ''}</h5>
+        <div className="table-titles" style={{ display: 'flex', marginBottom: '10px' }}>
+            <div style={{ flex: 1 }}>
+                <h5>{oldVersionName}</h5>
             </div>
-            <div className="d-flex flex-column">
-                <h5>{newVersion?.version_name || ''}</h5>
+            <div style={{ width: '10px' }}></div>  {/* Spacer to align with divider */}
+            <div style={{ flex: 1 }}>
+                <h5>{newVersionName}</h5>
             </div>
         </div>
         <table className="table table-bordered">
@@ -134,13 +163,13 @@ const TwoPaneComparison = ({ deletions, additions, modifications, unchanged, old
             <tbody>
                 {empty && <tr><td colSpan="7" style={{textAlign: 'center'}}>No submittals in these versions</td></tr>}
                 {deletions.map((deletion) => (
-                    <ComparisonItem key={deletion.id} oldSubmittalItem={deletion} isDeletion={true} dividerStyle={dividerStyle} />
+                    <TwoPaneComparisonItem key={deletion.id} oldSubmittalItem={deletion} isDeletion={true} dividerStyle={dividerStyle} />
                 ))}
                 {additions.map((addition) => (
-                    <ComparisonItem key={addition.id} newSubmittalItem={addition} isAddition={true} dividerStyle={dividerStyle} />
+                    <TwoPaneComparisonItem key={addition.id} newSubmittalItem={addition} isAddition={true} dividerStyle={dividerStyle} />
                 ))}
                 {modifications.map((modification) => (
-                    <ComparisonItem 
+                    <TwoPaneComparisonItem 
                         key={modification.id}
                         oldSubmittalItem={modification.old_submittal} 
                         newSubmittalItem={modification.new_submittal} 
@@ -151,7 +180,7 @@ const TwoPaneComparison = ({ deletions, additions, modifications, unchanged, old
                     />
                 ))}
                 {unchanged.map((unchanged) => (
-                    <ComparisonItem 
+                    <TwoPaneComparisonItem 
                         key={unchanged.id}
                         oldSubmittalItem={unchanged}
                         newSubmittalItem={unchanged}
@@ -164,4 +193,48 @@ const TwoPaneComparison = ({ deletions, additions, modifications, unchanged, old
         </>
     )
 }
+
+
+const SinglePaneComparison = ({ deletions, additions, modifications, unchanged, oldVersion, newVersion }) => {
+    const empty = !deletions.length && !additions.length && !modifications.length && !unchanged.length;
+    return (
+        <>
+        <table className="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Para No.</th>
+                    <th>Submittal Title</th>
+                    <th>Submittal Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {empty && <tr><td colSpan="7" style={{textAlign: 'center'}}>No submittals in these versions</td></tr>}
+                {deletions.map((deletion) => (
+                    <SinglePaneComparisonItem key={deletion.id} submittalItem={deletion} isDeletion={true} />
+                ))}
+                {additions.map((addition) => (
+                    <SinglePaneComparisonItem key={addition.id} submittalItem={addition} isAddition={true} />
+                ))}
+                {modifications.map((modification) => (
+                    <SinglePaneComparisonItem 
+                        key={modification.id}
+                        submittalItem={modification.new_submittal} 
+                        isModification={true} 
+                        paragraphDifferences={modification.paragraph_number_differences}
+                        textDifferences={modification.content_differences}
+                    />
+                ))}
+                {unchanged.map((unchanged) => (
+                    <SinglePaneComparisonItem 
+                        key={unchanged.id}
+                        submittalItem={unchanged}
+                        isUnchanged={true}
+                    />
+                ))}
+            </tbody>
+        </table>
+        </>
+    )
+}
+
 export default VersionComparisonModal;
