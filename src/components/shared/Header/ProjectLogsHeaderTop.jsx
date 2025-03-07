@@ -72,7 +72,13 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
         {props.isVersioningEnabled && (
           <>
             {props.isVersionComparisonEnabled && (
-              <Button color="primary" onClick={props.toggleVersionComparisonModal}>Version Comparison</Button>
+              <button
+                type="button"
+                className="table-top-btn btn-disabled selection-btn mr-2 mb-1"
+                onClick={props.toggleVersionComparisonModal}
+              >
+                <span>Compare Versions</span>
+              </button>
             )}
             <VersionDropdown
               availableVersions={props.projectVersions}
