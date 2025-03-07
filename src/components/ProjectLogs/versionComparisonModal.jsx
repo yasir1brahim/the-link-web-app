@@ -3,6 +3,8 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Form, FormGroup, La
 import { getVersionComparison } from '../../api/ProjectLogs/api';
 import { TwoPaneComparisonItem, SinglePaneComparisonItem } from './comparisonItem';
 import CircularProgress from '@mui/material/CircularProgress';
+import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
+
 
 const VersionComparisonModal = ({
     showVersionComparisonModal,
@@ -40,12 +42,22 @@ const VersionComparisonModal = ({
     }, [oldVersion, newVersion, masterformatNumber]);
 
     const dividerStyle = {
-        width: '10px',
+        width: '2%',
         padding: '0px',
         backgroundColor: 'white',
         border: 'none',
         borderTop: 'none',
         borderBottom: 'none',
+    }
+
+    const setOldVersionFromInput = (inputChangeEvent) => {
+        setOldVersion(inputChangeEvent.target.value);
+        setOldVersionName(inputChangeEvent.target.options[inputChangeEvent.target.selectedIndex].text);
+    }
+
+    const setNewVersionFromInput = (inputChangeEvent) => {
+        setNewVersion(inputChangeEvent.target.value);
+        setNewVersionName(inputChangeEvent.target.options[inputChangeEvent.target.selectedIndex].text);
     }
 
   return (
@@ -63,7 +75,20 @@ const VersionComparisonModal = ({
                 <Col>
                     <FormGroup>
                         <Label>Old Version</Label>
-                        <Input type="select" value={oldVersion || ''} onChange={(e) => {
+                        <SelectDropdown
+                            label={'Old Version'}
+                            setSelected={setOldVersionFromInput}
+                            selected={oldVersion}
+                            defaultInputValue={oldVersion}
+                            options={availableVersions.map((version) => {
+                                return {
+                                    value: version?.id,
+                                    label: version?.version_name,
+                                };
+                            })}
+                            className="form-control"
+                        />
+                        {/* <Input type="select" value={oldVersion || ''} onChange={(e) => {
                             setOldVersion(e.target.value);
                             setOldVersionName(e.target.options[e.target.selectedIndex].text);
                         }}>
@@ -71,7 +96,7 @@ const VersionComparisonModal = ({
                             {availableVersions.map((version) => (
                                 <option key={version.id} value={version.id}>{version.version_name}</option>
                             ))}
-                        </Input>
+                        </Input> */}
                     </FormGroup>
                 </Col>
                 <Col>
@@ -139,16 +164,28 @@ const TwoPaneComparison = ({
     const empty = !deletions.length && !additions.length && !modifications.length && !unchanged.length;
     return (
         <>
-        <div className="table-titles" style={{ display: 'flex', marginBottom: '10px' }}>
+        <div className="table-titles" style={{ display: 'flex' }}>
             <div style={{ flex: 1 }}>
                 <h5>{oldVersionName}</h5>
             </div>
-            <div style={{ width: '10px' }}></div>  {/* Spacer to align with divider */}
+            <div style={{ width: '2%' }}></div>  {/* Spacer to align with divider */}
             <div style={{ flex: 1 }}>
                 <h5>{newVersionName}</h5>
             </div>
         </div>
         <table className="table table-bordered">
+            <colgroup>
+                {/* Left side columns */}
+                <col style={{ width: '5%' }} />  {/* Para No. */}
+                <col style={{ width: '10%' }} />  {/* Submittal Title */}
+                <col style={{ width: '34%' }} />  {/* Submittal Description */}
+                {/* Divider */}
+                <col style={{ width: '2%' }} />   {/* Divider column */}
+                {/* Right side columns */}
+                <col style={{ width: '5%' }} />  {/* Para No. */}
+                <col style={{ width: '10%' }} />  {/* Submittal Title */}
+                <col style={{ width: '34%' }} />  {/* Submittal Description */}
+            </colgroup>
             <thead>
                 <tr>
                     <th>Para No.</th>

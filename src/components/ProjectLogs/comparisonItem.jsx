@@ -111,7 +111,7 @@ const OldParagraphDifferences = ({ paragraphDifferences }) => {
     return (
         <>
             {filteredParagraphDifferences.map((difference, index) => (
-                <span key={index} style={{backgroundColor: difference.type === 'delete' ? DELETION_COLOR : 'white'}}>
+                <span key={index} style={difference.type === 'delete' ? {textDecoration: 'line-through'} : {}}>
                     {difference.value}{index === filteredParagraphDifferences.length - 1 ? '' : '.'}
                 </span>
             ))}
@@ -161,7 +161,7 @@ const OldTextDifferences = ({ textDifferences }) => {
     return (
         <>
             {filteredTextDifferences.map((difference, index) => (
-                <span key={index} style={{backgroundColor: difference.type === 'delete' ? DELETION_COLOR : 'white'}}>
+                <span key={index} style={difference.type === 'delete' ? {textDecoration: 'line-through'} : {}}>
                     {difference.value}{index === filteredTextDifferences.length - 1 ? '' : ' '}
                 </span>
             ))}
