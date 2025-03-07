@@ -368,7 +368,7 @@ const ProjectLogs = () => {
 
     console.log("responseData", submittalItems.data);
     setSelectedFilterValue(submittalItems.data.all_filter_vals);
-    setAvailableMasterformatNumbers(submittalItems.data.all_filter_vals?.spec_section || []);
+    setAvailableMasterformatNumbers(submittalItems.data.all_masterformat_numbers_for_project || []);
     const submittalLogs = submittalItems.data.message;
     setLogData(submittalLogs);
     setHasPlaceholderSubmittals(submittalItems.data.has_placeholder_submittals || false);

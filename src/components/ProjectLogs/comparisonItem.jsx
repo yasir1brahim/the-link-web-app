@@ -3,7 +3,7 @@ import React from 'react';
 const DELETION_COLOR = '#FFE8E8';
 const ADDITION_COLOR = '#E8F5E9';
 const MODIFICATION_COLOR = 'white';
-const UNCHANGED_COLOR = '#F8F8F8';
+const UNCHANGED_COLOR = '#F0F0F0';
 
 export const TwoPaneComparisonItem = ({ 
     oldSubmittalItem,

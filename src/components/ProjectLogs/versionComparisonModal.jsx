@@ -17,10 +17,7 @@ const VersionComparisonModal = ({
     const [newVersion, setNewVersion] = useState(null);
     const [newVersionName, setNewVersionName] = useState('');
     const [masterformatNumber, setMasterformatNumber] = useState(null);
-    const [deletions, setDeletions] = useState([]);
-    const [additions, setAdditions] = useState([]);
-    const [modifications, setModifications] = useState([]);
-    const [unchanged, setUnchanged] = useState([]);
+    const [differences, setDifferences] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleGetVersionComparison = async () => {
@@ -30,10 +27,7 @@ const VersionComparisonModal = ({
         setIsLoading(true);
         const response = await getVersionComparison(oldVersion, newVersion, masterformatNumber);
         console.log('response', response);
-        setDeletions(response.data.deletions);
-        setAdditions(response.data.additions);
-        setModifications(response.data.modifications);
-        setUnchanged(response.data.unchanged);
+        setDifferences(response.data.differences);
         setIsLoading(false);
     }
 
@@ -48,16 +42,6 @@ const VersionComparisonModal = ({
         border: 'none',
         borderTop: 'none',
         borderBottom: 'none',
-    }
-
-    const setOldVersionFromInput = (inputChangeEvent) => {
-        setOldVersion(inputChangeEvent.target.value);
-        setOldVersionName(inputChangeEvent.target.options[inputChangeEvent.target.selectedIndex].text);
-    }
-
-    const setNewVersionFromInput = (inputChangeEvent) => {
-        setNewVersion(inputChangeEvent.target.value);
-        setNewVersionName(inputChangeEvent.target.options[inputChangeEvent.target.selectedIndex].text);
     }
 
   return (
@@ -75,20 +59,7 @@ const VersionComparisonModal = ({
                 <Col>
                     <FormGroup>
                         <Label>Old Version</Label>
-                        <SelectDropdown
-                            label={'Old Version'}
-                            setSelected={setOldVersionFromInput}
-                            selected={oldVersion}
-                            defaultInputValue={oldVersion}
-                            options={availableVersions.map((version) => {
-                                return {
-                                    value: version?.id,
-                                    label: version?.version_name,
-                                };
-                            })}
-                            className="form-control"
-                        />
-                        {/* <Input type="select" value={oldVersion || ''} onChange={(e) => {
+                        <Input type="select" value={oldVersion || ''} onChange={(e) => {
                             setOldVersion(e.target.value);
                             setOldVersionName(e.target.options[e.target.selectedIndex].text);
                         }}>
@@ -96,7 +67,7 @@ const VersionComparisonModal = ({
                             {availableVersions.map((version) => (
                                 <option key={version.id} value={version.id}>{version.version_name}</option>
                             ))}
-                        </Input> */}
+                        </Input>
                     </FormGroup>
                 </Col>
                 <Col>
@@ -132,10 +103,7 @@ const VersionComparisonModal = ({
         {isLoading && <Row className="mt-5 mb-5 ml-5 mr-5"><CircularProgress style={{margin: 'auto'}}/></Row>}
         {oldVersion && newVersion && masterformatNumber && !isLoading && (
             <TwoPaneComparison 
-                deletions={deletions} 
-                additions={additions} 
-                modifications={modifications} 
-                unchanged={unchanged} 
+                differences={differences} 
                 oldVersion={oldVersion} 
                 oldVersionName={oldVersionName}
                 newVersion={newVersion} 
@@ -151,17 +119,14 @@ const VersionComparisonModal = ({
 
 
 const TwoPaneComparison = ({ 
-    deletions, 
-    additions, 
-    modifications, 
-    unchanged, 
+    differences, 
     oldVersion, 
     oldVersionName, 
     newVersion, 
     newVersionName, 
     dividerStyle 
 }) => {
-    const empty = !deletions.length && !additions.length && !modifications.length && !unchanged.length;
+    const empty = !differences.length;
     return (
         <>
         <div className="table-titles" style={{ display: 'flex' }}>
@@ -199,32 +164,39 @@ const TwoPaneComparison = ({
             </thead>
             <tbody>
                 {empty && <tr><td colSpan="7" style={{textAlign: 'center'}}>No submittals in these versions</td></tr>}
-                {deletions.map((deletion) => (
-                    <TwoPaneComparisonItem key={deletion.id} oldSubmittalItem={deletion} isDeletion={true} dividerStyle={dividerStyle} />
-                ))}
-                {additions.map((addition) => (
-                    <TwoPaneComparisonItem key={addition.id} newSubmittalItem={addition} isAddition={true} dividerStyle={dividerStyle} />
-                ))}
-                {modifications.map((modification) => (
-                    <TwoPaneComparisonItem 
-                        key={modification.id}
-                        oldSubmittalItem={modification.old_submittal} 
-                        newSubmittalItem={modification.new_submittal} 
-                        isModification={true} 
-                        dividerStyle={dividerStyle} 
-                        paragraphDifferences={modification.paragraph_number_differences}
-                        textDifferences={modification.content_differences}
-                    />
-                ))}
-                {unchanged.map((unchanged) => (
-                    <TwoPaneComparisonItem 
-                        key={unchanged.id}
-                        oldSubmittalItem={unchanged}
-                        newSubmittalItem={unchanged}
-                        isUnchanged={true}
-                        dividerStyle={dividerStyle}
-                    />
-                ))}
+                {differences.map(difference => {
+                    if (difference.difference_type === 'deletion') {
+                        return (
+                            <TwoPaneComparisonItem key={difference.id} oldSubmittalItem={difference.old_submittal} isDeletion={true} dividerStyle={dividerStyle} />
+                        )
+                    } else if (difference.difference_type === 'addition') {
+                        return (
+                            <TwoPaneComparisonItem key={difference.id} newSubmittalItem={difference.new_submittal} isAddition={true} dividerStyle={dividerStyle} />
+                        )
+                    } else if (difference.difference_type === 'modification') {
+                        return (
+                            <TwoPaneComparisonItem 
+                                key={difference.id} 
+                                oldSubmittalItem={difference.old_submittal} 
+                                newSubmittalItem={difference.new_submittal} 
+                                isModification={true} 
+                                dividerStyle={dividerStyle} 
+                                paragraphDifferences={difference.paragraph_number_differences}
+                                textDifferences={difference.content_differences}
+                            />
+                        )
+                    } else if (difference.difference_type === 'unchanged') {
+                        return (
+                            <TwoPaneComparisonItem 
+                                key={difference.id}
+                                oldSubmittalItem={difference.old_submittal}
+                                newSubmittalItem={difference.new_submittal}
+                                isUnchanged={true}
+                                dividerStyle={dividerStyle}
+                            />
+                        )
+                    }
+                })}
             </tbody>
         </table>
         </>
