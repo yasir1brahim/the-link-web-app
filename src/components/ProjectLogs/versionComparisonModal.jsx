@@ -86,32 +86,27 @@ const VersionComparisonModal = ({
                 </Col>
             </Row>
             <FormGroup>
-                <Label>Masterformat Number</Label>
-                <Input type="select" value={masterformatNumber || ''} onChange={(e) => {
-                    setMasterformatNumber(e.target.value);
-                }}>
-                    <option value="">Select a MasterFormat number...</option>
-                    {availableMasterformatNumbers.map((number) => (
-                        <option key={number} value={number}>{number}</option>
-                    ))}
-                </Input>
+                <Label>Spec Section</Label>
+                <MasterformatNumberSelector availableMasterformatNumbers={availableMasterformatNumbers} masterformatNumber={masterformatNumber} setMasterformatNumber={setMasterformatNumber} />
             </FormGroup>
         </Form>
         {(!oldVersion || !newVersion || !masterformatNumber) && (
-            <Row className="mt-5 mb-5 ml-5 mr-5"><p style={{margin: 'auto'}}>Select two versions and a MasterFormat number to compare differences</p></Row>
+            <Row className="mt-5 mb-5 ml-5 mr-5"><p style={{margin: 'auto'}}>Select two versions and a spec section to compare differences</p></Row>
         )}
         {isLoading && <Row className="mt-5 mb-5 ml-5 mr-5"><CircularProgress style={{margin: 'auto'}}/></Row>}
         {oldVersion && newVersion && masterformatNumber && !isLoading && (
-            <TwoPaneComparison 
-                differences={differences} 
-                oldVersion={oldVersion} 
-                oldVersionName={oldVersionName}
-                newVersion={newVersion} 
-                newVersionName={newVersionName}
-                dividerStyle={dividerStyle} 
-            />
+            <>
+                <TwoPaneComparison 
+                    differences={differences} 
+                    oldVersion={oldVersion} 
+                    oldVersionName={oldVersionName}
+                    newVersion={newVersion} 
+                    newVersionName={newVersionName}
+                    dividerStyle={dividerStyle} 
+                />
+                <MasterformatNumberPager availableMasterformatNumbers={availableMasterformatNumbers} currentMasterformatNumber={masterformatNumber} setMasterformatNumber={setMasterformatNumber} />
+            </>
         )}
-        
       </ModalBody>
     </Modal>
   )
@@ -200,6 +195,38 @@ const TwoPaneComparison = ({
             </tbody>
         </table>
         </>
+    )
+}
+
+
+const formatSpecSection = (specSection) => {
+    if (typeof specSection !== "string") return specSection;
+    return specSection.slice(0, 2) + " " + specSection.slice(2, 4) + " " + specSection.slice(4);
+};
+
+const MasterformatNumberSelector = ({ availableMasterformatNumbers, masterformatNumber, setMasterformatNumber }) => {
+    return (
+        <Input type="select" value={masterformatNumber || ''} onChange={(e) => {
+            setMasterformatNumber(e.target.value);
+        }}>
+            <option value="">Select a spec section...</option>
+            {availableMasterformatNumbers.map((number) => (
+                <option key={number} value={number}>{formatSpecSection(number)}</option>
+            ))}
+        </Input>
+    )
+}
+
+const MasterformatNumberPager = ({ availableMasterformatNumbers, currentMasterformatNumber, setMasterformatNumber }) => {
+    const index = availableMasterformatNumbers.findIndex(number => number === currentMasterformatNumber);
+    return (
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
+            <Button onClick={() => setMasterformatNumber(availableMasterformatNumbers[index - 1])}>Previous</Button>
+            <div style={{display: 'flex', maxWidth: '30%'}}>
+                <MasterformatNumberSelector availableMasterformatNumbers={availableMasterformatNumbers} masterformatNumber={currentMasterformatNumber} setMasterformatNumber={setMasterformatNumber} />
+            </div>
+            <Button onClick={() => setMasterformatNumber(availableMasterformatNumbers[index + 1])}>Next</Button>
+        </div>
     )
 }
 
