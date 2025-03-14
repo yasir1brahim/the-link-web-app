@@ -68,7 +68,7 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
         </div>
       </div>
       <div className="col-4"></div>
-      <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '0px' }}>
         {props.isVersioningEnabled && (
           <>
             {props.isVersionComparisonEnabled && (
