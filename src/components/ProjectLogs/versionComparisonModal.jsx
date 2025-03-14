@@ -4,7 +4,7 @@ import { getVersionComparison } from '../../api/ProjectLogs/api';
 import { TwoPaneComparisonItem, SinglePaneComparisonItem } from './comparisonItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
-
+import { ArrowBack, ArrowForward } from '@mui/icons-material';
 
 const VersionComparisonModal = ({
     showVersionComparisonModal,
@@ -204,9 +204,9 @@ const formatSpecSection = (specSection) => {
     return specSection.slice(0, 2) + " " + specSection.slice(2, 4) + " " + specSection.slice(4);
 };
 
-const MasterformatNumberSelector = ({ availableMasterformatNumbers, masterformatNumber, setMasterformatNumber }) => {
+const MasterformatNumberSelector = ({ availableMasterformatNumbers, masterformatNumber, setMasterformatNumber, centerText = false }) => {
     return (
-        <Input type="select" value={masterformatNumber || ''} onChange={(e) => {
+        <Input type="select" style={{minWidth: '125px', textAlign: centerText ? 'center' : 'left', textAlignLast: centerText ? 'center' : 'left'}} value={masterformatNumber || ''} onChange={(e) => {
             setMasterformatNumber(e.target.value);
         }}>
             <option value="">Select a spec section...</option>
@@ -220,12 +220,26 @@ const MasterformatNumberSelector = ({ availableMasterformatNumbers, masterformat
 const MasterformatNumberPager = ({ availableMasterformatNumbers, currentMasterformatNumber, setMasterformatNumber }) => {
     const index = availableMasterformatNumbers.findIndex(number => number === currentMasterformatNumber);
     return (
-        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
-            <Button onClick={() => setMasterformatNumber(availableMasterformatNumbers[index - 1])}>Previous</Button>
-            <div style={{display: 'flex', maxWidth: '30%'}}>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', margin: 'auto', paddingBottom: '10px'}}>
+            <Button 
+                style={{display: 'flex', alignItems: 'center', justifyContent: 'left', minWidth: '125px'}} 
+                onClick={() => setMasterformatNumber(availableMasterformatNumbers[index - 1])}
+                disabled={index === 0}
+            >
+                <ArrowBack style={{marginRight: '5px'}}/>
+                {formatSpecSection(availableMasterformatNumbers[index - 1])}
+            </Button>
+            <div style={{display: 'flex', width: '125px'}}>
                 <MasterformatNumberSelector availableMasterformatNumbers={availableMasterformatNumbers} masterformatNumber={currentMasterformatNumber} setMasterformatNumber={setMasterformatNumber} />
             </div>
-            <Button onClick={() => setMasterformatNumber(availableMasterformatNumbers[index + 1])}>Next</Button>
+            <Button 
+                style={{display: 'flex', alignItems: 'center', justifyContent: 'right', minWidth: '125px'}} 
+                onClick={() => setMasterformatNumber(availableMasterformatNumbers[index + 1])}
+                disabled={index === availableMasterformatNumbers.length - 1}
+            >
+                {formatSpecSection(availableMasterformatNumbers[index + 1])}
+                <ArrowForward style={{marginLeft: '5px'}}/>
+            </Button>
         </div>
     )
 }
