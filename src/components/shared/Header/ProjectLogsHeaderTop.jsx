@@ -68,8 +68,18 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
         </div>
       </div>
       <div className="col-4"></div>
-      <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '0px' }}>
         {props.isVersioningEnabled && (
+          <>
+            {props.isVersionComparisonEnabled && (
+              <button
+                type="button"
+                className="table-top-btn btn-disabled selection-btn mr-2 mb-1"
+                onClick={props.toggleVersionComparisonModal}
+              >
+                <span>Compare Versions</span>
+              </button>
+            )}
             <VersionDropdown
               availableVersions={props.projectVersions}
               currentVersionId={props.projectVersionId}
@@ -89,6 +99,7 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
               }
               onPressAddNewVersion={() => props.setShowVersionModal(true)}
             />
+          </>
         )}
       </div>
     </div>

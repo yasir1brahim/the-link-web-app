@@ -33,10 +33,10 @@ import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmitta
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
-import { isVersioningFlagActive } from "../../api/FeatureFlags/api";
+import { isVersioningFlagActive, isVersionComparisonFlagActive } from "../../api/FeatureFlags/api";
 import { getCurrentUserData } from "../../api/Authentication/api";
 import ArchiveConfirmationModal from "./archiveConfirmationModal";
-
+import VersionComparisonModal from "./versionComparisonModal";
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
@@ -181,7 +181,9 @@ const ProjectLogs = () => {
   const [page, setPage] = React.useState(1);
 
   const [versioningFeatureFlagActive, setVersioningFeatureFlagActive] = useState(false);
+  const [versionComparisonFeatureFlagActive, setVersionComparisonFeatureFlagActive] = useState(false);
   const [availableVersions, setAvailableVersions] = useState([]);
+  const [availableMasterformatNumbers, setAvailableMasterformatNumbers] = useState([]);
   const [projectVersionId, setProjectVersionId] = useState(searchParams.get("projectVersion") ? parseInt(searchParams.get("projectVersion")) : null);
   const [showVersionModal, setShowVersionModal] = useState(false);
   const toggleVersionModal = () => setShowVersionModal(!showVersionModal);
@@ -189,6 +191,8 @@ const ProjectLogs = () => {
   const toggleArchiveConfirmationModal = () => setShowArchiveConfirmationModal(!showArchiveConfirmationModal);
   const [editingVersionId, setEditingVersionId] = useState(null);
   const [editingVersionName, setEditingVersionName] = useState('');
+  const [showVersionComparisonModal, setShowVersionComparisonModal] = useState(false);
+  const toggleVersionComparisonModal = () => setShowVersionComparisonModal(!showVersionComparisonModal);
 
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
@@ -364,7 +368,7 @@ const ProjectLogs = () => {
 
     console.log("responseData", submittalItems.data);
     setSelectedFilterValue(submittalItems.data.all_filter_vals);
-
+    setAvailableMasterformatNumbers(submittalItems.data.all_masterformat_numbers_for_project || []);
     const submittalLogs = submittalItems.data.message;
     setLogData(submittalLogs);
     setHasPlaceholderSubmittals(submittalItems.data.has_placeholder_submittals || false);
@@ -438,6 +442,8 @@ const ProjectLogs = () => {
       setTeamId(response.data.team);
       const versioningActive = await isVersioningFlagActive(response.data.team);
       setVersioningFeatureFlagActive(versioningActive);
+      const versionComparisonActive = await isVersionComparisonFlagActive(response.data.team);
+      setVersionComparisonFeatureFlagActive(versionComparisonActive);
       setProjectName(response.data.name);
       const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
       setProjectVersionId(activeVersion);
@@ -1219,6 +1225,8 @@ const ProjectLogs = () => {
             navBtn={"logs"}
             teamId={teamId}
             isVersioningEnabled={versioningFeatureFlagActive}
+            isVersionComparisonEnabled={versionComparisonFeatureFlagActive}
+            toggleVersionComparisonModal={toggleVersionComparisonModal}
             onClickVersion={onClickVersion}
             projectVersionId={projectVersionId}
             projectVersions={availableVersions}
@@ -1733,6 +1741,13 @@ const ProjectLogs = () => {
         initialProjectVersionName={editingVersionName}
         handleUpdateProjectVersion={handleUpdateProjectVersion}
         handleCreateProjectVersion={handleCreateProjectVersion}
+      />}
+
+      {showVersionComparisonModal && <VersionComparisonModal
+        showVersionComparisonModal={showVersionComparisonModal}
+        toggleVersionComparisonModal={toggleVersionComparisonModal}
+        availableVersions={availableVersions}
+        availableMasterformatNumbers={availableMasterformatNumbers}
       />}
 
       {showArchiveConfirmationModal && <ArchiveConfirmationModal

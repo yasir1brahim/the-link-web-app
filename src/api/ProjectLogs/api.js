@@ -280,6 +280,26 @@ const getProjectIdBySubmittalId = async (submittalId) => {
     }
 }
 
+
+const getVersionComparison = async (oldVersionId, newVersionId, masterformatNumber) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: 'api/deliverables/version-comparison/',
+            params: {
+                'old_version': oldVersionId,
+                'new_version': newVersionId,
+                'masterformat_number': masterformatNumber
+            }
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+
+
+
 export {
     getSavedLogs,
     getSubmittalItemById,
@@ -295,5 +315,6 @@ export {
     getExcelExportHeader,
     upsertExcelExportHeader,
     combineRows,
-    getProjectIdBySubmittalId
+    getProjectIdBySubmittalId,
+    getVersionComparison,
 }
