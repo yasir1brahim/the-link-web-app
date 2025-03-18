@@ -297,8 +297,22 @@ const getVersionComparison = async (oldVersionId, newVersionId, masterformatNumb
     }
 }
 
-
-
+const getFilteredVersionComparison = async (oldVersionId, newVersionId, differencesOnly, searchTerm) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: 'api/deliverables/filtered-version-comparison/',
+            params: {
+                'old_version': oldVersionId,
+                'new_version': newVersionId,
+                'only_differences': differencesOnly,
+                'keyword': searchTerm
+            }
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
 
 export {
     getSavedLogs,
@@ -317,4 +331,5 @@ export {
     combineRows,
     getProjectIdBySubmittalId,
     getVersionComparison,
+    getFilteredVersionComparison,
 }

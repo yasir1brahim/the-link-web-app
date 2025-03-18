@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Form, FormGroup, Label, Input, Row, Col } from 'reactstrap';
-import { getVersionComparison } from '../../api/ProjectLogs/api';
+import { getVersionComparison, getFilteredVersionComparison } from '../../api/ProjectLogs/api';
 import { TwoPaneComparisonItem, SinglePaneComparisonItem } from './comparisonItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
@@ -16,7 +16,12 @@ const VersionComparisonModal = ({
     const [oldVersionName, setOldVersionName] = useState('');
     const [newVersion, setNewVersion] = useState(null);
     const [newVersionName, setNewVersionName] = useState('');
+    const [onlyDifferences, setOnlyDifferences] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const [masterformatNumber, setMasterformatNumber] = useState(null);
+
+    const [fullComparison, setFullComparison] = useState([]);
+    const [masterformatNumbersWithDifferences, setMasterformatNumbersWithDifferences] = useState(availableMasterformatNumbers);
     const [differences, setDifferences] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -31,9 +36,49 @@ const VersionComparisonModal = ({
         setIsLoading(false);
     }
 
+    const clearFilters = () => {
+        setOnlyDifferences(false);
+        setSearchTerm('');
+        setFullComparison([]);
+        setMasterformatNumbersWithDifferences(availableMasterformatNumbers);
+    }
+
     useEffect(() => {
-        handleGetVersionComparison();
-    }, [oldVersion, newVersion, masterformatNumber]);
+        setFullComparison([]);
+        setMasterformatNumbersWithDifferences(availableMasterformatNumbers);
+    }, [onlyDifferences, searchTerm]);
+
+    const handleGetFilteredVersionComparison = async () => {
+        setMasterformatNumber(null);
+        if (!oldVersion || !newVersion) {
+            alert('Please select two versions to compare');
+            return;
+        }
+        if (!onlyDifferences && !searchTerm) {
+            clearFilters();
+            handleGetVersionComparison();
+            return;
+        }
+        setIsLoading(true);
+        const response = await getFilteredVersionComparison(oldVersion, newVersion, onlyDifferences, searchTerm);
+        console.log('response', response);
+        setFullComparison(response.data.comparison);
+        setMasterformatNumbersWithDifferences(response.data.masterformat_numbers_with_desired_differences);
+        setIsLoading(false);
+    }
+
+    useEffect(() => {
+        if (fullComparison.length > 0) {
+            const item = fullComparison.filter(item => item.masterformat_number === masterformatNumber)
+            if (item.length > 0) {
+                setDifferences(item[0].differences);
+            } else {
+                setDifferences([]);
+            }
+        } else {
+            handleGetVersionComparison();
+        }
+    }, [masterformatNumber]);
 
     const dividerStyle = {
         width: '2%',
@@ -85,9 +130,21 @@ const VersionComparisonModal = ({
                     </FormGroup>
                 </Col>
             </Row>
+            <Row>
+                <FormGroup>
+                    <Label>Filter to only differences</Label>
+                    <Input type="checkbox" checked={onlyDifferences} onChange={(e) => setOnlyDifferences(e.target.checked)} />
+                </FormGroup>
+                <FormGroup>
+                    <Label>Search</Label>
+                    <Input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                </FormGroup>
+                <Button onClick={handleGetFilteredVersionComparison}>Search</Button>
+            </Row>
+            
             <FormGroup>
                 <Label>Spec Section</Label>
-                <MasterformatNumberSelector availableMasterformatNumbers={availableMasterformatNumbers} masterformatNumber={masterformatNumber} setMasterformatNumber={setMasterformatNumber} />
+                <MasterformatNumberSelector availableMasterformatNumbers={masterformatNumbersWithDifferences} masterformatNumber={masterformatNumber} setMasterformatNumber={setMasterformatNumber} />
             </FormGroup>
         </Form>
         {(!oldVersion || !newVersion || !masterformatNumber) && (
@@ -104,7 +161,7 @@ const VersionComparisonModal = ({
                     newVersionName={newVersionName}
                     dividerStyle={dividerStyle} 
                 />
-                <MasterformatNumberPager availableMasterformatNumbers={availableMasterformatNumbers} currentMasterformatNumber={masterformatNumber} setMasterformatNumber={setMasterformatNumber} />
+                <MasterformatNumberPager availableMasterformatNumbers={masterformatNumbersWithDifferences} currentMasterformatNumber={masterformatNumber} setMasterformatNumber={setMasterformatNumber} />
             </>
         )}
       </ModalBody>
