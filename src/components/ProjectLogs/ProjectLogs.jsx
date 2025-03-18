@@ -186,11 +186,18 @@ const ProjectLogs = () => {
   const [availableMasterformatNumbers, setAvailableMasterformatNumbers] = useState([]);
   const [projectVersionId, setProjectVersionId] = useState(searchParams.get("projectVersion") ? parseInt(searchParams.get("projectVersion")) : null);
   const [showVersionModal, setShowVersionModal] = useState(false);
-  const toggleVersionModal = () => setShowVersionModal(!showVersionModal);
-  const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] = useState(false);
-  const toggleArchiveConfirmationModal = () => setShowArchiveConfirmationModal(!showArchiveConfirmationModal);
   const [editingVersionId, setEditingVersionId] = useState(null);
   const [editingVersionName, setEditingVersionName] = useState('');
+  const toggleVersionModal = () => {
+    if (showVersionModal) {
+      setEditingVersionId(null);
+      setEditingVersionName('');
+    }
+    setShowVersionModal(!showVersionModal);
+  }
+  const [showArchiveConfirmationModal, setShowArchiveConfirmationModal] = useState(false);
+  const toggleArchiveConfirmationModal = () => setShowArchiveConfirmationModal(!showArchiveConfirmationModal);
+ 
   const [showVersionComparisonModal, setShowVersionComparisonModal] = useState(false);
   const toggleVersionComparisonModal = () => setShowVersionComparisonModal(!showVersionComparisonModal);
 
@@ -280,7 +287,7 @@ const ProjectLogs = () => {
           draggable: true,
           progress: undefined,
         });
-        setShowVersionModal(false);
+        toggleVersionModal();
         onClickVersion(response.data.id);
       } else {
         console.log("response.data", response.data);
@@ -317,7 +324,7 @@ const ProjectLogs = () => {
           progress: undefined,
         });
         setAvailableVersions(availableVersions.map((version) => version.id === versionId ? response.data : version));
-        setShowVersionModal(false);
+        toggleVersionModal();
       } else {
         handleError(response);
       }
