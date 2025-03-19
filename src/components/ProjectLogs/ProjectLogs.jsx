@@ -33,7 +33,7 @@ import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmitta
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
-import { isVersioningFlagActive, isVersionComparisonFlagActive } from "../../api/FeatureFlags/api";
+import { isVersioningFlagActive, isVersionComparisonFlagActive, isVersionComparisonSearchFlagActive } from "../../api/FeatureFlags/api";
 import { getCurrentUserData } from "../../api/Authentication/api";
 import ArchiveConfirmationModal from "./archiveConfirmationModal";
 import VersionComparisonModal from "./versionComparisonModal";
@@ -182,6 +182,7 @@ const ProjectLogs = () => {
 
   const [versioningFeatureFlagActive, setVersioningFeatureFlagActive] = useState(false);
   const [versionComparisonFeatureFlagActive, setVersionComparisonFeatureFlagActive] = useState(false);
+  const [versionComparisonSearchFlagActive, setVersionComparisonSearchFlagActive] = useState(false);
   const [availableVersions, setAvailableVersions] = useState([]);
   const [availableMasterformatNumbers, setAvailableMasterformatNumbers] = useState([]);
   const [projectVersionId, setProjectVersionId] = useState(searchParams.get("projectVersion") ? parseInt(searchParams.get("projectVersion")) : null);
@@ -451,6 +452,8 @@ const ProjectLogs = () => {
       setVersioningFeatureFlagActive(versioningActive);
       const versionComparisonActive = await isVersionComparisonFlagActive(response.data.team);
       setVersionComparisonFeatureFlagActive(versionComparisonActive);
+      const versionComparisonSearchActive = await isVersionComparisonSearchFlagActive(response.data.team);
+      setVersionComparisonSearchFlagActive(versionComparisonSearchActive);
       setProjectName(response.data.name);
       const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
       setProjectVersionId(activeVersion);
@@ -1755,6 +1758,7 @@ const ProjectLogs = () => {
         toggleVersionComparisonModal={toggleVersionComparisonModal}
         availableVersions={availableVersions}
         availableMasterformatNumbers={availableMasterformatNumbers}
+        versionComparisonSearchFlagActive={versionComparisonSearchFlagActive}
       />}
 
       {showArchiveConfirmationModal && <ArchiveConfirmationModal

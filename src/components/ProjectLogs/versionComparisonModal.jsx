@@ -1,12 +1,239 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Form, FormGroup, Label, Input, Row, Col } from 'reactstrap';
-import { getVersionComparison } from '../../api/ProjectLogs/api';
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Form, FormGroup, Label, Input, Row, Col, Card, CardHeader, CardBody, Collapse } from 'reactstrap';
+import { getVersionComparison, getFilteredVersionComparison } from '../../api/ProjectLogs/api';
 import { TwoPaneComparisonItem, SinglePaneComparisonItem } from './comparisonItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import SelectDropdown from "../shared/SelectDropdown/SelectDropdown";
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 
 const VersionComparisonModal = ({
+    showVersionComparisonModal,
+    toggleVersionComparisonModal,
+    availableVersions,
+    availableMasterformatNumbers,
+    versionComparisonSearchFlagActive
+}) => {
+    if (versionComparisonSearchFlagActive) {
+        return <VersionComparisonModalWithSearch
+            showVersionComparisonModal={showVersionComparisonModal}
+            toggleVersionComparisonModal={toggleVersionComparisonModal}
+            availableVersions={availableVersions}
+            availableMasterformatNumbers={availableMasterformatNumbers}
+        />
+    } else {
+        return <VersionComparisonModalWithoutSearch
+            showVersionComparisonModal={showVersionComparisonModal}
+            toggleVersionComparisonModal={toggleVersionComparisonModal}
+            availableVersions={availableVersions}
+            availableMasterformatNumbers={availableMasterformatNumbers}
+        />
+    }
+}
+
+const VersionComparisonModalWithSearch = ({
+    showVersionComparisonModal,
+    toggleVersionComparisonModal,
+    availableVersions,
+    availableMasterformatNumbers
+}) => {
+    const [oldVersion, setOldVersion] = useState(null);
+    const [oldVersionName, setOldVersionName] = useState('');
+    const [newVersion, setNewVersion] = useState(null);
+    const [newVersionName, setNewVersionName] = useState('');
+    const [onlyDifferences, setOnlyDifferences] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [masterformatNumber, setMasterformatNumber] = useState(null);
+
+    const [fullComparison, setFullComparison] = useState([]);
+    const [masterformatNumbersWithDifferences, setMasterformatNumbersWithDifferences] = useState(availableMasterformatNumbers);
+    const [differences, setDifferences] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const [filterCollapseOpen, setFilterCollapseOpen] = useState(true);
+    const toggleFilterCollapse = () => setFilterCollapseOpen(!filterCollapseOpen);
+
+    const handleGetVersionComparison = async () => {
+        if (!oldVersion || !newVersion || !masterformatNumber) {
+            return;
+        }
+        setIsLoading(true);
+        const response = await getVersionComparison(oldVersion, newVersion, masterformatNumber);
+        console.log('response', response);
+        setDifferences(response.data.differences);
+        setIsLoading(false);
+    }
+
+    const clearFilters = () => {
+        setOnlyDifferences(false);
+        setSearchTerm('');
+        setFullComparison([]);
+        setMasterformatNumbersWithDifferences(availableMasterformatNumbers);
+    }
+
+    useEffect(() => {
+        setFullComparison([]);
+        setMasterformatNumbersWithDifferences(availableMasterformatNumbers);
+    }, [onlyDifferences, searchTerm]);
+
+    const handleGetFilteredVersionComparison = async () => {
+        setMasterformatNumber(null);
+        if (!oldVersion || !newVersion) {
+            alert('Please select two versions to compare');
+            return;
+        }
+        if (!onlyDifferences && !searchTerm) {
+            clearFilters();
+            handleGetVersionComparison();
+            return;
+        }
+        setIsLoading(true);
+        const response = await getFilteredVersionComparison(oldVersion, newVersion, onlyDifferences, searchTerm);
+        console.log('response', response);
+        setFullComparison(response.data.comparison);
+        setMasterformatNumbersWithDifferences(response.data.masterformat_numbers_with_desired_differences);
+        setIsLoading(false);
+    }
+
+    useEffect(() => {
+        if (fullComparison.length > 0) {
+            const item = fullComparison.filter(item => item.masterformat_number === masterformatNumber)
+            if (item.length > 0) {
+                setDifferences(item[0].differences);
+            } else {
+                setDifferences([]);
+            }
+        } else {
+            handleGetVersionComparison();
+        }
+    }, [masterformatNumber]);
+
+    const dividerStyle = {
+        width: '2%',
+        padding: '0px',
+        backgroundColor: 'white',
+        border: 'none',
+        borderTop: 'none',
+        borderBottom: 'none',
+    }
+
+  return (
+    <Modal
+      isOpen={showVersionComparisonModal}
+      fade={false}
+      toggle={toggleVersionComparisonModal}
+      style={{maxWidth: '95%', width: '95%', maxHeight: '95vh'}}
+      className="new-user version-comparison-modal"
+    >
+      <ModalHeader toggle={toggleVersionComparisonModal}>Version Comparison</ModalHeader>
+      <ModalBody style={{maxHeight: '95vh', height: '95vh'}}>
+        <Form>
+            <Row>
+                <Col>
+                    <FormGroup>
+                        <Label>Old Version *</Label>
+                        <Input type="select" value={oldVersion || ''} onChange={(e) => {
+                            setOldVersion(e.target.value);
+                            setOldVersionName(e.target.options[e.target.selectedIndex].text);
+                        }}>
+                            <option value="">Select a version...</option>
+                            {availableVersions.map((version) => (
+                                <option key={version.id} value={version.id}>{version.version_name}</option>
+                            ))}
+                        </Input>
+                    </FormGroup>
+                </Col>
+                <Col>
+                    <FormGroup>
+                        <Label>New Version *</Label>
+                        <Input type="select" value={newVersion || ''} onChange={(e) => {
+                            setNewVersion(e.target.value);
+                            setNewVersionName(e.target.options[e.target.selectedIndex].text);
+                        }}>
+                            <option value="">Select a version...</option>
+                            {availableVersions.map((version) => (
+                                <option key={version.id} value={version.id}>{version.version_name}</option>
+                            ))}
+                        </Input>
+                    </FormGroup>
+                </Col>
+            </Row>
+            <Card className="mb-3">
+                <CardHeader 
+                    onClick={toggleFilterCollapse} 
+                    style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between'}}
+                >
+                    <strong>Filter comparison items</strong>
+                    <span style={{marginLeft: '10px'}}>{filterCollapseOpen ? '▼' : '►'}</span>
+                </CardHeader>
+                <Collapse isOpen={filterCollapseOpen}>
+                    <CardBody>
+                        <Row style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                            <Col>
+                                <FormGroup style={{display: 'flex', alignItems: 'center', marginBottom: '0px'}}>
+                                    <Label style={{marginBottom: 0, marginRight: '10px'}}>Only show differences</Label>
+                                    <Input 
+                                        type="checkbox" 
+                                        style={{width: '20px', height: '20px', marginLeft: '10px', marginTop: '0px'}} 
+                                        checked={onlyDifferences} 
+                                        onChange={(e) => setOnlyDifferences(e.target.checked)} 
+                                    />
+                                </FormGroup>
+                            </Col>
+                            <Col>
+                                <FormGroup style={{marginBottom: '0px'}}>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="searchTerm"
+                                        aria-describedby="searchTerm"
+                                        placeholder="Search"
+                                        defaultValue={searchTerm}
+                                        onChange={(e) => {
+                                            setSearchTerm(e.target.value);
+                                        }}
+                                    />
+                                    <label className="text-label" htmlFor="searchTerm">
+                                        Search
+                                    </label>
+                                </FormGroup>
+                            </Col>
+                            <Col style={{display: 'flex', justifyContent: 'right'}}>
+                                  <Button onClick={handleGetFilteredVersionComparison}>Apply Filters</Button>
+                            </Col>
+                        </Row>
+                    </CardBody>
+                </Collapse>
+            </Card>
+            
+            {!isLoading && <FormGroup>
+                <Label>Spec Section *</Label>
+                <MasterformatNumberSelector availableMasterformatNumbers={masterformatNumbersWithDifferences} masterformatNumber={masterformatNumber} setMasterformatNumber={setMasterformatNumber} />
+            </FormGroup>}
+        </Form>
+        {(!oldVersion || !newVersion || !masterformatNumber) && (
+            <Row className="mt-5 mb-5 ml-5 mr-5"><p style={{margin: 'auto'}}>Select two versions and a spec section to compare differences</p></Row>
+        )}
+        {isLoading && <Row className="mt-5 mb-5 ml-5 mr-5"><CircularProgress style={{margin: 'auto'}}/></Row>}
+        {oldVersion && newVersion && masterformatNumber && !isLoading && (
+            <>
+                <TwoPaneComparison 
+                    differences={differences} 
+                    oldVersion={oldVersion} 
+                    oldVersionName={oldVersionName}
+                    newVersion={newVersion} 
+                    newVersionName={newVersionName}
+                    dividerStyle={dividerStyle} 
+                />
+                <MasterformatNumberPager availableMasterformatNumbers={masterformatNumbersWithDifferences} currentMasterformatNumber={masterformatNumber} setMasterformatNumber={setMasterformatNumber} />
+            </>
+        )}
+      </ModalBody>
+    </Modal>
+  )
+}
+
+
+const VersionComparisonModalWithoutSearch = ({
     showVersionComparisonModal,
     toggleVersionComparisonModal,
     availableVersions,
