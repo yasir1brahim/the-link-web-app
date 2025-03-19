@@ -70,13 +70,7 @@ const VersionComparisonModalWithSearch = ({
         setMasterformatNumbersWithDifferences(availableMasterformatNumbers);
     }
 
-    useEffect(() => {
-        setFullComparison([]);
-        setMasterformatNumbersWithDifferences(availableMasterformatNumbers);
-    }, [onlyDifferences, searchTerm]);
-
     const handleGetFilteredVersionComparison = async () => {
-        setMasterformatNumber(null);
         if (!oldVersion || !newVersion) {
             alert('Please select two versions to compare');
             return;
@@ -90,7 +84,13 @@ const VersionComparisonModalWithSearch = ({
         const response = await getFilteredVersionComparison(oldVersion, newVersion, onlyDifferences, searchTerm);
         console.log('response', response);
         setFullComparison(response.data.comparison);
-        setMasterformatNumbersWithDifferences(response.data.masterformat_numbers_with_desired_differences);
+        if (response.data.masterformat_numbers_with_desired_differences.includes(masterformatNumber)) {
+            setDifferences(response.data.comparison.filter(item => item.masterformat_number === masterformatNumber)[0].differences);
+            setMasterformatNumbersWithDifferences(response.data.masterformat_numbers_with_desired_differences);
+        } else {
+            setDifferences([]);
+            setMasterformatNumbersWithDifferences([masterformatNumber, ...response.data.masterformat_numbers_with_desired_differences]);
+        }
         setIsLoading(false);
     }
 
@@ -198,8 +198,8 @@ const VersionComparisonModalWithSearch = ({
                                 </FormGroup>
                             </Col>
                         </Row>
-                        <Row style={{display: 'flex', justifyContent: 'right', marginTop: '15px', marginRight: '0px', paddingRight: '0px'}}>
-                            <Button primary onClick={handleGetFilteredVersionComparison}>Apply Filters</Button>
+                        <Row style={{display: 'flex', justifyContent: 'left', marginTop: '15px', marginLeft: '0px', paddingLeft: '0px'}}>
+                            <Button color="primary" onClick={handleGetFilteredVersionComparison}>Apply Filters</Button>
                         </Row>
                     </CardBody>
                 </Collapse>
