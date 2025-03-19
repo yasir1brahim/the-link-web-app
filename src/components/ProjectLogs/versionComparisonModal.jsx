@@ -186,20 +186,20 @@ const VersionComparisonModalWithSearch = ({
                                         className="form-control"
                                         id="searchTerm"
                                         aria-describedby="searchTerm"
-                                        placeholder="Search"
+                                        placeholder="Keyword"
                                         defaultValue={searchTerm}
                                         onChange={(e) => {
                                             setSearchTerm(e.target.value);
                                         }}
                                     />
                                     <label className="text-label" htmlFor="searchTerm">
-                                        Search
+                                        Keyword
                                     </label>
                                 </FormGroup>
                             </Col>
-                            <Col style={{display: 'flex', justifyContent: 'right'}}>
-                                  <Button onClick={handleGetFilteredVersionComparison}>Apply Filters</Button>
-                            </Col>
+                        </Row>
+                        <Row style={{display: 'flex', justifyContent: 'right', marginTop: '15px', marginRight: '0px', paddingRight: '0px'}}>
+                            <Button primary onClick={handleGetFilteredVersionComparison}>Apply Filters</Button>
                         </Row>
                     </CardBody>
                 </Collapse>
