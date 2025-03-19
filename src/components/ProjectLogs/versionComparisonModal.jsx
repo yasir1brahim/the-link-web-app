@@ -11,6 +11,7 @@ const VersionComparisonModal = ({
     toggleVersionComparisonModal,
     availableVersions,
     availableMasterformatNumbers,
+    versionComparisonSearchFlagActive
 }) => {
     const [oldVersion, setOldVersion] = useState(null);
     const [oldVersionName, setOldVersionName] = useState('');
@@ -103,7 +104,7 @@ const VersionComparisonModal = ({
             <Row>
                 <Col>
                     <FormGroup>
-                        <Label>Old Version</Label>
+                        <Label>Old Version *</Label>
                         <Input type="select" value={oldVersion || ''} onChange={(e) => {
                             setOldVersion(e.target.value);
                             setOldVersionName(e.target.options[e.target.selectedIndex].text);
@@ -117,7 +118,7 @@ const VersionComparisonModal = ({
                 </Col>
                 <Col>
                     <FormGroup>
-                        <Label>New Version</Label>
+                        <Label>New Version *</Label>
                         <Input type="select" value={newVersion || ''} onChange={(e) => {
                             setNewVersion(e.target.value);
                             setNewVersionName(e.target.options[e.target.selectedIndex].text);
@@ -133,7 +134,7 @@ const VersionComparisonModal = ({
             <Row>
                 <Col>
                     <FormGroup>
-                        <Label>Filter to only differences</Label>
+                        <Label>Only show differences</Label>
                         <Input type="checkbox" checked={onlyDifferences} onChange={(e) => setOnlyDifferences(e.target.checked)} />
                     </FormGroup>
                 </Col>
@@ -149,7 +150,7 @@ const VersionComparisonModal = ({
             </Row>
             
             <FormGroup>
-                <Label>Spec Section</Label>
+                <Label>Spec Section *</Label>
                 <MasterformatNumberSelector availableMasterformatNumbers={masterformatNumbersWithDifferences} masterformatNumber={masterformatNumber} setMasterformatNumber={setMasterformatNumber} />
             </FormGroup>
         </Form>
