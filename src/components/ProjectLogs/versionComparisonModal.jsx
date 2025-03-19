@@ -131,15 +131,21 @@ const VersionComparisonModal = ({
                 </Col>
             </Row>
             <Row>
-                <FormGroup>
-                    <Label>Filter to only differences</Label>
-                    <Input type="checkbox" checked={onlyDifferences} onChange={(e) => setOnlyDifferences(e.target.checked)} />
-                </FormGroup>
-                <FormGroup>
-                    <Label>Search</Label>
-                    <Input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                </FormGroup>
-                <Button onClick={handleGetFilteredVersionComparison}>Search</Button>
+                <Col>
+                    <FormGroup>
+                        <Label>Filter to only differences</Label>
+                        <Input type="checkbox" checked={onlyDifferences} onChange={(e) => setOnlyDifferences(e.target.checked)} />
+                    </FormGroup>
+                </Col>
+                <Col>
+                    <FormGroup>
+                        <Label>Search</Label>
+                        <Input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                    </FormGroup>
+                </Col>
+                <Col>
+                    <Button onClick={handleGetFilteredVersionComparison}>Filter</Button>
+                </Col>
             </Row>
             
             <FormGroup>
