@@ -43,7 +43,7 @@ const VersionComparisonModalWithSearch = ({
     const [onlyDifferences, setOnlyDifferences] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [masterformatNumber, setMasterformatNumber] = useState(null);
-
+    const [filterMessage, setFilterMessage] = useState('');
     const [fullComparison, setFullComparison] = useState([]);
     const [masterformatNumbersWithDifferences, setMasterformatNumbersWithDifferences] = useState(availableMasterformatNumbers);
     const [differences, setDifferences] = useState([]);
@@ -68,15 +68,10 @@ const VersionComparisonModalWithSearch = ({
         setSearchTerm('');
         setFullComparison([]);
         setMasterformatNumbersWithDifferences(availableMasterformatNumbers);
+        handleGetVersionComparison();
     }
 
-    useEffect(() => {
-        setFullComparison([]);
-        setMasterformatNumbersWithDifferences(availableMasterformatNumbers);
-    }, [onlyDifferences, searchTerm]);
-
     const handleGetFilteredVersionComparison = async () => {
-        setMasterformatNumber(null);
         if (!oldVersion || !newVersion) {
             alert('Please select two versions to compare');
             return;
@@ -90,7 +85,21 @@ const VersionComparisonModalWithSearch = ({
         const response = await getFilteredVersionComparison(oldVersion, newVersion, onlyDifferences, searchTerm);
         console.log('response', response);
         setFullComparison(response.data.comparison);
-        setMasterformatNumbersWithDifferences(response.data.masterformat_numbers_with_desired_differences);
+        if (masterformatNumber == null) {
+            if (response.data.comparison.length > 0) {
+                setMasterformatNumber(response.data.comparison[0].masterformat_number);
+                setDifferences(response.data.comparison[0].differences);
+            } else {
+                setDifferences([]);
+            }
+        }
+        else if (response.data.masterformat_numbers_with_desired_differences.includes(masterformatNumber)) {
+            setDifferences(response.data.comparison.filter(item => item.masterformat_number === masterformatNumber)[0].differences);
+            setMasterformatNumbersWithDifferences(response.data.masterformat_numbers_with_desired_differences);
+        } else {
+            setDifferences([]);
+            setMasterformatNumbersWithDifferences([masterformatNumber, ...response.data.masterformat_numbers_with_desired_differences]);
+        }
         setIsLoading(false);
     }
 
@@ -106,6 +115,34 @@ const VersionComparisonModalWithSearch = ({
             handleGetVersionComparison();
         }
     }, [masterformatNumber]);
+
+    useEffect(() => {
+        setFilterMessage(constructFilterMessage());
+    }, [fullComparison, isLoading]);
+
+    const constructFilterMessage = () => {
+        if (!onlyDifferences && !searchTerm) {
+            return ``;
+        } else if (onlyDifferences && !searchTerm) {
+            if (isLoading) {
+                return 'Hiding unchanged submittals...';
+            } else {
+                return `Found ${fullComparison ? fullComparison.reduce((acc, item) => acc + item.differences.length, 0) : 0} changes across ${fullComparison?.length || ''} spec section${fullComparison?.length === 1 ? '' : 's'}`;
+            }
+        } else if (onlyDifferences && searchTerm) {
+            if (isLoading) {
+                return `Searching for changes containing keyword: ${searchTerm}...`;
+            } else {
+                return `Found ${fullComparison ? fullComparison.reduce((acc, item) => acc + item.differences.length, 0) : 0} changes containing "${searchTerm}" across ${fullComparison?.length || ''} spec section${fullComparison?.length === 1 ? '' : 's'}`;
+            }
+        } else if (!onlyDifferences && searchTerm) {
+            if (isLoading) {
+                return `Searching for submittals containing keyword: ${searchTerm}...`;
+            } else {
+                return `Found ${fullComparison ? fullComparison.reduce((acc, item) => acc + item.differences.length, 0) : 0} submittals containing "${searchTerm}" across ${fullComparison?.length || ''} spec section${fullComparison?.length === 1 ? '' : 's'}`;
+            }
+        }
+    }
 
     const dividerStyle = {
         width: '2%',
@@ -162,25 +199,53 @@ const VersionComparisonModalWithSearch = ({
                     onClick={toggleFilterCollapse} 
                     style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between'}}
                 >
-                    <strong>Filter comparison items</strong>
+                    <strong>Display options</strong>
                     <span style={{marginLeft: '10px'}}>{filterCollapseOpen ? '▼' : '►'}</span>
                 </CardHeader>
                 <Collapse isOpen={filterCollapseOpen}>
                     <CardBody>
                         <Row style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                             <Col>
-                                <FormGroup style={{display: 'flex', alignItems: 'center', marginBottom: '0px'}}>
-                                    <Label style={{marginBottom: 0, marginRight: '10px'}}>Only show differences</Label>
-                                    <Input 
-                                        type="checkbox" 
-                                        style={{width: '20px', height: '20px', marginLeft: '10px', marginTop: '0px'}} 
-                                        checked={onlyDifferences} 
-                                        onChange={(e) => setOnlyDifferences(e.target.checked)} 
-                                    />
+                                <FormGroup style={{display: 'flex', flexDirection: 'column', alignItems: 'left', marginBottom: '0px', paddingLeft: '5px'}}>
+                                    <div style={{display: 'flex', alignItems: 'center', marginBottom: '15px'}} onClick={() => setOnlyDifferences(false)}>
+                                        <Input 
+                                            type="radio" 
+                                            name="showDifferences" 
+                                            style={{
+                                                width: '24px', 
+                                                height: '24px', 
+                                                marginRight: '8px', 
+                                                marginTop: '0px', 
+                                                marginLeft: '0px',
+                                            }} 
+                                            checked={!onlyDifferences} 
+                                            onChange={() => setOnlyDifferences(false)} 
+                                        />
+                                        <Label style={{marginBottom: '0px', fontSize: '90%'}}>Show unchanged submittal items</Label>
+                                    </div>
+                                    <div style={{display: 'flex', alignItems: 'center', marginRight: '15px'}} onClick={() => setOnlyDifferences(true)}>
+                                        <Input 
+                                            type="radio" 
+                                            name="showDifferences" 
+                                            style={{
+                                                width: '24px', 
+                                                height: '24px', 
+                                                marginRight: '8px', 
+                                                marginTop: '0px', 
+                                                marginLeft: '0px',
+                                            }} 
+                                            checked={onlyDifferences} 
+                                            onChange={() => setOnlyDifferences(true)} 
+                                        />
+                                        <Label style={{marginBottom: '0px', fontSize: '90%'}}>Hide unchanged submittal items</Label>
+                                    </div>
                                 </FormGroup>
                             </Col>
                             <Col>
                                 <FormGroup style={{marginBottom: '0px'}}>
+                                    <label htmlFor="searchTerm">
+                                        Filter to submittal items containing keyword:
+                                    </label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -192,18 +257,19 @@ const VersionComparisonModalWithSearch = ({
                                             setSearchTerm(e.target.value);
                                         }}
                                     />
-                                    <label className="text-label" htmlFor="searchTerm">
-                                        Keyword
-                                    </label>
                                 </FormGroup>
                             </Col>
                         </Row>
-                        <Row style={{display: 'flex', justifyContent: 'right', marginTop: '15px', marginRight: '0px', paddingRight: '0px'}}>
-                            <Button primary onClick={handleGetFilteredVersionComparison}>Apply Filters</Button>
+                        <Row style={{display: 'flex', justifyContent: 'flex-start', marginTop: '15px', marginLeft: '0px', marginRight: '0px', paddingLeft: '0px', paddingRight: '0px'}}>
+                            <Button color="primary" style={{minWidth: '125px'}} onClick={handleGetFilteredVersionComparison}>Apply</Button>
+                            {fullComparison.length > 0 && <Button color="secondary" style={{minWidth: '125px', marginLeft: '20px'}} onClick={clearFilters}>Reset</Button>}
                         </Row>
                     </CardBody>
                 </Collapse>
             </Card>
+
+            <Row style={{display: 'flex', justifyContent: 'flex-start', marginTop: '5px', marginBottom: '15px', marginLeft: '0px', marginRight: '0px', paddingLeft: '0px', paddingRight: '0px'}}><i>{filterMessage}</i></Row>
+
             
             {!isLoading && <FormGroup>
                 <Label>Spec Section *</Label>
@@ -222,7 +288,9 @@ const VersionComparisonModalWithSearch = ({
                     oldVersionName={oldVersionName}
                     newVersion={newVersion} 
                     newVersionName={newVersionName}
-                    dividerStyle={dividerStyle} 
+                    dividerStyle={dividerStyle}
+                    filteredByDifferences={onlyDifferences}
+                    filteredByKeyword={!!searchTerm}
                 />
                 <MasterformatNumberPager availableMasterformatNumbers={masterformatNumbersWithDifferences} currentMasterformatNumber={masterformatNumber} setMasterformatNumber={setMasterformatNumber} />
             </>
@@ -346,7 +414,9 @@ const TwoPaneComparison = ({
     oldVersionName, 
     newVersion, 
     newVersionName, 
-    dividerStyle 
+    dividerStyle,
+    filteredByDifferences = false,
+    filteredByKeyword = false,
 }) => {
     const empty = !differences.length;
     return (
@@ -385,7 +455,9 @@ const TwoPaneComparison = ({
                 </tr>
             </thead>
             <tbody>
-                {empty && <tr><td colSpan="7" style={{textAlign: 'center'}}>No submittals in these versions</td></tr>}
+                {empty && <tr><td colSpan="7" style={{textAlign: 'center'}}>
+                    {filteredByKeyword ? 'No differences matching keyword' : filteredByDifferences ? 'No differences in this spec section' : 'No submittals in this spec section'}
+                </td></tr>}
                 {differences.map(difference => {
                     if (difference.difference_type === 'deletion') {
                         return (
