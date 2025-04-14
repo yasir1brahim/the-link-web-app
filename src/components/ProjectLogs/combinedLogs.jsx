@@ -403,11 +403,13 @@ export default function CombinedLogs(props) {
 
   const formatSpecSection = (specSection) => {
     if (typeof specSection !== "string") return specSection;
-    const fiveOrSixDigitString = specSection.slice(0, 2) + " " + specSection.slice(2, 4) + " " + specSection.slice(4);
+    const fiveOrSixDigitString = specSection.slice(0, 2) + " " + specSection.slice(2, 4);
     if (specSection.length > 6) {
-      return fiveOrSixDigitString + "." + specSection.slice(6);
+      return fiveOrSixDigitString + " " + specSection.slice(4, 6) + "." + specSection.slice(6);
     }
-    return fiveOrSixDigitString;
+    else {
+      return fiveOrSixDigitString + " " + specSection.slice(4);
+    }
   };
 
   const formatSubmittalNumber = (number) => {
