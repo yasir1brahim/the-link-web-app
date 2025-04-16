@@ -266,7 +266,7 @@ const NoticesPage = () => {
     setLoadingView(true);
     setLogInViewer(null);
 
-    const response = await getSemanticallyProcessedSpecItems(projectId);
+    const response = await getSemanticallyProcessedSpecItems(projectId, page, itemsPerPage);
 
     console.log("responseData", response);
 
@@ -274,12 +274,10 @@ const NoticesPage = () => {
     setSpecItemData(items);
     console.log("spec items", items);
 
-
-   
     setLoading(false);
     setLoadingView(false);
     setErrorMessage("");
-    setTotalCount(items.length);
+    setTotalCount(response.data.count);
   };
   useEffect(() => {
     if (projectId !== null) {
