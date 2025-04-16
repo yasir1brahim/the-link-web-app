@@ -264,7 +264,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
           </div>
           <div className={props.showSearch ? "col-12 d-flex justify-content-end" : "pr-0 col-6 d-flex justify-content-between"}>
             <div className={props.showSearch ? "d-none" : "total-count-submittals"}>
-              {`${props.totalCount} ${!!props.isNotices ? 'notices' : 'submittals'}`}
+              {`${props.totalCount} ${!!props.isNotices ? 'notices' : props.isFullSpecProcessing ? 'spec items' : 'submittals'}`}
             </div>
             {props.searchEnabled ? (
               <div className={`header-right-swap header-right ${props.showSearch ? "w-100" : ""}`}>

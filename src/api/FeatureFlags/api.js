@@ -6,7 +6,8 @@ import {
     NOTICES_FEATURE_FLAG_NAME, 
     VERSIONING_FEATURE_FLAG_NAME, 
     VERSION_COMPARISON_FEATURE_FLAG_NAME,
-    VERSION_COMPARISON_SEARCH_FEATURE_FLAG_NAME
+    VERSION_COMPARISON_SEARCH_FEATURE_FLAG_NAME,
+    FULL_SPEC_PROCESSING_FEATURE_FLAG_NAME
 } from "../../constants";
 
 
@@ -37,6 +38,14 @@ const isNoticesFlagActive = async (teamId) => {
     const activeFlagsForUser = await getActiveFlagsForUser();
     console.log('activeFlagsForUser', activeFlagsForUser);
     return activeFlagsForTeam.includes(NOTICES_FEATURE_FLAG_NAME) || activeFlagsForUser.includes(NOTICES_FEATURE_FLAG_NAME);
+}
+
+const isFullSpecProcessingFlagActive = async (teamId) => {
+    const activeFlagsForTeam = await getActiveFlagsForTeam(teamId);
+    console.log('activeFlagsForTeam', activeFlagsForTeam);
+    const activeFlagsForUser = await getActiveFlagsForUser();
+    console.log('activeFlagsForUser', activeFlagsForUser);
+    return activeFlagsForTeam.includes(FULL_SPEC_PROCESSING_FEATURE_FLAG_NAME) || activeFlagsForUser.includes(FULL_SPEC_PROCESSING_FEATURE_FLAG_NAME);
 }
 
 const isVersioningFlagActive = async (teamId) => {
@@ -71,5 +80,6 @@ export {
     isNoticesFlagActive,
     isVersioningFlagActive,
     isVersionComparisonFlagActive,
-    isVersionComparisonSearchFlagActive
+    isVersionComparisonSearchFlagActive,
+    isFullSpecProcessingFlagActive,
 }
