@@ -109,7 +109,7 @@ const NoticesPage = () => {
   const [filterValues, setFilterValues] = useState(initFilter);
   const [showClearFilters, setShowClearFilters] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState(initFilter);
-  const [rowsPerPage, setRowsPerPage] = React.useState(50);
+  const [rowsPerPage, setRowsPerPage] = React.useState(200);
   const [page, setPage] = React.useState(1);
 
   const [logIdList, setLogIdList] = React.useState([]);
