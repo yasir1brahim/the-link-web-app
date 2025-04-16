@@ -314,6 +314,17 @@ const getFilteredVersionComparison = async (oldVersionId, newVersionId, differen
     }
 }
 
+const getSemanticallyProcessedSpecItems = async (projectId) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/${projectId}/semantically-processed-spec-items/`,
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
 export {
     getSavedLogs,
     getSubmittalItemById,
@@ -332,4 +343,5 @@ export {
     getProjectIdBySubmittalId,
     getVersionComparison,
     getFilteredVersionComparison,
+    getSemanticallyProcessedSpecItems,
 }

@@ -17,6 +17,7 @@ import { EditIcon } from "../shared/icons/editIcon";
 import { UploadIcon } from "../shared/icons/uploadIcon";
 import { LaunchIcon } from "../shared/icons/launchIcon";
 import { AddUserIcon } from "../shared/icons/addUserIcon";
+import { DocumentScannerIcon } from "../shared/icons/documentScanner";
 import { ArchiveProjectModal } from "./archiveProjectModal";
 import { Tooltip } from "reactstrap";
 import { RestoreProjectModal } from "./restoreProjectModal";
@@ -43,7 +44,9 @@ const ProjectsTable = ({
   toggleArchive,
   customerId,
   noticesFeatureFlagActive,
-  onClickNotices
+  fullSpecProcessingFeatureFlagActive,
+  onClickNotices,
+  onClickFullSpecProcessing
 }) => {
   const [employeeModal, setEmployeeModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
@@ -56,6 +59,7 @@ const ProjectsTable = ({
   const [launchTooltip, setLaunchTooltip] = useState(null);
   const [addUsersTooltip, setAddUsersTooltip] = useState(null);
   const [noticesTooltip, setNoticesTooltip] = useState(null);
+  const [fullSpecProcessingTooltip, setFullSpecProcessingTooltip] = useState(null);
   const [editTooltip, setEditTooltip] = useState(null);
   const [archiveTooltip, setArchiveTooltip] = useState(null);
   const [restoreTooltip, setRestoreTooltip] = useState(null);
@@ -307,6 +311,35 @@ const ProjectsTable = ({
                                   }
                                 >
                                   Add Notices
+                                </Tooltip>
+                              </span>
+                              </>
+                            )}
+                            {fullSpecProcessingFeatureFlagActive && (
+                              <>
+                              <span 
+                                id={"full-spec-processing-tooltip" + index + 1}
+                                onClick={() => onClickFullSpecProcessing(project)}
+                                style={{ cursor: "pointer" }}
+                              >
+                                <DocumentScannerIcon />
+                              </span>
+                              <span>
+                                <Tooltip
+                                  placement="left"
+                                  target={"full-spec-processing-tooltip" + index + 1}
+                                  isOpen={fullSpecProcessingTooltip === index + 1}
+                                  toggle={() =>
+                                    setFullSpecProcessingTooltip(
+                                      fullSpecProcessingTooltip
+                                        ? fullSpecProcessingTooltip === index + 1
+                                          ? null
+                                          : index + 1
+                                        : index + 1,
+                                    )
+                                  }
+                                >
+                                  Full Spec Processing
                                 </Tooltip>
                               </span>
                               </>

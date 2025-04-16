@@ -11,7 +11,7 @@ import { listProjects, getUserRoleInProject } from "../../api/Projects/api";
 import { isFeatureFlagActive } from "../../utils/featureFlags";
 import { useParams } from 'react-router-dom';
 import { getUserRoleInTeam } from "../../api/Authentication/api";
-import { isNoticesFlagActive } from "../../api/FeatureFlags/api";
+import { isNoticesFlagActive, isFullSpecProcessingFlagActive } from "../../api/FeatureFlags/api";
 
 const ProjectsPage = () => {
   const navigate = useNavigate();
@@ -32,6 +32,7 @@ const ProjectsPage = () => {
   const toggleArchiveProjectModal = () => setArchiveProjectModal(!archiveProjectModal);
   const toggleRestoreProjectModal = () => setRestoreProjectModal(!restoreProjectModal);
   const [noticesFeatureFlagActive, setNoticesFeatureFlagActive] = useState(false);
+  const [fullSpecProcessingFeatureFlagActive, setFullSpecProcessingFeatureFlagActive] = useState(false);
   const [versioningFeatureFlagActive, setVersioningFeatureFlagActive] = useState(false);
   const { teamId } = useParams();
 
@@ -54,6 +55,17 @@ const ProjectsPage = () => {
 
   const onClickNotices = (project) => {
     navigate(`/notices?projectDetails=${project?.id}`, {
+      state: {
+        project,
+        projectName: project?.name,
+        userId: localStorage.getItem("userId"),
+        customerData,
+      },
+    })
+  }
+
+  const onClickFullSpecProcessing = (project) => {
+    navigate(`/full-spec?projectDetails=${project?.id}`, {
       state: {
         project,
         projectName: project?.name,
@@ -92,6 +104,9 @@ useEffect(() => {
   fetchData(); 
   isNoticesFlagActive(teamId).then(isActive => {
     setNoticesFeatureFlagActive(isActive)
+  });
+  isFullSpecProcessingFlagActive(teamId).then(isActive => {
+    setFullSpecProcessingFeatureFlagActive(isActive)
   });
 
   return () => {
@@ -135,7 +150,9 @@ useEffect(() => {
             toggleArchive={toggleArchive}
             customerId={customerId}
             noticesFeatureFlagActive={noticesFeatureFlagActive}
+            fullSpecProcessingFeatureFlagActive={fullSpecProcessingFeatureFlagActive}
             onClickNotices={onClickNotices}
+            onClickFullSpecProcessing={onClickFullSpecProcessing}
           />
         </div>
       </div>

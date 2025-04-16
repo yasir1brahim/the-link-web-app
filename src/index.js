@@ -25,7 +25,7 @@ import AcceptInvitation from './components/Authentication/AcceptInvitation';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 import NoticesPage from './components/Notices/NoticesPage';
 import LoadingPage from './components/LoadingPage';
-
+import FullSpecPage from './components/FullSpecProcessing/FullSpecPage';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -93,6 +93,10 @@ const router = createBrowserRouter([
   {
     path: "/notices",
     element: <ProtectedRoute><NoticesPage /></ProtectedRoute>,
+  },
+  {
+    path: "/full-spec",
+    element: <ProtectedRoute><FullSpecPage /></ProtectedRoute>,
   },
   {
     path: "/admin-landing",
