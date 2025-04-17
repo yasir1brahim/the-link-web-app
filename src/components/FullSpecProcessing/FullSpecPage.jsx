@@ -109,7 +109,7 @@ const NoticesPage = () => {
   const [filterValues, setFilterValues] = useState(initFilter);
   const [showClearFilters, setShowClearFilters] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState(initFilter);
-  const [rowsPerPage, setRowsPerPage] = React.useState(50);
+  const [rowsPerPage, setRowsPerPage] = React.useState(200);
   const [page, setPage] = React.useState(1);
 
   const [logIdList, setLogIdList] = React.useState([]);
@@ -306,6 +306,33 @@ const NoticesPage = () => {
     );
   }
 
+  const handleExportCsv = async () => {
+    try {
+      setLoading(true);
+      // Build the API URL
+      const baseURL = process.env.REACT_APP_API_URL || '';
+      let url = `${baseURL}/api/deliverables/${projectId}/semantically-processed-spec-items/export-csv/`;
+      
+      // Make a GET request to the export endpoint
+      const response = await axiosInstance.get(url, {
+        responseType: 'blob', // Important for file downloads
+      });
+      
+      // Create a download with the response
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      const fileName = `spec_items_${projectName || projectId}_${new Date().toISOString().slice(0, 10)}.csv`;
+      FileDownload(blob, fileName);
+      
+      toast.success('CSV export completed successfully');
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      toast.error('Error exporting CSV file');
+      handleError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // useEffect(() => {
   //   const retriveSelected = localStorage.getItem('selectedRows')?.split(',')?.map( row => JSON.parse(row));
   //   if (retriveSelected) setSelected(retriveSelected);
@@ -483,6 +510,7 @@ const NoticesPage = () => {
             btnSize={"small"}
             isNotices={false}
             isFullSpecProcessing={true}
+            onExportCsv={handleExportCsv}
           />
           {documentIsProcessing(documentData) && (
             <div

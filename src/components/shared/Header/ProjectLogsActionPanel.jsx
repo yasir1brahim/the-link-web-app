@@ -43,6 +43,15 @@ const ProjectLogsActionPanel = ({ ...props }) => {
               </button>
             )}
           </div>
+          {props.isFullSpecProcessing && props.onExportCsv && (
+            <button
+              type="button"
+              className="table-top-btn selection-btn mr-2 mb-1"
+              onClick={props.onExportCsv}
+            >
+              Export CSV
+            </button>
+          )}
           <div className="mr-2 mb-1">
             {localStorage.getItem('roleId') !== '7' && !!props.handleExportExcel && (
               <Dropdown isOpen={props.dropdownOpen} toggle={props.toggle}>
