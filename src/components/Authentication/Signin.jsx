@@ -6,7 +6,7 @@ import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
-import { login, getUserTeams } from '../../api/Authentication/api'
+import { login, getUserTeams, getMicrosoftLoginUrl } from '../../api/Authentication/api'
 import { AuthContext } from '../../auth/authcontext';
 import { getHomeUrl } from '../../utils/navigation';
 import Loader from '../shared/Loader/Loader';
@@ -20,7 +20,7 @@ const Signin = (props) => {
   const [email, setEmail] = useState({ value: '', errors: '' });
   const [password, setPassword] = useState({ value: '', errors: '' });
   const toggleType = () => setShowPwd(!showPwd);
-  const history = useNavigate();
+  const navigate = useNavigate();
   const [isLoading, setLoading] = useState(false);
 
   const validate = () => {
@@ -47,7 +47,7 @@ const Signin = (props) => {
         if (response.data.status === 'success') {
           setUserDetails(response.data.jwt);
           localStorage.setItem('jwt', response.data.jwt);
-          await getHomeUrl(e, true, user, getUserTeams, history);
+          await getHomeUrl(e, true, user, getUserTeams, navigate);
         }
       } catch (error) {
         console.log("Error in handleSubmit", error);
@@ -129,6 +129,11 @@ const Signin = (props) => {
           <div className="form-group form-btn">
             <button type="submit" className="btn btn-primary w-100">
               Login
+            </button>
+          </div>
+          <div className="form-group">
+            <button className="btn btn-secondary w-100 mt-2" onClick={() => navigate({ pathname: `/login/sso` })}>
+              Login with SSO
             </button>
           </div>
           <div className="form-helping-text">
