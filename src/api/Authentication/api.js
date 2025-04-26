@@ -16,6 +16,27 @@ const login = async (email,password) => {
     }
 }
 
+const getMicrosoftLoginUrl = async (domain) => {
+    return await axiosInstance({
+        method: 'get',
+        url: '/api/auth/microsoft/login/',
+        params: {
+            organization_domain: domain
+        }
+    });
+}
+
+const microsoftLogin = async (url, code, redirect_uri) => {
+    return await axiosInstance({
+        method: 'post',
+        url: url,
+        data: {
+            code: code,
+            redirect_uri: redirect_uri
+        }
+    });
+}
+
 const register = async (email, password1, password2) => {
     return await axiosInstance({
         method: 'post',
@@ -187,6 +208,8 @@ const updateUserStatus = async (userId, isActive) => {
 
 export {
     login, 
+    getMicrosoftLoginUrl,
+    microsoftLogin,
     getAuthTokenFromRefreshToken, 
     getCurrentUserData,
     getUserRoleInTeam,

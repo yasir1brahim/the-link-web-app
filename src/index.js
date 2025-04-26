@@ -26,6 +26,9 @@ import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 import NoticesPage from './components/Notices/NoticesPage';
 import LoadingPage from './components/LoadingPage';
 import FullSpecPage from './components/FullSpecProcessing/FullSpecPage';
+import TheLinkMicrosoftLoginCallback from './components/Authentication/TheLinkMicrosoftLoginCallback';
+import EllisDonMicrosoftLoginCallback from './components/Authentication/EllisDonMicrosoftLoginCallback';
+import SSODisambiguationPage from './components/Authentication/SSODisambiguationPage';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -37,6 +40,18 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Signin />,
+  },
+  {
+    path: "/login/sso",
+    element: <SSODisambiguationPage />,
+  },
+  {
+    path: "/the_link/microsoft/login/callback",
+    element: <TheLinkMicrosoftLoginCallback />,
+  },
+  {
+    path: "/ellisdon/microsoft/login/callback",
+    element: <EllisDonMicrosoftLoginCallback />,
   },
   {
     path: "/not-found",
