@@ -18,7 +18,7 @@ import { SortIcon } from "../shared/icons/sortIcon";
 import { FilterIcon } from "../shared/icons/filterIcon";
 import { useRef } from "react";
 import { updateSubmittalItem, addSubmittalItem } from "../../api/ProjectLogs/api";
-
+import ClassificationChip from "./ClassificationChip";
 export default function FullSpecLog(props) {
   const {
     specItemData,
@@ -478,12 +478,18 @@ export default function FullSpecLog(props) {
                 <td
                   className={`reduce-height`}
                 >
-                  {log.topic ?? ""}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {log.topic ? log.topic.map((topic, index) => (
+                      <ClassificationChip index={index} classification={topic} />
+                    )) : ""}
+                  </div>
                 </td>
                 <td
                   className={`reduce-height`}
                 >
-                  {log.item_type ?? ""}
+                  {log.item_type ? log.item_type.map((itemType, index) => (
+                      <ClassificationChip index={index} classification={itemType} />
+                    )) : ""}
                 </td>
                 <td
                   className={`reduce-height`}
