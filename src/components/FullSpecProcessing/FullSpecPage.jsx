@@ -266,7 +266,7 @@ const NoticesPage = () => {
     setLoadingView(true);
     setLogInViewer(null);
 
-    const response = await getSemanticallyProcessedSpecItems(projectId, page, itemsPerPage);
+    const response = await getSemanticallyProcessedSpecItems(projectId, search, page, itemsPerPage);
 
     console.log("responseData", response);
 
@@ -495,7 +495,7 @@ const NoticesPage = () => {
             showClearFilters={showClearFilters}
             clearFilters={clearFilters}
 
-            searchEnabled={false}
+            searchEnabled={true}
             showSearch={showSearch}
             searchValue={searchValue}
             handleSearchChange={handleSearchChange}
