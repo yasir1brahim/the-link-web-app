@@ -314,12 +314,13 @@ const getFilteredVersionComparison = async (oldVersionId, newVersionId, differen
     }
 }
 
-const getSemanticallyProcessedSpecItems = async (projectId, page_number, limit) => {
+const getSemanticallyProcessedSpecItems = async (projectId, search, page_number, limit) => {
     try {
         return await axiosInstance({
             method: 'get',
             url: `/api/deliverables/${projectId}/semantically-processed-spec-items/`,
             params: {
+                ...(search && { search }),
                 ...(page_number && { page_number }),
                 ...(limit && { limit })
             }
