@@ -424,7 +424,7 @@ export default function FullSpecLog(props) {
                             <span
                               onClick={() => {
                                 handleViewPdf(
-                                  log.document.document_link,
+                                  log.document_section_link,
                                   log.text_location,
                                   index,
                                   log.document.document_id,
