@@ -400,7 +400,7 @@ const NoticesPage = () => {
       
       setPdfData({
         ...pdfData,
-        url: data.document.document_link,
+        url: data.document_section_link,
         textLoc: data.text_location,
         index: pIndex,
         docId: data.doc_id,
