@@ -132,11 +132,9 @@ const Signin = (props) => {
             </button>
           </div>
           <div className="form-group">
-            {window.location.hostname !== 'app.thelink.ai' && (
-              <button className="btn btn-secondary w-100 mt-2" onClick={() => navigate({ pathname: `/login/sso` })}>
-                Login with SSO
-              </button>
-            )}
+            <button className="btn btn-secondary w-100 mt-2" onClick={() => navigate({ pathname: `/login/sso` })}>
+              Login with SSO
+            </button>
           </div>
           <div className="form-helping-text">
             <p>
