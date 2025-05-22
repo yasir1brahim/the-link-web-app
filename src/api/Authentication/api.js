@@ -16,12 +16,12 @@ const login = async (email,password) => {
     }
 }
 
-const getMicrosoftLoginUrl = async (domain) => {
+const getMicrosoftLoginUrl = async (userEmail) => {
     return await axiosInstance({
         method: 'get',
         url: '/api/auth/microsoft/login/',
         params: {
-            organization_domain: domain
+            user_email: userEmail
         }
     });
 }
