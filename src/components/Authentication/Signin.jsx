@@ -126,13 +126,24 @@ const Signin = (props) => {
               Forgot Password?
             </a>
           </div>
-          <div className="form-group form-btn">
+          <div className="form-group">
             <button type="submit" className="btn btn-primary w-100">
               Login
             </button>
           </div>
           <div className="form-group">
-            <button className="btn btn-secondary w-100 mt-2" onClick={() => navigate({ pathname: `/login/sso` })}>
+            <button 
+              type="button" 
+              className="btn btn-secondary w-100 mt-2" 
+              onClick={(e) => {
+                e.preventDefault();
+                console.log('Navigating to SSO with email:', email.value);
+                navigate('/login/sso', { 
+                  state: { user_email: email.value },
+                  replace: false 
+                });
+              }}
+            >
               Login with SSO
             </button>
           </div>

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
@@ -7,13 +7,19 @@ import { getMicrosoftLoginUrl } from '../../api/Authentication/api';
 import Loader from '../shared/Loader/Loader';
 
 const SSODisambiguationPage = () => {
-  const [domain, setDomain] = useState({ value: '', errors: '' });
+  const location = useLocation();
+  const [userEmail, setUserEmail] = useState({ value: location.state?.user_email || '', errors: '' });
   const [isLoading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    console.log('Location state:', location.state);
+    console.log('User email from state:', location.state?.user_email);
+  }, [location]);
+
   const validate = () => {
-    if (domain.value === '') {
-      setDomain({ ...domain, errors: 'Domain is required.' });
+    if (userEmail.value === '') {
+      setUserEmail({ ...userEmail, errors: 'User email is required.' });
       return true;
     }
     return false;
@@ -26,7 +32,7 @@ const SSODisambiguationPage = () => {
     if (!hasErrors) {
       setLoading(true);
       try {
-        const response = await getMicrosoftLoginUrl(domain.value);
+        const response = await getMicrosoftLoginUrl(userEmail.value);
         window.location.href = response.data.auth_url;
       } catch (error) {
         console.error("Error in SSO login:", error);
@@ -52,19 +58,19 @@ const SSODisambiguationPage = () => {
         <form className="login-form">
           <h1 className="form-heading">SSO Login</h1>
           <p className="form-info">
-            Please enter your organization domain to continue with Single Sign-On.
+            Please enter your email address to continue with Single Sign-On.
           </p>
           <div className="form-group">
-            <label className="text-label">Organization Domain</label>
+            <label className="text-label">Email address</label>
             <input
               type="text"
               className="form-control"
               id="domainId"
-              placeholder="example.com"
-              value={domain.value}
-              onChange={(e) => setDomain({ value: e.target.value, errors: '' })}
+              placeholder="test@example.com"
+              value={userEmail.value}
+              onChange={(e) => setUserEmail({ value: e.target.value, errors: '' })}
             />
-            {domain.errors && <div className="error-message">{domain.errors}</div>}
+            {userEmail.errors && <div className="error-message">{userEmail.errors}</div>}
           </div>
           <div className="form-group">
             <button
