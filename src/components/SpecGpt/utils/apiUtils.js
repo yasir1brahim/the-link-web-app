@@ -19,15 +19,13 @@ const fetchPdf = async (fileId, authToken) => {
     return null;
 }
 
-const fetchChatHistory = async () => {
+const fetchChatHistory = async (projectId) => {
     try {
         const response = await axiosInstance({
             method: 'GET',
-            url: `/api/chat-history`,
+            url: `/api/deliverables/${projectId}/specgpt-chats/`,
         });
-        if (response.data.success) {
-            return [...response.data.chat_history];
-        }
+        return [...response.data.results];
     } catch (error) {
         handleError(error);
         return [];
@@ -36,20 +34,18 @@ const fetchChatHistory = async () => {
 }
 
 
-const fetchChatSessionHistory = async (chatSessionID, token) => {
+const fetchChatSessionHistory = async (projectId, chatSessionID) => {
     try {
         const response = await axiosInstance({
             method: 'GET',
-            url: `/api/chat-session-history?chat_session_id=${chatSessionID}`,
+            url: `/api/deliverables/${projectId}/specgpt-chats/${chatSessionID}/`,
         });
-        if (response.data.success) {
-            return response.data.chat_history
-        }
+        console.log("chat session history", response.data);
+        return response.data.messages;
     } catch (error) {
         handleError(error);
         return [];
     }
-    return [];
 }
 
 const ERROR_MESSAGE = "I’m unable to answer that question, can you please restate? Try to make it more specific or narrower if possible."

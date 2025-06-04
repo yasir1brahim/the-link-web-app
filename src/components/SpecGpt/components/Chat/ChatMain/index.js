@@ -33,7 +33,15 @@ const quickActions = [
     }
 ]
 
-const ChatMain = ({ messages, setMessages, chatSessionId, setChatSessionId, projectId, projectVersionId }) => {
+const ChatMain = ({ 
+    messages, 
+    setMessages, 
+    chatSessionId, 
+    setChatSessionId, 
+    projectId, 
+    projectVersionId,
+    onFirstAIResponse 
+}) => {
     const onKeyDown = (e) => {
         if (e.key === "Enter") {
             submitMessage();
@@ -67,6 +75,9 @@ const ChatMain = ({ messages, setMessages, chatSessionId, setChatSessionId, proj
         endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
         fetchPromptAnswer(userMessage, k, chatSessionId, projectId, projectVersionId).then((newMessage) => {
             setShowLoadingMessage(false);
+            if (messages.filter((message) => message.role === MESSAGE_ROLE_TYPE.ASSISTANT).length === 0) {
+                onFirstAIResponse(newMessage.session_id);
+            }
             setMessages((prevMessages) => [...prevMessages, newMessage]);
             setChatSessionId(newMessage.chat_id);
             endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });

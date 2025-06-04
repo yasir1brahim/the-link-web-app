@@ -9,40 +9,46 @@ import ChatMain from './ChatMain'
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { fetchChatHistory, fetchChatSessionHistory, loadUserDocs } from '../../utils/apiUtils';
+import { fetchChatHistory, fetchChatSessionHistory } from '../../utils/apiUtils';
 
-const Chat = () => {
+const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId}) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const navigator = useNavigate();
     const [messages, setMessages] = useState([]);
-    const [chatSessionId, setChatSessionId] = useState(new URLSearchParams(window.location.search).get('chatId'));
     const [chatHistory, setChatHistory] = useState([]);
     const [userDocs, setUserDocs] = useState([]);
-    const [projectId, setProjectId] = useState(new URLSearchParams(window.location.search).get('projectId'));
-    const [projectVersionId, setProjectVersionId] = useState(new URLSearchParams(window.location.search).get('projectVersionId'));
 
 
-    useEffect(() => {
-        loadUserDocs().then((docs) => {
-            setUserDocs(docs)
-        });
-    }, []);
 
     useEffect(() => {
-        fetchChatHistory().then((data) => {
+        fetchChatHistory(projectId).then((data) => {
+            console.log("chat history", data);
             setChatHistory(data);
         });
     }, []);  
 
+    useEffect(() => {
+        if (chatSessionId) {
+            fetchChatSessionHistory(projectId, chatSessionId).then((messages) => {
+                setMessages(messages);
+            });
+        } else {
+            setMessages([]);
+        }
+    }, [chatSessionId]);
+
     const onNewChatClick = () => {
-        navigator('/chat');
+        setChatSessionId(null);
+        navigator(`/project-logs?projectId=${projectId}&projectVersionId=${projectVersionId}`);
     }
 
     const onClickChatLink = (chatSessionId) => {
-        fetchChatSessionHistory(chatSessionId, projectId, projectVersionId).then((messages) => {
-            setMessages(messages);
-            setChatSessionId(chatSessionId);
-        });
+        setChatSessionId(chatSessionId);
+        navigator(`/project-logs?projectId=${projectId}&projectVersionId=${projectVersionId}&chatId=${chatSessionId}`);
+    }
+
+    const onFirstAIResponse = (chatSessionId) => {
+        navigator(`/project-logs?projectId=${projectId}&projectVersionId=${projectVersionId}&chatId=${chatSessionId}`);
     }
 
     return (
@@ -54,7 +60,6 @@ const Chat = () => {
                             chatHistory={chatHistory}
                             onClickChatLink={onClickChatLink}
                             onNewChatClick={onNewChatClick}
-                            onClose={onClose}
                         />
                     </Box>
                     <Box w={"280px"}></Box>
@@ -70,6 +75,7 @@ const Chat = () => {
                                     setChatSessionId={setChatSessionId}
                                     projectId={projectId} 
                                     projectVersionId={projectVersionId} 
+                                    onFirstAIResponse={onFirstAIResponse}
                                 />
                             </Box>
                         </Box>
@@ -89,7 +95,6 @@ const Chat = () => {
                             chatHistory={chatHistory}
                             onClickChatLink={onClickChatLink}
                             onNewChatClick={onNewChatClick}
-                            onClose={onClose}
                         />
                     </DrawerBody>
                 </DrawerContent>

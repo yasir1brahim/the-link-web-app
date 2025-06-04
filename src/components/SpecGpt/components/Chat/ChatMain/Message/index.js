@@ -38,7 +38,7 @@ const Message = ({ messageType, message, sources, isLoading }) => {
             <Text color={"gray.900"} whiteSpace={"pre-wrap"} ms={10}>
                 {isLoading ? <Skeleton height={6} width={"100%"} /> :  TextWithLinks(message)}
             </Text>
-            {sources !== undefined && !isLoading && (
+            {!!sources && !isLoading && (
                 <MessageSources
                     sources={sources}
                 />

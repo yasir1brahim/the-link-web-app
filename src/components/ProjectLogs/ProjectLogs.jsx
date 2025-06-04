@@ -33,10 +33,12 @@ import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmitta
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
-import { isVersioningFlagActive, isVersionComparisonFlagActive, isVersionComparisonSearchFlagActive } from "../../api/FeatureFlags/api";
+import { isVersioningFlagActive, isVersionComparisonFlagActive, isVersionComparisonSearchFlagActive, isSpecGptFlagActive } from "../../api/FeatureFlags/api";
 import { getCurrentUserData } from "../../api/Authentication/api";
 import ArchiveConfirmationModal from "./archiveConfirmationModal";
 import VersionComparisonModal from "./versionComparisonModal";
+import Chat from "../SpecGpt/components/Chat";
+
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
@@ -201,6 +203,10 @@ const ProjectLogs = () => {
  
   const [showVersionComparisonModal, setShowVersionComparisonModal] = useState(false);
   const toggleVersionComparisonModal = () => setShowVersionComparisonModal(!showVersionComparisonModal);
+
+  const [chatId, setChatId] = useState(searchParams.get("chatId") ? parseInt(searchParams.get("chatId")) : null);
+  const [isSpecGptFeatureFlagActive, setIsSpecGptFeatureFlagActive] = useState(false);
+  const [activeTab, setActiveTab] = useState('submittal');
 
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
@@ -454,6 +460,9 @@ const ProjectLogs = () => {
       setVersionComparisonFeatureFlagActive(versionComparisonActive);
       const versionComparisonSearchActive = await isVersionComparisonSearchFlagActive(response.data.team);
       setVersionComparisonSearchFlagActive(versionComparisonSearchActive);
+      const isSpecGptActive = await isSpecGptFlagActive(response.data.team);
+      console.log('isSpecGptActive', isSpecGptActive);
+      setIsSpecGptFeatureFlagActive(isSpecGptActive);
       setProjectName(response.data.name);
       const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
       setProjectVersionId(activeVersion);
@@ -1320,8 +1329,48 @@ const ProjectLogs = () => {
               )}
             </div></>
           )}
-
-          <div className="project-logs-content">
+          {isSpecGptFeatureFlagActive && (
+            <div className="tab-row" style={{ marginBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
+              <div className="tab-container" style={{ display: 'flex', gap: '0' }}>
+                <button
+                  className={`tab-button ${activeTab === 'submittal' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('submittal')}
+                  style={{
+                    padding: '12px 24px',
+                    border: 'none',
+                    backgroundColor: activeTab === 'submittal' ? '#fff' : '#f5f5f5',
+                    borderBottom: activeTab === 'submittal' ? '2px solid #007bff' : '2px solid transparent',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: activeTab === 'submittal' ? '600' : '400',
+                    color: activeTab === 'submittal' ? '#007bff' : '#666',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Submittal Log
+                </button>
+                <button
+                  className={`tab-button ${activeTab === 'specgpt' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('specgpt')}
+                  style={{
+                    padding: '12px 24px',
+                    border: 'none',
+                    backgroundColor: activeTab === 'specgpt' ? '#fff' : '#f5f5f5',
+                    borderBottom: activeTab === 'specgpt' ? '2px solid #007bff' : '2px solid transparent',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: activeTab === 'specgpt' ? '600' : '400',
+                    color: activeTab === 'specgpt' ? '#007bff' : '#666',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  SpecGPT
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {activeTab == 'submittal' && <div className="project-logs-content">
             <div className="project-logs">
               <div className={pdfData.url && "side-by-side"}>
                 <CombinedLogs
@@ -1457,7 +1506,8 @@ const ProjectLogs = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div>}
+          {activeTab == 'specgpt' && <Chat projectId={projectId} projectVersionId={projectVersionId} chatSessionId={chatId} setChatSessionId={setChatId}></Chat>}
         </div>
       )}
       <ToastContainer

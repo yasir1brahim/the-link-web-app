@@ -2,16 +2,13 @@ import { Box, Flex, Heading, List, ListItem, Text } from '@chakra-ui/react'
 import React from 'react'
 import { ChatSvg, CloseIcon, PlusIcon } from '../../../assets/icons'
 
-const ChatSidebar = ({ chatHistory, onClickChatLink, onNewChatClick, onClose }) => {
+const ChatSidebar = ({ chatHistory, onClickChatLink, onNewChatClick }) => {
     return (
         <Box w="100%" bgColor="#1F2A43" h="100vh" px={{ base: "24px", lg: "30px" }} overflowY={"auto"}>
             <Flex py="25px" align={"center"} justifyContent={"space-between"}>
                 <Heading as="h4" fontSize={{ base: "18px", lg: "24px" }} fontWeight="semibold" color="#FFFFFF">
                     SpecGPT
                 </Heading>
-                <Box onClick={onClose} display={{ base: "block", lg: "none" }}>
-                    <CloseIcon fill="white" />
-                </Box>
             </Flex>
             <Box py={5}>
                 <Flex onClick={onNewChatClick} mb={6} border="1px" borderColor="#FFFFFF33" px={3} py={4} borderRadius="6px" gap={3} align="center" cursor="pointer">

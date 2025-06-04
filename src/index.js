@@ -123,10 +123,6 @@ const router = createBrowserRouter([
     path: "/company-profile",
     element: <ProtectedRoute><CustomerProfile /></ProtectedRoute>,
   },
-  {
-    path: "/spec-gpt",
-    element: <ProtectedRoute><ChatPage /></ProtectedRoute>,
-  }
 ])
 
 

@@ -7,7 +7,8 @@ import {
     VERSIONING_FEATURE_FLAG_NAME, 
     VERSION_COMPARISON_FEATURE_FLAG_NAME,
     VERSION_COMPARISON_SEARCH_FEATURE_FLAG_NAME,
-    FULL_SPEC_PROCESSING_FEATURE_FLAG_NAME
+    FULL_SPEC_PROCESSING_FEATURE_FLAG_NAME,
+    SPEC_GPT_FEATURE_FLAG_NAME
 } from "../../constants";
 
 
@@ -72,6 +73,14 @@ const isVersionComparisonSearchFlagActive = async (teamId) => {
     return activeFlagsForTeam.includes(VERSION_COMPARISON_SEARCH_FEATURE_FLAG_NAME) || activeFlagsForUser.includes(VERSION_COMPARISON_SEARCH_FEATURE_FLAG_NAME);
 }
 
+const isSpecGptFlagActive = async (teamId) => {
+    const activeFlagsForTeam = await getActiveFlagsForTeam(teamId);
+    console.log('activeFlagsForTeam', activeFlagsForTeam);
+    const activeFlagsForUser = await getActiveFlagsForUser();
+    console.log('activeFlagsForUser', activeFlagsForUser);
+    return activeFlagsForTeam.includes(SPEC_GPT_FEATURE_FLAG_NAME) || activeFlagsForUser.includes(SPEC_GPT_FEATURE_FLAG_NAME);
+}
+
 
 export {
     listFeatureFlags,
@@ -82,4 +91,5 @@ export {
     isVersionComparisonFlagActive,
     isVersionComparisonSearchFlagActive,
     isFullSpecProcessingFlagActive,
+    isSpecGptFlagActive
 }
