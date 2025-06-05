@@ -4,7 +4,7 @@ import SpecGptImage from "../../../../assets/spec-gpt.png"
 import { MESSAGE_ROLE_TYPE } from '../../../../utils/enums';
 import MessageSources from '../MessageSources';
 
-const Message = ({ messageType, message, sources, isLoading }) => {
+const Message = ({ messageType, message, sources, isLoading, projectId }) => {
     let messageHeading = "System"
     if (messageType === MESSAGE_ROLE_TYPE.USER) {
         messageHeading = "You"
@@ -41,6 +41,7 @@ const Message = ({ messageType, message, sources, isLoading }) => {
             {!!sources && !isLoading && (
                 <MessageSources
                     sources={sources}
+                    projectId={projectId}
                 />
             )}
         </Container>   

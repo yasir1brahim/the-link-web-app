@@ -130,6 +130,7 @@ const ChatMain = ({
                             message={message.message} 
                             questionid={message.questionid} 
                             sources={message.sources}
+                            projectId={projectId}
                         />
                     }
                 )}
@@ -138,6 +139,7 @@ const ChatMain = ({
                         messageType={MESSAGE_ROLE_TYPE.ASSISTANT}
                         message={""}
                         isLoading={true}
+                        projectId={projectId}
                     />}
                 <div ref={endOfMessagesRef}/>
             </Box>

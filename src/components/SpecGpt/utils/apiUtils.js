@@ -2,16 +2,14 @@ import axiosInstance from "../../../config/axios";
 import handleError from "../../../config/errorHandler";
 import { MESSAGE_ROLE_TYPE } from "./enums";
 
-const fetchPdf = async (fileId, authToken) => {
+const fetchPdf = async (projectId, s3Bucket, s3Key) => {
     try {
         const response = await axiosInstance({
             method: 'GET',
-            url: `/api/signed-url?id=${fileId}`,
+            url: `/api/deliverables/${projectId}/specgpt-chats/generate-presigned-url?s3_bucket=${s3Bucket}&s3_key=${s3Key}`,
         });
-        if (response.data.success) {
-            console.log('signed url', response.data.url);
-            return response.data.url
-        }
+        console.log('signed url', response.data.url);
+        return response.data.url
     } catch (error) {
         handleError(error);
         return null;

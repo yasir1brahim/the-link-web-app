@@ -1,14 +1,17 @@
 import React, {useState, useEffect} from "react";
 import { HStack, Icon, Text, Badge, CardBody, CardHeader, Card, Heading,
-     Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, useDisclosure, Modal,
-      ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button } from "@chakra-ui/react";
+     Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, useDisclosure,
+    Button } from "@chakra-ui/react";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+
 import {ExternalLinkIcon} from "@chakra-ui/icons"
 import { FaListUl } from "react-icons/fa6";
 import { shortenFilename, shortenString } from "../../../../utils/textUtils";
 import { fetchPdf } from "../../../../utils/apiUtils";
 
 
-const MessageSources = ({sources}) => {
+const MessageSources = ({sources, projectId}) => {
+    console.log("sources", sources);
     const [focusedSource, setFocusedSource] = useState(null);
     const [focusedSourceSignedUrl, setFocusedSourceSignedUrl] = useState(null);
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -16,7 +19,7 @@ const MessageSources = ({sources}) => {
     useEffect(() => {
         console.log("focused source", focusedSource);
         if (focusedSource) {
-            fetchPdf(focusedSource.docid).then((url) => {
+            fetchPdf(projectId, focusedSource?.metadata?.s3_bucket, focusedSource?.metadata?.s3_key).then((url) => {
                 console.log(url);
                 setFocusedSourceSignedUrl(url);
             });
@@ -44,10 +47,10 @@ const MessageSources = ({sources}) => {
                             {sources.map((source, index) => (
                                 <Card key={index} minWidth={"20ch"} height={"12ch"} _hover={{cursor: "pointer"}} onClick={() => {setFocusedSource(source); onOpen()}}>
                                     <CardHeader p={3}>
-                                        <Heading size="sm">{shortenFilename(source.filename, 20)}</Heading>
+                                        <Heading size="sm">{shortenFilename(source?.metadata?.source, 20)}</Heading>
                                     </CardHeader>
                                     <CardBody p={3}>
-                                        <Text>{shortenString(source.text, 40)}</Text>
+                                        <Text>{shortenString(source?.page_content, 40)}</Text>
                                     </CardBody>
                                 </Card>
                             ))}
@@ -56,31 +59,21 @@ const MessageSources = ({sources}) => {
                 </AccordionItem>
             </Accordion>}
             <Modal
-                onClose={onClose}
                 isOpen={isOpen}
-                isCentered
-                scrollBehavior={"inside"}
+                fade={false}
+                toggle={onClose}
+                className="new-customer modal-md"
             >
-                <ModalOverlay />
-                <ModalContent m={2}>
-                    <ModalHeader>{focusedSource?.filename}</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
-                        <Text style={{whiteSpace: "pre-wrap"}}>{focusedSource?.text}</Text>
-                    </ModalBody>
-                    <ModalFooter justifyContent={'space-between'}>
-                        <Button onClick={onClose}>Close</Button>
-                        <Button 
-                            as={"a"} href={`/source?url=${focusedSourceSignedUrl}` || ''} 
-                            disabled={!focusedSourceSignedUrl} 
-                            target={"_blank"} 
-                            colorScheme="blue" 
-                            alignItems={"center"}
-                        >
-                            <ExternalLinkIcon/>&nbsp;Open Document
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
+                <ModalHeader toggle={onClose}>{focusedSource?.metadata?.source}</ModalHeader>
+                <ModalBody>
+                    <Text style={{whiteSpace: "pre-wrap"}}>{focusedSource?.page_content}</Text>
+                </ModalBody>
+                <ModalFooter justifyContent={'space-between'}>
+                    <Button onClick={onClose}>Close</Button>
+                    <Button as={"a"} href={`/view-pdf?url=${focusedSourceSignedUrl}` || ''} disabled={!focusedSourceSignedUrl} target={"_blank"} colorScheme="blue" alignItems={"center"}>
+                        <ExternalLinkIcon/>&nbsp;Open Document
+                    </Button>
+                </ModalFooter>
             </Modal>
         </>
     )
