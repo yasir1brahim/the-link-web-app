@@ -29,6 +29,8 @@ import FullSpecPage from './components/FullSpecProcessing/FullSpecPage';
 import TheLinkMicrosoftLoginCallback from './components/Authentication/TheLinkMicrosoftLoginCallback';
 import EllisDonMicrosoftLoginCallback from './components/Authentication/EllisDonMicrosoftLoginCallback';
 import SSODisambiguationPage from './components/Authentication/SSODisambiguationPage';
+import ChatPage from './components/SpecGpt/containers/ChatPage';
+import ViewPDFPage from './components/SpecGpt/containers/ViewPDFPage';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -120,7 +122,11 @@ const router = createBrowserRouter([
   {
     path: "/company-profile",
     element: <ProtectedRoute><CustomerProfile /></ProtectedRoute>,
-  }
+  },
+  {
+    path: "/view-pdf",
+    element: <ProtectedRoute><ViewPDFPage /></ProtectedRoute>,
+  },
 ])
 
 
