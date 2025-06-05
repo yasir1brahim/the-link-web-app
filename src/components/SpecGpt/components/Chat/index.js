@@ -39,16 +39,10 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId}) =>
 
     const onNewChatClick = () => {
         setChatSessionId(null);
-        navigator(`/project-logs?projectId=${projectId}&projectVersionId=${projectVersionId}`);
     }
 
     const onClickChatLink = (chatSessionId) => {
         setChatSessionId(chatSessionId);
-        navigator(`/project-logs?projectId=${projectId}&projectVersionId=${projectVersionId}&chatId=${chatSessionId}`);
-    }
-
-    const onFirstAIResponse = (chatSessionId) => {
-        navigator(`/project-logs?projectId=${projectId}&projectVersionId=${projectVersionId}&chatId=${chatSessionId}`);
     }
 
     return (
@@ -75,7 +69,7 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId}) =>
                                     setChatSessionId={setChatSessionId}
                                     projectId={projectId} 
                                     projectVersionId={projectVersionId} 
-                                    onFirstAIResponse={onFirstAIResponse}
+                                    onFirstAIResponse={() => {}}
                                 />
                             </Box>
                         </Box>

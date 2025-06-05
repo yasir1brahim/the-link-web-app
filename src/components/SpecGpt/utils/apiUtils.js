@@ -14,7 +14,6 @@ const fetchPdf = async (projectId, s3Bucket, s3Key) => {
         handleError(error);
         return null;
     }
-    return null;
 }
 
 const fetchChatHistory = async (projectId) => {
@@ -28,7 +27,6 @@ const fetchChatHistory = async (projectId) => {
         handleError(error);
         return [];
     }   
-    return [];
 }
 
 

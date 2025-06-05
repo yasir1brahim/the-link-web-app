@@ -1,4 +1,7 @@
 const shortenFilename = (filename, maxCharacters) => {
+    if (!filename) {
+        return '';
+    }
     const extension = filename.split('.').pop();
     const filenameWithoutExtension = filename.substring(0, filename.length - extension.length - 1);
     if (filename.length > maxCharacters) {
@@ -9,6 +12,9 @@ const shortenFilename = (filename, maxCharacters) => {
 }
 
 const shortenString = (stringToShorten, maxCharacters) => {
+    if (!stringToShorten) {
+        return '';
+    }
     if (stringToShorten.length > maxCharacters) {
         return stringToShorten.substring(0, maxCharacters - 3) + '...';
     }

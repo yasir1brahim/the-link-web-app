@@ -3,6 +3,8 @@ import React from 'react'
 import SpecGptImage from "../../../../assets/spec-gpt.png"
 import { MESSAGE_ROLE_TYPE } from '../../../../utils/enums';
 import MessageSources from '../MessageSources';
+import { marked } from 'marked';
+
 
 const Message = ({ messageType, message, sources, isLoading, projectId }) => {
     let messageHeading = "System"
@@ -20,9 +22,22 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
     }
     
     const TextWithLinks = (text) => {
-        const convertedText = convertUrlsToLinks(text);
+        let markdownConvertedToHtml = '';
+        if (!!text) {
+            const convertedText = convertUrlsToLinks(text);
+            marked.setOptions({
+                gfm: true,
+                tables: true,
+                breaks: true,
+                pedantic: false,
+                sanitize: true,
+                smartLists: true,
+                smartypants: false
+            });
+            markdownConvertedToHtml = marked(convertedText);
+        }
         return (
-            <div dangerouslySetInnerHTML={{ __html: convertedText }} />
+            <div dangerouslySetInnerHTML={{ __html: markdownConvertedToHtml }} />
         );
     };
     return (
