@@ -1,4 +1,4 @@
-import { Box, Grid, GridItem, Heading, Input, InputRightElement, Text, InputGroup } from '@chakra-ui/react'
+import { Box, Grid, GridItem, Heading, Input, InputRightElement, Text, InputGroup, Center } from '@chakra-ui/react'
 import React, { useEffect, useRef, useState } from 'react'
 import { BrushIcon, QuestionIcon, SendIcon, SendMessageIcon } from '../../../assets/icons'
 import Message from './Message'
@@ -33,6 +33,24 @@ const quickActions = [
     }
 ]
 
+const MessageInput = ({
+    userInput,
+    setUserInput,
+    isLoadingMessage,
+    submitMessage,
+    onKeyDown
+}) => {
+    return <Box zIndex={1000} bottom={{ base: "20px", lg: "40px" }} maxH={"100px"} left={0} right={0} px={4} w={"100%"}>
+        <InputGroup>
+            <Input width={"100%"} value={userInput} placeholder='Message' border="1px" borderColor="#EDEDED" focusBorderColor='#1F2A43' py={4} onKeyDown={onKeyDown}
+                onChange={(e) => setUserInput(e.target.value)} />
+            <InputRightElement cursor={"pointer"} onClick={(e) => userInput && !isLoadingMessage ? submitMessage() : null}>
+                <SendMessageIcon />
+            </InputRightElement>
+        </InputGroup>
+    </Box>
+}
+
 const ChatMain = ({ 
     messages, 
     setMessages, 
@@ -48,7 +66,7 @@ const ChatMain = ({
         }
     }
 
-    const [isLoadingMessage, setIsLoadingMessage] = useState(true);
+    const [isLoadingMessage, setIsLoadingMessage] = useState(false);
     const [userInput, setUserInput] = useState('');
     const [k, setK] = useState(21);
 
@@ -117,7 +135,22 @@ const ChatMain = ({
     }
     return (
         <Box w="100%" maxW={"800px"} h={"100%"} position={"relative"} pt={{ base: "20px", lg: "40px" }} marginX={"auto"}>
-            <Box display={messages?.length > 0 ? "block" : "none"} h={"calc(100% - 100px)"} w={"100%"} overflowY={"auto"}>
+            {messages?.length === 0 && 
+                <Center h={"100%"} w={"100%"} flexDirection={"column"} gap={5}>
+                    <Heading mb={5} as="h2" size="xl" marginX="auto" fontWeight="semibold" color="#1F2A43">
+                        SpecGPT
+                    </Heading>
+                    <MessageInput 
+                        userInput={userInput}
+                        setUserInput={setUserInput}
+                        isLoadingMessage={isLoadingMessage}
+                        submitMessage={submitMessage}
+                        onKeyDown={onKeyDown}
+                    />
+                </Center>
+            }
+            {messages?.length > 0 && <>
+                <Box display={messages?.length > 0 ? "block" : "none"} h={"calc(100% - 100px)"} w={"100%"} overflowY={"auto"}>
                 {messages.map(
                     (message, index) => {
                         return <Message key={index} 
@@ -129,18 +162,18 @@ const ChatMain = ({
                             isLoading={message.loading}
                         />
                     }
-                )}
-                <div ref={endOfMessagesRef}/>
-            </Box>
-            <Box zIndex={1000} bottom={{ base: "20px", lg: "40px" }} maxH={"100px"} left={0} right={0} px={4} w={"100%"}>
-                <InputGroup>
-                    <Input width={"100%"} value={userInput} placeholder='Message' border="1px" borderColor="#EDEDED" focusBorderColor='#1F2A43' py={4} onKeyDown={onKeyDown}
-                        onChange={(e) => setUserInput(e.target.value)} />
-                    <InputRightElement cursor={"pointer"} onClick={(e) => userInput && !isLoadingMessage ? submitMessage() : null}>
-                        <SendMessageIcon />
-                    </InputRightElement>
-                </InputGroup>
-            </Box>
+                    )}
+                    <div ref={endOfMessagesRef}/>
+                </Box>
+                <MessageInput 
+                    userInput={userInput}
+                    setUserInput={setUserInput}
+                    isLoadingMessage={isLoadingMessage}
+                    submitMessage={submitMessage}
+                    onKeyDown={onKeyDown}
+                />
+                </>
+            }
         </Box>
     )
 }

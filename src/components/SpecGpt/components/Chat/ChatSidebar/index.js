@@ -28,7 +28,7 @@ const ChatSidebar = ({ chatHistory, onClickChatLink, onNewChatClick }) => {
                                             >
                                                 <Flex gap={3}>
                                                     <ChatSvg />
-                                                    <Text flex={1} color="#EDEDED" fontSize="14px">{item?.question}</Text>
+                                                    <Text flex={1} marginBottom={0} color="#EDEDED" fontSize="14px">{item?.question}</Text>
                                                 </Flex>
                                             </ListItem>
                                         )
