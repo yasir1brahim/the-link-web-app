@@ -1,4 +1,4 @@
-import { Flex, Image, Text, Skeleton, Container } from '@chakra-ui/react'
+import { Flex, Image, Text, Skeleton, Container, SkeletonText } from '@chakra-ui/react'
 import React from 'react'
 import SpecGptImage from "../../../../assets/spec-gpt.png"
 import { MESSAGE_ROLE_TYPE } from '../../../../utils/enums';
@@ -48,7 +48,9 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
                 </Text>
             </Flex>
             <Text color={"gray.900"} whiteSpace={"pre-wrap"} ms={10}>
-                {isLoading ? <Skeleton height={6} width={"100%"} /> :  TextWithLinks(message)}
+                <SkeletonText isLoaded={!isLoading} noOfLines={4} skeletonHeight="20px" width={"100%"}>
+                    {TextWithLinks(message)}
+                </SkeletonText>
             </Text>
             {!!sources && !isLoading && (
                 <MessageSources

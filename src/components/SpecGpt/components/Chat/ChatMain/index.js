@@ -48,7 +48,7 @@ const ChatMain = ({
         }
     }
 
-    const [showLoadingMessage, setShowLoadingMessage] = useState(false);
+    const [showLoadingMessage, setShowLoadingMessage] = useState(true);
     const [userInput, setUserInput] = useState('');
     const [k, setK] = useState(21);
 
@@ -69,7 +69,22 @@ const ChatMain = ({
 
     const getChatResponse = (userMessage) => {
         console.log('Submit message: ', userMessage);
-        setMessages([...messages, {'role': MESSAGE_ROLE_TYPE.USER, 'message': userMessage, 'session_id': chatSessionId, questionid: ''}]);
+        setMessages([
+            ...messages, 
+            {
+                'role': MESSAGE_ROLE_TYPE.USER, 
+                'message': userMessage, 
+                'session_id': chatSessionId, 
+                'questionid': ''
+            },
+            {
+                'role': MESSAGE_ROLE_TYPE.ASSISTANT,
+                'message': '',
+                'session_id': chatSessionId,
+                'questionid': '',
+                'loading': true
+            }
+        ]);
         setShowLoadingMessage(true);
         setUserInput('');
         endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -78,7 +93,19 @@ const ChatMain = ({
             if (messages.filter((message) => message.role === MESSAGE_ROLE_TYPE.ASSISTANT).length === 0) {
                 onFirstAIResponse(newMessage.session_id);
             }
-            setMessages((prevMessages) => [...prevMessages, newMessage]);
+            setMessages((prevMessages) => {
+                const lastMessage = prevMessages[prevMessages.length - 1];
+                return [
+                    ...prevMessages.slice(0, -1),
+                    { 
+                        ...lastMessage, 
+                        message: newMessage.message, 
+                        loading: false, 
+                        questionid: newMessage.questionid,
+                        sources: newMessage.sources
+                    }
+                ];
+            });
             setChatSessionId(newMessage.chat_id);
             endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
         });
@@ -99,16 +126,10 @@ const ChatMain = ({
                             questionid={message.questionid} 
                             sources={message.sources}
                             projectId={projectId}
+                            isLoading={message.loading}
                         />
                     }
                 )}
-                {showLoadingMessage && 
-                    <Message
-                        messageType={MESSAGE_ROLE_TYPE.ASSISTANT}
-                        message={""}
-                        isLoading={true}
-                        projectId={projectId}
-                    />}
                 <div ref={endOfMessagesRef}/>
             </Box>
             <Box zIndex={1000} bottom={{ base: "20px", lg: "40px" }} maxH={"100px"} left={0} right={0} px={4} w={"100%"}>
