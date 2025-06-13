@@ -580,3 +580,14 @@
   flex: 1;
   overflow-y: auto;
 }
+
+.markdown-body ul {
+  margin: 0 20px;
+  list-style: disc;
+}
+
+.markdown-body ol {
+  margin: 0 20px;
+  list-style: decimal;
+}
+

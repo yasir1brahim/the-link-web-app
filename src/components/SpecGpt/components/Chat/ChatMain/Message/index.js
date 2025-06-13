@@ -4,6 +4,7 @@ import SpecGptImage from "../../../../assets/spec-gpt.png"
 import { MESSAGE_ROLE_TYPE } from '../../../../utils/enums';
 import MessageSources from '../MessageSources';
 import { marked } from 'marked';
+import { FALSE } from 'sass';
 
 
 const Message = ({ messageType, message, sources, isLoading, projectId }) => {
@@ -23,21 +24,18 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
     
     const TextWithLinks = (text) => {
         let markdownConvertedToHtml = '';
+        console.log("text", text)
         if (!!text) {
             const convertedText = convertUrlsToLinks(text);
             marked.setOptions({
-                gfm: true,
                 tables: true,
-                breaks: true,
+                breaks: false,
                 pedantic: false,
-                sanitize: true,
-                smartLists: true,
-                smartypants: false
             });
             markdownConvertedToHtml = marked(convertedText);
         }
         return (
-            <div dangerouslySetInnerHTML={{ __html: markdownConvertedToHtml }} />
+            <div className="markdown-body" dangerouslySetInnerHTML={{ __html: markdownConvertedToHtml }} />
         );
     };
     return (
