@@ -154,7 +154,7 @@ const ChatMain = ({
                 {messages.map(
                     (message, index) => {
                         return <Message key={index} 
-                            messageType={message.role}
+                            messageType={message.type}
                             message={message.message} 
                             questionid={message.questionid} 
                             sources={message.sources}

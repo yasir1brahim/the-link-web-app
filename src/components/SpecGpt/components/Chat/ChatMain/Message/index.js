@@ -23,7 +23,6 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
     
     const TextWithLinks = (text) => {
         let markdownConvertedToHtml = '';
-        console.log("text", text)
         if (!!text) {
             const convertedText = convertUrlsToLinks(text);
             marked.setOptions({
@@ -38,19 +37,26 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
         );
     };
     return (
-        <Container borderRadius={6} maxW={"100%"} p={4} alignSelf={"center"} color={"gray.900"}>
-            <Flex mb={2} gap={4}>
-                <Flex align="center" justifyContent="center" w="24px" h="26px" borderRadius="8px">
-                    <Image src={messageType === MESSAGE_ROLE_TYPE.USER ? "" : SpecGptImage} borderRadius="8px"></Image>
-                </Flex>
-                <Text mb={2} color="#676F74" fontWeight={"semibold"} fontSize={{ base: "14px", lg: "16px" }}>
-                    {messageHeading}
-                </Text>
-            </Flex>
-            <Text color={"gray.900"} whiteSpace={"pre-wrap"} ms={10}>
-                <SkeletonText isLoaded={!isLoading} noOfLines={4} skeletonHeight="20px" width={"100%"}>
-                    {TextWithLinks(message)}
-                </SkeletonText>
+        <Container 
+            borderRadius={6} 
+            maxW={messageType === MESSAGE_ROLE_TYPE.USER ? "75%" : "100%"} 
+            p={4} 
+            backgroundColor={messageType === MESSAGE_ROLE_TYPE.USER ? "gray.100" : "white"}
+            color={"gray.900"}
+            ml={messageType === MESSAGE_ROLE_TYPE.USER ? "auto" : "0"}
+            mr={messageType === MESSAGE_ROLE_TYPE.USER ? "0" : "auto"}
+            mb="20px"
+            >
+            <Text color={"gray.900"} whiteSpace={"pre-wrap"} m={0}>
+                {messageType === MESSAGE_ROLE_TYPE.USER ? (
+                    <Text color={"gray.900"} whiteSpace={"pre-wrap"} m={0}>
+                        {message}
+                    </Text>
+                ) : (
+                    <SkeletonText isLoaded={!isLoading} noOfLines={4} skeletonHeight="20px" width={"100%"}>
+                        {TextWithLinks(message)}
+                    </SkeletonText>
+                )}
             </Text>
             {!!sources && !isLoading && (
                 <MessageSources
