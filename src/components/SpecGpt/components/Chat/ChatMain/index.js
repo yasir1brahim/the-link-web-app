@@ -108,7 +108,7 @@ const ChatMain = ({
         endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
         fetchPromptAnswer(userMessage, k, chatSessionId, projectId, projectVersionId).then((newMessage) => {
             if (messages.filter((message) => message.role === MESSAGE_ROLE_TYPE.ASSISTANT).length === 0) {
-                onFirstAIResponse(newMessage.session_id);
+                onFirstAIResponse(newMessage.session_id, userMessage);
             }
             setMessages((prevMessages) => {
                 const lastMessage = prevMessages[prevMessages.length - 1];

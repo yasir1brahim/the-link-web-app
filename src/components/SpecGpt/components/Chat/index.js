@@ -46,6 +46,14 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId}) =>
         setChatSessionId(chatSessionId);
     }
 
+    const onFirstAIResponse = (chatSessionId, userMessage) => {
+        console.log("onFirstAIResponse", chatSessionId, userMessage);
+        fetchChatHistory(projectId).then((data) => {
+            console.log("chat history", data);
+            setChatHistory(data);
+        });
+    }
+
     return (
         <>
             <Flex w={"100%"}  mx="auto" h="100vh" position="relative" >
@@ -67,7 +75,7 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId}) =>
                         setChatSessionId={setChatSessionId}
                         projectId={projectId} 
                         projectVersionId={projectVersionId} 
-                        onFirstAIResponse={() => {}}
+                        onFirstAIResponse={onFirstAIResponse}
                     />
                 </Box>
             </Flex>
