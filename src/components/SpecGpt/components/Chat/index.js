@@ -3,6 +3,7 @@ import {
     DrawerBody,
     DrawerOverlay,
     DrawerContent,
+    Center,
 } from '@chakra-ui/react'
 import ChatSidebar from './ChatSidebar'
 import ChatMain from './ChatMain'
@@ -45,6 +46,14 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId}) =>
         setChatSessionId(chatSessionId);
     }
 
+    const onFirstAIResponse = (chatSessionId, userMessage) => {
+        console.log("onFirstAIResponse", chatSessionId, userMessage);
+        fetchChatHistory(projectId).then((data) => {
+            console.log("chat history", data);
+            setChatHistory(data);
+        });
+    }
+
     return (
         <>
             <Flex w={"100%"}  mx="auto" h="100vh" position="relative" >
@@ -58,22 +67,16 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId}) =>
                     </Box>
                     <Box w={"280px"}></Box>
                 </Box>
-                <Box w={{ base: "100%", lg: "calc(100vw - 280px)" }} >
-                    <Flex flexDir="column" w="100%" h="100vh">
-                        <Box flex={1} px={{ base: '16px', xl: '0px' }}>
-                            <Box w="100%" maxW="800px" mx="auto" >
-                                <ChatMain 
-                                    messages={messages} 
-                                    setMessages={setMessages} 
-                                    chatSessionId={chatSessionId} 
-                                    setChatSessionId={setChatSessionId}
-                                    projectId={projectId} 
-                                    projectVersionId={projectVersionId} 
-                                    onFirstAIResponse={() => {}}
-                                />
-                            </Box>
-                        </Box>
-                    </Flex>
+                <Box w="100%" h="100%" >
+                    <ChatMain 
+                        messages={messages} 
+                        setMessages={setMessages} 
+                        chatSessionId={chatSessionId} 
+                        setChatSessionId={setChatSessionId}
+                        projectId={projectId} 
+                        projectVersionId={projectVersionId} 
+                        onFirstAIResponse={onFirstAIResponse}
+                    />
                 </Box>
             </Flex>
             <Drawer

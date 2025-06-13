@@ -13,7 +13,7 @@ const ChatSidebar = ({ chatHistory, onClickChatLink, onNewChatClick }) => {
             <Box py={5}>
                 <Flex onClick={onNewChatClick} mb={6} border="1px" borderColor="#FFFFFF33" px={3} py={4} borderRadius="6px" gap={3} align="center" cursor="pointer">
                     <PlusIcon />
-                    <Text fontSize="14px" color="#FFFFFF">New chat</Text>
+                    <Text marginBottom={0} fontSize="14px" color="#FFFFFF">New chat</Text>
                 </Flex>
                 <Flex flexDir="column" gap={6}>
                     {chatHistory?.map((chat, index) => {
@@ -28,7 +28,7 @@ const ChatSidebar = ({ chatHistory, onClickChatLink, onNewChatClick }) => {
                                             >
                                                 <Flex gap={3}>
                                                     <ChatSvg />
-                                                    <Text flex={1} color="#EDEDED" fontSize="14px">{item?.question}</Text>
+                                                    <Text flex={1} marginBottom={0} color="#EDEDED" fontSize="14px">{item?.question}</Text>
                                                 </Flex>
                                             </ListItem>
                                         )

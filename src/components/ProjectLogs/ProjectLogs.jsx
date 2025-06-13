@@ -38,6 +38,7 @@ import { getCurrentUserData } from "../../api/Authentication/api";
 import ArchiveConfirmationModal from "./archiveConfirmationModal";
 import VersionComparisonModal from "./versionComparisonModal";
 import Chat from "../SpecGpt/components/Chat";
+import { ChakraProvider } from "@chakra-ui/react";
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -1507,7 +1508,7 @@ const ProjectLogs = () => {
               </div>
             </div>
           </div>}
-          {activeTab == 'specgpt' && <Chat projectId={projectId} projectVersionId={projectVersionId} chatSessionId={chatId} setChatSessionId={setChatId}></Chat>}
+          {activeTab == 'specgpt' && <ChakraProvider><Chat projectId={projectId} projectVersionId={projectVersionId} chatSessionId={chatId} setChatSessionId={setChatId}></Chat></ChakraProvider>}
         </div>
       )}
       <ToastContainer
