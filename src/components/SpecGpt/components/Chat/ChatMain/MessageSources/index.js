@@ -11,7 +11,6 @@ import { fetchPdf } from "../../../../utils/apiUtils";
 
 
 const MessageSources = ({sources, projectId}) => {
-    console.log("sources", sources);
     const [focusedSource, setFocusedSource] = useState(null);
     const [focusedSourceSignedUrl, setFocusedSourceSignedUrl] = useState(null);
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -28,7 +27,7 @@ const MessageSources = ({sources, projectId}) => {
 
     return (
         <>
-            {sources.length > 0 && <Accordion bg={"gray.100"} borderRadius={6} mt={2} p={1} ms={10} allowToggle>
+            {sources.length > 0 && <Accordion border={"1px solid #E2E8F0"} borderRadius={6} mt={"-15px"} p={1} ms={10} allowToggle>
                 <AccordionItem border={"none"}>
                     <AccordionButton>
                         <HStack width={"100%"} bg={"transparent"} justify="space-between" align={"center"} >

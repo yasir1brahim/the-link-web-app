@@ -45,7 +45,7 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
             color={"gray.900"}
             ml={messageType === MESSAGE_ROLE_TYPE.USER ? "auto" : "0"}
             mr={messageType === MESSAGE_ROLE_TYPE.USER ? "0" : "auto"}
-            mb="20px"
+            mb="30px"
             >
             <Text color={"gray.900"} whiteSpace={"pre-wrap"} m={0}>
                 {messageType === MESSAGE_ROLE_TYPE.USER ? (
