@@ -4,7 +4,6 @@ import SpecGptImage from "../../../../assets/spec-gpt.png"
 import { MESSAGE_ROLE_TYPE } from '../../../../utils/enums';
 import MessageSources from '../MessageSources';
 import { marked } from 'marked';
-import { FALSE } from 'sass';
 
 
 const Message = ({ messageType, message, sources, isLoading, projectId }) => {
