@@ -48,7 +48,7 @@ const ChatMain = ({
         }
     }
 
-    const [showLoadingMessage, setShowLoadingMessage] = useState(true);
+    const [isLoadingMessage, setIsLoadingMessage] = useState(true);
     const [userInput, setUserInput] = useState('');
     const [k, setK] = useState(21);
 
@@ -85,11 +85,10 @@ const ChatMain = ({
                 'loading': true
             }
         ]);
-        setShowLoadingMessage(true);
+        setIsLoadingMessage(true);
         setUserInput('');
         endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
         fetchPromptAnswer(userMessage, k, chatSessionId, projectId, projectVersionId).then((newMessage) => {
-            setShowLoadingMessage(false);
             if (messages.filter((message) => message.role === MESSAGE_ROLE_TYPE.ASSISTANT).length === 0) {
                 onFirstAIResponse(newMessage.session_id);
             }
@@ -107,6 +106,7 @@ const ChatMain = ({
                 ];
             });
             setChatSessionId(newMessage.chat_id);
+            setIsLoadingMessage(false);
             endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
         });
     }
@@ -136,7 +136,7 @@ const ChatMain = ({
                 <InputGroup>
                     <Input width={"100%"} value={userInput} placeholder='Message' border="1px" borderColor="#EDEDED" focusBorderColor='#1F2A43' py={4} onKeyDown={onKeyDown}
                         onChange={(e) => setUserInput(e.target.value)} />
-                    <InputRightElement cursor={"pointer"} onClick={(e) => userInput ? submitMessage() : null}>
+                    <InputRightElement cursor={"pointer"} onClick={(e) => userInput && !isLoadingMessage ? submitMessage() : null}>
                         <SendMessageIcon />
                     </InputRightElement>
                 </InputGroup>
