@@ -39,6 +39,7 @@ import ArchiveConfirmationModal from "./archiveConfirmationModal";
 import VersionComparisonModal from "./versionComparisonModal";
 import Chat from "../SpecGpt/components/Chat";
 import { ChakraProvider } from "@chakra-ui/react";
+import ProcessingIndicator from "./processingIndicator";
 
 const ProjectLogs = () => {
   const [modal, setModal] = useState(false);
@@ -47,6 +48,9 @@ const ProjectLogs = () => {
   const [showDocumentStatusModal, setShowDocumentStatusModal] = useState(false);
   const toggleDocumentStatusModal = () =>
     setShowDocumentStatusModal(!showDocumentStatusModal);
+  const [showSpecGptProcessingModal, setShowSpecGptProcessingModal] = useState(false);
+  const toggleSpecGptProcessingModal = () =>
+    setShowSpecGptProcessingModal(!showSpecGptProcessingModal);
   const toggleModal = () => setModal(!modal);
   const [pdfFile, setPdfFile] = useState({});
   const [logInViewer, setLogInViewer] = useState(null);
@@ -845,6 +849,14 @@ const ProjectLogs = () => {
     );
   }
 
+  const documentIsBeingEmbedded = (documents = []) => {
+    return documents.some((doc) =>
+      ["UPLOADING", "IN_QUEUE", "PROCESSING"].includes(
+        doc.specgpt_processing_status
+      )
+    );
+  }
+
   const onClickVersion = (versionId) => {
     setProjectVersionId(versionId);
     navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}`);
@@ -1309,27 +1321,7 @@ const ProjectLogs = () => {
             toggleModal={toggleModal}
             btnSize={"small"}
           />
-          {documentIsProcessing(documentData) && (<>
-            <div
-              className="alert"
-              style={{ backgroundColor: "#D5E73E" }}
-              role="alert"
-            >
-              Documents are being processed...
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'left' }}>
-              {documentIsProcessing(documentData) && (
-                <button
-                  type="button"
-                  className="table-top-btn selection-btn"
-                  style={{ marginTop: '10px', marginBottom: '20px' }}
-                  onClick={toggleDocumentStatusModal}
-                >
-                  <span>Document Status</span>
-                </button>
-              )}
-            </div></>
-          )}
+          
           {isSpecGptFeatureFlagActive && (
             <div className="tab-row" style={{ marginBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
               <div className="tab-container" style={{ display: 'flex', gap: '0' }}>
@@ -1370,8 +1362,13 @@ const ProjectLogs = () => {
               </div>
             </div>
           )}
-          
           {activeTab == 'submittal' && <div className="project-logs-content">
+            <ProcessingIndicator
+              documentIsProcessing={documentIsProcessing}
+              documentData={documentData}
+              toggleDocumentStatusModal={toggleDocumentStatusModal}
+              indicatorText={"Documents are being processed..."}
+            />
             <div className="project-logs">
               <div className={pdfData.url && "side-by-side"}>
                 <CombinedLogs
@@ -1508,7 +1505,17 @@ const ProjectLogs = () => {
               </div>
             </div>
           </div>}
-          {activeTab == 'specgpt' && <ChakraProvider><Chat projectId={projectId} projectVersionId={projectVersionId} chatSessionId={chatId} setChatSessionId={setChatId}></Chat></ChakraProvider>}
+          {activeTab == 'specgpt' && 
+            <>
+              <ProcessingIndicator
+                documentIsProcessing={documentIsBeingEmbedded}
+                documentData={documentData}
+                toggleDocumentStatusModal={toggleSpecGptProcessingModal}
+                indicatorText={"SpecGPT is processing your documents..."}
+              />
+              <ChakraProvider><Chat projectId={projectId} projectVersionId={projectVersionId} chatSessionId={chatId} setChatSessionId={setChatId}></Chat></ChakraProvider>
+            </>
+          }
         </div>
       )}
       <ToastContainer
@@ -1694,6 +1701,20 @@ const ProjectLogs = () => {
         </ModalHeader>
         <ModalBody>
           <DocumentStatus documentData={documentData} />
+        </ModalBody>
+      </Modal>
+
+      <Modal
+        isOpen={showSpecGptProcessingModal}
+        toggle={toggleSpecGptProcessingModal}
+        fade={false}
+        className="new-customer modal-xl"
+      >
+        <ModalHeader toggle={toggleSpecGptProcessingModal}>
+          SpecGPT Processing Status
+        </ModalHeader>
+        <ModalBody>
+          <DocumentStatus documentData={documentData} isSpecGptStatus={true} />
         </ModalBody>
       </Modal>
 
