@@ -851,7 +851,7 @@ const ProjectLogs = () => {
 
   const documentIsBeingEmbedded = (documents = []) => {
     return documents.some((doc) =>
-      ["UPLOADING", "IN_QUEUE", "PROCESSING"].includes(
+      ["UPLOADING", "IN_QUEUE", "PROCESSING", "SUBSECTIONS_EXTRACTED"].includes(
         doc.specgpt_processing_status
       )
     );
