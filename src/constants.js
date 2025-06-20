@@ -68,3 +68,4 @@ export const VERSIONING_FEATURE_FLAG_NAME = "versioning";
 export const VERSION_COMPARISON_FEATURE_FLAG_NAME = "versioning_submittal_comparison";
 export const VERSION_COMPARISON_SEARCH_FEATURE_FLAG_NAME = "versioning_submittal_comparison_search";
 export const SPEC_GPT_FEATURE_FLAG_NAME = "specgpt";
+export const INSPECTION_LOG_FEATURE_FLAG_NAME = "inspection_log";

@@ -53,20 +53,7 @@ const fetchInspectionLog = async (projectId, projectVersionId) => {
                 'project_version_id': projectVersionId,
             },
         });
-        if (!response.data) return {session_id: '', questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: ERROR_MESSAGE};
-        if (response.status === 400) {
-            // return 400 error
-            const message = response.data.message;
-            return {session_id: '', questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: message};
-        }
-        if (response.status === 500) {
-            return {session_id: '', questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: ERROR_MESSAGE};
-        }
-        const answer = response.data.answer;
-        const questionid = response.data.questionid;
-        const chatId = response.data.chat_id;
-        return {session_id: chatId, questionid: questionid, role: MESSAGE_ROLE_TYPE.ASSISTANT, message: answer, sources: []};
-
+        return response.data.answer;
     } catch (error) {
         console.log('Error: ', error);
         return {session_id: '', questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: ERROR_MESSAGE};

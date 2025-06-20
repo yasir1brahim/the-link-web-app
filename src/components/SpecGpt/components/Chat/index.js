@@ -13,8 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { fetchChatHistory, fetchChatSessionHistory, fetchInspectionLog } from '../../utils/apiUtils';
 import { MESSAGE_ROLE_TYPE } from '../../utils/enums';
 import { fetchPromptAnswer } from '../../utils/apiUtils';
-
-const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId}) => {
+import InspectionLog from './InspectionLog';
+const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isInspectionLogFeatureFlagActive}) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const navigator = useNavigate();
     const [messages, setMessages] = useState([]);
@@ -24,8 +24,8 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId}) =>
     const [userInput, setUserInput] = useState('');
     const endOfMessagesRef = useRef(null);
     const [k, setK] = useState(21);
-
-
+    const [isGeneratingInspectionLog, setIsGeneratingInspectionLog] = useState(false);
+    const [inspectionLog, setInspectionLog] = useState('');
 
     useEffect(() => {
         fetchChatHistory(projectId).then((data) => {
@@ -35,6 +35,7 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId}) =>
     }, []);  
 
     useEffect(() => {
+        setIsGeneratingInspectionLog(false);
         if (chatSessionId) {
             fetchChatSessionHistory(projectId, chatSessionId).then((messages) => {
                 setMessages(messages);
@@ -93,46 +94,11 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId}) =>
 
     const onGenerateInspectionLogClick = () => {
         console.log("onGenerateInspectionLogClick");
-        setChatSessionId(null);
-        setMessages([
-            ...messages, 
-            {
-                'type': MESSAGE_ROLE_TYPE.USER, 
-                'message': "Create an inspection log for this project version", 
-                'session_id': chatSessionId, 
-                'questionid': ''
-            },
-            {
-                'type': MESSAGE_ROLE_TYPE.ASSISTANT,
-                'message': '',
-                'session_id': chatSessionId,
-                'questionid': '',
-                'loading': true
-            }
-        ]);
-        setIsLoadingMessage(true);
-        setUserInput('');
-        fetchInspectionLog(projectId, projectVersionId, chatSessionId).then((inspectionLog) => {
+        setIsGeneratingInspectionLog(true);
+        setInspectionLog('');
+        fetchInspectionLog(projectId, projectVersionId).then((inspectionLog) => {
             console.log("inspectionLog", inspectionLog);
-            if (messages.filter((message) => message.type === MESSAGE_ROLE_TYPE.ASSISTANT).length === 0) {
-                onFirstAIResponse(inspectionLog.session_id, "Create an inspection log for this project version");
-            }
-            setMessages((prevMessages) => {
-                const lastMessage = prevMessages[prevMessages.length - 1];
-                return [
-                    ...prevMessages.slice(0, -1),
-                    { 
-                        ...lastMessage, 
-                        message: inspectionLog.message, 
-                        loading: false, 
-                        questionid: inspectionLog.questionid,
-                        sources: []
-                    }
-                ];
-            });
-            console.log("inspectionLog.session_id", inspectionLog.session_id);
-            setChatSessionId(inspectionLog.session_id);
-            setIsLoadingMessage(false);
+            setInspectionLog(inspectionLog);
         });
     }
 
@@ -158,20 +124,29 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId}) =>
                             onClickChatLink={onClickChatLink}
                             onNewChatClick={onNewChatClick}
                             onGenerateInspectionLogClick={onGenerateInspectionLogClick}
+                            isInspectionLogFeatureFlagActive={isInspectionLogFeatureFlagActive}
                         />
                     </Box>
                     <Box w={"280px"}></Box>
                 </Box>
                 <Box w="100%" h="100%" >
-                    <ChatMain 
-                        messages={messages} 
-                        projectId={projectId} 
-                        getChatResponse={getChatResponse}
-                        isLoadingMessage={isLoadingMessage}
-                        userInput={userInput}
-                        setUserInput={setUserInput}
-                        endOfMessagesRef={endOfMessagesRef}
-                    />
+                    {isGeneratingInspectionLog && (
+                        <InspectionLog 
+                            inspectionLog={inspectionLog}
+                            projectId={projectId}
+                        />
+                    )}
+                    {!isGeneratingInspectionLog && (
+                        <ChatMain 
+                            messages={messages} 
+                            projectId={projectId} 
+                            getChatResponse={getChatResponse}
+                            isLoadingMessage={isLoadingMessage}
+                            userInput={userInput}
+                            setUserInput={setUserInput}
+                            endOfMessagesRef={endOfMessagesRef}
+                        />
+                    )}
                 </Box>
             </Flex>
             <Drawer

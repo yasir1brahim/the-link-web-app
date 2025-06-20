@@ -2,7 +2,7 @@ import { Box, Flex, Heading, List, ListItem, Text } from '@chakra-ui/react'
 import React from 'react'
 import { ChatSvg, CloseIcon, PlusIcon } from '../../../assets/icons'
 
-const ChatSidebar = ({ chatHistory, onClickChatLink, onNewChatClick, onGenerateInspectionLogClick }) => {
+const ChatSidebar = ({ chatHistory, onClickChatLink, onNewChatClick, onGenerateInspectionLogClick, isInspectionLogFeatureFlagActive }) => {
     return (
         <Box w="100%" bgColor="#1F2A43" h="100vh" px={{ base: "24px", lg: "30px" }} overflowY={"auto"}>
             <Flex py="25px" align={"center"} justifyContent={"space-between"}>
@@ -15,9 +15,11 @@ const ChatSidebar = ({ chatHistory, onClickChatLink, onNewChatClick, onGenerateI
                     <PlusIcon />
                     <Text marginBottom={0} fontSize="14px" color="#FFFFFF">New chat</Text>
                 </Flex>
-                <Flex onClick={onGenerateInspectionLogClick} mb={6} border="1px" borderColor="#FFFFFF33" px={3} py={4} borderRadius="6px" gap={3} align="center" cursor="pointer">
-                    <Text marginBottom={0} fontSize="14px" color="#FFFFFF">Generate Inspection Log</Text>
-                </Flex>
+                {isInspectionLogFeatureFlagActive && (
+                    <Flex onClick={onGenerateInspectionLogClick} mb={6} border="1px" borderColor="#FFFFFF33" px={3} py={4} borderRadius="6px" gap={3} align="center" cursor="pointer">
+                        <Text marginBottom={0} fontSize="14px" color="#FFFFFF">Generate Inspection Log</Text>
+                    </Flex>
+                )}
                 <Flex flexDir="column" gap={6}>
                     {chatHistory?.map((chat, index) => {
                         return chat.chats.length > 0 && (

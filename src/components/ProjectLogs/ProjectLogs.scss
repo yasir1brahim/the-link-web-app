@@ -585,13 +585,51 @@
   overflow-y: auto;
 }
 
-.markdown-body ul {
-  margin: 0 20px;
-  list-style: disc;
-}
+.markdown-body {
+  p {
+    margin: 0;
+    line-height: 1.4;
+  }
+  
+  hr {
+    margin: 0.5rem 0;
+  }
 
-.markdown-body ol {
-  margin: 0 20px;
-  list-style: decimal;
+  ul {
+    margin: 0 20px;
+    list-style: disc;
+    padding-left: 0;
+    
+    li {
+      margin: 0 0;
+    }
+  }
+  
+  ol {
+    margin: 0 20px;
+    list-style: decimal;
+    padding-left: 0;
+    
+    li {
+      margin: 0 0;
+    }
+  }
+  
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0 0;
+    
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 6px 10px;
+      text-align: left;
+    }
+    
+    th {
+      background-color: #f9fafb;
+      font-weight: 600;
+    }
+  }
 }
 
