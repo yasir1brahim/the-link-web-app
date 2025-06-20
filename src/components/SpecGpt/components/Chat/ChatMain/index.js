@@ -53,12 +53,12 @@ const MessageInput = ({
 
 const ChatMain = ({ 
     messages, 
-    setMessages, 
-    chatSessionId, 
-    setChatSessionId, 
     projectId, 
-    projectVersionId,
-    onFirstAIResponse 
+    getChatResponse,
+    isLoadingMessage,
+    userInput,
+    setUserInput,
+    endOfMessagesRef
 }) => {
     const onKeyDown = (e) => {
         if (e.key === "Enter") {
@@ -66,11 +66,6 @@ const ChatMain = ({
         }
     }
 
-    const [isLoadingMessage, setIsLoadingMessage] = useState(false);
-    const [userInput, setUserInput] = useState('');
-    const [k, setK] = useState(21);
-
-    const endOfMessagesRef = useRef(null);
     useEffect(() => {
         endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);   
@@ -85,50 +80,6 @@ const ChatMain = ({
         getChatResponse(userInput);
     }
 
-    const getChatResponse = (userMessage) => {
-        console.log('Submit message: ', userMessage);
-        setMessages([
-            ...messages, 
-            {
-                'type': MESSAGE_ROLE_TYPE.USER, 
-                'message': userMessage, 
-                'session_id': chatSessionId, 
-                'questionid': ''
-            },
-            {
-                'type': MESSAGE_ROLE_TYPE.ASSISTANT,
-                'message': '',
-                'session_id': chatSessionId,
-                'questionid': '',
-                'loading': true
-            }
-        ]);
-        setIsLoadingMessage(true);
-        setUserInput('');
-        endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-        fetchPromptAnswer(userMessage, k, chatSessionId, projectId, projectVersionId).then((newMessage) => {
-            console.log("newMessage", newMessage);
-            if (messages.filter((message) => message.type === MESSAGE_ROLE_TYPE.ASSISTANT).length === 0) {
-                onFirstAIResponse(newMessage.session_id, userMessage);
-            }
-            setMessages((prevMessages) => {
-                const lastMessage = prevMessages[prevMessages.length - 1];
-                return [
-                    ...prevMessages.slice(0, -1),
-                    { 
-                        ...lastMessage, 
-                        message: newMessage.message, 
-                        loading: false, 
-                        questionid: newMessage.questionid,
-                        sources: newMessage.sources
-                    }
-                ];
-            });
-            setChatSessionId(newMessage.chat_id);
-            setIsLoadingMessage(false);
-            endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-        });
-    }
 
     const onClickQuickQuestion = (text) => {
         setUserInput(text);

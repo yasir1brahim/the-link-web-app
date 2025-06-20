@@ -166,12 +166,11 @@
       .l-table-wrapper {
         border: 1px solid rgba(229, 231, 235, 1) !important;
         box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.06);
-
         box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
-
         border-radius: 8px !important;
-        max-height: calc(100vh - 230px);
+        max-height: calc(100vh - 280px);
         margin-bottom: 10px;
+        overflow: auto;
         table {
           thead {
             tr {
@@ -363,6 +362,11 @@
         }
       }
       .table-footer-content {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 10px 0;
+        z-index: 1;
         display: flex;
         align-items: center;
         justify-content: space-between;
