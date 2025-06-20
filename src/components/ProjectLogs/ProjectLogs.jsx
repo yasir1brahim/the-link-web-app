@@ -33,7 +33,7 @@ import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmitta
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
-import { isVersioningFlagActive, isVersionComparisonFlagActive, isVersionComparisonSearchFlagActive, isSpecGptFlagActive } from "../../api/FeatureFlags/api";
+import { isVersioningFlagActive, isVersionComparisonFlagActive, isVersionComparisonSearchFlagActive, isSpecGptFlagActive, isInspectionLogFlagActive } from "../../api/FeatureFlags/api";
 import { getCurrentUserData } from "../../api/Authentication/api";
 import ArchiveConfirmationModal from "./archiveConfirmationModal";
 import VersionComparisonModal from "./versionComparisonModal";
@@ -211,6 +211,7 @@ const ProjectLogs = () => {
 
   const [chatId, setChatId] = useState(searchParams.get("chatId") ? parseInt(searchParams.get("chatId")) : null);
   const [isSpecGptFeatureFlagActive, setIsSpecGptFeatureFlagActive] = useState(false);
+  const [isInspectionLogFeatureFlagActive, setIsInspectionLogFeatureFlagActive] = useState(false);
   const [activeTab, setActiveTab] = useState('submittal');
 
   const [logIdList, setLogIdList] = React.useState([]);
@@ -484,6 +485,8 @@ const ProjectLogs = () => {
 
       setAvailableVersions(response.data.project_versions);
       fetchLogData(0, rowsPerPage, null, null, null, null, null, activeVersion)
+      const isInspectionLogActive = await isInspectionLogFlagActive(response.data.team);
+      setIsInspectionLogFeatureFlagActive(isInspectionLogActive);
       setLoading(false);
     };
 
@@ -1513,7 +1516,15 @@ const ProjectLogs = () => {
                 toggleDocumentStatusModal={toggleSpecGptProcessingModal}
                 indicatorText={"SpecGPT is processing your documents..."}
               />
-              <ChakraProvider><Chat projectId={projectId} projectVersionId={projectVersionId} chatSessionId={chatId} setChatSessionId={setChatId}></Chat></ChakraProvider>
+              <ChakraProvider>
+                <Chat 
+                  projectId={projectId} 
+                  projectVersionId={projectVersionId} 
+                  chatSessionId={chatId} 
+                  setChatSessionId={setChatId}
+                  isInspectionLogFeatureFlagActive={isInspectionLogFeatureFlagActive}
+                ></Chat>
+              </ChakraProvider>
             </>
           }
         </div>

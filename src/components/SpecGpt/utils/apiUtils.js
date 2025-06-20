@@ -44,6 +44,22 @@ const fetchChatSessionHistory = async (projectId, chatSessionID) => {
     }
 }
 
+const fetchInspectionLog = async (projectId, projectVersionId) => {
+    try {
+        const response = await axiosInstance({
+            method: 'POST',
+            url: `/api/deliverables/${projectId}/specgpt-chats/generate-inspection-log/`,
+            data: {
+                'project_version_id': projectVersionId,
+            },
+        });
+        return response.data.answer;
+    } catch (error) {
+        console.log('Error: ', error);
+        return {session_id: '', questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: ERROR_MESSAGE};
+    }
+}
+
 const ERROR_MESSAGE = "I’m unable to answer that question, can you please restate? Try to make it more specific or narrower if possible."
 
 const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, projectVersionId) => {
@@ -129,4 +145,5 @@ export {
     countUserDocs,
     ProcessingStatus,
     loadUserDocs,
+    fetchInspectionLog,
 };
