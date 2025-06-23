@@ -173,6 +173,7 @@ const ProjectLogs = () => {
     useState("");
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
+  const [uploadErrorMessage, setUploadErrorMessage] = useState("");
   const [totalCount, setTotalCount] = useState(0);
   const initFilter = {
     spec_section: [],
@@ -507,14 +508,14 @@ const ProjectLogs = () => {
       if (documentIsProcessing(documentData)) {
         const fetchDocumentData = async () => {
           const response = await getProjectDetails(projectId);
-          let documentData = response.data.document_details;
+          let responseDocumentData = response.data.document_details;
           if (versioningFeatureFlagActive) {
             const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
-            documentData = documentData.filter((doc) => doc.project_version.id === activeVersion);
+            responseDocumentData = responseDocumentData.filter((doc) => doc.project_version.id === activeVersion);
           }
-          setDocumentData(documentData);  
-          console.log('documentIsProcessing', documentIsProcessing(documentData));
-          if (!documentIsProcessing(documentData)) {
+          setDocumentData(responseDocumentData);  
+          console.log('documentIsProcessing', documentIsProcessing(responseDocumentData));
+          if (!documentIsProcessing(responseDocumentData)) {
             fetchLogData(0, rowsPerPage, null, null, null, null, null, projectVersionId);
           }
         };
@@ -550,14 +551,28 @@ const ProjectLogs = () => {
       data.append("project_id", projectId || state.project?.project_id);
       data.append("project_version_id", projectVersionId);
       Object.values(pdfFile)?.forEach((file) => data.append("files", file));
-      const response = await uploadFiles(data)
+      const response = await uploadFiles(data, (error) => {
+        setUploadLoading(false);
+        toggleErrorModal(true);
+        setModal(false);
+        if (error.response.data.error === 'TOO_MANY_FILES') {
+          setUploadErrorMessage(error.response.data.detail);
+        } else {
+          handleError(error);
+        }
+      })
       if (response.data) {
         const check_response = await getProjectDetails(projectId);
+        let responseDocumentData = {}
         if (versioningFeatureFlagActive) {
           const activeVersion = projectVersionId || check_response.data.project_versions[check_response.data.project_versions.length - 1].id;
-          setDocumentData(check_response.data.document_details.filter((doc) => doc.project_version.id === activeVersion));
+          responseDocumentData = check_response.data.document_details.filter((doc) => doc.project_version.id === activeVersion);
         } else {
-          setDocumentData(check_response.data.document_details);
+          responseDocumentData = check_response.data.document_details;
+        }
+        setDocumentData(responseDocumentData);
+        if (!documentIsProcessing(responseDocumentData)) {
+          fetchLogData(0, rowsPerPage, null, null, null, null, null, projectVersionId);
         }
         setUploadLoading(false);
         setAlreadyExistingFiles(response.data.already_exist);
@@ -566,6 +581,7 @@ const ProjectLogs = () => {
         setPageRefresh(!pageRefresh);
       }
     } catch (error) {
+      console.log("error", error);
       setUploadLoading(false);
       toggleErrorModal(true);
       setModal(false);
@@ -1553,6 +1569,7 @@ const ProjectLogs = () => {
         successModal={successModal}
         toggleSuccessModal={toggleSuccessModal}
         alreadyExistingFiles={alreadyExistingFiles}
+        uploadErrorMessage={uploadErrorMessage}
       />
       <Procore
         companyId={companyId}

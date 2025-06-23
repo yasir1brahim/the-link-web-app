@@ -17,8 +17,10 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
 
     function convertUrlsToLinks(text) {
         const urlPattern = /(\bhttps?:\/\/[^\s/$.?#].[^\s]*)/gi;
-        
-        return text.replace(urlPattern, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+        if (!!text) {
+            return text.replace(urlPattern, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+        }
+        return text;
     }
     
     const TextWithLinks = (text) => {
