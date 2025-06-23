@@ -508,14 +508,14 @@ const ProjectLogs = () => {
       if (documentIsProcessing(documentData)) {
         const fetchDocumentData = async () => {
           const response = await getProjectDetails(projectId);
-          let documentData = response.data.document_details;
+          let responseDocumentData = response.data.document_details;
           if (versioningFeatureFlagActive) {
             const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
-            documentData = documentData.filter((doc) => doc.project_version.id === activeVersion);
+            responseDocumentData = responseDocumentData.filter((doc) => doc.project_version.id === activeVersion);
           }
-          setDocumentData(documentData);  
-          console.log('documentIsProcessing', documentIsProcessing(documentData));
-          if (!documentIsProcessing(documentData)) {
+          setDocumentData(responseDocumentData);  
+          console.log('documentIsProcessing', documentIsProcessing(responseDocumentData));
+          if (!documentIsProcessing(responseDocumentData)) {
             fetchLogData(0, rowsPerPage, null, null, null, null, null, projectVersionId);
           }
         };
@@ -563,11 +563,16 @@ const ProjectLogs = () => {
       })
       if (response.data) {
         const check_response = await getProjectDetails(projectId);
+        let responseDocumentData = {}
         if (versioningFeatureFlagActive) {
           const activeVersion = projectVersionId || check_response.data.project_versions[check_response.data.project_versions.length - 1].id;
-          setDocumentData(check_response.data.document_details.filter((doc) => doc.project_version.id === activeVersion));
+          responseDocumentData = check_response.data.document_details.filter((doc) => doc.project_version.id === activeVersion);
         } else {
-          setDocumentData(check_response.data.document_details);
+          responseDocumentData = check_response.data.document_details;
+        }
+        setDocumentData(responseDocumentData);
+        if (!documentIsProcessing(responseDocumentData)) {
+          fetchLogData(0, rowsPerPage, null, null, null, null, null, projectVersionId);
         }
         setUploadLoading(false);
         setAlreadyExistingFiles(response.data.already_exist);
