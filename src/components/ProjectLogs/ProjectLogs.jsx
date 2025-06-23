@@ -173,6 +173,7 @@ const ProjectLogs = () => {
     useState("");
   const [selectedFilterValue, setSelectedFilterValue] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
+  const [uploadErrorMessage, setUploadErrorMessage] = useState("");
   const [totalCount, setTotalCount] = useState(0);
   const initFilter = {
     spec_section: [],
@@ -550,7 +551,16 @@ const ProjectLogs = () => {
       data.append("project_id", projectId || state.project?.project_id);
       data.append("project_version_id", projectVersionId);
       Object.values(pdfFile)?.forEach((file) => data.append("files", file));
-      const response = await uploadFiles(data)
+      const response = await uploadFiles(data, (error) => {
+        setUploadLoading(false);
+        toggleErrorModal(true);
+        setModal(false);
+        if (error.response.data.error === 'TOO_MANY_FILES') {
+          setUploadErrorMessage(error.response.data.detail);
+        } else {
+          handleError(error);
+        }
+      })
       if (response.data) {
         const check_response = await getProjectDetails(projectId);
         if (versioningFeatureFlagActive) {
@@ -566,6 +576,7 @@ const ProjectLogs = () => {
         setPageRefresh(!pageRefresh);
       }
     } catch (error) {
+      console.log("error", error);
       setUploadLoading(false);
       toggleErrorModal(true);
       setModal(false);
@@ -1553,6 +1564,7 @@ const ProjectLogs = () => {
         successModal={successModal}
         toggleSuccessModal={toggleSuccessModal}
         alreadyExistingFiles={alreadyExistingFiles}
+        uploadErrorMessage={uploadErrorMessage}
       />
       <Procore
         companyId={companyId}

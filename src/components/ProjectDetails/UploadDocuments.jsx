@@ -17,17 +17,19 @@ export const UploadDocuments = (props) => {
     handleSubmit,
     isUploadLoading,
     errorModal,
+    toggleErrorModal,
     backToUpload,
     successModal,
     toggleSuccessModal,
     alreadyExistingFiles,
     logScreenUrl,
     project,
+    uploadErrorMessage,
   } = props;
 
   const navigate = useNavigate();
   const [dragOver, setDragOver] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState(uploadErrorMessage);
 
   const handleFileDrop = useCallback((e) => {
     e.preventDefault();
@@ -183,15 +185,15 @@ export const UploadDocuments = (props) => {
       <Modal
         isOpen={errorModal}
         fade={false}
-        toggle={toggleModal}
+        toggle={() => toggleErrorModal(!errorModal)}
         className="upload-doc-popup modal-lg"
       >
-        <ModalHeader toggle={toggleModal}>Upload Document</ModalHeader>
+        <ModalHeader toggle={() => toggleErrorModal(!errorModal)}>Upload Document</ModalHeader>
         <ModalBody>
           <div className="error-upload text-center">
             <Error />
             <h5>Error</h5>
-            <p>{errorMessage || "There was some error uploading this file."}</p>
+            <p>{uploadErrorMessage || "There was some error uploading this file."}</p>
             <button
               type="button"
               className="d-inline-block btn btn-primary"

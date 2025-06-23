@@ -213,7 +213,7 @@ const getExportJetBuildData = async (
 }
 
 
-const uploadFiles = async (data) => {
+const uploadFiles = async (data, errorCallback) => {
     try {
         return await axiosInstance({
             method: 'post',
@@ -221,7 +221,12 @@ const uploadFiles = async (data) => {
             data: data
         });
     } catch (error) {
-        handleError(error);
+        console.log("error in uploadFiles", error);
+        if (errorCallback) {
+            errorCallback(error);
+        } else {
+            handleError(error);
+        }
     }
 }
 
