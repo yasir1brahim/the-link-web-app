@@ -60,7 +60,26 @@ const fetchInspectionLog = async (projectId, projectVersionId) => {
     }
 }
 
-const ERROR_MESSAGE = "I’m unable to answer that question, can you please restate? Try to make it more specific or narrower if possible."
+const extractTablesToExcel = async (projectId, text) => {
+    try {
+        const response = await axiosInstance({
+            method: 'POST',
+            url: `/api/deliverables/${projectId}/specgpt-chats/extract-tables-to-csv/`,
+            data: {
+                'text': text,
+                'extract_all': true,
+            },
+            responseType: 'blob', // Important for file downloads
+        });
+
+        return response;
+    } catch (error) {
+        console.log('Error extracting tables: ', error);
+        return { success: false, error: error.message };
+    }
+}
+
+const ERROR_MESSAGE = "I'm unable to answer that question, can you please restate? Try to make it more specific or narrower if possible."
 
 const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, projectVersionId) => {
     try {
@@ -146,4 +165,5 @@ export {
     ProcessingStatus,
     loadUserDocs,
     fetchInspectionLog,
+    extractTablesToExcel,
 };
