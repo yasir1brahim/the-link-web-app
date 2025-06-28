@@ -83,9 +83,6 @@ const InspectionLog = ({
                     {/* Extract Tables Button */}
                     <Box mb={4} px={4}>
                         <HStack spacing={3} justify="flex-end">
-                            <Text fontSize="sm" color="gray.600">
-                                Export to Excel:
-                            </Text>
                             <Button
                                 size="sm"
                                 colorScheme="blue"
@@ -94,7 +91,7 @@ const InspectionLog = ({
                                 isLoading={isExtracting}
                                 loadingText="Exporting..."
                             >
-                                Inspection Log
+                                Export to Excel
                             </Button>
                         </HStack>
                     </Box>
