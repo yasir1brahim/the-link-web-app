@@ -38,12 +38,13 @@ const MessageInput = ({
     setUserInput,
     isLoadingMessage,
     submitMessage,
-    onKeyDown
+    onKeyDown,
+    isChatEnabled
 }) => {
     return <Box zIndex={1000} bottom={{ base: "20px", lg: "40px" }} maxH={"100px"} left={0} right={0} px={4} w={"100%"}>
         <InputGroup>
             <Input width={"100%"} value={userInput} placeholder='Message' border="1px" borderColor="#EDEDED" focusBorderColor='#1F2A43' py={4} onKeyDown={onKeyDown}
-                onChange={(e) => setUserInput(e.target.value)} />
+                onChange={(e) => setUserInput(e.target.value)} disabled={!isChatEnabled || isLoadingMessage} />
             <InputRightElement cursor={"pointer"} onClick={(e) => userInput && !isLoadingMessage ? submitMessage() : null}>
                 <SendMessageIcon />
             </InputRightElement>
@@ -58,7 +59,8 @@ const ChatMain = ({
     isLoadingMessage,
     userInput,
     setUserInput,
-    endOfMessagesRef
+    endOfMessagesRef,
+    isChatEnabled
 }) => {
     const onKeyDown = (e) => {
         if (e.key === "Enter") {
@@ -98,6 +100,7 @@ const ChatMain = ({
                         isLoadingMessage={isLoadingMessage}
                         submitMessage={submitMessage}
                         onKeyDown={onKeyDown}
+                        isChatEnabled={true}
                     />
                 </Center>
             }
@@ -123,6 +126,7 @@ const ChatMain = ({
                     isLoadingMessage={isLoadingMessage}
                     submitMessage={submitMessage}
                     onKeyDown={onKeyDown}
+                    isChatEnabled={isChatEnabled}
                 />
                 </>
             }

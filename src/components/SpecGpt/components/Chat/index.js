@@ -16,6 +16,7 @@ import { fetchPromptAnswer } from '../../utils/apiUtils';
 import InspectionLog from './InspectionLog';
 const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isInspectionLogFeatureFlagActive}) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const DEFAULT_MAX_CHAT_MESSAGES = 10;
     const navigator = useNavigate();
     const [messages, setMessages] = useState([]);
     const [chatHistory, setChatHistory] = useState([]);
@@ -26,6 +27,8 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
     const [k, setK] = useState(21);
     const [isGeneratingInspectionLog, setIsGeneratingInspectionLog] = useState(false);
     const [inspectionLog, setInspectionLog] = useState('');
+    const [maxChatMessages, setMaxChatMessages] = useState(DEFAULT_MAX_CHAT_MESSAGES);
+    const [isChatEnabled, setIsChatEnabled] = useState(true);
 
     useEffect(() => {
         fetchChatHistory(projectId).then((data) => {
@@ -36,6 +39,7 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
 
     useEffect(() => {
         setIsGeneratingInspectionLog(false);
+        setIsChatEnabled(true);
         if (chatSessionId) {
             fetchChatSessionHistory(projectId, chatSessionId).then((messages) => {
                 setMessages(messages);
@@ -45,7 +49,18 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
         }
     }, [chatSessionId]);
 
+    useEffect(() => {
+        console.log("maxChatMessages", maxChatMessages);
+        console.log("messages", messages);
+        if (messages.filter((message) => message.type === MESSAGE_ROLE_TYPE.ASSISTANT).length > maxChatMessages) {
+            setIsChatEnabled(false);
+        } else {
+            setIsChatEnabled(true);
+        }
+    }, [maxChatMessages, messages]);
+
     const onNewChatClick = () => {
+        console.log("onNewChatClick");
         setChatSessionId(null);
     }
 
@@ -88,6 +103,7 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
                 ];
             });
             setChatSessionId(newMessage.session_id);
+            setMaxChatMessages(newMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
             setIsLoadingMessage(false);
         });
     }
@@ -108,6 +124,7 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
 
     const onFirstAIResponse = (chatSessionId, userMessage) => {
         console.log("onFirstAIResponse", chatSessionId, userMessage);
+        setChatSessionId(chatSessionId);
         fetchChatHistory(projectId).then((data) => {
             console.log("chat history", data);
             setChatHistory(data);
@@ -145,6 +162,7 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
                             userInput={userInput}
                             setUserInput={setUserInput}
                             endOfMessagesRef={endOfMessagesRef}
+                            isChatEnabled={isChatEnabled}
                         />
                     )}
                 </Box>
