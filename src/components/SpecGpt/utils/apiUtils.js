@@ -93,21 +93,27 @@ const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, project
                 ...(chatSessionId ? {'chat_id': chatSessionId} : {}),
             },
         });
-        if (!response.data) return {session_id: chatSessionId, questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: ERROR_MESSAGE};
-        if (response.status === 400) {
+        if (response.data.error) {
             // return 400 error
-            const message = response.data.message;
+            const message = response.data.error;
             return {session_id: chatSessionId, questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: message};
         }
-        if (response.status === 500) {
-            return {session_id: chatSessionId, questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: ERROR_MESSAGE};
-        }
+        if (!response.data) return {session_id: chatSessionId, questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: ERROR_MESSAGE};
+        
         const answer = response.data.answer;
         const questionid = response.data.questionid;
         const sources = response.data.sources;
         const chatId = response.data.chat_id;
         console.log(sources);
-        return {session_id: chatSessionId, chat_id: chatId, questionid: questionid, role: MESSAGE_ROLE_TYPE.ASSISTANT, message: answer, sources: sources};
+        return {
+            session_id: chatId, 
+            chat_id: chatId, 
+            questionid: questionid, 
+            role: MESSAGE_ROLE_TYPE.ASSISTANT, 
+            message: answer, 
+            sources: sources, 
+            max_chat_messages: response.data.max_chat_messages
+        };
 
     } catch (error) {
         console.log('Error: ', error);
