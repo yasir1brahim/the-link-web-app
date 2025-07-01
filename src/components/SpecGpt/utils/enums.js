@@ -18,6 +18,7 @@ const MESSAGE_ROLE_TYPE = {
     SYSTEM: 'system',
     WELCOME_MESSAGE: 'welcome_message',
     ERROR: 'error',
+    AI_INSPECTION_LOG: 'ai_inspection_log'
 };
 
 const CSS_VARS = {

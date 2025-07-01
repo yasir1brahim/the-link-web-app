@@ -45,43 +45,12 @@ const fetchChatSessionHistory = async (projectId, chatSessionID) => {
 }
 
 const fetchInspectionLog = async (projectId, projectVersionId) => {
-    try {
-        const response = await axiosInstance({
-            method: 'POST',
-            url: `/api/deliverables/${projectId}/specgpt-chats/generate-inspection-log/`,
-            data: {
-                'project_version_id': projectVersionId,
-            },
-        });
-        return response.data.answer;
-    } catch (error) {
-        console.log('Error: ', error);
-        return {session_id: '', questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: ERROR_MESSAGE};
-    }
-}
-
-const extractTablesToExcel = async (projectId, text) => {
-    try {
-        const response = await axiosInstance({
-            method: 'POST',
-            url: `/api/deliverables/${projectId}/specgpt-chats/extract-tables-to-csv/`,
-            data: {
-                'text': text,
-                'extract_all': true,
-            },
-            responseType: 'blob', // Important for file downloads
-        });
-
-        return response;
-    } catch (error) {
-        console.log('Error extracting tables: ', error);
-        return { success: false, error: error.message };
-    }
+    return fetchPromptAnswer('', 1, null, projectId, projectVersionId, 'inspection_log');
 }
 
 const ERROR_MESSAGE = "I'm unable to answer that question, can you please restate? Try to make it more specific or narrower if possible."
 
-const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, projectVersionId) => {
+const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, projectVersionId, responseType = 'standard') => {
     try {
         const response = await axiosInstance({
             method: 'POST',
@@ -89,6 +58,7 @@ const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, project
             data: {
                 'user_input': userInput,
                 'k': k,
+                'response_type': responseType,
                 ...(projectVersionId ? {'project_version_id': projectVersionId} : {}),
                 ...(chatSessionId ? {'chat_id': chatSessionId} : {}),
             },
@@ -118,6 +88,25 @@ const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, project
     } catch (error) {
         console.log('Error: ', error);
         return {session_id: chatSessionId, questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: ERROR_MESSAGE};
+    }
+}
+
+const extractTablesToExcel = async (projectId, text) => {
+    try {
+        const response = await axiosInstance({
+            method: 'POST',
+            url: `/api/deliverables/${projectId}/specgpt-chats/extract-tables-to-csv/`,
+            data: {
+                'text': text,
+                'extract_all': true,
+            },
+            responseType: 'blob', // Important for file downloads
+        });
+
+        return response;
+    } catch (error) {
+        console.log('Error extracting tables: ', error);
+        return { success: false, error: error.message };
     }
 }
 
