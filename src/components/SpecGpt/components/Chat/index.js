@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { fetchChatHistory, fetchChatSessionHistory, fetchInspectionLog } from '../../utils/apiUtils';
 import { MESSAGE_ROLE_TYPE } from '../../utils/enums';
 import { fetchPromptAnswer } from '../../utils/apiUtils';
-import InspectionLog from './InspectionLog';
+
 const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isInspectionLogFeatureFlagActive}) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const DEFAULT_MAX_CHAT_MESSAGES = 10;
@@ -27,7 +27,6 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
     const endOfMessagesRef = useRef(null);
     const [k, setK] = useState(21);
     const [isGeneratingInspectionLog, setIsGeneratingInspectionLog] = useState(false);
-    const [inspectionLog, setInspectionLog] = useState('');
     const [maxChatMessages, setMaxChatMessages] = useState(DEFAULT_MAX_CHAT_MESSAGES);
     const [isChatEnabled, setIsChatEnabled] = useState(true);
 
