@@ -4,6 +4,7 @@ import {
     DrawerOverlay,
     DrawerContent,
     Center,
+    Spinner
 } from '@chakra-ui/react'
 import ChatSidebar from './ChatSidebar'
 import ChatMain from './ChatMain'
@@ -38,7 +39,6 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
     }, []);  
 
     useEffect(() => {
-        setIsGeneratingInspectionLog(false);
         setIsChatEnabled(true);
         if (chatSessionId) {
             fetchChatSessionHistory(projectId, chatSessionId).then((messages) => {
@@ -60,7 +60,6 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
     }, [maxChatMessages, messages]);
 
     const onNewChatClick = () => {
-        console.log("onNewChatClick");
         setChatSessionId(null);
     }
 
@@ -110,11 +109,40 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
 
     const onGenerateInspectionLogClick = () => {
         console.log("onGenerateInspectionLogClick");
+        setChatSessionId(null);
+        setMessages([
+            ...messages,
+            {
+                'type': MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG,
+                'message': '',
+                'session_id': chatSessionId,
+                'questionid': '',
+                'loading': true
+            }
+        ]);
+        setIsLoadingMessage(true);
         setIsGeneratingInspectionLog(true);
-        setInspectionLog('');
-        fetchInspectionLog(projectId, projectVersionId).then((inspectionLog) => {
-            console.log("inspectionLog", inspectionLog);
-            setInspectionLog(inspectionLog);
+        setUserInput('');
+        fetchInspectionLog(projectId, projectVersionId).then((inspectionLogMessage) => {
+            console.log("inspectionLog", inspectionLogMessage);
+            onFirstAIResponse(inspectionLogMessage.session_id, '');
+            setMessages((prevMessages) => {
+                const lastMessage = prevMessages[prevMessages.length - 1];
+                return [
+                    ...prevMessages.slice(0, -1),
+                    { 
+                        ...lastMessage, 
+                        message: inspectionLogMessage.message, 
+                        loading: false, 
+                        questionid: inspectionLogMessage.questionid,
+                        sources: inspectionLogMessage.sources
+                    }
+                ];
+            });
+            setChatSessionId(inspectionLogMessage.session_id);
+            setMaxChatMessages(inspectionLogMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
+            setIsLoadingMessage(false);
+            setIsGeneratingInspectionLog(false);
         });
     }
 
@@ -148,10 +176,9 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
                 </Box>
                 <Box w="100%" h="100%" >
                     {isGeneratingInspectionLog && (
-                        <InspectionLog 
-                            inspectionLog={inspectionLog}
-                            projectId={projectId}
-                        />
+                        <Center h={"100%"} w={"100%"} flexDirection={"column"} gap={5}>
+                            <Spinner size="xl" color="#1F2A43" />
+                        </Center>
                     )}
                     {!isGeneratingInspectionLog && (
                         <ChatMain 

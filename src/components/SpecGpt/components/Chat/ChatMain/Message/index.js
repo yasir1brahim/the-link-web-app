@@ -1,12 +1,18 @@
-import { Flex, Image, Text, Skeleton, Container, SkeletonText } from '@chakra-ui/react'
-import React from 'react'
+import { Flex, Image, Text, Skeleton, Container, SkeletonText, Button, useToast, Box, HStack } from '@chakra-ui/react'
+import React, { useState } from 'react'
 import SpecGptImage from "../../../../assets/spec-gpt.png"
+import { DownloadIcon } from '@chakra-ui/icons'
+import FileDownload from "js-file-download";
 import { MESSAGE_ROLE_TYPE } from '../../../../utils/enums';
+import { extractTablesToExcel } from '../../../../utils/apiUtils';
 import MessageSources from '../MessageSources';
 import { marked } from 'marked';
 
 
 const Message = ({ messageType, message, sources, isLoading, projectId }) => {
+    const [isExtracting, setIsExtracting] = useState(false);
+    const toast = useToast();
+
     let messageHeading = "System"
     if (messageType === MESSAGE_ROLE_TYPE.USER) {
         messageHeading = "You"
@@ -14,6 +20,62 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
     if (messageType === MESSAGE_ROLE_TYPE.ASSISTANT) {
         messageHeading = "SpecGPT"
     }
+
+    const handleExtractTables = async () => {
+        if (!message) {
+            toast({
+                title: "No content to extract",
+                description: "Please wait for the inspection log to load first.",
+                status: "warning",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+
+        setIsExtracting(true);
+        try {
+            const result = await extractTablesToExcel(projectId, message);
+        
+              let blob = new Blob([result.data], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              });
+              FileDownload(
+                blob,
+                `${
+                  `Project`
+                }_inspection_log_${new Date().toLocaleDateString("en-US", { day: 'numeric' })}_${new Date().toLocaleDateString("en-US", { month: 'short' })}_${new Date().toLocaleDateString("en-US", { year: 'numeric' })}.xlsx`
+              );
+            console.log("result", result);
+            if (result.status === 200) {
+                toast({
+                    title: "Inspection log exported successfully",
+                    description: `Excel file downloaded`,
+                    status: "success",
+                    duration: 3000,
+                    isClosable: true,
+                });
+            } else {
+                toast({
+                    title: "Export failed",
+                    description: result.error || "No inspection log found in the content",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        } catch (error) {
+            toast({
+                title: "Export failed",
+                description: "An unexpected error occurred while exporting the inspection log",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            setIsExtracting(false);
+        }
+    };
 
     function convertUrlsToLinks(text) {
         const urlPattern = /(\bhttps?:\/\/[^\s/$.?#].[^\s]*)/gi;
@@ -56,6 +118,22 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
                     </Text>
                 ) : (
                     <SkeletonText isLoaded={!isLoading} noOfLines={4} skeletonHeight="20px" width={"100%"}>
+                        {messageType === MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG &&
+                            <Box mb={4} px={4}>
+                                <HStack spacing={3} justify="flex-end">
+                                    <Button
+                                        size="sm"
+                                        colorScheme="blue"
+                                        leftIcon={<DownloadIcon />}
+                                        onClick={() => handleExtractTables(true)}
+                                        isLoading={isExtracting}
+                                        loadingText="Exporting..."
+                                    >
+                                        Export to Excel
+                                    </Button>
+                                </HStack>
+                            </Box>
+                        }
                         {TextWithLinks(message)}
                     </SkeletonText>
                 )}
