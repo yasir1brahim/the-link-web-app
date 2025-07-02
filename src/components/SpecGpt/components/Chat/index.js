@@ -11,7 +11,7 @@ import ChatMain from './ChatMain'
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { fetchChatHistory, fetchChatSessionHistory, fetchInspectionLog } from '../../utils/apiUtils';
+import { fetchChatHistory, fetchChatSessionHistory, fetchInspectionLog, fetchOwnerDeliverablesLog } from '../../utils/apiUtils';
 import { MESSAGE_ROLE_TYPE } from '../../utils/enums';
 import { fetchPromptAnswer } from '../../utils/apiUtils';
 
@@ -26,7 +26,7 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
     const [userInput, setUserInput] = useState('');
     const endOfMessagesRef = useRef(null);
     const [k, setK] = useState(21);
-    const [isGeneratingInspectionLog, setIsGeneratingInspectionLog] = useState(false);
+    const [isGeneratingLog, setIsGeneratingLog] = useState(false);
     const [maxChatMessages, setMaxChatMessages] = useState(DEFAULT_MAX_CHAT_MESSAGES);
     const [isChatEnabled, setIsChatEnabled] = useState(true);
 
@@ -106,13 +106,13 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
         });
     }
 
-    const onGenerateInspectionLogClick = () => {
-        console.log("onGenerateInspectionLogClick");
+    const handleLogGeneration = (logType, logFetchFunction) => {
+        console.log("handleLogGeneration", logType);
         setChatSessionId(null);
         setMessages([
             ...messages,
             {
-                'type': MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG,
+                'type': logType,
                 'message': '',
                 'session_id': chatSessionId,
                 'questionid': '',
@@ -120,29 +120,38 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
             }
         ]);
         setIsLoadingMessage(true);
-        setIsGeneratingInspectionLog(true);
+        setIsGeneratingLog(true);
         setUserInput('');
-        fetchInspectionLog(projectId, projectVersionId).then((inspectionLogMessage) => {
-            console.log("inspectionLog", inspectionLogMessage);
-            onFirstAIResponse(inspectionLogMessage.session_id, '');
+
+        logFetchFunction(projectId, projectVersionId).then((logMessage) => {
+            console.log("logMessage", logMessage);
+            onFirstAIResponse(logMessage.session_id, '');
             setMessages((prevMessages) => {
                 const lastMessage = prevMessages[prevMessages.length - 1];
                 return [
                     ...prevMessages.slice(0, -1),
                     { 
                         ...lastMessage, 
-                        message: inspectionLogMessage.message, 
+                        message: logMessage.message, 
                         loading: false, 
-                        questionid: inspectionLogMessage.questionid,
-                        sources: inspectionLogMessage.sources
+                        questionid: logMessage.questionid,
+                        sources: logMessage.sources
                     }
                 ];
             });
-            setChatSessionId(inspectionLogMessage.session_id);
-            setMaxChatMessages(inspectionLogMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
+            setChatSessionId(logMessage.session_id);
+            setMaxChatMessages(logMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
             setIsLoadingMessage(false);
-            setIsGeneratingInspectionLog(false);
+            setIsGeneratingLog(false);
         });
+    }
+
+    const onGenerateInspectionLogClick = () => {
+        handleLogGeneration(MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG, fetchInspectionLog);
+    }
+
+    const onGenerateOwnerDeliverablesLogClick = () => {
+        handleLogGeneration(MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG, fetchOwnerDeliverablesLog);
     }
 
     const onClickChatLink = (chatSessionId) => {
@@ -168,18 +177,19 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
                             onClickChatLink={onClickChatLink}
                             onNewChatClick={onNewChatClick}
                             onGenerateInspectionLogClick={onGenerateInspectionLogClick}
+                            onGenerateOwnerDeliverablesLogClick={onGenerateOwnerDeliverablesLogClick}
                             isInspectionLogFeatureFlagActive={isInspectionLogFeatureFlagActive}
                         />
                     </Box>
                     <Box w={"280px"}></Box>
                 </Box>
                 <Box w="100%" h="100%" >
-                    {isGeneratingInspectionLog && (
+                    {isGeneratingLog && (
                         <Center h={"100%"} w={"100%"} flexDirection={"column"} gap={5}>
                             <Spinner size="xl" color="#1F2A43" />
                         </Center>
                     )}
-                    {!isGeneratingInspectionLog && (
+                    {!isGeneratingLog && (
                         <ChatMain 
                             messages={messages} 
                             projectId={projectId} 
@@ -206,6 +216,9 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
                             chatHistory={chatHistory}
                             onClickChatLink={onClickChatLink}
                             onNewChatClick={onNewChatClick}
+                            onGenerateInspectionLogClick={onGenerateInspectionLogClick}
+                            onGenerateOwnerDeliverablesLogClick={onGenerateOwnerDeliverablesLogClick}
+                            isInspectionLogFeatureFlagActive={isInspectionLogFeatureFlagActive}
                         />
                     </DrawerBody>
                 </DrawerContent>
