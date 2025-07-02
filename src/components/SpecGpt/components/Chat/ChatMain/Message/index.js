@@ -118,7 +118,7 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
                     </Text>
                 ) : (
                     <SkeletonText isLoaded={!isLoading} noOfLines={4} skeletonHeight="20px" width={"100%"}>
-                        {messageType === MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG &&
+                        {messageType === MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG || messageType === MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG &&
                             <Box mb={4} px={4}>
                                 <HStack spacing={3} justify="flex-end">
                                     <Button
