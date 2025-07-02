@@ -48,6 +48,10 @@ const fetchInspectionLog = async (projectId, projectVersionId) => {
     return fetchPromptAnswer('', 1, null, projectId, projectVersionId, 'inspection_log');
 }
 
+const fetchOwnerDeliverablesLog = async (projectId, projectVersionId) => {
+    return fetchPromptAnswer('', 1, null, projectId, projectVersionId, 'owner_deliverables_log');
+}
+
 const ERROR_MESSAGE = "I'm unable to answer that question, can you please restate? Try to make it more specific or narrower if possible."
 
 const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, projectVersionId, responseType = 'standard') => {
@@ -160,5 +164,6 @@ export {
     ProcessingStatus,
     loadUserDocs,
     fetchInspectionLog,
+    fetchOwnerDeliverablesLog,
     extractTablesToExcel,
 };
