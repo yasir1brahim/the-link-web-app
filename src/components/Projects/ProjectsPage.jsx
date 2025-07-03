@@ -8,13 +8,19 @@ import Loader from "../shared/Loader/Loader";
 import handleError from "../../config/errorHandler";
 import HeaderTabs from "../shared/HeaderTabs/HeaderTabs";
 import { listProjects, getUserRoleInProject } from "../../api/Projects/api";
-import { isFeatureFlagActive } from "../../utils/featureFlags";
 import { useParams } from 'react-router-dom';
 import { getUserRoleInTeam } from "../../api/Authentication/api";
-import { isNoticesFlagActive, isFullSpecProcessingFlagActive } from "../../api/FeatureFlags/api";
+import { useFeatureFlags } from "../../contexts/FeatureFlagsContext";
 
 const ProjectsPage = () => {
+  const { 
+    isNoticesFlagActive, 
+    isFullSpecProcessingFlagActive, 
+    loadTeamFlags,
+    loadingTeamIds 
+  } = useFeatureFlags();
   const navigate = useNavigate();
+
   const [uploadSpecsModal, setUploadSpecsModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [archiveProjectModal, setArchiveProjectModal] = useState(false);
@@ -31,13 +37,9 @@ const ProjectsPage = () => {
     setCreateProjectModal(!createProjectModal);
   const toggleArchiveProjectModal = () => setArchiveProjectModal(!archiveProjectModal);
   const toggleRestoreProjectModal = () => setRestoreProjectModal(!restoreProjectModal);
-  const [noticesFeatureFlagActive, setNoticesFeatureFlagActive] = useState(false);
-  const [fullSpecProcessingFeatureFlagActive, setFullSpecProcessingFeatureFlagActive] = useState(false);
-  const [versioningFeatureFlagActive, setVersioningFeatureFlagActive] = useState(false);
   const { teamId } = useParams();
 
   const customerId = teamId;
-
 
   const handleLaunch = (project) => {
     navigate(
@@ -47,6 +49,7 @@ const ProjectsPage = () => {
           project,
           projectName: project?.name,
           userId: localStorage.getItem("userId"),
+          teamId: teamId,
           customerData,
         },
       },
@@ -59,6 +62,7 @@ const ProjectsPage = () => {
         project,
         projectName: project?.name,
         userId: localStorage.getItem("userId"),
+        teamId: teamId,
         customerData,
       },
     })
@@ -70,6 +74,7 @@ const ProjectsPage = () => {
         project,
         projectName: project?.name,
         userId: localStorage.getItem("userId"),
+        teamId: teamId,
         customerData,
       },
     })
@@ -97,22 +102,24 @@ const ProjectsPage = () => {
     }
 };
 
-
 useEffect(() => {
   let isMounted = true;
+  console.log('customerId', customerId);
+  
+  // Load team flags when component mounts
+  if (customerId) {
+    loadTeamFlags(customerId);
+  }
 
   fetchData(); 
-  isNoticesFlagActive(teamId).then(isActive => {
-    setNoticesFeatureFlagActive(isActive)
-  });
-  isFullSpecProcessingFlagActive(teamId).then(isActive => {
-    setFullSpecProcessingFeatureFlagActive(isActive)
-  });
 
   return () => {
       isMounted = false;
   };
 }, [state, pageRefresh, isArchived, customerId]);
+
+  // Check if team flags are still loading
+  const isTeamLoading = customerId && loadingTeamIds.has(customerId);
 
   return (
     <>
@@ -149,14 +156,14 @@ useEffect(() => {
             isArchived={isArchived}
             toggleArchive={toggleArchive}
             customerId={customerId}
-            noticesFeatureFlagActive={noticesFeatureFlagActive}
-            fullSpecProcessingFeatureFlagActive={fullSpecProcessingFeatureFlagActive}
+            noticesFeatureFlagActive={isNoticesFlagActive(customerId)}
+            fullSpecProcessingFeatureFlagActive={isFullSpecProcessingFlagActive(customerId)}
             onClickNotices={onClickNotices}
             onClickFullSpecProcessing={onClickFullSpecProcessing}
           />
         </div>
       </div>
-      <Loader showComponentLoader={isLoading} />
+      <Loader showComponentLoader={isLoading || isTeamLoading} />
     </>
   );
 };

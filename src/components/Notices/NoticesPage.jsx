@@ -28,10 +28,12 @@ import { getProjectDetails } from "../../api/Projects/api";
 import { uploadFiles } from "../../api/ProjectLogs/api";
 import { getNotices } from "../../api/Notices/api";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
-import { isNoticesFlagActive } from "../../api/FeatureFlags/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
+import { useFeatureFlags } from "../../contexts/FeatureFlagsContext";
+
 
 const NoticesPage = () => {
+  const { isNoticesFlagActive } = useFeatureFlags();
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);

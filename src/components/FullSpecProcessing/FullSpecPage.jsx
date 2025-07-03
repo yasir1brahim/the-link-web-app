@@ -28,8 +28,8 @@ import { getProjectDetails } from "../../api/Projects/api";
 import { uploadFiles } from "../../api/ProjectLogs/api";
 import { getSemanticallyProcessedSpecItems } from "../../api/ProjectLogs/api";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
-import { isNoticesFlagActive } from "../../api/FeatureFlags/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
+import { useFeatureFlags } from "../../contexts/FeatureFlagsContext";
 
 const NoticesPage = () => {
   const [modal, setModal] = useState(false);
