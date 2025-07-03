@@ -61,18 +61,17 @@ const MessageInput = ({
     return (
         <Box 
             zIndex={1000} 
-            position="fixed"
+            position="absolute"
             bottom={{ base: "20px", lg: "40px" }} 
             left={0} 
             right={0} 
             px={4} 
             w={"100%"}
-            display="flex"
-            justifyContent="center"
         >
             <Box 
                 maxW="800px" 
                 w="100%" 
+                marginX="auto"
                 position="relative"
                 display="flex"
                 alignItems="flex-end"
