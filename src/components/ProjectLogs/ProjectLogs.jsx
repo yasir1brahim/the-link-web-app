@@ -33,15 +33,24 @@ import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmitta
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
-import { isVersioningFlagActive, isVersionComparisonFlagActive, isVersionComparisonSearchFlagActive, isSpecGptFlagActive, isInspectionLogFlagActive } from "../../api/FeatureFlags/api";
 import { getCurrentUserData } from "../../api/Authentication/api";
 import ArchiveConfirmationModal from "./archiveConfirmationModal";
 import VersionComparisonModal from "./versionComparisonModal";
 import Chat from "../SpecGpt/components/Chat";
 import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
+import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
+
 
 const ProjectLogs = () => {
+  const { 
+    isVersioningFlagActive, 
+    isVersionComparisonFlagActive, 
+    isVersionComparisonSearchFlagActive,
+    isSpecGptFlagActive, 
+    isInspectionLogFlagActive 
+  } = useFeatureFlags();
+
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -70,6 +79,7 @@ const ProjectLogs = () => {
   const [viewSavedList, setToggleViewSavedList] = useState(false);
   const toggleViewSavedList = () => setToggleViewSavedList(!viewSavedList);
   const { state } = useLocation();
+  console.log('state', state);
   const [logData, setLogData] = useState([]);
   const [filteredLogData, setFilteredLogData] = useState([]);
   const [selected, setSelected] = useState(
@@ -142,8 +152,6 @@ const ProjectLogs = () => {
   const [projectId, setProjectId] = useState(projectDetails?.length
     ? JSON.parse(projectDetails[0])
     : null);
-  const [customerId, setCustomerId] = useState(
-    projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null);
   const [projectName, setProjectName] = useState("");
   const authCode = searchParams.get("code");
   const procoreClientId = window.location.href.includes(
@@ -188,9 +196,6 @@ const ProjectLogs = () => {
   const [rowsPerPage, setRowsPerPage] = React.useState(50);
   const [page, setPage] = React.useState(1);
 
-  const [versioningFeatureFlagActive, setVersioningFeatureFlagActive] = useState(false);
-  const [versionComparisonFeatureFlagActive, setVersionComparisonFeatureFlagActive] = useState(false);
-  const [versionComparisonSearchFlagActive, setVersionComparisonSearchFlagActive] = useState(false);
   const [availableVersions, setAvailableVersions] = useState([]);
   const [availableMasterformatNumbers, setAvailableMasterformatNumbers] = useState([]);
   const [projectVersionId, setProjectVersionId] = useState(searchParams.get("projectVersion") ? parseInt(searchParams.get("projectVersion")) : null);
@@ -211,8 +216,6 @@ const ProjectLogs = () => {
   const toggleVersionComparisonModal = () => setShowVersionComparisonModal(!showVersionComparisonModal);
 
   const [chatId, setChatId] = useState(searchParams.get("chatId") ? parseInt(searchParams.get("chatId")) : null);
-  const [isSpecGptFeatureFlagActive, setIsSpecGptFeatureFlagActive] = useState(false);
-  const [isInspectionLogFeatureFlagActive, setIsInspectionLogFeatureFlagActive] = useState(false);
   const [activeTab, setActiveTab] = useState('submittal');
 
   const [logIdList, setLogIdList] = React.useState([]);
@@ -222,7 +225,7 @@ const ProjectLogs = () => {
 
   const [userRole, setUserRole] = useState('');
   const [userRoleInCompany, setUserRoleInCompany] = useState('member');
-  const [teamId, setTeamId] = useState(null);
+  const [teamId, setTeamId] = useState(state?.teamId);
 
   const [hasPlaceholderSubmittals, setHasPlaceholderSubmittals] = useState(false);
 
@@ -460,20 +463,13 @@ const ProjectLogs = () => {
       }
       const response = await getProjectDetails(projectId);
       console.log('projectData', response.data);
-      setTeamId(response.data.team);
-      const versioningActive = await isVersioningFlagActive(response.data.team);
-      setVersioningFeatureFlagActive(versioningActive);
-      const versionComparisonActive = await isVersionComparisonFlagActive(response.data.team);
-      setVersionComparisonFeatureFlagActive(versionComparisonActive);
-      const versionComparisonSearchActive = await isVersionComparisonSearchFlagActive(response.data.team);
-      setVersionComparisonSearchFlagActive(versionComparisonSearchActive);
-      const isSpecGptActive = await isSpecGptFlagActive(response.data.team);
-      console.log('isSpecGptActive', isSpecGptActive);
-      setIsSpecGptFeatureFlagActive(isSpecGptActive);
+      if (response.data.team !== teamId) {
+        setTeamId(response.data.team);
+      }
       setProjectName(response.data.name);
       const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
       setProjectVersionId(activeVersion);
-      if (versioningActive) {
+      if (isVersioningFlagActive(response.data.team)) {
         setDocumentData(response.data.document_details.filter((doc) => {
           return doc.project_version.id === parseInt(activeVersion);
         }));
@@ -486,8 +482,6 @@ const ProjectLogs = () => {
 
       setAvailableVersions(response.data.project_versions);
       fetchLogData(0, rowsPerPage, null, null, null, null, null, activeVersion)
-      const isInspectionLogActive = await isInspectionLogFlagActive(response.data.team);
-      setIsInspectionLogFeatureFlagActive(isInspectionLogActive);
       setLoading(false);
     };
 
@@ -509,7 +503,7 @@ const ProjectLogs = () => {
         const fetchDocumentData = async () => {
           const response = await getProjectDetails(projectId);
           let responseDocumentData = response.data.document_details;
-          if (versioningFeatureFlagActive) {
+          if (isVersioningFlagActive(teamId)) {
             const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
             responseDocumentData = responseDocumentData.filter((doc) => doc.project_version.id === activeVersion);
           }
@@ -564,7 +558,7 @@ const ProjectLogs = () => {
       if (response.data) {
         const check_response = await getProjectDetails(projectId);
         let responseDocumentData = {}
-        if (versioningFeatureFlagActive) {
+        if (isVersioningFlagActive(teamId)) {
           const activeVersion = projectVersionId || check_response.data.project_versions[check_response.data.project_versions.length - 1].id;
           responseDocumentData = check_response.data.document_details.filter((doc) => doc.project_version.id === activeVersion);
         } else {
@@ -701,7 +695,7 @@ const ProjectLogs = () => {
     }
   }, [
     authCode,
-    customerId,
+    teamId,
     projectId,
     selectedRows,
     searchParams,
@@ -722,7 +716,7 @@ const ProjectLogs = () => {
         get(res, "data.procore_company_id")
       );
       localStorage.setItem("projectId", projectId);
-      localStorage.setItem("customerId", customerId);
+      localStorage.setItem("teamId", teamId);
       localStorage.setItem("projectName", projectName);
       setProcoreProjectName(get(res, "data.procore_project_name"));
       setProcoreProjectId(get(res, "data.procore_project_id"));
@@ -762,7 +756,7 @@ const ProjectLogs = () => {
         get(res, "data.procore_company_id")
       );
       localStorage.setItem("projectId", projectId);
-      localStorage.setItem("customerId", customerId);
+      localStorage.setItem("teamId", teamId);
       localStorage.setItem("projectName", projectName);
       setProcoreProjectName(get(res, "data.procore_project_name"));
       setProcoreProjectId(get(res, "data.procore_project_id"));
@@ -1275,8 +1269,8 @@ const ProjectLogs = () => {
             qaDashboard={state?.qaDashboard}
             navBtn={"logs"}
             teamId={teamId}
-            isVersioningEnabled={versioningFeatureFlagActive}
-            isVersionComparisonEnabled={versionComparisonFeatureFlagActive}
+            isVersioningEnabled={isVersioningFlagActive(teamId)}
+            isVersionComparisonEnabled={isVersionComparisonFlagActive(teamId)}
             toggleVersionComparisonModal={toggleVersionComparisonModal}
             onClickVersion={onClickVersion}
             projectVersionId={projectVersionId}
@@ -1341,7 +1335,7 @@ const ProjectLogs = () => {
             btnSize={"small"}
           />
           
-          {isSpecGptFeatureFlagActive && (
+          {isSpecGptFlagActive(teamId) && (
             <div className="tab-row" style={{ marginBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
               <div className="tab-container" style={{ display: 'flex', gap: '0' }}>
                 <button
@@ -1399,9 +1393,9 @@ const ProjectLogs = () => {
                   pageRefresh={pageRefresh}
                   setPageRefresh={setPageRefresh}
                   setLoading={setLoading}
-                  customerId={state?.customerId || customerId}
+                  customerId={teamId}
                   setLogData={setLogData}
-                  projectId={state?.projectId || projectId}
+                  projectId={projectId}
                   listId={listId}
                   setPdfData={setPdfData}
                   setSubmittalIdParam={setSubmittalIdParam}
@@ -1538,7 +1532,7 @@ const ProjectLogs = () => {
                   projectVersionId={projectVersionId} 
                   chatSessionId={chatId} 
                   setChatSessionId={setChatId}
-                  isInspectionLogFeatureFlagActive={isInspectionLogFeatureFlagActive}
+                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
                 ></Chat>
               </ChakraProvider>
             </>
@@ -1858,7 +1852,7 @@ const ProjectLogs = () => {
         toggleVersionComparisonModal={toggleVersionComparisonModal}
         availableVersions={availableVersions}
         availableMasterformatNumbers={availableMasterformatNumbers}
-        versionComparisonSearchFlagActive={versionComparisonSearchFlagActive}
+        versionComparisonSearchFlagActive={isVersionComparisonSearchFlagActive(teamId)}
       />}
 
       {showArchiveConfirmationModal && <ArchiveConfirmationModal

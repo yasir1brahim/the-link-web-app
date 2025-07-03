@@ -4,6 +4,7 @@ import './index.scss';
 import './App.scss';
 import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from './auth/authprovider';
+import { FeatureFlagsProvider } from './contexts/FeatureFlagsContext';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import ErrorPage from './components/ErrorPage';
 import Signin from './components/Authentication/Signin';
@@ -133,7 +134,9 @@ const router = createBrowserRouter([
 ReactDOM.render(
   <React.StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <FeatureFlagsProvider>
+        <RouterProvider router={router} />
+      </FeatureFlagsProvider>
     </AuthProvider>
   </React.StrictMode>,
   document.getElementById('root')
