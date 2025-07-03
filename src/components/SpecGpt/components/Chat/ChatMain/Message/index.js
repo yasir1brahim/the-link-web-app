@@ -97,7 +97,40 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
             markdownConvertedToHtml = marked(convertedText);
         }
         return (
-            <div className="markdown-body" dangerouslySetInnerHTML={{ __html: markdownConvertedToHtml }} />
+            <>
+                <style>
+                    {`
+                        .markdown-body {
+                            line-height: 1.2;
+                        }
+                        .markdown-body p {
+                            margin: 0 0;
+                        }
+                        .markdown-body h1, .markdown-body h2, .markdown-body h3, 
+                        .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+                            margin: 0.8em 0 0.4em 0;
+                        }
+                        .markdown-body ul, .markdown-body ol {
+                            margin: 0 0;
+                            padding-left: 1.5em;
+                        }
+                        .markdown-body li {
+                            margin: 0 0;
+                        }
+                        .markdown-body hr {
+                            margin: 0 0;
+                            border: none;
+                            border-top: 1px solid #e2e8f0;
+                        }
+                        .markdown-body blockquote {
+                            margin: 0 0;
+                            padding-left: 1em;
+                            border-left: 3px solid #e2e8f0;
+                        }
+                    `}
+                </style>
+                <div className="markdown-body" dangerouslySetInnerHTML={{ __html: markdownConvertedToHtml }} />
+            </>
         );
     };
     return (
