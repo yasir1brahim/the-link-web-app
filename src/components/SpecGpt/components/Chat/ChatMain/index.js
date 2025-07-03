@@ -46,7 +46,7 @@ const MessageInput = ({
     const adjustTextareaHeight = () => {
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
-            textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+            textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 240) + 'px';
         }
     };
 
@@ -94,7 +94,7 @@ const MessageInput = ({
                     disabled={!isChatEnabled || isLoadingMessage}
                     resize="none"
                     minH="40px"
-                    maxH="120px"
+                    maxH="240px"
                     overflowY="auto"
                     borderRadius="md"
                     bg="white"
@@ -107,6 +107,7 @@ const MessageInput = ({
                     right="12px"
                     bottom="8px"
                     cursor="pointer" 
+                    zIndex={1001}
                     onClick={(e) => userInput && !isLoadingMessage ? submitMessage() : null}
                 >
                     <SendMessageIcon />
@@ -127,7 +128,8 @@ const ChatMain = ({
     isChatEnabled
 }) => {
     const onKeyDown = (e) => {
-        if (e.key === "Enter") {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
             submitMessage();
         }
     }
