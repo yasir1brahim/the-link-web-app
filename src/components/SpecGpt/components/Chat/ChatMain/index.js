@@ -76,6 +76,9 @@ const MessageInput = ({
                 position="relative"
                 display="flex"
                 alignItems="flex-end"
+                bg="white"
+                borderRadius="md"
+                boxShadow="0 4px 6px rgba(0, 0, 0, 0.1)"
             >
                 <Textarea 
                     ref={textareaRef}
@@ -95,6 +98,10 @@ const MessageInput = ({
                     maxH="120px"
                     overflowY="auto"
                     borderRadius="md"
+                    bg="white"
+                    _focus={{
+                        bg: "white"
+                    }}
                 />
                 <Box 
                     position="absolute"
