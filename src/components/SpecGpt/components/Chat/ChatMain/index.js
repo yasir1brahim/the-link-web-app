@@ -1,4 +1,4 @@
-import { Box, Grid, GridItem, Heading, Input, InputRightElement, Text, InputGroup, Center } from '@chakra-ui/react'
+import { Box, Grid, GridItem, Heading, Input, InputRightElement, Text, InputGroup, Center, Textarea } from '@chakra-ui/react'
 import React, { useEffect, useRef, useState } from 'react'
 import { BrushIcon, QuestionIcon, SendIcon, SendMessageIcon } from '../../../assets/icons'
 import Message from './Message'
@@ -41,15 +41,73 @@ const MessageInput = ({
     onKeyDown,
     isChatEnabled
 }) => {
-    return <Box zIndex={1000} bottom={{ base: "20px", lg: "40px" }} maxH={"100px"} left={0} right={0} px={4} w={"100%"}>
-        <InputGroup>
-            <Input width={"100%"} value={userInput} placeholder='Message' border="1px" borderColor="#EDEDED" focusBorderColor='#1F2A43' py={4} onKeyDown={onKeyDown}
-                onChange={(e) => setUserInput(e.target.value)} disabled={!isChatEnabled || isLoadingMessage} />
-            <InputRightElement cursor={"pointer"} onClick={(e) => userInput && !isLoadingMessage ? submitMessage() : null}>
-                <SendMessageIcon />
-            </InputRightElement>
-        </InputGroup>
-    </Box>
+    const textareaRef = useRef(null);
+
+    const adjustTextareaHeight = () => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+        }
+    };
+
+    useEffect(() => {
+        adjustTextareaHeight();
+    }, [userInput]);
+
+    const handleChange = (e) => {
+        setUserInput(e.target.value);
+    };
+
+    return (
+        <Box 
+            zIndex={1000} 
+            position="fixed"
+            bottom={{ base: "20px", lg: "40px" }} 
+            left={0} 
+            right={0} 
+            px={4} 
+            w={"100%"}
+            display="flex"
+            justifyContent="center"
+        >
+            <Box 
+                maxW="800px" 
+                w="100%" 
+                position="relative"
+                display="flex"
+                alignItems="flex-end"
+            >
+                <Textarea 
+                    ref={textareaRef}
+                    width={"100%"} 
+                    value={userInput} 
+                    placeholder='Message' 
+                    border="1px" 
+                    borderColor="#EDEDED" 
+                    focusBorderColor='#1F2A43' 
+                    py={4} 
+                    pr="50px"
+                    onKeyDown={onKeyDown}
+                    onChange={handleChange} 
+                    disabled={!isChatEnabled || isLoadingMessage}
+                    resize="none"
+                    minH="40px"
+                    maxH="120px"
+                    overflowY="auto"
+                    borderRadius="md"
+                />
+                <Box 
+                    position="absolute"
+                    right="12px"
+                    bottom="8px"
+                    cursor="pointer" 
+                    onClick={(e) => userInput && !isLoadingMessage ? submitMessage() : null}
+                >
+                    <SendMessageIcon />
+                </Box>
+            </Box>
+        </Box>
+    )
 }
 
 const ChatMain = ({ 
