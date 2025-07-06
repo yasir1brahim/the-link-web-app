@@ -499,7 +499,7 @@ const ProjectLogs = () => {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (documentIsProcessing(documentData)) {
+      if (documentIsProcessing(documentData) || documentIsBeingEmbedded(documentData)) {
         const fetchDocumentData = async () => {
           const response = await getProjectDetails(projectId);
           let responseDocumentData = response.data.document_details;
@@ -507,11 +507,13 @@ const ProjectLogs = () => {
             const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
             responseDocumentData = responseDocumentData.filter((doc) => doc.project_version.id === activeVersion);
           }
-          setDocumentData(responseDocumentData);  
-          console.log('documentIsProcessing', documentIsProcessing(responseDocumentData));
-          if (!documentIsProcessing(responseDocumentData)) {
+          if (documentIsProcessing(documentData) && !documentIsProcessing(responseDocumentData)) {
+            console.log('previous documentIsProcessing', documentIsProcessing(documentData));
+            console.log('new documentIsProcessing', documentIsProcessing(responseDocumentData));
             fetchLogData(0, rowsPerPage, null, null, null, null, null, projectVersionId);
           }
+          setDocumentData(responseDocumentData);  
+          console.log('documentIsProcessing', documentIsProcessing(responseDocumentData));
         };
         fetchDocumentData().catch((error) => {
           handleError(error);

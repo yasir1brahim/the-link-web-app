@@ -39,14 +39,18 @@ const MessageInput = ({
     isLoadingMessage,
     submitMessage,
     onKeyDown,
-    isChatEnabled
+    isChatEnabled,
+    position = "absolute"
 }) => {
     const textareaRef = useRef(null);
+    const [needsScroll, setNeedsScroll] = useState(false);
 
     const adjustTextareaHeight = () => {
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
-            textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 240) + 'px';
+            const newHeight = Math.min(textareaRef.current.scrollHeight, 240);
+            textareaRef.current.style.height = newHeight + 'px';
+            setNeedsScroll(textareaRef.current.scrollHeight > 240);
         }
     };
 
@@ -61,8 +65,8 @@ const MessageInput = ({
     return (
         <Box 
             zIndex={1000} 
-            position="absolute"
-            bottom={{ base: "20px", lg: "40px" }} 
+            position={position}
+            bottom={position === "absolute" ? { base: "20px", lg: "40px" } : undefined}
             left={0} 
             right={0} 
             px={4} 
@@ -95,7 +99,7 @@ const MessageInput = ({
                     resize="none"
                     minH="40px"
                     maxH="240px"
-                    overflowY="auto"
+                    overflowY={needsScroll ? "auto" : "hidden"}
                     borderRadius="md"
                     bg="white"
                     _focus={{
@@ -157,9 +161,6 @@ const ChatMain = ({
         <Box w="100%" maxW={"800px"} h={"100%"} position={"relative"} pt={{ base: "20px", lg: "40px" }} marginX={"auto"}>
             {messages?.length === 0 && 
                 <Center h={"100%"} w={"100%"} flexDirection={"column"} gap={5}>
-                    <Heading mb={5} as="h2" size="xl" marginX="auto" fontWeight="semibold" color="#1F2A43">
-                        SpecGPT
-                    </Heading>
                     <MessageInput 
                         userInput={userInput}
                         setUserInput={setUserInput}
@@ -167,6 +168,7 @@ const ChatMain = ({
                         submitMessage={submitMessage}
                         onKeyDown={onKeyDown}
                         isChatEnabled={true}
+                        position="static"
                     />
                 </Center>
             }
@@ -193,6 +195,7 @@ const ChatMain = ({
                     submitMessage={submitMessage}
                     onKeyDown={onKeyDown}
                     isChatEnabled={isChatEnabled}
+                    position="absolute"
                 />
                 </>
             }
