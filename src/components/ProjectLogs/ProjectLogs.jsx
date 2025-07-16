@@ -495,7 +495,7 @@ const ProjectLogs = () => {
         initLoading();
       });
     }
-  }, [projectId]);
+  }, [projectId, projectVersionId]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
