@@ -73,12 +73,11 @@ const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, project
             return {session_id: chatSessionId, questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: message};
         }
         if (!response.data) return {session_id: chatSessionId, questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: ERROR_MESSAGE};
-        
+        console.log("newMessage response.data", response.data);
         const answer = response.data.answer;
         const questionid = response.data.questionid;
         const sources = response.data.sources;
         const chatId = response.data.chat_id;
-        console.log(sources);
         return {
             session_id: chatId, 
             chat_id: chatId, 

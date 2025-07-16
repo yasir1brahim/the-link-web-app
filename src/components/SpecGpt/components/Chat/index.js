@@ -15,20 +15,33 @@ import { fetchChatHistory, fetchChatSessionHistory, fetchInspectionLog, fetchOwn
 import { MESSAGE_ROLE_TYPE } from '../../utils/enums';
 import { fetchPromptAnswer } from '../../utils/apiUtils';
 
-const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isInspectionLogFeatureFlagActive}) => {
+const Chat = ({
+    projectId, 
+    projectVersionId, 
+    chatSessionId, 
+    setChatSessionId,
+    messages,
+    setMessages,
+    chatHistory,
+    setChatHistory,
+    isInspectionLogFeatureFlagActive,
+    isLoadingMessage,
+    setIsLoadingMessage,
+    userInput,
+    setUserInput,
+    isGeneratingLog,
+    setIsGeneratingLog,
+    isChatEnabled,
+    setIsChatEnabled,
+}) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const DEFAULT_MAX_CHAT_MESSAGES = 10;
-    const navigator = useNavigate();
-    const [messages, setMessages] = useState([]);
-    const [chatHistory, setChatHistory] = useState([]);
-    const [userDocs, setUserDocs] = useState([]);
-    const [isLoadingMessage, setIsLoadingMessage] = useState(false);
-    const [userInput, setUserInput] = useState('');
+    
     const endOfMessagesRef = useRef(null);
-    const [k, setK] = useState(21);
-    const [isGeneratingLog, setIsGeneratingLog] = useState(false);
+    const k = 21;
     const [maxChatMessages, setMaxChatMessages] = useState(DEFAULT_MAX_CHAT_MESSAGES);
-    const [isChatEnabled, setIsChatEnabled] = useState(true);
+    const chatSessionIdRef = useRef(chatSessionId);
+
 
     useEffect(() => {
         fetchChatHistory(projectId).then((data) => {
@@ -38,6 +51,7 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
     }, []);  
 
     useEffect(() => {
+        chatSessionIdRef.current = chatSessionId;
         setIsChatEnabled(true);
         if (chatSessionId) {
             fetchChatSessionHistory(projectId, chatSessionId).then((messages) => {
@@ -84,24 +98,29 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
         setUserInput('');
         fetchPromptAnswer(userMessage, k, chatSessionId, projectId, projectVersionId).then((newMessage) => {
             console.log("newMessage", newMessage);
+            console.log("chatSessionId", chatSessionIdRef.current); // Use ref for current value
+            console.log("newMessage.session_id", newMessage.session_id);
             if (messages.filter((message) => message.type === MESSAGE_ROLE_TYPE.ASSISTANT).length === 0) {
                 onFirstAIResponse(newMessage.session_id, userMessage);
             }
-            setMessages((prevMessages) => {
-                const lastMessage = prevMessages[prevMessages.length - 1];
-                return [
-                    ...prevMessages.slice(0, -1),
-                    { 
-                        ...lastMessage, 
-                        message: newMessage.message, 
-                        loading: false, 
-                        questionid: newMessage.questionid,
-                        sources: newMessage.sources
-                    }
-                ];
-            });
-            setChatSessionId(newMessage.session_id);
-            setMaxChatMessages(newMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
+            // only update the messages if it's a new chat or the chat session id is the same as the new message's session id
+            // this is to prevent the messages from being updated if the user is continuing a different chat
+            if (chatSessionIdRef.current === null || chatSessionIdRef.current === newMessage.session_id) {
+                setMessages((prevMessages) => {
+                    const lastMessage = prevMessages[prevMessages.length - 1];
+                    return [
+                        ...prevMessages.slice(0, -1),
+                        { 
+                            ...lastMessage, 
+                            message: newMessage.message, 
+                            loading: false, 
+                            questionid: newMessage.questionid,
+                            sources: newMessage.sources
+                        }
+                    ];
+                });
+                setMaxChatMessages(newMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
+            }
             setIsLoadingMessage(false);
         });
     }
@@ -126,23 +145,24 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
         logFetchFunction(projectId, projectVersionId).then((logMessage) => {
             console.log("logMessage", logMessage);
             onFirstAIResponse(logMessage.session_id, '');
-            setMessages((prevMessages) => {
-                const lastMessage = prevMessages[prevMessages.length - 1];
-                return [
-                    ...prevMessages.slice(0, -1),
-                    { 
-                        ...lastMessage, 
-                        message: logMessage.message, 
-                        loading: false, 
-                        questionid: logMessage.questionid,
-                        sources: logMessage.sources
-                    }
-                ];
-            });
-            setChatSessionId(logMessage.session_id);
-            setMaxChatMessages(logMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
-            setIsLoadingMessage(false);
-            setIsGeneratingLog(false);
+            if (chatSessionIdRef.current === null || chatSessionIdRef.current === logMessage.session_id) {
+                setMessages((prevMessages) => {
+                    const lastMessage = prevMessages[prevMessages.length - 1];
+                    return [
+                        ...prevMessages.slice(0, -1),
+                        { 
+                            ...lastMessage, 
+                            message: logMessage.message, 
+                            loading: false, 
+                            questionid: logMessage.questionid,
+                            sources: logMessage.sources
+                        }
+                    ];
+                });
+                setMaxChatMessages(logMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
+                setIsLoadingMessage(false);
+                setIsGeneratingLog(false);
+            }
         });
     }
 
@@ -155,12 +175,16 @@ const Chat = ({projectId, projectVersionId, chatSessionId, setChatSessionId, isI
     }
 
     const onClickChatLink = (chatSessionId) => {
+        console.log("onClickChatLink", chatSessionId);
         setChatSessionId(chatSessionId);
     }
 
     const onFirstAIResponse = (chatSessionId, userMessage) => {
         console.log("onFirstAIResponse", chatSessionId, userMessage);
-        setChatSessionId(chatSessionId);
+        // only set the chat session id if it's a new chat, we don't want to change the chat session id if the user is continuing a different chat
+        if (chatSessionId === null) {
+            setChatSessionId(chatSessionId);
+        }
         fetchChatHistory(projectId).then((data) => {
             console.log("chat history", data);
             setChatHistory(data);

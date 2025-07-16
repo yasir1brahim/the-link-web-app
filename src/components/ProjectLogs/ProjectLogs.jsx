@@ -216,6 +216,12 @@ const ProjectLogs = () => {
   const toggleVersionComparisonModal = () => setShowVersionComparisonModal(!showVersionComparisonModal);
 
   const [chatId, setChatId] = useState(searchParams.get("chatId") ? parseInt(searchParams.get("chatId")) : null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatHistory, setChatHistory] = useState([]);
+  const [isSpecGptLoadingMessage, setIsSpecGptLoadingMessage] = useState(false);
+  const [specGptUserInput, setSpecGptUserInput] = useState('');
+  const [isSpecGptGeneratingLog, setIsSpecGptGeneratingLog] = useState(false);
+  const [isSpecGptChatEnabled, setIsSpecGptChatEnabled] = useState(true);
   const [activeTab, setActiveTab] = useState('submittal');
 
   const [logIdList, setLogIdList] = React.useState([]);
@@ -529,6 +535,7 @@ const ProjectLogs = () => {
       setPdfFile({});
     }
   }, [modal]);
+  
 
   const backToUpload = () => {
     toggleErrorModal(false);
@@ -1535,7 +1542,19 @@ const ProjectLogs = () => {
                   chatSessionId={chatId} 
                   setChatSessionId={setChatId}
                   isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
-                ></Chat>
+                  messages={chatMessages}
+                  setMessages={setChatMessages}
+                  chatHistory={chatHistory}
+                  setChatHistory={setChatHistory}
+                  isLoadingMessage={isSpecGptLoadingMessage}
+                  setIsLoadingMessage={setIsSpecGptLoadingMessage}
+                  userInput={specGptUserInput}
+                  setUserInput={setSpecGptUserInput}
+                  isGeneratingLog={isSpecGptGeneratingLog}
+                  setIsGeneratingLog={setIsSpecGptGeneratingLog}
+                  isChatEnabled={isSpecGptChatEnabled}
+                  setIsChatEnabled={setIsSpecGptChatEnabled}
+                />
               </ChakraProvider>
             </>
           }
