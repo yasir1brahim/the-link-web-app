@@ -108,6 +108,9 @@ const extractTablesToExcel = async (projectId, text) => {
 
         return response;
     } catch (error) {
+        if (error.response.status === 422) {
+            return { success: false, errorType: 'no_tables', error: error.response.data.error };
+        }
         console.log('Error extracting tables: ', error);
         return { success: false, error: error.message };
     }

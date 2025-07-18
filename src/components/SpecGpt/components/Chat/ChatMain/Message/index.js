@@ -37,28 +37,36 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
         try {
             const result = await extractTablesToExcel(projectId, message);
         
-              let blob = new Blob([result.data], {
-                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-              });
-              FileDownload(
-                blob,
-                `${
-                  `Project`
-                }_inspection_log_${new Date().toLocaleDateString("en-US", { day: 'numeric' })}_${new Date().toLocaleDateString("en-US", { month: 'short' })}_${new Date().toLocaleDateString("en-US", { year: 'numeric' })}.xlsx`
-              );
             console.log("result", result);
             if (result.status === 200) {
+                let blob = new Blob([result.data], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                });
+                FileDownload(
+                    blob,
+                    `${
+                        `Project`
+                    }_inspection_log_${new Date().toLocaleDateString("en-US", { day: 'numeric' })}_${new Date().toLocaleDateString("en-US", { month: 'short' })}_${new Date().toLocaleDateString("en-US", { year: 'numeric' })}.xlsx`
+                );
                 toast({
                     title: "Inspection log exported successfully",
                     description: `Excel file downloaded`,
                     status: "success",
-                    duration: 3000,
+                    duration: 5000,
+                    isClosable: true,
+                });
+                  
+            } else if (result.errorType === 'no_tables') {
+                toast({
+                    title: "No exportable data found",
+                    status: "warning",
+                    duration: 5000,
                     isClosable: true,
                 });
             } else {
                 toast({
                     title: "Export failed",
-                    description: result.error || "No inspection log found in the content",
+                    description: result.error || "Export failed",
                     status: "error",
                     duration: 5000,
                     isClosable: true,
@@ -67,7 +75,7 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
         } catch (error) {
             toast({
                 title: "Export failed",
-                description: "An unexpected error occurred while exporting the inspection log",
+                description: "An unexpected error occurred while exporting",
                 status: "error",
                 duration: 5000,
                 isClosable: true,
