@@ -1267,82 +1267,73 @@ const ProjectLogs = () => {
       />
       {isAssociatedUser === true && (
         <div className="project-logs-wrapper log-table-width">
-          <ProjectLogsHeaderTop
-            breadcrumb={"View Projects"}
-            breadcrumbUrl={`/project-list/${teamId}`}
-            breadcrumb2={"Submittal Log"}
-            showBtn={"Upload Documents"}
-            toggleModal={toggleModal}
-            btnSize={"small"}
-            docParsed={documentData?.length || 0}
-            qaDashboard={state?.qaDashboard}
-            navBtn={"logs"}
-            teamId={teamId}
-            isVersioningEnabled={isVersioningFlagActive(teamId)}
-            isVersionComparisonEnabled={isVersionComparisonFlagActive(teamId)}
-            toggleVersionComparisonModal={toggleVersionComparisonModal}
-            onClickVersion={onClickVersion}
-            projectVersionId={projectVersionId}
-            projectVersions={availableVersions}
-            onPressArchive={onPressArchive}
-            setShowVersionModal={setShowVersionModal}
-            setEditingVersionId={setEditingVersionId}
-            setEditingVersionName={setEditingVersionName}
-
-          />
-          <ProjectLogsActionPanel
-            handleDeleteLogs={handleDeleteLogs}
-
-            toggle={toggle}
-            dropdownOpen={dropdownOpen}
-            handleExportExcel={handleExportExcel}
-            handleExportJetBuild={handleExportJetBuild}
-            getProjectLists={getSavedListsForProjects}
-
-            listId={listId}
-            selected={selected}
-            isCombining={isCombining}
-            toggleSaveListName={toggleSaveListName}
-
-            isSelectAll={isSelectAll}
-            logInViewer={logInViewer}
-            setLogInViewer={setLogInViewer}
-            setPdfData={setPdfData}
-            pdfData={pdfData}
-            setIsCombining={setIsCombining}
-            updateCombiningQueue={updateCombiningQueue}
-            editRow={editRow}
-            handleCombineRows={handleCombineRows}
-
-            handleClearSelection={handleClearSelection}
-
-            setSubmittalIdParam={setSubmittalIdParam}
-
-            documentIsProcessing={documentIsProcessing}
-            documentData={documentData}
-            toggleDocumentStatusModal={toggleDocumentStatusModal}
-            
-            showClearFilters={showClearFilters}
-            clearFilters={clearFilters}
-
-            showSearch={showSearch}
-            searchEnabled={true}
-            searchValue={searchValue}
-            handleSearchChange={handleSearchChange}
-            handleEnterKeyPress={handleEnterKeyPress}
-            handleSearchClick={handleSearchClick}
-            handleClearSearch={handleClearSearch}
-
-            procoreAccessToken={procoreAccessToken}
-            procoreAuthUrl={procoreAuthUrl}
-            handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
-
-            docParsed={documentData?.length || 0}
-            totalCount={totalCount}
-            showBtn={"Upload Documents"}
-            toggleModal={toggleModal}
-            btnSize={"small"}
-          />
+          {(!isSpecGptFlagActive(teamId) || activeTab === 'submittal') && (
+            <ProjectLogsHeaderTop
+              // Breadcrumbs removed
+              showBtn={"Upload Documents"}
+              toggleModal={toggleModal}
+              btnSize={"small"}
+              docParsed={documentData?.length || 0}
+              qaDashboard={state?.qaDashboard}
+              navBtn={"logs"}
+              teamId={teamId}
+              isVersioningEnabled={isVersioningFlagActive(teamId)}
+              isVersionComparisonEnabled={isVersionComparisonFlagActive(teamId)}
+              toggleVersionComparisonModal={toggleVersionComparisonModal}
+              onClickVersion={onClickVersion}
+              projectVersionId={projectVersionId}
+              projectVersions={availableVersions}
+              onPressArchive={onPressArchive}
+              setShowVersionModal={setShowVersionModal}
+              setEditingVersionId={setEditingVersionId}
+              setEditingVersionName={setEditingVersionName}
+            />
+          )}
+          {activeTab === 'submittal' && (
+            <ProjectLogsActionPanel
+              handleDeleteLogs={handleDeleteLogs}
+              toggle={toggle}
+              dropdownOpen={dropdownOpen}
+              handleExportExcel={handleExportExcel}
+              handleExportJetBuild={handleExportJetBuild}
+              getProjectLists={getSavedListsForProjects}
+              listId={listId}
+              selected={selected}
+              isCombining={isCombining}
+              toggleSaveListName={toggleSaveListName}
+              isSelectAll={isSelectAll}
+              logInViewer={logInViewer}
+              setLogInViewer={setLogInViewer}
+              setPdfData={setPdfData}
+              pdfData={pdfData}
+              setIsCombining={setIsCombining}
+              updateCombiningQueue={updateCombiningQueue}
+              editRow={editRow}
+              handleCombineRows={handleCombineRows}
+              handleClearSelection={handleClearSelection}
+              setSubmittalIdParam={setSubmittalIdParam}
+              documentIsProcessing={documentIsProcessing}
+              documentData={documentData}
+              toggleDocumentStatusModal={toggleDocumentStatusModal}
+              showClearFilters={showClearFilters}
+              clearFilters={clearFilters}
+              showSearch={showSearch}
+              searchEnabled={true}
+              searchValue={searchValue}
+              handleSearchChange={handleSearchChange}
+              handleEnterKeyPress={handleEnterKeyPress}
+              handleSearchClick={handleSearchClick}
+              handleClearSearch={handleClearSearch}
+              procoreAccessToken={procoreAccessToken}
+              procoreAuthUrl={procoreAuthUrl}
+              handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
+              docParsed={documentData?.length || 0}
+              totalCount={totalCount}
+              showBtn={"Upload Documents"}
+              toggleModal={toggleModal}
+              btnSize={"small"}
+            />
+          )}
           
           {isSpecGptFlagActive(teamId) && (
             <div className="tab-row" style={{ marginBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
