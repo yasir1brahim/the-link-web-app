@@ -8,6 +8,7 @@ import {
 } from "reactstrap";
 import { ReactComponent as Logo } from "../../../assets/images/procore-vector-logo.svg";
 import { ReactComponent as ExcelLogo } from "../../../assets/images/excel.svg";
+import Excel from '../../../assets/images/Excel-Logo-New.png';
 import { ReactComponent as MergeIcon } from "../../../assets/images/merge.svg";
 import { ReactComponent as JetBuildLogo } from "../../../assets/images/jet_build.svg";
 import { Check } from '@mui/icons-material';
@@ -58,15 +59,19 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                 <DropdownToggle caret className="export-btn">
                   Export
                 </DropdownToggle>
-                <DropdownMenu style={{ maxWidth: '200px', backgroundColor: 'white' }}>
-                  <DropdownItem 
-                    className="text-center" 
-                    style={{ backgroundColor: 'white' }} 
+                <DropdownMenu style={{ maxWidth: '160px', backgroundColor: 'white' }}>
+                  <DropdownItem
+                    className="text-center"
+                    style={{ backgroundColor: 'white' }}
                     onClick={() => props.handleExportExcel(['All'])}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                   >
-                    <ExcelLogo style={{ height: '45px', margin: '5px 0' }} />
+                    {/* <ExcelLogo style={{ height: '30px', maxWidth: '100%', objectFit: 'contain' }} /> */}
+                    <img 
+                      src={Excel} alt=""
+                      style={{height: '30px', maxWidth: '100%', objectFit: 'contain'}}
+                    />
                   </DropdownItem>
                   <DropdownItem
                     className="text-center"
@@ -76,11 +81,11 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                   >
                     {props.procoreAccessToken === 'null' ? (
                       <a href={props.procoreAuthUrl} className="breadcrumb-text">
-                        <Logo style={{ height: '90px' }} />
+                        <Logo style={{ height: '30px', maxWidth: '100%', objectFit: 'contain' }} />
                       </a>
                     ) : (
                       <div onClick={props.handleExportToProcoreButtonClick}>
-                        <Logo style={{ height: '90px' }} />
+                        <Logo style={{ height: '30px', maxWidth: '100%', objectFit: 'contain' }} />
                       </div>
                     )}
                   </DropdownItem>
@@ -91,7 +96,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                     onClick={() => props.handleExportJetBuild(['All'])}
                   >
-                    <JetBuildLogo style={{ height: '40px', maxWidth: '100%', margin: '20px auto' }} />
+                    <JetBuildLogo style={{ height: '28px', maxWidth: '100%', objectFit: 'contain'  }} />
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
