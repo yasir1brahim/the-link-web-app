@@ -1379,7 +1379,7 @@ const ProjectLogs = () => {
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  SpecGPT
+                  Compass
                 </button>
               </div>
             </div>
@@ -1533,7 +1533,7 @@ const ProjectLogs = () => {
                 documentIsProcessing={documentIsBeingEmbedded}
                 documentData={documentData}
                 toggleDocumentStatusModal={toggleSpecGptProcessingModal}
-                indicatorText={"SpecGPT is processing your documents..."}
+                indicatorText={"Compass is processing your documents..."}
               />
               <ChakraProvider>
                 <Chat 
@@ -1754,7 +1754,7 @@ const ProjectLogs = () => {
         className="new-customer modal-xl"
       >
         <ModalHeader toggle={toggleSpecGptProcessingModal}>
-          SpecGPT Processing Status
+          Compass Processing Status
         </ModalHeader>
         <ModalBody>
           <DocumentStatus documentData={documentData} isSpecGptStatus={true} />
