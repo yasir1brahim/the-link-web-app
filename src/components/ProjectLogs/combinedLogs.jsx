@@ -1,5 +1,5 @@
 // import moment from 'moment';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState , useRef} from "react";
 import axiosInstance from "../../config/axios";
 // import DateSelector from '../shared/DateSelector/DateSelector';
 // import SelectDropdown from '../shared/SelectDropdown/SelectDropdown';
@@ -17,7 +17,6 @@ import { Tooltip } from "@mui/material";
 import handleError from "../../config/errorHandler";
 import { SortIcon } from "../shared/icons/sortIcon";
 import { FilterIcon } from "../shared/icons/filterIcon";
-import { useRef } from "react";
 import { updateSubmittalItem, addSubmittalItem } from "../../api/ProjectLogs/api";
 
 export default function CombinedLogs(props) {
@@ -71,46 +70,34 @@ export default function CombinedLogs(props) {
   const targetRef = useRef(null);
 
   useEffect(() => {
-    setShowMore(Array(props.logData.length).fill(false));
-  }, [props.logData]);
+    setShowMore(Array(logData.length).fill(false));
+    rowRefs.current = Array(logData.length).fill(null); 
+  }, [logData]);
 
   useEffect(() => {
     const hasClamping = (el) => {
-      const { clientHeight, scrollHeight, textContent } = el;
-      // console.log(clientHeight, scrollHeight, textContent);
+      if (!el) return false;
+      const { clientHeight, scrollHeight } = el;
       return clientHeight !== scrollHeight;
     };
 
     const checkButtonAvailability = () => {
-      const newShowExpansionButton = [];
-      for (let i = 0; i < rowRefs.current.length; i++) {
-        if (rowRefs.current[i]) {
-          // Save current state to reapply later if necessary.
-          const hadTextOverflowClass =
-            rowRefs.current[i].classList.contains("text-overflow");
-          // Make sure that CSS clamping is applied if applicable.
-          if (!hadTextOverflowClass)
-            rowRefs.current[i].classList.add("text-overflow");
-          // Check for clamping and show or hide button accordingly.
-          newShowExpansionButton.push(hasClamping(rowRefs.current[i]));
-          // Sync clamping with local state.
-          if (!hadTextOverflowClass)
-            rowRefs.current[i].classList.remove("text-overflow");
-        }
-      }
-      setShouldShowExpansionButton(newShowExpansionButton);
+      setTimeout(() => {
+        const newShowExpansionButton = rowRefs.current.map((ref) =>
+          ref ? hasClamping(ref) : false
+        );
+        setShouldShowExpansionButton(newShowExpansionButton);
+      }, 0);
     };
 
-    // const debouncedCheck = lodash.debounce(checkButtonAvailability, 50);
-
     checkButtonAvailability();
-    // window.addEventListener("resize", debouncedCheck);
+    window.addEventListener('resize', checkButtonAvailability);
 
-    // return () => {
-    //   window.removeEventListener("resize", debouncedCheck);
-    // };
-  }, [rowRefs, props.logData]);
-
+    return () => {
+      window.removeEventListener('resize', checkButtonAvailability);
+    };
+  }, [logData, newRowIndex]); 
+  
   const handleEditToggle = (log, index) => {
     setRowData(log);
     setEditRow(index);
@@ -1100,102 +1087,69 @@ export default function CombinedLogs(props) {
                 </td>
                 <>
                   <td
-                    className={`${
-                      editRow === index ? 'activeTh' : ''
-                    } reduce-height`}
+                    className={`${editRow === index ? 'activeTh' : ''} reduce-height`}
                     style={{
-                      fontWeight: `${log.parsing_method === 'PLACEHOLDER' ? 'bold' : 'normal'}`
+                      fontWeight: `${
+                        log.parsing_method === 'PLACEHOLDER' ? 'bold' : 'normal'
+                      }`,
                     }}
                   >
                     {isCombining && isCombineTarget ? (
                       <div
-                        className={
-                          'log-desc ' +
-                          (
-                            isCombineTarget
-                              ? 'show-content'
-                              : showMore[index]
-                                ? 'show-content'
-                                : 'text-overflow'
-                          )
-                        }
+                        className={`log-desc ${
+                          showMore[index] ? 'show-content' : 'text-overflow'
+                        }`}
                         style={{ whiteSpace: 'pre-wrap' }}
-                        ref={(element) => rowRefs.current.push(element)}
+                        ref={(element) => (rowRefs.current[index] = element)}
                       >
                         {combiningResult.para_context}
                         {shouldShowExpansionButton[index] && (
                           <span
-                            className="showmore-wrap"
+                            className='showmore-wrap'
                             onClick={() =>
-                              setShowMore(
-                                showMore.with(index, !showMore[index])
+                              setShowMore((prev) =>
+                                prev.map((val, i) => (i === index ? !val : val))
                               )
                             }
                           >
-                            {showMore[index] ? (
-                              <CollapseButton />
-                            ) : (
-                              <ExpandButton />
-                            )}
+                            {showMore[index] ? <CollapseButton /> : <ExpandButton />}
                           </span>
                         )}
                       </div>
                     ) : editRow === index ? (
                       <input
-                        placeholder="Enter"
+                        placeholder='Enter'
                         className={`form-control ${
                           formValid.para_context ? '' : 'form-required'
                         }`}
-                        type="text"
+                        type='text'
                         value={rowData.para_context}
-                        // style={{ border: 'none' }}
                         onChange={(e) =>
                           setRowData({
                             ...rowData,
-                            para_context: e.target.value
-                          })
-                        }
-                      />
-                    ) : editRow === index ? (
-                      <input
-                        placeholder="Enter"
-                        className={`form-control ${
-                          formValid.para_context ? '' : 'form-required'
-                        }`}
-                        type="text"
-                        value={rowData.para_context}
-                        // style={{ border: 'none' }}
-                        onChange={(e) =>
-                          setRowData({
-                            ...rowData,
-                            para_context: e.target.value
+                            para_context: e.target.value,
                           })
                         }
                       />
                     ) : (
                       <div
-                        className={
-                          'log-desc ' +
-                          (showMore[index] ? 'show-content' : 'text-overflow')
-                        }
-                        ref={(element) => rowRefs.current.push(element)}
+                        className={`log-desc ${
+                          showMore[index] ? 'show-content' : 'text-overflow'
+                        }`}
                         style={{ whiteSpace: 'pre-wrap' }}
+                        ref={(element) => (rowRefs.current[index] = element)}
                       >
                         {log.para_context}
                         {shouldShowExpansionButton[index] && (
                           <span
-                            className="showmore-wrap"
+                            className='showmore-wrap'
                             onClick={() =>
-                              setShowMore(
-                                showMore.with(index, !showMore[index])
+                              setShowMore((prev) =>
+                                prev.map((val, i) => (i === index ? !val : val))
                               )
                             }
                           >
-                            {showMore[index] ? (
-                              <CollapseButton />
-                            ) : (
-                              <ExpandButton />
-                            )}
+                            {showMore[index] ? <CollapseButton /> : <ExpandButton />}
                           </span>
                         )}
                       </div>
