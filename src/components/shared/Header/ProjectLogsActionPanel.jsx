@@ -8,7 +8,7 @@ import {
 } from "reactstrap";
 import { ReactComponent as Logo } from "../../../assets/images/procore-vector-logo.svg";
 import { ReactComponent as ExcelLogo } from "../../../assets/images/excel.svg";
-import Excel from '../../../assets/images/Excel-Logo-New.png';
+import Excel from '../../../assets/images/Microsoft-Excel-Symbol.png';
 import { ReactComponent as MergeIcon } from "../../../assets/images/merge.svg";
 import { ReactComponent as JetBuildLogo } from "../../../assets/images/jet_build.svg";
 import { Check } from '@mui/icons-material';
