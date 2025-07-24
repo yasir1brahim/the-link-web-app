@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
-import { ReactComponent as Logo } from '../../../assets/images/logo-dark-v7.svg';
+import { ReactComponent as Logo } from '../../../assets/images/the-link-ai-header-logo-new.svg';
 import { ReactComponent as Down } from '../../../assets/images/chevron-bottom.svg';
 // import { ReactComponent as Notification } from '../../../assets/images/notificat.svg';
 import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
