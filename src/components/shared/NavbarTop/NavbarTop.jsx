@@ -76,8 +76,15 @@ const NavbarTop = ({...props}) => {
       >
         <div className='row w-100 m-0'>
           <div className='col-4 d-flex'>
-            <a href="#" onClick={(e) => getHomeUrl(e, isAuthenticated, user, getUserTeams, navigate)} className="navbar-brand">
-                <Logo/>
+            <a href="#" onClick={(e) => {
+              e.preventDefault();
+              if (props.teamId) {
+                navigate(`/project-list/${props.teamId}`);
+              } else {
+                getHomeUrl(e, isAuthenticated, user, getUserTeams, navigate);
+              }
+            }} className="navbar-brand">
+              <Logo />
             </a>
             {props?.customerData &&
               <div className="cust-name d-flex justify-content-center">
