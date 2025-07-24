@@ -114,6 +114,7 @@ const ProjectLogs = () => {
     para_no: "",
     project_id: "",
     spec_section: "",
+    section_title: "",
     status: "",
     type: "",
     classification: "",

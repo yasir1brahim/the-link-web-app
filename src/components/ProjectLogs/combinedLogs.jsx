@@ -122,6 +122,7 @@ export default function CombinedLogs(props) {
     try {
       setFormValid({
         spec_section: true,
+        spec_section_title: true,
         para_no: true,
         para_context: true,
         type: true,
@@ -156,7 +157,8 @@ export default function CombinedLogs(props) {
           rowData.item_desc, 
           rowData.type, 
           rowData.added_under_submittal_id,
-          props.projectVersionId
+          props.projectVersionId,
+          rowData.section_title
         );
       } else {
         await updateSubmittalItem(
@@ -167,7 +169,8 @@ export default function CombinedLogs(props) {
           rowData.para_context, 
           rowData.item_desc, 
           rowData.type, 
-          props.projectVersionId
+          props.projectVersionId,
+          rowData.section_title
         );
       }
       setNewRowIndex(null);
@@ -995,7 +998,20 @@ export default function CombinedLogs(props) {
                     editRow === index ? 'activeTh' : ''
                   } reduce-height`}
                 >
-                  {log.section_title}
+                  {editRow === index ? (
+                    <input
+                      placeholder="Enter"
+                      className={`form-control`}
+                      type="text"
+                      value={rowData.section_title}
+                      // style={{ border: 'none' }}
+                      onChange={(e) =>
+                        setRowData({ ...rowData, section_title: e.target.value })
+                      }
+                    />
+                  ) : (
+                    log.section_title
+                  )}
                 </td>
                 <td
                   className={`${
