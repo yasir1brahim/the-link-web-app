@@ -40,6 +40,7 @@ import Chat from "../SpecGpt/components/Chat";
 import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
+import DocumentListModal from "./DocumentListModal";
 
 
 const ProjectLogs = () => {
@@ -51,6 +52,7 @@ const ProjectLogs = () => {
     isInspectionLogFlagActive 
   } = useFeatureFlags();
 
+  const [showDocumentListModal, setShowDocumentListModal] = useState(false);
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -1337,6 +1339,8 @@ const ProjectLogs = () => {
             procoreAuthUrl={procoreAuthUrl}
             handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
 
+            onShowDocumentListModal={() => setShowDocumentListModal(true)}
+
             docParsed={documentData?.length || 0}
             totalCount={totalCount}
             showBtn={"Upload Documents"}
@@ -1889,6 +1893,11 @@ const ProjectLogs = () => {
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
       <Loader showComponentLoader={isLoading} />
+      <DocumentListModal
+        isOpen={showDocumentListModal}
+        toggle={() => setShowDocumentListModal(false)}
+        documents={documentData}
+      />
     </div>
   );
 };
