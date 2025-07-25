@@ -40,6 +40,7 @@ import Chat from "../SpecGpt/components/Chat";
 import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
+import { getTeamDetails } from "../../api/Authentication/api";
 
 
 const ProjectLogs = () => {
@@ -51,6 +52,8 @@ const ProjectLogs = () => {
     isInspectionLogFlagActive 
   } = useFeatureFlags();
 
+  const [companyLogoUrl, setCompanyLogoUrl] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -238,7 +241,6 @@ const ProjectLogs = () => {
   const { user, isAuthenticated } = useContext(AuthContext);
   const [currentUser, setCurrentUser] = useState(user);
 
-
   const getProcoreAccessTokenData = async () => {
     try {
       const accessTokenData = await axiosInstance({
@@ -295,6 +297,23 @@ const ProjectLogs = () => {
       handleError(error);
     }
   }
+
+  useEffect(() => {
+  const fetchCompanyDetails = async () => {
+    if (!teamId) return;
+    try {
+      const response = await getTeamDetails(teamId);
+      setCompanyLogoUrl(response.data.legacy_logo_url || "");
+      setCompanyName(response.data.name || "");
+    } catch (error) {
+      setCompanyLogoUrl("");
+      setCompanyName("");
+      console.error("Error fetching company details:", error);
+    }
+  };
+  fetchCompanyDetails();
+}, [teamId]);
+
 
   const handleCreateProjectVersion = async (versionName) => {
     try {
@@ -1264,6 +1283,8 @@ const ProjectLogs = () => {
         customerData={customerData}
         userRole={userRoleInCompany}
         teamId={teamId}
+        customerAvatarUrl={companyLogoUrl}
+        customerName={companyName}
       />
       {isAssociatedUser === true && (
         <div className="project-logs-wrapper log-table-width">

@@ -86,6 +86,40 @@ const NavbarTop = ({...props}) => {
             }} className="navbar-brand">
               <Logo />
             </a>
+            {(props.customerAvatarUrl || props.customerName) && (
+              <div className="d-flex align-items-center">
+                <span
+                  style={{
+                    borderLeft: "1px solid #ccc",
+                    height: "32px",
+                    margin: "0 12px"
+                  }}
+                ></span>
+                {props.customerAvatarUrl ? (
+                  <img
+                    src={props.customerAvatarUrl}
+                    alt={props.customerName}
+                    className="customer-header-logo"
+                    style={{
+                      maxHeight: "32px",
+                      maxWidth: "120px",
+                      objectFit: "contain"
+                    }}
+                  />
+                ) : (
+                  <span
+                    className="customer-header-name"
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "0.9em",
+                      color: "#fff",
+                    }}
+                  >
+                    {props.customerName}
+                  </span>
+                )}
+              </div>
+            )}
             {props?.customerData &&
               <div className="cust-name d-flex justify-content-center">
                 <div className="title-wrap">

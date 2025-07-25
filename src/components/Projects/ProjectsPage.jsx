@@ -11,6 +11,7 @@ import { listProjects, getUserRoleInProject } from "../../api/Projects/api";
 import { useParams } from 'react-router-dom';
 import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { useFeatureFlags } from "../../contexts/FeatureFlagsContext";
+import { getTeamDetails } from "../../api/Authentication/api";
 
 const ProjectsPage = () => {
   const { 
@@ -37,6 +38,8 @@ const ProjectsPage = () => {
     setCreateProjectModal(!createProjectModal);
   const toggleArchiveProjectModal = () => setArchiveProjectModal(!archiveProjectModal);
   const toggleRestoreProjectModal = () => setRestoreProjectModal(!restoreProjectModal);
+  const [companyLogoUrl, setCompanyLogoUrl] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const { teamId } = useParams();
 
   const customerId = teamId;
@@ -103,6 +106,25 @@ const ProjectsPage = () => {
 };
 
 useEffect(() => {
+  const fetchCompanyDetails = async () => {
+    if (!teamId) return;
+    try {
+      setIsLoading(true);
+      const response = await getTeamDetails(teamId);
+      setCompanyLogoUrl(response.data.legacy_logo_url || "");
+      setCompanyName(response.data.name || "");
+    } catch (error) {
+      setCompanyLogoUrl("");
+      setCompanyName("");
+      console.error("Error fetching company details:", error);
+    }finally {
+      setIsLoading(false);
+    }
+  };
+  fetchCompanyDetails();
+}, [teamId]);
+
+useEffect(() => {
   let isMounted = true;
   console.log('customerId', customerId);
   
@@ -127,6 +149,8 @@ useEffect(() => {
         <NavbarTop
           userRole={currentUserRole}
           teamId={teamId}
+          customerAvatarUrl={companyLogoUrl}
+          customerName={companyName}
          />
         <div className="page-wrap-content personal-projects-wrapper">
           {currentUserRole === 'admin' && <Header
