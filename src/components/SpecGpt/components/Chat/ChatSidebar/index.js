@@ -14,7 +14,7 @@ const ChatSidebar = ({
         <Box w="100%" bgColor="#1F2A43" h="100vh" px={{ base: "24px", lg: "30px" }} overflowY={"auto"}>
             <Flex py="25px" align={"center"} justifyContent={"space-between"}>
                 <Heading as="h4" fontSize={{ base: "18px", lg: "24px" }} fontWeight="semibold" color="#FFFFFF">
-                    SpecGPT
+                    Compass
                 </Heading>
             </Flex>
             <Box py={5}>
