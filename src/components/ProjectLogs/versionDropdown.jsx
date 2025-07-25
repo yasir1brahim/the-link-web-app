@@ -12,7 +12,8 @@ const VersionDropdown = ({
     onSelectVersion, 
     onPressEdit,
     onPressAddNewVersion,
-    onPressArchive
+    onPressArchive,
+    handleViewArchivedVersions
 }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -77,6 +78,14 @@ const VersionDropdown = ({
                     onClick={onPressAddNewVersion}
                 >
                     + Add New Version
+                </DropdownItem>
+                <DropdownItem
+                    style={{ backgroundColor: 'white', borderTop: '1px solid #e0eaf7' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    onClick={handleViewArchivedVersions}
+                >
+                    + View Archived Versions
                 </DropdownItem>
             </DropdownMenu>
         </Dropdown>

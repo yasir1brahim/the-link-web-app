@@ -40,6 +40,7 @@ import Chat from "../SpecGpt/components/Chat";
 import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
+import ArchivedVersionsModal from "./archivedVersionModal";
 
 
 const ProjectLogs = () => {
@@ -238,6 +239,10 @@ const ProjectLogs = () => {
 
   const { user, isAuthenticated } = useContext(AuthContext);
   const [currentUser, setCurrentUser] = useState(user);
+
+  const [showArchivedVersionsModal, setShowArchivedVersionsModal] = useState(false);
+  const [archivedVersions, setArchivedVersions] = useState([]);
+  const [loadingUnarchiveId, setLoadingUnarchiveId] = useState(null);
 
 
   const getProcoreAccessTokenData = async () => {
@@ -1253,6 +1258,36 @@ const ProjectLogs = () => {
   }
 
 
+  const fetchArchivedVersions = async () => {
+    try {
+      const response = await getProjectDetails(projectId);
+      const isArchived = response.data.is_archived;
+      const archived = isArchived ? [response.data] : [];
+      setArchivedVersions(archived);
+      console.log("Archived project:", archived);
+    } catch (error) {
+      handleError(error);
+      setArchivedVersions([]);
+    }
+  };
+
+  const handleViewArchivedVersions = async () => {
+    await fetchArchivedVersions();
+    setShowArchivedVersionsModal(true);
+  };
+
+  const handleUnarchiveVersion = async (versionId) => {
+    setLoadingUnarchiveId(versionId);
+    try {
+      await updateProjectVersion(projectId, versionId, { is_archived: false });
+      await fetchArchivedVersions();
+      toast.success("Version unarchived!");
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setLoadingUnarchiveId(null);
+    }
+  };
 
   return (
     <div className="page-wrap">
@@ -1289,7 +1324,7 @@ const ProjectLogs = () => {
             setShowVersionModal={setShowVersionModal}
             setEditingVersionId={setEditingVersionId}
             setEditingVersionName={setEditingVersionName}
-
+            handleViewArchivedVersions={handleViewArchivedVersions}
           />
           <ProjectLogsActionPanel
             handleDeleteLogs={handleDeleteLogs}
@@ -1616,6 +1651,13 @@ const ProjectLogs = () => {
         setProcoreProjectName={setProcoreProjectName}
         setProcoreSubmittalManagerId={setProcoreSubmittalManagerId}
         setProcoreSubmittalManagerName={setProcoreSubmittalManagerName}
+      />
+      <ArchivedVersionsModal
+        isOpen={showArchivedVersionsModal}
+        toggle={() => setShowArchivedVersionsModal(false)}
+        archivedVersions={archivedVersions}
+        onUnarchive={handleUnarchiveVersion}
+        loadingUnarchiveId={loadingUnarchiveId}
       />
       <Modal
         isOpen={saveListName}
