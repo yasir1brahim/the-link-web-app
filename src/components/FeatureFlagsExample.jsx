@@ -84,7 +84,7 @@ const FeatureFlagsExample = ({ teamId }) => {
                     <li>Version Comparison: {isVersionComparisonFlagActive(teamId) ? '✅ Active' : '❌ Inactive'}</li>
                     <li>Version Comparison Search: {isVersionComparisonSearchFlagActive(teamId) ? '✅ Active' : '❌ Inactive'}</li>
                     <li>Full Spec Processing: {isFullSpecProcessingFlagActive(teamId) ? '✅ Active' : '❌ Inactive'}</li>
-                    <li>Spec GPT: {isSpecGptFlagActive(teamId) ? '✅ Active' : '❌ Inactive'}</li>
+                    <li>Compass: {isSpecGptFlagActive(teamId) ? '✅ Active' : '❌ Inactive'}</li>
                     <li>Inspection Log: {isInspectionLogFlagActive(teamId) ? '✅ Active' : '❌ Inactive'}</li>
                 </ul>
             </div>
