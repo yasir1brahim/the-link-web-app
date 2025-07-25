@@ -263,9 +263,12 @@ const ProjectLogsActionPanel = ({ ...props }) => {
         <div className="col-6 row">
           <div className={props.showSearch ? "d-none" : "col-6 d-flex justify-content-end spliter pl-0"}>
             {props?.docParsed ? (
-              <div className="total-count-documents">
-                {props?.docParsed} document{props?.docParsed > 1 ? 's' : ''}{' '}
-                uploaded{' '}
+              <div
+                className="total-count-documents"
+                style={{ cursor: "pointer", fontSize: "0.9em" }}
+                onClick={props.onShowDocumentListModal}
+              >
+                {props?.docParsed} document{props?.docParsed > 1 ? 's' : ''} uploaded
               </div>
             ) : (
               ''
