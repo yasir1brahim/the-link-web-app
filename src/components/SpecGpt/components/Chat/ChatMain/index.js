@@ -1,9 +1,10 @@
-import { Box, Grid, GridItem, Heading, Input, InputRightElement, Text, InputGroup, Center, Textarea } from '@chakra-ui/react'
+import { Box, Grid, GridItem, Heading, Input, InputRightElement, Text, InputGroup, Center, Textarea, Button } from '@chakra-ui/react'
 import React, { useEffect, useRef, useState } from 'react'
 import { BrushIcon, QuestionIcon, SendIcon, SendMessageIcon } from '../../../assets/icons'
 import Message from './Message'
 import { MESSAGE_ROLE_TYPE } from '../../../utils/enums';
 import { fetchPromptAnswer } from '../../../utils/apiUtils';
+import { ArrowDownIcon } from '@chakra-ui/icons';
 
 
 const quickActions = [
@@ -131,6 +132,10 @@ const ChatMain = ({
     endOfMessagesRef,
     isChatEnabled
 }) => {
+    const chatContainerRef = useRef(null);
+    const [isAtBottom, setIsAtBottom] = useState(true);
+    const isFirstRender = useRef(true);
+
     const onKeyDown = (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -139,8 +144,27 @@ const ChatMain = ({
     }
 
     useEffect(() => {
-        endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);   
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return; 
+        }
+        if (endOfMessagesRef.current) {
+            endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages, endOfMessagesRef]);
+
+    useEffect(() => {
+        const chatDiv = chatContainerRef.current;
+        if (!chatDiv) return;
+        const handleScroll = () => {
+            const threshold = 20; 
+            const atBottom = chatDiv.scrollHeight - chatDiv.scrollTop - chatDiv.clientHeight < threshold;
+            setIsAtBottom(atBottom);
+        };
+        chatDiv.addEventListener('scroll', handleScroll);
+        handleScroll();
+        return () => chatDiv.removeEventListener('scroll', handleScroll);
+    }, [messages]);
 
     const submitMessageInline = (message) => { 
         console.log(message)
@@ -152,11 +176,16 @@ const ChatMain = ({
         getChatResponse(userInput);
     }
 
-
     const onClickQuickQuestion = (text) => {
         setUserInput(text);
         submitMessageInline(text);
     }
+    const handleGoToBottom = () => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTo({ top: chatContainerRef.current.scrollHeight, behavior: 'smooth' });
+        }
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    };
     return (
         <Box w="100%" maxW={"800px"} h={"100%"} position={"relative"} pt={{ base: "20px", lg: "40px" }} marginX={"auto"}>
             {messages?.length === 0 && 
@@ -173,7 +202,7 @@ const ChatMain = ({
                 </Center>
             }
             {messages?.length > 0 && <>
-                <Box display={messages?.length > 0 ? "block" : "none"} h={"calc(100% - 100px)"} w={"100%"} overflowY={"auto"}>
+                <Box ref={chatContainerRef} display={messages?.length > 0 ? "block" : "none"} h={"calc(100% - 100px)"} w={"100%"} overflowY={"auto"}>
                 {messages.map(
                     (message, index) => {
                         return <Message key={index} 
@@ -188,6 +217,21 @@ const ChatMain = ({
                     )}
                     <div ref={endOfMessagesRef}/>
                 </Box>
+                {!isAtBottom && (
+                    <Box position="fixed" right={{ base: '24px', lg: '250px' }} bottom={{ base: '24px', lg: '40px' }} zIndex={2000}>
+                        <Button 
+                            colorScheme="gray"
+                            variant="solid"
+                            size="md"
+                            onClick={handleGoToBottom}
+                            boxShadow="md"
+                            p={2}
+                            minW={"auto"}
+                        >
+                            <ArrowDownIcon boxSize={6} />
+                        </Button>
+                    </Box>
+                )}
                 <MessageInput 
                     userInput={userInput}
                     setUserInput={setUserInput}
