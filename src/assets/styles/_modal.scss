@@ -1028,10 +1028,9 @@
                         }
 
                         .doc-content-table {
-                            width: 100%;
+                            width: 80%;
                             border: 1px solid rgba($primary, 0.1);
                             display: inline-block;
-                            max-width: 384px;
                             border-radius: 8px;
                             margin-bottom: 32px;
 
@@ -1042,9 +1041,10 @@
                                 padding: 0 16px;
                                 align-items: center;
                                 justify-content: flex-start;
+                                font-size: 14px !important;
 
                                 >* {
-                                    width: 50%;
+                                    width: 100%;
                                     text-align: left;
 
                                     &:first-child {
