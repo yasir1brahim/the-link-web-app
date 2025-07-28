@@ -92,7 +92,7 @@ const NavbarTop = ({...props}) => {
                   style={{
                     borderLeft: "1px solid #ccc",
                     height: "32px",
-                    margin: "0 12px"
+                    margin: "0 12px 0 5px"
                   }}
                 ></span>
                 {props.customerAvatarUrl ? (
