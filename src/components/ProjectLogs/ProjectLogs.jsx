@@ -40,8 +40,7 @@ import Chat from "../SpecGpt/components/Chat";
 import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
-import { getTeamDetails } from "../../api/Authentication/api";
-
+import useCompanyDetails from "../../hooks/useCompanyDetails";
 
 const ProjectLogs = () => {
   const { 
@@ -52,8 +51,6 @@ const ProjectLogs = () => {
     isInspectionLogFlagActive 
   } = useFeatureFlags();
 
-  const [companyLogoUrl, setCompanyLogoUrl] = useState("");
-  const [companyName, setCompanyName] = useState("");
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -237,6 +234,8 @@ const ProjectLogs = () => {
   const [userRoleInCompany, setUserRoleInCompany] = useState('member');
   const [teamId, setTeamId] = useState(state?.teamId);
 
+  const { companyLogoUrl, companyName, isLoading:headerLoading } = useCompanyDetails(teamId);
+
   const [hasPlaceholderSubmittals, setHasPlaceholderSubmittals] = useState(false);
 
   const { user, isAuthenticated } = useContext(AuthContext);
@@ -298,23 +297,6 @@ const ProjectLogs = () => {
       handleError(error);
     }
   }
-
-  useEffect(() => {
-  const fetchCompanyDetails = async () => {
-    if (!teamId) return;
-    try {
-      const response = await getTeamDetails(teamId);
-      setCompanyLogoUrl(response.data.legacy_logo_url || "");
-      setCompanyName(response.data.name || "");
-    } catch (error) {
-      setCompanyLogoUrl("");
-      setCompanyName("");
-      console.error("Error fetching company details:", error);
-    }
-  };
-  fetchCompanyDetails();
-}, [teamId]);
-
 
   const handleCreateProjectVersion = async (versionName) => {
     try {
@@ -1901,7 +1883,7 @@ const ProjectLogs = () => {
         manageExcelExportModal={manageExcelExportModal}
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
-      <Loader showComponentLoader={isLoading} />
+      <Loader showComponentLoader={isLoading || headerLoading} />
     </div>
   );
 };

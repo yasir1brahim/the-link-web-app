@@ -11,7 +11,7 @@ import { listProjects, getUserRoleInProject } from "../../api/Projects/api";
 import { useParams } from 'react-router-dom';
 import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { useFeatureFlags } from "../../contexts/FeatureFlagsContext";
-import { getTeamDetails } from "../../api/Authentication/api";
+import useCompanyDetails from "../../hooks/useCompanyDetails";
 
 const ProjectsPage = () => {
   const { 
@@ -38,9 +38,8 @@ const ProjectsPage = () => {
     setCreateProjectModal(!createProjectModal);
   const toggleArchiveProjectModal = () => setArchiveProjectModal(!archiveProjectModal);
   const toggleRestoreProjectModal = () => setRestoreProjectModal(!restoreProjectModal);
-  const [companyLogoUrl, setCompanyLogoUrl] = useState("");
-  const [companyName, setCompanyName] = useState("");
   const { teamId } = useParams();
+  const { companyLogoUrl, companyName, isLoading: headerLoading } = useCompanyDetails(teamId);
 
   const customerId = teamId;
 
@@ -106,25 +105,6 @@ const ProjectsPage = () => {
 };
 
 useEffect(() => {
-  const fetchCompanyDetails = async () => {
-    if (!teamId) return;
-    try {
-      setIsLoading(true);
-      const response = await getTeamDetails(teamId);
-      setCompanyLogoUrl(response.data.legacy_logo_url || "");
-      setCompanyName(response.data.name || "");
-    } catch (error) {
-      setCompanyLogoUrl("");
-      setCompanyName("");
-      console.error("Error fetching company details:", error);
-    }finally {
-      setIsLoading(false);
-    }
-  };
-  fetchCompanyDetails();
-}, [teamId]);
-
-useEffect(() => {
   let isMounted = true;
   console.log('customerId', customerId);
   
@@ -187,7 +167,7 @@ useEffect(() => {
           />
         </div>
       </div>
-      <Loader showComponentLoader={isLoading || isTeamLoading} />
+      <Loader showComponentLoader={isLoading || isTeamLoading || headerLoading} />
     </>
   );
 };
