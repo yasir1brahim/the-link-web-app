@@ -140,6 +140,19 @@ const updateProjectVersion = async (projectId, versionId, versionName) => {
     });
 }
 
+const getArchivedVersions = async (projectId) => {
+    try {
+        const response = await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/${projectId}/project-versions/archived/`,
+        });
+        return response;
+    } catch (error) {
+        console.error('Error details:', error.response?.status, error.response?.data);
+        handleError(error);
+    }
+};
+
 const archiveProjectVersion = async (projectId, versionId) => {
     try {
         return await axiosInstance({
@@ -204,5 +217,6 @@ export {
     createProjectVersion,
     updateProjectVersion,
     archiveProjectVersion,
-    restoreProjectVersion
+    restoreProjectVersion,
+    getArchivedVersions
 }

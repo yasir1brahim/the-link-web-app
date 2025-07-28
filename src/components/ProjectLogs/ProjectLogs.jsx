@@ -21,13 +21,13 @@ import ManageProcore from "./manageProcore";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
-import { combineRows, getExportJetBuildData, getProjectIdBySubmittalId, getSavedLogs ,  getArchivedVersions} from "../../api/ProjectLogs/api";
+import { combineRows, getExportJetBuildData, getProjectIdBySubmittalId, getSavedLogs} from "../../api/ProjectLogs/api";
 import DocumentStatus from "./documentStatus";
 import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
-import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion } from "../../api/Projects/api";
+import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion , getArchivedVersions} from "../../api/Projects/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
@@ -1257,27 +1257,38 @@ const ProjectLogs = () => {
     }
   }
 
-
-  const fetchArchivedVersions = async () => {
-    try {
-      const response = await getArchivedVersions(projectId);
-      setArchivedVersions(response.data);
-      console.log("Archived versions:", response.data);
-    } catch (error) {
-      handleError(error);
-      setArchivedVersions([]);
-    }
-  };  
-
   const handleViewArchivedVersions = async () => {
     await fetchArchivedVersions();
     setShowArchivedVersionsModal(true);
   };
 
+  const fetchArchivedVersions = async () => {
+    try {
+        const response = await getArchivedVersions(projectId);
+        setArchivedVersions(response.data || []);
+        setShowArchivedVersionsModal(true);
+    } catch (error) {
+        handleError(error);
+        setArchivedVersions([]);
+        toast.error("Failed to fetch archived versions.", {
+            position: "bottom-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+        });
+    }
+};  
+
   const handleUnarchiveVersion = async (versionId) => {
     setLoadingUnarchiveId(versionId);
     try {
-      const response = await archiveProjectVersion(projectId, versionId, { action: 'restore' });
+      const response = await axiosInstance({
+        method: 'post',
+        url: `/api/deliverables/${projectId}/project-versions/${versionId}/archive/`,
+        data: { action: 'restore' },
+      });
       if (response.status === 200) {
         toast.success("Version unarchived successfully!", {
           position: "bottom-center",
@@ -1286,19 +1297,27 @@ const ProjectLogs = () => {
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
         });
+        // Refresh archived versions
         await fetchArchivedVersions();
+        // Update available versions
         const projectResponse = await getProjectDetails(projectId);
         setAvailableVersions(projectResponse.data.project_versions);
       }
     } catch (error) {
       handleError(error);
+      toast.error("Failed to unarchive version.", {
+        position: "bottom-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } finally {
       setLoadingUnarchiveId(null);
     }
   };
-
 
   return (
     <div className="page-wrap">

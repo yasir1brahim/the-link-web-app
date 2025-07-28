@@ -348,20 +348,6 @@ const getSemanticallyProcessedSpecItems = async (projectId, search, page_number,
     }
 }
 
-const getArchivedVersions = async (projectId) => {
-    console.log(`Requesting archived versions for project_id: ${projectId}`);
-    try {
-        const response = await axiosInstance({
-            method: 'get',
-            url: `/api/projects/${projectId}/project-versions/archived/`,
-        });
-        console.log('Response:', response.data);
-        return response;
-    } catch (error) {
-        console.error('Error details:', error.response?.status, error.response?.data);
-        handleError(error);
-    }
-}
 
 export {
     getSavedLogs,
@@ -382,5 +368,4 @@ export {
     getVersionComparison,
     getFilteredVersionComparison,
     getSemanticallyProcessedSpecItems,
-    getArchivedVersions,
 }
