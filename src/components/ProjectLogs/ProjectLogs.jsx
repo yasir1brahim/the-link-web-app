@@ -41,6 +41,8 @@ import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
 import useCompanyDetails from "../../hooks/useCompanyDetails";
+import DocumentListModal from "./DocumentListModal";
+
 
 const ProjectLogs = () => {
   const { 
@@ -51,6 +53,7 @@ const ProjectLogs = () => {
     isInspectionLogFlagActive 
   } = useFeatureFlags();
 
+  const [showDocumentListModal, setShowDocumentListModal] = useState(false);
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -1331,6 +1334,7 @@ const ProjectLogs = () => {
               procoreAccessToken={procoreAccessToken}
               procoreAuthUrl={procoreAuthUrl}
               handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
+              onShowDocumentListModal={() => setShowDocumentListModal(true)}
               docParsed={documentData?.length || 0}
               totalCount={totalCount}
               showBtn={"Upload Documents"}
@@ -1374,7 +1378,7 @@ const ProjectLogs = () => {
                     transition: 'all 0.2s ease'
                   }}
                 >
-                  SpecGPT
+                  Compass
                 </button>
               </div>
             </div>
@@ -1528,7 +1532,7 @@ const ProjectLogs = () => {
                 documentIsProcessing={documentIsBeingEmbedded}
                 documentData={documentData}
                 toggleDocumentStatusModal={toggleSpecGptProcessingModal}
-                indicatorText={"SpecGPT is processing your documents..."}
+                indicatorText={"Compass is processing your documents..."}
               />
               <ChakraProvider>
                 <Chat 
@@ -1749,7 +1753,7 @@ const ProjectLogs = () => {
         className="new-customer modal-xl"
       >
         <ModalHeader toggle={toggleSpecGptProcessingModal}>
-          SpecGPT Processing Status
+          Compass Processing Status
         </ModalHeader>
         <ModalBody>
           <DocumentStatus documentData={documentData} isSpecGptStatus={true} />
@@ -1884,6 +1888,11 @@ const ProjectLogs = () => {
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
       <Loader showComponentLoader={isLoading || headerLoading} />
+      <DocumentListModal
+        isOpen={showDocumentListModal}
+        toggle={() => setShowDocumentListModal(false)}
+        documents={documentData}
+      />
     </div>
   );
 };
