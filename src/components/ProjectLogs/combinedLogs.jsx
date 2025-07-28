@@ -279,12 +279,12 @@ export default function CombinedLogs(props) {
               )}`,
         // customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
         submittal_number: null,
-
-        // Only used to help BE determine what to do when inserted
         added_under_submittal_id: log.id,
+        manually_added: true,
       };
       const result = insertElement(props.logData, index + 1, logObj);
       props.setFilteredLogData(result);
+      props.setLogData(result);
 
       setNewRowIndex(index + 1);
       handleEditToggle(logObj, index + 1);
@@ -304,6 +304,7 @@ export default function CombinedLogs(props) {
       });
     }
   };
+  
   useEffect(() => {
     setEditRow("");
   }, [props.searchValue]);
