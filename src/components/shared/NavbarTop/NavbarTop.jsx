@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
-import { ReactComponent as Logo } from '../../../assets/images/logo-dark-v7.svg';
+import { ReactComponent as Logo } from '../../../assets/images/the-link-ai-header-logo-new.svg';
 import { ReactComponent as Down } from '../../../assets/images/chevron-bottom.svg';
 // import { ReactComponent as Notification } from '../../../assets/images/notificat.svg';
 import { Navbar, Nav, NavItem, NavLink } from 'reactstrap';
@@ -76,7 +76,14 @@ const NavbarTop = ({...props}) => {
       >
         <div className='row w-100 m-0'>
           <div className='col-4 d-flex'>
-            <a href="#" onClick={(e) => getHomeUrl(e, isAuthenticated, user, getUserTeams, navigate)} className="navbar-brand">
+            <a href="#" onClick={(e) => {
+              e.preventDefault();
+              if (props.teamId) {
+                navigate(`/project-list/${props.teamId}`);
+              } else {
+                getHomeUrl(e, isAuthenticated, user, getUserTeams, navigate);
+              }
+            }} className="navbar-brand">
               <Logo />
             </a>
             {props?.customerData &&

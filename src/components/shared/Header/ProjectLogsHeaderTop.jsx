@@ -19,51 +19,7 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
       <div className="col-4 px-0">
         <div className="header-swap">
           <div className="main-wrapper">
-            <div className="breadcrumb-wrap">
-              <a
-                href="#"
-                onClick={(e) => getHomeUrl(e, isAuthenticated, user, getUserTeams, navigate)}
-                className="main-link"
-              >
-                Home
-              </a>
-              {props.breadcrumb && (
-                <>
-                  <span className="main-link">/</span>
-                  <a
-                    onClick={() => navigate(props.breadcrumbUrl)}
-                    className="active-link"
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {props.breadcrumb}
-                  </a>
-                </>
-              )}
-              {props.breadcrumb2 && (
-                <>
-                  <span className="main-link">/</span>
-                  <a
-                    onClick={() => navigate(-1)}
-                    className="active-link"
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {props.breadcrumb2}
-                  </a>
-                </>
-              )}
-              {props.breadcrumb3 && (
-                <>
-                  <span className="main-link">/</span>
-                  <a
-                    onClick={() => navigate(-1)}
-                    className="active-link"
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {props.breadcrumb3}
-                  </a>
-                </>
-              )}
-            </div>
+            {/* Breadcrumbs removed */}
           </div>
         </div>
       </div>
