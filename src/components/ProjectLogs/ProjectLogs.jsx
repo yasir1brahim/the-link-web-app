@@ -21,7 +21,7 @@ import ManageProcore from "./manageProcore";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
-import { combineRows, getExportJetBuildData, getProjectIdBySubmittalId, getSavedLogs } from "../../api/ProjectLogs/api";
+import { combineRows, getExportJetBuildData, getProjectIdBySubmittalId, getSavedLogs ,  getArchivedVersions} from "../../api/ProjectLogs/api";
 import DocumentStatus from "./documentStatus";
 import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
@@ -1260,16 +1260,14 @@ const ProjectLogs = () => {
 
   const fetchArchivedVersions = async () => {
     try {
-      const response = await getProjectDetails(projectId);
-      const isArchived = response.data.is_archived;
-      const archived = isArchived ? [response.data] : [];
-      setArchivedVersions(archived);
-      console.log("Archived project:", archived);
+      const response = await getArchivedVersions(projectId);
+      setArchivedVersions(response.data);
+      console.log("Archived versions:", response.data);
     } catch (error) {
       handleError(error);
       setArchivedVersions([]);
     }
-  };
+  };  
 
   const handleViewArchivedVersions = async () => {
     await fetchArchivedVersions();
@@ -1279,15 +1277,28 @@ const ProjectLogs = () => {
   const handleUnarchiveVersion = async (versionId) => {
     setLoadingUnarchiveId(versionId);
     try {
-      await updateProjectVersion(projectId, versionId, { is_archived: false });
-      await fetchArchivedVersions();
-      toast.success("Version unarchived!");
+      const response = await archiveProjectVersion(projectId, versionId, { action: 'restore' });
+      if (response.status === 200) {
+        toast.success("Version unarchived successfully!", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        await fetchArchivedVersions();
+        const projectResponse = await getProjectDetails(projectId);
+        setAvailableVersions(projectResponse.data.project_versions);
+      }
     } catch (error) {
       handleError(error);
     } finally {
       setLoadingUnarchiveId(null);
     }
   };
+
 
   return (
     <div className="page-wrap">
