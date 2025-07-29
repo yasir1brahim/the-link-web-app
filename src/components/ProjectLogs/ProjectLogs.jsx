@@ -41,6 +41,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
 import ArchivedVersionsModal from "./archivedVersionModal";
+import useCompanyDetails from "../../hooks/useCompanyDetails";
 import DocumentListModal from "./DocumentListModal";
 
 
@@ -237,11 +238,12 @@ const ProjectLogs = () => {
   const [userRoleInCompany, setUserRoleInCompany] = useState('member');
   const [teamId, setTeamId] = useState(state?.teamId);
 
+  const { companyLogoUrl, companyName, isLoading:headerLoading } = useCompanyDetails(teamId);
+
   const [hasPlaceholderSubmittals, setHasPlaceholderSubmittals] = useState(false);
 
   const { user, isAuthenticated } = useContext(AuthContext);
   const [currentUser, setCurrentUser] = useState(user);
-
   const [showArchivedVersionsModal, setShowArchivedVersionsModal] = useState(false);
   const [archivedVersions, setArchivedVersions] = useState([]);
   const [loadingUnarchiveId, setLoadingUnarchiveId] = useState(null);
@@ -1332,6 +1334,8 @@ const ProjectLogs = () => {
         customerData={customerData}
         userRole={userRoleInCompany}
         teamId={teamId}
+        customerAvatarUrl={companyLogoUrl}
+        customerName={companyName}
       />
       {isAssociatedUser === true && (
         <div className="project-logs-wrapper log-table-width">
@@ -1955,7 +1959,7 @@ const ProjectLogs = () => {
         manageExcelExportModal={manageExcelExportModal}
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
-      <Loader showComponentLoader={isLoading} />
+      <Loader showComponentLoader={isLoading || headerLoading} />
       <DocumentListModal
         isOpen={showDocumentListModal}
         toggle={() => setShowDocumentListModal(false)}

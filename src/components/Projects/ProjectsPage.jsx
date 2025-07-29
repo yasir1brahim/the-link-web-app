@@ -11,6 +11,7 @@ import { listProjects, getUserRoleInProject } from "../../api/Projects/api";
 import { useParams } from 'react-router-dom';
 import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { useFeatureFlags } from "../../contexts/FeatureFlagsContext";
+import useCompanyDetails from "../../hooks/useCompanyDetails";
 
 const ProjectsPage = () => {
   const { 
@@ -38,6 +39,7 @@ const ProjectsPage = () => {
   const toggleArchiveProjectModal = () => setArchiveProjectModal(!archiveProjectModal);
   const toggleRestoreProjectModal = () => setRestoreProjectModal(!restoreProjectModal);
   const { teamId } = useParams();
+  const { companyLogoUrl, companyName, isLoading: headerLoading } = useCompanyDetails(teamId);
 
   const customerId = teamId;
 
@@ -127,6 +129,8 @@ useEffect(() => {
         <NavbarTop
           userRole={currentUserRole}
           teamId={teamId}
+          customerAvatarUrl={companyLogoUrl}
+          customerName={companyName}
          />
         <div className="page-wrap-content personal-projects-wrapper">
           {currentUserRole === 'admin' && <Header
@@ -163,7 +167,7 @@ useEffect(() => {
           />
         </div>
       </div>
-      <Loader showComponentLoader={isLoading || isTeamLoading} />
+      <Loader showComponentLoader={isLoading || isTeamLoading || headerLoading} />
     </>
   );
 };
