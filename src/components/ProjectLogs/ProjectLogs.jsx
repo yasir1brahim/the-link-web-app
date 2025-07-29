@@ -967,26 +967,102 @@ const ProjectLogs = () => {
     return error;
   };
 
-  const handleUpDownView = (direction) => {
+  const handleUpDownView = async (direction) => {
     if (!pdfData || loadingView) return;
 
-    if (
-      (direction > 0 && pdfData.index < filteredLogData.length - 1) ||
-      (direction < 0 && pdfData.index > 0)
-    ) {
-      const pIndex = pdfData.index + direction;
-      const data = filteredLogData[pIndex];
-      
-      setPdfData({
-        ...pdfData,
-        url: data.doc_link,
-        textLoc: data.text_loc,
-        index: pIndex,
-        docId: data.doc_id,
-        submittalId: data.id,
-        additionalTextLocations: data.additional_text_locations,
-      });
-      setSubmittalIdParam(data.id);
+    const currentIndex = pdfData.index;
+    const currentPage = page;
+    const itemsPerPage = rowsPerPage;
+    const totalItems = totalCount;
+
+    if (direction > 0) {
+      if (currentIndex < filteredLogData.length - 1) {
+        // Stay on the same page, move to the next item
+        const pIndex = currentIndex + 1;
+        const data = filteredLogData[pIndex];
+        setPdfData({
+          ...pdfData,
+          url: data.doc_link,
+          textLoc: data.text_loc,
+          index: pIndex,
+          docId: data.doc_id,
+          submittalId: data.id,
+          additionalTextLocations: data.additional_text_locations,
+        });
+        setSubmittalIdParam(data.id);
+      } else if (currentPage * itemsPerPage < totalItems) {
+        // Move to the next page
+        const nextPage = currentPage + 1;
+        setPage(nextPage);
+        await fetchLogData(
+          nextPage - 1, // API page is 0-based
+          itemsPerPage,
+          searchValue,
+          listId,
+          appliedFilters,
+          null,
+          null,
+          projectVersionId
+        );
+        // After fetching, set to the first item of the new page
+        if (filteredLogData.length > 0) {
+          const data = filteredLogData[0];
+          setPdfData({
+            ...pdfData,
+            url: data.doc_link,
+            textLoc: data.text_loc,
+            index: 0,
+            docId: data.doc_id,
+            submittalId: data.id,
+            additionalTextLocations: data.additional_text_locations,
+          });
+          setSubmittalIdParam(data.id);
+        }
+      }
+    } else if (direction < 0) {
+      if (currentIndex > 0) {
+        // Stay on the same page, move to the previous item
+        const pIndex = currentIndex - 1;
+        const data = filteredLogData[pIndex];
+        setPdfData({
+          ...pdfData,
+          url: data.doc_link,
+          textLoc: data.text_loc,
+          index: pIndex,
+          docId: data.doc_id,
+          submittalId: data.id,
+          additionalTextLocations: data.additional_text_locations,
+        });
+        setSubmittalIdParam(data.id);
+      } else if (currentPage > 1) {
+        const prevPage = currentPage - 1;
+        setPage(prevPage);
+        await fetchLogData(
+          prevPage - 1, 
+          itemsPerPage,
+          searchValue,
+          listId,
+          appliedFilters,
+          null,
+          null,
+          projectVersionId
+        );
+        // After fetching, set to the last item of the previous page
+        if (filteredLogData.length > 0) {
+          const lastIndex = filteredLogData.length - 1;
+          const data = filteredLogData[lastIndex];
+          setPdfData({
+            ...pdfData,
+            url: data.doc_link,
+            textLoc: data.text_loc,
+            index: lastIndex,
+            docId: data.doc_id,
+            submittalId: data.id,
+            additionalTextLocations: data.additional_text_locations,
+          });
+          setSubmittalIdParam(data.id);
+        }
+      }
     }
   };
 
@@ -1453,7 +1529,7 @@ const ProjectLogs = () => {
                       }}
                     >
                       <button
-                        disabled={pdfData && pdfData.index > 0 ? false : true}
+                        disabled={pdfData && (pdfData.index > 0 || page > 1) ? false : true}
                         onClick={() => {
                           handleUpDownView(-1);
                         }}
@@ -1467,7 +1543,7 @@ const ProjectLogs = () => {
                       <button
                         disabled={
                           pdfData &&
-                          pdfData.index < filteredLogData.length - 1
+                          (pdfData.index < filteredLogData.length - 1 || page * rowsPerPage < totalCount)
                             ? false
                             : true
                         }
