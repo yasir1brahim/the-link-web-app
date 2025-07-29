@@ -1696,7 +1696,10 @@ const ProjectLogs = () => {
       >
         <ModalHeader>Save Selection</ModalHeader>
         <ModalBody>
-          <form className="create-customer-form">
+          <form 
+            className="create-customer-form"
+            onSubmit={handleListSubmit}
+          >
             <div className="save-list-name">
               <div className="row">
                 <div className="col">
