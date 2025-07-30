@@ -5,7 +5,7 @@ import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
+import { ReactComponent as ReactLogo } from '../../assets/images/logo-white.svg';
 import { login, getUserTeams, getMicrosoftLoginUrl } from '../../api/Authentication/api'
 import { AuthContext } from '../../auth/authcontext';
 import { getHomeUrl } from '../../utils/navigation';
