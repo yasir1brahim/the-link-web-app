@@ -187,7 +187,17 @@ const ChatMain = ({
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     };
     return (
-        <Box w="100%" maxW={"800px"} h={"100%"} position={"relative"} pt={{ base: "20px", lg: "40px" }} marginX={"auto"}>
+        <Box
+            w="100%"
+            maxW="800px"
+            h="100%"
+            position="relative"
+            pt={{ base: "20px", lg: "40px" }}
+            marginX="auto"
+            display="flex"
+            flexDirection="column"
+            className="chat-main-outer"
+        >
             {messages?.length === 0 && 
                 <Center h={"100%"} w={"100%"} flexDirection={"column"} gap={5}>
                     <MessageInput 
@@ -202,7 +212,12 @@ const ChatMain = ({
                 </Center>
             }
             {messages?.length > 0 && <>
-                <Box ref={chatContainerRef} display={messages?.length > 0 ? "block" : "none"} h={"calc(100% - 100px)"} w={"100%"} overflowY={"auto"}>
+                <Box
+                    flex="1 1 auto"
+                    overflowY="auto"
+                    minHeight={0}
+                    className="chat-messages-area"
+                >
                 {messages.map(
                     (message, index) => {
                         return <Message key={index} 
@@ -218,7 +233,13 @@ const ChatMain = ({
                     <div ref={endOfMessagesRef}/>
                 </Box>
                 {!isAtBottom && (
-                    <Box position="fixed" right={{ base: '24px', lg: '250px' }} bottom={{ base: '24px', lg: '40px' }} zIndex={2000}>
+                    <Box
+                        flexShrink={0}
+                        className="chat-input-area"
+                        p={3}
+                        borderTop="1px solid #e5e7eb"
+                        bg="white"
+                    >
                         <Button 
                             colorScheme="gray"
                             variant="solid"
