@@ -287,11 +287,7 @@ export default function CombinedLogs(props) {
       props.setFilteredLogData(result);
 
       setNewRowIndex(index + 1);
-      handleEditToggle(logObj, index + 1);
-      if (props.pdfData?.url) {
-        let docElement = document.getElementsByClassName("l-table-wrapper");
-        docElement[0].scrollTo(890, 0);
-      }
+      handleEditToggle(logObj, index + 1)
     } catch (error) {
       toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
