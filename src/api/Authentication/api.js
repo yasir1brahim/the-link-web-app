@@ -112,11 +112,14 @@ const getTeamDetails = async (teamId) => {
 }
 
 const getUserRoleInTeam = async (userId, teamId) => {
-    const team = await getTeamDetails(teamId);
-    const members = team.data.members;
-    const member = members.find((member) => member.user_id === parseInt(userId));
-    return member.role;
-}
+  const team = await getTeamDetails(teamId);
+  const members = team.data.members;
+  const member = members.find((member) => member.user_id === parseInt(userId));
+  if (!member) {
+    return 'member'; 
+  }
+  return member.role;
+};
 
 const getUserTeams = async (accessToken) => {
     if (accessToken) {
