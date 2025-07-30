@@ -196,7 +196,7 @@ const Chat = ({
             <Flex
                 className="compass-chat-flex"
                 w="100%"
-                // mx="auto"
+                mx="auto"
                 h="100%"
                 position="relative"
             >
