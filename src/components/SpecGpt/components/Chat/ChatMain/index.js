@@ -187,7 +187,7 @@ const ChatMain = ({
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     };
     return (
-        <Box w="100%" maxW={"800px"} h={"100%"} position={"relative"} pt={{ base: "20px", lg: "40px" }} marginX={"auto"}>
+        <Box w="100%" maxW={"800px"} h={"100%"} position={"relative"} pt={"10px"} marginX={"auto"}>
             {messages?.length === 0 && 
                 <Center h={"100%"} w={"100%"} flexDirection={"column"} gap={5}>
                     <MessageInput 
