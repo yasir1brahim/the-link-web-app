@@ -1248,7 +1248,7 @@ const ProjectLogs = () => {
 
   const onConfirmArchive = async (versionId) => {
     try {
-      await archiveProjectVersion(projectId, versionId);
+      await archiveProjectVersion(projectId, versionId , 'archive');
       if (versionId === projectVersionId) {
         navigate(`/project-logs?projectDetails=${projectId}`);
         window.location.reload();
@@ -1262,8 +1262,12 @@ const ProjectLogs = () => {
   }
 
   const handleViewArchivedVersions = async () => {
-    await fetchArchivedVersions();
-    setShowArchivedVersionsModal(true);
+    try {
+      await fetchArchivedVersions();
+      setShowArchivedVersionsModal(true);
+    } catch (error) {
+        console.error("Failed to fetch archived versions:", error);
+    }
   };
 
   const fetchArchivedVersions = async () => {
@@ -1271,6 +1275,7 @@ const ProjectLogs = () => {
         const response = await getArchivedVersions(projectId);
         setArchivedVersions(response.data || []);
         setShowArchivedVersionsModal(true);
+
     } catch (error) {
         handleError(error);
         setArchivedVersions([]);
@@ -1288,11 +1293,7 @@ const ProjectLogs = () => {
   const handleUnarchiveVersion = async (versionId) => {
     setLoadingUnarchiveId(versionId);
     try {
-      const response = await axiosInstance({
-        method: 'post',
-        url: `/api/deliverables/${projectId}/project-versions/${versionId}/archive/`,
-        data: { action: 'restore' },
-      });
+      const response = await archiveProjectVersion(projectId, versionId , 'restore');
       if (response.status === 200) {
         toast.success("Version unarchived successfully!", {
           position: "bottom-center",
@@ -1341,7 +1342,6 @@ const ProjectLogs = () => {
         <div className="project-logs-wrapper log-table-width">
           {(!isSpecGptFlagActive(teamId) || activeTab === 'submittal') && (
             <ProjectLogsHeaderTop
-              // Breadcrumbs removed
               showBtn={"Upload Documents"}
               toggleModal={toggleModal}
               btnSize={"small"}
@@ -1359,6 +1359,7 @@ const ProjectLogs = () => {
               setShowVersionModal={setShowVersionModal}
               setEditingVersionId={setEditingVersionId}
               setEditingVersionName={setEditingVersionName}
+              onViewArchivedVersions={handleViewArchivedVersions}
             />
           )}
           {activeTab === 'submittal' && (

@@ -3,6 +3,7 @@ import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap
 import { EditIcon } from "../shared/icons/editIcon";
 import { LaunchIcon } from '../shared/icons/launchIcon';
 import { ArchiveIcon } from '../shared/icons/archiveIcon';
+import { AddIcon } from '../shared/icons/AddIcon';
 
 
 const VersionDropdown = ({ 
@@ -77,7 +78,10 @@ const VersionDropdown = ({
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                     onClick={onPressAddNewVersion}
                 >
-                    + Add New Version
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <AddIcon />
+                        Add New Version
+                    </div>
                 </DropdownItem>
                 <DropdownItem
                     style={{ backgroundColor: 'white', borderTop: '1px solid #e0eaf7' }}
@@ -85,7 +89,10 @@ const VersionDropdown = ({
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                     onClick={handleViewArchivedVersions}
                 >
-                    + View Archived Versions
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <LaunchIcon />
+                        View Archived Versions
+                    </div>
                 </DropdownItem>
             </DropdownMenu>
         </Dropdown>
