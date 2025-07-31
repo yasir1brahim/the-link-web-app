@@ -1,4 +1,4 @@
-import { Flex, Image, Text, Skeleton, Container, SkeletonText, Button, useToast, Box, HStack } from '@chakra-ui/react'
+import { Flex, Image, Text, Skeleton, Container, SkeletonText, Button, useToast, Box, HStack, Heading } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import SpecGptImage from "../../../../assets/spec-gpt.png"
 import { DownloadIcon } from '@chakra-ui/icons'
@@ -19,6 +19,19 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
     }
     if (messageType === MESSAGE_ROLE_TYPE.ASSISTANT) {
         messageHeading = "SpecGPT"
+    }
+
+    const isOwnerDeliverablesCommandMessage = messageType === MESSAGE_ROLE_TYPE.SYSTEM && message === "Generate owner deliverables log"
+    const isInspectionLogCommandMessage = messageType === MESSAGE_ROLE_TYPE.SYSTEM && message === "Generate inspection log"
+
+    const convertCommandMessageToHeading = (message) => {
+        if (message === "Generate owner deliverables log") {
+            return "Owner Deliverables"
+        }
+        if (message === "Generate inspection log") {
+            return "Inspections"
+        }
+        return message
     }
 
     const handleExtractTables = async () => {
@@ -145,18 +158,26 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
         <Container 
             borderRadius={6} 
             maxW={messageType === MESSAGE_ROLE_TYPE.USER ? "75%" : "100%"} 
-            p={4} 
+            pt={isOwnerDeliverablesCommandMessage || isInspectionLogCommandMessage ? 0 : 4} 
+            pb={isOwnerDeliverablesCommandMessage || isInspectionLogCommandMessage ? 0 : 4} 
+            px={4} 
             backgroundColor={messageType === MESSAGE_ROLE_TYPE.USER ? "gray.100" : "white"}
             color={"gray.900"}
             ml={messageType === MESSAGE_ROLE_TYPE.USER ? "auto" : "0"}
             mr={messageType === MESSAGE_ROLE_TYPE.USER ? "0" : "auto"}
-            mb="30px"
+            mb={isOwnerDeliverablesCommandMessage || isInspectionLogCommandMessage ? "0" : "30px"}
+            textAlign={isOwnerDeliverablesCommandMessage || isInspectionLogCommandMessage ? "center" : "left"}
         >
             <Text color={"gray.900"} whiteSpace={"pre-wrap"} m={0}>
                 {messageType === MESSAGE_ROLE_TYPE.USER ? (
                     <Text color={"gray.900"} whiteSpace={"pre-wrap"} m={0}>
                         {message}
                     </Text>
+                ) : 
+                isOwnerDeliverablesCommandMessage || isInspectionLogCommandMessage ? (
+                    <Heading color={"gray.900"} whiteSpace={"pre-wrap"} m={0} fontSize={"1.25rem"} fontWeight={"bold"}>
+                        {convertCommandMessageToHeading(message)}
+                    </Heading>
                 ) : (
                     <SkeletonText isLoaded={!isLoading} noOfLines={4} skeletonHeight="20px" width={"100%"}>
                         {(messageType === MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG || messageType === MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG) &&

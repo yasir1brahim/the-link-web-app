@@ -1593,6 +1593,7 @@ const ProjectLogs = () => {
           </div>}
           {activeTab == 'specgpt' && 
             <>
+            <div className="compass-chat-viewport">
               <ProcessingIndicator
                 documentIsProcessing={documentIsBeingEmbedded}
                 documentData={documentData}
@@ -1620,6 +1621,7 @@ const ProjectLogs = () => {
                   setIsChatEnabled={setIsSpecGptChatEnabled}
                 />
               </ChakraProvider>
+              </div>
             </>
           }
         </div>
