@@ -54,3 +54,20 @@
   background: #fff;
   border-top: 1px solid #e5e7eb;
 }   
+
+.sidebar-scroller {
+  margin-bottom: 20px ;
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #ffffff33;
+        border-radius: 3px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background: #ffffff55;
+    }
+}
