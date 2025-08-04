@@ -193,7 +193,13 @@ const Chat = ({
 
     return (
         <>
-            <Flex w={"100%"}  mx="auto" h="100vh" position="relative" >
+            <Flex
+                className="compass-chat-flex"
+                w="100%"
+                mx="auto"
+                h="100%"
+                position="relative"
+            >
                 <Box display={{ base: "none", lg: "block" }}>
                     <Box w="280px" position={"absolute"} top={0} bottom={0} left={0} style={{ marginLeft: "-20px" }}>
                         <ChatSidebar
