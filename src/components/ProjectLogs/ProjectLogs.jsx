@@ -1274,28 +1274,28 @@ const ProjectLogs = () => {
       />
       {isAssociatedUser === true && (
         <div className="project-logs-wrapper log-table-width">
-          {(!isSpecGptFlagActive(teamId) || activeTab === 'submittal') && (
-            <ProjectLogsHeaderTop
-              // Breadcrumbs removed
-              showBtn={"Upload Documents"}
-              toggleModal={toggleModal}
-              btnSize={"small"}
-              docParsed={documentData?.length || 0}
-              qaDashboard={state?.qaDashboard}
-              navBtn={"logs"}
-              teamId={teamId}
-              isVersioningEnabled={isVersioningFlagActive(teamId)}
-              isVersionComparisonEnabled={isVersionComparisonFlagActive(teamId)}
-              toggleVersionComparisonModal={toggleVersionComparisonModal}
-              onClickVersion={onClickVersion}
-              projectVersionId={projectVersionId}
-              projectVersions={availableVersions}
-              onPressArchive={onPressArchive}
-              setShowVersionModal={setShowVersionModal}
-              setEditingVersionId={setEditingVersionId}
-              setEditingVersionName={setEditingVersionName}
-            />
-          )}
+          <ProjectLogsHeaderTop
+            showBtn={"Upload Documents"}
+            toggleModal={toggleModal}
+            btnSize={"small"}
+            docParsed={documentData?.length || 0}
+            qaDashboard={state?.qaDashboard}
+            navBtn={"logs"}
+            teamId={teamId}
+            isVersioningEnabled={isVersioningFlagActive(teamId)}
+            isVersionComparisonEnabled={isVersionComparisonFlagActive(teamId)}
+            toggleVersionComparisonModal={toggleVersionComparisonModal}
+            onClickVersion={onClickVersion}
+            projectVersionId={projectVersionId}
+            projectVersions={availableVersions}
+            onPressArchive={onPressArchive}
+            setShowVersionModal={setShowVersionModal}
+            setEditingVersionId={setEditingVersionId}
+            setEditingVersionName={setEditingVersionName}
+            isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
           {activeTab === 'submittal' && (
             <ProjectLogsActionPanel
               handleDeleteLogs={handleDeleteLogs}
@@ -1342,47 +1342,7 @@ const ProjectLogs = () => {
               btnSize={"small"}
             />
           )}
-          
-          {isSpecGptFlagActive(teamId) && (
-            <div className="tab-row" style={{ marginBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
-              <div className="tab-container" style={{ display: 'flex', gap: '0' }}>
-                <button
-                  className={`tab-button ${activeTab === 'submittal' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('submittal')}
-                  style={{
-                    padding: '12px 24px',
-                    border: 'none',
-                    backgroundColor: activeTab === 'submittal' ? '#fff' : '#f5f5f5',
-                    borderBottom: activeTab === 'submittal' ? '2px solid #007bff' : '2px solid transparent',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: activeTab === 'submittal' ? '600' : '400',
-                    color: activeTab === 'submittal' ? '#007bff' : '#666',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Submittal Log
-                </button>
-                <button
-                  className={`tab-button ${activeTab === 'specgpt' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('specgpt')}
-                  style={{
-                    padding: '12px 24px',
-                    border: 'none',
-                    backgroundColor: activeTab === 'specgpt' ? '#fff' : '#f5f5f5',
-                    borderBottom: activeTab === 'specgpt' ? '2px solid #007bff' : '2px solid transparent',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: activeTab === 'specgpt' ? '600' : '400',
-                    color: activeTab === 'specgpt' ? '#007bff' : '#666',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Compass
-                </button>
-              </div>
-            </div>
-          )}
+        
           {activeTab == 'submittal' && <div className="project-logs-content">
             <ProcessingIndicator
               documentIsProcessing={documentIsProcessing}

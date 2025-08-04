@@ -16,14 +16,46 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
   console.log("props.projectVersions", props.projectVersions)
   return (
     <div className="header-wrapper-swap row mx-0 my-3">
-      <div className="col-4 px-0">
-        <div className="header-swap">
-          <div className="main-wrapper">
-            {/* Breadcrumbs removed */}
+      <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+        {props.isSpecGptFlagActive && (
+          <div className="tab-container" style={{ display: 'flex', gap: '0' }}>
+            <button
+              className={`tab-button ${props.activeTab === 'submittal' ? 'active' : ''}`}
+              onClick={() => props.setActiveTab('submittal')}
+              style={{
+                padding: '12px 24px',
+                border: 'none',
+                backgroundColor: props.activeTab === 'submittal' ? '#fff' : '#f5f5f5',
+                borderBottom: props.activeTab === 'submittal' ? '2px solid #007bff' : '2px solid transparent',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: props.activeTab === 'submittal' ? '600' : '400',
+                color: props.activeTab === 'submittal' ? '#007bff' : '#666',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              Submittal Log
+            </button>
+            <button
+              className={`tab-button ${props.activeTab === 'specgpt' ? 'active' : ''}`}
+              onClick={() => props.setActiveTab('specgpt')}
+              style={{
+                padding: '12px 24px',
+                border: 'none',
+                backgroundColor: props.activeTab === 'specgpt' ? '#fff' : '#f5f5f5',
+                borderBottom: props.activeTab === 'specgpt' ? '2px solid #007bff' : '2px solid transparent',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: props.activeTab === 'specgpt' ? '600' : '400',
+                color: props.activeTab === 'specgpt' ? '#007bff' : '#666',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              Compass
+            </button>
           </div>
-        </div>
+        )}
       </div>
-      <div className="col-4"></div>
       <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '0px' }}>
         {props.isVersioningEnabled && (
           <>
