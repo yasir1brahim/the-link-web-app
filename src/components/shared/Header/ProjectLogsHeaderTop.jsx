@@ -15,7 +15,7 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
   console.log("props.projectVersionId", props.projectVersionId)
   console.log("props.projectVersions", props.projectVersions)
   return (
-    <div className="header-wrapper-swap row mx-0 my-3">
+    <div className="header-wrapper-swap row mx-0 my-2" style={{ borderBottom: '1px solid #e0e0e0' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
         {props.isSpecGptFlagActive && (
           <div className="tab-container" style={{ display: 'flex', gap: '0' }}>
@@ -57,7 +57,7 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
         )}
       </div>
       <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '0px' }}>
-        {props.isVersioningEnabled && (
+        {props.isVersioningEnabled && props.activeTab === 'submittal' && (
           <>
             {props.isVersionComparisonEnabled && (
               <button
