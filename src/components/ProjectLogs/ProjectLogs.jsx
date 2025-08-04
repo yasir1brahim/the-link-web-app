@@ -1,9 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useCallback, useContext } from "react";
-import Header from "../shared/Header/Header";
 import NavbarTop from "../shared/NavbarTop/NavbarTop";
-
-import { ReactComponent as Trash } from "../../assets/images/trash.svg";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { toast, ToastContainer } from "react-toastify";
@@ -18,7 +15,6 @@ import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
 import { useSearchParams } from "react-router-dom";
 import Procore from "./procore";
 import ManageProcore from "./manageProcore";
-import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
 import { combineRows, getExportJetBuildData, getProjectIdBySubmittalId, getSavedLogs } from "../../api/ProjectLogs/api";
@@ -395,7 +391,7 @@ const ProjectLogs = () => {
       filterValues,
       orderCol,
       order,
-      page || 0,
+      page || 1,
       itemsPerPage,
       listId,
       projectVersionId
@@ -492,7 +488,7 @@ const ProjectLogs = () => {
       console.log("response.data.project_versions", response.data.project_versions);
 
       setAvailableVersions(response.data.project_versions);
-      fetchLogData(0, rowsPerPage, null, null, null, null, null, activeVersion)
+      fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion)
       setLoading(false);
     };
 
@@ -521,7 +517,7 @@ const ProjectLogs = () => {
           if (documentIsProcessing(documentData) && !documentIsProcessing(responseDocumentData)) {
             console.log('previous documentIsProcessing', documentIsProcessing(documentData));
             console.log('new documentIsProcessing', documentIsProcessing(responseDocumentData));
-            fetchLogData(0, rowsPerPage, null, null, null, null, null, projectVersionId);
+            fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
           }
           setDocumentData(responseDocumentData);  
           console.log('documentIsProcessing', documentIsProcessing(responseDocumentData));
@@ -580,7 +576,7 @@ const ProjectLogs = () => {
         }
         setDocumentData(responseDocumentData);
         if (!documentIsProcessing(responseDocumentData)) {
-          fetchLogData(0, rowsPerPage, null, null, null, null, null, projectVersionId);
+          fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
         }
         setUploadLoading(false);
         setAlreadyExistingFiles(response.data.already_exist);
@@ -970,97 +966,71 @@ const ProjectLogs = () => {
   const handleUpDownView = async (direction) => {
     if (!pdfData || loadingView) return;
 
-    const currentIndex = pdfData.index;
-    const currentPage = page;
-    const itemsPerPage = rowsPerPage;
-    const totalItems = totalCount;
-
-    if (direction > 0) {
-      if (currentIndex < filteredLogData.length - 1) {
-        // Stay on the same page, move to the next item
-        const pIndex = currentIndex + 1;
-        const data = filteredLogData[pIndex];
-        setPdfData({
-          ...pdfData,
-          url: data.doc_link,
-          textLoc: data.text_loc,
-          index: pIndex,
-          docId: data.doc_id,
-          submittalId: data.id,
-          additionalTextLocations: data.additional_text_locations,
-        });
-        setSubmittalIdParam(data.id);
-      } else if (currentPage * itemsPerPage < totalItems) {
-        // Move to the next page
-        const nextPage = currentPage + 1;
-        setPage(nextPage);
-        await fetchLogData(
-          nextPage - 1, // API page is 0-based
-          itemsPerPage,
-          searchValue,
-          listId,
-          appliedFilters,
-          null,
-          null,
-          projectVersionId
-        );
-        // After fetching, set to the first item of the new page
-        if (filteredLogData.length > 0) {
-          const data = filteredLogData[0];
-          setPdfData({
-            ...pdfData,
-            url: data.doc_link,
-            textLoc: data.text_loc,
-            index: 0,
-            docId: data.doc_id,
-            submittalId: data.id,
-            additionalTextLocations: data.additional_text_locations,
-          });
-          setSubmittalIdParam(data.id);
+    // Check if we can navigate within the current page
+    if (
+      (direction > 0 && pdfData.index < filteredLogData.length - 1) ||
+      (direction < 0 && pdfData.index > 0)
+    ) {
+      const pIndex = pdfData.index + direction;
+      const data = filteredLogData[pIndex];
+      
+      setPdfData({
+        ...pdfData,
+        url: data.doc_link,
+        textLoc: data.text_loc,
+        index: pIndex,
+        docId: data.doc_id,
+        submittalId: data.id,
+        additionalTextLocations: data.additional_text_locations,
+      });
+      setSubmittalIdParam(data.id);
+    } else {
+      if (direction > 0 && pdfData.index === filteredLogData.length - 1) {
+        const nextPage = page + 1;
+        const totalPages = Math.ceil(totalCount / rowsPerPage);
+        
+        if (nextPage <= totalPages) {
+          await fetchLogData(nextPage, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
+          setPage(nextPage);
+          
+          setTimeout(() => {
+            if (filteredLogData.length > 0) {
+              const firstData = filteredLogData[0];
+              setPdfData({
+                ...pdfData,
+                url: firstData.doc_link,
+                textLoc: firstData.text_loc,
+                index: 0,
+                docId: firstData.doc_id,
+                submittalId: firstData.id,
+                additionalTextLocations: firstData.additional_text_locations,
+              });
+              setSubmittalIdParam(firstData.id);
+            }
+          }, 100);
         }
-      }
-    } else if (direction < 0) {
-      if (currentIndex > 0) {
-        // Stay on the same page, move to the previous item
-        const pIndex = currentIndex - 1;
-        const data = filteredLogData[pIndex];
-        setPdfData({
-          ...pdfData,
-          url: data.doc_link,
-          textLoc: data.text_loc,
-          index: pIndex,
-          docId: data.doc_id,
-          submittalId: data.id,
-          additionalTextLocations: data.additional_text_locations,
-        });
-        setSubmittalIdParam(data.id);
-      } else if (currentPage > 1) {
-        const prevPage = currentPage - 1;
-        setPage(prevPage);
-        await fetchLogData(
-          prevPage - 1, 
-          itemsPerPage,
-          searchValue,
-          listId,
-          appliedFilters,
-          null,
-          null,
-          projectVersionId
-        );
-        // After fetching, set to the last item of the previous page
-        if (filteredLogData.length > 0) {
-          const lastIndex = filteredLogData.length - 1;
-          const data = filteredLogData[lastIndex];
-          setPdfData({
-            ...pdfData,
-            url: data.doc_link,
-            textLoc: data.text_loc,
-            index: lastIndex,
-            docId: data.doc_id,
-            submittalId: data.id,
-            additionalTextLocations: data.additional_text_locations,
-          });
-          setSubmittalIdParam(data.id);
+      } else if (direction < 0 && pdfData.index === 0) {
+        const prevPage = page - 1;
+        
+        if (prevPage >= 1) {
+          await fetchLogData(prevPage, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
+          setPage(prevPage);
+          
+          setTimeout(() => {
+            if (filteredLogData.length > 0) {
+              const lastData = filteredLogData[filteredLogData.length - 1];
+              setPdfData({
+                ...pdfData,
+                url: lastData.doc_link,
+                textLoc: lastData.text_loc,
+                index: filteredLogData.length - 1,
+                docId: lastData.doc_id,
+                submittalId: lastData.id,
+                additionalTextLocations: lastData.additional_text_locations,
+              });
+              setSubmittalIdParam(lastData.id);
+            }
+          }, 100);
         }
       }
     }
@@ -1108,14 +1078,13 @@ const ProjectLogs = () => {
 
   const handleSearchClick = () => {
     setShowSearch(true);
-    fetchLogData(0, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
+    fetchLogData(1, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
   };
 
   const handleOpenSaveList = async (listId) => {
-    // const savedLogs = await getSavedLogs(listId);
     setFilterValues(initFilter);
 
-    await fetchLogData(0, rowsPerPage, "", listId, {}, null, null, projectVersionId);
+    await fetchLogData(1, rowsPerPage, "", listId, {}, null, null, projectVersionId);
 
     setListId(listId);
     setSearchValue("");
@@ -1132,11 +1101,11 @@ const ProjectLogs = () => {
   const handleClearSearch = () => {
     setSearchValue("");
     setShowSearch(false);
-    fetchLogData(0, rowsPerPage, "", listId, null, null, null, projectVersionId);
+    fetchLogData(1, rowsPerPage, "", listId, null, null, null, projectVersionId);
   };
 
   const handleClearSelection = async () => {
-    await fetchLogData(0, rowsPerPage, searchValue, null, null, null, null, projectVersionId);
+    await fetchLogData(1, rowsPerPage, searchValue, null, null, null, null, projectVersionId);
     setListId(null);
     setSelected([]);
   };
@@ -1238,7 +1207,7 @@ const ProjectLogs = () => {
     );
     setShowClearFilters(hasActiveFilters);
 
-    fetchLogData(0, rowsPerPage, "", listId, appliedFilters, null, null, projectVersionId);
+    fetchLogData(1, rowsPerPage, "", listId, appliedFilters, null, null, projectVersionId);
   }, [appliedFilters]);
 
   const clearFilters = () => {
@@ -1529,7 +1498,12 @@ const ProjectLogs = () => {
                       }}
                     >
                       <button
-                        disabled={pdfData && (pdfData.index > 0 || page > 1) ? false : true}
+                        disabled={
+                          pdfData && 
+                          (pdfData.index > 0 || page > 1) 
+                            ? false 
+                            : true
+                        }
                         onClick={() => {
                           handleUpDownView(-1);
                         }}
@@ -1543,7 +1517,7 @@ const ProjectLogs = () => {
                       <button
                         disabled={
                           pdfData &&
-                          (pdfData.index < filteredLogData.length - 1 || page * rowsPerPage < totalCount)
+                          (pdfData.index < filteredLogData.length - 1 || page < Math.ceil(totalCount / rowsPerPage))
                             ? false
                             : true
                         }
