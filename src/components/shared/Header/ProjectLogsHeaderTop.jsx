@@ -1,66 +1,65 @@
-  /* eslint-disable react-hooks/exhaustive-deps */
-  import React, { useContext, useState } from 'react';
-  import { useNavigate } from 'react-router-dom';
-  import {AuthContext} from '../../../auth/authcontext'
-  import { getUserTeams } from '../../../api/Authentication/api';
-  import { getHomeUrl } from '../../../utils/navigation';
-  import { Button } from 'reactstrap';
-  import VersionDropdown from '../../ProjectLogs/versionDropdown';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {AuthContext} from '../../../auth/authcontext'
+import { getUserTeams } from '../../../api/Authentication/api';
+import { getHomeUrl } from '../../../utils/navigation';
+import { Button } from 'reactstrap';
+import VersionDropdown from '../../ProjectLogs/versionDropdown';
 
-  // @ts-ignore
-  const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
-    const navigate = useNavigate();
-    const { user, isAuthenticated } = useContext(AuthContext);
+// @ts-ignore
+const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useContext(AuthContext);
 
-    console.log("props.projectVersionId", props.projectVersionId)
-    console.log("props.projectVersions", props.projectVersions)
-    return (
-      <div className="header-wrapper-swap row mx-0 my-3">
-        <div className="col-4 px-0">
-          <div className="header-swap">
-            <div className="main-wrapper">
-              {/* Breadcrumbs removed */}
-            </div>
+  console.log("props.projectVersionId", props.projectVersionId)
+  console.log("props.projectVersions", props.projectVersions)
+  return (
+    <div className="header-wrapper-swap row mx-0 my-3">
+      <div className="col-4 px-0">
+        <div className="header-swap">
+          <div className="main-wrapper">
           </div>
         </div>
-        <div className="col-4"></div>
-        <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '0px' }}>
-          {props.isVersioningEnabled && (
-            <>
-              {props.isVersionComparisonEnabled && (
-                <button
-                  type="button"
-                  className="table-top-btn btn-disabled selection-btn mr-2 mb-1"
-                  onClick={props.toggleVersionComparisonModal}
-                >
-                  <span>Compare Versions</span>
-                </button>
-              )}
-              <VersionDropdown
-                availableVersions={props.projectVersions}
-                currentVersionId={props.projectVersionId}
-                currentVersionName={props.projectVersions.find(version => parseInt(version.id) === parseInt(props.projectVersionId))?.version_name || ''}
-                onSelectVersion={props.onClickVersion}
-                onPressEdit={
-                  (versionId) => {
-                    props.setEditingVersionId(versionId);
-                    props.setEditingVersionName(props.projectVersions.find(version => version.id === versionId).version_name);
-                    props.setShowVersionModal(true);
-                  }
-                }
-                onPressArchive={
-                  (versionId) => {
-                    props.onPressArchive(versionId);
-                  }
-                }
-                onPressAddNewVersion={() => props.setShowVersionModal(true)}
-                handleViewArchivedVersions={props.onViewArchivedVersions}
-              />
-            </>
-          )}
-        </div>
       </div>
-    );
-  };
+      <div className="col-4"></div>
+      <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '0px' }}>
+        {props.isVersioningEnabled && (
+          <>
+            {props.isVersionComparisonEnabled && (
+              <button
+                type="button"
+                className="table-top-btn btn-disabled selection-btn mr-2 mb-1"
+                onClick={props.toggleVersionComparisonModal}
+              >
+                <span>Compare Versions</span>
+              </button>
+            )}
+            <VersionDropdown
+              availableVersions={props.projectVersions}
+              currentVersionId={props.projectVersionId}
+              currentVersionName={props.projectVersions.find(version => parseInt(version.id) === parseInt(props.projectVersionId))?.version_name || ''}
+              onSelectVersion={props.onClickVersion}
+              onPressEdit={
+                (versionId) => {
+                  props.setEditingVersionId(versionId);
+                  props.setEditingVersionName(props.projectVersions.find(version => version.id === versionId).version_name);
+                  props.setShowVersionModal(true);
+                }
+              }
+              onPressArchive={
+                (versionId) => {
+                  props.onPressArchive(versionId);
+                }
+              }
+              onPressAddNewVersion={() => props.setShowVersionModal(true)}
+              handleViewArchivedVersions={props.onViewArchivedVersions}
+            />
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
 
-  export default ProjectLogsHeaderTop;
+export default ProjectLogsHeaderTop;
