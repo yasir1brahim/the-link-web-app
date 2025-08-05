@@ -42,6 +42,7 @@ import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
 import useCompanyDetails from "../../hooks/useCompanyDetails";
 import DocumentListModal from "./DocumentListModal";
+import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
 
 
 const ProjectLogs = () => {
@@ -54,6 +55,8 @@ const ProjectLogs = () => {
   } = useFeatureFlags();
 
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
+  const [showDuplicateFilesModal, setShowDuplicateFilesModal] = useState(false);
+  const [duplicateFiles, setDuplicateFiles] = useState([]);
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -551,6 +554,21 @@ const ProjectLogs = () => {
     setListName({ value: '', errors: '' });
   };
 
+  const handleDuplicateFilesSkipAll = () => {
+    // Show success modal with information about skipped files
+    setAlreadyExistingFiles(duplicateFiles.map(f => f.filename));
+    setDuplicateFiles([]);
+    setShowDuplicateFilesModal(false);
+    toggleSuccessModal(true);
+  };
+
+  const handleDuplicateFilesConfirmAll = () => {
+    // This is handled by the modal itself
+    setDuplicateFiles([]);
+    setShowDuplicateFilesModal(false);
+    toggleSuccessModal(true);
+  };
+
   const handleSubmit = async () => {
     // console.log(pdfFile);
     try {
@@ -584,8 +602,23 @@ const ProjectLogs = () => {
         }
         setUploadLoading(false);
         setAlreadyExistingFiles(response.data.already_exist);
-        setModal(false);
-        toggleSuccessModal(true);
+        
+        // Handle duplicate files for confirmation
+        if (response.data.duplicate_files_for_confirmation && response.data.duplicate_files_for_confirmation.length > 0) {
+          setDuplicateFiles(response.data.duplicate_files_for_confirmation);
+          setModal(false);
+          setShowDuplicateFilesModal(true);
+          
+          // If there were also successful uploads, show them in the success message later
+          if (response.data.async_processing && response.data.async_processing.length > 0) {
+            // Show success toast for uploaded files while showing confirmation modal for duplicates
+            toast.success(`${response.data.async_processing.length} files uploaded successfully. Please confirm action for duplicate files.`);
+          }
+        } else {
+          setModal(false);
+          toggleSuccessModal(true);
+        }
+        
         setPageRefresh(!pageRefresh);
       }
     } catch (error) {
@@ -1895,6 +1928,19 @@ const ProjectLogs = () => {
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
       <Loader showComponentLoader={isLoading || headerLoading} />
+      <DocumentListModal
+        isOpen={showDocumentListModal}
+        toggle={() => setShowDocumentListModal(false)}
+        documents={documentData}
+      />
+      
+      <DuplicateFileConfirmationModal
+        isOpen={showDuplicateFilesModal}
+        toggle={() => setShowDuplicateFilesModal(false)}
+        duplicateFiles={duplicateFiles}
+        onConfirmAll={handleDuplicateFilesConfirmAll}
+        onSkipAll={handleDuplicateFilesSkipAll}
+      />
     </div>
   );
 };
