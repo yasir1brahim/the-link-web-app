@@ -21,13 +21,13 @@ import ManageProcore from "./manageProcore";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
-import { combineRows, getExportJetBuildData, getProjectIdBySubmittalId, getSavedLogs } from "../../api/ProjectLogs/api";
+import { combineRows, getExportJetBuildData, getProjectIdBySubmittalId, getSavedLogs} from "../../api/ProjectLogs/api";
 import DocumentStatus from "./documentStatus";
 import ProjectLogsHeaderTop from "../shared/Header/ProjectLogsHeaderTop";
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
-import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion } from "../../api/Projects/api";
+import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion , getArchivedVersions} from "../../api/Projects/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
@@ -40,6 +40,7 @@ import Chat from "../SpecGpt/components/Chat";
 import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
+import ArchivedVersionsModal from "./archivedVersionModal";
 import useCompanyDetails from "../../hooks/useCompanyDetails";
 import DocumentListModal from "./DocumentListModal";
 
@@ -243,6 +244,10 @@ const ProjectLogs = () => {
 
   const { user, isAuthenticated } = useContext(AuthContext);
   const [currentUser, setCurrentUser] = useState(user);
+  const [showArchivedVersionsModal, setShowArchivedVersionsModal] = useState(false);
+  const [archivedVersions, setArchivedVersions] = useState([]);
+  const [loadingUnarchiveId, setLoadingUnarchiveId] = useState(null);
+
 
   const getProcoreAccessTokenData = async () => {
     try {
@@ -1243,7 +1248,7 @@ const ProjectLogs = () => {
 
   const onConfirmArchive = async (versionId) => {
     try {
-      await archiveProjectVersion(projectId, versionId);
+      await archiveProjectVersion(projectId, versionId , 'archive');
       if (versionId === projectVersionId) {
         navigate(`/project-logs?projectDetails=${projectId}`);
         window.location.reload();
@@ -1256,7 +1261,68 @@ const ProjectLogs = () => {
     }
   }
 
+  const handleViewArchivedVersions = async () => {
+    try {
+      await fetchArchivedVersions();
+      setShowArchivedVersionsModal(true);
+    } catch (error) {
+        console.error("Failed to fetch archived versions:", error);
+    }
+  };
 
+  const fetchArchivedVersions = async () => {
+    try {
+        const response = await getArchivedVersions(projectId);
+        setArchivedVersions(response.data || []);
+        setShowArchivedVersionsModal(true);
+
+    } catch (error) {
+        handleError(error);
+        setArchivedVersions([]);
+        toast.error("Failed to fetch archived versions.", {
+            position: "bottom-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+        });
+    }
+};  
+
+  const handleUnarchiveVersion = async (versionId) => {
+    setLoadingUnarchiveId(versionId);
+    try {
+      const response = await archiveProjectVersion(projectId, versionId , 'restore');
+      if (response.status === 200) {
+        toast.success("Version unarchived successfully!", {
+          position: "bottom-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        // Refresh archived versions
+        await fetchArchivedVersions();
+        // Update available versions
+        const projectResponse = await getProjectDetails(projectId);
+        setAvailableVersions(projectResponse.data.project_versions);
+      }
+    } catch (error) {
+      handleError(error);
+      toast.error("Failed to unarchive version.", {
+        position: "bottom-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } finally {
+      setLoadingUnarchiveId(null);
+    }
+  };
 
   return (
     <div className="page-wrap">
@@ -1276,7 +1342,6 @@ const ProjectLogs = () => {
         <div className="project-logs-wrapper log-table-width">
           {(!isSpecGptFlagActive(teamId) || activeTab === 'submittal') && (
             <ProjectLogsHeaderTop
-              // Breadcrumbs removed
               showBtn={"Upload Documents"}
               toggleModal={toggleModal}
               btnSize={"small"}
@@ -1294,6 +1359,7 @@ const ProjectLogs = () => {
               setShowVersionModal={setShowVersionModal}
               setEditingVersionId={setEditingVersionId}
               setEditingVersionName={setEditingVersionName}
+              onViewArchivedVersions={handleViewArchivedVersions}
             />
           )}
           {activeTab === 'submittal' && (
@@ -1616,6 +1682,13 @@ const ProjectLogs = () => {
         setProcoreProjectName={setProcoreProjectName}
         setProcoreSubmittalManagerId={setProcoreSubmittalManagerId}
         setProcoreSubmittalManagerName={setProcoreSubmittalManagerName}
+      />
+      <ArchivedVersionsModal
+        isOpen={showArchivedVersionsModal}
+        toggle={() => setShowArchivedVersionsModal(false)}
+        archivedVersions={archivedVersions}
+        onUnarchive={handleUnarchiveVersion}
+        loadingUnarchiveId={loadingUnarchiveId}
       />
       <Modal
         isOpen={saveListName}
