@@ -1859,6 +1859,11 @@ const ProjectLogs = () => {
           </form>
         </ModalBody>
       </Modal>
+      <DocumentListModal
+        isOpen={showDocumentListModal}
+        toggle={() => setShowDocumentListModal(false)}
+        documents={documentData}
+      />
 
       {showVersionModal && <ManageVersionModal
         showVersionModal={showVersionModal}
@@ -1890,11 +1895,6 @@ const ProjectLogs = () => {
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
       <Loader showComponentLoader={isLoading || headerLoading} />
-      <DocumentListModal
-        isOpen={showDocumentListModal}
-        toggle={() => setShowDocumentListModal(false)}
-        documents={documentData}
-      />
     </div>
   );
 };
