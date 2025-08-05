@@ -55,7 +55,7 @@ const DocumentListModal = ({ isOpen, toggle, documents }) => {
                           onClick={() => handleReprocess(doc.document_id, doc.document_name)}
                           disabled={isReprocessing}
                         >
-                          {isReprocessing ? 'Processing...' : 'Reprocess'}
+                          Reprocess
                         </Button>
                       </td>
                     </tr>
