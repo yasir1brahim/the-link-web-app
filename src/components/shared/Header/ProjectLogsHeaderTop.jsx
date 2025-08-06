@@ -37,17 +37,17 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
               Submittal Log
             </button>
             <button
-              className={`tab-button ${props.activeTab === 'specgpt' ? 'active' : ''}`}
-              onClick={() => props.setActiveTab('specgpt')}
+              className={`tab-button ${props.activeTab === 'compass' ? 'active' : ''}`}
+              onClick={() => props.setActiveTab('compass')}
               style={{
                 padding: '12px 24px',
                 border: 'none',
-                backgroundColor: props.activeTab === 'specgpt' ? '#fff' : '#f5f5f5',
-                borderBottom: props.activeTab === 'specgpt' ? '2px solid #007bff' : '2px solid transparent',
+                backgroundColor: props.activeTab === 'compass' ? '#fff' : '#f5f5f5',
+                borderBottom: props.activeTab === 'compass' ? '2px solid #007bff' : '2px solid transparent',
                 cursor: 'pointer',
                 fontSize: '14px',
-                fontWeight: props.activeTab === 'specgpt' ? '600' : '400',
-                color: props.activeTab === 'specgpt' ? '#007bff' : '#666',
+                fontWeight: props.activeTab === 'compass' ? '600' : '400',
+                color: props.activeTab === 'compass' ? '#007bff' : '#666',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -57,9 +57,9 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
         )}
       </div>
       <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '0px' }}>
-        {props.isVersioningEnabled && props.activeTab === 'submittal' && (
+        {props.isVersioningEnabled && (props.activeTab === 'submittal' || props.activeTab === 'compass') && (
           <>
-            {props.isVersionComparisonEnabled && (
+            {props.isVersionComparisonEnabled && props.activeTab === 'submittal' && (
               <button
                 type="button"
                 className="table-top-btn btn-disabled selection-btn mr-2 mb-1"

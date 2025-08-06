@@ -223,7 +223,7 @@ const ProjectLogs = () => {
   const [specGptUserInput, setSpecGptUserInput] = useState('');
   const [isSpecGptGeneratingLog, setIsSpecGptGeneratingLog] = useState(false);
   const [isSpecGptChatEnabled, setIsSpecGptChatEnabled] = useState(true);
-  const [activeTab, setActiveTab] = useState('submittal');
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || 'submittal');
 
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
@@ -508,6 +508,26 @@ const ProjectLogs = () => {
       });
     }
   }, [projectId, projectVersionId]);
+
+  // Handle activeTab changes from URL parameters
+  useEffect(() => {
+    const tabFromUrl = searchParams.get("tab");
+    if (tabFromUrl && (tabFromUrl === 'submittal' || tabFromUrl === 'compass')) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
+
+  // Update URL when activeTab changes manually
+  useEffect(() => {
+    if (projectId && projectVersionId) {
+      const currentTab = searchParams.get("tab");
+      if (currentTab !== activeTab) {
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set("tab", activeTab);
+        navigate(`/project-logs?${newSearchParams.toString()}`, { replace: true });
+      }
+    }
+  }, [activeTab, projectId, projectVersionId]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -887,7 +907,7 @@ const ProjectLogs = () => {
 
   const onClickVersion = (versionId) => {
     setProjectVersionId(versionId);
-    navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}`);
+    navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}&tab=${activeTab}`);
     window.location.reload();
   }
 
@@ -1403,6 +1423,7 @@ const ProjectLogs = () => {
             setShowVersionModal={setShowVersionModal}
             setEditingVersionId={setEditingVersionId}
             setEditingVersionName={setEditingVersionName}
+            onViewArchivedVersions={handleViewArchivedVersions}
             isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
@@ -1602,7 +1623,7 @@ const ProjectLogs = () => {
               </div>
             </div>
           </div>}
-          {activeTab == 'specgpt' && 
+          {activeTab == 'compass' && 
             <>
             <div className="compass-chat-viewport">
               <ProcessingIndicator
