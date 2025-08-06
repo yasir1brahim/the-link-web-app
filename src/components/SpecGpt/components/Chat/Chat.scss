@@ -1,0 +1,73 @@
+.compass-chat-viewport {
+  height: calc(100vh - 60px - 20px - 40px); 
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin: -8px -20px 0 -20px;
+}
+
+.compass-chat-flex {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.compass-chat-sidebar {
+  height: 100vh;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.compass-chat-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-main-outer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.chat-messages-area {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  max-height: 75%;
+  
+  -ms-overflow-style: none;  
+  scrollbar-width: none; 
+}
+
+.chat-messages-area::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-input-area {
+  flex-shrink: 0;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+}   
+
+.sidebar-scroller {
+  margin-bottom: 20px ;
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #ffffff33;
+        border-radius: 3px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background: #ffffff55;
+    }
+}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
+import { ReactComponent as ReactLogo } from '../../assets/images/the-link-ai-header-logo-new.svg';
 import { getMicrosoftLoginUrl } from '../../api/Authentication/api';
 import Loader from '../shared/Loader/Loader';
 

@@ -4,7 +4,7 @@ import { microsoftLogin, getUserTeams } from '../../api/Authentication/api';
 import { AuthContext } from '../../auth/authcontext';
 import { getHomeUrl } from '../../utils/navigation';
 import { ToastContainer } from 'react-toastify';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo-dark-v7.svg';
+import { ReactComponent as ReactLogo } from '../../assets/images/the-link-ai-header-logo-new.svg';
 import Loader from '../shared/Loader/Loader';
 
 const TheLinkMicrosoftLoginCallback = () => {
