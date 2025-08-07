@@ -1402,6 +1402,10 @@ const ProjectLogs = () => {
     }
   };
 
+  const handleFileReprocessed = (fileId) => {
+    setDuplicateFiles(prev => prev.filter(file => file.existing_file_id !== fileId));
+  };
+
   return (
     <div className="page-wrap">
       <NavbarTop
@@ -2063,6 +2067,7 @@ const ProjectLogs = () => {
         duplicateFiles={duplicateFiles}
         onConfirmAll={handleDuplicateFilesConfirmAll}
         onSkipAll={handleDuplicateFilesSkipAll}
+        onFileReprocessed={handleFileReprocessed} 
       />
     </div>
   );

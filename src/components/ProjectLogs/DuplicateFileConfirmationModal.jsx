@@ -9,7 +9,8 @@ const DuplicateFileConfirmationModal = ({
   toggle, 
   duplicateFiles, 
   onConfirmAll, 
-  onSkipAll 
+  onSkipAll,
+  onFileReprocessed 
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingFiles, setProcessingFiles] = useState(new Set());
@@ -22,9 +23,13 @@ const DuplicateFileConfirmationModal = ({
       await reprocessDocument(fileId);
       toast.success(`Successfully started reprocessing "${fileInfo.filename}"`);
       
-      // Remove from duplicate list after successful reprocess
-      const updatedFiles = duplicateFiles.filter(f => f.existing_file_id !== fileId);
-      if (updatedFiles.length === 0) {
+      if (onFileReprocessed) {
+        onFileReprocessed(fileId);
+      }
+      
+      // Check if this was the last file and close modal if needed
+      const remainingFiles = duplicateFiles.filter(f => f.existing_file_id !== fileId);
+      if (remainingFiles.length === 0) {
         toggle(); // Close modal if no more files
       }
     } catch (error) {
@@ -50,6 +55,13 @@ const DuplicateFileConfirmationModal = ({
       
       await Promise.all(promises);
       toast.success(`Successfully started reprocessing ${duplicateFiles.length} files`);
+      
+      if (onFileReprocessed) {
+        duplicateFiles.forEach(fileInfo => {
+          onFileReprocessed(fileInfo.existing_file_id);
+        });
+      }
+      
       toggle();
     } catch (error) {
       console.error('Error reprocessing files:', error);
