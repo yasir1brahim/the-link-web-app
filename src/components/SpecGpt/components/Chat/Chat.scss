@@ -39,7 +39,7 @@
 .chat-messages-area {
   flex: 1 1 auto;
   overflow-y: auto;
-  max-height: 75%;
+  padding-bottom: 20px;
   
   -ms-overflow-style: none;  
   scrollbar-width: none; 
@@ -56,7 +56,7 @@
 }   
 
 .sidebar-scroller {
-  margin-bottom: 20px ;
+  margin-bottom: -4px ;
     &::-webkit-scrollbar {
         width: 6px;
     }
