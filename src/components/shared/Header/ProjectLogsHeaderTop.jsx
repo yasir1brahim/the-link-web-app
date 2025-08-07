@@ -19,7 +19,6 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
       <div className="col-4 px-0">
         <div className="header-swap">
           <div className="main-wrapper">
-            {/* Breadcrumbs removed */}
           </div>
         </div>
       </div>
@@ -54,6 +53,7 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
                 }
               }
               onPressAddNewVersion={() => props.setShowVersionModal(true)}
+              handleViewArchivedVersions={props.onViewArchivedVersions}
             />
           </>
         )}

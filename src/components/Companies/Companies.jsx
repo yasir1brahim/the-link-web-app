@@ -100,7 +100,7 @@ const Companies = () => {
                                 </a>
                               )}
                             </td>
-                            <td>{company.project_count}</td>
+                            <td>{company.active_count}</td>
                             <td>{company.members.length}</td>
                             <td>
                               <div className="action-wrapper">

@@ -140,17 +140,35 @@ const updateProjectVersion = async (projectId, versionId, versionName) => {
     });
 }
 
-const archiveProjectVersion = async (projectId, versionId) => {
+const getArchivedVersions = async (projectId) => {
     try {
+        const response = await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/${projectId}/project-versions/archived/`,
+        });
+        return response;
+    } catch (error) {
+        console.error('Error details:', error.response?.status, error.response?.data);
+        handleError(error);
+    }
+};
+
+const archiveProjectVersion = async (projectId, versionId, action) => {
+    try {
+        if (!['archive', 'restore'].includes(action)) {
+            throw new Error(`Invalid action: ${action}. Allowed values are 'archive' or 'restore'.`);
+        }
+
         return await axiosInstance({
             method: 'post',
             url: `/api/deliverables/${projectId}/project-versions/${versionId}/archive/`,
-            data: { action: 'archive' }
+            data: { action }
         });
     } catch (error) {
         handleError(error);
     }
-}
+};
+
 
 const restoreProjectVersion = async (projectId, versionId) => {
     try {
@@ -204,5 +222,6 @@ export {
     createProjectVersion,
     updateProjectVersion,
     archiveProjectVersion,
-    restoreProjectVersion
+    restoreProjectVersion,
+    getArchivedVersions
 }

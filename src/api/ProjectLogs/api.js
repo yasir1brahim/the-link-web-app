@@ -365,6 +365,7 @@ const getSemanticallyProcessedSpecItems = async (projectId, search, page_number,
     }
 }
 
+
 export {
     getSavedLogs,
     getSubmittalItemById,
