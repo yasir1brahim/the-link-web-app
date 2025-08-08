@@ -76,12 +76,24 @@ const NavbarTop = ({...props}) => {
       >
         <div className='row w-100 m-0'>
           <div className='col-4 d-flex'>
-            <a href="#" onClick={(e) => {
+            <a href="#" onClick={async (e) => {
               e.preventDefault();
-              if (props.teamId) {
-                navigate(`/project-list/${props.teamId}`);
-              } else {
-                getHomeUrl(e, isAuthenticated, user, getUserTeams, navigate);
+              try {
+                const currentPath = window.location.pathname;
+                if (currentPath.includes('project-logs')) {
+                  if (props.teamId) {
+                    navigate(`/project-list/${props.teamId}`);
+                  }
+                }
+                else if (currentPath.includes('company-profile') || currentPath.includes('project-list')) {
+                  navigate('/companies');
+                }
+                else {
+                  await getHomeUrl(e, isAuthenticated, user, getUserTeams, navigate);
+                }
+              } catch (error) {
+                console.error('Navigation error:', error);
+                navigate('/companies');
               }
             }} className="navbar-brand">
               <Logo />
