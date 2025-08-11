@@ -326,6 +326,10 @@
       padding: 24px;
       box-shadow: 0px 10px 10px -5px rgba(0, 0, 0, 0.04);
       box-shadow: 0px 20px 25px -5px rgba(0, 0, 0, 0.1);
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
 
     }
 
@@ -354,9 +358,10 @@
     }
 
     .lproject-body {
-      // padding: 16px 16px 0;
-      // overflow: auto;
-      // max-height: 500px;
+      overflow-y: auto;
+      max-height: calc(90vh - 100px); 
+      padding-right: 8px;
+      flex-grow: 1;
 
       .create-project-form {
         .customer-dp-container {

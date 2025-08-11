@@ -1,9 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useCallback, useContext } from "react";
-import Header from "../shared/Header/Header";
 import NavbarTop from "../shared/NavbarTop/NavbarTop";
-
-import { ReactComponent as Trash } from "../../assets/images/trash.svg";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { toast, ToastContainer } from "react-toastify";
@@ -18,7 +15,6 @@ import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
 import { useSearchParams } from "react-router-dom";
 import Procore from "./procore";
 import ManageProcore from "./manageProcore";
-import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
 import Pagination from "../shared/Pagination/LogsPagination";
 import { combineRows, getExportJetBuildData, getProjectIdBySubmittalId, getSavedLogs} from "../../api/ProjectLogs/api";
@@ -227,7 +223,7 @@ const ProjectLogs = () => {
   const [specGptUserInput, setSpecGptUserInput] = useState('');
   const [isSpecGptGeneratingLog, setIsSpecGptGeneratingLog] = useState(false);
   const [isSpecGptChatEnabled, setIsSpecGptChatEnabled] = useState(true);
-  const [activeTab, setActiveTab] = useState('submittal');
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || 'submittal');
 
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
@@ -400,7 +396,7 @@ const ProjectLogs = () => {
       filterValues,
       orderCol,
       order,
-      page || 0,
+      page || 1,
       itemsPerPage,
       listId,
       projectVersionId
@@ -497,7 +493,7 @@ const ProjectLogs = () => {
       console.log("response.data.project_versions", response.data.project_versions);
 
       setAvailableVersions(response.data.project_versions);
-      fetchLogData(0, rowsPerPage, null, null, null, null, null, activeVersion)
+      fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion)
       setLoading(false);
     };
 
@@ -513,6 +509,26 @@ const ProjectLogs = () => {
     }
   }, [projectId, projectVersionId]);
 
+  // Handle activeTab changes from URL parameters
+  useEffect(() => {
+    const tabFromUrl = searchParams.get("tab");
+    if (tabFromUrl && (tabFromUrl === 'submittal' || tabFromUrl === 'compass')) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
+
+  // Update URL when activeTab changes manually
+  useEffect(() => {
+    if (projectId && projectVersionId) {
+      const currentTab = searchParams.get("tab");
+      if (currentTab !== activeTab) {
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set("tab", activeTab);
+        navigate(`/project-logs?${newSearchParams.toString()}`, { replace: true });
+      }
+    }
+  }, [activeTab, projectId, projectVersionId]);
+
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (documentIsProcessing(documentData) || documentIsBeingEmbedded(documentData)) {
@@ -526,7 +542,7 @@ const ProjectLogs = () => {
           if (documentIsProcessing(documentData) && !documentIsProcessing(responseDocumentData)) {
             console.log('previous documentIsProcessing', documentIsProcessing(documentData));
             console.log('new documentIsProcessing', documentIsProcessing(responseDocumentData));
-            fetchLogData(0, rowsPerPage, null, null, null, null, null, projectVersionId);
+            fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
           }
           setDocumentData(responseDocumentData);  
           console.log('documentIsProcessing', documentIsProcessing(responseDocumentData));
@@ -585,7 +601,7 @@ const ProjectLogs = () => {
         }
         setDocumentData(responseDocumentData);
         if (!documentIsProcessing(responseDocumentData)) {
-          fetchLogData(0, rowsPerPage, null, null, null, null, null, projectVersionId);
+          fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
         }
         setUploadLoading(false);
         setAlreadyExistingFiles(response.data.already_exist);
@@ -891,7 +907,7 @@ const ProjectLogs = () => {
 
   const onClickVersion = (versionId) => {
     setProjectVersionId(versionId);
-    navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}`);
+    navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}&tab=${activeTab}`);
     window.location.reload();
   }
 
@@ -972,9 +988,10 @@ const ProjectLogs = () => {
     return error;
   };
 
-  const handleUpDownView = (direction) => {
+  const handleUpDownView = async (direction) => {
     if (!pdfData || loadingView) return;
 
+    // Check if we can navigate within the current page
     if (
       (direction > 0 && pdfData.index < filteredLogData.length - 1) ||
       (direction < 0 && pdfData.index > 0)
@@ -992,6 +1009,55 @@ const ProjectLogs = () => {
         additionalTextLocations: data.additional_text_locations,
       });
       setSubmittalIdParam(data.id);
+    } else {
+      if (direction > 0 && pdfData.index === filteredLogData.length - 1) {
+        const nextPage = page + 1;
+        const totalPages = Math.ceil(totalCount / rowsPerPage);
+        
+        if (nextPage <= totalPages) {
+          await fetchLogData(nextPage, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
+          setPage(nextPage);
+          
+          setTimeout(() => {
+            if (filteredLogData.length > 0) {
+              const firstData = filteredLogData[0];
+              setPdfData({
+                ...pdfData,
+                url: firstData.doc_link,
+                textLoc: firstData.text_loc,
+                index: 0,
+                docId: firstData.doc_id,
+                submittalId: firstData.id,
+                additionalTextLocations: firstData.additional_text_locations,
+              });
+              setSubmittalIdParam(firstData.id);
+            }
+          }, 100);
+        }
+      } else if (direction < 0 && pdfData.index === 0) {
+        const prevPage = page - 1;
+        
+        if (prevPage >= 1) {
+          await fetchLogData(prevPage, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
+          setPage(prevPage);
+          
+          setTimeout(() => {
+            if (filteredLogData.length > 0) {
+              const lastData = filteredLogData[filteredLogData.length - 1];
+              setPdfData({
+                ...pdfData,
+                url: lastData.doc_link,
+                textLoc: lastData.text_loc,
+                index: filteredLogData.length - 1,
+                docId: lastData.doc_id,
+                submittalId: lastData.id,
+                additionalTextLocations: lastData.additional_text_locations,
+              });
+              setSubmittalIdParam(lastData.id);
+            }
+          }, 100);
+        }
+      }
     }
   };
 
@@ -1037,14 +1103,13 @@ const ProjectLogs = () => {
 
   const handleSearchClick = () => {
     setShowSearch(true);
-    fetchLogData(0, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
+    fetchLogData(1, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
   };
 
   const handleOpenSaveList = async (listId) => {
-    // const savedLogs = await getSavedLogs(listId);
     setFilterValues(initFilter);
 
-    await fetchLogData(0, rowsPerPage, "", listId, {}, null, null, projectVersionId);
+    await fetchLogData(1, rowsPerPage, "", listId, {}, null, null, projectVersionId);
 
     setListId(listId);
     setSearchValue("");
@@ -1061,11 +1126,11 @@ const ProjectLogs = () => {
   const handleClearSearch = () => {
     setSearchValue("");
     setShowSearch(false);
-    fetchLogData(0, rowsPerPage, "", listId, null, null, null, projectVersionId);
+    fetchLogData(1, rowsPerPage, "", listId, null, null, null, projectVersionId);
   };
 
   const handleClearSelection = async () => {
-    await fetchLogData(0, rowsPerPage, searchValue, null, null, null, null, projectVersionId);
+    await fetchLogData(1, rowsPerPage, searchValue, null, null, null, null, projectVersionId);
     setListId(null);
     setSelected([]);
   };
@@ -1167,7 +1232,7 @@ const ProjectLogs = () => {
     );
     setShowClearFilters(hasActiveFilters);
 
-    fetchLogData(0, rowsPerPage, "", listId, appliedFilters, null, null, projectVersionId);
+    fetchLogData(1, rowsPerPage, "", listId, appliedFilters, null, null, projectVersionId);
   }, [appliedFilters]);
 
   const clearFilters = () => {
@@ -1248,7 +1313,7 @@ const ProjectLogs = () => {
 
   const onConfirmArchive = async (versionId) => {
     try {
-      await archiveProjectVersion(projectId, versionId);
+      await archiveProjectVersion(projectId, versionId , 'archive');
       if (versionId === projectVersionId) {
         navigate(`/project-logs?projectDetails=${projectId}`);
         window.location.reload();
@@ -1262,8 +1327,12 @@ const ProjectLogs = () => {
   }
 
   const handleViewArchivedVersions = async () => {
-    await fetchArchivedVersions();
-    setShowArchivedVersionsModal(true);
+    try {
+      await fetchArchivedVersions();
+      setShowArchivedVersionsModal(true);
+    } catch (error) {
+        console.error("Failed to fetch archived versions:", error);
+    }
   };
 
   const fetchArchivedVersions = async () => {
@@ -1271,6 +1340,7 @@ const ProjectLogs = () => {
         const response = await getArchivedVersions(projectId);
         setArchivedVersions(response.data || []);
         setShowArchivedVersionsModal(true);
+
     } catch (error) {
         handleError(error);
         setArchivedVersions([]);
@@ -1288,11 +1358,7 @@ const ProjectLogs = () => {
   const handleUnarchiveVersion = async (versionId) => {
     setLoadingUnarchiveId(versionId);
     try {
-      const response = await axiosInstance({
-        method: 'post',
-        url: `/api/deliverables/${projectId}/project-versions/${versionId}/archive/`,
-        data: { action: 'restore' },
-      });
+      const response = await archiveProjectVersion(projectId, versionId , 'restore');
       if (response.status === 200) {
         toast.success("Version unarchived successfully!", {
           position: "bottom-center",
@@ -1339,28 +1405,29 @@ const ProjectLogs = () => {
       />
       {isAssociatedUser === true && (
         <div className="project-logs-wrapper log-table-width">
-          {(!isSpecGptFlagActive(teamId) || activeTab === 'submittal') && (
-            <ProjectLogsHeaderTop
-              // Breadcrumbs removed
-              showBtn={"Upload Documents"}
-              toggleModal={toggleModal}
-              btnSize={"small"}
-              docParsed={documentData?.length || 0}
-              qaDashboard={state?.qaDashboard}
-              navBtn={"logs"}
-              teamId={teamId}
-              isVersioningEnabled={isVersioningFlagActive(teamId)}
-              isVersionComparisonEnabled={isVersionComparisonFlagActive(teamId)}
-              toggleVersionComparisonModal={toggleVersionComparisonModal}
-              onClickVersion={onClickVersion}
-              projectVersionId={projectVersionId}
-              projectVersions={availableVersions}
-              onPressArchive={onPressArchive}
-              setShowVersionModal={setShowVersionModal}
-              setEditingVersionId={setEditingVersionId}
-              setEditingVersionName={setEditingVersionName}
-            />
-          )}
+          <ProjectLogsHeaderTop
+            showBtn={"Upload Documents"}
+            toggleModal={toggleModal}
+            btnSize={"small"}
+            docParsed={documentData?.length || 0}
+            qaDashboard={state?.qaDashboard}
+            navBtn={"logs"}
+            teamId={teamId}
+            isVersioningEnabled={isVersioningFlagActive(teamId)}
+            isVersionComparisonEnabled={isVersionComparisonFlagActive(teamId)}
+            toggleVersionComparisonModal={toggleVersionComparisonModal}
+            onClickVersion={onClickVersion}
+            projectVersionId={projectVersionId}
+            projectVersions={availableVersions}
+            onPressArchive={onPressArchive}
+            setShowVersionModal={setShowVersionModal}
+            setEditingVersionId={setEditingVersionId}
+            setEditingVersionName={setEditingVersionName}
+            onViewArchivedVersions={handleViewArchivedVersions}
+            isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
           {activeTab === 'submittal' && (
             <ProjectLogsActionPanel
               handleDeleteLogs={handleDeleteLogs}
@@ -1407,47 +1474,7 @@ const ProjectLogs = () => {
               btnSize={"small"}
             />
           )}
-          
-          {isSpecGptFlagActive(teamId) && (
-            <div className="tab-row" style={{ marginBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
-              <div className="tab-container" style={{ display: 'flex', gap: '0' }}>
-                <button
-                  className={`tab-button ${activeTab === 'submittal' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('submittal')}
-                  style={{
-                    padding: '12px 24px',
-                    border: 'none',
-                    backgroundColor: activeTab === 'submittal' ? '#fff' : '#f5f5f5',
-                    borderBottom: activeTab === 'submittal' ? '2px solid #007bff' : '2px solid transparent',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: activeTab === 'submittal' ? '600' : '400',
-                    color: activeTab === 'submittal' ? '#007bff' : '#666',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Submittal Log
-                </button>
-                <button
-                  className={`tab-button ${activeTab === 'specgpt' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('specgpt')}
-                  style={{
-                    padding: '12px 24px',
-                    border: 'none',
-                    backgroundColor: activeTab === 'specgpt' ? '#fff' : '#f5f5f5',
-                    borderBottom: activeTab === 'specgpt' ? '2px solid #007bff' : '2px solid transparent',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: activeTab === 'specgpt' ? '600' : '400',
-                    color: activeTab === 'specgpt' ? '#007bff' : '#666',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Compass
-                </button>
-              </div>
-            </div>
-          )}
+        
           {activeTab == 'submittal' && <div className="project-logs-content">
             <ProcessingIndicator
               documentIsProcessing={documentIsProcessing}
@@ -1518,7 +1545,12 @@ const ProjectLogs = () => {
                       }}
                     >
                       <button
-                        disabled={pdfData && pdfData.index > 0 ? false : true}
+                        disabled={
+                          pdfData && 
+                          (pdfData.index > 0 || page > 1) 
+                            ? false 
+                            : true
+                        }
                         onClick={() => {
                           handleUpDownView(-1);
                         }}
@@ -1532,7 +1564,7 @@ const ProjectLogs = () => {
                       <button
                         disabled={
                           pdfData &&
-                          pdfData.index < filteredLogData.length - 1
+                          (pdfData.index < filteredLogData.length - 1 || page < Math.ceil(totalCount / rowsPerPage))
                             ? false
                             : true
                         }
@@ -1591,8 +1623,9 @@ const ProjectLogs = () => {
               </div>
             </div>
           </div>}
-          {activeTab == 'specgpt' && 
+          {activeTab == 'compass' && 
             <>
+            <div className="compass-chat-viewport">
               <ProcessingIndicator
                 documentIsProcessing={documentIsBeingEmbedded}
                 documentData={documentData}
@@ -1620,6 +1653,7 @@ const ProjectLogs = () => {
                   setIsChatEnabled={setIsSpecGptChatEnabled}
                 />
               </ChakraProvider>
+              </div>
             </>
           }
         </div>

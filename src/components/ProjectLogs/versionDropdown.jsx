@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import { EditIcon } from "../shared/icons/editIcon";
 import { LaunchIcon } from '../shared/icons/launchIcon';
 import { ArchiveIcon } from '../shared/icons/archiveIcon';
+import { AddIcon } from '../shared/icons/AddIcon';
 
 
 const VersionDropdown = ({ 
@@ -27,65 +28,61 @@ const VersionDropdown = ({
             <DropdownToggle caret style={{ backgroundColor: 'white', border: '1px solid #e0eaf7', width: '400px' }}>
                 {currentVersionName}
             </DropdownToggle>
-            <DropdownMenu style={{ backgroundColor: 'white', width: '400px' }}>
+            <DropdownMenu style={{ backgroundColor: 'white', width: '400px' , zIndex:'1500'}}>
                 {availableVersions.map(version => (
                     <DropdownItem 
                         key={version.id} 
-                        onClick={() => onSelectVersion(version.id)}
-                        style={{ backgroundColor: 'white', cursor: 'pointer' }}
+                        onClick={() => { onSelectVersion(version.id); setIsOpen(false); }}
+                        style={{ backgroundColor: 'white', cursor: 'pointer', border: 'none', borderRadius: 0, padding: '8px 16px' }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                     >
-                        <div style = {{width: '100%', display: 'flex', justifyContent: 'space-between'}}>
-                            <div>{version.version_name}</div>
-                            <div>
-                                <span
-                                    onClick={() => onSelectVersion(version.id)}
-                                    style={{ cursor: 'pointer' }}
+                        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: '24px' }}>
+                            <div style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginRight: '12px' }}>{version.version_name}</div>
+                            <div style={{ flexShrink: 0, display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <span 
+                                    onClick={(e) => { e.stopPropagation(); onSelectVersion(version.id); setIsOpen(false); }} 
+                                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                                 >
                                     <LaunchIcon />
                                 </span>
-                                <span
-                                    className="ml-2"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setIsOpen(false);
-                                        onPressEdit(version.id)
-                                    }}
-                                    style={{ cursor: 'pointer' }}
+                                <span 
+                                    onClick={(e) => { e.stopPropagation(); onPressEdit(version.id); setIsOpen(false); }} 
+                                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                                 >
                                     <EditIcon />
                                 </span>
-                                {availableVersions.length > 1 && <span
-                                    className="ml-2"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setIsOpen(false);
-                                        onPressArchive(version.id)
-                                    }}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    <ArchiveIcon />
-                                </span>}
+                                {availableVersions.length > 1 && (
+                                    <span 
+                                        onClick={(e) => { e.stopPropagation(); onPressArchive(version.id); setIsOpen(false); }} 
+                                        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                                    >
+                                        <ArchiveIcon />
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </DropdownItem>
                 ))}
                 <DropdownItem
-                    style={{ backgroundColor: 'white', borderTop: '1px solid #e0eaf7' }}
+                    style={{ backgroundColor: 'white', borderTop: '1px solid #e0eaf7', border: 'none', borderRadius: 0, padding: '8px 16px' }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                    onClick={onPressAddNewVersion}
+                    onClick={() => { onPressAddNewVersion(); setIsOpen(false); }}
                 >
-                    + Add New Version
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <AddIcon /> Add New Version
+                    </div>
                 </DropdownItem>
                 <DropdownItem
-                    style={{ backgroundColor: 'white', borderTop: '1px solid #e0eaf7' }}
+                    style={{ backgroundColor: 'white', borderTop: '1px solid #e0eaf7', border: 'none', borderRadius: 0, padding: '8px 16px' }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                    onClick={handleViewArchivedVersions}
+                    onClick={() => { handleViewArchivedVersions(); setIsOpen(false); }}
                 >
-                    + View Archived Versions
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <LaunchIcon /> View Archived Versions
+                    </div>
                 </DropdownItem>
             </DropdownMenu>
         </Dropdown>

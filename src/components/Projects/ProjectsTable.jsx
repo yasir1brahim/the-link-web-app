@@ -79,6 +79,9 @@ const ProjectsTable = ({
     const fetchUserProjectRoles = async () => {
       const roles = await getUserRoleInAllProjects(userId, customerId);
       console.log('roles', roles);
+      if (!Array.isArray(roles)) {
+        return;
+      }
       const projectToRolesMap = {};
       roles.forEach((role) => {
         projectToRolesMap[role.projectId] = role.role;

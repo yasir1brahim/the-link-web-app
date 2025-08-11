@@ -153,17 +153,22 @@ const getArchivedVersions = async (projectId) => {
     }
 };
 
-const archiveProjectVersion = async (projectId, versionId) => {
+const archiveProjectVersion = async (projectId, versionId, action) => {
     try {
+        if (!['archive', 'restore'].includes(action)) {
+            throw new Error(`Invalid action: ${action}. Allowed values are 'archive' or 'restore'.`);
+        }
+
         return await axiosInstance({
             method: 'post',
             url: `/api/deliverables/${projectId}/project-versions/${versionId}/archive/`,
-            data: { action: 'archive' }
+            data: { action }
         });
     } catch (error) {
         handleError(error);
     }
-}
+};
+
 
 const restoreProjectVersion = async (projectId, versionId) => {
     try {
