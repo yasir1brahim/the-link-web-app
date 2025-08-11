@@ -47,7 +47,15 @@ const Signin = (props) => {
         if (response.data.status === 'success') {
           setUserDetails(response.data.jwt);
           localStorage.setItem('jwt', response.data.jwt);
-          await getHomeUrl(e, true, user, getUserTeams, navigate);
+          
+          // Redirect to the originally requested page if present
+          const redirectUrl = localStorage.getItem('postLoginRedirect');
+          if (redirectUrl) {
+            localStorage.removeItem('postLoginRedirect');
+            navigate(redirectUrl);
+          } else {
+            await getHomeUrl(e, true, user, getUserTeams, navigate);
+          }
         }
       } catch (error) {
         console.log("Error in handleSubmit", error);
