@@ -243,6 +243,23 @@ const uploadFiles = async (data, errorCallback) => {
     }
 }
 
+const reprocessDocument = async (documentId) => {
+    try {
+        const payload = {
+            document_id: documentId
+        };
+        
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/reprocess-document/`,
+            data: payload
+        });
+    } catch (error) {
+        console.log("error in reprocessDocument", error);
+        handleError(error);
+    }
+}
+
 
 const getExcelExportHeader = async () => {
     try {
@@ -359,6 +376,7 @@ export {
     updateSubmittalItem,
     deleteSubmittalItems,
     uploadFiles,
+    reprocessDocument,
     getExportExcelData,
     getExportJetBuildData,
     getExcelExportHeader,
