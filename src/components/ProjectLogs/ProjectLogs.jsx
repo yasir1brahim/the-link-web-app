@@ -226,7 +226,7 @@ const ProjectLogs = () => {
   const [specGptUserInput, setSpecGptUserInput] = useState('');
   const [isSpecGptGeneratingLog, setIsSpecGptGeneratingLog] = useState(false);
   const [isSpecGptChatEnabled, setIsSpecGptChatEnabled] = useState(true);
-  const [activeTab, setActiveTab] = useState('submittal');
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || 'submittal');
 
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
@@ -511,6 +511,26 @@ const ProjectLogs = () => {
       });
     }
   }, [projectId, projectVersionId]);
+
+  // Handle activeTab changes from URL parameters
+  useEffect(() => {
+    const tabFromUrl = searchParams.get("tab");
+    if (tabFromUrl && (tabFromUrl === 'submittal' || tabFromUrl === 'compass')) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
+
+  // Update URL when activeTab changes manually
+  useEffect(() => {
+    if (projectId && projectVersionId) {
+      const currentTab = searchParams.get("tab");
+      if (currentTab !== activeTab) {
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set("tab", activeTab);
+        navigate(`/project-logs?${newSearchParams.toString()}`, { replace: true });
+      }
+    }
+  }, [activeTab, projectId, projectVersionId]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -920,7 +940,7 @@ const ProjectLogs = () => {
 
   const onClickVersion = (versionId) => {
     setProjectVersionId(versionId);
-    navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}`);
+    navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}&tab=${activeTab}`);
     window.location.reload();
   }
 
@@ -1339,6 +1359,21 @@ const ProjectLogs = () => {
     }
   }
 
+  const refreshDocumentsAndSubmittals = React.useCallback(async () => {
+    try {
+      const response = await getProjectDetails(projectId);
+      let responseDocumentData = response.data.document_details;
+      if (isVersioningFlagActive(teamId)) {
+        const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
+        responseDocumentData = responseDocumentData.filter((doc) => doc.project_version.id === activeVersion);
+      }
+      setDocumentData(responseDocumentData);
+      await fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+    } catch (e) {
+      handleError(e);
+    }
+  }, [projectId, teamId, projectVersionId, rowsPerPage]);
+
   const handleViewArchivedVersions = async () => {
     try {
       await fetchArchivedVersions();
@@ -1422,28 +1457,29 @@ const ProjectLogs = () => {
       />
       {isAssociatedUser === true && (
         <div className="project-logs-wrapper log-table-width">
-          {(!isSpecGptFlagActive(teamId) || activeTab === 'submittal') && (
-            <ProjectLogsHeaderTop
-              showBtn={"Upload Documents"}
-              toggleModal={toggleModal}
-              btnSize={"small"}
-              docParsed={documentData?.length || 0}
-              qaDashboard={state?.qaDashboard}
-              navBtn={"logs"}
-              teamId={teamId}
-              isVersioningEnabled={isVersioningFlagActive(teamId)}
-              isVersionComparisonEnabled={isVersionComparisonFlagActive(teamId)}
-              toggleVersionComparisonModal={toggleVersionComparisonModal}
-              onClickVersion={onClickVersion}
-              projectVersionId={projectVersionId}
-              projectVersions={availableVersions}
-              onPressArchive={onPressArchive}
-              setShowVersionModal={setShowVersionModal}
-              setEditingVersionId={setEditingVersionId}
-              setEditingVersionName={setEditingVersionName}
-              onViewArchivedVersions={handleViewArchivedVersions}
-            />
-          )}
+          <ProjectLogsHeaderTop
+            showBtn={"Upload Documents"}
+            toggleModal={toggleModal}
+            btnSize={"small"}
+            docParsed={documentData?.length || 0}
+            qaDashboard={state?.qaDashboard}
+            navBtn={"logs"}
+            teamId={teamId}
+            isVersioningEnabled={isVersioningFlagActive(teamId)}
+            isVersionComparisonEnabled={isVersionComparisonFlagActive(teamId)}
+            toggleVersionComparisonModal={toggleVersionComparisonModal}
+            onClickVersion={onClickVersion}
+            projectVersionId={projectVersionId}
+            projectVersions={availableVersions}
+            onPressArchive={onPressArchive}
+            setShowVersionModal={setShowVersionModal}
+            setEditingVersionId={setEditingVersionId}
+            setEditingVersionName={setEditingVersionName}
+            onViewArchivedVersions={handleViewArchivedVersions}
+            isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
           {activeTab === 'submittal' && (
             <ProjectLogsActionPanel
               handleDeleteLogs={handleDeleteLogs}
@@ -1490,47 +1526,7 @@ const ProjectLogs = () => {
               btnSize={"small"}
             />
           )}
-          
-          {isSpecGptFlagActive(teamId) && (
-            <div className="tab-row" style={{ marginBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
-              <div className="tab-container" style={{ display: 'flex', gap: '0' }}>
-                <button
-                  className={`tab-button ${activeTab === 'submittal' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('submittal')}
-                  style={{
-                    padding: '12px 24px',
-                    border: 'none',
-                    backgroundColor: activeTab === 'submittal' ? '#fff' : '#f5f5f5',
-                    borderBottom: activeTab === 'submittal' ? '2px solid #007bff' : '2px solid transparent',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: activeTab === 'submittal' ? '600' : '400',
-                    color: activeTab === 'submittal' ? '#007bff' : '#666',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Submittal Log
-                </button>
-                <button
-                  className={`tab-button ${activeTab === 'specgpt' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('specgpt')}
-                  style={{
-                    padding: '12px 24px',
-                    border: 'none',
-                    backgroundColor: activeTab === 'specgpt' ? '#fff' : '#f5f5f5',
-                    borderBottom: activeTab === 'specgpt' ? '2px solid #007bff' : '2px solid transparent',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: activeTab === 'specgpt' ? '600' : '400',
-                    color: activeTab === 'specgpt' ? '#007bff' : '#666',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Compass
-                </button>
-              </div>
-            </div>
-          )}
+        
           {activeTab == 'submittal' && <div className="project-logs-content">
             <ProcessingIndicator
               documentIsProcessing={documentIsProcessing}
@@ -1679,7 +1675,7 @@ const ProjectLogs = () => {
               </div>
             </div>
           </div>}
-          {activeTab == 'specgpt' && 
+          {activeTab == 'compass' && 
             <>
             <div className="compass-chat-viewport">
               <ProcessingIndicator
@@ -1786,7 +1782,10 @@ const ProjectLogs = () => {
       >
         <ModalHeader>Save Selection</ModalHeader>
         <ModalBody>
-          <form className="create-customer-form">
+          <form 
+            className="create-customer-form"
+            onSubmit={handleListSubmit}
+          >
             <div className="save-list-name">
               <div className="row">
                 <div className="col">
@@ -2023,6 +2022,7 @@ const ProjectLogs = () => {
         isOpen={showDocumentListModal}
         toggle={() => setShowDocumentListModal(false)}
         documents={documentData}
+        onAfterReprocess={refreshDocumentsAndSubmittals}
       />
 
       {showVersionModal && <ManageVersionModal

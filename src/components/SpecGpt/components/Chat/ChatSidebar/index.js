@@ -44,7 +44,7 @@ const ChatSidebar = ({
                 minH={0}
                 className="sidebar-scroller"
             >
-                <Flex flexDir="column" gap={6} pb={12}>
+                <Flex flexDir="column" gap={6} pb={40}>
                     {chatHistory?.map((chat, index) => {
                         return chat.chats.length > 0 && (
                             <Box key={index}>
