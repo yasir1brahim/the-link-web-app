@@ -74,6 +74,11 @@ const Chat = ({
 
     const onNewChatClick = () => {
         setChatSessionId(null);
+        setMessages([]);
+        setUserInput('');
+        setIsLoadingMessage(false);
+        setIsGeneratingLog(false);
+        setIsChatEnabled(true);
     }
 
     const getChatResponse = (userMessage) => {

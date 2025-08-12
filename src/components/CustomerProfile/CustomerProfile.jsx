@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
-// import WhitingTurner from '../../assets/images/whiting-turner.svg';
 import ProfilePhoto from '../../assets/images/dummy-profile.svg';
 import { ReactComponent as Camera } from '../../assets/images/camera.svg';
 import { ReactComponent as AddUser } from '../../assets/images/circle-add.svg';
-
 import PaginatedItems from '../shared/Pagination/Pagination';
 import CreateEmployee from './createEmployee';
 import axiosInstance from '../../config/axios';
@@ -19,7 +17,6 @@ import handleError from '../../config/errorHandler';
 import { get } from 'lodash';
 import Procore from '../ProjectLogs/procore';
 import Loader from '../shared/Loader/Loader';
-import { useParams } from 'react-router-dom';
 import { getTeamDetails, getUserRoleInTeam, updateTeamDetails, uploadTeamLogo } from '../../api/Authentication/api';
 
 const CustomerProfile = (props) => {
@@ -40,7 +37,6 @@ const CustomerProfile = (props) => {
     value: undefined,
     errors: ''
   });
-
   const [employee, setEmployee] = useState({});
   const [customerData, setCustomerData] = useState({});
   const [currentItems, setCurrentItems] = useState([]);
@@ -72,20 +68,9 @@ const CustomerProfile = (props) => {
   const roleDisplayMap = {
     'member': 'Company Member',
     'admin': 'Company Admin',
-  }
+  };
 
-  const fetchData = async (
-    customerId,
-    setCustomerData,
-    setEmployeeData,
-    setTeamId,
-    setCompanyName,
-    setProfilePicture,
-    setCurrentUserRole,
-    handleError,
-    navigate,
-    setLoading
-  ) => {
+  const fetchData = async () => {
     let isMounted = true;
     try {
       setLoading(true);
@@ -93,6 +78,8 @@ const CustomerProfile = (props) => {
         localStorage.getItem('userId'),
         customerId
       );
+      if (!isMounted) return;
+
       setCurrentUserRole(userRole);
       if (userRole !== 'admin') {
         setLoading(false);
@@ -103,31 +90,31 @@ const CustomerProfile = (props) => {
       }
 
       const response = await getTeamDetails(customerId);
+      if (!isMounted) return;
 
-      if (isMounted) {
-        setCustomerData(response.data);
-        setEmployeeData(response.data.members);
-        setTeamId(response.data.id);
+      setCustomerData(response.data);
+      setEmployeeData(response.data.members);
+      setTeamId(response.data.id);
 
-        // Profile data
-        setCompanyName((prevState) => ({
-          ...prevState,
-          value: response.data.name
-        }));
-        setProfilePicture((prevState) => ({
-          ...prevState,
-          value: response.data?.legacy_logo_url
-        }));
-        setLoading(false);
-      }
+      setCompanyName((prevState) => ({
+        ...prevState,
+        value: response.data.name
+      }));
+      setProfilePicture((prevState) => ({
+        ...prevState,
+        value: response.data?.legacy_logo_url
+      }));
     } catch (error) {
+      if (!isMounted) return;
       if (error.response && error.response.status === 404) {
-        setLoading(false);
         navigate('/not-found', { 
           state: { statusCode: 404, message: 'Team not found.' } 
         });
       } else {
         handleError(error);
+      }
+    } finally {
+      if (isMounted) {
         setLoading(false);
       }
     }
@@ -138,22 +125,8 @@ const CustomerProfile = (props) => {
   };
 
   useEffect(() => {
-    const cleanup = fetchData(
-      customerId,
-      setCustomerData,
-      setEmployeeData,
-      setTeamId,
-      setCompanyName,
-      setProfilePicture,
-      setCurrentUserRole,
-      handleError,
-      navigate,
-      setLoading,
-    );
-  
-    return cleanup;
-  }, [pageRefresh, customerId]);
-
+    fetchData();
+  }, [pageRefresh, customerId, navigate]);
 
   const handleDeleteEmployee = async (membershipId) => {
     try {
@@ -205,7 +178,7 @@ const CustomerProfile = (props) => {
     console.log("handleProcoreEffect")
     console.log("authCode:", authCode)
     if (authCode) {
-      const fetchData = async () => {
+      const fetchProcoreData = async () => {
         const accessTokenData = await axiosInstance({
           method: 'post',
           url: '/api/deliverables/procore/access_token/',
@@ -239,7 +212,7 @@ const CustomerProfile = (props) => {
         }
       };
 
-      fetchData().catch((error) => {
+      fetchProcoreData().catch((error) => {
         handleError(error);
       });
     }

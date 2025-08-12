@@ -70,7 +70,6 @@ const MessageInput = ({
             bottom={position === "absolute" ? { base: "20px", lg: "40px" } : undefined}
             left={0} 
             right={0} 
-            px={4} 
             w={"100%"}
         >
             <Box 

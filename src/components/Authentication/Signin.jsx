@@ -5,7 +5,7 @@ import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ReactComponent as ReactLogo } from '../../assets/images/logo-white.svg';
+import { ReactComponent as ReactLogo } from '../../assets/images/the-link-ai-header-logo-new.svg';
 import { login, getUserTeams, getMicrosoftLoginUrl } from '../../api/Authentication/api'
 import { AuthContext } from '../../auth/authcontext';
 import { getHomeUrl } from '../../utils/navigation';
@@ -47,7 +47,15 @@ const Signin = (props) => {
         if (response.data.status === 'success') {
           setUserDetails(response.data.jwt);
           localStorage.setItem('jwt', response.data.jwt);
-          await getHomeUrl(e, true, user, getUserTeams, navigate);
+          
+          // Redirect to the originally requested page if present
+          const redirectUrl = localStorage.getItem('postLoginRedirect');
+          if (redirectUrl) {
+            localStorage.removeItem('postLoginRedirect');
+            navigate(redirectUrl);
+          } else {
+            await getHomeUrl(e, true, user, getUserTeams, navigate);
+          }
         }
       } catch (error) {
         console.log("Error in handleSubmit", error);

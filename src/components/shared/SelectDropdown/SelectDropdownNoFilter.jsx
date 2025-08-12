@@ -65,6 +65,7 @@ const SelectDropdownNoFilter = ({ ...props }) => {
         defaultSelected={props.defaultSelected}
         defaultInputValue={props.defaultInputValue}
         filterBy={() => true}
+        inputProps={{ readOnly: true }} 
       />
       <label className="text-label">{props.label}</label>
       <i className="has-icon icon-dropdown"></i>
