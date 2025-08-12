@@ -11,13 +11,16 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess }) => {
     setIsReprocessing(true);
     try {
       console.log('Reprocessing document:', { documentId, documentName });
-      const response = await reprocessDocument(documentId);
+      await reprocessDocument(documentId);
 
       toast.success(`Successfully started reprocessing "${documentName}"`);
-      if (onAfterReprocess) {
-        await onAfterReprocess(documentId);
-      }
+
+      setIsReprocessing(false);
       toggle();
+
+      if (onAfterReprocess) {
+        onAfterReprocess(documentId);
+      }
 
     } catch (error) {
       console.error('Error reprocessing document:', error);
