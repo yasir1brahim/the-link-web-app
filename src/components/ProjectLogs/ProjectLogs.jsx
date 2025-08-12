@@ -1326,6 +1326,21 @@ const ProjectLogs = () => {
     }
   }
 
+  const refreshDocumentsAndSubmittals = React.useCallback(async () => {
+    try {
+      const response = await getProjectDetails(projectId);
+      let responseDocumentData = response.data.document_details;
+      if (isVersioningFlagActive(teamId)) {
+        const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
+        responseDocumentData = responseDocumentData.filter((doc) => doc.project_version.id === activeVersion);
+      }
+      setDocumentData(responseDocumentData);
+      await fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+    } catch (e) {
+      handleError(e);
+    }
+  }, [projectId, teamId, projectVersionId, rowsPerPage]);
+
   const handleViewArchivedVersions = async () => {
     try {
       await fetchArchivedVersions();
@@ -1970,6 +1985,7 @@ const ProjectLogs = () => {
         isOpen={showDocumentListModal}
         toggle={() => setShowDocumentListModal(false)}
         documents={documentData}
+        onAfterReprocess={refreshDocumentsAndSubmittals}
       />
 
       {showVersionModal && <ManageVersionModal

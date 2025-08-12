@@ -4,7 +4,7 @@ import { reprocessDocument } from "../../api/ProjectLogs/api";
 import { toast } from "react-toastify";
 import Loader from "../shared/Loader/Loader";
 
-const DocumentListModal = ({ isOpen, toggle, documents }) => {
+const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess }) => {
   const [isReprocessing, setIsReprocessing] = useState(false);
 
   const handleReprocess = async (documentId, documentName) => {
@@ -14,7 +14,9 @@ const DocumentListModal = ({ isOpen, toggle, documents }) => {
       const response = await reprocessDocument(documentId);
 
       toast.success(`Successfully started reprocessing "${documentName}"`);
-
+      if (onAfterReprocess) {
+        await onAfterReprocess(documentId);
+      }
       toggle();
 
     } catch (error) {
