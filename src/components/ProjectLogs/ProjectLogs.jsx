@@ -493,7 +493,7 @@ const ProjectLogs = () => {
       console.log("response.data.project_versions", response.data.project_versions);
 
       setAvailableVersions(response.data.project_versions);
-      fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion)
+      await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion)
       setLoading(false);
     };
 
@@ -537,7 +537,7 @@ const ProjectLogs = () => {
           let responseDocumentData = response.data.document_details;
           if (isVersioningFlagActive(teamId)) {
             const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
-            responseDocumentData = responseDocumentData.filter((doc) => doc.project_version.id === activeVersion);
+            responseDocumentData = responseDocumentData.filter((doc) => doc.project_version.id === parseInt(activeVersion));
           }
           if (documentIsProcessing(documentData) && !documentIsProcessing(responseDocumentData)) {
             console.log('previous documentIsProcessing', documentIsProcessing(documentData));
@@ -595,7 +595,7 @@ const ProjectLogs = () => {
         let responseDocumentData = {}
         if (isVersioningFlagActive(teamId)) {
           const activeVersion = projectVersionId || check_response.data.project_versions[check_response.data.project_versions.length - 1].id;
-          responseDocumentData = check_response.data.document_details.filter((doc) => doc.project_version.id === activeVersion);
+          responseDocumentData = check_response.data.document_details.filter((doc) => doc.project_version.id === parseInt(activeVersion));
         } else {
           responseDocumentData = check_response.data.document_details;
         }
@@ -906,9 +906,9 @@ const ProjectLogs = () => {
   }
 
   const onClickVersion = (versionId) => {
+    setLoading(true);
     setProjectVersionId(versionId);
     navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}&tab=${activeTab}`);
-    window.location.reload();
   }
 
   // useEffect(() => {
@@ -1325,6 +1325,21 @@ const ProjectLogs = () => {
       handleError(error);
     }
   }
+
+  const refreshDocumentsAndSubmittals = React.useCallback(async () => {
+    try {
+      const response = await getProjectDetails(projectId);
+      let responseDocumentData = response.data.document_details;
+      if (isVersioningFlagActive(teamId)) {
+        const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
+        responseDocumentData = responseDocumentData.filter((doc) => doc.project_version.id === activeVersion);
+      }
+      setDocumentData(responseDocumentData);
+      await fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+    } catch (e) {
+      handleError(e);
+    }
+  }, [projectId, teamId, projectVersionId, rowsPerPage]);
 
   const handleViewArchivedVersions = async () => {
     try {
@@ -1966,6 +1981,12 @@ const ProjectLogs = () => {
           </form>
         </ModalBody>
       </Modal>
+      <DocumentListModal
+        isOpen={showDocumentListModal}
+        toggle={() => setShowDocumentListModal(false)}
+        documents={documentData}
+        onAfterReprocess={refreshDocumentsAndSubmittals}
+      />
 
       {showVersionModal && <ManageVersionModal
         showVersionModal={showVersionModal}
@@ -1997,11 +2018,6 @@ const ProjectLogs = () => {
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
       <Loader showComponentLoader={isLoading || headerLoading} />
-      <DocumentListModal
-        isOpen={showDocumentListModal}
-        toggle={() => setShowDocumentListModal(false)}
-        documents={documentData}
-      />
     </div>
   );
 };

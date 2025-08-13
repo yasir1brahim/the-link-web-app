@@ -1,12 +1,23 @@
-import React from 'react';
+import {React , useEffect} from 'react';
 
 const Loader = (props) => {
+  useEffect(() => {
+    const shouldLockScroll = props.showComponentLoader && !props.componentScoped;
+    if (shouldLockScroll) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [props.showComponentLoader, props.componentScoped]);
+
   return (
     props.showComponentLoader && (
       <div
         className={
           'loader-wrapper ' +
-          (props.showComponentLoader ? 'wrapper-component' : '')
+          (props.componentScoped ? 'wrapper-component' : '')
         }
         style={props.specGptLoader && {top: '18%'}}
       >
