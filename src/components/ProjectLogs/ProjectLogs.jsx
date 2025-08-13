@@ -1437,8 +1437,18 @@ const ProjectLogs = () => {
     }
   };
 
-  const handleFileReprocessed = (fileId) => {
-    setDuplicateFiles(prev => prev.filter(file => file.existing_file_id !== fileId));
+  const handleFileReprocessed = async (fileId) => {
+    try {
+      setDuplicateFiles(prev => prev.filter(file => file.existing_file_id !== fileId));
+      
+      await refreshDocumentsAndSubmittals();
+      
+      setPageRefresh(!pageRefresh);
+      
+    } catch (error) {
+      console.error('Error refreshing document data after reprocess:', error);
+      handleError(error);
+    }
   };
 
   return (
