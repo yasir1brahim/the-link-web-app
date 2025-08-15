@@ -1015,47 +1015,69 @@ const ProjectLogs = () => {
         const totalPages = Math.ceil(totalCount / rowsPerPage);
         
         if (nextPage <= totalPages) {
-          await fetchLogData(nextPage, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
-          setPage(nextPage);
+          const response = await getSubmittalItems(
+            projectId,
+            searchValue,
+            filterValues,
+            null,
+            null,
+            nextPage,
+            rowsPerPage,
+            listId,
+            projectVersionId
+          );
           
-          setTimeout(() => {
-            if (filteredLogData.length > 0) {
-              const firstData = filteredLogData[0];
-              setPdfData({
-                ...pdfData,
-                url: firstData.doc_link,
-                textLoc: firstData.text_loc,
-                index: 0,
-                docId: firstData.doc_id,
-                submittalId: firstData.id,
-                additionalTextLocations: firstData.additional_text_locations,
-              });
-              setSubmittalIdParam(firstData.id);
-            }
-          }, 100);
+          const newLogData = response.data.message;
+          setPage(nextPage);
+          setLogData(newLogData);
+          
+          if (newLogData.length > 0) {
+            const firstData = newLogData[0];
+            setPdfData({
+              ...pdfData,
+              url: firstData.doc_link,
+              textLoc: firstData.text_loc,
+              index: 0,
+              docId: firstData.doc_id,
+              submittalId: firstData.id,
+              additionalTextLocations: firstData.additional_text_locations,
+            });
+            setSubmittalIdParam(firstData.id);
+          }
         }
       } else if (direction < 0 && pdfData.index === 0) {
         const prevPage = page - 1;
         
         if (prevPage >= 1) {
-          await fetchLogData(prevPage, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
-          setPage(prevPage);
+          const response = await getSubmittalItems(
+            projectId,
+            searchValue,
+            filterValues,
+            null,
+            null,
+            prevPage,
+            rowsPerPage,
+            listId,
+            projectVersionId
+          );
           
-          setTimeout(() => {
-            if (filteredLogData.length > 0) {
-              const lastData = filteredLogData[filteredLogData.length - 1];
-              setPdfData({
-                ...pdfData,
-                url: lastData.doc_link,
-                textLoc: lastData.text_loc,
-                index: filteredLogData.length - 1,
-                docId: lastData.doc_id,
-                submittalId: lastData.id,
-                additionalTextLocations: lastData.additional_text_locations,
-              });
-              setSubmittalIdParam(lastData.id);
-            }
-          }, 100);
+          const newLogData = response.data.message;
+          setPage(prevPage);
+          setLogData(newLogData);
+          
+          if (newLogData.length > 0) {
+            const lastData = newLogData[newLogData.length - 1];
+            setPdfData({
+              ...pdfData,
+              url: lastData.doc_link,
+              textLoc: lastData.text_loc,
+              index: newLogData.length - 1,
+              docId: lastData.doc_id,
+              submittalId: lastData.id,
+              additionalTextLocations: lastData.additional_text_locations,
+            });
+            setSubmittalIdParam(lastData.id);
+          }
         }
       }
     }
