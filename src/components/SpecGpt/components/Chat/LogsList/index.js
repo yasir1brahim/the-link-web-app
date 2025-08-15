@@ -9,19 +9,13 @@ import {
     Center,
     Button,
     Icon,
-    useDisclosure,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalCloseButton,
     Badge,
     VStack,
     HStack
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, CalendarIcon, CheckCircleIcon, WarningIcon, AddIcon } from '@chakra-ui/icons';
 import { fetchAiGeneratedLogs, fetchAiGeneratedLogDetail } from '../../../utils/apiUtils';
+import Message from '../ChatMain/Message';
 
 const LogsList = ({ 
     projectId, 
@@ -33,8 +27,7 @@ const LogsList = ({
 }) => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedLog, setSelectedLog] = useState(null);
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [selectedLogMessage, setSelectedLogMessage] = useState(null);
 
     useEffect(() => {
         loadLogs();
@@ -54,9 +47,32 @@ const LogsList = ({
 
     const handleLogClick = async (log) => {
         try {
+            console.log("log", log);
             const logDetail = await fetchAiGeneratedLogDetail(projectId, log.id);
-            setSelectedLog(logDetail);
-            onOpen();
+            
+            // Determine the message type based on log type
+            let messageType;
+            if (logType === 'inspection_log') {
+                messageType = 'AI_INSPECTION_LOG';
+            } else if (logType === 'owner_deliverables_log') {
+                messageType = 'AI_OWNER_DELIVERABLES_LOG';
+            } else {
+                messageType = 'ASSISTANT'; // fallback
+            }
+            
+            // Create a message object that matches the expected format
+            const message = {
+                type: messageType,
+                message: logDetail.log_table,
+                session_id: null,
+                questionid: logDetail.id,
+                sources: null,
+                created_at: logDetail.created_at,
+                log_status: logDetail.log_status
+            };
+            
+            // Set the selected log message to display in main area
+            setSelectedLogMessage(message);
         } catch (error) {
             console.error('Error loading log detail:', error);
         }
@@ -112,75 +128,6 @@ const LogsList = ({
         });
     };
 
-    const renderLogTable = (logTable) => {
-        try {
-            const tableData = JSON.parse(logTable);
-            if (tableData.results && Array.isArray(tableData.results)) {
-                return (
-                    <Box overflowX="auto">
-                        <Box as="table" width="100%" borderCollapse="collapse">
-                            <Box as="thead">
-                                <Box as="tr" bg="gray.100">
-                                    {Object.keys(tableData.results[0] || {}).map((header, index) => (
-                                        <Box
-                                            as="th"
-                                            key={index}
-                                            px={4}
-                                            py={2}
-                                            textAlign="left"
-                                            borderBottom="1px solid"
-                                            borderColor="gray.200"
-                                            fontSize="sm"
-                                            fontWeight="bold"
-                                        >
-                                            {header.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                        </Box>
-                                    ))}
-                                </Box>
-                            </Box>
-                            <Box as="tbody">
-                                {tableData.results.map((row, rowIndex) => (
-                                    <Box as="tr" key={rowIndex} _hover={{ bg: 'gray.50' }}>
-                                        {Object.values(row).map((cell, cellIndex) => (
-                                            <Box
-                                                as="td"
-                                                key={cellIndex}
-                                                px={4}
-                                                py={2}
-                                                borderBottom="1px solid"
-                                                borderColor="gray.200"
-                                                fontSize="sm"
-                                            >
-                                                {cell}
-                                            </Box>
-                                        ))}
-                                    </Box>
-                                ))}
-                            </Box>
-                        </Box>
-                    </Box>
-                );
-            }
-        } catch (error) {
-            console.error('Error parsing log table:', error);
-        }
-        
-        // Fallback: display as plain text
-        return (
-            <Box
-                p={4}
-                bg="gray.50"
-                borderRadius="md"
-                fontFamily="mono"
-                fontSize="sm"
-                whiteSpace="pre-wrap"
-                overflowX="auto"
-            >
-                {logTable}
-            </Box>
-        );
-    };
-
     if (loading) {
         return (
             <Center h="100%" flexDirection="column" gap={4}>
@@ -191,136 +138,135 @@ const LogsList = ({
     }
 
     return (
-        <Box w="100%" bgColor="#1F2A43" h="100vh" display="flex" flexDirection="column">
-            <Box px={{ base: "24px", lg: "30px" }} flexShrink={0}>
-                <Flex py="20px" align="center" justifyContent="space-between">
-                    <Flex align="center" gap={3}>
-                        <Button
-                            variant="ghost"
-                            color="white"
-                            onClick={onBack}
-                            leftIcon={<ChevronLeftIcon />}
-                            _hover={{ bg: "rgba(255,255,255,0.1)" }}
+        <Flex
+            className="compass-chat-flex"
+            w="100%"
+            mx="auto"
+            h="100%"
+            position="relative"
+        >
+            {/* Sidebar */}
+            <Box display={{ base: "none", lg: "block" }}>
+                <Box w="280px" position={"absolute"} top={0} bottom={0} left={0} style={{ marginLeft: "-20px" }}>
+                    <Box w="100%" bgColor="#1F2A43" h="100vh" display="flex" flexDirection="column">
+                        <Box px={{ base: "24px", lg: "30px" }} flexShrink={0}>
+                            <Flex py="20px" align="center" justifyContent="space-between">
+                                <Flex align="center" gap={3}>
+                                    <Button
+                                        variant="ghost"
+                                        color="white"
+                                        onClick={onBack}
+                                        leftIcon={<ChevronLeftIcon />}
+                                        _hover={{ bg: "rgba(255,255,255,0.1)" }}
+                                    >
+                                        Back
+                                    </Button>
+                                    <Text fontSize={{ base: "18px", lg: "24px" }} fontWeight="semibold" color="#FFFFFF">
+                                        {getLogTypeDisplayName(logType)}
+                                    </Text>
+                                </Flex>
+                            </Flex>
+                            
+                            {/* Generate New Log Button */}
+                            <Box pb={4}>
+                                <Button
+                                    onClick={handleGenerateNewLog}
+                                    leftIcon={<AddIcon />}
+                                    colorScheme="blue"
+                                    variant="solid"
+                                    size="sm"
+                                    w="100%"
+                                    _hover={{ bg: "blue.600" }}
+                                >
+                                    Generate New {getLogTypeDisplayName(logType)}
+                                </Button>
+                            </Box>
+                        </Box>
+
+                        <Box 
+                            flex={1} 
+                            overflowY="auto" 
+                            px={{ base: "24px", lg: "30px" }}
+                            minH={0}
+                            className="sidebar-scroller"
                         >
-                            Back
-                        </Button>
-                        <Text fontSize={{ base: "18px", lg: "24px" }} fontWeight="semibold" color="#FFFFFF">
-                            {getLogTypeDisplayName(logType)}
-                        </Text>
-                    </Flex>
-                </Flex>
-                
-                {/* Generate New Log Button */}
-                <Box pb={4}>
-                    <Button
-                        onClick={handleGenerateNewLog}
-                        leftIcon={<AddIcon />}
-                        colorScheme="blue"
-                        variant="solid"
-                        size="sm"
-                        w="100%"
-                        _hover={{ bg: "blue.600" }}
-                    >
-                        Generate New {getLogTypeDisplayName(logType)}
-                    </Button>
+                            {logs.length === 0 ? (
+                                <Center h="100%" flexDirection="column" gap={4}>
+                                    <Text color="#676F74" textAlign="center">
+                                        No {getLogTypeDisplayName(logType).toLowerCase()} logs found for this project version.
+                                    </Text>
+                                    <Text color="#676F74" textAlign="center" fontSize="sm">
+                                        Click "Generate New {getLogTypeDisplayName(logType)}" above to create one.
+                                    </Text>
+                                </Center>
+                            ) : (
+                                <VStack spacing={4} pb={40}>
+                                    {logs.map((log) => {
+                                        const StatusIcon = getStatusIcon(log.log_status);
+                                        return (
+                                            <Box
+                                                key={log.id}
+                                                w="100%"
+                                                bg="#24314D"
+                                                p={4}
+                                                borderRadius="8px"
+                                                cursor="pointer"
+                                                onClick={() => handleLogClick(log)}
+                                                _hover={{ bg: "#2A3651" }}
+                                                transition="background-color 0.2s"
+                                                border={selectedLogMessage?.questionid === log.id ? "2px solid" : "none"}
+                                                borderColor="blue.400"
+                                            >
+                                                <VStack align="start" spacing={2}>
+                                                    <HStack justify="space-between" w="100%">
+                                                        <HStack spacing={2}>
+                                                            {StatusIcon && <Icon as={StatusIcon} color={`${getStatusColor(log.log_status)}.400`} />}
+                                                            <Badge colorScheme={getStatusColor(log.log_status)} variant="subtle">
+                                                                {log.log_status}
+                                                            </Badge>
+                                                        </HStack>
+                                                        <HStack spacing={1} color="#676F74">
+                                                            <CalendarIcon size="sm" />
+                                                            <Text fontSize="xs">
+                                                                {formatDate(log.created_at)}
+                                                            </Text>
+                                                        </HStack>
+                                                    </HStack>
+                                                    <Text color="#EDEDED" fontSize="sm" fontWeight="medium">
+                                                        {log.project_name} - v{log.project_version_number}
+                                                    </Text>
+                                                    <Text color="#676F74" fontSize="xs">
+                                                        Click to view log details
+                                                    </Text>
+                                                </VStack>
+                                            </Box>
+                                        );
+                                    })}
+                                </VStack>
+                            )}
+                        </Box>
+                    </Box>
                 </Box>
+                <Box w={"280px"}></Box>
             </Box>
 
-            <Box 
-                flex={1} 
-                overflowY="auto" 
-                px={{ base: "24px", lg: "30px" }}
-                minH={0}
-                className="sidebar-scroller"
-            >
-                {logs.length === 0 ? (
-                    <Center h="100%" flexDirection="column" gap={4}>
-                        <Text color="#676F74" textAlign="center">
-                            No {getLogTypeDisplayName(logType).toLowerCase()} logs found for this project version.
-                        </Text>
-                        <Text color="#676F74" textAlign="center" fontSize="sm">
-                            Click "Generate New {getLogTypeDisplayName(logType)}" above to create one.
-                        </Text>
-                    </Center>
+            {/* Main Content Area */}
+            <Box w="100%" h="100%" bg="white">
+                {selectedLogMessage ? (
+                    <Box p={6} h="100%" overflowY="auto">
+                        <Message 
+                            messageType={selectedLogMessage.type}
+                            message={selectedLogMessage.message}
+                            projectId={projectId}
+                        />
+                    </Box>
                 ) : (
-                    <VStack spacing={4} pb={40}>
-                        {logs.map((log) => {
-                            const StatusIcon = getStatusIcon(log.log_status);
-                            return (
-                                <Box
-                                    key={log.id}
-                                    w="100%"
-                                    bg="#24314D"
-                                    p={4}
-                                    borderRadius="8px"
-                                    cursor="pointer"
-                                    onClick={() => handleLogClick(log)}
-                                    _hover={{ bg: "#2A3651" }}
-                                    transition="background-color 0.2s"
-                                >
-                                    <VStack align="start" spacing={2}>
-                                        <HStack justify="space-between" w="100%">
-                                            <HStack spacing={2}>
-                                                {StatusIcon && <Icon as={StatusIcon} color={`${getStatusColor(log.log_status)}.400`} />}
-                                                <Badge colorScheme={getStatusColor(log.log_status)} variant="subtle">
-                                                    {log.log_status}
-                                                </Badge>
-                                            </HStack>
-                                            <HStack spacing={1} color="#676F74">
-                                                <CalendarIcon size="sm" />
-                                                <Text fontSize="xs">
-                                                    {formatDate(log.created_at)}
-                                                </Text>
-                                            </HStack>
-                                        </HStack>
-                                        <Text color="#EDEDED" fontSize="sm" fontWeight="medium">
-                                            {log.project_name} - v{log.project_version_number}
-                                        </Text>
-                                        <Text color="#676F74" fontSize="xs">
-                                            Click to view log details
-                                        </Text>
-                                    </VStack>
-                                </Box>
-                            );
-                        })}
-                    </VStack>
+                    <Center h={"100%"} w={"100%"} flexDirection={"column"} gap={5}>
+                        <Text color="#676F74">Select a log from the sidebar to view details</Text>
+                    </Center>
                 )}
             </Box>
-
-            {/* Modal for displaying log details */}
-            <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>
-                        {selectedLog && getLogTypeDisplayName(selectedLog.log_type)}
-                    </ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody pb={6}>
-                        {selectedLog && (
-                            <VStack align="start" spacing={4}>
-                                <HStack justify="space-between" w="100%">
-                                    <Text fontSize="sm" color="gray.600">
-                                        Project: {selectedLog.project_name} - v{selectedLog.project_version_number}
-                                    </Text>
-                                    <Badge colorScheme={getStatusColor(selectedLog.log_status)}>
-                                        {selectedLog.log_status}
-                                    </Badge>
-                                </HStack>
-                                <Text fontSize="sm" color="gray.600">
-                                    Created: {formatDate(selectedLog.created_at)}
-                                </Text>
-                                <Box w="100%">
-                                    <Text fontSize="sm" fontWeight="medium" mb={2}>
-                                        Log Data:
-                                    </Text>
-                                    {renderLogTable(selectedLog.log_table)}
-                                </Box>
-                            </VStack>
-                        )}
-                    </ModalBody>
-                </ModalContent>
-            </Modal>
-        </Box>
+        </Flex>
     );
 };
 

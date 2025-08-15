@@ -194,31 +194,13 @@ const Chat = ({
     if (showLogsList && currentLogType) {
         return (
             <>
-                <Flex
-                    className="compass-chat-flex"
-                    w="100%"
-                    mx="auto"
-                    h="100%"
-                    position="relative"
-                >
-                    <Box display={{ base: "none", lg: "block" }}>
-                        <Box w="280px" position={"absolute"} top={0} bottom={0} left={0} style={{ marginLeft: "-20px" }}>
-                            <LogsList
-                                projectId={projectId}
-                                projectVersionId={projectVersionId}
-                                logType={currentLogType}
-                                onBack={onBackFromLogsList}
-                                onGenerateNewLog={onGenerateNewLog}
-                            />
-                        </Box>
-                        <Box w={"280px"}></Box>
-                    </Box>
-                    <Box w="100%" h="100%" >
-                        <Center h={"100%"} w={"100%"} flexDirection={"column"} gap={5}>
-                            <Text color="#676F74">Select a log from the sidebar to view details</Text>
-                        </Center>
-                    </Box>
-                </Flex>
+                <LogsList
+                    projectId={projectId}
+                    projectVersionId={projectVersionId}
+                    logType={currentLogType}
+                    onBack={onBackFromLogsList}
+                    onGenerateNewLog={onGenerateNewLog}
+                />
                 <Drawer
                     isOpen={isOpen}
                     placement='left'
