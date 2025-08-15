@@ -16,6 +16,7 @@ import {
 import { ChevronLeftIcon, CalendarIcon, CheckCircleIcon, WarningIcon, AddIcon } from '@chakra-ui/icons';
 import { fetchAiGeneratedLogs, fetchAiGeneratedLogDetail } from '../../../utils/apiUtils';
 import Message from '../ChatMain/Message';
+import { MESSAGE_ROLE_TYPE } from '../../../utils/enums';
 
 const LogsList = ({ 
     projectId, 
@@ -53,9 +54,9 @@ const LogsList = ({
             // Determine the message type based on log type
             let messageType;
             if (logType === 'inspection_log') {
-                messageType = 'AI_INSPECTION_LOG';
+                messageType = MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG;
             } else if (logType === 'owner_deliverables_log') {
-                messageType = 'AI_OWNER_DELIVERABLES_LOG';
+                messageType = MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG;
             } else {
                 messageType = 'ASSISTANT'; // fallback
             }
