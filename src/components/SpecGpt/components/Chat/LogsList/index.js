@@ -173,11 +173,19 @@ const LogsList = ({
                                 <Button
                                     onClick={handleGenerateNewLog}
                                     leftIcon={<AddIcon />}
-                                    colorScheme="blue"
+                                    bg="#d5e63e"
+                                    color="black"
                                     variant="solid"
                                     size="sm"
                                     w="100%"
-                                    _hover={{ bg: "blue.600" }}
+                                    h="auto"
+                                    py={3}
+                                    px={4}
+                                    whiteSpace="normal"
+                                    textAlign="center"
+                                    lineHeight="1.2"
+                                    _hover={{ bg: "#c4d535" }}
+                                    _active={{ bg: "#b3c42c" }}
                                 >
                                     Generate New {getLogTypeDisplayName(logType)}
                                 </Button>
