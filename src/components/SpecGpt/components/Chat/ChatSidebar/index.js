@@ -6,8 +6,8 @@ const ChatSidebar = ({
     chatHistory, 
     onClickChatLink, 
     onNewChatClick, 
-    onGenerateInspectionLogClick, 
-    onGenerateOwnerDeliverablesLogClick, 
+    onShowInspectionLogsClick, 
+    onShowOwnerDeliverablesLogsClick, 
     isInspectionLogFeatureFlagActive 
 }) => {
     return (
@@ -26,11 +26,11 @@ const ChatSidebar = ({
                     </Flex>
                     {isInspectionLogFeatureFlagActive && (
                         <>
-                            <Flex onClick={onGenerateInspectionLogClick} mb={3} border="1px" borderColor="#FFFFFF33" px={3} py={3} borderRadius="6px" gap={3} align="center" cursor="pointer" _hover={{ bgColor: "#FFFFFF11" }}>
-                                <Text marginBottom={0} fontSize="14px" color="#FFFFFF">Inspection Log</Text>
+                            <Flex onClick={onShowInspectionLogsClick} mb={3} border="1px" borderColor="#FFFFFF33" px={3} py={3} borderRadius="6px" gap={3} align="center" cursor="pointer" _hover={{ bgColor: "#FFFFFF11" }}>
+                                <Text marginBottom={0} fontSize="14px" color="#FFFFFF">View Inspection Logs</Text>
                             </Flex>
-                            <Flex onClick={onGenerateOwnerDeliverablesLogClick} mb={3} border="1px" borderColor="#FFFFFF33" px={3} py={3} borderRadius="6px" gap={3} align="center" cursor="pointer" _hover={{ bgColor: "#FFFFFF11" }}>
-                                <Text marginBottom={0} fontSize="14px" color="#FFFFFF">Owner Deliverables Log</Text>
+                            <Flex onClick={onShowOwnerDeliverablesLogsClick} mb={3} border="1px" borderColor="#FFFFFF33" px={3} py={3} borderRadius="6px" gap={3} align="center" cursor="pointer" _hover={{ bgColor: "#FFFFFF11" }}>
+                                <Text marginBottom={0} fontSize="14px" color="#FFFFFF">View Owner Deliverables Logs</Text>
                             </Flex>
                         </>
                     )}

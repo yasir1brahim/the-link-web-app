@@ -4,10 +4,12 @@ import {
     DrawerOverlay,
     DrawerContent,
     Center,
-    Spinner
+    Spinner,
+    Text
 } from '@chakra-ui/react'
 import ChatSidebar from './ChatSidebar'
 import ChatMain from './ChatMain'
+import LogsList from './LogsList'
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -42,6 +44,9 @@ const Chat = ({
     const [maxChatMessages, setMaxChatMessages] = useState(DEFAULT_MAX_CHAT_MESSAGES);
     const chatSessionIdRef = useRef(chatSessionId);
 
+    // New state for logs list functionality
+    const [showLogsList, setShowLogsList] = useState(false);
+    const [currentLogType, setCurrentLogType] = useState(null);
 
     useEffect(() => {
         fetchChatHistory(projectId).then((data) => {
@@ -79,6 +84,8 @@ const Chat = ({
         setIsLoadingMessage(false);
         setIsGeneratingLog(false);
         setIsChatEnabled(true);
+        setShowLogsList(false);
+        setCurrentLogType(null);
     }
 
     const getChatResponse = (userMessage) => {
@@ -130,58 +137,45 @@ const Chat = ({
         });
     }
 
-    const handleLogGeneration = (logType, logFetchFunction) => {
-        console.log("handleLogGeneration", logType);
-        setChatSessionId(null);
-        setMessages([
-            ...messages,
-            {
-                'type': logType,
-                'message': '',
-                'session_id': chatSessionId,
-                'questionid': '',
-                'loading': true
-            }
-        ]);
-        setIsLoadingMessage(true);
-        setIsGeneratingLog(true);
-        setUserInput('');
+    // New handlers for logs list functionality
+    const onShowInspectionLogsClick = () => {
+        setShowLogsList(true);
+        setCurrentLogType('inspection_log');
+    }
+
+    const onShowOwnerDeliverablesLogsClick = () => {
+        setShowLogsList(true);
+        setCurrentLogType('owner_deliverables_log');
+    }
+
+    const onBackFromLogsList = () => {
+        setShowLogsList(false);
+        setCurrentLogType(null);
+    }
+
+    const onGenerateNewLog = (logType) => {
+        // Determine which log generation function to use
+        let logFetchFunction;
+        
+        if (logType === 'inspection_log') {
+            logFetchFunction = fetchInspectionLog;
+        } else if (logType === 'owner_deliverables_log') {
+            logFetchFunction = fetchOwnerDeliverablesLog;
+        } else {
+            console.error('Unknown log type:', logType);
+            return;
+        }
 
         logFetchFunction(projectId, projectVersionId).then((logMessage) => {
             console.log("logMessage", logMessage);
-            onFirstAIResponse(logMessage.session_id, '');
-            if (chatSessionIdRef.current === null || chatSessionIdRef.current === logMessage.session_id) {
-                setMessages((prevMessages) => {
-                    const lastMessage = prevMessages[prevMessages.length - 1];
-                    return [
-                        ...prevMessages.slice(0, -1),
-                        { 
-                            ...lastMessage, 
-                            message: logMessage.message, 
-                            loading: false, 
-                            questionid: logMessage.questionid,
-                            sources: logMessage.sources
-                        }
-                    ];
-                });
-                setMaxChatMessages(logMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
-                setIsLoadingMessage(false);
-                setIsGeneratingLog(false);
-            }
         });
-    }
-
-    const onGenerateInspectionLogClick = () => {
-        handleLogGeneration(MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG, fetchInspectionLog);
-    }
-
-    const onGenerateOwnerDeliverablesLogClick = () => {
-        handleLogGeneration(MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG, fetchOwnerDeliverablesLog);
     }
 
     const onClickChatLink = (chatSessionId) => {
         console.log("onClickChatLink", chatSessionId);
         setChatSessionId(chatSessionId);
+        setShowLogsList(false);
+        setCurrentLogType(null);
     }
 
     const onFirstAIResponse = (chatSessionId, userMessage) => {
@@ -194,6 +188,40 @@ const Chat = ({
             console.log("chat history", data);
             setChatHistory(data);
         });
+    }
+
+    // Render logs list if active
+    if (showLogsList && currentLogType) {
+        return (
+            <>
+                <LogsList
+                    projectId={projectId}
+                    projectVersionId={projectVersionId}
+                    logType={currentLogType}
+                    onBack={onBackFromLogsList}
+                    onGenerateNewLog={onGenerateNewLog}
+                />
+                <Drawer
+                    isOpen={isOpen}
+                    placement='left'
+                    onClose={onClose}
+                    size={{ base: "xs", sm: 'sm' }}
+                >
+                    <DrawerOverlay />
+                    <DrawerContent w="100%">
+                        <DrawerBody p={"0px"}>
+                            <LogsList
+                                projectId={projectId}
+                                projectVersionId={projectVersionId}
+                                logType={currentLogType}
+                                onBack={onBackFromLogsList}
+                                onGenerateNewLog={onGenerateNewLog}
+                            />
+                        </DrawerBody>
+                    </DrawerContent>
+                </Drawer>
+            </>
+        );
     }
 
     return (
@@ -211,8 +239,8 @@ const Chat = ({
                             chatHistory={chatHistory}
                             onClickChatLink={onClickChatLink}
                             onNewChatClick={onNewChatClick}
-                            onGenerateInspectionLogClick={onGenerateInspectionLogClick}
-                            onGenerateOwnerDeliverablesLogClick={onGenerateOwnerDeliverablesLogClick}
+                            onShowInspectionLogsClick={onShowInspectionLogsClick}
+                            onShowOwnerDeliverablesLogsClick={onShowOwnerDeliverablesLogsClick}
                             isInspectionLogFeatureFlagActive={isInspectionLogFeatureFlagActive}
                         />
                     </Box>
@@ -251,8 +279,8 @@ const Chat = ({
                             chatHistory={chatHistory}
                             onClickChatLink={onClickChatLink}
                             onNewChatClick={onNewChatClick}
-                            onGenerateInspectionLogClick={onGenerateInspectionLogClick}
-                            onGenerateOwnerDeliverablesLogClick={onGenerateOwnerDeliverablesLogClick}
+                            onShowInspectionLogsClick={onShowInspectionLogsClick}
+                            onShowOwnerDeliverablesLogsClick={onShowOwnerDeliverablesLogsClick}
                             isInspectionLogFeatureFlagActive={isInspectionLogFeatureFlagActive}
                         />
                     </DrawerBody>
