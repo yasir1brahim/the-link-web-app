@@ -52,6 +52,37 @@ const fetchOwnerDeliverablesLog = async (projectId, projectVersionId) => {
     return fetchPromptAnswer('', 1, null, projectId, projectVersionId, 'owner_deliverables_log');
 }
 
+// New functions for AI-generated logs
+const fetchAiGeneratedLogs = async (projectId, projectVersionId, logType) => {
+    try {
+        const response = await axiosInstance({
+            method: 'GET',
+            url: `/api/deliverables/${projectId}/ai-generated-logs/`,
+            params: {
+                project_version_id: projectVersionId,
+                log_type: logType
+            }
+        });
+        return response.data.results;
+    } catch (error) {
+        handleError(error);
+        return [];
+    }
+}
+
+const fetchAiGeneratedLogDetail = async (projectId, logId) => {
+    try {
+        const response = await axiosInstance({
+            method: 'GET',
+            url: `/api/deliverables/${projectId}/ai-generated-logs/${logId}/`,
+        });
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+}
+
 const ERROR_MESSAGE = "I'm unable to answer that question, can you please restate? Try to make it more specific or narrower if possible."
 
 const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, projectVersionId, responseType = 'standard') => {
@@ -167,5 +198,7 @@ export {
     loadUserDocs,
     fetchInspectionLog,
     fetchOwnerDeliverablesLog,
+    fetchAiGeneratedLogs,
+    fetchAiGeneratedLogDetail,
     extractTablesToExcel,
 };
