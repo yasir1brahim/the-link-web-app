@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 
-const DateSelector = ({ ...props }) => {
+const DateSelector = ({ preventManualInput = false, ...props }) => {
   const [focused, setFocused] = useState(false);
+
+  const handleKeyDown = (e) => {
+    if (preventManualInput) {
+      if (!['Tab', 'Enter', 'Escape'].includes(e.key)) {
+        e.preventDefault();
+      }
+    }
+  };
 
   return (
     <div
@@ -20,6 +28,7 @@ const DateSelector = ({ ...props }) => {
         isClearable={props.isClearable}
         onFocus={(e) => (focused === true ? '' : setFocused(true))}
         onBlur={(e) => (focused === false ? '' : setFocused(false))}
+        onKeyDown={handleKeyDown}
         placeholderText={props.placeholderText}
         minDate={props.minDate}
         dateFormat={props.dateFormat}
