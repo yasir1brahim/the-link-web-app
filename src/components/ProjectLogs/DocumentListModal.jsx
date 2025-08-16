@@ -39,9 +39,23 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess }) => {
     setIsDownloading(true);
     try {
       await downloadDocument(documentId);
-      toast.success(`Downloading "${documentName}"`);
+      toast.success(`Successfully downloaded "${documentName}"`);
     } catch (error) {
-      const errorMessage = error.response?.data?.detail || 'Failed to download document';
+      console.error('Error downloading document:', error);
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to download document';
+      
+      if (error.message?.includes('popup was blocked')) {
+        errorMessage = 'Download failed and popup was blocked. Please allow popups and try again.';
+      } else if (error.message?.includes('HTTP')) {
+        errorMessage = 'Document is temporarily unavailable. Please try again later.';
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast.error(`Error: ${errorMessage}`);
     } finally {
       setIsDownloading(false);

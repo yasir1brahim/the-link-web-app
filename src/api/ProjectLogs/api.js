@@ -271,13 +271,41 @@ const downloadDocument = async (documentId) => {
         });
         
         if (response.data.download_url) {
-            // Create a temporary link and trigger download
-            const link = document.createElement('a');
-            link.href = response.data.download_url;
-            link.download = response.data.document_name;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const downloadUrl = response.data.download_url;
+            const fileName = response.data.document_name;
+            
+            try {
+                const fileResponse = await fetch(downloadUrl);
+                
+                if (!fileResponse.ok) {
+                    throw new Error(`Download failed: HTTP ${fileResponse.status}`);
+                }
+                
+                const blob = await fileResponse.blob();
+                
+                const blobUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = fileName;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up blob URL to prevent memory leaks
+                window.URL.revokeObjectURL(blobUrl);
+                
+            } catch (downloadError) {
+                console.warn('Blob download failed, opening in new tab:', downloadError);
+                
+                // Fallback: Open in new tab if blob download fails
+                const newWindow = window.open(downloadUrl, '_blank');
+                
+                if (!newWindow) {
+                    throw new Error('Download failed and popup was blocked. Please allow popups and try again.');
+                }
+            }
         }
         
         return response;
