@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Loader from '../shared/Loader/Loader';
 import handleError from '../../config/errorHandler';
 import { getUserTeams, getUserRoleInTeam } from '../../api/Authentication/api';
-import Tooltip from '@mui/material/Tooltip';
+import SharedTooltip from '../shared/StyledTooltip/StyledTooltip';
 
 const Companies = () => {
     const [companies, setCompanies] = useState([]);
@@ -96,11 +96,11 @@ const Companies = () => {
                               {isMember ? (
                                 <span>{company.name}</span>
                               ) : (
-                                <Tooltip title="View Company" arrow>
+                                <SharedTooltip title="View Company" arrow>
                                 <a href={`/company-profile?companyId=${company.id}`}>
                                   {company.name}
                                 </a>
-                                </Tooltip>
+                                </SharedTooltip>
                               )}
                             </td>
                             <td>{company.active_count}</td>

@@ -19,7 +19,7 @@ import { LaunchIcon } from "../shared/icons/launchIcon";
 import { AddUserIcon } from "../shared/icons/addUserIcon";
 import { DocumentScannerIcon } from "../shared/icons/documentScanner";
 import { ArchiveProjectModal } from "./archiveProjectModal";
-import Tooltip from '@mui/material/Tooltip';
+import StyledTooltip from '../shared/StyledTooltip/StyledTooltip';
 import { RestoreProjectModal } from "./restoreProjectModal";
 import { RestoreIcon } from "../shared/icons/restoreIcon";
 import { CalendarIcon } from "../shared/icons/calendarIcon";
@@ -259,36 +259,36 @@ const ProjectsTable = ({
                         <td>{project.end_date}</td>
                         <td>
                           <div className="action-wrapper">
-                            <Tooltip title="Launch Project" arrow placement="left">
+                            <StyledTooltip title="Launch Project" arrow placement="left">
                               <span
                                 onClick={() => handleLaunch(project)}
                                 style={{ cursor: "pointer" }}
                               >
                                 <LaunchIcon />
                               </span>
-                            </Tooltip>
+                            </StyledTooltip>
                             {noticesFeatureFlagActive && (
-                              <Tooltip title="Add Notices" arrow placement="left">
+                              <StyledTooltip title="Add Notices" arrow placement="left">
                                 <span 
                                   onClick={() => onClickNotices(project)}
                                   style={{ cursor: "pointer" }}
                                 >
                                   <CalendarIcon />
                                 </span>
-                              </Tooltip>
+                              </StyledTooltip>
                             )}
                             {fullSpecProcessingFeatureFlagActive && (
-                              <Tooltip title="Full Spec Processing" arrow placement="left">
+                              <StyledTooltip title="Full Spec Processing" arrow placement="left">
                                 <span 
                                   onClick={() => onClickFullSpecProcessing(project)}
                                   style={{ cursor: "pointer" }}
                                 >
                                   <DocumentScannerIcon />
                                 </span>
-                              </Tooltip>
+                              </StyledTooltip>
                             )}
                             {isArchived ? (
-                              <Tooltip title="Restore Project" arrow placement="left">
+                              <StyledTooltip title="Restore Project" arrow placement="left">
                                 <span
                                   onClick={() => {
                                     toggleRestoreProjectModal()
@@ -298,20 +298,20 @@ const ProjectsTable = ({
                                 >
                                   <RestoreIcon />
                                 </span>
-                              </Tooltip>
+                              </StyledTooltip>
                             ) : (
                               <>
                                 {userRole === 'project_admin' ? (
                                   <>
-                                    <Tooltip title="Edit Project" arrow placement="left">
+                                    <StyledTooltip title="Edit Project" arrow placement="left">
                                       <span
                                         onClick={() => handleEdit(project)}
                                         style={{ cursor: "pointer" }}
                                       >
                                         <EditIcon />
                                       </span>
-                                    </Tooltip>
-                                    <Tooltip title="Archive Project" arrow placement="left">
+                                    </StyledTooltip>
+                                    <StyledTooltip title="Archive Project" arrow placement="left">
                                       <span
                                         onClick={() => {
                                           toggleArchiveProjectModal()
@@ -321,10 +321,10 @@ const ProjectsTable = ({
                                       >
                                         <ArchiveIcon />
                                       </span>
-                                    </Tooltip>
+                                    </StyledTooltip>
                                   </>
                                 ) : (
-                                  <Tooltip title="Add Users to Project" arrow placement="left">
+                                  <StyledTooltip title="Add Users to Project" arrow placement="left">
                                     <span
                                       onClick={() => {
                                         toggleAddUsersModal()
@@ -334,7 +334,7 @@ const ProjectsTable = ({
                                     >
                                       <AddUserIcon />
                                     </span>
-                                  </Tooltip>
+                                  </StyledTooltip>
                                 )}
                               </>
                             )}

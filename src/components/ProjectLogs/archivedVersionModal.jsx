@@ -1,7 +1,7 @@
 import { React, useState } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "reactstrap";
 import { RestoreIcon } from "../shared/icons/restoreIcon";
-import Tooltip from '@mui/material/Tooltip';
+import StyledTooltip from "../shared/StyledTooltip/StyledTooltip";
 
 const ArchivedVersionsModal = ({
   isOpen,
@@ -29,7 +29,7 @@ const ArchivedVersionsModal = ({
                 <tr key={version.id}>
                   <td>{version.version_name}</td>
                   <td>
-                    <Tooltip 
+                    <StyledTooltip 
                       title={loadingUnarchiveId === version.id ? "Unarchiving..." : "Restore Project"} 
                       arrow
                       placement="left"
@@ -42,7 +42,7 @@ const ArchivedVersionsModal = ({
                       >
                         <RestoreIcon />
                       </span>
-                    </Tooltip>
+                    </StyledTooltip>
                   </td>
                 </tr>
               ))}

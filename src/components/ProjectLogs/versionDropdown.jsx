@@ -4,7 +4,7 @@ import { EditIcon } from "../shared/icons/editIcon";
 import { LaunchIcon } from '../shared/icons/launchIcon';
 import { ArchiveIcon } from '../shared/icons/archiveIcon';
 import { AddIcon } from '../shared/icons/AddIcon';
-import Tooltip from '@mui/material/Tooltip';
+import StyledTooltip from '../shared/StyledTooltip/StyledTooltip';
 
 
 const VersionDropdown = ({ 
@@ -41,32 +41,32 @@ const VersionDropdown = ({
                         <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: '24px' }}>
                             <div style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginRight: '12px' }}>{version.version_name}</div>
                             <div style={{ flexShrink: 0, display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                <Tooltip title="View" arrow>
+                                <StyledTooltip title="View" arrow>
                                 <span 
                                     onClick={(e) => { e.stopPropagation(); onSelectVersion(version.id); setIsOpen(false); }} 
                                     style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                                 >
                                     <LaunchIcon />
                                 </span>
-                                </Tooltip>
-                                <Tooltip title="Edit" arrow>
+                                </StyledTooltip>
+                                <StyledTooltip title="Edit" arrow>
                                 <span 
                                     onClick={(e) => { e.stopPropagation(); onPressEdit(version.id); setIsOpen(false); }} 
                                     style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                                 >
                                     <EditIcon />
                                 </span>
-                                </Tooltip>
+                                </StyledTooltip>
 
                                 {availableVersions.length > 1 && (
-                                    <Tooltip title="Archive" arrow>
+                                    <StyledTooltip title="Archive" arrow>
                                     <span 
                                         onClick={(e) => { e.stopPropagation(); onPressArchive(version.id); setIsOpen(false); }} 
                                         style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                                     >
                                         <ArchiveIcon />
                                     </span>
-                                    </Tooltip>
+                                    </StyledTooltip>
                                 )}
                             </div>
                         </div>

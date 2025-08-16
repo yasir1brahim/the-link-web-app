@@ -11,7 +11,7 @@ import { ReactComponent as ExcelLogo } from "../../../assets/images/microsoft-ex
 import { ReactComponent as MergeIcon } from "../../../assets/images/merge.svg";
 import { ReactComponent as JetBuildLogo } from "../../../assets/images/jet_build.svg";
 import { Check } from '@mui/icons-material';
-import Tooltip from '@mui/material/Tooltip';
+import StyledTooltip from '../StyledTooltip/StyledTooltip';
 
 // @ts-ignore
 const ProjectLogsActionPanel = ({ ...props }) => {
@@ -21,7 +21,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
         <div className="d-flex p-0">
           <div className="mr-2 mb-1">
             {localStorage.getItem('roleId') !== '7' && !!props.handleDeleteLogs && (
-              <Tooltip title="Delete" arrow>
+              <StyledTooltip title="Delete" arrow>
                 <button
                   type="button"
                   className="trash-icon"
@@ -43,7 +43,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                     />
                   </svg>
                 </button>
-              </Tooltip>
+              </StyledTooltip>
             )}
           </div>
           {props.isFullSpecProcessing && props.onExportCsv && (
