@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "reactstrap";
-import { reprocessDocument } from "../../api/ProjectLogs/api";
+import { reprocessDocument, downloadDocument } from "../../api/ProjectLogs/api";
 import { toast } from "react-toastify";
 import Loader from "../shared/Loader/Loader";
+import { Tooltip, IconButton } from "@mui/material";
+import { ReactComponent as ReprocessIcon } from "../../assets/images/file-reprocess.svg";
+import { ReactComponent as DownloadIcon } from "../../assets/images/file-download.svg";
 
 const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess }) => {
   const [isReprocessing, setIsReprocessing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleReprocess = async (documentId, documentName) => {
     setIsReprocessing(true);
@@ -31,6 +35,19 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess }) => {
     }
   };
 
+  const handleDownload = async (documentId, documentName) => {
+    setIsDownloading(true);
+    try {
+      await downloadDocument(documentId);
+      toast.success(`Downloading "${documentName}"`);
+    } catch (error) {
+      const errorMessage = error.response?.data?.detail || 'Failed to download document';
+      toast.error(`Error: ${errorMessage}`);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <>
       <Modal isOpen={isOpen} toggle={toggle} fade={false} className="new-customer modal-lg">
@@ -43,7 +60,7 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess }) => {
                   <tr>
                     <th style={{ width: "60%" }}>File Name</th>
                     <th style={{ width: "20%" }}>Date Uploaded</th>
-                    <th style={{ width: "20%" }}>Action</th>
+                    <th style={{ width: "20%" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -54,14 +71,38 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess }) => {
                         {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "-"}
                       </td>
                       <td>
-                        <Button
-                          color="primary"
-                          size="sm"
-                          onClick={() => handleReprocess(doc.document_id, doc.document_name)}
-                          disabled={isReprocessing}
-                        >
-                          Reprocess
-                        </Button>
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                          <Tooltip title="Reprocess Document" placement="top">
+                            <span>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleReprocess(doc.document_id, doc.document_name)}
+                                disabled={isReprocessing || isDownloading}
+                                style={{ 
+                                  color: '#1976d2',
+                                  // padding: '4px'
+                                }}
+                              >
+                                <ReprocessIcon style={{ width: '20px', height: '20px' }}/>
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          <Tooltip title="Download Document" placement="top">
+                            <span>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDownload(doc.document_id, doc.document_name)}
+                                disabled={isReprocessing || isDownloading}
+                                style={{ 
+                                  color: '#1976d2',
+                                  padding: '4px'
+                                }}
+                              >
+                                <DownloadIcon style={{ width: '20px', height: '20px' }}/>  
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -73,13 +114,13 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess }) => {
           )}
         </ModalBody>
         <ModalFooter>
-          <Button color="secondary" onClick={toggle} disabled={isReprocessing}>
+          <Button color="secondary" onClick={toggle} disabled={isReprocessing || isDownloading}>
             Close
           </Button>
         </ModalFooter>
       </Modal>
 
-      <Loader showComponentLoader={isReprocessing} />
+      <Loader showComponentLoader={isReprocessing || isDownloading} />
     </>
   );
 };

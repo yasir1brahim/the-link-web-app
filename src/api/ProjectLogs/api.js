@@ -260,6 +260,34 @@ const reprocessDocument = async (documentId) => {
     }
 }
 
+const downloadDocument = async (documentId) => {
+    try {
+        const response = await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/download-document/`,
+            params: {
+                document_id: documentId
+            }
+        });
+        
+        if (response.data.download_url) {
+            // Create a temporary link and trigger download
+            const link = document.createElement('a');
+            link.href = response.data.download_url;
+            link.download = response.data.document_name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        return response;
+    } catch (error) {
+        console.log("error in downloadDocument", error);
+        handleError(error);
+        throw error;
+    }
+}
+
 
 const getExcelExportHeader = async () => {
     try {
@@ -377,6 +405,7 @@ export {
     deleteSubmittalItems,
     uploadFiles,
     reprocessDocument,
+    downloadDocument,
     getExportExcelData,
     getExportJetBuildData,
     getExcelExportHeader,
