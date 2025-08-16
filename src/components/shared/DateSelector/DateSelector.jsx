@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import DatePicker from 'react-datepicker';
+import { useSmartDateInput, useDateKeyboardHandler, useDateFocus } from '../../../hooks/useDateInput';
 
-const DateSelector = ({ preventManualInput = false, ...props }) => {
-  const [focused, setFocused] = useState(false);
+const DateSelector = ({ preventManualInput = false, smartInput = false, ...props }) => {
 
-  const handleKeyDown = (e) => {
-    if (preventManualInput) {
-      if (!['Tab', 'Enter', 'Escape'].includes(e.key)) {
-        e.preventDefault();
-      }
-    }
-  };
+  const { focused, handleFocus, handleBlur } = useDateFocus();
+  
+  const { 
+    inputValue, 
+    isValidCompleteDate, 
+    handleInputChange, 
+    handleDatePickerChange 
+  } = useSmartDateInput(props.selected, props.onChange, smartInput);
+  
+  const handleKeyDown = useDateKeyboardHandler(preventManualInput, smartInput, isValidCompleteDate);
 
   return (
     <div
@@ -24,14 +27,16 @@ const DateSelector = ({ preventManualInput = false, ...props }) => {
         startDate={props.startDate}
         endDate={props.endDate}
         selected={props.selected}
-        onChange={(e) => props.onChange(e)}
+        onChange={handleDatePickerChange}
         isClearable={props.isClearable}
-        onFocus={(e) => (focused === true ? '' : setFocused(true))}
-        onBlur={(e) => (focused === false ? '' : setFocused(false))}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         onKeyDown={handleKeyDown}
+        onChangeRaw={(e) => smartInput && handleInputChange(e.target.value)}
         placeholderText={props.placeholderText}
         minDate={props.minDate}
         dateFormat={props.dateFormat}
+        value={smartInput ? inputValue : undefined}
       />
       <label className="text-label">{props.labelText}</label>
       <i className="has-icon icon-calendar"></i>
