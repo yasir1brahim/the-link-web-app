@@ -26,7 +26,7 @@ const BaseEmployeeForm = ({
           className="new-user modal-lg"
         >
           <ModalHeader toggle={toggleModal}>{formTitle}</ModalHeader>
-          <ModalBody>
+          <ModalBody className="employee-form-body">
             <form className="create-user-form">
               <div className="create-user-content">
                 <div className="row">
