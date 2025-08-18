@@ -9,6 +9,9 @@ import handleError from '../../config/errorHandler';
 import CollaborationPdfReader from '../PdfReader/collaborationPdfReader';
 // import Switch from 'react-switch';
 import CollaborationPdfVersionControl from '../PdfReader/collaborationPdfVersionControl';
+import DocumentListModal from "../ProjectLogs/DocumentListModal";
+import useDocumentRefresh from "../../hooks/useDocumentRefresh";
+import { getProjectDetails } from "../../api/Projects/api";
 
 const CollaborationHub = () => {
   const { state } = useLocation();
@@ -25,10 +28,13 @@ const CollaborationHub = () => {
     projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null;
   const projectName = projectDetails?.length >= 4 ? projectDetails[3] : null;
   const [modal, setModal] = useState(false);
+  const [showDocumentListModal, setShowDocumentListModal] = useState(false);
   const toggleModal = () => setModal(!modal);
   const [pdfFile, setPdfFile] = useState({});
   const [fileData, setFileData] = useState({});
   const [docParsed, setDocParsed] = useState(0);
+  const [documentData, setDocumentData] = useState([]);
+  const refreshDocuments = useDocumentRefresh(state?.project?.project_id || projectId, setDocumentData, setDocParsed);
   const [collabDocs, setCollabDocs] = useState([]);
   const [isUploadLoading, setUploadLoading] = useState(false);
   const [pageRefresh, setPageRefresh] = useState(false);
@@ -65,6 +71,14 @@ const CollaborationHub = () => {
         url: `/project_data/${state.project?.project_id || projectId}`
       });
       setDocParsed(response.data.doc_parsed);
+      
+      // Also fetch document details for the modal
+      try {
+        const projectDetailsResponse = await getProjectDetails(state.project?.project_id || projectId);
+        setDocumentData(projectDetailsResponse.data.document_details || []);
+      } catch (error) {
+        console.error('Error fetching document details:', error);
+      }
     };
 
     fetchData().catch((error) => {
@@ -167,8 +181,12 @@ const CollaborationHub = () => {
           <div className="collabHub-sideNav-contents">
             <div className="side-nav-collab-hub-heading">Spec Sections</div>
             {docParsed ? (
-              <div className="side-nav-collab-hub-heading collab-hub-sub-heading">
-                {`Uploaded: ${docParsed}`}
+              <div 
+                className="side-nav-collab-hub-heading collab-hub-sub-heading"
+                style={{ cursor: "pointer" }}
+                onClick={() => setShowDocumentListModal(true)}
+              >
+                {`Uploaded: ${docParsed} document${docParsed > 1 ? 's' : ''}`}
               </div>
             ) : null}
             <div className="side-nav-collab-hub" id="chub-item-container" />
@@ -203,6 +221,12 @@ const CollaborationHub = () => {
         successModal={successModal}
         toggleSuccessModal={toggleSuccessModal}
         fileData={fileData}
+      />
+      <DocumentListModal
+        isOpen={showDocumentListModal}
+        toggle={() => setShowDocumentListModal(false)}
+        documents={documentData}
+        onAfterReprocess={refreshDocuments}
       />
     </>
   );

@@ -260,6 +260,62 @@ const reprocessDocument = async (documentId) => {
     }
 }
 
+const downloadDocument = async (documentId) => {
+    try {
+        const response = await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/download-document/`,
+            params: {
+                document_id: documentId
+            }
+        });
+        
+        if (response.data.download_url) {
+            const downloadUrl = response.data.download_url;
+            const fileName = response.data.document_name;
+            
+            try {
+                const fileResponse = await fetch(downloadUrl);
+                
+                if (!fileResponse.ok) {
+                    throw new Error(`Download failed: HTTP ${fileResponse.status}`);
+                }
+                
+                const blob = await fileResponse.blob();
+                
+                const blobUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = fileName;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up blob URL to prevent memory leaks
+                window.URL.revokeObjectURL(blobUrl);
+                
+            } catch (downloadError) {
+                console.warn('Blob download failed, opening in new tab:', downloadError);
+                
+                // Fallback: Open in new tab if blob download fails
+                const newWindow = window.open(downloadUrl, '_blank');
+                
+                if (!newWindow) {
+                    throw new Error('Download failed and popup was blocked. Please allow popups and try again.');
+                }
+            }
+        }
+        
+        return response;
+    } catch (error) {
+        console.log("error in downloadDocument", error);
+        handleError(error);
+        throw error;
+    }
+}
+
 
 const getExcelExportHeader = async () => {
     try {
@@ -377,6 +433,7 @@ export {
     deleteSubmittalItems,
     uploadFiles,
     reprocessDocument,
+    downloadDocument,
     getExportExcelData,
     getExportJetBuildData,
     getExcelExportHeader,
