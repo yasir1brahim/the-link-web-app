@@ -29,10 +29,49 @@ const LogsList = ({
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedLogMessage, setSelectedLogMessage] = useState(null);
+    const [isPolling, setIsPolling] = useState(false);
+    const [selectedLogId, setSelectedLogId] = useState(null);
 
     useEffect(() => {
         loadLogs();
     }, [projectId, projectVersionId, logType]);
+
+    useEffect(() => {
+        let intervalId = null;
+        if (isPolling && selectedLogId) {
+            intervalId = setInterval(async () => {
+                try {
+                    const logDetail = await fetchAiGeneratedLogDetail(projectId, selectedLogId);
+                    if (!logDetail) return;
+                    const messageType = logType === 'inspection_log'
+                        ? MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG
+                        : logType === 'owner_deliverables_log'
+                        ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
+                        : 'ASSISTANT';
+                    setSelectedLogMessage({
+                        type: messageType,
+                        message: logDetail.log_table,
+                        session_id: null,
+                        questionid: logDetail.id,
+                        sources: null,
+                        created_at: logDetail.created_at,
+                        log_status: logDetail.log_status,
+                    });
+                    if (logDetail.log_status !== 'PROCESSING') {
+                        setIsPolling(false);
+                        // Also refresh list to reflect final status
+                        loadLogs();
+                    }
+                } catch (e) {
+                    // stop polling on repeated errors
+                    setIsPolling(false);
+                }
+            }, 2000);
+        }
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [isPolling, selectedLogId, projectId, logType]);
 
     const loadLogs = async () => {
         setLoading(true);
@@ -48,49 +87,51 @@ const LogsList = ({
 
     const handleLogClick = async (log) => {
         try {
-            console.log("log", log);
             const logDetail = await fetchAiGeneratedLogDetail(projectId, log.id);
-            
-            // Determine the message type based on log type
             let messageType;
             if (logType === 'inspection_log') {
                 messageType = MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG;
             } else if (logType === 'owner_deliverables_log') {
                 messageType = MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG;
             } else {
-                messageType = 'ASSISTANT'; // fallback
+                messageType = 'ASSISTANT';
             }
-            
-            // Create a message object that matches the expected format
             const message = {
                 type: messageType,
-                message: logDetail.log_table,
+                message: logDetail?.log_table,
                 session_id: null,
-                questionid: logDetail.id,
+                questionid: log.id,
                 sources: null,
-                created_at: logDetail.created_at,
-                log_status: logDetail.log_status
+                created_at: logDetail?.created_at,
+                log_status: logDetail?.log_status,
             };
-            
-            // Set the selected log message to display in main area
+            setSelectedLogId(log.id);
             setSelectedLogMessage(message);
+            // Start polling if processing
+            if (logDetail && logDetail.log_status === 'PROCESSING') {
+                setIsPolling(true);
+            } else {
+                setIsPolling(false);
+            }
         } catch (error) {
             console.error('Error loading log detail:', error);
+            setIsPolling(false);
         }
     };
 
     const handleGenerateNewLog = () => {
         if (onGenerateNewLog) {
             onGenerateNewLog(logType);
+            loadLogs();
         }
     };
 
     const getLogTypeDisplayName = (type) => {
         switch (type) {
             case 'inspection_log':
-                return 'Inspection Log';
+                return 'Inspections List';
             case 'owner_deliverables_log':
-                return 'Owner Deliverables Log';
+                return 'Owner Deliverables List';
             default:
                 return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
@@ -102,6 +143,8 @@ const LogsList = ({
                 return 'green';
             case 'FAILURE':
                 return 'red';
+            case 'PROCESSING':
+                return 'blue';
             default:
                 return 'gray';
         }
@@ -212,6 +255,7 @@ const LogsList = ({
                                 <VStack spacing={4} pb={40}>
                                     {logs.map((log) => {
                                         const StatusIcon = getStatusIcon(log.log_status);
+                                        const isProcessing = log.log_status === 'PROCESSING';
                                         return (
                                             <Box
                                                 key={log.id}
@@ -229,7 +273,11 @@ const LogsList = ({
                                                 <VStack align="start" spacing={2}>
                                                     <HStack justify="space-between" w="100%">
                                                         <HStack spacing={2}>
-                                                            {StatusIcon && <Icon as={StatusIcon} color={`${getStatusColor(log.log_status)}.400`} />}
+                                                            {isProcessing ? (
+                                                                <Spinner size="xs" color={`${getStatusColor(log.log_status)}.400`} />
+                                                            ) : (
+                                                                StatusIcon && <Icon as={StatusIcon} color={`${getStatusColor(log.log_status)}.400`} />
+                                                            )}
                                                             <Badge colorScheme={getStatusColor(log.log_status)} variant="subtle">
                                                                 {log.log_status}
                                                             </Badge>
@@ -267,6 +315,7 @@ const LogsList = ({
                             messageType={selectedLogMessage.type}
                             message={selectedLogMessage.message}
                             projectId={projectId}
+                            isLoading={selectedLogMessage.log_status === 'PROCESSING'}
                         />
                     </Box>
                 ) : (
