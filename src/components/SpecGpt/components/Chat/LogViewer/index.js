@@ -35,6 +35,8 @@ const LogViewer = ({
                 ? MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG
                 : logType === 'owner_deliverables_log'
                 ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
+                : logType === 'owner_deliverables'
+                ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
                 : 'ASSISTANT';
             
             setLogMessage({
@@ -67,6 +69,8 @@ const LogViewer = ({
                     const messageType = logType === 'inspection_log'
                         ? MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG
                         : logType === 'owner_deliverables_log'
+                        ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
+                        : logType === 'owner_deliverables'
                         ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
                         : 'ASSISTANT';
                     
@@ -101,6 +105,8 @@ const LogViewer = ({
                 const messageType = logType === 'inspection_log'
                     ? MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG
                     : logType === 'owner_deliverables_log'
+                    ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
+                    : logType === 'owner_deliverables'
                     ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
                     : 'ASSISTANT';
                 
@@ -156,7 +162,9 @@ const LogViewer = ({
             case 'inspection_log':
                 return 'Inspections List';
             case 'owner_deliverables_log':
-                return 'Owner Deliverables List';
+                return 'Owner Deliverables';
+            case 'owner_deliverables':
+                return 'Owner Deliverables';
             default:
                 return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
@@ -219,22 +227,21 @@ const LogViewer = ({
                 <Box w="280px" position={"absolute"} top={0} bottom={0} left={0} style={{ marginLeft: "-20px" }}>
                     <Box w="100%" bgColor="#1F2A43" h="100vh" display="flex" flexDirection="column">
                         <Box px={{ base: "24px", lg: "30px" }} flexShrink={0}>
-                            <Flex py="20px" align="center" justifyContent="space-between">
-                                <Flex align="center" gap={3}>
-                                    <Button
-                                        variant="ghost"
-                                        color="white"
-                                        onClick={onBack}
-                                        leftIcon={<ChevronLeftIcon />}
-                                        _hover={{ bg: "rgba(255,255,255,0.1)" }}
-                                    >
-                                        Back
-                                    </Button>
-                                    <Text fontSize={{ base: "18px", lg: "24px" }} fontWeight="semibold" color="#FFFFFF">
-                                        {getLogTypeDisplayName(logType)}
-                                    </Text>
-                                </Flex>
-                            </Flex>
+                            <VStack spacing={3} py="20px" align="start">
+                                <Button
+                                    variant="ghost"
+                                    color="white"
+                                    onClick={onBack}
+                                    leftIcon={<ChevronLeftIcon />}
+                                    _hover={{ bg: "rgba(255,255,255,0.1)" }}
+                                    alignSelf="flex-start"
+                                >
+                                    Back
+                                </Button>
+                                <Text fontSize={{ base: "18px", lg: "24px" }} fontWeight="semibold" color="#FFFFFF">
+                                    {getLogTypeDisplayName(logType)}
+                                </Text>
+                            </VStack>
                             
                             {/* Log Status and Regenerate Button */}
                             {logMessage && (
@@ -242,19 +249,22 @@ const LogViewer = ({
                                     <Box w="100%" bg="#24314D" p={4} borderRadius="8px">
                                         <VStack align="start" spacing={2}>
                                             <HStack justify="space-between" w="100%">
-                                                <HStack spacing={2}>
-                                                    {logMessage.log_status === 'PROCESSING' ? (
-                                                        <Spinner size="xs" color={`${getStatusColor(logMessage.log_status)}.400`} />
-                                                    ) : (
-                                                        getStatusIcon(logMessage.log_status) && 
-                                                        <Icon as={getStatusIcon(logMessage.log_status)} color={`${getStatusColor(logMessage.log_status)}.400`} />
-                                                    )}
-                                                    <Badge colorScheme={getStatusColor(logMessage.log_status)} variant="subtle">
-                                                        {logMessage.log_status}
-                                                    </Badge>
-                                                </HStack>
-                                                <Text fontSize="xs" color="#676F74">
-                                                    {formatDate(logMessage.created_at)}
+                                                {logMessage.log_status != 'SUCCESS' && (
+                                                    <HStack spacing={2}>
+                                                        {logMessage.log_status === 'PROCESSING' ? (
+                                                            <Spinner size="xs" color={`${getStatusColor(logMessage.log_status)}.400`} />
+                                                        ) : (
+                                                            getStatusIcon(logMessage.log_status) && 
+                                                            <Icon as={getStatusIcon(logMessage.log_status)} color={`${getStatusColor(logMessage.log_status)}.400`} />
+                                                        )}
+                                                        <Badge colorScheme={getStatusColor(logMessage.log_status)} variant="subtle">
+                                                            {logMessage.log_status}
+                                                        </Badge>
+                                                    </HStack>
+                                                )}
+
+                                                <Text fontSize="s" color="#676F74">
+                                                    Generated on {formatDate(logMessage.created_at)}
                                                 </Text>
                                             </HStack>
                                         </VStack>
