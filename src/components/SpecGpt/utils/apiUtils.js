@@ -83,6 +83,26 @@ const fetchAiGeneratedLogDetail = async (projectId, logId) => {
     }
 }
 
+const fetchMostRecentLog = async (projectId, projectVersionId, logType) => {
+    try {
+        const response = await axiosInstance({
+            method: 'GET',
+            url: `/api/deliverables/${projectId}/ai-generated-logs/`,
+            params: {
+                project_version_id: projectVersionId,
+                log_type: logType,
+                page: 1
+            }
+        });
+        console.log('Most recent log:', response.data);
+        // The backend orders by -created_at, so the first result is the most recent
+        return response.data.results.length > 0 ? response.data.results[0] : null;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+}
+
 const ERROR_MESSAGE = "I'm unable to answer that question, can you please restate? Try to make it more specific or narrower if possible."
 
 const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, projectVersionId, responseType = 'standard') => {
@@ -219,6 +239,7 @@ export {
     fetchOwnerDeliverablesLog,
     fetchAiGeneratedLogs,
     fetchAiGeneratedLogDetail,
+    fetchMostRecentLog,
     extractTablesToExcel,
     generateAiLog,
 };

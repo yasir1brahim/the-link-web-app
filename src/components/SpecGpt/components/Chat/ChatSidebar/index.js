@@ -27,10 +27,10 @@ const ChatSidebar = ({
                     {isInspectionLogFeatureFlagActive && (
                         <>
                             <Flex onClick={onShowInspectionLogsClick} mb={3} border="1px" borderColor="#FFFFFF33" px={3} py={3} borderRadius="6px" gap={3} align="center" cursor="pointer" _hover={{ bgColor: "#FFFFFF11" }}>
-                                <Text marginBottom={0} fontSize="14px" color="#FFFFFF">View Inspection Logs</Text>
+                                <Text marginBottom={0} fontSize="14px" color="#FFFFFF">View Inspection Log</Text>
                             </Flex>
                             <Flex onClick={onShowOwnerDeliverablesLogsClick} mb={3} border="1px" borderColor="#FFFFFF33" px={3} py={3} borderRadius="6px" gap={3} align="center" cursor="pointer" _hover={{ bgColor: "#FFFFFF11" }}>
-                                <Text marginBottom={0} fontSize="14px" color="#FFFFFF">View Owner Deliverables Logs</Text>
+                                <Text marginBottom={0} fontSize="14px" color="#FFFFFF">View Owner Deliverables Log</Text>
                             </Flex>
                         </>
                     )}
