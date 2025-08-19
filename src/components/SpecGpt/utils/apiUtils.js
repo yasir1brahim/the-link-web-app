@@ -45,11 +45,11 @@ const fetchChatSessionHistory = async (projectId, chatSessionID) => {
 }
 
 const fetchInspectionLog = async (projectId, projectVersionId) => {
-    return fetchPromptAnswer('', 1, null, projectId, projectVersionId, 'inspection_log');
+    return generateAiLog(projectId, projectVersionId, 'inspection_log');
 }
 
 const fetchOwnerDeliverablesLog = async (projectId, projectVersionId) => {
-    return fetchPromptAnswer('', 1, null, projectId, projectVersionId, 'owner_deliverables_log');
+    return generateAiLog(projectId, projectVersionId, 'owner_deliverables_log');
 }
 
 // New functions for AI-generated logs
@@ -122,6 +122,25 @@ const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, project
     } catch (error) {
         console.log('Error: ', error);
         return {session_id: chatSessionId, questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: ERROR_MESSAGE};
+    }
+}
+
+
+const generateAiLog = async (projectId, projectVersionId, logType) => {
+    try {
+        const response = await axiosInstance({
+            method: 'POST',
+            url: `/api/deliverables/${projectId}/specgpt-chats/generate-ai-log/`,
+            data: {
+                'project_id': projectId,
+                'project_version_id': projectVersionId,
+                'log_type': logType,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.log('Error: ', error);
+        return null;
     }
 }
 
@@ -201,4 +220,5 @@ export {
     fetchAiGeneratedLogs,
     fetchAiGeneratedLogDetail,
     extractTablesToExcel,
+    generateAiLog,
 };
