@@ -264,7 +264,7 @@ const LogViewer = ({
                                                 )}
 
                                                 <Text fontSize="s" color="#676F74">
-                                                    Generated on {formatDate(logMessage.created_at)}
+                                                    {logMessage.log_status === 'SUCCESS' ? `Generated on ${formatDate(logMessage.created_at)}` : `Last updated on ${formatDate(logMessage.created_at)}`}
                                                 </Text>
                                             </HStack>
                                         </VStack>
