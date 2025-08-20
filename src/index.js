@@ -32,6 +32,7 @@ import EllisDonMicrosoftLoginCallback from './components/Authentication/EllisDon
 import SSODisambiguationPage from './components/Authentication/SSODisambiguationPage';
 import ChatPage from './components/SpecGpt/containers/ChatPage';
 import ViewPDFPage from './components/SpecGpt/containers/ViewPDFPage';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -133,11 +134,13 @@ const router = createBrowserRouter([
 
 ReactDOM.render(
   <React.StrictMode>
-    <AuthProvider>
-      <FeatureFlagsProvider>
-        <RouterProvider router={router} />
-      </FeatureFlagsProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <FeatureFlagsProvider>
+          <RouterProvider router={router} />
+        </FeatureFlagsProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   </React.StrictMode>,
   document.getElementById('root')
 );
