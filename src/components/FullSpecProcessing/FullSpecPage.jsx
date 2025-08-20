@@ -30,8 +30,11 @@ import { getSemanticallyProcessedSpecItems } from "../../api/ProjectLogs/api";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { useFeatureFlags } from "../../contexts/FeatureFlagsContext";
+import useDocumentRefresh from "../../hooks/useDocumentRefresh";
+import DocumentListModal from "../ProjectLogs/DocumentListModal";
 
 const NoticesPage = () => {
+  const [showDocumentListModal, setShowDocumentListModal] = useState(false);
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -135,6 +138,9 @@ const NoticesPage = () => {
     }
     return 'Unauthorized';
   }
+
+  const refreshDocuments = useDocumentRefresh(projectId, setDocumentData, setDocParsed);
+
 
   useEffect(() => {
     const fetchProjectData = async () => {
@@ -511,6 +517,7 @@ const NoticesPage = () => {
             isNotices={false}
             isFullSpecProcessing={true}
             onExportCsv={handleExportCsv}
+            onShowDocumentListModal={() => setShowDocumentListModal(true)}
           />
           {documentIsProcessing(documentData) && (
             <div
@@ -681,6 +688,12 @@ const NoticesPage = () => {
           <DocumentStatus documentData={documentData} />
         </ModalBody>
       </Modal>
+      <DocumentListModal
+        isOpen={showDocumentListModal}
+        toggle={() => setShowDocumentListModal(false)}
+        documents={documentData}
+        onAfterReprocess={refreshDocuments}
+      />
       <Loader showComponentLoader={isLoading} />
     </div>
   );

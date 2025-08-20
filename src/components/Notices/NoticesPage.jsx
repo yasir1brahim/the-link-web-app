@@ -30,6 +30,8 @@ import { getNotices } from "../../api/Notices/api";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { useFeatureFlags } from "../../contexts/FeatureFlagsContext";
+import useDocumentRefresh from "../../hooks/useDocumentRefresh";
+import DocumentListModal from "../ProjectLogs/DocumentListModal";
 
 
 const NoticesPage = () => {
@@ -38,6 +40,7 @@ const NoticesPage = () => {
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
   const [showDocumentStatusModal, setShowDocumentStatusModal] = useState(false);
+  const [showDocumentListModal, setShowDocumentListModal] = useState(false);
   const toggleDocumentStatusModal = () =>
     setShowDocumentStatusModal(!showDocumentStatusModal);
   const toggleModal = () => setModal(!modal);
@@ -93,6 +96,7 @@ const NoticesPage = () => {
   const [projectId, setProjectId] = useState(projectDetails?.length
     ? JSON.parse(projectDetails[0])
     : null);
+  const refreshDocuments = useDocumentRefresh(projectId, setDocumentData, setDocParsed);
   const [customerId, setCustomerId] = useState(
     projectDetails?.length >= 2 ? JSON.parse(projectDetails[1]) : null);
   const [projectName, setProjectName] = useState("");
@@ -491,6 +495,7 @@ const NoticesPage = () => {
             toggleModal={toggleModal}
             btnSize={"small"}
             isNotices={true}
+            onShowDocumentListModal={() => setShowDocumentListModal(true)}
           />
           {documentIsProcessing(documentData) && (
             <div
@@ -661,6 +666,12 @@ const NoticesPage = () => {
           <DocumentStatus documentData={documentData} />
         </ModalBody>
       </Modal>
+      <DocumentListModal
+        isOpen={showDocumentListModal}
+        toggle={() => setShowDocumentListModal(false)}
+        documents={documentData}
+        onAfterReprocess={refreshDocuments}
+      />
       <Loader showComponentLoader={isLoading} />
     </div>
   );

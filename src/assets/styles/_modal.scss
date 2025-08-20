@@ -664,6 +664,25 @@
                     overflow: auto;
                     max-height: 500px;
                     padding-bottom: 0;
+                    
+                    &.employee-form-body {
+                        overflow: visible;
+                        
+                        .create-user-form {
+                            .create-user-content {
+                                overflow: visible;
+                                
+                                .has-typehead {
+                                    position: relative;
+                                    z-index: 1050;
+                                    
+                                    .rbt-menu {
+                                        z-index: 1051;
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     .create-customer-form {
                         .create-customer-content {
