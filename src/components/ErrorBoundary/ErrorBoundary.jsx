@@ -22,7 +22,7 @@ const ErrorFallback = ({ error, errorInfo }) => {
         <h1 className="error-title">Something went wrong</h1>
         
         <p className="error-message">
-          We're sorry, but something unexpected happened. Our team has been notified and is working to fix this issue.
+          We're sorry, but something unexpected happened.
         </p>
 
         {process.env.NODE_ENV === 'development' && (
