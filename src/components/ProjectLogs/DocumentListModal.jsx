@@ -3,10 +3,11 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "reactstrap";
 import { reprocessDocument, downloadDocument, deleteDocument } from "../../api/ProjectLogs/api";
 import { toast } from "react-toastify";
 import Loader from "../shared/Loader/Loader";
-import { Tooltip, IconButton } from "@mui/material";
+import { IconButton } from "@mui/material";
 import { ReactComponent as ReprocessIcon } from "../../assets/images/file-reprocess.svg";
 import { ReactComponent as DownloadIcon } from "../../assets/images/file-download.svg";
 import { ReactComponent as TrashIcon } from "../../assets/images/trash.svg";
+import StyledTooltip from "../shared/StyledTooltip/StyledTooltip";
 
 const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfterDelete }) => {
   const [isReprocessing, setIsReprocessing] = useState(false);
@@ -21,7 +22,7 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
       console.log('Reprocessing document:', { documentId, documentName });
       await reprocessDocument(documentId);
 
-      toast.success(`Successfully started reprocessing "${documentName}"`);
+      toast.success("Document reprocessing started successfully");
 
       setIsReprocessing(false);
       toggle();
@@ -43,7 +44,7 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
     setIsDownloading(true);
     try {
       await downloadDocument(documentId);
-      toast.success(`Successfully downloaded "${documentName}"`);
+      toast.success("Document Downloaded Successfully");
     } catch (error) {
       console.error('Error downloading document:', error);
       
@@ -77,7 +78,7 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
     setIsDeleting(true);
     try {
       await deleteDocument(documentToDelete.id);
-      toast.success(`Successfully deleted "${documentToDelete.name}"`);
+      toast.success("Document Deleted Successfully");
       
       setDeleteConfirmationModal(false);
       setDocumentToDelete(null);
@@ -125,7 +126,7 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: '4px' }}>
-                          <Tooltip title="Reprocess Document" placement="top">
+                          <StyledTooltip title="Reprocess Document" arrow>
                             <span>
                               <IconButton
                                 size="small"
@@ -139,8 +140,8 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
                                 <ReprocessIcon style={{ width: '20px', height: '20px' }}/>
                               </IconButton>
                             </span>
-                          </Tooltip>
-                          <Tooltip title="Download Document" placement="top">
+                          </StyledTooltip>
+                          <StyledTooltip title="Download Document" arrow>
                             <span>
                               <IconButton
                                 size="small"
@@ -154,8 +155,8 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
                                 <DownloadIcon style={{ width: '20px', height: '20px' }}/>  
                               </IconButton>
                             </span>
-                          </Tooltip>
-                          <Tooltip title="Delete Document" placement="top">
+                          </StyledTooltip>
+                          <StyledTooltip title="Delete Document" arrow>
                             <span>
                               <IconButton
                                 size="small"
@@ -169,7 +170,7 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
                                 <TrashIcon style={{ width: '20px', height: '20px' }}/>  
                               </IconButton>
                             </span>
-                          </Tooltip>
+                          </StyledTooltip>
                         </div>
                       </td>
                     </tr>
