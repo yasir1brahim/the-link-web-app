@@ -18,7 +18,7 @@ import handleError from "../../config/errorHandler";
 import { SortIcon } from "../shared/icons/sortIcon";
 import { FilterIcon } from "../shared/icons/filterIcon";
 import { updateSubmittalItem, addSubmittalItem } from "../../api/ProjectLogs/api";
-import DocumentDeletedModal from "./DocumentDeletedModal";
+import DocumentDeletedModal from "./documentDeletedModal";
 
 export default function CombinedLogs(props) {
   const {

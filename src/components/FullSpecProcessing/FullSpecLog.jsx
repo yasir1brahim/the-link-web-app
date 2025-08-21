@@ -19,7 +19,7 @@ import { FilterIcon } from "../shared/icons/filterIcon";
 import { useRef } from "react";
 import { updateSubmittalItem, addSubmittalItem } from "../../api/ProjectLogs/api";
 import ClassificationChip from "./ClassificationChip";
-import DocumentDeletedModal from "../ProjectLogs/DocumentDeletedModal";
+import DocumentDeletedModal from "../ProjectLogs/documentDeletedModal";
 export default function FullSpecLog(props) {
   const {
     specItemData,
