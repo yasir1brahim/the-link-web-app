@@ -80,13 +80,17 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
       await deleteDocument(documentToDelete.id);
       toast.success("Document Deleted Successfully");
       
+      if (onAfterDelete && typeof onAfterDelete === 'function') {
+        try {
+          await onAfterDelete(documentToDelete.id);
+        } catch (callbackError) {
+          console.error('Error in onAfterDelete callback:', callbackError);
+        }
+      }
+
       setDeleteConfirmationModal(false);
       setDocumentToDelete(null);
       toggle();
-
-      if (onAfterDelete) {
-        onAfterDelete(documentToDelete.id);
-      }
 
     } catch (error) {
       console.error('Error deleting document:', error);

@@ -2067,11 +2067,6 @@ const ProjectLogs = () => {
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
       <Loader showComponentLoader={isLoading || headerLoading} />
-      <DocumentListModal
-        isOpen={showDocumentListModal}
-        toggle={() => setShowDocumentListModal(false)}
-        documents={documentData}
-      />
       
       <DuplicateFileConfirmationModal
         isOpen={showDuplicateFilesModal}
