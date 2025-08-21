@@ -27,7 +27,7 @@ const ErrorFallback = ({ error, errorInfo }) => {
 
         {process.env.NODE_ENV === 'development' && (
           <details className="error-details">
-            <summary>Error Details (Development)</summary>
+            <summary>Error Details</summary>
             <div className="error-stack">
               <h4>Error:</h4>
               <pre>{error?.toString()}</pre>
@@ -84,7 +84,9 @@ class ErrorBoundary extends React.Component {
     });
     
     // Log error to console for debugging
-    console.error('Error Boundary caught an error:', error, errorInfo);
+    console.error('Error Boundary caught an error:', error);
+    console.error('Error Info:', errorInfo);
+    console.error('Component Stack:', errorInfo?.componentStack);
   }
 
   render() {
