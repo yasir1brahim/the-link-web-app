@@ -11,6 +11,7 @@ import { ReactComponent as ExcelLogo } from "../../../assets/images/microsoft-ex
 import { ReactComponent as MergeIcon } from "../../../assets/images/merge.svg";
 import { ReactComponent as JetBuildLogo } from "../../../assets/images/jet_build.svg";
 import { Check } from '@mui/icons-material';
+import StyledTooltip from '../StyledTooltip/StyledTooltip';
 
 // @ts-ignore
 const ProjectLogsActionPanel = ({ ...props }) => {
@@ -20,27 +21,29 @@ const ProjectLogsActionPanel = ({ ...props }) => {
         <div className="d-flex p-0">
           <div className="mr-2 mb-1">
             {localStorage.getItem('roleId') !== '7' && !!props.handleDeleteLogs && (
-              <button
-                type="button"
-                className="trash-icon"
-                onClick={props.handleDeleteLogs}
-              >
-                <svg
-                  width="16"
-                  height="18"
-                  viewBox="0 0 16 18"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+              <StyledTooltip title="Delete" arrow>
+                <button
+                  type="button"
+                  className="trash-icon"
+                  onClick={props.handleDeleteLogs}
                 >
-                  <path
-                    d="M14.125 4.55556L13.3661 15.3489C13.3007 16.2792 12.5387 17 11.6205 17H4.37946C3.46134 17 2.69932 16.2792 2.63391 15.3489L1.875 4.55556M6.25 8.11111V13.4444M9.75 8.11111V13.4444M10.625 4.55556V1.88889C10.625 1.39797 10.2332 1 9.75 1H6.25C5.76675 1 5.375 1.39797 5.375 1.88889V4.55556M1 4.55556H15"
-                    stroke="#0E2332"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    width="16"
+                    height="18"
+                    viewBox="0 0 16 18"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M14.125 4.55556L13.3661 15.3489C13.3007 16.2792 12.5387 17 11.6205 17H4.37946C3.46134 17 2.69932 16.2792 2.63391 15.3489L1.875 4.55556M6.25 8.11111V13.4444M9.75 8.11111V13.4444M10.625 4.55556V1.88889C10.625 1.39797 10.2332 1 9.75 1H6.25C5.76675 1 5.375 1.39797 5.375 1.88889V4.55556M1 4.55556H15"
+                      stroke="#0E2332"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </StyledTooltip>
             )}
           </div>
           {props.isFullSpecProcessing && props.onExportCsv && (
