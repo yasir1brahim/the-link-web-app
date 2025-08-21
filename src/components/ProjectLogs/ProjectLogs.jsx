@@ -1987,6 +1987,7 @@ const ProjectLogs = () => {
         toggle={() => setShowDocumentListModal(false)}
         documents={documentData}
         onAfterReprocess={refreshDocumentsAndSubmittals}
+        onAfterDelete={refreshDocumentsAndSubmittals}
       />
 
       {showVersionModal && <ManageVersionModal

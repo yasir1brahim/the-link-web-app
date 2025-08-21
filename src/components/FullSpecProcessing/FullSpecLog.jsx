@@ -19,6 +19,7 @@ import { FilterIcon } from "../shared/icons/filterIcon";
 import { useRef } from "react";
 import { updateSubmittalItem, addSubmittalItem } from "../../api/ProjectLogs/api";
 import ClassificationChip from "./ClassificationChip";
+import DocumentDeletedModal from "../ProjectLogs/DocumentDeletedModal";
 export default function FullSpecLog(props) {
   const {
     specItemData,
@@ -51,6 +52,7 @@ export default function FullSpecLog(props) {
   const [shouldShowExpansionButton, setShouldShowExpansionButton] = useState(
     []
   );
+  const [showDocumentDeletedModal, setShowDocumentDeletedModal] = useState(false);
   const rowRefs = useRef([]);
   const logRowRefs = useRef([]);
   const stickyHeaderRef = useRef(null);
@@ -133,6 +135,12 @@ export default function FullSpecLog(props) {
     submittalId,
     additionalTextLocations
   ) => {
+    // Check if the document has been deleted (empty pdfUrl)
+    if (!pdfUrl || pdfUrl === "") {
+      setShowDocumentDeletedModal(true);
+      return;
+    }
+
     props.setPdfData({
       ...props.pdfData,
       url: pdfUrl,
@@ -553,6 +561,10 @@ export default function FullSpecLog(props) {
           </span>
         </div>
       )}
+      <DocumentDeletedModal
+        isOpen={showDocumentDeletedModal}
+        toggle={() => setShowDocumentDeletedModal(false)}
+      />
     </div>
   );
 }
