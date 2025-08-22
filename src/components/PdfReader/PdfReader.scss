@@ -1,0 +1,28 @@
+.upload-doc-popup {
+  z-index: 1055;
+
+  .error-upload {
+    text-align: center;
+
+    .error-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+
+      h5{
+        font-weight: bold;
+        font-size: 16px;
+        color: #212121;
+      }
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+  }
+}
