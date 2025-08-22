@@ -1662,7 +1662,8 @@ const ProjectLogs = () => {
                       <button
                         disabled={
                           !pdfData || 
-                          (pdfData.index === 0 && page === 1)
+                          (pdfData.index === 0 && page === 1) ||
+                          loadingView
                         }
                         onClick={() => {
                           handleUpDownView(-1);
@@ -1670,6 +1671,8 @@ const ProjectLogs = () => {
                         style={{
                           borderColor: "#E2E2E2",
                           borderWidth: "thin",
+                          opacity: loadingView ? 0.6 : 1,
+                          cursor: loadingView ? "not-allowed" : "pointer"
                         }}
                       >
                         <ArrowDropUpIcon/>
@@ -1677,7 +1680,8 @@ const ProjectLogs = () => {
                       <button
                         disabled={
                           !pdfData ||
-                          (pdfData.index === filteredLogData.length - 1 && page >= Math.ceil(totalCount / rowsPerPage))
+                          (pdfData.index === filteredLogData.length - 1 && page >= Math.ceil(totalCount / rowsPerPage)) ||
+                          loadingView
                         }
                         onClick={() => {
                           handleUpDownView(1);
@@ -1685,6 +1689,8 @@ const ProjectLogs = () => {
                         style={{
                           borderColor: "#E2E2E2",
                           borderWidth: "thin",
+                          opacity: loadingView ? 0.6 : 1,
+                          cursor: loadingView ? "not-allowed" : "pointer"
                         }}
                       >
                         <ArrowDropDownIcon />
