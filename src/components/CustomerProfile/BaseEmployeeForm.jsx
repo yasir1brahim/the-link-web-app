@@ -43,13 +43,19 @@ const BaseEmployeeForm = ({
                         onChange={(e) => {
                           setFirstName({
                             ...firstName,
-                            value: e.target.value
+                            value: e.target.value,
+                            errors:''
                           });
                         }}
                       />
                       <label className="text-label" htmlFor="userFirstName">
                         First Name
                       </label>
+                      {firstName.errors && (
+                        <small className="form-error" style={{ color: 'red' }}>
+                          {firstName.errors}
+                        </small>
+                      )}
                     </div>
                   </div>
                   <div className="col-4">
@@ -65,13 +71,19 @@ const BaseEmployeeForm = ({
                         onChange={(e) => {
                           setLastName({
                             ...lastName,
-                            value: e.target.value
+                            value: e.target.value,
+                            errors:''
                           });
                         }}
                       />
                       <label className="text-label" htmlFor="userLastName">
                         Last Name
                       </label>
+                      {lastName.errors && (
+                        <small className="form-error" style={{ color: 'red' }}>
+                          {lastName.errors}
+                        </small>
+                      )}
                     </div>
                   </div>
                   <div className="col-4">
@@ -88,7 +100,8 @@ const BaseEmployeeForm = ({
                         onChange={(e) => {
                           setEmail({
                             ...email,
-                            value: e.target.value
+                            value: e.target.value,
+                            errors:''
                           });
                         }}
                       />
