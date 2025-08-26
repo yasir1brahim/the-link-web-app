@@ -629,11 +629,21 @@ const ProjectLogs = () => {
     toggleSuccessModal(true);
   };
 
-  const handleDuplicateFilesConfirmAll = () => {
-    // This is handled by the modal itself
-    setDuplicateFiles([]);
-    setShowDuplicateFilesModal(false);
-    toggleSuccessModal(true);
+  const handleDuplicateFilesConfirmAll = async () => {
+    try {
+      // Clear duplicate files and close modal
+      setDuplicateFiles([]);
+      setShowDuplicateFilesModal(false);
+      
+      // Refresh documents and submittals after bulk reprocessing
+      await refreshDocumentsAndSubmittals();
+      
+      // Show success modal
+      toggleSuccessModal(true);
+    } catch (error) {
+      console.error('Error refreshing data after bulk reprocessing:', error);
+      handleError(error);
+    }
   };
 
   const handleSubmit = async () => {
