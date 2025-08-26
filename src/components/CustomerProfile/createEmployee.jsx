@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
 import { toast } from 'react-toastify';
-// import { Typeahead } from 'react-bootstrap-typeahead';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 import { handleUserInvitation } from '../../api/Authentication/api';
 import handleError from "../../config/errorHandler";
@@ -29,10 +28,26 @@ const CreateEmployee = ({
     }
   }, [modal]);
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const validate = () => {
     let error = false;
     if (email.value === '') {
       setEmail({ ...email, errors: 'Email is required.' });
+      error = true;
+    } else if (!validateEmail(email.value)) {
+      setEmail({ ...email, errors: 'Invalid email format.' });
+      error = true;
+    }
+    if (firstName.value === '') {
+      setFirstName({ ...firstName, errors: 'First Name is required.' });
+      error = true;
+    }
+    if (lastName.value === '') {
+      setLastName({ ...lastName, errors: 'Last Name is required.' });
       error = true;
     }
     return error;
