@@ -27,14 +27,27 @@ const EditEmployee = ({
     setRole([{ value: employee?.role || 'member', label: employee?.role === 'admin' ? 'Admin' : 'Member' }]);
   }, [modal, employee]);
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const validate = () => {
     let error = false;
     if (email?.value === '') {
       setEmail({ ...email, errors: 'Email is required.' });
       error = true;
-    } else {
-      setEmail({ ...email, errors: '' });
-      error = false;
+    } else if (!validateEmail(email.value)) {
+      setEmail({ ...email, errors: 'Invalid email format.' });
+      error = true;
+    }
+    if (firstName.value === '') {
+      setFirstName({ ...firstName, errors: 'First Name is required.' });
+      error = true;
+    }
+    if (lastName.value === '') {
+      setLastName({ ...lastName, errors: 'Last Name is required.' });
+      error = true;
     }
     return error;
   };
