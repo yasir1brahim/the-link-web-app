@@ -1,3 +1,5 @@
+import { validateS3Link, isS3LinkExpiredError } from './utils/s3LinkValidator.js';
+
 class ViewSDKClient {
   constructor() {
     this.readyPromise = new Promise((resolve) => {
@@ -16,46 +18,63 @@ class ViewSDKClient {
     return this.readyPromise;
   }
 
-  previewFile(divId, viewerConfig, url, setNewAnnotations) {
+  async previewFile(divId, viewerConfig, url, setNewAnnotations, onError) {
+    // Simple S3 validation
+    try {
+      const isValid = await validateS3Link(url);
+      if (!isValid) {
+        onError && onError({ message: 'The document link has expired. Please refresh the page to get a new link and try again.' });
+        return Promise.reject(new Error('Link expired'));
+      }
+    } catch (error) {
+      console.log('S3 validation failed, continuing with PDF load');
+    }
+
     const clientId = window.location.href.includes('https://app.thelink.ai')
       ? 'f59bde8fafcd4dcba42ebed3acbaa23f'
       : window.location.href.includes('localhost')
       ? 'd3c644fbd03e48ea8b592b78c42afe41'
       : '6454c8a765d64f8797872973904d5f2a';
-    const config = {
-      // clientId: "d3c644fbd03e48ea8b592b78c42afe41", //enter local client id here
-      // clientId: "6454c8a765d64f8797872973904d5f2a", //enter dev client id here ,
-      clientId
-    };
+    
+    const config = { clientId };
     if (divId) {
       config.divId = divId;
     }
+    
     this.adobeDCView = new window.AdobeDC.View(config);
+    
     const previewFilePromise = this.adobeDCView.previewFile(
       {
         content: {
-          location: {
-            url
-          }
+          location: { url }
         },
         metaData: {
-          fileName: url.slice(42), // Taking name of the file from the url
+          fileName: url.slice(42),
           id: '6d07d124-ac85-43b3-a867-36930f502ac6'
         }
       },
       viewerConfig
     );
+
+    // Error handling
+    previewFilePromise.catch((error) => {
+      if (isS3LinkExpiredError(error)) {
+        onError && onError({ message: 'The document link has expired. Please refresh the page to get a new link and try again.' });
+      } else {
+        onError && onError({ message: 'Unable to load the PDF document. Please try again.' });
+      }
+    });
+
     const profile = {
       userProfile: {
         name: localStorage.getItem('fullName')
-        // firstName: ,
-        // lastName: ,
       }
     };
+    
     this.adobeDCView.registerCallback(
       window.AdobeDC.View.Enum.CallbackType.GET_USER_PROFILE_API,
       function () {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
           resolve({
             code: window.AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
             data: profile
@@ -64,10 +83,10 @@ class ViewSDKClient {
       },
       {}
     );
+    
     this.adobeDCView.registerCallback(
       window.AdobeDC.View.Enum.CallbackType.SAVE_API,
       async function (metaData, content, options) {
-        console.log('inside register callback');
         try {
           await previewFilePromise.then((adobeViewer) => {
             adobeViewer.getAnnotationManager().then((annotationManager) => {
@@ -75,7 +94,6 @@ class ViewSDKClient {
                 .getAnnotations()
                 .then((result) => {
                   setNewAnnotations(result);
-                  console.log('annotation:', result);
                 })
                 .catch((error) => console.log(error));
             });
@@ -84,7 +102,7 @@ class ViewSDKClient {
           console.log(error);
         }
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
           resolve({
             code: window.AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
             data: {
@@ -99,20 +117,22 @@ class ViewSDKClient {
         showSaveButton: true
       }
     );
+    
     return previewFilePromise;
   }
+
   previewFileUsingFilePromise(divId, filePromise, fileName) {
     const clientId = window.location.href.includes('https://app.thelink.ai')
       ? 'f59bde8fafcd4dcba42ebed3acbaa23f'
       : window.location.href.includes('localhost')
       ? 'd3c644fbd03e48ea8b592b78c42afe41'
       : '6454c8a765d64f8797872973904d5f2a';
+    
     this.adobeDCView = new window.AdobeDC.View({
-      // clientId: "d3c644fbd03e48ea8b592b78c42afe41", //enter local Client id here
-      // clientId: "6454c8a765d64f8797872973904d5f2a", //enter dev Client id here
       clientId,
       divId
     });
+    
     this.adobeDCView.previewFile(
       {
         content: {
@@ -128,7 +148,6 @@ class ViewSDKClient {
 
   registerSaveApiHandler() {
     const saveApiHandler = (metaData, content, options) => {
-      console.log('save', metaData, content, options);
       return new Promise((resolve) => {
         setTimeout(() => {
           const response = {
@@ -143,6 +162,7 @@ class ViewSDKClient {
         }, 2000);
       });
     };
+    
     this.adobeDCView.registerCallback(
       window.AdobeDC.View.Enum.CallbackType.SAVE_API,
       saveApiHandler,
@@ -162,4 +182,5 @@ class ViewSDKClient {
     );
   }
 }
+
 export default ViewSDKClient;
