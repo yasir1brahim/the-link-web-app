@@ -411,6 +411,7 @@ const ProjectLogs = () => {
     setAvailableMasterformatNumbers(submittalItems.data.all_masterformat_numbers_for_project || []);
     const submittalLogs = submittalItems.data.message;
     setLogData(submittalLogs);
+    setFilteredLogData(submittalLogs); 
     setHasPlaceholderSubmittals(submittalItems.data.has_placeholder_submittals || false);
     console.log("submittalLogs", submittalLogs);
 
@@ -424,6 +425,15 @@ const ProjectLogs = () => {
           docId: submittalLogs[submittalIdx].doc_id,
           submittalId: submittalLogs[submittalIdx].id,
           additionalTextLocations: submittalLogs[submittalIdx].additional_text_locations,
+        });
+      } else if (page === 1) {
+        setPdfData({
+          url: "",
+          textLoc: {},
+          index: "",
+          docId: null,
+          submittalId: null,
+          additionalTextLocations: [],
         });
       }
     }
@@ -911,8 +921,10 @@ const ProjectLogs = () => {
   };
 
   useEffect(() => {
-    setFilteredLogData(logData);
-  }, [logData, searchValue, setFilteredLogData]);
+    if (JSON.stringify(filteredLogData) !== JSON.stringify(logData)) {
+      setFilteredLogData(logData);
+    }
+  }, [logData, searchValue]);
 
   const handleSelectAll = () => {
     setIsSelectAll(!isSelectAll);
@@ -1033,28 +1045,45 @@ const ProjectLogs = () => {
       const pIndex = pdfData.index + direction;
       const data = filteredLogData[pIndex];
       
-      setPdfData({
-        ...pdfData,
-        url: data.doc_link,
-        textLoc: data.text_loc,
-        index: pIndex,
-        docId: data.doc_id,
-        submittalId: data.id,
-        additionalTextLocations: data.additional_text_locations,
-      });
-      setSubmittalIdParam(data.id);
+      if (data) {
+        setPdfData({
+          ...pdfData,
+          url: data.doc_link,
+          textLoc: data.text_loc,
+          index: pIndex,
+          docId: data.doc_id,
+          submittalId: data.id,
+          additionalTextLocations: data.additional_text_locations,
+        });
+        setSubmittalIdParam(data.id);
+      }
     } else {
       if (direction > 0 && pdfData.index === filteredLogData.length - 1) {
         const nextPage = page + 1;
         const totalPages = Math.ceil(totalCount / rowsPerPage);
         
         if (nextPage <= totalPages) {
-          await fetchLogData(nextPage, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
-          setPage(nextPage);
-          
-          setTimeout(() => {
-            if (filteredLogData.length > 0) {
-              const firstData = filteredLogData[0];
+          setLoadingView(true);
+          try {
+            const response = await getSubmittalItems(
+              projectId,
+              searchValue,
+              filterValues,
+              null,
+              null,
+              nextPage,
+              rowsPerPage,
+              listId,
+              projectVersionId
+            );
+            
+            const newLogData = response.data.message;
+            if (newLogData && newLogData.length > 0) {
+              setPage(nextPage);
+              setLogData(newLogData);
+              setFilteredLogData(newLogData); 
+              
+              const firstData = newLogData[0];
               setPdfData({
                 ...pdfData,
                 url: firstData.doc_link,
@@ -1066,30 +1095,53 @@ const ProjectLogs = () => {
               });
               setSubmittalIdParam(firstData.id);
             }
-          }, 100);
+          } catch (error) {
+            handleError(error);
+          } finally {
+            setLoadingView(false);
+          }
         }
       } else if (direction < 0 && pdfData.index === 0) {
         const prevPage = page - 1;
         
         if (prevPage >= 1) {
-          await fetchLogData(prevPage, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
-          setPage(prevPage);
-          
-          setTimeout(() => {
-            if (filteredLogData.length > 0) {
-              const lastData = filteredLogData[filteredLogData.length - 1];
+          setLoadingView(true);
+          try {
+            const response = await getSubmittalItems(
+              projectId,
+              searchValue,
+              filterValues,
+              null,
+              null,
+              prevPage,
+              rowsPerPage,
+              listId,
+              projectVersionId
+            );
+            
+            const newLogData = response.data.message;
+            if (newLogData && newLogData.length > 0) {
+              setPage(prevPage);
+              setLogData(newLogData);
+              setFilteredLogData(newLogData); 
+              
+              const lastData = newLogData[newLogData.length - 1];
               setPdfData({
                 ...pdfData,
                 url: lastData.doc_link,
                 textLoc: lastData.text_loc,
-                index: filteredLogData.length - 1,
+                index: newLogData.length - 1,
                 docId: lastData.doc_id,
                 submittalId: lastData.id,
                 additionalTextLocations: lastData.additional_text_locations,
               });
               setSubmittalIdParam(lastData.id);
             }
-          }, 100);
+          } catch (error) {
+            handleError(error);
+          } finally {
+            setLoadingView(false);
+          }
         }
       }
     }
@@ -1609,10 +1661,9 @@ const ProjectLogs = () => {
                     >
                       <button
                         disabled={
-                          pdfData && 
-                          (pdfData.index > 0 || page > 1) 
-                            ? false 
-                            : true
+                          !pdfData || 
+                          (pdfData.index === 0 && page === 1) ||
+                          loadingView
                         }
                         onClick={() => {
                           handleUpDownView(-1);
@@ -1620,16 +1671,17 @@ const ProjectLogs = () => {
                         style={{
                           borderColor: "#E2E2E2",
                           borderWidth: "thin",
+                          opacity: loadingView ? 0.6 : 1,
+                          cursor: loadingView ? "not-allowed" : "pointer"
                         }}
                       >
                         <ArrowDropUpIcon/>
                       </button>
                       <button
                         disabled={
-                          pdfData &&
-                          (pdfData.index < filteredLogData.length - 1 || page < Math.ceil(totalCount / rowsPerPage))
-                            ? false
-                            : true
+                          !pdfData ||
+                          (pdfData.index === filteredLogData.length - 1 && page >= Math.ceil(totalCount / rowsPerPage)) ||
+                          loadingView
                         }
                         onClick={() => {
                           handleUpDownView(1);
@@ -1637,6 +1689,8 @@ const ProjectLogs = () => {
                         style={{
                           borderColor: "#E2E2E2",
                           borderWidth: "thin",
+                          opacity: loadingView ? 0.6 : 1,
+                          cursor: loadingView ? "not-allowed" : "pointer"
                         }}
                       >
                         <ArrowDropDownIcon />
