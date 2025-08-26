@@ -71,9 +71,9 @@ const CreateEmployee = ({
     }
   };
   
-  const handleSuccess = () => {
+  const handleSuccess = (message) => {
     setPageRefresh(!pageRefresh);
-    showToast("User created and password reset email sent.");
+    showToast(message || "User created successfully. A password reset email has been sent.");
   };
 
   const handleSubmit = async () => {
@@ -87,19 +87,28 @@ const CreateEmployee = ({
           customerID,
           role[0].value
         );
+        console.log("Invitation response:", response?.data);
         if (response?.data) {
-          if (response?.data?.message === "User already exists.") {
-            showToast("This user has already been invited. A new invitation has been sent.", 'info');
+          if (response?.data?.message === "User has been added to the company. A notification email has been sent.") {
+            showToast("User has been added to the company. A notification email has been sent.", 'success');
+            setPageRefresh(!pageRefresh);
+            resetForm();
+            toggleModal();
+          } else if (response?.data?.message === "User created successfully. A password reset email has been sent.") {
+            handleSuccess(response.data.message);
             resetForm();
             toggleModal();
           } else {
-            handleSuccess()
+            // Fallback for any other successful response
+            showToast(response.data.message || "User invitation processed successfully.", 'success');
+            setPageRefresh(!pageRefresh);
+            resetForm();
             toggleModal();
           }
         }
       } catch (error) {
         handleError(error);
-        toggleModal();
+        // Don't close modal on error, let user fix the issue
       }
     }
   };
