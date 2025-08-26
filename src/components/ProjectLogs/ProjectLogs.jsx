@@ -2088,6 +2088,7 @@ const ProjectLogs = () => {
         toggle={() => setShowDocumentListModal(false)}
         documents={documentData}
         onAfterReprocess={refreshDocumentsAndSubmittals}
+        onAfterDelete={refreshDocumentsAndSubmittals}
       />
 
       {showVersionModal && <ManageVersionModal
@@ -2120,11 +2121,6 @@ const ProjectLogs = () => {
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
       <Loader showComponentLoader={isLoading || headerLoading} />
-      <DocumentListModal
-        isOpen={showDocumentListModal}
-        toggle={() => setShowDocumentListModal(false)}
-        documents={documentData}
-      />
       
       <DuplicateFileConfirmationModal
         isOpen={showDuplicateFilesModal}
