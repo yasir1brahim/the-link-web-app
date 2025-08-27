@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Custom hook for managing smart date input validation and formatting
+ * Custom hook for managing date input display and calendar selection
  * @param {Date} selectedDate - The currently selected date
  * @param {Function} onChange - Callback function when date changes
  * @param {boolean} smartInput - Whether to enable smart input features
@@ -19,37 +19,6 @@ export const useSmartDateInput = (selectedDate, onChange, smartInput = false) =>
     }
   }, [selectedDate, smartInput]);
 
-  const isValidCompleteDate = (dateString) => {
-    // Check if it matches YYYY-MM-DD format and is a valid date
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(dateString)) return false;
-    
-    const date = new Date(dateString + 'T00:00:00');
-    return date instanceof Date && !isNaN(date.getTime()) && 
-           date.toISOString().split('T')[0] === dateString;
-  };
-
-  const handleInputChange = (value) => {
-    if (!smartInput) return;
-
-    let formattedValue = value;
-    
-    // Auto-format as user types
-    if (value.length === 4 && !value.includes('-')) {
-      formattedValue = value + '-';
-    } else if (value.length === 7 && value.split('-').length === 2) {
-      formattedValue = value + '-';
-    }
-
-    setInputValue(formattedValue);
-
-    // If it's a complete valid date, update the DatePicker
-    if (isValidCompleteDate(formattedValue)) {
-      const date = new Date(formattedValue + 'T00:00:00');
-      onChange(date);
-    }
-  };
-
   const handleDatePickerChange = (date) => {
     onChange(date);
     if (smartInput && date) {
@@ -60,9 +29,6 @@ export const useSmartDateInput = (selectedDate, onChange, smartInput = false) =>
 
   return {
     inputValue,
-    setInputValue,
-    isValidCompleteDate,
-    handleInputChange,
     handleDatePickerChange
   };
 };
@@ -71,10 +37,9 @@ export const useSmartDateInput = (selectedDate, onChange, smartInput = false) =>
  * Custom hook for handling keyboard input validation
  * @param {boolean} preventManualInput - Whether to prevent all manual input
  * @param {boolean} smartInput - Whether to enable smart input validation
- * @param {Function} isValidCompleteDate - Function to check if date is complete and valid
  * @returns {Function} Key down handler function
  */
-export const useDateKeyboardHandler = (preventManualInput, smartInput, isValidCompleteDate) => {
+export const useDateKeyboardHandler = (preventManualInput, smartInput) => {
   const handleKeyDown = (e) => {
     // Handle preventManualInput mode
     if (preventManualInput) {
@@ -86,16 +51,9 @@ export const useDateKeyboardHandler = (preventManualInput, smartInput, isValidCo
 
     // Handle smartInput mode
     if (smartInput) {
-      const currentValue = e.target.value;
+      const currentValue = e.target?.value || '';
       
-      // If we already have a complete valid date, prevent further input
-      if (isValidCompleteDate(currentValue) && 
-          !['Backspace', 'Delete', 'Tab', 'Enter', 'Escape', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-        e.preventDefault();
-        return;
-      }
-
-      // Allow navigation keys
+      // Allow navigation keys always
       if (['Tab', 'Enter', 'Escape', 'ArrowLeft', 'ArrowRight', 'Backspace', 'Delete'].includes(e.key)) {
         return;
       }
@@ -105,13 +63,6 @@ export const useDateKeyboardHandler = (preventManualInput, smartInput, isValidCo
         // Prevent more than 10 characters (YYYY-MM-DD)
         if (currentValue.length >= 10) {
           e.preventDefault();
-          return;
-        }
-
-        // Auto-add dashes at correct positions
-        const newValue = currentValue + e.key;
-        if ((newValue.length === 4 || newValue.length === 7) && e.key !== '-') {
-          // Don't auto-add dash if they're typing a dash
           return;
         }
       } else {

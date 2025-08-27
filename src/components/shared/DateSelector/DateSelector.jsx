@@ -8,12 +8,10 @@ const DateSelector = ({ preventManualInput = false, smartInput = false, ...props
   
   const { 
     inputValue, 
-    isValidCompleteDate, 
-    handleInputChange, 
     handleDatePickerChange 
   } = useSmartDateInput(props.selected, props.onChange, smartInput);
   
-  const handleKeyDown = useDateKeyboardHandler(preventManualInput, smartInput, isValidCompleteDate);
+  const handleKeyDown = useDateKeyboardHandler(preventManualInput, smartInput);
 
   return (
     <div
@@ -32,7 +30,6 @@ const DateSelector = ({ preventManualInput = false, smartInput = false, ...props
         onFocus={handleFocus}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        onChangeRaw={(e) => smartInput && handleInputChange(e.target.value)}
         placeholderText={props.placeholderText}
         minDate={props.minDate}
         dateFormat={props.dateFormat}
