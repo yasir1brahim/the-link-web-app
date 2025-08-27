@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import ProjectLogsReader from '../../PdfReader/projectLogsReader';
+import { useS3LinkValidation } from '../../../hooks/useS3LinkValidation.js';
 
 const ViewPDFPage = () => {
     const [pdfUrl, setPdfUrl] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const { handleError, ErrorModal } = useS3LinkValidation();
+
     useEffect(() => {
         const search = window.location.search.replace('?url=', '');
         setPdfUrl(search);
@@ -11,8 +13,12 @@ const ViewPDFPage = () => {
 
     return (
         <div style={{ height: '100vh' }}>
+            <ErrorModal />
             {pdfUrl && (
-                <ProjectLogsReader url={pdfUrl} setLoading={setIsLoading} />
+                <ProjectLogsReader 
+                    url={pdfUrl} 
+                    onError={handleError}
+                />
             )}
         </div>
     );

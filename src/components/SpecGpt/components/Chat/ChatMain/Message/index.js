@@ -99,6 +99,7 @@ const Message = ({ messageType, message, sources, isLoading, projectId }) => {
     };
 
     function convertUrlsToLinks(text) {
+        console.log("text", text);
         const urlPattern = /(\bhttps?:\/\/[^\s/$.?#].[^\s]*)/gi;
         if (!!text) {
             return text.replace(urlPattern, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');

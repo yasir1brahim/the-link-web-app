@@ -12,13 +12,14 @@ import { ReactComponent as CancelButton } from "../../assets/images/label-reject
 import { ReactComponent as ExpandButton } from "../../assets/images/down-arrow.svg";
 import { ReactComponent as CollapseButton } from "../../assets/images/up-arrow.svg";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
-import { Tooltip } from "@mui/material";
+import StyledTooltip from '../shared/StyledTooltip/StyledTooltip';
 import handleError from "../../config/errorHandler";
 import { SortIcon } from "../shared/icons/sortIcon";
 import { FilterIcon } from "../shared/icons/filterIcon";
 import { useRef } from "react";
 import { updateSubmittalItem, addSubmittalItem } from "../../api/ProjectLogs/api";
 import ClassificationChip from "./ClassificationChip";
+import DocumentDeletedModal from "../ProjectLogs/documentDeletedModal";
 export default function FullSpecLog(props) {
   const {
     specItemData,
@@ -51,6 +52,7 @@ export default function FullSpecLog(props) {
   const [shouldShowExpansionButton, setShouldShowExpansionButton] = useState(
     []
   );
+  const [showDocumentDeletedModal, setShowDocumentDeletedModal] = useState(false);
   const rowRefs = useRef([]);
   const logRowRefs = useRef([]);
   const stickyHeaderRef = useRef(null);
@@ -133,6 +135,12 @@ export default function FullSpecLog(props) {
     submittalId,
     additionalTextLocations
   ) => {
+    // Check if the document has been deleted (empty pdfUrl)
+    if (!pdfUrl || pdfUrl === "") {
+      setShowDocumentDeletedModal(true);
+      return;
+    }
+
     props.setPdfData({
       ...props.pdfData,
       url: pdfUrl,
@@ -408,7 +416,7 @@ export default function FullSpecLog(props) {
                             style={{ cursor: "pointer" }}
                             className="pdf-button"
                           >
-                            <Tooltip title="Close Pdf" arrow>
+                            <StyledTooltip title="Close Pdf" arrow>
                               <svg id={"Pdf-Tooltip-" + index + 1} width="18px" height="18px" viewBox="0 0 1.08 1.08" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path width="48" height="48" fill="white" fill-opacity="0.01" d="M0 0H1.08V1.08H0V0z"/>
                                 <path d="M1.08 0H0v1.08h1.08z" fill="white" fill-opacity="0.01"/>
@@ -416,7 +424,7 @@ export default function FullSpecLog(props) {
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M0.405 0.405h0.27v0.18L0.405 0.585z" stroke="white" stroke-width="0.09" stroke-linecap="round" stroke-linejoin="round"/>
                                 <path d="M0.405 0.405v0.36" stroke="white" stroke-width="0.07" stroke-linecap="round"/>
                               </svg>
-                            </Tooltip>
+                            </StyledTooltip>
                           </div>
                         ) : (
                           newRowIndex !== index &&
@@ -436,7 +444,7 @@ export default function FullSpecLog(props) {
                               style={{ cursor: "pointer" }}
                               className="pdf-button"
                             >
-                              <Tooltip title="View Pdf" arrow>
+                              <StyledTooltip title="View Pdf" arrow>
                                 <svg id={"Pdf-Tooltip-" + index + 1} width="18px" height="18px" viewBox="0 0 1.08 1.08" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path width="48" height="48" fill="white" fill-opacity="0.01" d="M0 0H1.08V1.08H0V0z"/>
                                   <path d="M1.08 0H0v1.08h1.08z" fill="white" fill-opacity="0.01"/>
@@ -444,7 +452,7 @@ export default function FullSpecLog(props) {
                                   <path fill-rule="evenodd" clip-rule="evenodd" d="M0.405 0.405h0.27v0.18L0.405 0.585z" stroke="#36454F" stroke-width="0.09" stroke-linecap="round" stroke-linejoin="round"/>
                                   <path d="M0.405 0.405v0.36" stroke="#36454F" stroke-width="0.09" stroke-linecap="round"/>
                                 </svg>
-                              </Tooltip>
+                              </StyledTooltip>
                             </span>
                           )
                         )}
@@ -553,6 +561,10 @@ export default function FullSpecLog(props) {
           </span>
         </div>
       )}
+      <DocumentDeletedModal
+        isOpen={showDocumentDeletedModal}
+        toggle={() => setShowDocumentDeletedModal(false)}
+      />
     </div>
   );
 }

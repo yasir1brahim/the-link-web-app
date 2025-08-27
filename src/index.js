@@ -32,6 +32,8 @@ import EllisDonMicrosoftLoginCallback from './components/Authentication/EllisDon
 import SSODisambiguationPage from './components/Authentication/SSODisambiguationPage';
 import ChatPage from './components/SpecGpt/containers/ChatPage';
 import ViewPDFPage from './components/SpecGpt/containers/ViewPDFPage';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -42,19 +44,19 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <Signin />,
+    element: <ErrorBoundary><Signin /></ErrorBoundary>,
   },
   {
     path: "/login/sso",
-    element: <SSODisambiguationPage />,
+    element: <ErrorBoundary><SSODisambiguationPage /></ErrorBoundary>,
   },
   {
     path: "/the_link/microsoft/login/callback",
-    element: <TheLinkMicrosoftLoginCallback />,
+    element: <ErrorBoundary><TheLinkMicrosoftLoginCallback /></ErrorBoundary>,
   },
   {
     path: "/ellisdon/microsoft/login/callback",
-    element: <EllisDonMicrosoftLoginCallback />,
+    element: <ErrorBoundary><EllisDonMicrosoftLoginCallback /></ErrorBoundary>,
   },
   {
     path: "/not-found",
@@ -66,79 +68,81 @@ const router = createBrowserRouter([
   // },
   {
     path: "/accept-invitation",
-    element: <AcceptInvitation />,
+    element: <ErrorBoundary><AcceptInvitation /></ErrorBoundary>,
   },
   {
     path: "/forgot-password",
-    element: <Forgotpwd />,
+    element: <ErrorBoundary><Forgotpwd /></ErrorBoundary>,
   },
   {
     path: "/password-reset/confirm/:uidb64/:token",
-    element: <Resetpwd />,
+    element: <ErrorBoundary><Resetpwd /></ErrorBoundary>,
   },
   {
     path: "/reset-success",
-    element: <Resetsuccess />,
+    element: <ErrorBoundary><Resetsuccess /></ErrorBoundary>,
   },
   {
     path: "/check-email",
-    element: <Checkemail />,
+    element: <ErrorBoundary><Checkemail /></ErrorBoundary>,
   },
   {
     path: "/pdf-view",
-    element: <ProtectedRoute><PdfWrapper /></ProtectedRoute>,
+    element: <ErrorBoundary><ProtectedRoute><PdfWrapper /></ProtectedRoute></ErrorBoundary>,
   },
   { 
     path: "/submittal-mappings",
-    element: <ProtectedRoute><SubmittalMappings /></ProtectedRoute>,
+    element: <ErrorBoundary><ProtectedRoute><SubmittalMappings /></ProtectedRoute></ErrorBoundary>,
   },
   {
     path: "/collaboration-hub",
-    element: <ProtectedRoute><CollaborationHub /></ProtectedRoute>,
+    element: <ErrorBoundary><ProtectedRoute><CollaborationHub /></ProtectedRoute></ErrorBoundary>,
   },
   {
     path: "/project-list/:teamId",
-    element: <ProtectedRoute><ProjectsPage /></ProtectedRoute>,
+    element: <ErrorBoundary><ProtectedRoute><ProjectsPage /></ProtectedRoute></ErrorBoundary>,
   },
   {
     path: "/companies",
-    element: <ProtectedRoute><Companies /></ProtectedRoute>,
+    element: <ErrorBoundary><ProtectedRoute><Companies /></ProtectedRoute></ErrorBoundary>,
   },
   {
     path: "/project-logs",
-    element: <ProtectedRoute><ProjectLogs /></ProtectedRoute>,
+    element: <ErrorBoundary><ProtectedRoute><ProjectLogs /></ProtectedRoute></ErrorBoundary>,
   },
   {
     path: "/notices",
-    element: <ProtectedRoute><NoticesPage /></ProtectedRoute>,
+    element: <ErrorBoundary><ProtectedRoute><NoticesPage /></ProtectedRoute></ErrorBoundary>,
   },
   {
     path: "/full-spec",
-    element: <ProtectedRoute><FullSpecPage /></ProtectedRoute>,
+    element: <ErrorBoundary><ProtectedRoute><FullSpecPage /></ProtectedRoute></ErrorBoundary>,
   },
   {
     path: "/admin-landing",
-    element: <ProtectedRoute><AdminLanding /></ProtectedRoute>,
+    element: <ErrorBoundary><ProtectedRoute><AdminLanding /></ProtectedRoute></ErrorBoundary>,
   },
   {
     path: "/company-profile",
-    element: <ProtectedRoute><CustomerProfile /></ProtectedRoute>,
+    element: <ErrorBoundary><ProtectedRoute><CustomerProfile /></ProtectedRoute></ErrorBoundary>,
   },
   {
     path: "/view-pdf",
-    element: <ProtectedRoute><ViewPDFPage /></ProtectedRoute>,
+    element: <ErrorBoundary><ProtectedRoute><ViewPDFPage /></ProtectedRoute></ErrorBoundary>,
   },
 ])
 
 
 ReactDOM.render(
   <React.StrictMode>
-    <AuthProvider>
-      <FeatureFlagsProvider>
-        <RouterProvider router={router} />
-      </FeatureFlagsProvider>
-    </AuthProvider>
-  </React.StrictMode>,
+    <ErrorBoundary>
+      <AuthProvider>
+        <FeatureFlagsProvider>
+          <RouterProvider router={router} />
+        </FeatureFlagsProvider>
+      </AuthProvider>
+    </ErrorBoundary>
+   </React.StrictMode>,
   document.getElementById('root')
 );
 

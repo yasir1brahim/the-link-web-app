@@ -67,7 +67,7 @@ const MessageInput = ({
         <Box 
             zIndex={1000} 
             position={position}
-            bottom={position === "absolute" ? { base: "20px", lg: "40px" } : undefined}
+            bottom={position === "absolute" ? { base: "10px", lg: "20px" } : undefined}
             left={0} 
             right={0} 
             w={"100%"}
@@ -147,22 +147,40 @@ const ChatMain = ({
             isFirstRender.current = false;
             return; 
         }
-        if (endOfMessagesRef.current) {
-            endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
+        
+        if (isAtBottom && endOfMessagesRef.current) {
+            requestAnimationFrame(() => {
+                if (endOfMessagesRef.current) {
+                    endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
         }
-    }, [messages, endOfMessagesRef]);
+    }, [messages, endOfMessagesRef, isAtBottom]);
 
     useEffect(() => {
         const chatDiv = chatContainerRef.current;
         if (!chatDiv) return;
+        
         const handleScroll = () => {
             const threshold = 20; 
-            const atBottom = chatDiv.scrollHeight - chatDiv.scrollTop - chatDiv.clientHeight < threshold;
-            setIsAtBottom(atBottom);
+            const { scrollHeight, scrollTop, clientHeight } = chatDiv;
+            const atBottom = scrollHeight - scrollTop - clientHeight < threshold;
+            
+            const needsScrolling = scrollHeight > clientHeight;
+            setIsAtBottom(atBottom || !needsScrolling);
         };
+        
         chatDiv.addEventListener('scroll', handleScroll);
+        // Initial check
         handleScroll();
-        return () => chatDiv.removeEventListener('scroll', handleScroll);
+        
+        const resizeObserver = new ResizeObserver(handleScroll);
+        resizeObserver.observe(chatDiv);
+        
+        return () => {
+            chatDiv.removeEventListener('scroll', handleScroll);
+            resizeObserver.disconnect();
+        };
     }, [messages]);
 
     const submitMessageInline = (message) => { 
@@ -181,9 +199,19 @@ const ChatMain = ({
     }
     const handleGoToBottom = () => {
         if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTo({ top: chatContainerRef.current.scrollHeight, behavior: 'smooth' });
+            requestAnimationFrame(() => {
+                const chatDiv = chatContainerRef.current;
+                if (chatDiv) {
+                    chatDiv.scrollTo({ 
+                        top: chatDiv.scrollHeight, 
+                        behavior: 'smooth' 
+                    });
+                    if (endOfMessagesRef.current) {
+                        endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
         }
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     };
     return (
         <Box
@@ -212,6 +240,7 @@ const ChatMain = ({
             }
             {messages?.length > 0 && <>
                 <Box
+                    ref={chatContainerRef}
                     flex="1 1 auto"
                     overflowY="auto"
                     minHeight={0}
@@ -231,27 +260,43 @@ const ChatMain = ({
                     )}
                     <div ref={endOfMessagesRef}/>
                 </Box>
-                {!isAtBottom && (
-                    <Box
-                        flexShrink={0}
-                        className="chat-input-area"
-                        p={3}
-                        borderTop="1px solid #e5e7eb"
-                        bg="white"
+                <Box
+                    position="absolute"
+                    bottom="100px"
+                    left="50%"
+                    transform="translateX(-50%)"
+                    zIndex={999}
+                    opacity={isAtBottom ? 0 : 0.8}
+                    visibility={isAtBottom ? "hidden" : "visible"}
+                    transition="all 0.3s ease-in-out"
+                    pointerEvents={isAtBottom ? "none" : "auto"}
+                    css={{ borderRadius: '50% !important', overflow: 'hidden'}}
+                >
+                    <Button 
+                        colorScheme="blue"
+                        variant="solid"
+                        size="xs"
+                        onClick={handleGoToBottom}
+                        boxShadow="0 4px 12px rgba(0, 0, 0, 0.15)"
+                        width="32pxpx"
+                        height="32px"
+                        minW="32px"
+                        p={0}
+                        bg="#1F2A43"
+                        transition="all 0.2s ease-in-out"
+                        _hover={{
+                            bg: "#2A3654",
+                            transform: "scale(1.05)",
+                            boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)"
+                        }}
+                        _active={{
+                            bg: "#1A2238",
+                            transform: "scale(0.95)"
+                        }}
                     >
-                        <Button 
-                            colorScheme="gray"
-                            variant="solid"
-                            size="md"
-                            onClick={handleGoToBottom}
-                            boxShadow="md"
-                            p={2}
-                            minW={"auto"}
-                        >
-                            <ArrowDownIcon boxSize={6} />
-                        </Button>
-                    </Box>
-                )}
+                        <ArrowDownIcon boxSize={3} color="white" />
+                    </Button>
+                </Box>
                 <MessageInput 
                     userInput={userInput}
                     setUserInput={setUserInput}

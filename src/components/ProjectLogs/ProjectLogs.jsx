@@ -38,7 +38,9 @@ import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
 import ArchivedVersionsModal from "./archivedVersionModal";
 import useCompanyDetails from "../../hooks/useCompanyDetails";
+import useDocumentRefresh from "../../hooks/useDocumentRefresh";
 import DocumentListModal from "./DocumentListModal";
+import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
 
 
 const ProjectLogs = () => {
@@ -51,6 +53,8 @@ const ProjectLogs = () => {
   } = useFeatureFlags();
 
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
+  const [showDuplicateFilesModal, setShowDuplicateFilesModal] = useState(false);
+  const [duplicateFiles, setDuplicateFiles] = useState([]);
   const [modal, setModal] = useState(false);
   const [errorModal, toggleErrorModal] = useState(false);
   const [successModal, toggleSuccessModal] = useState(false);
@@ -407,6 +411,7 @@ const ProjectLogs = () => {
     setAvailableMasterformatNumbers(submittalItems.data.all_masterformat_numbers_for_project || []);
     const submittalLogs = submittalItems.data.message;
     setLogData(submittalLogs);
+    setFilteredLogData(submittalLogs); 
     setHasPlaceholderSubmittals(submittalItems.data.has_placeholder_submittals || false);
     console.log("submittalLogs", submittalLogs);
 
@@ -420,6 +425,15 @@ const ProjectLogs = () => {
           docId: submittalLogs[submittalIdx].doc_id,
           submittalId: submittalLogs[submittalIdx].id,
           additionalTextLocations: submittalLogs[submittalIdx].additional_text_locations,
+        });
+      } else if (page === 1) {
+        setPdfData({
+          url: "",
+          textLoc: {},
+          index: "",
+          docId: null,
+          submittalId: null,
+          additionalTextLocations: [],
         });
       }
     }
@@ -572,6 +586,21 @@ const ProjectLogs = () => {
     setListName({ value: '', errors: '' });
   };
 
+  const handleDuplicateFilesSkipAll = () => {
+    // Show success modal with information about skipped files
+    setAlreadyExistingFiles(duplicateFiles.map(f => f.filename));
+    setDuplicateFiles([]);
+    setShowDuplicateFilesModal(false);
+    toggleSuccessModal(true);
+  };
+
+  const handleDuplicateFilesConfirmAll = () => {
+    // This is handled by the modal itself
+    setDuplicateFiles([]);
+    setShowDuplicateFilesModal(false);
+    toggleSuccessModal(true);
+  };
+
   const handleSubmit = async () => {
     // console.log(pdfFile);
     try {
@@ -605,8 +634,23 @@ const ProjectLogs = () => {
         }
         setUploadLoading(false);
         setAlreadyExistingFiles(response.data.already_exist);
-        setModal(false);
-        toggleSuccessModal(true);
+        
+        // Handle duplicate files for confirmation
+        if (response.data.duplicate_files_for_confirmation && response.data.duplicate_files_for_confirmation.length > 0) {
+          setDuplicateFiles(response.data.duplicate_files_for_confirmation);
+          setModal(false);
+          setShowDuplicateFilesModal(true);
+          
+          // If there were also successful uploads, show them in the success message later
+          if (response.data.async_processing && response.data.async_processing.length > 0) {
+            // Show success toast for uploaded files while showing confirmation modal for duplicates
+            toast.success(`${response.data.async_processing.length} files uploaded successfully. Please confirm action for duplicate files.`);
+          }
+        } else {
+          setModal(false);
+          toggleSuccessModal(true);
+        }
+        
         setPageRefresh(!pageRefresh);
       }
     } catch (error) {
@@ -877,8 +921,10 @@ const ProjectLogs = () => {
   };
 
   useEffect(() => {
-    setFilteredLogData(logData);
-  }, [logData, searchValue, setFilteredLogData]);
+    if (JSON.stringify(filteredLogData) !== JSON.stringify(logData)) {
+      setFilteredLogData(logData);
+    }
+  }, [logData, searchValue]);
 
   const handleSelectAll = () => {
     setIsSelectAll(!isSelectAll);
@@ -999,28 +1045,45 @@ const ProjectLogs = () => {
       const pIndex = pdfData.index + direction;
       const data = filteredLogData[pIndex];
       
-      setPdfData({
-        ...pdfData,
-        url: data.doc_link,
-        textLoc: data.text_loc,
-        index: pIndex,
-        docId: data.doc_id,
-        submittalId: data.id,
-        additionalTextLocations: data.additional_text_locations,
-      });
-      setSubmittalIdParam(data.id);
+      if (data) {
+        setPdfData({
+          ...pdfData,
+          url: data.doc_link,
+          textLoc: data.text_loc,
+          index: pIndex,
+          docId: data.doc_id,
+          submittalId: data.id,
+          additionalTextLocations: data.additional_text_locations,
+        });
+        setSubmittalIdParam(data.id);
+      }
     } else {
       if (direction > 0 && pdfData.index === filteredLogData.length - 1) {
         const nextPage = page + 1;
         const totalPages = Math.ceil(totalCount / rowsPerPage);
         
         if (nextPage <= totalPages) {
-          await fetchLogData(nextPage, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
-          setPage(nextPage);
-          
-          setTimeout(() => {
-            if (filteredLogData.length > 0) {
-              const firstData = filteredLogData[0];
+          setLoadingView(true);
+          try {
+            const response = await getSubmittalItems(
+              projectId,
+              searchValue,
+              filterValues,
+              null,
+              null,
+              nextPage,
+              rowsPerPage,
+              listId,
+              projectVersionId
+            );
+            
+            const newLogData = response.data.message;
+            if (newLogData && newLogData.length > 0) {
+              setPage(nextPage);
+              setLogData(newLogData);
+              setFilteredLogData(newLogData); 
+              
+              const firstData = newLogData[0];
               setPdfData({
                 ...pdfData,
                 url: firstData.doc_link,
@@ -1032,30 +1095,53 @@ const ProjectLogs = () => {
               });
               setSubmittalIdParam(firstData.id);
             }
-          }, 100);
+          } catch (error) {
+            handleError(error);
+          } finally {
+            setLoadingView(false);
+          }
         }
       } else if (direction < 0 && pdfData.index === 0) {
         const prevPage = page - 1;
         
         if (prevPage >= 1) {
-          await fetchLogData(prevPage, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
-          setPage(prevPage);
-          
-          setTimeout(() => {
-            if (filteredLogData.length > 0) {
-              const lastData = filteredLogData[filteredLogData.length - 1];
+          setLoadingView(true);
+          try {
+            const response = await getSubmittalItems(
+              projectId,
+              searchValue,
+              filterValues,
+              null,
+              null,
+              prevPage,
+              rowsPerPage,
+              listId,
+              projectVersionId
+            );
+            
+            const newLogData = response.data.message;
+            if (newLogData && newLogData.length > 0) {
+              setPage(prevPage);
+              setLogData(newLogData);
+              setFilteredLogData(newLogData); 
+              
+              const lastData = newLogData[newLogData.length - 1];
               setPdfData({
                 ...pdfData,
                 url: lastData.doc_link,
                 textLoc: lastData.text_loc,
-                index: filteredLogData.length - 1,
+                index: newLogData.length - 1,
                 docId: lastData.doc_id,
                 submittalId: lastData.id,
                 additionalTextLocations: lastData.additional_text_locations,
               });
               setSubmittalIdParam(lastData.id);
             }
-          }, 100);
+          } catch (error) {
+            handleError(error);
+          } finally {
+            setLoadingView(false);
+          }
         }
       }
     }
@@ -1404,6 +1490,20 @@ const ProjectLogs = () => {
     }
   };
 
+  const handleFileReprocessed = async (fileId) => {
+    try {
+      setDuplicateFiles(prev => prev.filter(file => file.existing_file_id !== fileId));
+      
+      await refreshDocumentsAndSubmittals();
+      
+      setPageRefresh(!pageRefresh);
+      
+    } catch (error) {
+      console.error('Error refreshing document data after reprocess:', error);
+      handleError(error);
+    }
+  };
+
   return (
     <div className="page-wrap">
       <NavbarTop
@@ -1561,10 +1661,9 @@ const ProjectLogs = () => {
                     >
                       <button
                         disabled={
-                          pdfData && 
-                          (pdfData.index > 0 || page > 1) 
-                            ? false 
-                            : true
+                          !pdfData || 
+                          (pdfData.index === 0 && page === 1) ||
+                          loadingView
                         }
                         onClick={() => {
                           handleUpDownView(-1);
@@ -1572,16 +1671,17 @@ const ProjectLogs = () => {
                         style={{
                           borderColor: "#E2E2E2",
                           borderWidth: "thin",
+                          opacity: loadingView ? 0.6 : 1,
+                          cursor: loadingView ? "not-allowed" : "pointer"
                         }}
                       >
                         <ArrowDropUpIcon/>
                       </button>
                       <button
                         disabled={
-                          pdfData &&
-                          (pdfData.index < filteredLogData.length - 1 || page < Math.ceil(totalCount / rowsPerPage))
-                            ? false
-                            : true
+                          !pdfData ||
+                          (pdfData.index === filteredLogData.length - 1 && page >= Math.ceil(totalCount / rowsPerPage)) ||
+                          loadingView
                         }
                         onClick={() => {
                           handleUpDownView(1);
@@ -1589,6 +1689,8 @@ const ProjectLogs = () => {
                         style={{
                           borderColor: "#E2E2E2",
                           borderWidth: "thin",
+                          opacity: loadingView ? 0.6 : 1,
+                          cursor: loadingView ? "not-allowed" : "pointer"
                         }}
                       >
                         <ArrowDropDownIcon />
@@ -1986,6 +2088,7 @@ const ProjectLogs = () => {
         toggle={() => setShowDocumentListModal(false)}
         documents={documentData}
         onAfterReprocess={refreshDocumentsAndSubmittals}
+        onAfterDelete={refreshDocumentsAndSubmittals}
       />
 
       {showVersionModal && <ManageVersionModal
@@ -2018,6 +2121,15 @@ const ProjectLogs = () => {
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
       <Loader showComponentLoader={isLoading || headerLoading} />
+      
+      <DuplicateFileConfirmationModal
+        isOpen={showDuplicateFilesModal}
+        toggle={() => setShowDuplicateFilesModal(false)}
+        duplicateFiles={duplicateFiles}
+        onConfirmAll={handleDuplicateFilesConfirmAll}
+        onSkipAll={handleDuplicateFilesSkipAll}
+        onFileReprocessed={handleFileReprocessed} 
+      />
     </div>
   );
 };
