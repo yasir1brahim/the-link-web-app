@@ -3,10 +3,14 @@
 
 import React from 'react';
 import ProjectLogsReader from './components/PdfReader/projectLogsReader';
+import { useS3LinkValidation } from './hooks/useS3LinkValidation.js';
+
 const PdfWrapper = (props) => {
-  // const location = useLocation()
+  const { handleError, ErrorModal } = useS3LinkValidation();
+
   return (
     <div className="ss-pdf-wrraper" style={{width: '100%'}}>
+      <ErrorModal />
       <ProjectLogsReader
         url={props.pdfData.url}
         textLoc={props.pdfData.textLoc}
@@ -19,9 +23,10 @@ const PdfWrapper = (props) => {
         setLogInViewer={props.setLogInViewer}
         loading={props.loading}
         setLoading={props.setLoading}
+        onError={handleError}
       />
-      {/* <PdfReader url={props.pdfData.url} textLoc={props.pdfData.textLoc} docId={props.pdfData.docId}/> */}
     </div>
   );
 };
+
 export default PdfWrapper;

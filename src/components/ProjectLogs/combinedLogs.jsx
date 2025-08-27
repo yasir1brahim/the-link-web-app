@@ -18,6 +18,7 @@ import handleError from "../../config/errorHandler";
 import { SortIcon } from "../shared/icons/sortIcon";
 import { FilterIcon } from "../shared/icons/filterIcon";
 import { updateSubmittalItem, addSubmittalItem } from "../../api/ProjectLogs/api";
+import DocumentDeletedModal from "./documentDeletedModal";
 
 export default function CombinedLogs(props) {
   const {
@@ -64,6 +65,7 @@ export default function CombinedLogs(props) {
   const [shouldShowExpansionButton, setShouldShowExpansionButton] = useState(
     []
   );
+  const [showDocumentDeletedModal, setShowDocumentDeletedModal] = useState(false);
   const rowRefs = useRef([]);
   const logRowRefs = useRef([]);
   const stickyHeaderRef = useRef(null);
@@ -221,6 +223,12 @@ export default function CombinedLogs(props) {
     submittalId,
     additionalTextLocations
   ) => {
+    // Check if the document has been deleted (empty pdfUrl)
+    if (!pdfUrl || pdfUrl === "") {
+      setShowDocumentDeletedModal(true);
+      return;
+    }
+
     props.setPdfData({
       ...props.pdfData,
       url: pdfUrl,
@@ -1200,6 +1208,10 @@ export default function CombinedLogs(props) {
           </span>
         </div>
       )}
+      <DocumentDeletedModal
+        isOpen={showDocumentDeletedModal}
+        toggle={() => setShowDocumentDeletedModal(false)}
+      />
     </div>
   );
 }

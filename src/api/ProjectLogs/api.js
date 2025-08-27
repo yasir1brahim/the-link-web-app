@@ -316,6 +316,24 @@ const downloadDocument = async (documentId) => {
     }
 }
 
+const deleteDocument = async (documentId) => {
+    try {
+        const payload = {
+            document_id: documentId
+        };
+        
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/delete-document/`,
+            data: payload
+        });
+    } catch (error) {
+        console.log("error in deleteDocument", error);
+        handleError(error);
+        throw error;
+    }
+}
+
 
 const getExcelExportHeader = async () => {
     try {
@@ -434,6 +452,7 @@ export {
     uploadFiles,
     reprocessDocument,
     downloadDocument,
+    deleteDocument,
     getExportExcelData,
     getExportJetBuildData,
     getExcelExportHeader,

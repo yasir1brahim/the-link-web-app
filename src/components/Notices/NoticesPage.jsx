@@ -671,6 +671,7 @@ const NoticesPage = () => {
         toggle={() => setShowDocumentListModal(false)}
         documents={documentData}
         onAfterReprocess={refreshDocuments}
+        onAfterDelete={refreshDocuments}
       />
       <Loader showComponentLoader={isLoading} />
     </div>

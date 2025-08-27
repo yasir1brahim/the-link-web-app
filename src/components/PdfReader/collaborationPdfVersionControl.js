@@ -1,16 +1,33 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axiosInstance from '../../config/axios';
 import WebViewer from '@pdftron/webviewer';
+import { validateS3Link, isS3LinkExpiredError } from '../../utils/s3LinkValidator.js';
+import { useS3LinkValidation } from '../../hooks/useS3LinkValidation.js';
 
 const CollaborationPdfVersionControl = ({ docId, projectName }) => {
   const viewer = useRef(null);
+  const { handleError, ErrorModal } = useS3LinkValidation();
+
   useEffect(() => {
     loadPDF();
   }, []);
 
-  const loadPDF = () => {
+  const loadPDF = async () => {
+    const pdfUrl = 'http://d1ke0zqcx0inzb.cloudfront.net/original/project_292_03_3816_-HP_UNBONDED_POST-TENSIONED_CONCRETE.pdf';
+    
+    // Simple S3 validation
+    try {
+      const isValid = await validateS3Link(pdfUrl);
+      if (!isValid) {
+        handleError({ message: 'The document link has expired. Please refresh the page to get a new link and try again.' });
+        return;
+      }
+    } catch (error) {
+      console.log('S3 validation failed, continuing with PDF load');
+    }
+
     WebViewer(
       {
         fullAPI: true,
@@ -18,8 +35,7 @@ const CollaborationPdfVersionControl = ({ docId, projectName }) => {
         path: '/webviewer/lib',
         licenseKey:
           'Thelinkai, Inc. (thelink.ai):PWS:Thelinkai::B+2:D0333312DD61815C33A681734AA1DD04DD5EB88FFD89F8DBFE1FBDE14C08D8EFE6EE4ED826BD',
-        initialDoc:
-          'http://d1ke0zqcx0inzb.cloudfront.net/original/project_292_03_3816_-HP_UNBONDED_POST-TENSIONED_CONCRETE.pdf'
+        initialDoc: pdfUrl
       },
       viewer.current
     ).then(async (instance) => {
@@ -28,6 +44,16 @@ const CollaborationPdfVersionControl = ({ docId, projectName }) => {
       // const { Color } = Annotations;
       const { documentViewer, annotationManager, PDFNet } = instance.Core;
       instance.UI.enableFeatures([instance.UI.Feature.InlineComment]);
+      
+      // Error handling
+      documentViewer.addEventListener("documentError", (error) => {
+        if (isS3LinkExpiredError(error)) {
+          handleError({ message: 'The document link has expired. Please refresh the page to get a new link and try again.' });
+        } else {
+          handleError({ message: 'Unable to load the PDF document. Please try again.' });
+        }
+      });
+
       const userData = [
         {
           value: 'Hugh Seaton',
@@ -220,6 +246,7 @@ const CollaborationPdfVersionControl = ({ docId, projectName }) => {
   };
   return (
     <>
+      <ErrorModal />
       <div
         style={{ height: '100vh' }}
         ref={viewer}
