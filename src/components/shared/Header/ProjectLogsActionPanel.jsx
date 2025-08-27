@@ -131,7 +131,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
           </div>
         </div>
         <div className="p-0">
-          {props.listId === null && props.selected?.length > 0 && !props.isCombining  && !!props.toggleSaveListName && (
+          {props.listId === null && props.selected?.length > 0 && !props.isCombining && !props.showClearFilters && !!props.toggleSaveListName && (
             <button
               type="button"
               className="table-top-btn btn-disabled selection-btn mr-2 mb-1"
@@ -213,7 +213,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
               <span>Clear Filters</span>
             </button>
           </div>}
-          {!props.logInViewer && props.listId === null && props.selected?.length > 0 && !props.isSelectAll && !!props.setIsCombining && (
+          {!props.logInViewer && props.listId === null && props.selected?.length > 0 && !props.isSelectAll && !props.showClearFilters && !!props.setIsCombining && (
             <button
               type="button"
               className={`table-top-btn btn-disabled selection-btn mr-2 mb-1`}
