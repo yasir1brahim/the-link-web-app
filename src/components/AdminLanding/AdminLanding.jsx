@@ -4,10 +4,10 @@ import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
 import PaginatedItems from '../shared/Pagination/Pagination';
 import CreateCustomer from './createCustomer';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastService } from '../shared/Toast/Toast';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../shared/Loader/Loader';
+import Toast from '../shared/Toast/Toast';
 import handleError from '../../config/errorHandler';
 
 const Adminlanding = (props) => {
@@ -66,15 +66,7 @@ const Adminlanding = (props) => {
 
       setPageRefresh(!pageRefresh);
 
-      toast.success('Profile Updated Successfully.', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined
-      });
+      ToastService.success('Profile Updated Successfully.');
     } catch (error) {
       console.log(error.message);
       handleError(error);
@@ -246,17 +238,7 @@ const Adminlanding = (props) => {
           pageRefresh={pageRefresh}
         />
       </div>
-      <ToastContainer
-        position="bottom-center"
-        autoClose={5000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <Toast />
       <Loader showComponentLoader={isLoading} />
     </div>
   );

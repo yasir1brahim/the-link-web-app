@@ -3,8 +3,7 @@ import ProfilePhoto from '../../assets/images/dummy-profile.svg';
 import { ReactComponent as Camera } from '../../assets/images/camera.svg';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import Toast from '../shared/Toast/Toast';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 import handleError from '../../config/errorHandler';
 
@@ -344,17 +343,7 @@ const CreateCustomer = ({
           </form>
         </ModalBody>
       </Modal>
-      <ToastContainer
-        position="bottom-center"
-        autoClose={5000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <Toast />
     </>
   );
 };
