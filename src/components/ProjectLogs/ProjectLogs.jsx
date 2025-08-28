@@ -952,6 +952,10 @@ const ProjectLogs = () => {
   }
 
   const onClickVersion = (versionId) => {
+    // Prevent navigation if clicking on the current version
+    if (parseInt(versionId) === parseInt(projectVersionId)) {
+      return;
+    }
     setLoading(true);
     setProjectVersionId(versionId);
     navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}&tab=${activeTab}`);
