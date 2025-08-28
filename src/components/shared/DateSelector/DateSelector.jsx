@@ -2,16 +2,21 @@ import React from 'react';
 import DatePicker from 'react-datepicker';
 import { useSmartDateInput, useDateKeyboardHandler, useDateFocus } from '../../../hooks/useDateInput';
 
-const DateSelector = ({ preventManualInput = false, smartInput = false, ...props }) => {
+const DateSelector = ({ preventManualInput = false, smartInput = false, allowManualInput = true, ...props }) => {
 
   const { focused, handleFocus, handleBlur } = useDateFocus();
-  
   const { 
     inputValue, 
-    handleDatePickerChange 
-  } = useSmartDateInput(props.selected, props.onChange, smartInput);
-  
-  const handleKeyDown = useDateKeyboardHandler(preventManualInput, smartInput);
+    handleDatePickerChange,
+    handleInputChange,
+    handleInputBlur
+  } = useSmartDateInput(props.selected, props.onChange, smartInput, allowManualInput);
+
+  const handleKeyDown = useDateKeyboardHandler(preventManualInput, smartInput, allowManualInput);
+  const handleBlurWithParsing = (e) => {
+    handleBlur(e);
+    handleInputBlur();
+  };
 
   return (
     <div
@@ -19,7 +24,6 @@ const DateSelector = ({ preventManualInput = false, smartInput = false, ...props
         props.selected === null ? 'empty' : ''
       }`}
     >
-      {/* @ts-ignore */}
       <DatePicker
         selectsRange={props.selectsRange}
         startDate={props.startDate}
@@ -28,12 +32,13 @@ const DateSelector = ({ preventManualInput = false, smartInput = false, ...props
         onChange={handleDatePickerChange}
         isClearable={props.isClearable}
         onFocus={handleFocus}
-        onBlur={handleBlur}
+        onBlur={handleBlurWithParsing}
         onKeyDown={handleKeyDown}
+        onChangeRaw={handleInputChange}
         placeholderText={props.placeholderText}
         minDate={props.minDate}
         dateFormat={props.dateFormat}
-        value={smartInput ? inputValue : undefined}
+        readOnly={preventManualInput}
       />
       <label className="text-label">{props.labelText}</label>
       <i className="has-icon icon-calendar"></i>
