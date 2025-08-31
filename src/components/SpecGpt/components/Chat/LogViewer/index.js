@@ -12,7 +12,7 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, RepeatIcon, CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
-import { fetchAiGeneratedLogDetail, generateAiLog } from '../../../utils/apiUtils';
+import { fetchAiGeneratedLogDetail, fetchSortedLogData, generateAiLog } from '../../../utils/apiUtils';
 import Message from '../ChatMain/Message';
 import { MESSAGE_ROLE_TYPE } from '../../../utils/enums';
 import { useFeatureFlags } from '../../../../../contexts/FeatureFlagsContext';
@@ -138,7 +138,7 @@ const LogViewer = ({
         setSorting({ column: columnName, order });
         
         try {
-            const sortedData = await fetchSortedLogData(projectId, logMessage.questionid, columnName, order);
+            const sortedData = await handleSortedLogData(projectId, logMessage.questionid, columnName, order);
             if (sortedData) {
                 setLogMessage(prev => ({ 
                     ...prev, 
@@ -157,10 +157,10 @@ const LogViewer = ({
         console.log('Filter requested for column:', columnName);
     };
 
-    // Fetch sorted log data
-    const fetchSortedLogData = async (projectId, logId, orderBy, order) => {
+    // Fetch sorted log data using the API utility
+    const handleSortedLogData = async (projectId, logId, orderBy, order) => {
         try {
-            const logDetail = await fetchAiGeneratedLogDetail(projectId, logId);
+            const logDetail = await fetchSortedLogData(projectId, logId, orderBy, order);
             if (logDetail && logDetail.log_data) {
                 return logDetail.log_data;
             }
