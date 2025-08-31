@@ -15,6 +15,8 @@ import { ChevronLeftIcon, RepeatIcon, CheckCircleIcon, WarningIcon } from '@chak
 import { fetchAiGeneratedLogDetail, generateAiLog } from '../../../utils/apiUtils';
 import Message from '../ChatMain/Message';
 import { MESSAGE_ROLE_TYPE } from '../../../utils/enums';
+import { useFeatureFlags } from '../../../../../contexts/FeatureFlagsContext';
+import SortableTable from '../../../../shared/SortableTable';
 
 const LogViewer = ({ 
     projectId, 
@@ -22,12 +24,152 @@ const LogViewer = ({
     logType, 
     onBack,
     logId,
-    initialLogData
+    initialLogData,
+    teamId
 }) => {
     const [logMessage, setLogMessage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isPolling, setIsPolling] = useState(false);
     const [isRegenerating, setIsRegenerating] = useState(false);
+    const [sorting, setSorting] = useState({ column: '', order: 'desc' });
+    const [filterValues, setFilterValues] = useState({});
+
+    // Feature flag checking
+    const { isInspectionLogUseDataTablesFlagActive } = useFeatureFlags();
+    const shouldUseDataTables = isInspectionLogUseDataTablesFlagActive(teamId);
+
+    // Column definitions for different log types
+    const getColumnsForLogType = (logType) => {
+        if (logType === 'inspection_log') {
+            return [
+                { 
+                    key: 'spec_section_number', 
+                    label: 'Spec Section #', 
+                    sortable: true, 
+                    width: 15,
+                    minWidth: 120
+                },
+                { 
+                    key: 'spec_section_name', 
+                    label: 'Spec Section Name', 
+                    sortable: true, 
+                    width: 25,
+                    minWidth: 150,
+                    expandable: true
+                },
+                { 
+                    key: 'inspection_type_and_requirements', 
+                    label: 'Inspection Type & Requirements', 
+                    sortable: true, 
+                    width: 30,
+                    minWidth: 200,
+                    expandable: true
+                },
+                { 
+                    key: 'inspection_frequency', 
+                    label: 'Inspection Frequency', 
+                    sortable: true, 
+                    width: 15,
+                    minWidth: 120
+                },
+                { 
+                    key: 'responsible_party', 
+                    label: 'Responsible Party', 
+                    sortable: true, 
+                    width: 15,
+                    minWidth: 120
+                }
+            ];
+        } else if (logType === 'owner_deliverables_log') {
+            return [
+                { 
+                    key: 'spec_section_number', 
+                    label: 'Spec Section #', 
+                    sortable: true, 
+                    width: 12,
+                    minWidth: 100
+                },
+                { 
+                    key: 'spec_section_name', 
+                    label: 'Spec Section Name', 
+                    sortable: true, 
+                    width: 20,
+                    minWidth: 150,
+                    expandable: true
+                },
+                { 
+                    key: 'deliverable_type', 
+                    label: 'Deliverable Type', 
+                    sortable: true, 
+                    width: 15,
+                    minWidth: 120
+                },
+                { 
+                    key: 'when_due', 
+                    label: 'When Due', 
+                    sortable: true, 
+                    width: 12,
+                    minWidth: 100
+                },
+                { 
+                    key: 'responsible_party', 
+                    label: 'Responsible Party', 
+                    sortable: true, 
+                    width: 15,
+                    minWidth: 120
+                },
+                { 
+                    key: 'exact_requirement_text', 
+                    label: 'Exact Requirement Text', 
+                    sortable: true, 
+                    width: 26,
+                    minWidth: 200,
+                    expandable: true
+                }
+            ];
+        }
+        return [];
+    };
+
+    // Handle sorting
+    const handleSort = async (columnName, order) => {
+        if (!logMessage?.questionid) return;
+        
+        setSorting({ column: columnName, order });
+        
+        try {
+            const sortedData = await fetchSortedLogData(projectId, logMessage.questionid, columnName, order);
+            if (sortedData) {
+                setLogMessage(prev => ({ 
+                    ...prev, 
+                    data: sortedData 
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching sorted data:', error);
+        }
+    };
+
+    // Handle filtering
+    const handleFilter = (columnName) => {
+        // For now, just log the filter request
+        // This can be expanded to show a filter modal or handle filtering
+        console.log('Filter requested for column:', columnName);
+    };
+
+    // Fetch sorted log data
+    const fetchSortedLogData = async (projectId, logId, orderBy, order) => {
+        try {
+            const logDetail = await fetchAiGeneratedLogDetail(projectId, logId);
+            if (logDetail && logDetail.log_data) {
+                return logDetail.log_data;
+            }
+            return null;
+        } catch (error) {
+            console.error('Error fetching sorted log data:', error);
+            return null;
+        }
+    };
 
     useEffect(() => {
         if (initialLogData) {
@@ -42,6 +184,7 @@ const LogViewer = ({
             setLogMessage({
                 type: messageType,
                 message: initialLogData.log_table,
+                data: initialLogData.log_data, // Add structured data
                 session_id: null,
                 questionid: initialLogData.id,
                 sources: null,
@@ -77,6 +220,7 @@ const LogViewer = ({
                     setLogMessage({
                         type: messageType,
                         message: logDetail.log_table,
+                        data: logDetail.log_data, // Add structured data
                         session_id: null,
                         questionid: logDetail.id,
                         sources: null,
@@ -113,6 +257,7 @@ const LogViewer = ({
                 setLogMessage({
                     type: messageType,
                     message: logDetail.log_table,
+                    data: logDetail.log_data, // Add structured data
                     session_id: null,
                     questionid: logDetail.id,
                     sources: null,
@@ -305,12 +450,26 @@ const LogViewer = ({
             <Box w="100%" h="100%" bg="white">
                 {logMessage ? (
                     <Box p={6} h="100%" overflowY="auto">
-                        <Message 
-                            messageType={logMessage.type}
-                            message={logMessage.message}
-                            projectId={projectId}
-                            isLoading={logMessage.log_status === 'PROCESSING'}
-                        />
+                        {shouldUseDataTables && logMessage.data && logMessage.data.length > 0 ? (
+                            // Render SortableTable when feature flag is active and structured data is available
+                            <SortableTable
+                                data={logMessage.data}
+                                columns={getColumnsForLogType(logType)}
+                                onSort={handleSort}
+                                sorting={sorting}
+                                onFilter={handleFilter}
+                                filterValues={filterValues}
+                                className="log-viewer-table"
+                            />
+                        ) : (
+                            // Render existing Message component for markdown display
+                            <Message 
+                                messageType={logMessage.type}
+                                message={logMessage.message}
+                                projectId={projectId}
+                                isLoading={logMessage.log_status === 'PROCESSING'}
+                            />
+                        )}
                     </Box>
                 ) : (
                     <Center h={"100%"} w={"100%"} flexDirection={"column"} gap={5}>
