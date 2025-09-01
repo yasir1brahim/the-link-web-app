@@ -49,7 +49,8 @@ const ProjectLogs = () => {
     isVersionComparisonFlagActive, 
     isVersionComparisonSearchFlagActive,
     isSpecGptFlagActive, 
-    isInspectionLogFlagActive 
+    isInspectionLogFlagActive,
+    isQaPlannerFlagActive
   } = useFeatureFlags();
 
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
@@ -1812,6 +1813,7 @@ const ProjectLogs = () => {
                   chatSessionId={chatId} 
                   setChatSessionId={setChatId}
                   isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
                   messages={chatMessages}
                   setMessages={setChatMessages}
                   chatHistory={chatHistory}

@@ -70,3 +70,4 @@ export const VERSION_COMPARISON_SEARCH_FEATURE_FLAG_NAME = "versioning_submittal
 export const SPEC_GPT_FEATURE_FLAG_NAME = "specgpt";
 export const INSPECTION_LOG_FEATURE_FLAG_NAME = "inspection_log";
 export const INSPECTION_LOG_USE_DATA_TABLES_FEATURE_FLAG_NAME = "inspection_log_use_data_tables";
+export const QA_PLANNER_FEATURE_FLAG_NAME = "qa_planner";

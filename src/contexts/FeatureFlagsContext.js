@@ -9,7 +9,8 @@ import {
     FULL_SPEC_PROCESSING_FEATURE_FLAG_NAME,
     SPEC_GPT_FEATURE_FLAG_NAME,
     INSPECTION_LOG_FEATURE_FLAG_NAME,
-    INSPECTION_LOG_USE_DATA_TABLES_FEATURE_FLAG_NAME
+    INSPECTION_LOG_USE_DATA_TABLES_FEATURE_FLAG_NAME,
+    QA_PLANNER_FEATURE_FLAG_NAME
 } from '../constants';
 
 const FeatureFlagsContext = createContext();
@@ -130,6 +131,7 @@ export const FeatureFlagsProvider = ({ children }) => {
     const isSpecGptFlagActive = (teamId) => isFlagActive(SPEC_GPT_FEATURE_FLAG_NAME, teamId);
     const isInspectionLogFlagActive = (teamId) => isFlagActive(INSPECTION_LOG_FEATURE_FLAG_NAME, teamId);
     const isInspectionLogUseDataTablesFlagActive = (teamId) => isFlagActive(INSPECTION_LOG_USE_DATA_TABLES_FEATURE_FLAG_NAME, teamId);
+    const isQaPlannerFlagActive = (teamId) => isFlagActive(QA_PLANNER_FEATURE_FLAG_NAME, teamId);
 
     // Refresh flags (useful when flags might have changed)
     const refreshFlags = async () => {
@@ -164,6 +166,7 @@ export const FeatureFlagsProvider = ({ children }) => {
         isSpecGptFlagActive,
         isInspectionLogFlagActive,
         isInspectionLogUseDataTablesFlagActive,
+        isQaPlannerFlagActive,
         refreshFlags
     };
 
