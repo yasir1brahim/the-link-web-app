@@ -142,13 +142,10 @@ const SortableTable = ({
 
   // Render table header
   const renderTableHeader = () => {
-    console.log('🔍 SortableTable: Rendering headers with columns:', columns.map(col => ({ key: col.key, label: col.label })));
-    
     return (
     <thead>
       <tr>
         {columns.map((column, index) => {
-          console.log('🔍 SortableTable: Rendering header for column:', { key: column.key, label: column.label, index });
           return (
           <th
             key={column.key}
