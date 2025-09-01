@@ -727,3 +727,26 @@
     }
   }
 }
+
+// Add Employee button hover fix
+.add-employe {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    color: rgba($primary, 0.6);
+    border-color: $primary;
+    background-color: $white;
+  }
+  
+  &:focus {
+    color: rgba($primary, 0.6);
+    border-color: $primary;
+    background-color: $white;
+  }
+  
+  &:focus:not(:hover) {
+    color: $primary;
+    border-color: $primary;
+    background-color: transparent;
+  }
+}

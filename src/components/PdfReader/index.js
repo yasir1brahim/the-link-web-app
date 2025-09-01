@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../config/axios';
 import ViewSDKClient from '../../ViewSDKClient';
+import { validateS3Link, isS3LinkExpiredError } from '../../utils/s3LinkValidator.js';
+import { useS3LinkValidation } from '../../hooks/useS3LinkValidation.js';
+
 const RenderMenu = ({ url, textLoc, docId }) => {
   const [docAnnotations, setAnnotations] = useState([]);
   const [newAnnotations, setNewAnnotations] = useState([]);
-  // let element = document.getElementsByClassName("sdk-HeaderView-header");
+  const { handleError, ErrorModal } = useS3LinkValidation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,11 +25,6 @@ const RenderMenu = ({ url, textLoc, docId }) => {
       console.log(error);
     });
   }, [docId]);
-  // useEffect(()=>{
-  //   if(element[0]) {
-  //     element[0].style.backgroundColor = 'rgba(32, 42, 68, 0.9)';
-  //   }
-  // },[element[0]])
 
   useEffect(() => {
     if (newAnnotations.length) {
@@ -49,8 +47,26 @@ const RenderMenu = ({ url, textLoc, docId }) => {
     }
   }, [newAnnotations, docId]);
 
-  const loadPDF = () => {
+  const loadPDF = async () => {
+    // Clean up existing PDF viewer
+    const pdfDiv = document.getElementById('pdf-div');
+    if (pdfDiv) {
+      pdfDiv.innerHTML = '';
+    }
+    
+    // Simple S3 validation
+    try {
+      const isValid = await validateS3Link(url);
+      if (!isValid) {
+        handleError({ message: 'The document link has expired. Please refresh the page to get a new link and try again.' });
+        return;
+      }
+    } catch (error) {
+      console.log('S3 validation failed, continuing with PDF load');
+    }
+
     const viewSDKClient = new ViewSDKClient();
+    
     viewSDKClient.ready().then(() => {
       const previewFilePromise = viewSDKClient.previewFile(
         'pdf-div',
@@ -64,10 +80,10 @@ const RenderMenu = ({ url, textLoc, docId }) => {
           enableAnnotationAPIs: true,
           includePDFAnnotations: true,
           showFullScreen: true
-          // exitPDFViewerType: 'RETURN',
         },
         url,
-        setNewAnnotations
+        setNewAnnotations,
+        handleError
       );
 
       previewFilePromise.then((adobeViewer) => {
@@ -87,7 +103,6 @@ const RenderMenu = ({ url, textLoc, docId }) => {
             .getAnnotations()
             .then((result) => {
               result.length && setNewAnnotations(result);
-              console.log('annotation:', result);
             })
             .catch((error) => console.log(error));
         });
@@ -110,26 +125,34 @@ const RenderMenu = ({ url, textLoc, docId }) => {
             .catch((error) => console.log(error));
         });
       });
+      
       previewFilePromise.then((adobeViewer) => {
         adobeViewer.getAPIs().then((apis) => {
           apis
             .gotoLocation(textLoc.page_no, textLoc.x, textLoc.y)
-            // apis.gotoLocation(2, 104, 407)
             .then(() => console.log('Success'))
             .catch((error) => console.log(error));
         });
       });
     });
   };
+
   return (
     <>
+      <ErrorModal />
       <div
-        // style={{ height: "100vh" }}
         id="pdf-div"
         className="full-window-div border border-gray-100 h-screen"
+        style={{
+          height: 'calc(100vh - 240px)',
+          width: '100%',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
         onDocumentLoad={loadPDF()}
       ></div>
     </>
   );
 };
+
 export default RenderMenu;

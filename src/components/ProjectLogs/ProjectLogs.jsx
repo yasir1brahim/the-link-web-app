@@ -992,6 +992,10 @@ const ProjectLogs = () => {
   }
 
   const onClickVersion = (versionId) => {
+    // Prevent navigation if clicking on the current version
+    if (parseInt(versionId) === parseInt(projectVersionId)) {
+      return;
+    }
     setIsDataLoading(true);
     setProjectVersionId(versionId);
     
@@ -2139,6 +2143,7 @@ const ProjectLogs = () => {
         toggle={() => setShowDocumentListModal(false)}
         documents={documentData}
         onAfterReprocess={refreshDocumentsAndSubmittals}
+        onAfterDelete={refreshDocumentsAndSubmittals}
       />
 
       {showVersionModal && <ManageVersionModal

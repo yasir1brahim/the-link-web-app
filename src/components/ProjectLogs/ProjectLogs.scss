@@ -633,3 +633,15 @@
   }
 }
 
+.document-delete-modal-heading{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap:8px;
+  margin-bottom: 20px;
+
+  h4{
+    font-weight: bold;
+    margin-bottom: 0 !important;
+  }
+}

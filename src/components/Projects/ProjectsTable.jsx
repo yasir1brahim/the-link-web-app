@@ -357,6 +357,7 @@ const ProjectsTable = ({
           </div>
           <div className="table-footer-content">
             <PaginatedItems
+              key={`projects-${isArchived ? 'archived' : 'active'}`}
               items={projectData}
               setCurrentItems={setCurrentItems}
               itemsPerPage={itemsPerPage}
