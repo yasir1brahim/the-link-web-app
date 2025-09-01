@@ -5,7 +5,7 @@ import { FilterIcon } from '../icons/filterIcon';
 import './SortableTable.scss';
 
 /**
- * SortableTable - A reusable table component with sorting and filtering capabilities
+ * SortableTable - A reusable table component with sorting, filtering, and pagination capabilities
  * 
  * @param {Array} data - Array of data objects to display
  * @param {Array} columns - Array of column definitions
@@ -13,6 +13,8 @@ import './SortableTable.scss';
  * @param {Object} sorting - Current sorting state { column: string, order: 'asc'|'desc' }
  * @param {Function} onFilter - Callback function for filtering
  * @param {Object} filterValues - Current filter values
+ * @param {Function} onPageChange - Callback function for pagination
+ * @param {Object} pagination - Pagination state { currentPage: number, pageSize: number, totalItems: number, totalPages: number }
  * @param {string} className - Additional CSS classes
  * @param {Object} props - Additional props
  */
@@ -23,6 +25,8 @@ const SortableTable = ({
   sorting = { column: '', order: 'desc' },
   onFilter,
   filterValues = {},
+  onPageChange,
+  pagination = null,
   className = '',
   ...props
 }) => {
@@ -255,6 +259,34 @@ const SortableTable = ({
         {renderTableBody()}
       </table>
       
+      {/* Pagination controls */}
+      {pagination && onPageChange && (
+        <div className="pagination-controls">
+          <div className="pagination-info">
+            Showing {((pagination.current_page - 1) * pagination.page_size) + 1} to {Math.min(pagination.current_page * pagination.page_size, pagination.total_items)} of {pagination.total_items} items
+          </div>
+          <div className="pagination-buttons">
+            <button
+              className="pagination-btn"
+              disabled={!pagination.has_previous}
+              onClick={() => onPageChange(pagination.previous_page)}
+            >
+              Previous
+            </button>
+            <span className="pagination-page-info">
+              Page {pagination.current_page} of {pagination.total_pages}
+            </span>
+            <button
+              className="pagination-btn"
+              disabled={!pagination.has_next}
+              onClick={() => onPageChange(pagination.next_page)}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* Filter modal would be rendered here if needed */}
       {filterModal && onFilter && (
         <div className="filter-modal">
@@ -292,6 +324,17 @@ SortableTable.propTypes = {
   }),
   onFilter: PropTypes.func,
   filterValues: PropTypes.object,
+  onPageChange: PropTypes.func,
+  pagination: PropTypes.shape({
+    currentPage: PropTypes.number,
+    pageSize: PropTypes.number,
+    totalItems: PropTypes.number,
+    totalPages: PropTypes.number,
+    hasNext: PropTypes.bool,
+    hasPrevious: PropTypes.bool,
+    nextPage: PropTypes.number,
+    previousPage: PropTypes.number,
+  }),
   className: PropTypes.string,
 };
 

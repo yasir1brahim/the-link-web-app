@@ -33,10 +33,23 @@ const LogViewer = ({
     const [isRegenerating, setIsRegenerating] = useState(false);
     const [sorting, setSorting] = useState({ column: '', order: 'desc' });
     const [filterValues, setFilterValues] = useState({});
+    const [pagination, setPagination] = useState({ currentPage: 1, pageSize: 50 });
 
     // Feature flag checking
     const { isInspectionLogUseDataTablesFlagActive } = useFeatureFlags();
     const shouldUseDataTables = isInspectionLogUseDataTablesFlagActive(teamId);
+
+    // Map frontend column names to backend field names
+    const fieldMapping = {
+        'Spec Section #': 'spec_section_number',
+        'Spec Section Name': 'spec_section_name',
+        'Inspection Type And Requirements': 'inspection_type_and_requirements',
+        'Inspection Frequency': 'inspection_frequency',
+        'Responsible Party': 'responsible_party',
+        'Deliverable Type': 'deliverable_type',
+        'When Due': 'when_due',
+        'Exact Requirement Text': 'exact_requirement_text'
+    };
 
     // Column definitions for different log types
     const getColumnsForLogType = (logType) => {
@@ -137,18 +150,6 @@ const LogViewer = ({
             return;
         }
         
-        // Map frontend column names to backend field names
-        const fieldMapping = {
-            'Spec Section #': 'spec_section_number',
-            'Spec Section Name': 'spec_section_name',
-            'Inspection Type And Requirements': 'inspection_type_and_requirements',
-            'Inspection Frequency': 'inspection_frequency',
-            'Responsible Party': 'responsible_party',
-            'Deliverable Type': 'deliverable_type',
-            'When Due': 'when_due',
-            'Exact Requirement Text': 'exact_requirement_text'
-        };
-        
         const backendFieldName = fieldMapping[columnName];
         if (!backendFieldName) {
             console.error('🔍 LogViewer: No mapping found for column name:', columnName);
@@ -156,13 +157,16 @@ const LogViewer = ({
         }
         
         setSorting({ column: columnName, order });
+        // Reset pagination when sorting changes
+        setPagination({ currentPage: 1, pageSize: 50 });
         
         try {
             const sortedData = await handleSortedLogData(projectId, logMessage.questionid, backendFieldName, order);
             if (sortedData) {
                 setLogMessage(prev => ({ 
                     ...prev, 
-                    data: sortedData 
+                    data: sortedData.data,
+                    pagination: sortedData.pagination || null
                 }));
             }
         } catch (error) {
@@ -177,13 +181,56 @@ const LogViewer = ({
         console.log('Filter requested for column:', columnName);
     };
 
-    // Fetch sorted log data using the API utility
-    const handleSortedLogData = async (projectId, logId, orderBy, order) => {
+    // Handle pagination
+    const handlePageChange = async (newPage) => {
+        if (!logMessage?.questionid) {
+            return;
+        }
+        
+
+        
         try {
-            const logDetail = await fetchSortedLogData(projectId, logId, orderBy, order);
+            // Use default sort field if no sorting is applied
+            const orderBy = sorting.column ? fieldMapping[sorting.column] : 'created_at';
+            
+
+            
+            const sortedData = await handleSortedLogData(
+                projectId, 
+                logMessage.questionid, 
+                orderBy, 
+                sorting.order,
+                newPage,
+                logMessage.pagination?.page_size || 50
+            );
+            
+            console.log('🔍 LogViewer: handleSortedLogData returned:', sortedData);
+            
+            if (sortedData) {
+                console.log('🔍 LogViewer: Received paginated data:', sortedData);
+                setLogMessage(prev => ({ 
+                    ...prev, 
+                    data: sortedData.data,
+                    pagination: sortedData.pagination || null
+                }));
+            } else {
+                console.log('🔍 LogViewer: No data returned from handleSortedLogData');
+            }
+        } catch (error) {
+            console.error('Error fetching paginated data:', error);
+        }
+    };
+
+    // Fetch sorted log data using the API utility
+    const handleSortedLogData = async (projectId, logId, orderBy, order, page = 1, pageSize = 50) => {
+        try {
+            const logDetail = await fetchSortedLogData(projectId, logId, orderBy, order, page, pageSize);
             
             if (logDetail && logDetail.log_data) {
-                return logDetail.log_data;
+                return {
+                    data: logDetail.log_data,
+                    pagination: logDetail.pagination
+                };
             } else {
                 return null;
             }
@@ -204,11 +251,13 @@ const LogViewer = ({
                 ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
                 : 'ASSISTANT';
             
+
             const logMessageData = {
                 type: messageType,
                 message: initialLogData.log_table,
                 data: initialLogData.log_data, // Add structured data
                 data_format: initialLogData.data_format, // Add data format
+                pagination: initialLogData.pagination, // Add pagination data
                 session_id: null,
                 questionid: initialLogData.id,
                 sources: null,
@@ -252,6 +301,7 @@ const LogViewer = ({
                         message: logDetail.log_table,
                         data: logDetail.log_data, // Add structured data
                         data_format: logDetail.data_format, // Add data format
+                        pagination: logDetail.pagination, // Add pagination data
                         session_id: null,
                         questionid: logDetail.id,
                         sources: null,
@@ -296,6 +346,7 @@ const LogViewer = ({
                     message: logDetail.log_table,
                     data: logDetail.log_data, // Add structured data
                     data_format: logDetail.data_format, // Add data format
+                    pagination: logDetail.pagination, // Add pagination data
                     session_id: null,
                     questionid: logDetail.id,
                     sources: null,
@@ -496,6 +547,7 @@ const LogViewer = ({
                             const shouldShowTable = logMessage.data_format === 'structured' && logMessage.data && logMessage.data.length > 0;
                             
                             if (shouldShowTable) {
+
                                 return (
                                     <SortableTable
                                         data={logMessage.data}
@@ -504,6 +556,8 @@ const LogViewer = ({
                                         sorting={sorting}
                                         onFilter={handleFilter}
                                         filterValues={filterValues}
+                                        onPageChange={handlePageChange}
+                                        pagination={logMessage.pagination}
                                         className="log-viewer-table"
                                     />
                                 );

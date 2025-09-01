@@ -106,7 +106,7 @@ const fetchAiGeneratedLogDetail = async (projectId, logId, orderBy = null, order
  * @param {string} order - Sort direction ('asc' or 'desc', default: 'desc')
  * @returns {Promise<Object|null>} Sorted log data or null on error
  */
-const fetchSortedLogData = async (projectId, logId, orderBy, order = 'desc') => {
+const fetchSortedLogData = async (projectId, logId, orderBy, order = 'desc', page = 1, pageSize = 50) => {
     try {
         if (!orderBy) {
             console.warn('fetchSortedLogData: orderBy parameter is required');
@@ -116,7 +116,9 @@ const fetchSortedLogData = async (projectId, logId, orderBy, order = 'desc') => 
         const url = `/api/deliverables/${projectId}/ai-generated-logs/${logId}/`;
         const params = {
             order_by: orderBy,
-            order: order
+            order: order,
+            page: page,
+            page_size: pageSize
         };
         
         const response = await axiosInstance({
