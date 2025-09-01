@@ -37,12 +37,6 @@ const LogViewer = ({
     // Feature flag checking
     const { isInspectionLogUseDataTablesFlagActive } = useFeatureFlags();
     const shouldUseDataTables = isInspectionLogUseDataTablesFlagActive(teamId);
-    
-    console.log('🔍 LogViewer: Feature flag check:', {
-        teamId,
-        shouldUseDataTables,
-        isInspectionLogUseDataTablesFlagActive: typeof isInspectionLogUseDataTablesFlagActive
-    });
 
     // Column definitions for different log types
     const getColumnsForLogType = (logType) => {
@@ -139,10 +133,7 @@ const LogViewer = ({
 
     // Handle sorting
     const handleSort = async (columnName, order) => {
-        console.log('🔍 LogViewer: handleSort called with:', { columnName, order });
-        
         if (!logMessage?.questionid) {
-            console.log('🔍 LogViewer: No questionid available for sorting');
             return;
         }
         
@@ -164,20 +155,15 @@ const LogViewer = ({
             return;
         }
         
-        console.log('🔍 LogViewer: Mapped column name to backend field:', { columnName, backendFieldName });
-        console.log('🔍 LogViewer: Setting sorting state and calling handleSortedLogData');
         setSorting({ column: columnName, order });
         
         try {
             const sortedData = await handleSortedLogData(projectId, logMessage.questionid, backendFieldName, order);
             if (sortedData) {
-                console.log('🔍 LogViewer: Received sorted data, updating state');
                 setLogMessage(prev => ({ 
                     ...prev, 
                     data: sortedData 
                 }));
-            } else {
-                console.log('🔍 LogViewer: No sorted data received');
             }
         } catch (error) {
             console.error('Error fetching sorted data:', error);
@@ -193,16 +179,12 @@ const LogViewer = ({
 
     // Fetch sorted log data using the API utility
     const handleSortedLogData = async (projectId, logId, orderBy, order) => {
-        console.log('🔍 LogViewer: handleSortedLogData called with:', { projectId, logId, orderBy, order });
         try {
             const logDetail = await fetchSortedLogData(projectId, logId, orderBy, order);
-            console.log('🔍 LogViewer: fetchSortedLogData returned:', logDetail);
             
             if (logDetail && logDetail.log_data) {
-                console.log('🔍 LogViewer: Returning sorted log_data with length:', logDetail.log_data.length);
                 return logDetail.log_data;
             } else {
-                console.log('🔍 LogViewer: No log_data found in response');
                 return null;
             }
         } catch (error) {
@@ -213,14 +195,6 @@ const LogViewer = ({
 
     useEffect(() => {
         if (initialLogData) {
-            console.log('🔍 LogViewer: Processing initialLogData:', {
-                id: initialLogData.id,
-                log_type: initialLogData.log_type,
-                data_format: initialLogData.data_format,
-                has_log_data: !!initialLogData.log_data,
-                log_data_length: initialLogData.log_data ? initialLogData.log_data.length : 0,
-                log_status: initialLogData.log_status
-            });
             
             const messageType = logType === 'inspection_log'
                 ? MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG
@@ -242,12 +216,7 @@ const LogViewer = ({
                 log_status: initialLogData.log_status,
             };
             
-            console.log('🔍 LogViewer: Setting logMessage state:', {
-                data_format: logMessageData.data_format,
-                has_data: !!logMessageData.data,
-                data_length: logMessageData.data ? logMessageData.data.length : 0,
-                should_show_table: logMessageData.data_format === 'structured' && logMessageData.data && logMessageData.data.length > 0
-            });
+
             
             setLogMessage(logMessageData);
             
@@ -276,13 +245,7 @@ const LogViewer = ({
                         ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
                         : 'ASSISTANT';
                     
-                    console.log('🔍 LogViewer: Polling update - logDetail:', {
-                        id: logDetail.id,
-                        data_format: logDetail.data_format,
-                        has_log_data: !!logDetail.log_data,
-                        log_data_length: logDetail.log_data ? logDetail.log_data.length : 0,
-                        log_status: logDetail.log_status
-                    });
+
                     
                     const logMessageData = {
                         type: messageType,
@@ -296,12 +259,7 @@ const LogViewer = ({
                         log_status: logDetail.log_status,
                     };
                     
-                    console.log('🔍 LogViewer: Polling update - setting logMessage:', {
-                        data_format: logMessageData.data_format,
-                        has_data: !!logMessageData.data,
-                        data_length: logMessageData.data ? logMessageData.data.length : 0,
-                        should_show_table: logMessageData.data_format === 'structured' && logMessageData.data && logMessageData.data.length > 0
-                    });
+
                     
                     setLogMessage(logMessageData);
                     
@@ -331,13 +289,7 @@ const LogViewer = ({
                     ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
                     : 'ASSISTANT';
                 
-                console.log('🔍 LogViewer: loadLogDetail - logDetail:', {
-                    id: logDetail.id,
-                    data_format: logDetail.data_format,
-                    has_log_data: !!logDetail.log_data,
-                    log_data_length: logDetail.log_data ? logDetail.log_data.length : 0,
-                    log_status: logDetail.log_status
-                });
+
                 
                 const logMessageData = {
                     type: messageType,
@@ -351,12 +303,7 @@ const LogViewer = ({
                     log_status: logDetail.log_status,
                 };
                 
-                console.log('🔍 LogViewer: loadLogDetail - setting logMessage:', {
-                    data_format: logMessageData.data_format,
-                    has_data: !!logMessageData.data,
-                    data_length: logMessageData.data ? logMessageData.data.length : 0,
-                    should_show_table: logMessageData.data_format === 'structured' && logMessageData.data && logMessageData.data.length > 0
-                });
+
                 
                 setLogMessage(logMessageData);
                 
@@ -547,21 +494,8 @@ const LogViewer = ({
                     <Box p={6} h="100%" overflowY="auto">
                         {(() => {
                             const shouldShowTable = logMessage.data_format === 'structured' && logMessage.data && logMessage.data.length > 0;
-                            console.log('🔍 LogViewer: Rendering decision:', {
-                                data_format: logMessage.data_format,
-                                has_data: !!logMessage.data,
-                                data_length: logMessage.data ? logMessage.data.length : 0,
-                                should_show_table: shouldShowTable,
-                                log_status: logMessage.log_status
-                            });
                             
                             if (shouldShowTable) {
-                                console.log('🔍 LogViewer: Rendering SortableTable with data:', {
-                                    data_length: logMessage.data.length,
-                                    first_item: logMessage.data[0],
-                                    columns: getColumnsForLogType(logType),
-                                    column_labels: getColumnsForLogType(logType).map(col => ({ key: col.key, label: col.label }))
-                                });
                                 return (
                                     <SortableTable
                                         data={logMessage.data}
@@ -574,7 +508,6 @@ const LogViewer = ({
                                     />
                                 );
                             } else {
-                                console.log('🔍 LogViewer: Rendering Message component for markdown');
                                 return (
                                     <Message 
                                         messageType={logMessage.type}

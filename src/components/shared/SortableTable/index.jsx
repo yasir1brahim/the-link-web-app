@@ -114,16 +114,13 @@ const SortableTable = ({
 
   // Handle sorting
   const handleSorting = (columnName) => {
-    console.log('🔍 SortableTable: handleSorting called with columnName:', columnName);
     if (!onSort) {
-      console.log('🔍 SortableTable: onSort function is not provided');
       return;
     }
     
     let sortingOrder = sorting.column === columnName ? sorting.order : "desc";
     const newOrder = sortingOrder === "desc" ? "asc" : "desc";
     
-    console.log('🔍 SortableTable: Calling onSort with:', { columnName, newOrder });
     onSort(columnName, newOrder);
   };
 
@@ -164,7 +161,6 @@ const SortableTable = ({
                         <span
           style={{ cursor: "pointer", marginLeft: "6px" }}
           onClick={(e) => {
-            console.log('🔍 SortableTable: Sort icon clicked for column:', column.key);
             e.stopPropagation();
             handleSorting(column.key);
           }}

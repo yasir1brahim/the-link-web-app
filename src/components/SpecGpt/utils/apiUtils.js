@@ -107,7 +107,6 @@ const fetchAiGeneratedLogDetail = async (projectId, logId, orderBy = null, order
  * @returns {Promise<Object|null>} Sorted log data or null on error
  */
 const fetchSortedLogData = async (projectId, logId, orderBy, order = 'desc') => {
-    console.log('🔍 API: fetchSortedLogData called with:', { projectId, logId, orderBy, order });
     try {
         if (!orderBy) {
             console.warn('fetchSortedLogData: orderBy parameter is required');
@@ -120,24 +119,14 @@ const fetchSortedLogData = async (projectId, logId, orderBy, order = 'desc') => 
             order: order
         };
         
-        console.log('🔍 API: Making request to:', url, 'with params:', params);
-        
         const response = await axiosInstance({
             method: 'GET',
             url: url,
             params: params
         });
         
-        console.log('🔍 API: Response received:', {
-            status: response.status,
-            has_log_data: !!response.data.log_data,
-            log_data_length: response.data.log_data ? response.data.log_data.length : 0,
-            data_format: response.data.data_format
-        });
-        
         return response.data;
     } catch (error) {
-        console.error('🔍 API: Error in fetchSortedLogData:', error);
         handleError(error);
         return null;
     }
