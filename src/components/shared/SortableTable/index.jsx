@@ -27,6 +27,7 @@ const SortableTable = ({
   filterValues = {},
   onPageChange,
   pagination = null,
+  enableExpansion = true, // New prop to control expansion functionality
   className = '',
   ...props
 }) => {
@@ -40,14 +41,18 @@ const SortableTable = ({
   const parentRef = useRef(null);
   const rowRefs = useRef([]);
 
-  // Initialize showMore state when data changes
+  // Initialize showMore state when data changes (only if expansion is enabled)
   useEffect(() => {
-    setShowMore(Array(data.length).fill(false));
-    rowRefs.current = Array(data.length).fill(null);
-  }, [data]);
+    if (enableExpansion) {
+      setShowMore(Array(data.length).fill(false));
+      rowRefs.current = Array(data.length).fill(null);
+    }
+  }, [data, enableExpansion]);
 
-  // Check for text overflow and show expansion buttons
+  // Check for text overflow and show expansion buttons (only if expansion is enabled)
   useEffect(() => {
+    if (!enableExpansion) return;
+    
     const hasClamping = (el) => {
       if (!el) return false;
       const { clientHeight, scrollHeight } = el;
@@ -69,7 +74,7 @@ const SortableTable = ({
     return () => {
       window.removeEventListener('resize', checkButtonAvailability);
     };
-  }, [data]);
+  }, [data, enableExpansion]);
 
   // Use fixed column widths to prevent layout shifts
   useEffect(() => {
@@ -190,14 +195,16 @@ const SortableTable = ({
                 column.render(row[column.key], row, rowIndex)
               ) : (
                 <div
-                  className={`${column.expandable ? 'log-desc' : ''} ${
-                    showMore[rowIndex] ? 'show-content' : 'text-overflow'
-                  }`}
-                  style={{ whiteSpace: 'pre-wrap' }}
-                  ref={column.expandable ? (element) => (rowRefs.current[rowIndex] = element) : null}
+                  className={enableExpansion && column.expandable ? 'log-desc' : ''}
+                  style={{ 
+                    whiteSpace: 'pre-wrap', // Always allow text wrapping
+                    overflow: 'visible', // Always show full content
+                    textOverflow: 'clip' // No ellipsis
+                  }}
+                  ref={enableExpansion && column.expandable ? (element) => (rowRefs.current[rowIndex] = element) : null}
                 >
                   {formatCellValue(row[column.key], column, row)}
-                  {column.expandable && shouldShowExpansionButton[rowIndex] && (
+                  {enableExpansion && column.expandable && shouldShowExpansionButton[rowIndex] && (
                     <span
                       className='showmore-wrap'
                       onClick={() =>
@@ -308,6 +315,7 @@ SortableTable.propTypes = {
     nextPage: PropTypes.number,
     previousPage: PropTypes.number,
   }),
+  enableExpansion: PropTypes.bool,
   className: PropTypes.string,
 };
 

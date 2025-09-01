@@ -553,6 +553,7 @@ const LogViewer = ({
                                         filterValues={filterValues}
                                         onPageChange={handlePageChange}
                                         pagination={logMessage.pagination}
+                                        enableExpansion={false}
                                         className="log-viewer-table"
                                     />
                                 );
