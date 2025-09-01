@@ -2,7 +2,7 @@
 // Extracted and adapted from existing table styling patterns
 
 .l-table-wrapper {
-  width: 1200px; // Fixed width to match table
+  width: 100%; // Fill available space
   margin: 0 auto;
   padding: 0 20px;
   overflow-x: auto;
@@ -14,10 +14,16 @@
 
   .table.logs-table {
     table-layout: fixed !important;
-    width: 1200px; // Fixed total width to prevent expansion
+    width: 100%; // Fill available space
     margin-bottom: 0;
     box-sizing: border-box;
     border-collapse: collapse; // Ensure consistent spacing
+    
+    // Make columns fill available space evenly
+    th, td {
+      width: 1%; // Force equal distribution
+      white-space: nowrap; // Prevent text wrapping
+    }
 
     th {
       background-color: #f8f9fa;
