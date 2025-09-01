@@ -71,49 +71,22 @@ const SortableTable = ({
     };
   }, [data]);
 
-  // Calculate table column widths
+  // Use fixed column widths to prevent layout shifts
   useEffect(() => {
-    if (parentRef.current && columns.length > 0) {
-      const parentWidth = parentRef.current.offsetWidth;
-      const minWidths = columns.reduce((acc, col, index) => {
-        acc[index] = col.minWidth || 100;
-        return acc;
-      }, {});
-
-      const newWidths = {};
+    if (columns.length > 0) {
+      const fixedWidths = {};
       columns.forEach((col, index) => {
-        const percentage = col.width || (100 / columns.length);
-        newWidths[index] = Math.max(
-          Math.round(parentWidth * (percentage / 100)),
-          minWidths[index]
-        );
+        // Use minWidth as fixed width to prevent any changes
+        fixedWidths[index] = col.minWidth || 150;
       });
-
-      setTableWidths(newWidths);
+      setTableWidths(fixedWidths);
     }
-  }, [parentRef.current, columns]);
+  }, [columns]);
 
-  // Handle column resizing
+  // Disable column resizing to prevent layout shifts
   const handleMouseDown = (e, colIndex) => {
-    const startX = e.clientX;
-    const startWidth = tableRef.current.querySelectorAll("th")[colIndex].offsetWidth;
-    const minWidth = columns[colIndex]?.minWidth || 100;
-
-    const handleMouseMove = (e) => {
-      const newWidth = Math.max(
-        startWidth + (e.clientX - startX),
-        minWidth
-      );
-      tableRef.current.querySelectorAll("th")[colIndex].style.width = `${newWidth}px`;
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    // Disabled to prevent layout shifts
+    return;
   };
 
   // Handle sorting
