@@ -6,7 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Loader from '../shared/Loader/Loader';
 import handleError from '../../config/errorHandler';
-import { getUserTeams, getUserRoleInTeam } from '../../api/Authentication/api';
+import { getUserTeams } from '../../api/Authentication/api';
 import SharedTooltip from '../shared/StyledTooltip/StyledTooltip';
 
 const Companies = () => {
@@ -15,27 +15,15 @@ const Companies = () => {
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [isLoading, setLoading] = useState(false);
     const [pageRefresh, setPageRefresh] = useState(false);
-    const [roles, setRoles] = useState({});
 
     useEffect(() => {
-      const fetchCompaniesAndRoles = async () => {
+      const fetchCompanies = async () => {
           try {
               setLoading(true);
   
               const response = await getUserTeams();
               const fetchedCompanies = response.data.results;
               setCompanies(fetchedCompanies);
-  
-              const userId = localStorage.getItem('userId');
-              const rolesPromises = fetchedCompanies.map(async (company) => {
-                  const role = await getUserRoleInTeam(userId, company.id);
-                  return { [company.id]: role };
-              });
-  
-              const rolesArray = await Promise.all(rolesPromises);
-              const rolesMap = rolesArray.reduce((acc, roleObj) => ({ ...acc, ...roleObj }), {});
-  
-              setRoles(rolesMap);
           } catch (error) {
               handleError(error);
           } finally {
@@ -43,7 +31,7 @@ const Companies = () => {
           }
       };
   
-      fetchCompaniesAndRoles();
+      fetchCompanies();
   }, [pageRefresh]);
 
     return (
@@ -87,8 +75,7 @@ const Companies = () => {
                     </thead>
                     <tbody>
                       {companies.map((company)  => {
-                        const role = roles[company.id];
-                        const isMember = role === 'member';
+                        const isMember = company.user_role === 'member';
 
                         return (
                           <tr key={company?.id}>
@@ -104,7 +91,7 @@ const Companies = () => {
                               )}
                             </td>
                             <td>{company.active_count}</td>
-                            <td>{company.members.length}</td>
+                            <td>{company.member_count}</td>
                             <td>
                               <div className="action-wrapper">
                                 <a

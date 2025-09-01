@@ -145,7 +145,6 @@ const ProjectLogs = () => {
   const [manageExcelExportModal, setManageExcelExportModal] = useState(false);
   const toggleManageExcelExportModal = () =>
     setManageExcelExportModal(!manageExcelExportModal);
-  const [loadingProjectDetails, setLoadingProjectDetails] = useState(false);
   const [companyList, setCompanyList] = useState([]);
   const [companyId, setCompanyId] = useState();
   const [documentData, setDocumentData] = useState([]);
@@ -248,6 +247,9 @@ const ProjectLogs = () => {
   const [archivedVersions, setArchivedVersions] = useState([]);
   const [loadingUnarchiveId, setLoadingUnarchiveId] = useState(null);
 
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isDataLoading, setIsDataLoading] = useState(false);
+  const [docParsed, setDocParsed] = useState(0);
 
   const getProcoreAccessTokenData = async () => {
     try {
@@ -321,6 +323,10 @@ const ProjectLogs = () => {
           progress: undefined,
         });
         toggleVersionModal();
+        
+        const projectResponse = await getProjectDetails(projectId);
+        setAvailableVersions(projectResponse.data.project_versions);
+        
         onClickVersion(response.data.id);
       } else {
         console.log("response.data", response.data);
@@ -390,82 +396,91 @@ const ProjectLogs = () => {
     projectVersionId = null,
   ) => {
     if (projectId === null) return;
-    setLoading(true);
+    
+    if (!isInitialLoading) {
+      setIsDataLoading(true);
+    }
     setLoadingView(true);
     setLogInViewer(null);
 
-    const submittalItems = await getSubmittalItems(
-      projectId,
-      search,
-      filterValues,
-      orderCol,
-      order,
-      page || 1,
-      itemsPerPage,
-      listId,
-      projectVersionId
-    );
+    try {
+      const submittalItems = await getSubmittalItems(
+        projectId,
+        search,
+        filterValues,
+        orderCol,
+        order,
+        page || 1,
+        itemsPerPage,
+        listId,
+        projectVersionId
+      );
 
-    console.log("responseData", submittalItems.data);
-    setSelectedFilterValue(submittalItems.data.all_filter_vals);
-    setAvailableMasterformatNumbers(submittalItems.data.all_masterformat_numbers_for_project || []);
-    const submittalLogs = submittalItems.data.message;
-    setLogData(submittalLogs);
-    setFilteredLogData(submittalLogs); 
-    setHasPlaceholderSubmittals(submittalItems.data.has_placeholder_submittals || false);
-    console.log("submittalLogs", submittalLogs);
+      console.log("responseData", submittalItems.data);
+      setSelectedFilterValue(submittalItems.data.all_filter_vals);
+      setAvailableMasterformatNumbers(submittalItems.data.all_masterformat_numbers_for_project || []);
+      const submittalLogs = submittalItems.data.message;
+      setLogData(submittalLogs);
+      setFilteredLogData(submittalLogs); 
+      setHasPlaceholderSubmittals(submittalItems.data.has_placeholder_submittals || false);
+      console.log("submittalLogs", submittalLogs);
 
-    if(submittalId) {
-      const submittalIdx = submittalLogs.findIndex((log) => log.id.toString() === submittalId);
-      if (submittalIdx !== -1) {
-        setPdfData({
-          url: submittalLogs[submittalIdx].doc_link,
-          textLoc: submittalLogs[submittalIdx].text_loc,
-          index: submittalIdx,
-          docId: submittalLogs[submittalIdx].doc_id,
-          submittalId: submittalLogs[submittalIdx].id,
-          additionalTextLocations: submittalLogs[submittalIdx].additional_text_locations,
-        });
-      } else if (page === 1) {
-        setPdfData({
-          url: "",
-          textLoc: {},
-          index: "",
-          docId: null,
-          submittalId: null,
-          additionalTextLocations: [],
-        });
+      if(submittalId) {
+        const submittalIdx = submittalLogs.findIndex((log) => log.id.toString() === submittalId);
+        if (submittalIdx !== -1) {
+          setPdfData({
+            url: submittalLogs[submittalIdx].doc_link,
+            textLoc: submittalLogs[submittalIdx].text_loc,
+            index: submittalIdx,
+            docId: submittalLogs[submittalIdx].doc_id,
+            submittalId: submittalLogs[submittalIdx].id,
+            additionalTextLocations: submittalLogs[submittalIdx].additional_text_locations,
+          });
+        } else if (page === 1) {
+          setPdfData({
+            url: "",
+            textLoc: {},
+            index: "",
+            docId: null,
+            submittalId: null,
+            additionalTextLocations: [],
+          });
+        }
       }
+
+      localStorage.setItem(
+        "filteredIds",
+        submittalLogs?.map((item) => item?.id)
+      );
+      setLogIdList(submittalItems.data.log_id_list);
+      setErrorMessage("");
+      
+      if (submittalItems.data.message?.length === 0) {
+        const filterHasValues = Object.values(filterValues).some(arr => arr.length > 0);
+        if (documentData?.length > 0 && !filterHasValues) {
+          setErrorMessage("No submittals were detected in the uploaded document(s)");
+          return;
+        }
+        if (search || filterHasValues) {
+          setErrorMessage("Sorry, no results found for your search query.");
+          return;
+        }
+        if (documentData?.length === 0) {
+          setErrorMessage("Upload spec documents to generate submittal log");
+          return;
+        }
+        if (documentIsProcessing(documentData)) {
+          setErrorMessage("Documents are being processed...");
+          return;
+        }
+      }
+      setTotalCount(submittalItems?.data?.total_count);
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setIsDataLoading(false);
+      setLoadingView(false);
     }
-
-    localStorage.setItem(
-      "filteredIds",
-      submittalLogs?.map((item) => item?.id)
-    );
-    setLogIdList(submittalItems.data.log_id_list);
-    setLoading(false);
-    setLoadingView(false);
-    setErrorMessage("");
-    if (submittalItems.data.message?.length === 0) {
-      const filterHasValues = Object.values(filterValues).some(arr => arr.length > 0);
-      if (documentData?.length > 0 && !filterHasValues) {
-        setErrorMessage("No submittals were detected in the uploaded document(s)");
-        return;
-      }
-      if (search || filterHasValues) {
-        setErrorMessage("Sorry, no results found for your search query.");
-        return;
-      }
-      if (documentData?.length === 0) {
-        setErrorMessage("Upload spec documents to generate submittal log");
-        return;
-      }
-      if (documentIsProcessing(documentData)) {
-        setErrorMessage("Documents are being processed...");
-        return;
-      }
-    }
-    setTotalCount(submittalItems?.data?.total_count);
   };
 
   useEffect(() => {
@@ -476,50 +491,69 @@ const ProjectLogs = () => {
         await checkProjectMapping();
       }
     };
+    
     const fetchProjectData = async () => {
       console.log("fetching project data");
-      setLoading(true);
-      if (submittalId && projectId === null) {
-        await handleGetProjectId(submittalId);
-      }
-      var updatedUser = currentUser;
-      if (currentUser === null) {
-        updatedUser = (await getCurrentUserData()).data;
-        setCurrentUser(updatedUser);
-      }
-      const response = await getProjectDetails(projectId);
-      console.log('projectData', response.data);
-      if (response.data.team !== teamId) {
-        setTeamId(response.data.team);
-      }
-      setProjectName(response.data.name);
-      const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
-      setProjectVersionId(activeVersion);
-      if (isVersioningFlagActive(response.data.team)) {
-        setDocumentData(response.data.document_details.filter((doc) => {
-          return doc.project_version.id === parseInt(activeVersion);
-        }));
-      } else {
+      setIsInitialLoading(true);
+      setIsDataLoading(true);
+      
+      try {
+        if (submittalId && projectId === null) {
+          await handleGetProjectId(submittalId);
+        }
+        
+        var updatedUser = currentUser;
+        if (currentUser === null) {
+          updatedUser = (await getCurrentUserData()).data;
+          setCurrentUser(updatedUser);
+        }
+        
+        // Determine the active version first
+        const tempResponse = await getProjectDetails(projectId);
+        const activeVersion = projectVersionId || tempResponse.data.project_versions[tempResponse.data.project_versions.length - 1].id;
+        setProjectVersionId(activeVersion);
+        
+        // Fetch project details with version-specific document filtering
+        const response = await getProjectDetails(projectId, activeVersion);
+        console.log('projectData', response.data);
+        
+        if (response.data.team !== teamId) {
+          setTeamId(response.data.team);
+        }
+        
+        setProjectName(response.data.name);
+        
+        // Documents are already filtered by version from the backend
         setDocumentData(response.data.document_details);
-      }
-      setUserRole(getUserRoleInProject(response.data, updatedUser));
-      setUserRoleInCompany(await getUserRoleInTeam(updatedUser.id, response.data.team));
-      console.log("response.data.project_versions", response.data.project_versions);
+        setDocParsed(response.data.doc_parsed);
+        
+        setUserRole(getUserRoleInProject(response.data, updatedUser));
+        setUserRoleInCompany(await getUserRoleInTeam(updatedUser.id, response.data.team));
+        console.log("response.data.project_versions", response.data.project_versions);
 
-      setAvailableVersions(response.data.project_versions);
-      await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion)
-      setLoading(false);
+        setAvailableVersions(response.data.project_versions);
+        
+        // Fetch log data with the correct version
+        await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
+        
+      } catch (error) {
+        console.log("error", error);
+        handleError(error);
+      } finally {
+        setIsInitialLoading(false);
+        setIsDataLoading(false);
+        setLoading(false);
+      }
     };
 
     console.log("projectId", projectId);
     if (projectId !== null) {
-      fetchProjectData().catch((error) => {
-        console.log("error", error);
-        setLoading(false);
-        handleError(error);
-      }).finally(() => {
+      fetchProjectData().then(() => {
         initLoading();
       });
+    } else {
+      setIsInitialLoading(false);
+      setIsDataLoading(false);
     }
   }, [projectId, projectVersionId]);
 
@@ -547,28 +581,29 @@ const ProjectLogs = () => {
     const intervalId = setInterval(() => {
       if (documentIsProcessing(documentData) || documentIsBeingEmbedded(documentData)) {
         const fetchDocumentData = async () => {
-          const response = await getProjectDetails(projectId);
-          let responseDocumentData = response.data.document_details;
-          if (isVersioningFlagActive(teamId)) {
-            const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
-            responseDocumentData = responseDocumentData.filter((doc) => doc.project_version.id === parseInt(activeVersion));
+          try {
+            const response = await getProjectDetails(projectId, projectVersionId);
+            
+            // Documents are already filtered by version from the backend
+            const responseDocumentData = response.data.document_details;
+            
+            if (documentIsProcessing(documentData) && !documentIsProcessing(responseDocumentData)) {
+              console.log('previous documentIsProcessing', documentIsProcessing(documentData));
+              console.log('new documentIsProcessing', documentIsProcessing(responseDocumentData));
+              fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+            }
+            setDocumentData(responseDocumentData);  
+            console.log('documentIsProcessing', documentIsProcessing(responseDocumentData));
+          } catch (error) {
+            handleError(error);
           }
-          if (documentIsProcessing(documentData) && !documentIsProcessing(responseDocumentData)) {
-            console.log('previous documentIsProcessing', documentIsProcessing(documentData));
-            console.log('new documentIsProcessing', documentIsProcessing(responseDocumentData));
-            fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
-          }
-          setDocumentData(responseDocumentData);  
-          console.log('documentIsProcessing', documentIsProcessing(responseDocumentData));
         };
-        fetchDocumentData().catch((error) => {
-          handleError(error);
-        });
+        fetchDocumentData();
       }
     }, 10000); // 10000 milliseconds = 10 seconds
 
     return () => clearInterval(intervalId); // This will clear the interval when the component unmounts
-  }, [projectId, state, documentData]); // Dependencies array, re-run the effect if these values change
+  }, [projectId, state, documentData, projectVersionId, rowsPerPage]); // Dependencies array, re-run the effect if these values change
 
   useEffect(() => {
     if (!modal) {
@@ -594,11 +629,21 @@ const ProjectLogs = () => {
     toggleSuccessModal(true);
   };
 
-  const handleDuplicateFilesConfirmAll = () => {
-    // This is handled by the modal itself
-    setDuplicateFiles([]);
-    setShowDuplicateFilesModal(false);
-    toggleSuccessModal(true);
+  const handleDuplicateFilesConfirmAll = async () => {
+    try {
+      // Clear duplicate files and close modal
+      setDuplicateFiles([]);
+      setShowDuplicateFilesModal(false);
+      
+      // Refresh documents and submittals after bulk reprocessing
+      await refreshDocumentsAndSubmittals();
+      
+      // Show success modal
+      toggleSuccessModal(true);
+    } catch (error) {
+      console.error('Error refreshing data after bulk reprocessing:', error);
+      handleError(error);
+    }
   };
 
   const handleSubmit = async () => {
@@ -620,16 +665,11 @@ const ProjectLogs = () => {
         }
       })
       if (response.data) {
-        const check_response = await getProjectDetails(projectId);
-        let responseDocumentData = {}
-        if (isVersioningFlagActive(teamId)) {
-          const activeVersion = projectVersionId || check_response.data.project_versions[check_response.data.project_versions.length - 1].id;
-          responseDocumentData = check_response.data.document_details.filter((doc) => doc.project_version.id === parseInt(activeVersion));
-        } else {
-          responseDocumentData = check_response.data.document_details;
-        }
-        setDocumentData(responseDocumentData);
-        if (!documentIsProcessing(responseDocumentData)) {
+        const check_response = await getProjectDetails(projectId, projectVersionId);
+        
+        // Documents are filtered by version from the backend
+        setDocumentData(check_response.data.document_details);
+        if (!documentIsProcessing(check_response.data.document_details)) {
           fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
         }
         setUploadLoading(false);
@@ -956,8 +996,20 @@ const ProjectLogs = () => {
     if (parseInt(versionId) === parseInt(projectVersionId)) {
       return;
     }
-    setLoading(true);
+    setIsDataLoading(true);
     setProjectVersionId(versionId);
+    
+    // Clear any cached submittal data when switching versions
+    setLogData([]);
+    setFilteredLogData([]);
+    setSelected([]);
+    setTotalCount(0);
+    setPage(1);
+    setSearchValue("");
+    setListId(null);
+    setFilterValues(initFilter);
+    setAppliedFilters(initFilter);
+    
     navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}&tab=${activeTab}`);
   }
 
@@ -1415,21 +1467,22 @@ const ProjectLogs = () => {
       handleError(error);
     }
   }
+  
+  const refreshDocuments = useDocumentRefresh(projectId, setDocumentData, setDocParsed, projectVersionId);
 
   const refreshDocumentsAndSubmittals = React.useCallback(async () => {
     try {
-      const response = await getProjectDetails(projectId);
-      let responseDocumentData = response.data.document_details;
-      if (isVersioningFlagActive(teamId)) {
-        const activeVersion = projectVersionId || response.data.project_versions[response.data.project_versions.length - 1].id;
-        responseDocumentData = responseDocumentData.filter((doc) => doc.project_version.id === activeVersion);
-      }
-      setDocumentData(responseDocumentData);
+      setIsDataLoading(true);
+      const projectResponse = await getProjectDetails(projectId, projectVersionId);
+      
+      setDocumentData(projectResponse.data.document_details);
       await fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
     } catch (e) {
       handleError(e);
+    } finally {
+      setIsDataLoading(false);
     }
-  }, [projectId, teamId, projectVersionId, rowsPerPage]);
+  }, [projectId, projectVersionId, rowsPerPage]);
 
   const handleViewArchivedVersions = async () => {
     try {
@@ -1498,7 +1551,7 @@ const ProjectLogs = () => {
     try {
       setDuplicateFiles(prev => prev.filter(file => file.existing_file_id !== fileId));
       
-      await refreshDocumentsAndSubmittals();
+      await refreshDocuments();
       
       setPageRefresh(!pageRefresh);
       
@@ -1515,7 +1568,6 @@ const ProjectLogs = () => {
         projectTitle={state?.projectName || projectName || ""}
         handleManageProcoreButtonClick={handleManageProcoreButtonClick}
         handleManageExcelExportButtonClick={handleManageExcelExportButtonClick}
-        loadingProjectDetails={loadingProjectDetails}
         customerData={customerData}
         userRole={userRoleInCompany}
         teamId={teamId}
@@ -1827,7 +1879,6 @@ const ProjectLogs = () => {
         toggleManageProcoreModal={toggleManageProcoreModal}
         setManageProcoreModal={setManageProcoreModal}
         toggleChangeProcoreAccountModal={toggleChangeProcoreAccountModal}
-        setLoadingProjectDetails={setLoadingProjectDetails}
         setCompanyId={setCompanyId}
         setProcoreCompanyName={setProcoreCompanyName}
         setProcoreProjectId={setProcoreProjectId}
@@ -2124,7 +2175,7 @@ const ProjectLogs = () => {
         manageExcelExportModal={manageExcelExportModal}
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
-      <Loader showComponentLoader={isLoading || headerLoading} />
+      <Loader showComponentLoader={isInitialLoading || isDataLoading || headerLoading} />
       
       <DuplicateFileConfirmationModal
         isOpen={showDuplicateFilesModal}
