@@ -70,12 +70,63 @@ const fetchAiGeneratedLogs = async (projectId, projectVersionId, logType) => {
     }
 }
 
-const fetchAiGeneratedLogDetail = async (projectId, logId) => {
+/**
+ * Fetch AI generated log detail with optional sorting parameters
+ * @param {string} projectId - Project ID
+ * @param {string} logId - Log ID
+ * @param {string} orderBy - Field to sort by (optional)
+ * @param {string} order - Sort direction ('asc' or 'desc', default: 'desc')
+ * @returns {Promise<Object|null>} Log detail data or null on error
+ */
+const fetchAiGeneratedLogDetail = async (projectId, logId, orderBy = null, order = 'desc') => {
     try {
+        const params = {};
+        if (orderBy) {
+            params.order_by = orderBy;
+            params.order = order;
+        }
+        
         const response = await axiosInstance({
             method: 'GET',
             url: `/api/deliverables/${projectId}/ai-generated-logs/${logId}/`,
+            params: params
         });
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+}
+
+/**
+ * Fetch sorted log data with required sorting parameters
+ * @param {string} projectId - Project ID
+ * @param {string} logId - Log ID
+ * @param {string} orderBy - Field to sort by
+ * @param {string} order - Sort direction ('asc' or 'desc', default: 'desc')
+ * @returns {Promise<Object|null>} Sorted log data or null on error
+ */
+const fetchSortedLogData = async (projectId, logId, orderBy, order = 'desc', page = 1, pageSize = 50) => {
+    try {
+        if (!orderBy) {
+            console.warn('fetchSortedLogData: orderBy parameter is required');
+            return null;
+        }
+        
+        const url = `/api/deliverables/${projectId}/ai-generated-logs/${logId}/`;
+        const params = {
+            order_by: orderBy,
+            order: order,
+            page: page,
+            page_size: pageSize
+        };
+        
+        const response = await axiosInstance({
+            method: 'GET',
+            url: url,
+            params: params
+        });
+        
         return response.data;
     } catch (error) {
         handleError(error);
@@ -239,6 +290,7 @@ export {
     fetchOwnerDeliverablesLog,
     fetchAiGeneratedLogs,
     fetchAiGeneratedLogDetail,
+    fetchSortedLogData,
     fetchMostRecentLog,
     extractTablesToExcel,
     generateAiLog,
