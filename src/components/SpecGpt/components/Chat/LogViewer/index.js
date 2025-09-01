@@ -204,17 +204,12 @@ const LogViewer = ({
                 logMessage.pagination?.page_size || 50
             );
             
-            console.log('🔍 LogViewer: handleSortedLogData returned:', sortedData);
-            
             if (sortedData) {
-                console.log('🔍 LogViewer: Received paginated data:', sortedData);
                 setLogMessage(prev => ({ 
                     ...prev, 
                     data: sortedData.data,
                     pagination: sortedData.pagination || null
                 }));
-            } else {
-                console.log('🔍 LogViewer: No data returned from handleSortedLogData');
             }
         } catch (error) {
             console.error('Error fetching paginated data:', error);
