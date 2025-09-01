@@ -114,11 +114,16 @@ const SortableTable = ({
 
   // Handle sorting
   const handleSorting = (columnName) => {
-    if (!onSort) return;
+    console.log('🔍 SortableTable: handleSorting called with columnName:', columnName);
+    if (!onSort) {
+      console.log('🔍 SortableTable: onSort function is not provided');
+      return;
+    }
     
     let sortingOrder = sorting.column === columnName ? sorting.order : "desc";
     const newOrder = sortingOrder === "desc" ? "asc" : "desc";
     
+    console.log('🔍 SortableTable: Calling onSort with:', { columnName, newOrder });
     onSort(columnName, newOrder);
   };
 
@@ -139,22 +144,31 @@ const SortableTable = ({
   };
 
   // Render table header
-  const renderTableHeader = () => (
+  const renderTableHeader = () => {
+    console.log('🔍 SortableTable: Rendering headers with columns:', columns.map(col => ({ key: col.key, label: col.label })));
+    
+    return (
     <thead>
       <tr>
-        {columns.map((column, index) => (
+        {columns.map((column, index) => {
+          console.log('🔍 SortableTable: Rendering header for column:', { key: column.key, label: column.label, index });
+          return (
           <th
             key={column.key}
             className={`small-font ${column.className || ''}`}
             style={{ width: `${tableWidths[index]}px` }}
           >
             <div className="d-flex">
-              <span>{column.label}</span>
+                      <span>{column.label}</span>
               {column.sortable && (
-                <span
-                  style={{ cursor: "pointer", marginLeft: "6px" }}
-                  onClick={() => handleSorting(column.key)}
-                >
+                        <span
+          style={{ cursor: "pointer", marginLeft: "6px" }}
+          onClick={(e) => {
+            console.log('🔍 SortableTable: Sort icon clicked for column:', column.key);
+            e.stopPropagation();
+            handleSorting(column.key);
+          }}
+        >
                   <SortIcon />
                 </span>
               )}
@@ -180,10 +194,12 @@ const SortableTable = ({
               )}
             </div>
           </th>
-        ))}
+          );
+        })}
       </tr>
     </thead>
-  );
+    );
+  };
 
   // Render table body
   const renderTableBody = () => (

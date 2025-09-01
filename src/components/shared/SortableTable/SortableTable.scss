@@ -20,7 +20,7 @@
       padding: 8px 12px;
       font-weight: 600;
       font-size: 12px;
-      color: #495057;
+      color: #212529;
       position: sticky;
       top: 0;
       z-index: 10;
@@ -36,6 +36,9 @@
         span {
           flex: 1;
           margin-right: 8px;
+          color: #212529;
+          font-weight: 600;
+          font-size: 13px;
         }
 
         .resizer {
