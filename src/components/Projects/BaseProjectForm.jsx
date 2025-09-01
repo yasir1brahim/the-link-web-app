@@ -151,7 +151,7 @@ const BaseProjectForm = ({
                                     onChange={setStartDate}
                                     dateFormat="yyyy-MM-dd"
                                     selected={startDate}
-                                    smartInput={false}
+                                    allowManualInput={true}
                                     />
                                 </div>
                                 <div className="form-group">
@@ -162,7 +162,7 @@ const BaseProjectForm = ({
                                     onChange={setEndDate}
                                     dateFormat="yyyy-MM-dd"
                                     selected={endDate}
-                                    smartInput={false}
+                                    allowManualInput={true}
                                     />
                                 </div>
                             </div>
