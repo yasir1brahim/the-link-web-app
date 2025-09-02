@@ -11,6 +11,7 @@ import ChatSidebar from './ChatSidebar'
 import ChatMain from './ChatMain'
 import LogsList from './LogsList'
 import LogViewer from './LogViewer'
+import QAPlannerModal from './QAPlannerModal'
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -28,6 +29,7 @@ const Chat = ({
     chatHistory,
     setChatHistory,
     isInspectionLogFeatureFlagActive,
+    isQaPlannerFlagActive,
     isLoadingMessage,
     setIsLoadingMessage,
     userInput,
@@ -53,6 +55,10 @@ const Chat = ({
     const [showLogViewer, setShowLogViewer] = useState(false);
     const [currentLogData, setCurrentLogData] = useState(null);
     const [isLoadingLog, setIsLoadingLog] = useState(false);
+
+    // New state for QA Planner functionality
+    const [showQAPlannerModal, setShowQAPlannerModal] = useState(false);
+    const [isGeneratingQALogs, setIsGeneratingQALogs] = useState(false);
 
     useEffect(() => {
         fetchChatHistory(projectId).then((data) => {
@@ -95,6 +101,8 @@ const Chat = ({
         setShowLogViewer(false);
         setCurrentLogData(null);
         setIsLoadingLog(false);
+        setShowQAPlannerModal(false);
+        setIsGeneratingQALogs(false);
     }
 
     const getChatResponse = (userMessage) => {
@@ -249,6 +257,37 @@ const Chat = ({
         setCurrentLogType(null);
     }
 
+    const onShowQAPlannerClick = () => {
+        setShowQAPlannerModal(true);
+    }
+
+    const onQAPlannerSubmit = async (selectedOptions) => {
+        setIsGeneratingQALogs(true);
+        setShowQAPlannerModal(false);
+        
+        try {
+            // For the demo, we'll just generate an inspection log with the same process
+            // In the full implementation, this would call a new QA Planner endpoint
+            const result = await generateAiLog(projectId, projectVersionId, 'inspection_log');
+            if (result && result.id) {
+                // Create a placeholder log data for the new generation
+                const newLogData = {
+                    id: result.id,
+                    log_table: '',
+                    created_at: new Date().toISOString(),
+                    log_status: 'PROCESSING'
+                };
+                setCurrentLogData(newLogData);
+                setCurrentLogType('inspection_log');
+                setShowLogViewer(true);
+            }
+        } catch (error) {
+            console.error('Error handling QA Planner submission:', error);
+        } finally {
+            setIsGeneratingQALogs(false);
+        }
+    }
+
     // Legacy handlers for logs list functionality (keeping for backward compatibility)
     const onShowLogsList = (logType) => {
         setShowLogsList(true);
@@ -385,7 +424,9 @@ const Chat = ({
                             onNewChatClick={onNewChatClick}
                             onShowInspectionLogsClick={onShowInspectionLogsClick}
                             onShowOwnerDeliverablesLogsClick={onShowOwnerDeliverablesLogsClick}
+                            onShowQAPlannerClick={onShowQAPlannerClick}
                             isInspectionLogFeatureFlagActive={isInspectionLogFeatureFlagActive}
+                            isQaPlannerFlagActive={isQaPlannerFlagActive}
                         />
                     </Box>
                     <Box w={"280px"}></Box>
@@ -428,11 +469,21 @@ const Chat = ({
                             onNewChatClick={onNewChatClick}
                             onShowInspectionLogsClick={onShowInspectionLogsClick}
                             onShowOwnerDeliverablesLogsClick={onShowOwnerDeliverablesLogsClick}
+                            onShowQAPlannerClick={onShowQAPlannerClick}
                             isInspectionLogFeatureFlagActive={isInspectionLogFeatureFlagActive}
+                            isQaPlannerFlagActive={isQaPlannerFlagActive}
                         />
                     </DrawerBody>
                 </DrawerContent>
             </Drawer>
+            
+            {/* QA Planner Modal */}
+            <QAPlannerModal
+                isOpen={showQAPlannerModal}
+                onClose={() => setShowQAPlannerModal(false)}
+                onSubmit={onQAPlannerSubmit}
+                isLoading={isGeneratingQALogs}
+            />
         </>
     )
 }

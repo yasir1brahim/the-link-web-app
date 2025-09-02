@@ -15,11 +15,17 @@ const listProjects = async (teamId) => {
     }
 }
 
-const getProjectDetails = async (projectId) => {
+const getProjectDetails = async (projectId, projectVersionId = null) => {
     try {
+        const params = {};
+        if (projectVersionId) {
+            params.project_version_id = projectVersionId;
+        }
+        
         return await axiosInstance({
             method: 'get',
             url: `/api/deliverables/projects/${projectId}/`,
+            params: params
         });
     } catch (error) {
         handleError(error);
