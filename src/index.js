@@ -33,6 +33,7 @@ import SSODisambiguationPage from './components/Authentication/SSODisambiguation
 import ChatPage from './components/SpecGpt/containers/ChatPage';
 import ViewPDFPage from './components/SpecGpt/containers/ViewPDFPage';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+import SessionExpired from './components/SessionExpired/SessionExpired';
 
 const router = createBrowserRouter([
   {
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
   {
     path: "/not-found",
     element: <NotFoundPage />,
+  },
+  {
+    path: "/session-expired",
+    element: <SessionExpired />,
   },
   // {
   //   path: "/sign-up",

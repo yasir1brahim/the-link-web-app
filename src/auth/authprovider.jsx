@@ -1,4 +1,4 @@
-import {useState, useEffect, ReactNode} from 'react';
+import {useState, useEffect, ReactNode, useRef} from 'react';
 import {AuthContext} from "./authcontext";
 import {getCurrentUserData, getAuthTokenFromRefreshToken} from "../api/Authentication/api";
 
@@ -7,6 +7,41 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const inactivityTimeoutIdRef = useRef(null);
+
+  // Inactivity timeout: 4 hours
+  const SESSION_TIMEOUT_MS = 4 * 60 * 60 * 1000;
+
+  const clearInactivityTimer = () => {
+    if (inactivityTimeoutIdRef.current) {
+      clearTimeout(inactivityTimeoutIdRef.current);
+      inactivityTimeoutIdRef.current = null;
+    }
+  };
+
+  const startInactivityTimer = () => {
+    clearInactivityTimer();
+    inactivityTimeoutIdRef.current = setTimeout(() => {
+      // On timeout, logout and redirect to session expired page
+      handleLogout();
+      // Use hard redirect to ensure all state is reset
+      window.location.href = '/session-expired';
+    }, SESSION_TIMEOUT_MS);
+  };
+
+  const activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+
+  const attachActivityListeners = () => {
+    activityEvents.forEach((eventName) => {
+      window.addEventListener(eventName, startInactivityTimer, { passive: true });
+    });
+  };
+
+  const detachActivityListeners = () => {
+    activityEvents.forEach((eventName) => {
+      window.removeEventListener(eventName, startInactivityTimer);
+    });
+  };
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -54,6 +89,21 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // When authentication status changes, manage inactivity timer and listeners
+  useEffect(() => {
+    if (isAuthenticated) {
+      attachActivityListeners();
+      startInactivityTimer();
+    } else {
+      detachActivityListeners();
+      clearInactivityTimer();
+    }
+    return () => {
+      detachActivityListeners();
+      clearInactivityTimer();
+    };
+  }, [isAuthenticated, SESSION_TIMEOUT_MS]);
+
   const handleSetUserDetails = (jwtResponseData) => {
     window.heap.identify(jwtResponseData.user.email);
     localStorage.setItem('token', jwtResponseData.access);
@@ -65,9 +115,12 @@ export const AuthProvider = ({ children }) => {
     setUser(jwtResponseData.user)
     setIsLoading(false);
     setIsAuthenticated(true);
+    startInactivityTimer();
   };
 
   const handleLogout = () => {
+    clearInactivityTimer();
+    detachActivityListeners();
     setToken(null);
     setUser(null);
     setIsAuthenticated(false);
