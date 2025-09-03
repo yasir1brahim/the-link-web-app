@@ -364,21 +364,41 @@ export default function CombinedLogs(props) {
   }, [parentRef.current]);
 
   const handleMouseDown = (e, colIndex) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     const startX = e.clientX;
-    const startWidth =
-      tableRef.current.querySelectorAll("th")[colIndex].offsetWidth;
+    // Account for 0-based indexing of querySelectorAll
+    const thIndex = colIndex; // colIndex already corresponds to the correct DOM index
+    const startWidth = tableRef.current.querySelectorAll("th")[thIndex].offsetWidth;
+
+    console.log(`Resizing column ${colIndex}, DOM index ${thIndex}, starting width: ${startWidth}px`);
 
     const handleMouseMove = (e) => {
       const newWidth = Math.max(
         startWidth + (e.clientX - startX),
         minWidths[colIndex]
       );
-      tableRef.current.querySelectorAll("th")[
-        colIndex
-      ].style.width = `${newWidth}px`;
+      
+      console.log(`Column ${colIndex} new width: ${newWidth}px`);
+      
+      // Update the tableWidths state
+      setTableWidths(prev => ({
+        ...prev,
+        [colIndex]: newWidth
+      }));
+      
+      // Apply the width to the specific column
+      const thElement = tableRef.current.querySelectorAll("th")[thIndex];
+      if (thElement) {
+        thElement.style.width = `${newWidth}px`;
+        thElement.style.minWidth = `${newWidth}px`;
+        thElement.style.maxWidth = `${newWidth}px`;
+      }
     };
 
     const handleMouseUp = () => {
+      console.log(`Finished resizing column ${colIndex}`);
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
@@ -504,7 +524,7 @@ export default function CombinedLogs(props) {
                   </span>
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 2)}
+                    onMouseDown={(e) => handleMouseDown(e, 3)}
                   >
                     |
                   </div>
@@ -519,7 +539,7 @@ export default function CombinedLogs(props) {
                 <span>Section Title</span>
                 <div
                   className="resizer"
-                  onMouseDown={(e) => handleMouseDown(e, 3)}
+                  onMouseDown={(e) => handleMouseDown(e, 4)}
                 >
                   |
                 </div>
@@ -533,7 +553,7 @@ export default function CombinedLogs(props) {
                 <span>Paragraph</span>
                 <div
                   className="resizer"
-                  onMouseDown={(e) => handleMouseDown(e, 4)}
+                  onMouseDown={(e) => handleMouseDown(e, 5)}
                 >
                   |
                 </div>
@@ -565,7 +585,7 @@ export default function CombinedLogs(props) {
                   </span>
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 5)}
+                    onMouseDown={(e) => handleMouseDown(e, 6)}
                   >
                     |
                   </div>
@@ -597,7 +617,7 @@ export default function CombinedLogs(props) {
                   </span>
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 6)}
+                    onMouseDown={(e) => handleMouseDown(e, 7)}
                   >
                     |
                   </div>
@@ -620,7 +640,7 @@ export default function CombinedLogs(props) {
                   </span>
                   <div
                     className="resizer"
-                    onMouseDown={(e) => handleMouseDown(e, 7)}
+                    onMouseDown={(e) => handleMouseDown(e, 8)}
                   >
                     |
                   </div>
