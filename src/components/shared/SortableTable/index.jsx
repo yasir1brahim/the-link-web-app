@@ -227,7 +227,7 @@ const SortableTable = ({
 
   return (
     <div
-      className={`l-table-wrapper ${className}`}
+      className={`sortable-table-wrapper l-table-wrapper ${className}`}
       style={{
         maxHeight: "calc(100vh - 240px)",
       }}
