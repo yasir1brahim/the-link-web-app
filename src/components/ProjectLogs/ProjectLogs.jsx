@@ -1826,6 +1826,7 @@ const ProjectLogs = () => {
                   setIsGeneratingLog={setIsSpecGptGeneratingLog}
                   isChatEnabled={isSpecGptChatEnabled}
                   setIsChatEnabled={setIsSpecGptChatEnabled}
+                  teamId={teamId}
                 />
               </ChakraProvider>
               </div>

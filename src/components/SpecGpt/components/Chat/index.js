@@ -12,12 +12,14 @@ import ChatMain from './ChatMain'
 import LogsList from './LogsList'
 import LogViewer from './LogViewer'
 import QAPlannerModal from './QAPlannerModal'
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { fetchChatHistory, fetchChatSessionHistory, fetchInspectionLog, fetchOwnerDeliverablesLog, fetchMostRecentLog, generateAiLog } from '../../utils/apiUtils';
 import { MESSAGE_ROLE_TYPE } from '../../utils/enums';
-import { fetchPromptAnswer } from '../../utils/apiUtils';
+import { fetchPromptAnswer, fetchPromptAnswerWebSocket } from '../../utils/apiUtils';
+import { useSpecGptWebSocket } from '../../../../hooks/useSpecGptWebSocket';
+import { useFeatureFlags } from '../../../../contexts/FeatureFlagsContext';
 
 const Chat = ({
     projectId, 
@@ -38,9 +40,14 @@ const Chat = ({
     setIsGeneratingLog,
     isChatEnabled,
     setIsChatEnabled,
+    teamId,
 }) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const DEFAULT_MAX_CHAT_MESSAGES = 10;
+    
+    // Feature flags and WebSocket
+    const { isSpecGptWebsocketsFlagActive } = useFeatureFlags();
+    const [isStreaming, setIsStreaming] = useState(false);
     
     const endOfMessagesRef = useRef(null);
     const k = 21;
@@ -60,12 +67,103 @@ const Chat = ({
     const [showQAPlannerModal, setShowQAPlannerModal] = useState(false);
     const [isGeneratingQALogs, setIsGeneratingQALogs] = useState(false);
 
+    // WebSocket message handlers
+    const handleWebSocketMessage = useCallback((data) => {
+        switch (data.type) {
+            case 'response_start':
+                setIsStreaming(true);
+                break;
+            case 'response_chunk':
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    const lastMessage = newMessages[newMessages.length - 1];
+                    if (lastMessage && lastMessage.isStreaming) {
+                        lastMessage.message += data.data.content;
+                    }
+                    return newMessages;
+                });
+                break;
+            case 'response_complete':
+                setIsStreaming(false);
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    const lastMessage = newMessages[newMessages.length - 1];
+                    if (lastMessage) {
+                        lastMessage.isStreaming = false;
+                        lastMessage.loading = false;
+                    }
+                    return newMessages;
+                });
+                setIsLoadingMessage(false);
+                break;
+            case 'response_error':
+                setIsStreaming(false);
+                setIsLoadingMessage(false);
+                setMessages(prev => [...prev, { 
+                    type: MESSAGE_ROLE_TYPE.ERROR, 
+                    message: data.data.error,
+                    session_id: chatSessionId,
+                    questionid: ''
+                }]);
+                break;
+        }
+    }, [chatSessionId]);
+
+    const { connect, sendMessage, isConnected } = useSpecGptWebSocket(
+        projectId,
+        handleWebSocketMessage,
+        (error) => {
+            console.error('WebSocket error:', error);
+            setIsLoadingMessage(false);
+        },
+        () => console.log('WebSocket complete')
+    );
+
+    // Helper function to handle HTTP responses
+    const handleHttpResponse = (newMessage, userMessage) => {
+        console.log("newMessage", newMessage);
+        console.log("chatSessionId", chatSessionIdRef.current); // Use ref for current value
+        console.log("newMessage.session_id", newMessage.session_id);
+        if (messages.filter((message) => message.type === MESSAGE_ROLE_TYPE.ASSISTANT).length === 0) {
+            onFirstAIResponse(newMessage.session_id, userMessage);
+        }
+        // only update the messages if it's a new chat or the chat session id is the same as the new message's session id
+        // this is to prevent the messages from being updated if the user is continuing a different chat
+        if (chatSessionIdRef.current === null || chatSessionIdRef.current === newMessage.session_id) {
+            setMessages((prevMessages) => {
+                const lastMessage = prevMessages[prevMessages.length - 1];
+                return [
+                    ...prevMessages.slice(0, -1),
+                    { 
+                        ...lastMessage, 
+                        message: newMessage.message, 
+                        loading: false, 
+                        questionid: newMessage.questionid,
+                        sources: newMessage.sources
+                    }
+                ];
+            });
+            setMaxChatMessages(newMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
+        }
+        setIsLoadingMessage(false);
+    };
+
     useEffect(() => {
         fetchChatHistory(projectId).then((data) => {
             console.log("chat history", data);
             setChatHistory(data);
         });
-    }, []);  
+    }, []);
+
+    // Connect to WebSocket if feature flag is active
+    useEffect(() => {
+        if (!projectId || !teamId) return;
+        if (!isSpecGptWebsocketsFlagActive(teamId)) return;
+        console.log('Connecting to WebSocket for project:', projectId);
+        connect();
+        // connect only once per projectId+teamId
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [projectId, teamId]);  
 
     useEffect(() => {
         chatSessionIdRef.current = chatSessionId;
@@ -107,6 +205,8 @@ const Chat = ({
 
     const getChatResponse = (userMessage) => {
         console.log('Submit message: ', userMessage);
+        
+        // Add user message
         setMessages([
             ...messages, 
             {
@@ -120,38 +220,52 @@ const Chat = ({
                 'message': '',
                 'session_id': chatSessionId,
                 'questionid': '',
-                'loading': true
+                'loading': true,
+                'isStreaming': false
             }
         ]);
         setIsLoadingMessage(true);
         setUserInput('');
-        fetchPromptAnswer(userMessage, k, chatSessionId, projectId, projectVersionId).then((newMessage) => {
-            console.log("newMessage", newMessage);
-            console.log("chatSessionId", chatSessionIdRef.current); // Use ref for current value
-            console.log("newMessage.session_id", newMessage.session_id);
-            if (messages.filter((message) => message.type === MESSAGE_ROLE_TYPE.ASSISTANT).length === 0) {
-                onFirstAIResponse(newMessage.session_id, userMessage);
-            }
-            // only update the messages if it's a new chat or the chat session id is the same as the new message's session id
-            // this is to prevent the messages from being updated if the user is continuing a different chat
-            if (chatSessionIdRef.current === null || chatSessionIdRef.current === newMessage.session_id) {
-                setMessages((prevMessages) => {
-                    const lastMessage = prevMessages[prevMessages.length - 1];
-                    return [
-                        ...prevMessages.slice(0, -1),
-                        { 
-                            ...lastMessage, 
-                            message: newMessage.message, 
-                            loading: false, 
-                            questionid: newMessage.questionid,
-                            sources: newMessage.sources
-                        }
-                    ];
-                });
-                setMaxChatMessages(newMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
-            }
-            setIsLoadingMessage(false);
+
+        // Check if WebSocket is available and feature flag is active
+        console.log('WebSocket check:', { 
+            isSpecGptWebsocketsFlagActive: isSpecGptWebsocketsFlagActive(teamId), 
+            teamId, 
+            isConnected 
         });
+        
+        if (isSpecGptWebsocketsFlagActive(teamId) && isConnected) {
+            // Use WebSocket for streaming
+            setMessages(prev => {
+                const newMessages = [...prev];
+                const lastMessage = newMessages[newMessages.length - 1];
+                if (lastMessage) {
+                    lastMessage.isStreaming = true;
+                }
+                return newMessages;
+            });
+            
+            try {
+                sendMessage({
+                    type: 'chat_message',
+                    user_input: userMessage,
+                    k: k,
+                    chat_id: chatSessionId,
+                    project_version_id: projectVersionId
+                });
+            } catch (error) {
+                console.error('WebSocket send error, falling back to HTTP:', error);
+                // Fallback to HTTP if WebSocket fails
+                fetchPromptAnswer(userMessage, k, chatSessionId, projectId, projectVersionId).then((newMessage) => {
+                    handleHttpResponse(newMessage, userMessage);
+                });
+            }
+        } else {
+            // Fallback to HTTP implementation
+            fetchPromptAnswer(userMessage, k, chatSessionId, projectId, projectVersionId).then((newMessage) => {
+                handleHttpResponse(newMessage, userMessage);
+            });
+        }
     }
 
     // New handlers for direct log viewing functionality
