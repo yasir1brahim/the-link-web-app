@@ -368,19 +368,14 @@ export default function CombinedLogs(props) {
     e.stopPropagation();
     
     const startX = e.clientX;
-    // Account for 0-based indexing of querySelectorAll
-    const thIndex = colIndex; // colIndex already corresponds to the correct DOM index
+    const thIndex = colIndex; // colIndex corresponds to the correct DOM index
     const startWidth = tableRef.current.querySelectorAll("th")[thIndex].offsetWidth;
-
-    console.log(`Resizing column ${colIndex}, DOM index ${thIndex}, starting width: ${startWidth}px`);
 
     const handleMouseMove = (e) => {
       const newWidth = Math.max(
         startWidth + (e.clientX - startX),
         minWidths[colIndex]
       );
-      
-      console.log(`Column ${colIndex} new width: ${newWidth}px`);
       
       // Update the tableWidths state
       setTableWidths(prev => ({
@@ -398,7 +393,6 @@ export default function CombinedLogs(props) {
     };
 
     const handleMouseUp = () => {
-      console.log(`Finished resizing column ${colIndex}`);
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
