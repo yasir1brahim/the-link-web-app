@@ -263,24 +263,30 @@ const ProjectLogsActionPanel = ({ ...props }) => {
         </div>
       </div>
       <div className="col-6 row justify-content-end">
-        <div className="col-6 row">
-          <div className={props.showSearch ? "d-none" : "col-6 d-flex justify-content-end spliter pl-0"}>
-            {props?.docParsed ? (
-              <div
-                className="total-count-documents"
-                style={{ cursor: "pointer", fontSize: "0.9em" }}
-                onClick={props.onShowDocumentListModal}
-              >
-                {props?.docParsed} document{props?.docParsed > 1 ? 's' : ''} uploaded
-              </div>
-            ) : (
-              ''
-            )}
-          </div>
-          <div className={props.showSearch ? "col-12 d-flex justify-content-end" : "pr-0 col-6 d-flex justify-content-between"}>
-            <div className={props.showSearch ? "d-none" : "total-count-submittals"}>
+        <div className="col-8 row d-flex align-items-end justify-content-end">
+          
+          <div className='col-10 d-flex justify-content-end'>
+            <div className={props.showSearch ? "d-none" : "col-7 d-flex justify-content-end spliter pl-0"}>
+              {props?.docParsed ? (
+                <div
+                  className="total-count-documents"
+                  style={{ cursor: "pointer", fontSize: "0.9em" }}
+                  onClick={props.onShowDocumentListModal}
+                >
+                  {props?.docParsed} document{props?.docParsed > 1 ? 's' : ''} uploaded
+                </div>
+              ) : (
+                ''
+              )}
+            </div>
+            <div className={props.showSearch ? "d-none" : "col-5 total-count-submittals"}>
               {`${props.totalCount} ${!!props.isNotices ? 'notices' : props.isFullSpecProcessing ? 'spec items' : 'submittals'}`}
             </div>
+
+          </div>
+ 
+          <div>
+      
             {props.searchEnabled ? (
               <div className={`header-right-swap header-right ${props.showSearch ? "w-100" : ""}`}>
                 <div className={props.showSearch ? "log-search w-100" : "log-search search-disable"}>
