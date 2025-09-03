@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
+import { ToastService } from '../shared/Toast/Toast';
 import BaseEmployeeForm from './BaseEmployeeForm';
 import { updateUserTeamMembership } from '../../api/Authentication/api';
 
@@ -66,27 +66,11 @@ const EditEmployee = ({
           console.log(response.data);
           setPageRefresh(!pageRefresh);
           toggleModal();
-          toast.success('Employee edited successfully!', {
-            position: 'bottom-center',
-            autoClose: 5000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined
-          });
+          ToastService.success('Employee edited successfully!');
         }
       } catch (error) {
         console.log(error.message);
-        toast.error(error.response.data.message, {
-          position: 'bottom-center',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined
-        });
+        ToastService.error(error.response.data.message);
         toggleModal();
       }
     }
