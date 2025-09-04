@@ -16,6 +16,9 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState(null);
 
+  // Check if we're in production environment
+  const isProduction = window.location.hostname === 'app.thelink.ai';
+
   const handleReprocess = async (documentId, documentName) => {
     setIsReprocessing(true);
     try {
@@ -130,21 +133,23 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: '4px' }}>
-                          <StyledTooltip title="Reprocess Document" arrow>
-                            <span>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleReprocess(doc.document_id, doc.document_name)}
-                                disabled={isReprocessing || isDownloading || isDeleting}
-                                style={{ 
-                                  color: '#1976d2',
-                                  // padding: '4px'
-                                }}
-                              >
-                                <ReprocessIcon style={{ width: '20px', height: '20px' }}/>
-                              </IconButton>
-                            </span>
-                          </StyledTooltip>
+                          {!isProduction && (
+                            <StyledTooltip title="Reprocess Document" arrow>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleReprocess(doc.document_id, doc.document_name)}
+                                  disabled={isReprocessing || isDownloading || isDeleting}
+                                  style={{ 
+                                    color: '#1976d2',
+                                    // padding: '4px'
+                                  }}
+                                >
+                                  <ReprocessIcon style={{ width: '20px', height: '20px' }}/>
+                                </IconButton>
+                              </span>
+                            </StyledTooltip>
+                          )}
                           <StyledTooltip title="Download Document" arrow>
                             <span>
                               <IconButton
@@ -160,21 +165,23 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
                               </IconButton>
                             </span>
                           </StyledTooltip>
-                          <StyledTooltip title="Delete Document" arrow>
-                            <span>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleDeleteClick(doc.document_id, doc.document_name)}
-                                disabled={isReprocessing || isDownloading || isDeleting}
-                                style={{ 
-                                  color: '#d32f2f',
-                                  padding: '4px'
-                                }}
-                              >
-                                <TrashIcon style={{ width: '20px', height: '20px' }}/>  
-                              </IconButton>
-                            </span>
-                          </StyledTooltip>
+                          {!isProduction && (
+                            <StyledTooltip title="Delete Document" arrow>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleDeleteClick(doc.document_id, doc.document_name)}
+                                  disabled={isReprocessing || isDownloading || isDeleting}
+                                  style={{ 
+                                    color: '#d32f2f',
+                                    padding: '4px'
+                                  }}
+                                >
+                                  <TrashIcon style={{ width: '20px', height: '20px' }}/>  
+                                </IconButton>
+                              </span>
+                            </StyledTooltip>
+                          )}
                         </div>
                       </td>
                     </tr>
