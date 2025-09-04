@@ -1382,11 +1382,15 @@ const ProjectLogs = () => {
     setFilterValues({ ...initFilter });
     setAppliedFilters({ ...initFilter });
     setSelected([]);
+    // Also clear localStorage to prevent restoration on navigation
+    localStorage.setItem("selectedRows", "");
   };
 
   const applyFilters = (newFilters) => {
     setAppliedFilters(newFilters);
     setSelected([]);
+    // Also clear localStorage to prevent restoration on navigation
+    localStorage.setItem("selectedRows", "");
   };
 
   const handleProceedWithExport = () => {
