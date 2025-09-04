@@ -1381,10 +1381,12 @@ const ProjectLogs = () => {
   const clearFilters = () => {
     setFilterValues({ ...initFilter });
     setAppliedFilters({ ...initFilter });
+    setSelected([]);
   };
 
   const applyFilters = (newFilters) => {
     setAppliedFilters(newFilters);
+    setSelected([]);
   };
 
   const handleProceedWithExport = () => {

@@ -131,7 +131,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
           </div>
         </div>
         <div className="p-0">
-          {props.listId === null && props.selected?.length > 0 && !props.isCombining  && !!props.toggleSaveListName && (
+          {props.listId === null && props.selected?.length > 0 && !props.isCombining && !!props.toggleSaveListName && (
             <button
               type="button"
               className="table-top-btn btn-disabled selection-btn mr-2 mb-1"
