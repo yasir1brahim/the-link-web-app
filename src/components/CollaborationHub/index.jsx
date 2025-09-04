@@ -227,6 +227,7 @@ const CollaborationHub = () => {
         toggle={() => setShowDocumentListModal(false)}
         documents={documentData}
         onAfterReprocess={refreshDocuments}
+        onAfterDelete={refreshDocuments}
       />
     </>
   );

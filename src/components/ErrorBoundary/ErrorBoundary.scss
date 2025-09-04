@@ -1,0 +1,222 @@
+.error-boundary-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #202a44;
+  color: white;
+  padding: 1rem;
+  font-family: inherit;
+}
+
+.error-boundary-content {
+  width: 100%;
+  max-width: 800px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 2rem 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.error-icon {
+  margin-bottom: 1.5rem;
+  color: rgb(213, 232, 62);
+  
+  svg {
+    width: 48px;
+    height: 48px;
+    filter: drop-shadow(0 4px 8px rgba(213, 232, 62, 0.3));
+  }
+}
+
+.error-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.error-message {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.error-details {
+  margin-bottom: 1.5rem;
+  text-align: left;
+  
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: rgb(213, 232, 62);
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(213, 232, 62, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(213, 232, 62, 0.2);
+    
+    &:hover {
+      background: rgba(213, 232, 62, 0.15);
+    }
+  }
+  
+  .error-stack {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    
+    h4 {
+      color: rgb(213, 232, 62);
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    pre {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      line-height: 1.4;
+      overflow-x: auto;
+      color: #ff6b6b;
+      border: 1px solid rgba(255, 107, 107, 0.2);
+      margin-bottom: 0.75rem;
+    }
+  }
+}
+
+.error-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.error-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  width: 100%;
+  max-width: 280px;
+  justify-content: center;
+  
+  svg {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.error-button-primary {
+  background-color: rgb(213, 232, 62);
+  color: #202a44;
+  
+  &:hover {
+    background-color: #c1d33f;
+  }
+  
+  &:focus {
+    outline: 2px solid rgba(213, 232, 62, 0.5);
+    outline-offset: 2px;
+  }
+}
+
+.error-button-secondary {
+  background-color: transparent;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+  
+  &:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+  }
+}
+
+@media (min-width: 768px) {
+  .error-boundary-container {
+    padding: 2rem;
+  }
+  
+  .error-boundary-content {
+    padding: 3rem 2rem;
+  }
+  
+  .error-icon svg {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .error-title {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .error-message {
+    font-size: 1.125rem;
+    margin-bottom: 2.5rem;
+    max-width: 500px;
+  }
+  
+  .error-details {
+    margin-bottom: 2.5rem;
+    
+    summary {
+      padding: 0.75rem;
+    }
+    
+    .error-stack {
+      padding: 1rem;
+    }
+  }
+  
+  .error-actions {
+    flex-direction: row;
+    gap: 1rem;
+  }
+  
+  .error-button {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+    min-width: 140px;
+    width: auto;
+    
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}

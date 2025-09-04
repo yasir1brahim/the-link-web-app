@@ -4,6 +4,8 @@ import axiosInstance from '../../config/axios';
 import WebViewer from '@pdftron/webviewer';
 import handleError from '../../config/errorHandler';
 import { useSearchParams } from 'react-router-dom';
+import { validateS3Link, isS3LinkExpiredError } from '../../utils/s3LinkValidator.js';
+import { useS3LinkValidation } from '../../hooks/useS3LinkValidation.js';
 
 const CollaborationPdfReader = ({
   //   docId,
@@ -18,6 +20,7 @@ const CollaborationPdfReader = ({
   const fullName = localStorage.getItem('fullName');
   const viewer = useRef(null);
   const [documentId, _setDocId] = useState('');
+  const { handleError: handleS3Error, ErrorModal } = useS3LinkValidation();
   let sectionId = '';
   let docId = '';
   const docIdRef = React.useRef(documentId);
@@ -74,7 +77,18 @@ const CollaborationPdfReader = ({
     setDocId(docId);
   };
 
-  const loadPDF = () => {
+  const loadPDF = async () => {
+    // Simple S3 validation
+    try {
+      const isValid = await validateS3Link(collabDocs[0].section_file_path);
+      if (!isValid) {
+        handleS3Error({ message: 'The document link has expired. Please refresh the page to get a new link and try again.' });
+        return;
+      }
+    } catch (error) {
+      console.log('S3 validation failed, continuing with PDF load');
+    }
+
     WebViewer(
       {
         path: '/webviewer/lib',
@@ -95,6 +109,15 @@ const CollaborationPdfReader = ({
       const annotHistoryManager = documentViewer.getAnnotationHistoryManager();
 
       annotationManager.setCurrentUser(localStorage.getItem('fullName'));
+
+      // Error handling
+      documentViewer.addEventListener("documentError", (error) => {
+        if (isS3LinkExpiredError(error)) {
+          handleS3Error({ message: 'The document link has expired. Please refresh the page to get a new link and try again.' });
+        } else {
+          handleS3Error({ message: 'Unable to load the PDF document. Please try again.' });
+        }
+      });
 
       const saveXfdfString = async (documentId, sectionId, xfdfString) => {
         try {
@@ -353,18 +376,20 @@ const CollaborationPdfReader = ({
         console.log(mentions);
         console.log(window.location);
       });
-    });
+    }).catch(handleS3Error);
   };
+
   return (
     <>
+      <ErrorModal />
       <div
         style={{ height: '100vh' }}
         ref={viewer}
         id="pdf-div"
         className="full-window-div border border-gray-100 h-screen"
-        // onDocumentLoad={loadPDF()}
       ></div>
     </>
   );
 };
+
 export default CollaborationPdfReader;

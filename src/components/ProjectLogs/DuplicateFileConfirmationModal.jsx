@@ -56,10 +56,8 @@ const DuplicateFileConfirmationModal = ({
       await Promise.all(promises);
       toast.success(`Successfully started reprocessing ${duplicateFiles.length} files`);
       
-      if (onFileReprocessed) {
-        duplicateFiles.forEach(fileInfo => {
-          onFileReprocessed(fileInfo.existing_file_id);
-        });
+      if (onConfirmAll) {
+        onConfirmAll();
       }
       
       toggle();

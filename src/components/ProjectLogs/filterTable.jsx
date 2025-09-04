@@ -139,7 +139,7 @@ export const FilterTable = (props) => {
               </div>
             </div>
           </div>
-          <ModalFooter style={{ justifyContent: 'center' }}>
+          <ModalFooter style={{ justifyContent: 'center' , paddingTop: '20px'}}>
             <Button color="secondary" onClick={toggleModal}>
               Cancel
             </Button>

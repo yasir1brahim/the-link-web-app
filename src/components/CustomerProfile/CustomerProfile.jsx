@@ -403,7 +403,7 @@ const CustomerProfile = (props) => {
                       </button>
                       <button
                         type="button"
-                        className="btn btn-secondary btn-sm btn-gap"
+                        className="btn btn-secondary btn-sm btn-gap add-employe"
                         onClick={toggleModal}
                       >
                         + Add Employee

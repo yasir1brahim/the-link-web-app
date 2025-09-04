@@ -12,9 +12,11 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, RepeatIcon, CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
-import { fetchAiGeneratedLogDetail, generateAiLog } from '../../../utils/apiUtils';
+import { fetchAiGeneratedLogDetail, fetchSortedLogData, generateAiLog } from '../../../utils/apiUtils';
 import Message from '../ChatMain/Message';
 import { MESSAGE_ROLE_TYPE } from '../../../utils/enums';
+import { useFeatureFlags } from '../../../../../contexts/FeatureFlagsContext';
+import SortableTable from '../../../../shared/SortableTable';
 
 const LogViewer = ({ 
     projectId, 
@@ -22,15 +24,220 @@ const LogViewer = ({
     logType, 
     onBack,
     logId,
-    initialLogData
+    initialLogData,
+    teamId
 }) => {
     const [logMessage, setLogMessage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isPolling, setIsPolling] = useState(false);
     const [isRegenerating, setIsRegenerating] = useState(false);
+    const [sorting, setSorting] = useState({ column: '', order: 'desc' });
+    const [filterValues, setFilterValues] = useState({});
+    const [pagination, setPagination] = useState({ currentPage: 1, pageSize: 50 });
+
+    // Feature flag checking
+    const { isInspectionLogUseDataTablesFlagActive } = useFeatureFlags();
+    const shouldUseDataTables = isInspectionLogUseDataTablesFlagActive(teamId);
+
+    // Map frontend column names to backend field names
+    const fieldMapping = {
+        'Spec Section #': 'spec_section_number',
+        'Spec Section Name': 'spec_section_name',
+        'Inspection Type And Requirements': 'inspection_type_and_requirements',
+        'Inspection Frequency': 'inspection_frequency',
+        'Responsible Party': 'responsible_party',
+        'Deliverable Type': 'deliverable_type',
+        'When Due': 'when_due',
+        'Exact Requirement Text': 'exact_requirement_text'
+    };
+
+    // Column definitions for different log types
+    const getColumnsForLogType = (logType) => {
+        if (logType === 'inspection_log') {
+            return [
+                { 
+                    key: 'Spec Section #', 
+                    label: 'Spec Section #', 
+                    sortable: true, 
+                    width: 15,
+                    minWidth: 120
+                },
+                { 
+                    key: 'Spec Section Name', 
+                    label: 'Spec Section Name', 
+                    sortable: true, 
+                    width: 25,
+                    minWidth: 150,
+                    expandable: true
+                },
+                { 
+                    key: 'Inspection Type And Requirements', 
+                    label: 'Inspection Type & Requirements', 
+                    sortable: true, 
+                    width: 30,
+                    minWidth: 200,
+                    expandable: true
+                },
+                { 
+                    key: 'Inspection Frequency', 
+                    label: 'Inspection Frequency', 
+                    sortable: true, 
+                    width: 15,
+                    minWidth: 120
+                },
+                { 
+                    key: 'Responsible Party', 
+                    label: 'Responsible Party', 
+                    sortable: true, 
+                    width: 15,
+                    minWidth: 120
+                }
+            ];
+        } else if (logType === 'owner_deliverables_log') {
+            return [
+                { 
+                    key: 'Spec Section #', 
+                    label: 'Spec Section #', 
+                    sortable: true, 
+                    width: 12,
+                    minWidth: 100
+                },
+                { 
+                    key: 'Spec Section Name', 
+                    label: 'Spec Section Name', 
+                    sortable: true, 
+                    width: 20,
+                    minWidth: 150,
+                    expandable: true
+                },
+                { 
+                    key: 'Deliverable Type', 
+                    label: 'Deliverable Type', 
+                    sortable: true, 
+                    width: 15,
+                    minWidth: 120
+                },
+                { 
+                    key: 'When Due', 
+                    label: 'When Due', 
+                    sortable: true, 
+                    width: 12,
+                    minWidth: 100
+                },
+                { 
+                    key: 'Responsible Party', 
+                    label: 'Responsible Party', 
+                    sortable: true, 
+                    width: 15,
+                    minWidth: 120
+                },
+                { 
+                    key: 'Exact Requirement Text', 
+                    label: 'Exact Requirement Text', 
+                    sortable: true, 
+                    width: 26,
+                    minWidth: 200,
+                    expandable: true
+                }
+            ];
+        }
+        return [];
+    };
+
+    // Handle sorting
+    const handleSort = async (columnName, order) => {
+        if (!logMessage?.questionid) {
+            return;
+        }
+        
+        const backendFieldName = fieldMapping[columnName];
+        if (!backendFieldName) {
+            console.error('🔍 LogViewer: No mapping found for column name:', columnName);
+            return;
+        }
+        
+        setSorting({ column: columnName, order });
+        // Reset pagination when sorting changes
+        setPagination({ currentPage: 1, pageSize: 50 });
+        
+        try {
+            const sortedData = await handleSortedLogData(projectId, logMessage.questionid, backendFieldName, order);
+            if (sortedData) {
+                setLogMessage(prev => ({ 
+                    ...prev, 
+                    data: sortedData.data,
+                    pagination: sortedData.pagination || null
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching sorted data:', error);
+        }
+    };
+
+    // Handle filtering
+    const handleFilter = (columnName) => {
+        // For now, just log the filter request
+        // This can be expanded to show a filter modal or handle filtering
+        console.log('Filter requested for column:', columnName);
+    };
+
+    // Handle pagination
+    const handlePageChange = async (newPage) => {
+        if (!logMessage?.questionid) {
+            return;
+        }
+        
+
+        
+        try {
+            // Use default sort field if no sorting is applied
+            const orderBy = sorting.column ? fieldMapping[sorting.column] : 'created_at';
+            
+
+            
+            const sortedData = await handleSortedLogData(
+                projectId, 
+                logMessage.questionid, 
+                orderBy, 
+                sorting.order,
+                newPage,
+                logMessage.pagination?.page_size || 50
+            );
+            
+            if (sortedData) {
+                setLogMessage(prev => ({ 
+                    ...prev, 
+                    data: sortedData.data,
+                    pagination: sortedData.pagination || null
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching paginated data:', error);
+        }
+    };
+
+    // Fetch sorted log data using the API utility
+    const handleSortedLogData = async (projectId, logId, orderBy, order, page = 1, pageSize = 50) => {
+        try {
+            const logDetail = await fetchSortedLogData(projectId, logId, orderBy, order, page, pageSize);
+            
+            if (logDetail && logDetail.log_data) {
+                return {
+                    data: logDetail.log_data,
+                    pagination: logDetail.pagination
+                };
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching sorted log data:', error);
+            return null;
+        }
+    };
 
     useEffect(() => {
         if (initialLogData) {
+            
             const messageType = logType === 'inspection_log'
                 ? MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG
                 : logType === 'owner_deliverables_log'
@@ -39,15 +246,23 @@ const LogViewer = ({
                 ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
                 : 'ASSISTANT';
             
-            setLogMessage({
+
+            const logMessageData = {
                 type: messageType,
                 message: initialLogData.log_table,
+                data: initialLogData.log_data, // Add structured data
+                data_format: initialLogData.data_format, // Add data format
+                pagination: initialLogData.pagination, // Add pagination data
                 session_id: null,
                 questionid: initialLogData.id,
                 sources: null,
                 created_at: initialLogData.created_at,
                 log_status: initialLogData.log_status,
-            });
+            };
+            
+
+            
+            setLogMessage(logMessageData);
             
             if (initialLogData.log_status === 'PROCESSING') {
                 setIsPolling(true);
@@ -74,15 +289,24 @@ const LogViewer = ({
                         ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
                         : 'ASSISTANT';
                     
-                    setLogMessage({
+
+                    
+                    const logMessageData = {
                         type: messageType,
                         message: logDetail.log_table,
+                        data: logDetail.log_data, // Add structured data
+                        data_format: logDetail.data_format, // Add data format
+                        pagination: logDetail.pagination, // Add pagination data
                         session_id: null,
                         questionid: logDetail.id,
                         sources: null,
                         created_at: logDetail.created_at,
                         log_status: logDetail.log_status,
-                    });
+                    };
+                    
+
+                    
+                    setLogMessage(logMessageData);
                     
                     if (logDetail.log_status !== 'PROCESSING') {
                         setIsPolling(false);
@@ -110,15 +334,24 @@ const LogViewer = ({
                     ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
                     : 'ASSISTANT';
                 
-                setLogMessage({
+
+                
+                const logMessageData = {
                     type: messageType,
                     message: logDetail.log_table,
+                    data: logDetail.log_data, // Add structured data
+                    data_format: logDetail.data_format, // Add data format
+                    pagination: logDetail.pagination, // Add pagination data
                     session_id: null,
                     questionid: logDetail.id,
                     sources: null,
                     created_at: logDetail.created_at,
                     log_status: logDetail.log_status,
-                });
+                };
+                
+
+                
+                setLogMessage(logMessageData);
                 
                 if (logDetail.log_status === 'PROCESSING') {
                     setIsPolling(true);
@@ -305,12 +538,36 @@ const LogViewer = ({
             <Box w="100%" h="100%" bg="white">
                 {logMessage ? (
                     <Box p={6} h="100%" overflowY="auto">
-                        <Message 
-                            messageType={logMessage.type}
-                            message={logMessage.message}
-                            projectId={projectId}
-                            isLoading={logMessage.log_status === 'PROCESSING'}
-                        />
+                        {(() => {
+                            const shouldShowTable = logMessage.data_format === 'structured' && logMessage.data && logMessage.data.length > 0;
+                            
+                            if (shouldShowTable) {
+
+                                return (
+                                    <SortableTable
+                                        data={logMessage.data}
+                                        columns={getColumnsForLogType(logType)}
+                                        onSort={handleSort}
+                                        sorting={sorting}
+                                        onFilter={handleFilter}
+                                        filterValues={filterValues}
+                                        onPageChange={handlePageChange}
+                                        pagination={logMessage.pagination}
+                                        enableExpansion={false}
+                                        className="log-viewer-table"
+                                    />
+                                );
+                            } else {
+                                return (
+                                    <Message 
+                                        messageType={logMessage.type}
+                                        message={logMessage.message}
+                                        projectId={projectId}
+                                        isLoading={logMessage.log_status === 'PROCESSING'}
+                                    />
+                                );
+                            }
+                        })()}
                     </Box>
                 ) : (
                     <Center h={"100%"} w={"100%"} flexDirection={"column"} gap={5}>
