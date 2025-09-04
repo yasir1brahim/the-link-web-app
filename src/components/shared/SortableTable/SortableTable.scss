@@ -1,7 +1,8 @@
 // SortableTable Component Styles
 // Extracted and adapted from existing table styling patterns
+// Scoped to prevent conflicts with other table components
 
-.l-table-wrapper {
+.sortable-table-wrapper.l-table-wrapper {
   width: 100%; // Fill available space
   margin: 0 auto;
   padding: 0 20px;
@@ -275,8 +276,8 @@
   }
 }
 
-// Filter modal styles (basic implementation)
-.filter-modal {
+// Filter modal styles (basic implementation) - scoped to SortableTable
+.sortable-table-wrapper .filter-modal {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -304,34 +305,36 @@
   }
 }
 
-// Utility classes
-.small-font {
-  font-size: 12px;
+// Utility classes - scoped to prevent conflicts with global styles
+.sortable-table-wrapper {
+  .small-font {
+    font-size: 12px;
+  }
+
+  .reduce-height {
+    padding: 4px 8px;
+    line-height: 1.2;
+  }
+
+  .d-flex {
+    display: flex;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .para-no {
+    min-width: 85px;
+  }
+
+  .log-description {
+    min-width: 520px;
+  }
 }
 
-.reduce-height {
-  padding: 4px 8px;
-  line-height: 1.2;
-}
-
-.d-flex {
-  display: flex;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.para-no {
-  min-width: 85px;
-}
-
-.log-description {
-  min-width: 520px;
-}
-
-// Pagination styles
-.pagination-controls {
+// Pagination styles - scoped to SortableTable
+.sortable-table-wrapper .pagination-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
