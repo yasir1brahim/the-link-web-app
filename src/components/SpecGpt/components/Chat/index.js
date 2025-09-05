@@ -331,6 +331,12 @@ const Chat = ({
         }
     }
 
+    const onQAPlannerRegenerate = () => {
+        // Close the log viewer and open the modal for new option selection
+        setShowLogViewer(false);
+        setShowQAPlannerModal(true);
+    }
+
     // Legacy handlers for logs list functionality (keeping for backward compatibility)
     const onShowLogsList = (logType) => {
         setShowLogsList(true);
@@ -392,6 +398,7 @@ const Chat = ({
                     logType={currentLogType}
                     onBack={onBackFromLogViewer}
                     initialLogData={currentLogData}
+                    onQAPlannerRegenerate={onQAPlannerRegenerate}
                 />
                 <Drawer
                     isOpen={isOpen}
@@ -408,6 +415,7 @@ const Chat = ({
                                 logType={currentLogType}
                                 onBack={onBackFromLogViewer}
                                 initialLogData={currentLogData}
+                                onQAPlannerRegenerate={onQAPlannerRegenerate}
                             />
                         </DrawerBody>
                     </DrawerContent>

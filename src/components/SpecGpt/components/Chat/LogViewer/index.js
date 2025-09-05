@@ -26,7 +26,8 @@ const LogViewer = ({
     onBack,
     logId,
     initialLogData,
-    teamId
+    teamId,
+    onQAPlannerRegenerate
 }) => {
     const [logMessage, setLogMessage] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -427,6 +428,13 @@ const LogViewer = ({
         // Only allow regeneration if the current log is not processing
         if (logMessage && logMessage.log_status === 'PROCESSING') {
             console.log('Cannot regenerate while log is processing');
+            return;
+        }
+        
+        // Special handling for QA planner logs - open modal for option selection
+        if (logType === 'qa_planner' && onQAPlannerRegenerate) {
+            console.log('Opening QA planner modal for regeneration');
+            onQAPlannerRegenerate();
             return;
         }
         
