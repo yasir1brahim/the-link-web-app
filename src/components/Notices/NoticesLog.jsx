@@ -414,6 +414,9 @@ export default function NoticesLog(props) {
                           showPdf && (
                             <span
                               onClick={() => {
+                                if (!log.document?.document_link || log.document.document_link === "") {
+                                  return;
+                                }
                                 handleViewPdf(
                                   log.document.document_link,
                                   formatPrimaryTextLocation(log),
@@ -424,10 +427,10 @@ export default function NoticesLog(props) {
                                 );
                                 props.setLogInViewer(log);
                               }}
-                              style={{ cursor: "pointer" }}
+                              style={{ cursor: (!log.document?.document_link || log.document.document_link === "") ? "not-allowed" : "pointer", opacity: (!log.document?.document_link || log.document.document_link === "") ? 0.5 : 1 }}
                               className="pdf-button"
                             >
-                              <StyledTooltip title="View Pdf" arrow>
+                              <StyledTooltip title={(!log.document?.document_link || log.document.document_link === "") ? "Cannot open - document deleted" : "View Pdf"} arrow>
                                 <svg id={"Pdf-Tooltip-" + index + 1} width="18px" height="18px" viewBox="0 0 1.08 1.08" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path width="48" height="48" fill="white" fill-opacity="0.01" d="M0 0H1.08V1.08H0V0z"/>
                                   <path d="M1.08 0H0v1.08h1.08z" fill="white" fill-opacity="0.01"/>

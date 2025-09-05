@@ -854,12 +854,13 @@ export default function CombinedLogs(props) {
                         ) : (
                           // If the row is not being edited
                           <>
-                            <StyledTooltip title={!isCombining
-                              ? 'Edit Row'
-                              : 'Cannot edit while combining'} arrow>
+                            <StyledTooltip title={log.doc_id === null ? "Cannot edit - document deleted" : (!isCombining ? "Edit Row" : "Cannot edit while combining")} arrow>
                               <span
-                                onClick={() => !isCombining && handleEditToggle(log, index)}
-                                style={{ cursor: "pointer" }}
+                                onClick={() => log.doc_id !== null && !isCombining && handleEditToggle(log, index)}
+                                style={{ 
+                                  cursor: log.doc_id === null ? "not-allowed" : "pointer",
+                                  opacity: log.doc_id === null ? 0.5 : 1
+                                }}
                               >
                                 <svg
                                   id={"Edit-Tooltip-" + index + 1}
@@ -913,6 +914,9 @@ export default function CombinedLogs(props) {
                           showPdf && (
                             <span
                               onClick={() => {
+                                if (!log.doc_link || log.doc_link === "") {
+                                  return;
+                                }
                                 handleViewPdf(
                                   log.doc_link,
                                   log.text_loc,
@@ -923,10 +927,10 @@ export default function CombinedLogs(props) {
                                 );
                                 props.setLogInViewer(log);
                               }}
-                              style={{ cursor: "pointer" }}
+                              style={{ cursor: (!log.doc_link || log.doc_link === "") ? "not-allowed" : "pointer", opacity: (!log.doc_link || log.doc_link === "") ? 0.5 : 1 }}
                               className="pdf-button"
                             >
-                              <StyledTooltip title="View Pdf" arrow>
+                              <StyledTooltip title={(!log.doc_link || log.doc_link === "") ? "Cannot open - document deleted" : "View Pdf"} arrow>
                                 <svg id={"Pdf-Tooltip-" + index + 1} width="18px" height="18px" viewBox="0 0 1.08 1.08" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path width="48" height="48" fill="white" fill-opacity="0.01" d="M0 0H1.08V1.08H0V0z"/>
                                   <path d="M1.08 0H0v1.08h1.08z" fill="white" fill-opacity="0.01"/>
@@ -939,18 +943,21 @@ export default function CombinedLogs(props) {
                           )
                         )}
                         {props.listId === null && editRow === "" && !isCombining && (
-                          <StyledTooltip title={isCombining
-                            ? 'Cannot add new row while combining rows'
-                            : 'Add Row Below'} arrow>
-                            <AddButton
+                          <StyledTooltip title={log.doc_id === null ? "Cannot add - document deleted" : (isCombining
+                            ? "Cannot add new row while combining rows"
+                            : "Add Row Below")} arrow>
+                            <span
                               onClick={() => {
+                                if (log.doc_id === null) return;
                                 if (isCombining) return;
                                 if (!newRowIndex) {
                                   handleAddRow(log);
                                 }
                               }}
-                              id={"Tooltip-" + index + 1}
-                            />
+                              style={{ cursor: log.doc_id === null ? "not-allowed" : "pointer", opacity: log.doc_id === null ? 0.5 : 1 }}
+                            >
+                              <AddButton id={"Tooltip-" + index + 1} />
+                            </span>
                           </StyledTooltip>
                         )}
 
