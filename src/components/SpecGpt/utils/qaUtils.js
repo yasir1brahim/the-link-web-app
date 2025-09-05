@@ -15,8 +15,6 @@ export const QA_OPTION_LABELS = {
 
 // Convert QA option code name to pretty display name
 export const getQAOptionLabel = (optionId) => {
-    console.log('optionId', optionId);
-    console.log('QA_OPTION_LABELS', QA_OPTION_LABELS);
     return QA_OPTION_LABELS[optionId] || optionId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 

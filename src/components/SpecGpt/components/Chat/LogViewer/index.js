@@ -177,7 +177,6 @@ const LogViewer = ({
                     width: 12,
                     minWidth: 110,
                     render: (value, row, rowIndex) => {
-                        console.log('item_type render called with:', { value, row, rowIndex });
                         return getQAOptionLabel(value);
                     }
                 },
@@ -612,18 +611,9 @@ const LogViewer = ({
                 {logMessage ? (
                     <Box p={6} h="100%" overflowY="auto">
                         {(() => {
-                            console.log('LogViewer - logMessage:', logMessage);
-                            console.log('LogViewer - data_format:', logMessage.data_format);
-                            console.log('LogViewer - data:', logMessage.data);
-                            console.log('LogViewer - logType:', logType);
-                            
                             const shouldShowTable = logMessage.data_format === 'structured' && logMessage.data && logMessage.data.length > 0;
-                            console.log('LogViewer - shouldShowTable:', shouldShowTable);
                             
                             if (shouldShowTable) {
-                                console.log('LogViewer - Rendering SortableTable');
-                                console.log('LogViewer - Table data sample:', logMessage.data[0]);
-                                console.log('LogViewer - Table columns:', getColumnsForLogType(logType));
 
                                 return (
                                     <SortableTable
