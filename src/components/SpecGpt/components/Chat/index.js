@@ -257,8 +257,46 @@ const Chat = ({
         setCurrentLogType(null);
     }
 
-    const onShowQAPlannerClick = () => {
-        setShowQAPlannerModal(true);
+    const onShowQAPlannerClick = async () => {
+        setIsLoadingLog(true);
+        setCurrentLogType('qa_planner');
+        
+        try {
+            // Try to get the most recent QA planner log
+            const mostRecentLog = await fetchMostRecentLog(projectId, projectVersionId, 'qa_planner');
+            console.log('Most recent QA planner log:', mostRecentLog);
+            
+            if (mostRecentLog) {
+                console.log('QA Planner log status:', mostRecentLog.log_status);
+                // Check if the log is still processing
+                if (mostRecentLog.log_status === 'PROCESSING') {
+                    console.log('Showing processing QA planner log without starting new generation');
+                    // Show the processing log directly
+                    setCurrentLogData(mostRecentLog);
+                    setShowLogViewer(true);
+                } else if (['SUCCESS', 'FAILURE'].includes(mostRecentLog.log_status)) {
+                    console.log('Showing completed QA planner log without starting new generation');
+                    // Log is complete, show it
+                    setCurrentLogData(mostRecentLog);
+                    setShowLogViewer(true);
+                } else {
+                    console.log('Showing QA planner log with unknown status');
+                    // Unknown status, show the log anyway
+                    setCurrentLogData(mostRecentLog);
+                    setShowLogViewer(true);
+                }
+            } else {
+                console.log('No QA planner log exists, showing modal for selection');
+                // No log exists, show the modal for option selection
+                setShowQAPlannerModal(true);
+            }
+        } catch (error) {
+            console.error('Error handling QA planner log:', error);
+            // On error, fall back to showing the modal
+            setShowQAPlannerModal(true);
+        } finally {
+            setIsLoadingLog(false);
+        }
     }
 
     const onQAPlannerSubmit = async (selectedOptions) => {
