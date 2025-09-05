@@ -63,7 +63,6 @@ const QAPlannerModal = ({ isOpen, onClose, onSubmit, isLoading = false }) => {
                                 key={option.id}
                                 isChecked={selectedOptions.includes(option.id)}
                                 onChange={(e) => handleOptionChange(option.id, e.target.checked)}
-                                colorScheme="green"
                                 size="lg"
                                 sx={{
                                     '.chakra-checkbox__control': {
@@ -74,6 +73,10 @@ const QAPlannerModal = ({ isOpen, onClose, onSubmit, isLoading = false }) => {
                                         },
                                         _hover: {
                                             borderColor: '#202A44',
+                                            _checked: {
+                                                bg: '#202A44',
+                                                borderColor: '#202A44',
+                                            }
                                         }
                                     }
                                 }}

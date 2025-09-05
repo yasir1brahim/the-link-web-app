@@ -465,6 +465,8 @@ const LogViewer = ({
                 return 'Owner Deliverables';
             case 'owner_deliverables':
                 return 'Owner Deliverables';
+            case 'qa_planner':
+                return 'QA Planner';
             default:
                 return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
