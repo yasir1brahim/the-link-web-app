@@ -210,3 +210,8 @@
     }
   }
 }
+.btn-primary:focus, .btn-primary.focus {
+  color: #fff;
+  background-color: #202A44;
+  border-color: #202A44;
+}
