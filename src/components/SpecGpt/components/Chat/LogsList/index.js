@@ -132,6 +132,8 @@ const LogsList = ({
                 return 'Inspections List';
             case 'owner_deliverables_log':
                 return 'Owner Deliverables List';
+            case 'qa_planner':
+                return 'QA Planner';
             default:
                 return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }

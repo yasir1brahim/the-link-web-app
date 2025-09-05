@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, RepeatIcon, CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
 import { fetchAiGeneratedLogDetail, fetchSortedLogData, generateAiLog } from '../../../utils/apiUtils';
-import { groupLogDataByItemType, getCompletionStatusWithLabels, getStatusDisplay } from '../../../utils/qaUtils';
+import { getQAOptionLabel } from '../../../utils/qaUtils';
 import Message from '../ChatMain/Message';
 import { MESSAGE_ROLE_TYPE } from '../../../utils/enums';
 import { useFeatureFlags } from '../../../../../contexts/FeatureFlagsContext';
@@ -38,18 +38,20 @@ const LogViewer = ({
 
     // Feature flag checking
     const { isInspectionLogUseDataTablesFlagActive } = useFeatureFlags();
-    const shouldUseDataTables = isInspectionLogUseDataTablesFlagActive(teamId);
+    const shouldUseDataTables = isInspectionLogUseDataTablesFlagActive(teamId) || logType === 'qa_planner';
 
     // Map frontend column names to backend field names
     const fieldMapping = {
         'Spec Section #': 'spec_section_number',
-        'Spec Section Name': 'spec_section_name',
+        'Spec Section Name': 'spec_section_name', 
         'Inspection Type And Requirements': 'inspection_type_and_requirements',
         'Inspection Frequency': 'inspection_frequency',
         'Responsible Party': 'responsible_party',
         'Deliverable Type': 'deliverable_type',
         'When Due': 'when_due',
-        'Exact Requirement Text': 'exact_requirement_text'
+        'Exact Requirement Text': 'exact_requirement_text',
+        'Item Type': 'item_type',
+        'Item Text': 'item_text'
     };
 
     // Column definitions for different log types
@@ -139,6 +141,46 @@ const LogViewer = ({
                     width: 26,
                     minWidth: 200,
                     expandable: true
+                }
+            ];
+        } else if (logType === 'qa_planner') {
+            return [
+                { 
+                    key: 'Spec Section #', 
+                    label: 'Spec Section #', 
+                    sortable: true, 
+                    width: 12,
+                    minWidth: 100
+                },
+                { 
+                    key: 'Spec Section Name', 
+                    label: 'Spec Section Name', 
+                    sortable: true, 
+                    width: 20,
+                    minWidth: 150,
+                    expandable: true
+                },
+                { 
+                    key: 'Item Type', 
+                    label: 'QA Type', 
+                    sortable: true, 
+                    width: 15,
+                    minWidth: 120
+                },
+                { 
+                    key: 'Item Text', 
+                    label: 'Requirements', 
+                    sortable: true, 
+                    width: 35,
+                    minWidth: 200,
+                    expandable: true
+                },
+                { 
+                    key: 'Responsible Party', 
+                    label: 'Responsible Party', 
+                    sortable: true, 
+                    width: 15,
+                    minWidth: 120
                 }
             ];
         }
@@ -555,6 +597,13 @@ const LogViewer = ({
                                         onPageChange={handlePageChange}
                                         pagination={logMessage.pagination}
                                         enableExpansion={false}
+                                        customCellRenderer={(columnKey, value, rowData) => {
+                                            // Custom renderer for QA planner Item Type column
+                                            if (columnKey === 'Item Type' && logType === 'qa_planner') {
+                                                return getQAOptionLabel(value);
+                                            }
+                                            return value;
+                                        }}
                                         className="log-viewer-table"
                                     />
                                 );
