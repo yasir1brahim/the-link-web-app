@@ -215,6 +215,24 @@ const generateAiLog = async (projectId, projectVersionId, logType) => {
     }
 }
 
+const generateQAPlannerLog = async (projectId, projectVersionId, selectedOptions) => {
+    try {
+        const response = await axiosInstance({
+            method: 'POST',
+            url: `/api/deliverables/${projectId}/specgpt-chats/generate-qa-planner-log/`,
+            data: {
+                'project_id': projectId,
+                'project_version_id': projectVersionId,
+                'selected_options': selectedOptions,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.log('Error generating QA planner log: ', error);
+        return null;
+    }
+}
+
 const extractTablesToExcel = async (projectId, text) => {
     try {
         const response = await axiosInstance({
@@ -294,4 +312,5 @@ export {
     fetchMostRecentLog,
     extractTablesToExcel,
     generateAiLog,
+    generateQAPlannerLog,
 };

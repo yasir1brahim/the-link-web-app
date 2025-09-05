@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, RepeatIcon, CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
 import { fetchAiGeneratedLogDetail, fetchSortedLogData, generateAiLog } from '../../../utils/apiUtils';
+import { getQAOptionLabel } from '../../../utils/qaUtils';
 import Message from '../ChatMain/Message';
 import { MESSAGE_ROLE_TYPE } from '../../../utils/enums';
 import { useFeatureFlags } from '../../../../../contexts/FeatureFlagsContext';
@@ -25,7 +26,8 @@ const LogViewer = ({
     onBack,
     logId,
     initialLogData,
-    teamId
+    teamId,
+    onQAPlannerRegenerate
 }) => {
     const [logMessage, setLogMessage] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -37,18 +39,22 @@ const LogViewer = ({
 
     // Feature flag checking
     const { isInspectionLogUseDataTablesFlagActive } = useFeatureFlags();
-    const shouldUseDataTables = isInspectionLogUseDataTablesFlagActive(teamId);
+    const shouldUseDataTables = isInspectionLogUseDataTablesFlagActive(teamId) || logType === 'qa_planner';
 
     // Map frontend column names to backend field names
     const fieldMapping = {
         'Spec Section #': 'spec_section_number',
-        'Spec Section Name': 'spec_section_name',
+        'Spec Section Name': 'spec_section_name', 
         'Inspection Type And Requirements': 'inspection_type_and_requirements',
         'Inspection Frequency': 'inspection_frequency',
         'Responsible Party': 'responsible_party',
         'Deliverable Type': 'deliverable_type',
         'When Due': 'when_due',
-        'Exact Requirement Text': 'exact_requirement_text'
+        'Exact Requirement Text': 'exact_requirement_text',
+        'Item Type': 'item_type',
+        'Item Text': 'item_text',
+        'Paragraph Number': 'paragraph_number',
+        'Requirement Text': 'requirement_text',
     };
 
     // Column definitions for different log types
@@ -138,6 +144,63 @@ const LogViewer = ({
                     width: 26,
                     minWidth: 200,
                     expandable: true
+                }
+            ];
+        } else if (logType === 'qa_planner') {
+            return [
+                { 
+                    key: 'Spec Section #', 
+                    label: 'Spec Section #', 
+                    sortable: true, 
+                    width: 10,
+                    minWidth: 90
+                },
+                { 
+                    key: 'Spec Section Name', 
+                    label: 'Spec Section Name', 
+                    sortable: true, 
+                    width: 18,
+                    minWidth: 140,
+                    expandable: true
+                },
+                { 
+                    key: 'Paragraph Number', 
+                    label: 'Para #', 
+                    sortable: true, 
+                    width: 8,
+                    minWidth: 70
+                },
+                { 
+                    key: 'item_type', 
+                    label: 'Item Type', 
+                    sortable: true, 
+                    width: 12,
+                    minWidth: 110,
+                    render: (value, row, rowIndex) => {
+                        return getQAOptionLabel(value);
+                    }
+                },
+                { 
+                    key: 'Requirement Text', 
+                    label: 'Requirement', 
+                    sortable: true, 
+                    width: 30,
+                    minWidth: 200,
+                    expandable: true
+                },
+                { 
+                    key: 'Responsible Party', 
+                    label: 'Responsible Party', 
+                    sortable: true, 
+                    width: 12,
+                    minWidth: 110
+                },
+                { 
+                    key: 'When Due', 
+                    label: 'When Due', 
+                    sortable: true, 
+                    width: 10,
+                    minWidth: 90
                 }
             ];
         }
@@ -371,6 +434,13 @@ const LogViewer = ({
             return;
         }
         
+        // Special handling for QA planner logs - open modal for option selection
+        if (logType === 'qa_planner' && onQAPlannerRegenerate) {
+            console.log('Opening QA planner modal for regeneration');
+            onQAPlannerRegenerate();
+            return;
+        }
+        
         setIsRegenerating(true);
         try {
             const result = await generateAiLog(projectId, projectVersionId, logType);
@@ -398,6 +468,8 @@ const LogViewer = ({
                 return 'Owner Deliverables';
             case 'owner_deliverables':
                 return 'Owner Deliverables';
+            case 'qa_planner':
+                return 'QA Planner';
             default:
                 return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
