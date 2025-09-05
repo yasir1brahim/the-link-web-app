@@ -51,7 +51,9 @@ const LogViewer = ({
         'When Due': 'when_due',
         'Exact Requirement Text': 'exact_requirement_text',
         'Item Type': 'item_type',
-        'Item Text': 'item_text'
+        'Item Text': 'item_text',
+        'Paragraph Number': 'paragraph_number',
+        'Requirement Text': 'requirement_text',
     };
 
     // Column definitions for different log types
@@ -149,29 +151,36 @@ const LogViewer = ({
                     key: 'Spec Section #', 
                     label: 'Spec Section #', 
                     sortable: true, 
-                    width: 12,
-                    minWidth: 100
+                    width: 10,
+                    minWidth: 90
                 },
                 { 
                     key: 'Spec Section Name', 
                     label: 'Spec Section Name', 
                     sortable: true, 
-                    width: 20,
-                    minWidth: 150,
+                    width: 18,
+                    minWidth: 140,
                     expandable: true
+                },
+                { 
+                    key: 'Paragraph Number', 
+                    label: 'Para #', 
+                    sortable: true, 
+                    width: 8,
+                    minWidth: 70
                 },
                 { 
                     key: 'Item Type', 
                     label: 'QA Type', 
                     sortable: true, 
-                    width: 15,
-                    minWidth: 120
+                    width: 12,
+                    minWidth: 110
                 },
                 { 
-                    key: 'Item Text', 
+                    key: 'Requirement Text', 
                     label: 'Requirements', 
                     sortable: true, 
-                    width: 35,
+                    width: 30,
                     minWidth: 200,
                     expandable: true
                 },
@@ -179,8 +188,15 @@ const LogViewer = ({
                     key: 'Responsible Party', 
                     label: 'Responsible Party', 
                     sortable: true, 
-                    width: 15,
-                    minWidth: 120
+                    width: 12,
+                    minWidth: 110
+                },
+                { 
+                    key: 'When Due', 
+                    label: 'When Due', 
+                    sortable: true, 
+                    width: 10,
+                    minWidth: 90
                 }
             ];
         }

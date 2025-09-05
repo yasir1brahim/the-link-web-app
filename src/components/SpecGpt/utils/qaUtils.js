@@ -3,11 +3,14 @@
 // Mapping from code names to user-friendly display names
 export const QA_OPTION_LABELS = {
     'inspections': 'Inspections',
-    'mock_ups': 'Mock-ups',
+    'mock_ups_sample_construction': 'Mock-ups/Sample Construction',
     'pre_installation_meetings': 'Pre-installation meetings',
     'warranties': 'Warranties',
     'certificates': 'Certificates',
-    'reports': 'Reports'
+    'closeout_submittals': 'Closeout submittals',
+    'test_reports': 'Test Reports',
+    'commissioning': 'Commissioning',
+    'delegated_design': 'Delegated Design'
 };
 
 // Convert QA option code name to pretty display name
