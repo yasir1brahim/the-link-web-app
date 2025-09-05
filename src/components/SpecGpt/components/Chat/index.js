@@ -15,7 +15,7 @@ import QAPlannerModal from './QAPlannerModal'
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { fetchChatHistory, fetchChatSessionHistory, fetchInspectionLog, fetchOwnerDeliverablesLog, fetchMostRecentLog, generateAiLog } from '../../utils/apiUtils';
+import { fetchChatHistory, fetchChatSessionHistory, fetchInspectionLog, fetchOwnerDeliverablesLog, fetchMostRecentLog, generateAiLog, generateQAPlannerLog } from '../../utils/apiUtils';
 import { MESSAGE_ROLE_TYPE } from '../../utils/enums';
 import { fetchPromptAnswer } from '../../utils/apiUtils';
 
@@ -266,19 +266,24 @@ const Chat = ({
         setShowQAPlannerModal(false);
         
         try {
-            // For the demo, we'll just generate an inspection log with the same process
-            // In the full implementation, this would call a new QA Planner endpoint
-            const result = await generateAiLog(projectId, projectVersionId, 'inspection_log');
+            // Call the new QA Planner endpoint
+            const result = await generateQAPlannerLog(projectId, projectVersionId, selectedOptions);
             if (result && result.id) {
-                // Create a placeholder log data for the new generation
+                // Create log data for the new QA planner generation
                 const newLogData = {
                     id: result.id,
                     log_table: '',
+                    log_data: [],
                     created_at: new Date().toISOString(),
-                    log_status: 'PROCESSING'
+                    log_status: 'PROCESSING',
+                    qa_options_selected: selectedOptions,
+                    completion_status: selectedOptions.reduce((acc, option) => {
+                        acc[option] = 'PENDING';
+                        return acc;
+                    }, {})
                 };
                 setCurrentLogData(newLogData);
-                setCurrentLogType('inspection_log');
+                setCurrentLogType('qa_planner');
                 setShowLogViewer(true);
             }
         } catch (error) {

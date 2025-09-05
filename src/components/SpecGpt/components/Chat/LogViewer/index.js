@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, RepeatIcon, CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
 import { fetchAiGeneratedLogDetail, fetchSortedLogData, generateAiLog } from '../../../utils/apiUtils';
+import { groupLogDataByItemType, getCompletionStatusWithLabels, getStatusDisplay } from '../../../utils/qaUtils';
 import Message from '../ChatMain/Message';
 import { MESSAGE_ROLE_TYPE } from '../../../utils/enums';
 import { useFeatureFlags } from '../../../../../contexts/FeatureFlagsContext';
