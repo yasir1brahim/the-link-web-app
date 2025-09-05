@@ -171,15 +171,19 @@ const LogViewer = ({
                     minWidth: 70
                 },
                 { 
-                    key: 'Item Type', 
-                    label: 'QA Type', 
+                    key: 'item_type', 
+                    label: 'Item Type', 
                     sortable: true, 
                     width: 12,
-                    minWidth: 110
+                    minWidth: 110,
+                    render: (value, row, rowIndex) => {
+                        console.log('item_type render called with:', { value, row, rowIndex });
+                        return getQAOptionLabel(value);
+                    }
                 },
                 { 
                     key: 'Requirement Text', 
-                    label: 'Requirements', 
+                    label: 'Requirement', 
                     sortable: true, 
                     width: 30,
                     minWidth: 200,
@@ -608,9 +612,18 @@ const LogViewer = ({
                 {logMessage ? (
                     <Box p={6} h="100%" overflowY="auto">
                         {(() => {
+                            console.log('LogViewer - logMessage:', logMessage);
+                            console.log('LogViewer - data_format:', logMessage.data_format);
+                            console.log('LogViewer - data:', logMessage.data);
+                            console.log('LogViewer - logType:', logType);
+                            
                             const shouldShowTable = logMessage.data_format === 'structured' && logMessage.data && logMessage.data.length > 0;
+                            console.log('LogViewer - shouldShowTable:', shouldShowTable);
                             
                             if (shouldShowTable) {
+                                console.log('LogViewer - Rendering SortableTable');
+                                console.log('LogViewer - Table data sample:', logMessage.data[0]);
+                                console.log('LogViewer - Table columns:', getColumnsForLogType(logType));
 
                                 return (
                                     <SortableTable
@@ -623,13 +636,6 @@ const LogViewer = ({
                                         onPageChange={handlePageChange}
                                         pagination={logMessage.pagination}
                                         enableExpansion={false}
-                                        customCellRenderer={(columnKey, value, rowData) => {
-                                            // Custom renderer for QA planner Item Type column
-                                            if (columnKey === 'Item Type' && logType === 'qa_planner') {
-                                                return getQAOptionLabel(value);
-                                            }
-                                            return value;
-                                        }}
                                         className="log-viewer-table"
                                     />
                                 );
