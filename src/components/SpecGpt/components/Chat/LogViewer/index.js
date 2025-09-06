@@ -152,14 +152,14 @@ const LogViewer = ({
                     key: 'Spec Section #', 
                     label: 'Spec Section #', 
                     sortable: true, 
-                    width: 10,
-                    minWidth: 90
+                    width: 12,
+                    minWidth: 120
                 },
                 { 
                     key: 'Spec Section Name', 
                     label: 'Spec Section Name', 
                     sortable: true, 
-                    width: 18,
+                    width: 16,
                     minWidth: 140,
                     expandable: true
                 },
@@ -184,7 +184,7 @@ const LogViewer = ({
                     key: 'Requirement Text', 
                     label: 'Requirement', 
                     sortable: true, 
-                    width: 30,
+                    width: 28,
                     minWidth: 200,
                     expandable: true
                 },
@@ -199,8 +199,8 @@ const LogViewer = ({
                     key: 'When Due', 
                     label: 'When Due', 
                     sortable: true, 
-                    width: 10,
-                    minWidth: 90
+                    width: 12,
+                    minWidth: 110
                 }
             ];
         }
