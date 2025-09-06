@@ -22,6 +22,9 @@ import './FilterModal.scss';
  * @param {boolean} enableSearch - Enable/disable search functionality
  * @param {string} searchPlaceholder - Placeholder text for search input
  * @param {boolean} enableExpansion - Enable/disable text expansion functionality
+ * @param {boolean} enableExport - Enable/disable export functionality
+ * @param {Function} onExport - Callback function for export
+ * @param {string} exportLabel - Label for export button (default: "Export")
  * @param {string} className - Additional CSS classes
  * @param {Object} props - Additional props
  */
@@ -41,6 +44,9 @@ const SortableTable = ({
   availableFilterValues = {}, // New prop for filter values from backend
   enableExpansion = true, // New prop to control expansion functionality
   formatFilterLabel = null, // Function to format filter option labels
+  enableExport = false, // Enable/disable export functionality
+  onExport = null, // Callback function for export
+  exportLabel = 'Export', // Label for export button
   className = '',
   ...props
 }) => {
@@ -158,6 +164,13 @@ const SortableTable = ({
   const handleClearSearch = () => {
     if (onSearch) {
       onSearch('');
+    }
+  };
+
+  // Handle export
+  const handleExport = () => {
+    if (onExport) {
+      onExport();
     }
   };
 
@@ -310,47 +323,60 @@ const SortableTable = ({
       ref={parentRef}
       {...props}
     >
-      {/* Search Bar */}
-      {enableSearch && (
-        <div className="table-search-bar">
-          <div className="search-input-container">
-            <input
-              type="text"
-              placeholder={searchPlaceholder}
-              className="search-input"
-              value={searchValue}
-              onChange={handleSearchChange}
-              onKeyPress={handleSearchKeyPress}
-            />
-            <div className="search-icons">
-              <span className="search-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="11" cy="11" r="6" stroke="#6c757d" strokeWidth="1.5" />
-                  <path d="M19 19L16 16" stroke="#6c757d" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </span>
-              {searchValue && (
-                <span className="clear-search-icon" onClick={handleClearSearch}>
-                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M5 5L15 15"
-                      stroke="#6c757d"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M15 5L5 15"
-                      stroke="#6c757d"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+      {/* Search Bar and Export */}
+      {(enableSearch || enableExport) && (
+        <div className="table-controls-bar">
+          {enableSearch && (
+            <div className="search-input-container">
+              <input
+                type="text"
+                placeholder={searchPlaceholder}
+                className="search-input"
+                value={searchValue}
+                onChange={handleSearchChange}
+                onKeyPress={handleSearchKeyPress}
+              />
+              <div className="search-icons">
+                <span className="search-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="6" stroke="#6c757d" strokeWidth="1.5" />
+                    <path d="M19 19L16 16" stroke="#6c757d" strokeWidth="1.5" strokeLinecap="round" />
                   </svg>
                 </span>
-              )}
+                {searchValue && (
+                  <span className="clear-search-icon" onClick={handleClearSearch}>
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M5 5L15 15"
+                        stroke="#6c757d"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M15 5L5 15"
+                        stroke="#6c757d"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
+          )}
+          
+          {enableExport && (
+            <button className="export-button" onClick={handleExport}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="7,10 12,15 17,10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              {exportLabel}
+            </button>
+          )}
         </div>
       )}
 
@@ -445,6 +471,9 @@ SortableTable.propTypes = {
   availableFilterValues: PropTypes.object,
   enableExpansion: PropTypes.bool,
   formatFilterLabel: PropTypes.func,
+  enableExport: PropTypes.bool,
+  onExport: PropTypes.func,
+  exportLabel: PropTypes.string,
   className: PropTypes.string,
 };
 

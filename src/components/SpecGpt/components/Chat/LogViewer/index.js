@@ -12,12 +12,14 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, RepeatIcon, CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
-import { fetchAiGeneratedLogDetail, fetchSortedLogData, fetchSearchedLogData, fetchFilteredLogData, fetchLogFilterValues, generateAiLog } from '../../../utils/apiUtils';
+import { fetchAiGeneratedLogDetail, fetchSortedLogData, fetchSearchedLogData, fetchFilteredLogData, fetchLogFilterValues, generateAiLog, exportLogDataToExcel } from '../../../utils/apiUtils';
 import { getQAOptionLabel } from '../../../utils/qaUtils';
 import Message from '../ChatMain/Message';
 import { MESSAGE_ROLE_TYPE } from '../../../utils/enums';
 import { useFeatureFlags } from '../../../../../contexts/FeatureFlagsContext';
 import SortableTable from '../../../../shared/SortableTable';
+import { generateExportFilename } from '../../../../../utils/exportUtils';
+import FileDownload from 'js-file-download';
 
 const LogViewer = ({ 
     projectId, 
@@ -42,6 +44,49 @@ const LogViewer = ({
     const [availableFilterValues, setAvailableFilterValues] = useState({});
     const [pagination, setPagination] = useState({ currentPage: 1, pageSize: 50 });
     const [searchValue, setSearchValue] = useState('');
+
+    // Handle Excel export
+    const handleExportExcel = async () => {
+        if (!logMessage?.questionid) {
+            return;
+        }
+        
+        console.log('📊 LogViewer: Excel export requested');
+        console.log('📊 LogViewer: Current table data length:', logMessage?.data?.length);
+        console.log('📊 LogViewer: Filter values:', filterValues);
+        console.log('📊 LogViewer: Search value:', searchValue);
+        
+        try {
+            console.log('📊 LogViewer: Requesting Excel export from backend...');
+            
+            // Use current sort field or default to created_at
+            const orderBy = sorting.column ? fieldMapping[sorting.column] : 'created_at';
+            
+            // Get Excel file data from backend
+            const excelData = await exportLogDataToExcel(
+                projectId, 
+                logMessage.questionid, 
+                filterValues,    // Current filters
+                orderBy, 
+                sorting.order,
+                searchValue      // Current search
+            );
+            
+            if (excelData) {
+                console.log('📊 LogViewer: Received Excel file, downloading...');
+                // Create blob and download Excel file
+                const blob = new Blob([excelData], { 
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                });
+                const filename = generateExportFilename(logType, null) + '.xlsx';
+                FileDownload(blob, filename);
+            } else {
+                console.log('📊 LogViewer: No data to export');
+            }
+        } catch (error) {
+            console.error('Error exporting data:', error);
+        }
+    };
 
     // Function to format filter labels based on column type
     const formatFilterLabel = (value) => {
@@ -801,6 +846,9 @@ const LogViewer = ({
                                         availableFilterValues={availableFilterValues}
                                         formatFilterLabel={formatFilterLabel}
                                         enableExpansion={false}
+                                        enableExport={true}
+                                        onExport={handleExportExcel}
+                                        exportLabel="Export to Excel"
                                         className="log-viewer-table"
                                     />
                                 );
