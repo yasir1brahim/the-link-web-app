@@ -756,7 +756,7 @@ const LogViewer = ({
                 {logMessage ? (
                     <Box p={6} h="100%" overflowY="auto">
                         {(() => {
-                            const shouldShowTable = logMessage.data_format === 'structured' && logMessage.data && logMessage.data.length > 0;
+                            const shouldShowTable = logMessage.data_format === 'structured';
                             
                             if (shouldShowTable) {
 

@@ -224,9 +224,36 @@ const SortableTable = ({
   };
 
   // Render table body
-  const renderTableBody = () => (
-    <tbody style={{ fontSize: "12px" }}>
-      {data.map((row, rowIndex) => (
+  const renderTableBody = () => {
+    // Handle empty state
+    if (!data || data.length === 0) {
+      return (
+        <tbody>
+          <tr>
+            <td 
+              colSpan={columns.length} 
+              className="empty-state-cell"
+              style={{ 
+                textAlign: 'center', 
+                padding: '40px 20px',
+                color: '#6c757d',
+                fontStyle: 'italic'
+              }}
+            >
+              {searchValue || Object.values(filterValues).some(filter => filter.length > 0) ? 
+                'No matching records found. Try adjusting your search or filters.' : 
+                'No data available.'
+              }
+            </td>
+          </tr>
+        </tbody>
+      );
+    }
+
+    // Render data rows
+    return (
+      <tbody style={{ fontSize: "12px" }}>
+        {data.map((row, rowIndex) => (
         <tr
           key={rowIndex}
           className={row.className || ''}
@@ -270,7 +297,8 @@ const SortableTable = ({
         </tr>
       ))}
     </tbody>
-  );
+    );
+  };
 
   return (
     <div

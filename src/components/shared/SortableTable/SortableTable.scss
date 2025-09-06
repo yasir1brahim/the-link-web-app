@@ -63,6 +63,21 @@
       }
     }
   }
+
+  // Empty state styles
+  .empty-state-cell {
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6;
+    white-space: normal !important; // Allow text wrapping for empty state message
+    max-width: none !important; // Remove width restrictions
+    overflow: visible !important; // Show full message
+    text-overflow: none !important; // No ellipsis for empty state
+    
+    &:hover {
+      background-color: #f8f9fa !important;
+    }
+  }
+
   width: 100%; // Fill available space
   margin: 0 auto;
   padding: 0 20px;
@@ -79,6 +94,7 @@
     margin-bottom: 0;
     box-sizing: border-box;
     border-collapse: collapse; // Ensure consistent spacing
+    min-height: 200px; // Prevent table from collapsing when empty
     
     // Make columns fill available space evenly
     th, td {
