@@ -12,6 +12,7 @@ import './FilterModal.scss';
  * @param {Array} availableValues - Array of available values for the column
  * @param {Array} selectedValues - Array of currently selected filter values
  * @param {Function} onApply - Callback when filter is applied
+ * @param {Function} formatLabel - Optional function to format display labels
  */
 const FilterModal = ({
   isOpen,
@@ -19,7 +20,8 @@ const FilterModal = ({
   columnName,
   availableValues = [],
   selectedValues = [],
-  onApply
+  onApply,
+  formatLabel = null
 }) => {
   const [searchValue, setSearchValue] = useState('');
   const [localSelectedValues, setLocalSelectedValues] = useState([...selectedValues]);
@@ -67,10 +69,19 @@ const FilterModal = ({
     onClose();
   };
 
-  // Filter available values based on search
-  const filteredValues = availableValues.filter(value =>
-    value?.toString().toLowerCase().includes(searchValue.toLowerCase())
-  );
+  // Helper function to get display label for a value
+  const getDisplayLabel = (value) => {
+    return formatLabel ? formatLabel(value) : value;
+  };
+
+  // Filter available values based on search (search both original value and formatted label)
+  const filteredValues = availableValues.filter(value => {
+    const originalValue = value?.toString().toLowerCase();
+    const formattedValue = getDisplayLabel(value)?.toString().toLowerCase();
+    const searchTerm = searchValue.toLowerCase();
+    
+    return originalValue.includes(searchTerm) || formattedValue.includes(searchTerm);
+  });
 
   if (!isOpen) return null;
 
@@ -126,7 +137,7 @@ const FilterModal = ({
                       tabIndex={-1} // Remove from tab order since we handle click on label
                     />
                     <span className="filter-checkbox-custom"></span>
-                    <span className="filter-value-text">{value}</span>
+                    <span className="filter-value-text">{getDisplayLabel(value)}</span>
                   </label>
                 </div>
               ))
@@ -159,6 +170,7 @@ FilterModal.propTypes = {
   availableValues: PropTypes.array.isRequired,
   selectedValues: PropTypes.array.isRequired,
   onApply: PropTypes.func.isRequired,
+  formatLabel: PropTypes.func,
 };
 
 export default FilterModal;

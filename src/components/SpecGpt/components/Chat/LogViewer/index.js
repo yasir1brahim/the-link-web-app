@@ -43,6 +43,16 @@ const LogViewer = ({
     const [pagination, setPagination] = useState({ currentPage: 1, pageSize: 50 });
     const [searchValue, setSearchValue] = useState('');
 
+    // Function to format filter labels based on column type
+    const formatFilterLabel = (value) => {
+        // For QA planner item_type column, use QA option labels
+        if (logType === 'qa_planner') {
+            return getQAOptionLabel(value);
+        }
+        // For other columns, return the value as-is
+        return value;
+    };
+
     // Feature flag checking
     const { isInspectionLogUseDataTablesFlagActive } = useFeatureFlags();
     const shouldUseDataTables = isInspectionLogUseDataTablesFlagActive(teamId) || logType === 'qa_planner';
@@ -789,6 +799,7 @@ const LogViewer = ({
                                         enableSearch={true}
                                         searchPlaceholder="Search across all fields..."
                                         availableFilterValues={availableFilterValues}
+                                        formatFilterLabel={formatFilterLabel}
                                         enableExpansion={false}
                                         className="log-viewer-table"
                                     />

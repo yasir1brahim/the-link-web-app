@@ -40,6 +40,7 @@ const SortableTable = ({
   searchPlaceholder = 'Search...',
   availableFilterValues = {}, // New prop for filter values from backend
   enableExpansion = true, // New prop to control expansion functionality
+  formatFilterLabel = null, // Function to format filter option labels
   className = '',
   ...props
 }) => {
@@ -394,6 +395,7 @@ const SortableTable = ({
         availableValues={availableFilterValues[filterColumn] || []}
         selectedValues={filterValues[filterColumn] || []}
         onApply={handleFilterApply}
+        formatLabel={formatFilterLabel}
       />
     </div>
   );
@@ -442,6 +444,7 @@ SortableTable.propTypes = {
   searchPlaceholder: PropTypes.string,
   availableFilterValues: PropTypes.object,
   enableExpansion: PropTypes.bool,
+  formatFilterLabel: PropTypes.func,
   className: PropTypes.string,
 };
 
