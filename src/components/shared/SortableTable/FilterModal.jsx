@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import './FilterModal.scss';
 
@@ -23,15 +24,27 @@ const FilterModal = ({
   const [searchValue, setSearchValue] = useState('');
   const [localSelectedValues, setLocalSelectedValues] = useState([...selectedValues]);
 
-  // Reset local state when modal opens
+  // Reset local state when modal opens and handle body scroll
   React.useEffect(() => {
     if (isOpen) {
       setLocalSelectedValues([...selectedValues]);
       setSearchValue('');
+      
+      // Prevent body scrolling when modal is open
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
     }
   }, [isOpen, selectedValues]);
 
-  const handleToggleValue = (value) => {
+  const handleToggleValue = (value, event) => {
+    // Prevent any default behavior that might cause scrolling
+    event?.preventDefault();
+    event?.stopPropagation();
+    
     if (localSelectedValues.includes(value)) {
       setLocalSelectedValues(localSelectedValues.filter(v => v !== value));
     } else {
@@ -61,7 +74,8 @@ const FilterModal = ({
 
   if (!isOpen) return null;
 
-  return (
+  // Create portal to render modal outside component tree
+  return ReactDOM.createPortal(
     <div className="filter-modal-overlay" onClick={handleCancel}>
       <div className="filter-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="filter-modal-header">
@@ -100,12 +114,16 @@ const FilterModal = ({
             {filteredValues.length > 0 ? (
               filteredValues.map((value, index) => (
                 <div key={index} className="filter-value-item">
-                  <label className="filter-checkbox-label">
+                  <label 
+                    className="filter-checkbox-label"
+                    onClick={(e) => handleToggleValue(value, e)}
+                  >
                     <input
                       type="checkbox"
                       className="filter-checkbox"
                       checked={localSelectedValues.includes(value)}
-                      onChange={() => handleToggleValue(value)}
+                      onChange={(e) => handleToggleValue(value, e)}
+                      tabIndex={-1} // Remove from tab order since we handle click on label
                     />
                     <span className="filter-checkbox-custom"></span>
                     <span className="filter-value-text">{value}</span>
@@ -129,7 +147,8 @@ const FilterModal = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body // Portal target - renders directly to body
   );
 };
 
