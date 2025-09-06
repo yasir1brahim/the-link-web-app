@@ -2,10 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { SortIcon } from '../icons/sortIcon';
 import { FilterIcon } from '../icons/filterIcon';
+import FilterModal from './FilterModal';
 import './SortableTable.scss';
+import './FilterModal.scss';
 
 /**
- * SortableTable - A reusable table component with sorting, filtering, and pagination capabilities
+ * SortableTable - A reusable table component with sorting, filtering, search, and pagination capabilities
  * 
  * @param {Array} data - Array of data objects to display
  * @param {Array} columns - Array of column definitions
@@ -15,6 +17,14 @@ import './SortableTable.scss';
  * @param {Object} filterValues - Current filter values
  * @param {Function} onPageChange - Callback function for pagination
  * @param {Object} pagination - Pagination state { currentPage: number, pageSize: number, totalItems: number, totalPages: number }
+ * @param {Function} onSearch - Callback function for search
+ * @param {string} searchValue - Current search value
+ * @param {boolean} enableSearch - Enable/disable search functionality
+ * @param {string} searchPlaceholder - Placeholder text for search input
+ * @param {boolean} enableExpansion - Enable/disable text expansion functionality
+ * @param {boolean} enableExport - Enable/disable export functionality
+ * @param {Function} onExport - Callback function for export
+ * @param {string} exportLabel - Label for export button (default: "Export")
  * @param {string} className - Additional CSS classes
  * @param {Object} props - Additional props
  */
@@ -27,7 +37,16 @@ const SortableTable = ({
   filterValues = {},
   onPageChange,
   pagination = null,
+  onSearch,
+  searchValue = '',
+  enableSearch = false,
+  searchPlaceholder = 'Search...',
+  availableFilterValues = {}, // New prop for filter values from backend
   enableExpansion = true, // New prop to control expansion functionality
+  formatFilterLabel = null, // Function to format filter option labels
+  enableExport = false, // Enable/disable export functionality
+  onExport = null, // Callback function for export
+  exportLabel = 'Export', // Label for export button
   className = '',
   ...props
 }) => {
@@ -48,6 +67,7 @@ const SortableTable = ({
       rowRefs.current = Array(data.length).fill(null);
     }
   }, [data, enableExpansion]);
+
 
   // Check for text overflow and show expansion buttons (only if expansion is enabled)
   useEffect(() => {
@@ -114,6 +134,46 @@ const SortableTable = ({
     setFilterModal(true);
   };
 
+  // Handle filter apply
+  const handleFilterApply = (columnName, selectedValues) => {
+    if (onFilter) {
+      onFilter(columnName, selectedValues);
+    }
+  };
+
+  // Handle filter modal close
+  const handleFilterModalClose = () => {
+    setFilterModal(false);
+    setFilterColumn('');
+  };
+
+  // Handle search
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    if (onSearch) {
+      onSearch(value);
+    }
+  };
+
+  const handleSearchKeyPress = (event) => {
+    if (event.key === 'Enter' && onSearch) {
+      onSearch(searchValue);
+    }
+  };
+
+  const handleClearSearch = () => {
+    if (onSearch) {
+      onSearch('');
+    }
+  };
+
+  // Handle export
+  const handleExport = () => {
+    if (onExport) {
+      onExport();
+    }
+  };
+
   // Format cell value based on column configuration
   const formatCellValue = (value, column, row) => {
     if (column.format) {
@@ -136,29 +196,30 @@ const SortableTable = ({
           >
             <div className="d-flex">
                       <span>{column.label}</span>
-              {column.sortable && (
-                        <span
-          style={{ cursor: "pointer", marginLeft: "6px" }}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleSorting(column.key);
-          }}
-        >
-                  <SortIcon />
-                </span>
-              )}
-              {column.filterable && (
-                <span
-                  className="ml-1"
-                  onClick={() => handleFilterClick(column.key)}
-                >
-                  <FilterIcon
-                    isActive={
-                      filterValues[column.key]?.length > 0 ? true : false
-                    }
-                  />
-                </span>
-              )}
+            {column.sortable && (
+              <span
+                style={{ cursor: "pointer", marginLeft: "6px" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSorting(column.key);
+                }}
+              >
+                <SortIcon />
+              </span>
+            )}
+            {column.filterable && (
+              <span
+                style={{ cursor: "pointer", marginLeft: "6px" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFilterClick(column.key);
+                }}
+              >
+                <FilterIcon 
+                  isActive={filterValues[column.key] && filterValues[column.key].length > 0}
+                />
+              </span>
+            )}
               {column.resizable !== false && (
                 <div
                   className="resizer"
@@ -177,9 +238,36 @@ const SortableTable = ({
   };
 
   // Render table body
-  const renderTableBody = () => (
-    <tbody style={{ fontSize: "12px" }}>
-      {data.map((row, rowIndex) => (
+  const renderTableBody = () => {
+    // Handle empty state
+    if (!data || data.length === 0) {
+      return (
+        <tbody>
+          <tr>
+            <td 
+              colSpan={columns.length} 
+              className="empty-state-cell"
+              style={{ 
+                textAlign: 'center', 
+                padding: '40px 20px',
+                color: '#6c757d',
+                fontStyle: 'italic'
+              }}
+            >
+              {searchValue || Object.values(filterValues).some(filter => filter.length > 0) ? 
+                'No matching records found. Try adjusting your search or filters.' : 
+                'No data available.'
+              }
+            </td>
+          </tr>
+        </tbody>
+      );
+    }
+
+    // Render data rows
+    return (
+      <tbody style={{ fontSize: "12px" }}>
+        {data.map((row, rowIndex) => (
         <tr
           key={rowIndex}
           className={row.className || ''}
@@ -223,7 +311,8 @@ const SortableTable = ({
         </tr>
       ))}
     </tbody>
-  );
+    );
+  };
 
   return (
     <div
@@ -234,6 +323,63 @@ const SortableTable = ({
       ref={parentRef}
       {...props}
     >
+      {/* Search Bar and Export */}
+      {(enableSearch || enableExport) && (
+        <div className="table-controls-bar">
+          {enableSearch && (
+            <div className="search-input-container">
+              <input
+                type="text"
+                placeholder={searchPlaceholder}
+                className="search-input"
+                value={searchValue}
+                onChange={handleSearchChange}
+                onKeyPress={handleSearchKeyPress}
+              />
+              <div className="search-icons">
+                <span className="search-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="6" stroke="#6c757d" strokeWidth="1.5" />
+                    <path d="M19 19L16 16" stroke="#6c757d" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </span>
+                {searchValue && (
+                  <span className="clear-search-icon" onClick={handleClearSearch}>
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M5 5L15 15"
+                        stroke="#6c757d"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M15 5L5 15"
+                        stroke="#6c757d"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {enableExport && (
+            <button className="export-button" onClick={handleExport}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="7,10 12,15 17,10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              {exportLabel}
+            </button>
+          )}
+        </div>
+      )}
+
       <table className="table logs-table" ref={tableRef}>
         {renderTableHeader()}
         {renderTableBody()}
@@ -267,13 +413,16 @@ const SortableTable = ({
         </div>
       )}
       
-      {/* Filter modal would be rendered here if needed */}
-      {filterModal && onFilter && (
-        <div className="filter-modal">
-          {/* Filter modal implementation would go here */}
-          <button onClick={() => setFilterModal(false)}>Close</button>
-        </div>
-      )}
+      {/* Filter Modal */}
+      <FilterModal
+        isOpen={filterModal}
+        onClose={handleFilterModalClose}
+        columnName={filterColumn}
+        availableValues={availableFilterValues[filterColumn] || []}
+        selectedValues={filterValues[filterColumn] || []}
+        onApply={handleFilterApply}
+        formatLabel={formatFilterLabel}
+      />
     </div>
   );
 };
@@ -315,7 +464,16 @@ SortableTable.propTypes = {
     nextPage: PropTypes.number,
     previousPage: PropTypes.number,
   }),
+  onSearch: PropTypes.func,
+  searchValue: PropTypes.string,
+  enableSearch: PropTypes.bool,
+  searchPlaceholder: PropTypes.string,
+  availableFilterValues: PropTypes.object,
   enableExpansion: PropTypes.bool,
+  formatFilterLabel: PropTypes.func,
+  enableExport: PropTypes.bool,
+  onExport: PropTypes.func,
+  exportLabel: PropTypes.string,
   className: PropTypes.string,
 };
 
