@@ -12,7 +12,7 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, RepeatIcon, CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
-import { fetchAiGeneratedLogDetail, fetchSortedLogData, fetchSearchedLogData, generateAiLog } from '../../../utils/apiUtils';
+import { fetchAiGeneratedLogDetail, fetchSortedLogData, fetchSearchedLogData, fetchFilteredLogData, fetchLogFilterValues, generateAiLog } from '../../../utils/apiUtils';
 import { getQAOptionLabel } from '../../../utils/qaUtils';
 import Message from '../ChatMain/Message';
 import { MESSAGE_ROLE_TYPE } from '../../../utils/enums';
@@ -34,7 +34,12 @@ const LogViewer = ({
     const [isPolling, setIsPolling] = useState(false);
     const [isRegenerating, setIsRegenerating] = useState(false);
     const [sorting, setSorting] = useState({ column: '', order: 'desc' });
-    const [filterValues, setFilterValues] = useState({});
+    const [filterValues, setFilterValues] = useState({
+        'Spec Section #': [],
+        'item_type': [],
+        'Responsible Party': []
+    });
+    const [availableFilterValues, setAvailableFilterValues] = useState({});
     const [pagination, setPagination] = useState({ currentPage: 1, pageSize: 50 });
     const [searchValue, setSearchValue] = useState('');
 
@@ -153,6 +158,7 @@ const LogViewer = ({
                     key: 'Spec Section #', 
                     label: 'Spec Section #', 
                     sortable: true, 
+                    filterable: true, // Add filter capability
                     width: 12,
                     minWidth: 120
                 },
@@ -175,6 +181,7 @@ const LogViewer = ({
                     key: 'item_type', 
                     label: 'Item Type', 
                     sortable: true, 
+                    filterable: true, // Add filter capability
                     width: 12,
                     minWidth: 110,
                     render: (value, row, rowIndex) => {
@@ -193,6 +200,7 @@ const LogViewer = ({
                     key: 'Responsible Party', 
                     label: 'Responsible Party', 
                     sortable: true, 
+                    filterable: true, // Add filter capability
                     width: 12,
                     minWidth: 110
                 },
@@ -239,10 +247,47 @@ const LogViewer = ({
     };
 
     // Handle filtering
-    const handleFilter = (columnName) => {
-        // For now, just log the filter request
-        // This can be expanded to show a filter modal or handle filtering
-        console.log('Filter requested for column:', columnName);
+    const handleFilter = async (columnName, selectedValues) => {
+        if (!logMessage?.questionid) {
+            return;
+        }
+        
+        console.log('🔽 LogViewer: Filter requested for column:', columnName, 'with values:', selectedValues);
+        
+        // Update filter values
+        setFilterValues(prev => ({
+            ...prev,
+            [columnName]: selectedValues
+        }));
+        
+        // Reset pagination when filter changes
+        setPagination({ currentPage: 1, pageSize: 50 });
+        
+        try {
+            // Use current sort field or default to created_at
+            const orderBy = sorting.column ? fieldMapping[sorting.column] : 'created_at';
+            
+            const filteredData = await handleFilteredLogData(
+                projectId, 
+                logMessage.questionid, 
+                { ...filterValues, [columnName]: selectedValues },
+                orderBy, 
+                sorting.order,
+                searchValue,
+                1,
+                50
+            );
+            
+            if (filteredData) {
+                setLogMessage(prev => ({ 
+                    ...prev, 
+                    data: filteredData.data,
+                    pagination: filteredData.pagination || null
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+        }
     };
 
     // Handle search
@@ -356,6 +401,41 @@ const LogViewer = ({
         }
     };
 
+    // Fetch filtered log data using the API utility
+    const handleFilteredLogData = async (projectId, logId, filters, orderBy = 'created_at', order = 'desc', searchTerm = '', page = 1, pageSize = 50) => {
+        try {
+            const logDetail = await fetchFilteredLogData(projectId, logId, filters, orderBy, order, searchTerm, page, pageSize);
+            
+            if (logDetail && logDetail.log_data) {
+                return {
+                    data: logDetail.log_data,
+                    pagination: logDetail.pagination
+                };
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching filtered log data:', error);
+            return null;
+        }
+    };
+
+    // Fetch available filter values from the backend
+    const loadFilterValues = async () => {
+        if (!logMessage?.questionid) {
+            return;
+        }
+        
+        try {
+            const filterData = await fetchLogFilterValues(projectId, logMessage.questionid);
+            if (filterData && filterData.filter_values) {
+                setAvailableFilterValues(filterData.filter_values);
+            }
+        } catch (error) {
+            console.error('Error fetching filter values:', error);
+        }
+    };
+
     useEffect(() => {
         if (initialLogData) {
             
@@ -393,6 +473,13 @@ const LogViewer = ({
             loadLogDetail();
         }
     }, [logId, initialLogData]);
+
+    // Load filter values when log message is available
+    useEffect(() => {
+        if (logMessage?.questionid) {
+            loadFilterValues();
+        }
+    }, [logMessage?.questionid, projectId]);
 
     useEffect(() => {
         let intervalId = null;
@@ -687,6 +774,7 @@ const LogViewer = ({
                                         searchValue={searchValue}
                                         enableSearch={true}
                                         searchPlaceholder="Search across all fields..."
+                                        availableFilterValues={availableFilterValues}
                                         enableExpansion={false}
                                         className="log-viewer-table"
                                     />

@@ -2,7 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { SortIcon } from '../icons/sortIcon';
 import { FilterIcon } from '../icons/filterIcon';
+import FilterModal from './FilterModal';
 import './SortableTable.scss';
+import './FilterModal.scss';
 
 /**
  * SortableTable - A reusable table component with sorting, filtering, search, and pagination capabilities
@@ -36,6 +38,7 @@ const SortableTable = ({
   searchValue = '',
   enableSearch = false,
   searchPlaceholder = 'Search...',
+  availableFilterValues = {}, // New prop for filter values from backend
   enableExpansion = true, // New prop to control expansion functionality
   className = '',
   ...props
@@ -57,6 +60,7 @@ const SortableTable = ({
       rowRefs.current = Array(data.length).fill(null);
     }
   }, [data, enableExpansion]);
+
 
   // Check for text overflow and show expansion buttons (only if expansion is enabled)
   useEffect(() => {
@@ -123,6 +127,19 @@ const SortableTable = ({
     setFilterModal(true);
   };
 
+  // Handle filter apply
+  const handleFilterApply = (columnName, selectedValues) => {
+    if (onFilter) {
+      onFilter(columnName, selectedValues);
+    }
+  };
+
+  // Handle filter modal close
+  const handleFilterModalClose = () => {
+    setFilterModal(false);
+    setFilterColumn('');
+  };
+
   // Handle search
   const handleSearchChange = (event) => {
     const value = event.target.value;
@@ -165,29 +182,30 @@ const SortableTable = ({
           >
             <div className="d-flex">
                       <span>{column.label}</span>
-              {column.sortable && (
-                        <span
-          style={{ cursor: "pointer", marginLeft: "6px" }}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleSorting(column.key);
-          }}
-        >
-                  <SortIcon />
-                </span>
-              )}
-              {column.filterable && (
-                <span
-                  className="ml-1"
-                  onClick={() => handleFilterClick(column.key)}
-                >
-                  <FilterIcon
-                    isActive={
-                      filterValues[column.key]?.length > 0 ? true : false
-                    }
-                  />
-                </span>
-              )}
+            {column.sortable && (
+              <span
+                style={{ cursor: "pointer", marginLeft: "6px" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSorting(column.key);
+                }}
+              >
+                <SortIcon />
+              </span>
+            )}
+            {column.filterable && (
+              <span
+                style={{ cursor: "pointer", marginLeft: "6px" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFilterClick(column.key);
+                }}
+              >
+                <FilterIcon 
+                  isActive={filterValues[column.key] && filterValues[column.key].length > 0}
+                />
+              </span>
+            )}
               {column.resizable !== false && (
                 <div
                   className="resizer"
@@ -340,13 +358,15 @@ const SortableTable = ({
         </div>
       )}
       
-      {/* Filter modal would be rendered here if needed */}
-      {filterModal && onFilter && (
-        <div className="filter-modal">
-          {/* Filter modal implementation would go here */}
-          <button onClick={() => setFilterModal(false)}>Close</button>
-        </div>
-      )}
+      {/* Filter Modal */}
+      <FilterModal
+        isOpen={filterModal}
+        onClose={handleFilterModalClose}
+        columnName={filterColumn}
+        availableValues={availableFilterValues[filterColumn] || []}
+        selectedValues={filterValues[filterColumn] || []}
+        onApply={handleFilterApply}
+      />
     </div>
   );
 };
@@ -392,6 +412,7 @@ SortableTable.propTypes = {
   searchValue: PropTypes.string,
   enableSearch: PropTypes.bool,
   searchPlaceholder: PropTypes.string,
+  availableFilterValues: PropTypes.object,
   enableExpansion: PropTypes.bool,
   className: PropTypes.string,
 };

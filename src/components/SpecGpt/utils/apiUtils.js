@@ -174,6 +174,78 @@ const fetchSearchedLogData = async (projectId, logId, searchTerm, orderBy = 'cre
     }
 }
 
+/**
+ * Fetch filtered AI generated log data with optional search, sorting and pagination
+ * @param {string} projectId - Project ID
+ * @param {string} logId - Log ID
+ * @param {Object} filters - Filter values by column (e.g., {'Spec Section #': ['01 5000'], 'item_type': ['Product']})
+ * @param {string} orderBy - Field to sort by (default: 'created_at')
+ * @param {string} order - Sort direction ('asc' or 'desc', default: 'desc')
+ * @param {string} searchTerm - Search term to filter data (default: '')
+ * @param {number} page - Page number (default: 1)
+ * @param {number} pageSize - Page size (default: 50)
+ * @returns {Promise<Object|null>} Filtered log data or null on error
+ */
+const fetchFilteredLogData = async (projectId, logId, filters = {}, orderBy = 'created_at', order = 'desc', searchTerm = '', page = 1, pageSize = 50) => {
+    try {
+        const url = `/api/deliverables/${projectId}/ai-generated-logs/${logId}/`;
+        const params = {
+            order_by: orderBy,
+            order: order,
+            page: page,
+            page_size: pageSize
+        };
+        
+        // Add search parameter if provided
+        if (searchTerm) {
+            params.search = searchTerm;
+        }
+        
+        // Add filter parameters
+        Object.keys(filters).forEach(columnKey => {
+            const filterValues = filters[columnKey];
+            if (filterValues && filterValues.length > 0) {
+                // Convert column keys to filter parameter names
+                const filterParamName = `filter_${columnKey.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+                params[filterParamName] = filterValues.join(',');
+            }
+        });
+        
+        const response = await axiosInstance({
+            method: 'GET',
+            url: url,
+            params: params
+        });
+        
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+}
+
+/**
+ * Fetch available filter values for a log
+ * @param {string} projectId - Project ID
+ * @param {string} logId - Log ID
+ * @returns {Promise<Object|null>} Available filter values or null on error
+ */
+const fetchLogFilterValues = async (projectId, logId) => {
+    try {
+        const url = `/api/deliverables/${projectId}/ai-generated-logs/${logId}/filter_values/`;
+        
+        const response = await axiosInstance({
+            method: 'GET',
+            url: url
+        });
+        
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+}
+
 const fetchMostRecentLog = async (projectId, projectVersionId, logType) => {
     try {
         const response = await axiosInstance({
@@ -350,6 +422,8 @@ export {
     fetchAiGeneratedLogDetail,
     fetchSortedLogData,
     fetchSearchedLogData,
+    fetchFilteredLogData,
+    fetchLogFilterValues,
     fetchMostRecentLog,
     extractTablesToExcel,
     generateAiLog,
