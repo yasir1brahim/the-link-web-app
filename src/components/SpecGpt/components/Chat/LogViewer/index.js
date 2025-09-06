@@ -58,6 +58,7 @@ const LogViewer = ({
         'When Due': 'when_due',
         'Exact Requirement Text': 'exact_requirement_text',
         'Item Type': 'item_type',
+        'item_type': 'item_type',  // Add mapping for QA planner lowercase key
         'Item Text': 'item_text',
         'Paragraph Number': 'paragraph_number',
         'Requirement Text': 'requirement_text',
@@ -228,12 +229,25 @@ const LogViewer = ({
             return;
         }
         
+        console.log('🔄 LogViewer: Sort requested for column:', columnName, 'order:', order);
+        
         setSorting({ column: columnName, order });
         // Reset pagination when sorting changes
         setPagination({ currentPage: 1, pageSize: 50 });
         
         try {
-            const sortedData = await handleSortedLogData(projectId, logMessage.questionid, backendFieldName, order);
+            // Use handleFilteredLogData to preserve current filter and search state when sorting
+            const sortedData = await handleFilteredLogData(
+                projectId, 
+                logMessage.questionid, 
+                filterValues,    // Preserve current filters
+                backendFieldName, 
+                order,
+                searchValue,     // Preserve current search
+                1,
+                50
+            );
+            
             if (sortedData) {
                 setLogMessage(prev => ({ 
                     ...prev, 
