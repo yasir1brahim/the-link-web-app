@@ -1094,112 +1094,119 @@ const ProjectLogs = () => {
   const handleUpDownView = async (direction) => {
     if (!pdfData || loadingView) return;
 
-    // Check if we can navigate within the current page
-    if (
-      (direction > 0 && pdfData.index < filteredLogData.length - 1) ||
-      (direction < 0 && pdfData.index > 0)
-    ) {
-      const pIndex = pdfData.index + direction;
-      const data = filteredLogData[pIndex];
-      
-      if (data) {
-        setPdfData({
-          ...pdfData,
-          url: data.doc_link,
-          textLoc: data.text_loc,
-          index: pIndex,
-          docId: data.doc_id,
-          submittalId: data.id,
-          additionalTextLocations: data.additional_text_locations,
-        });
-        setSubmittalIdParam(data.id);
+    const isValid = (item) => item && item.doc_link && item.doc_link !== "";
+
+    // Try to move within current page, skipping deleted-document records
+    const step = direction > 0 ? 1 : -1;
+    let candidateIndex = pdfData.index + step;
+
+    while (candidateIndex >= 0 && candidateIndex < filteredLogData.length && !isValid(filteredLogData[candidateIndex])) {
+      candidateIndex += step;
+    }
+
+    if (candidateIndex >= 0 && candidateIndex < filteredLogData.length) {
+      const data = filteredLogData[candidateIndex];
+      setPdfData({
+        ...pdfData,
+        url: data.doc_link,
+        textLoc: data.text_loc,
+        index: candidateIndex,
+        docId: data.doc_id,
+        submittalId: data.id,
+        additionalTextLocations: data.additional_text_locations,
+      });
+      setSubmittalIdParam(data.id);
+      return;
+    }
+
+    // Cross-page navigation: fetch next/prev pages until a valid record is found or pages exhausted
+    if (direction > 0 && (candidateIndex >= filteredLogData.length)) {
+      const totalPages = Math.ceil(totalCount / rowsPerPage);
+      let nextPageNum = page + 1;
+      setLoadingView(true);
+      try {
+        while (nextPageNum <= totalPages) {
+          const response = await getSubmittalItems(
+            projectId,
+            searchValue,
+            filterValues,
+            null,
+            null,
+            nextPageNum,
+            rowsPerPage,
+            listId,
+            projectVersionId
+          );
+          const newLogData = response.data.message || [];
+          const firstValidIndex = newLogData.findIndex((it) => isValid(it));
+          if (firstValidIndex !== -1) {
+            setPage(nextPageNum);
+            setLogData(newLogData);
+            setFilteredLogData(newLogData);
+            const firstData = newLogData[firstValidIndex];
+            setPdfData({
+              ...pdfData,
+              url: firstData.doc_link,
+              textLoc: firstData.text_loc,
+              index: firstValidIndex,
+              docId: firstData.doc_id,
+              submittalId: firstData.id,
+              additionalTextLocations: firstData.additional_text_locations,
+            });
+            setSubmittalIdParam(firstData.id);
+            return;
+          }
+          nextPageNum += 1;
+        }
+      } catch (error) {
+        handleError(error);
+      } finally {
+        setLoadingView(false);
       }
-    } else {
-      if (direction > 0 && pdfData.index === filteredLogData.length - 1) {
-        const nextPage = page + 1;
-        const totalPages = Math.ceil(totalCount / rowsPerPage);
-        
-        if (nextPage <= totalPages) {
-          setLoadingView(true);
-          try {
-            const response = await getSubmittalItems(
-              projectId,
-              searchValue,
-              filterValues,
-              null,
-              null,
-              nextPage,
-              rowsPerPage,
-              listId,
-              projectVersionId
-            );
-            
-            const newLogData = response.data.message;
-            if (newLogData && newLogData.length > 0) {
-              setPage(nextPage);
-              setLogData(newLogData);
-              setFilteredLogData(newLogData); 
-              
-              const firstData = newLogData[0];
-              setPdfData({
-                ...pdfData,
-                url: firstData.doc_link,
-                textLoc: firstData.text_loc,
-                index: 0,
-                docId: firstData.doc_id,
-                submittalId: firstData.id,
-                additionalTextLocations: firstData.additional_text_locations,
-              });
-              setSubmittalIdParam(firstData.id);
-            }
-          } catch (error) {
-            handleError(error);
-          } finally {
-            setLoadingView(false);
+    } else if (direction < 0 && (candidateIndex < 0)) {
+      let prevPageNum = page - 1;
+      setLoadingView(true);
+      try {
+        while (prevPageNum >= 1) {
+          const response = await getSubmittalItems(
+            projectId,
+            searchValue,
+            filterValues,
+            null,
+            null,
+            prevPageNum,
+            rowsPerPage,
+            listId,
+            projectVersionId
+          );
+          const newLogData = response.data.message || [];
+          let lastValidIndex = -1;
+          for (let i = newLogData.length - 1; i >= 0; i--) {
+            if (isValid(newLogData[i])) { lastValidIndex = i; break; }
           }
-        }
-      } else if (direction < 0 && pdfData.index === 0) {
-        const prevPage = page - 1;
-        
-        if (prevPage >= 1) {
-          setLoadingView(true);
-          try {
-            const response = await getSubmittalItems(
-              projectId,
-              searchValue,
-              filterValues,
-              null,
-              null,
-              prevPage,
-              rowsPerPage,
-              listId,
-              projectVersionId
-            );
-            
-            const newLogData = response.data.message;
-            if (newLogData && newLogData.length > 0) {
-              setPage(prevPage);
-              setLogData(newLogData);
-              setFilteredLogData(newLogData); 
-              
-              const lastData = newLogData[newLogData.length - 1];
-              setPdfData({
-                ...pdfData,
-                url: lastData.doc_link,
-                textLoc: lastData.text_loc,
-                index: newLogData.length - 1,
-                docId: lastData.doc_id,
-                submittalId: lastData.id,
-                additionalTextLocations: lastData.additional_text_locations,
-              });
-              setSubmittalIdParam(lastData.id);
-            }
-          } catch (error) {
-            handleError(error);
-          } finally {
-            setLoadingView(false);
+          if (lastValidIndex !== -1) {
+            setPage(prevPageNum);
+            setLogData(newLogData);
+            setFilteredLogData(newLogData);
+            const lastData = newLogData[lastValidIndex];
+            setPdfData({
+              ...pdfData,
+              url: lastData.doc_link,
+              textLoc: lastData.text_loc,
+              index: lastValidIndex,
+              docId: lastData.doc_id,
+              submittalId: lastData.id,
+              additionalTextLocations: lastData.additional_text_locations,
+            });
+            setSubmittalIdParam(lastData.id);
+            return;
           }
+          prevPageNum -= 1;
         }
+      } catch (error) {
+        handleError(error);
+      } finally {
+        setLoadingView(false);
       }
     }
   };
