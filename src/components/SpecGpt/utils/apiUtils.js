@@ -134,6 +134,46 @@ const fetchSortedLogData = async (projectId, logId, orderBy, order = 'desc', pag
     }
 }
 
+/**
+ * Fetch searched AI generated log data with optional sorting and pagination
+ * @param {string} projectId - Project ID
+ * @param {string} logId - Log ID
+ * @param {string} searchTerm - Search term to filter data
+ * @param {string} orderBy - Field to sort by (default: 'created_at')
+ * @param {string} order - Sort direction ('asc' or 'desc', default: 'desc')
+ * @param {number} page - Page number (default: 1)
+ * @param {number} pageSize - Page size (default: 50)
+ * @returns {Promise<Object|null>} Searched log data or null on error
+ */
+const fetchSearchedLogData = async (projectId, logId, searchTerm, orderBy = 'created_at', order = 'desc', page = 1, pageSize = 50) => {
+    try {
+        const url = `/api/deliverables/${projectId}/ai-generated-logs/${logId}/`;
+        const params = {
+            search: searchTerm,
+            order_by: orderBy,
+            order: order,
+            page: page,
+            page_size: pageSize
+        };
+        
+        // Only include search parameter if searchTerm is not empty
+        if (!searchTerm) {
+            delete params.search;
+        }
+        
+        const response = await axiosInstance({
+            method: 'GET',
+            url: url,
+            params: params
+        });
+        
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+}
+
 const fetchMostRecentLog = async (projectId, projectVersionId, logType) => {
     try {
         const response = await axiosInstance({
@@ -309,6 +349,7 @@ export {
     fetchAiGeneratedLogs,
     fetchAiGeneratedLogDetail,
     fetchSortedLogData,
+    fetchSearchedLogData,
     fetchMostRecentLog,
     extractTablesToExcel,
     generateAiLog,

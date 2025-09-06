@@ -5,7 +5,7 @@ import { FilterIcon } from '../icons/filterIcon';
 import './SortableTable.scss';
 
 /**
- * SortableTable - A reusable table component with sorting, filtering, and pagination capabilities
+ * SortableTable - A reusable table component with sorting, filtering, search, and pagination capabilities
  * 
  * @param {Array} data - Array of data objects to display
  * @param {Array} columns - Array of column definitions
@@ -15,6 +15,11 @@ import './SortableTable.scss';
  * @param {Object} filterValues - Current filter values
  * @param {Function} onPageChange - Callback function for pagination
  * @param {Object} pagination - Pagination state { currentPage: number, pageSize: number, totalItems: number, totalPages: number }
+ * @param {Function} onSearch - Callback function for search
+ * @param {string} searchValue - Current search value
+ * @param {boolean} enableSearch - Enable/disable search functionality
+ * @param {string} searchPlaceholder - Placeholder text for search input
+ * @param {boolean} enableExpansion - Enable/disable text expansion functionality
  * @param {string} className - Additional CSS classes
  * @param {Object} props - Additional props
  */
@@ -27,6 +32,10 @@ const SortableTable = ({
   filterValues = {},
   onPageChange,
   pagination = null,
+  onSearch,
+  searchValue = '',
+  enableSearch = false,
+  searchPlaceholder = 'Search...',
   enableExpansion = true, // New prop to control expansion functionality
   className = '',
   ...props
@@ -112,6 +121,26 @@ const SortableTable = ({
     
     setFilterColumn(columnName);
     setFilterModal(true);
+  };
+
+  // Handle search
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    if (onSearch) {
+      onSearch(value);
+    }
+  };
+
+  const handleSearchKeyPress = (event) => {
+    if (event.key === 'Enter' && onSearch) {
+      onSearch(searchValue);
+    }
+  };
+
+  const handleClearSearch = () => {
+    if (onSearch) {
+      onSearch('');
+    }
   };
 
   // Format cell value based on column configuration
@@ -234,6 +263,50 @@ const SortableTable = ({
       ref={parentRef}
       {...props}
     >
+      {/* Search Bar */}
+      {enableSearch && (
+        <div className="table-search-bar">
+          <div className="search-input-container">
+            <input
+              type="text"
+              placeholder={searchPlaceholder}
+              className="search-input"
+              value={searchValue}
+              onChange={handleSearchChange}
+              onKeyPress={handleSearchKeyPress}
+            />
+            <div className="search-icons">
+              <span className="search-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="11" cy="11" r="6" stroke="#6c757d" strokeWidth="1.5" />
+                  <path d="M19 19L16 16" stroke="#6c757d" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </span>
+              {searchValue && (
+                <span className="clear-search-icon" onClick={handleClearSearch}>
+                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M5 5L15 15"
+                      stroke="#6c757d"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M15 5L5 15"
+                      stroke="#6c757d"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <table className="table logs-table" ref={tableRef}>
         {renderTableHeader()}
         {renderTableBody()}
@@ -315,6 +388,10 @@ SortableTable.propTypes = {
     nextPage: PropTypes.number,
     previousPage: PropTypes.number,
   }),
+  onSearch: PropTypes.func,
+  searchValue: PropTypes.string,
+  enableSearch: PropTypes.bool,
+  searchPlaceholder: PropTypes.string,
   enableExpansion: PropTypes.bool,
   className: PropTypes.string,
 };

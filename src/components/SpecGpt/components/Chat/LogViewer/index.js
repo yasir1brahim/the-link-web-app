@@ -12,7 +12,7 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, RepeatIcon, CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
-import { fetchAiGeneratedLogDetail, fetchSortedLogData, generateAiLog } from '../../../utils/apiUtils';
+import { fetchAiGeneratedLogDetail, fetchSortedLogData, fetchSearchedLogData, generateAiLog } from '../../../utils/apiUtils';
 import { getQAOptionLabel } from '../../../utils/qaUtils';
 import Message from '../ChatMain/Message';
 import { MESSAGE_ROLE_TYPE } from '../../../utils/enums';
@@ -36,6 +36,7 @@ const LogViewer = ({
     const [sorting, setSorting] = useState({ column: '', order: 'desc' });
     const [filterValues, setFilterValues] = useState({});
     const [pagination, setPagination] = useState({ currentPage: 1, pageSize: 50 });
+    const [searchValue, setSearchValue] = useState('');
 
     // Feature flag checking
     const { isInspectionLogUseDataTablesFlagActive } = useFeatureFlags();
@@ -244,6 +245,44 @@ const LogViewer = ({
         console.log('Filter requested for column:', columnName);
     };
 
+    // Handle search
+    const handleSearch = async (searchTerm) => {
+        if (!logMessage?.questionid) {
+            return;
+        }
+        
+        console.log('🔍 LogViewer: Search requested for term:', searchTerm);
+        setSearchValue(searchTerm);
+        
+        // Reset pagination when search changes
+        setPagination({ currentPage: 1, pageSize: 50 });
+        
+        try {
+            // Use current sort field or default to created_at
+            const orderBy = sorting.column ? fieldMapping[sorting.column] : 'created_at';
+            
+            const searchedData = await handleSearchedLogData(
+                projectId, 
+                logMessage.questionid, 
+                searchTerm,
+                orderBy, 
+                sorting.order,
+                1,
+                50
+            );
+            
+            if (searchedData) {
+                setLogMessage(prev => ({ 
+                    ...prev, 
+                    data: searchedData.data,
+                    pagination: searchedData.pagination || null
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching searched data:', error);
+        }
+    };
+
     // Handle pagination
     const handlePageChange = async (newPage) => {
         if (!logMessage?.questionid) {
@@ -294,6 +333,25 @@ const LogViewer = ({
             }
         } catch (error) {
             console.error('Error fetching sorted log data:', error);
+            return null;
+        }
+    };
+
+    // Fetch searched log data using the API utility
+    const handleSearchedLogData = async (projectId, logId, searchTerm, orderBy = 'created_at', order = 'desc', page = 1, pageSize = 50) => {
+        try {
+            const logDetail = await fetchSearchedLogData(projectId, logId, searchTerm, orderBy, order, page, pageSize);
+            
+            if (logDetail && logDetail.log_data) {
+                return {
+                    data: logDetail.log_data,
+                    pagination: logDetail.pagination
+                };
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching searched log data:', error);
             return null;
         }
     };
@@ -625,6 +683,10 @@ const LogViewer = ({
                                         filterValues={filterValues}
                                         onPageChange={handlePageChange}
                                         pagination={logMessage.pagination}
+                                        onSearch={handleSearch}
+                                        searchValue={searchValue}
+                                        enableSearch={true}
+                                        searchPlaceholder="Search across all fields..."
                                         enableExpansion={false}
                                         className="log-viewer-table"
                                     />
