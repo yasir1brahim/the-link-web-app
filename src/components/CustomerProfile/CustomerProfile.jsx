@@ -450,14 +450,14 @@ const CustomerProfile = (props) => {
                                 <div className="action-wrapper">
                                   <button
                                     type="button"
-                                    className="btn btn-secondary btn-sm"
+                                    className="btn btn-secondary btn-sm add-employe"
                                     onClick={() => handleEdit(employeeMembership)}
                                   >
                                     Edit
                                   </button>
                                   <button
                                     type="button"
-                                    className="btn btn-secondary btn-sm"
+                                    className="btn btn-secondary btn-sm add-employe"
                                     onClick={() => {
                                       setMembershipId(employeeMembership.id);
                                       toggleConfirmModal();
