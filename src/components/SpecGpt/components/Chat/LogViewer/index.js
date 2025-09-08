@@ -375,12 +375,14 @@ const LogViewer = ({
             // Use current sort field or default to created_at
             const orderBy = sorting.column ? fieldMapping[sorting.column] : 'created_at';
             
-            const searchedData = await handleSearchedLogData(
+            // Use handleFilteredLogData to preserve current filter state during search
+            const searchedData = await handleFilteredLogData(
                 projectId, 
                 logMessage.questionid, 
-                searchTerm,
+                filterValues,    // Preserve current filters
                 orderBy, 
                 sorting.order,
+                searchTerm,      // Use the new search term
                 1,
                 50
             );
@@ -403,28 +405,29 @@ const LogViewer = ({
             return;
         }
         
-
+        console.log('📄 LogViewer: Page change requested to page:', newPage);
         
         try {
             // Use default sort field if no sorting is applied
             const orderBy = sorting.column ? fieldMapping[sorting.column] : 'created_at';
             
-
-            
-            const sortedData = await handleSortedLogData(
+            // Use handleFilteredLogData to preserve current filter and search state during pagination
+            const paginatedData = await handleFilteredLogData(
                 projectId, 
                 logMessage.questionid, 
+                filterValues,    // Preserve current filters
                 orderBy, 
                 sorting.order,
+                searchValue,     // Preserve current search
                 newPage,
                 logMessage.pagination?.page_size || 50
             );
             
-            if (sortedData) {
+            if (paginatedData) {
                 setLogMessage(prev => ({ 
                     ...prev, 
-                    data: sortedData.data,
-                    pagination: sortedData.pagination || null
+                    data: paginatedData.data,
+                    pagination: paginatedData.pagination || null
                 }));
             }
         } catch (error) {
