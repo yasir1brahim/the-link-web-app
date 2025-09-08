@@ -72,13 +72,31 @@ const Chat = ({
         switch (data.type) {
             case 'response_start':
                 setIsStreaming(true);
+                // Create a new empty message for streaming
+                setMessages(prev => [
+                    ...prev.filter(msg => !msg.isStreaming), // Remove any existing streaming messages
+                    { 
+                        type: MESSAGE_ROLE_TYPE.ASSISTANT,
+                        message: '', 
+                        session_id: chatSessionId,
+                        questionid: '',
+                        loading: false, // Set to false so it shows immediately
+                        isStreaming: true
+                    }
+                ]);
                 break;
             case 'response_chunk':
                 setMessages(prev => {
+                    // Find the streaming message
                     const newMessages = [...prev];
-                    const lastMessage = newMessages[newMessages.length - 1];
-                    if (lastMessage && lastMessage.isStreaming) {
-                        lastMessage.message += data.data.content;
+                    const lastMessageIndex = newMessages.findIndex(msg => msg.isStreaming);
+                    
+                    if (lastMessageIndex !== -1) {
+                        // Create a new message object with updated content to ensure React detects the change
+                        newMessages[lastMessageIndex] = {
+                            ...newMessages[lastMessageIndex],
+                            message: newMessages[lastMessageIndex].message + data.data.content
+                        };
                     }
                     return newMessages;
                 });
@@ -87,10 +105,17 @@ const Chat = ({
                 setIsStreaming(false);
                 setMessages(prev => {
                     const newMessages = [...prev];
-                    const lastMessage = newMessages[newMessages.length - 1];
-                    if (lastMessage) {
-                        lastMessage.isStreaming = false;
-                        lastMessage.loading = false;
+                    const lastMessageIndex = newMessages.findIndex(msg => msg.isStreaming);
+                    
+                    if (lastMessageIndex !== -1) {
+                        // Update the streaming message to mark it as complete
+                        newMessages[lastMessageIndex] = {
+                            ...newMessages[lastMessageIndex],
+                            isStreaming: false,
+                            loading: false,
+                            chat_id: data.data.chat_id || chatSessionId,
+                            sources: data.data.sources || []
+                        };
                     }
                     return newMessages;
                 });
@@ -99,7 +124,7 @@ const Chat = ({
             case 'response_error':
                 setIsStreaming(false);
                 setIsLoadingMessage(false);
-                setMessages(prev => [...prev, { 
+                setMessages(prev => [...prev.filter(msg => !msg.isStreaming), { 
                     type: MESSAGE_ROLE_TYPE.ERROR, 
                     message: data.data.error,
                     session_id: chatSessionId,
@@ -214,16 +239,9 @@ const Chat = ({
                 'message': userMessage, 
                 'session_id': chatSessionId, 
                 'questionid': ''
-            },
-            {
-                'type': MESSAGE_ROLE_TYPE.ASSISTANT,
-                'message': '',
-                'session_id': chatSessionId,
-                'questionid': '',
-                'loading': true,
-                'isStreaming': false
             }
         ]);
+        
         setIsLoadingMessage(true);
         setUserInput('');
 
@@ -235,16 +253,8 @@ const Chat = ({
         });
         
         if (isSpecGptWebsocketsFlagActive(teamId) && isConnected) {
-            // Use WebSocket for streaming
-            setMessages(prev => {
-                const newMessages = [...prev];
-                const lastMessage = newMessages[newMessages.length - 1];
-                if (lastMessage) {
-                    lastMessage.isStreaming = true;
-                }
-                return newMessages;
-            });
-            
+            // Use WebSocket for streaming - no need to add placeholder message
+            // as it will be added by the response_start handler
             try {
                 sendMessage({
                     type: 'chat_message',
@@ -256,12 +266,34 @@ const Chat = ({
             } catch (error) {
                 console.error('WebSocket send error, falling back to HTTP:', error);
                 // Fallback to HTTP if WebSocket fails
+                // Add placeholder message for HTTP response
+                setMessages(prev => [
+                    ...prev,
+                    {
+                        'type': MESSAGE_ROLE_TYPE.ASSISTANT,
+                        'message': '',
+                        'session_id': chatSessionId,
+                        'questionid': '',
+                        'loading': true,
+                        'isStreaming': false
+                    }
+                ]);
                 fetchPromptAnswer(userMessage, k, chatSessionId, projectId, projectVersionId).then((newMessage) => {
                     handleHttpResponse(newMessage, userMessage);
                 });
             }
         } else {
-            // Fallback to HTTP implementation
+            setMessages(prev => [
+                ...prev,
+                {
+                    'type': MESSAGE_ROLE_TYPE.ASSISTANT,
+                    'message': '',
+                    'session_id': chatSessionId,
+                    'questionid': '',
+                    'loading': true,
+                    'isStreaming': false
+                }
+            ]);
             fetchPromptAnswer(userMessage, k, chatSessionId, projectId, projectVersionId).then((newMessage) => {
                 handleHttpResponse(newMessage, userMessage);
             });
