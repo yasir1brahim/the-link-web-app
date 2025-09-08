@@ -605,7 +605,7 @@
                     flex: 1 1 100% !important;
                     height: 32px !important;
                     bottom: 0;
-                    position: sticky !important;
+                    // position: sticky !important;
                   }
 
                   .rbt-input-main {
@@ -656,7 +656,7 @@
         margin-top: 24px;
         bottom: 0;
         display: flex;
-        position: sticky;
+        // position: sticky;
         align-items: center;
         background-color: #fff;
         gap: 12px;
@@ -711,4 +711,19 @@
     background: #2F5AA3;
     color: white;
   }
+}
+
+.upload-modal-loader-overlay {
+  position: absolute;
+  top: 56px; 
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom-left-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
 }

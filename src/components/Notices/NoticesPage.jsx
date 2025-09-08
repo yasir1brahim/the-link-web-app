@@ -377,18 +377,22 @@ const NoticesPage = () => {
   const handleUpDownView = (direction) => {
     if (!pdfData || loadingView) return;
 
-    if (
-      (direction > 0 && pdfData.index < noticesData.length - 1) ||
-      (direction < 0 && pdfData.index > 0)
-    ) {
-      const pIndex = pdfData.index + direction;
-      const data = noticesData[pIndex];
-      
+    const isValid = (item) => item && item.document && item.document.document_link && item.document.document_link !== "";
+
+    const step = direction > 0 ? 1 : -1;
+    let candidateIndex = pdfData.index + step;
+
+    while (candidateIndex >= 0 && candidateIndex < noticesData.length && !isValid(noticesData[candidateIndex])) {
+      candidateIndex += step;
+    }
+
+    if (candidateIndex >= 0 && candidateIndex < noticesData.length) {
+      const data = noticesData[candidateIndex];
       setPdfData({
         ...pdfData,
         url: data.document.document_link,
         textLoc: data.text_loc,
-        index: pIndex,
+        index: candidateIndex,
         docId: data.doc_id,
         additionalTextLocations: data.additional_text_locations,
       });

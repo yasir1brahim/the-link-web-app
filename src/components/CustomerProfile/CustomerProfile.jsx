@@ -8,8 +8,7 @@ import PaginatedItems from '../shared/Pagination/Pagination';
 import CreateEmployee from './createEmployee';
 import axiosInstance from '../../config/axios';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastService } from '../shared/Toast/Toast';
 import EditEmployee from './editEmployee';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 import { ConfirmationModal } from './confirmationModal';
@@ -17,6 +16,7 @@ import handleError from '../../config/errorHandler';
 import { get } from 'lodash';
 import Procore from '../ProjectLogs/procore';
 import Loader from '../shared/Loader/Loader';
+import Toast from '../shared/Toast/Toast';
 import { getTeamDetails, getUserRoleInTeam, updateTeamDetails, uploadTeamLogo } from '../../api/Authentication/api';
 
 const CustomerProfile = (props) => {
@@ -137,15 +137,7 @@ const CustomerProfile = (props) => {
       console.log(response.data);
       toggleConfirmModal();
       setPageRefresh(!pageRefresh);
-      toast.success('Employee Deleted Successfully.', {
-        position: 'bottom-center',
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined
-      });
+      ToastService.success('Employee Deleted Successfully.');
     } catch (error) {
       console.log(error.message);
       handleError(error);
@@ -167,8 +159,17 @@ const CustomerProfile = (props) => {
     try {
       const response = await updateTeamDetails(teamId, data);
       console.log("Team updated successfully:", response);
+      
+      // Update the customerData state to reflect the new company name
+      setCustomerData(prevData => ({
+        ...prevData,
+        name: companyName.value
+      }));
+      
+      ToastService.success('Company details updated successfully.');
     } catch (error) {
       console.error("Failed to save team details:", error);
+      ToastService.error('Failed to update company details.');
     } finally {
       toggleEditProfile();
     }
@@ -449,14 +450,14 @@ const CustomerProfile = (props) => {
                                 <div className="action-wrapper">
                                   <button
                                     type="button"
-                                    className="btn btn-secondary btn-sm"
+                                    className="btn btn-secondary btn-sm add-employe"
                                     onClick={() => handleEdit(employeeMembership)}
                                   >
                                     Edit
                                   </button>
                                   <button
                                     type="button"
-                                    className="btn btn-secondary btn-sm"
+                                    className="btn btn-secondary btn-sm add-employe"
                                     onClick={() => {
                                       setMembershipId(employeeMembership.id);
                                       toggleConfirmModal();
@@ -509,17 +510,7 @@ const CustomerProfile = (props) => {
         empId={empId}
         membershipId={membershipId}
       />
-      <ToastContainer
-        position="bottom-center"
-        autoClose={5000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <Toast />
       {isLoading && <Loader showComponentLoader={true} />}
       <Procore
         companyId={customerId}

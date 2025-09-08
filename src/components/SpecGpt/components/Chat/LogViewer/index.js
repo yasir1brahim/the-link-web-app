@@ -12,11 +12,14 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, RepeatIcon, CheckCircleIcon, WarningIcon } from '@chakra-ui/icons';
-import { fetchAiGeneratedLogDetail, fetchSortedLogData, generateAiLog } from '../../../utils/apiUtils';
+import { fetchAiGeneratedLogDetail, fetchSortedLogData, fetchSearchedLogData, fetchFilteredLogData, fetchLogFilterValues, generateAiLog, exportLogDataToExcel } from '../../../utils/apiUtils';
+import { getQAOptionLabel } from '../../../utils/qaUtils';
 import Message from '../ChatMain/Message';
 import { MESSAGE_ROLE_TYPE } from '../../../utils/enums';
 import { useFeatureFlags } from '../../../../../contexts/FeatureFlagsContext';
 import SortableTable from '../../../../shared/SortableTable';
+import { generateExportFilename } from '../../../../../utils/exportUtils';
+import FileDownload from 'js-file-download';
 
 const LogViewer = ({ 
     projectId, 
@@ -25,30 +28,95 @@ const LogViewer = ({
     onBack,
     logId,
     initialLogData,
-    teamId
+    teamId,
+    onQAPlannerRegenerate
 }) => {
     const [logMessage, setLogMessage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isPolling, setIsPolling] = useState(false);
     const [isRegenerating, setIsRegenerating] = useState(false);
     const [sorting, setSorting] = useState({ column: '', order: 'desc' });
-    const [filterValues, setFilterValues] = useState({});
+    const [filterValues, setFilterValues] = useState({
+        'Spec Section #': [],
+        'item_type': [],
+        'Responsible Party': []
+    });
+    const [availableFilterValues, setAvailableFilterValues] = useState({});
     const [pagination, setPagination] = useState({ currentPage: 1, pageSize: 50 });
+    const [searchValue, setSearchValue] = useState('');
+
+    // Handle Excel export
+    const handleExportExcel = async () => {
+        if (!logMessage?.questionid) {
+            return;
+        }
+        
+        console.log('📊 LogViewer: Excel export requested');
+        console.log('📊 LogViewer: Current table data length:', logMessage?.data?.length);
+        console.log('📊 LogViewer: Filter values:', filterValues);
+        console.log('📊 LogViewer: Search value:', searchValue);
+        
+        try {
+            console.log('📊 LogViewer: Requesting Excel export from backend...');
+            
+            // Use current sort field or default to created_at
+            const orderBy = sorting.column ? fieldMapping[sorting.column] : 'created_at';
+            
+            // Get Excel file data from backend
+            const excelData = await exportLogDataToExcel(
+                projectId, 
+                logMessage.questionid, 
+                filterValues,    // Current filters
+                orderBy, 
+                sorting.order,
+                searchValue      // Current search
+            );
+            
+            if (excelData) {
+                console.log('📊 LogViewer: Received Excel file, downloading...');
+                // Create blob and download Excel file
+                const blob = new Blob([excelData], { 
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                });
+                const filename = generateExportFilename(logType, null) + '.xlsx';
+                FileDownload(blob, filename);
+            } else {
+                console.log('📊 LogViewer: No data to export');
+            }
+        } catch (error) {
+            console.error('Error exporting data:', error);
+        }
+    };
+
+    // Function to format filter labels based on column type
+    const formatFilterLabel = (value) => {
+        // For QA planner item_type column, use QA option labels
+        if (logType === 'qa_planner') {
+            return getQAOptionLabel(value);
+        }
+        // For other columns, return the value as-is
+        return value;
+    };
 
     // Feature flag checking
     const { isInspectionLogUseDataTablesFlagActive } = useFeatureFlags();
-    const shouldUseDataTables = isInspectionLogUseDataTablesFlagActive(teamId);
+    const shouldUseDataTables = isInspectionLogUseDataTablesFlagActive(teamId) || logType === 'qa_planner';
 
     // Map frontend column names to backend field names
     const fieldMapping = {
         'Spec Section #': 'spec_section_number',
-        'Spec Section Name': 'spec_section_name',
+        'Spec Section Name': 'spec_section_name', 
         'Inspection Type And Requirements': 'inspection_type_and_requirements',
         'Inspection Frequency': 'inspection_frequency',
         'Responsible Party': 'responsible_party',
         'Deliverable Type': 'deliverable_type',
         'When Due': 'when_due',
-        'Exact Requirement Text': 'exact_requirement_text'
+        'Exact Requirement Text': 'exact_requirement_text',
+        'Item Type': 'item_type',
+        'item_type': 'item_type',  // Add mapping for QA planner lowercase key
+        'Item Text': 'item_text',
+        'Paragraph Number': 'paragraph_number',
+        'Requirement Text': 'requirement_text',
     };
 
     // Column definitions for different log types
@@ -140,6 +208,66 @@ const LogViewer = ({
                     expandable: true
                 }
             ];
+        } else if (logType === 'qa_planner') {
+            return [
+                { 
+                    key: 'Spec Section #', 
+                    label: 'Spec Section #', 
+                    sortable: true, 
+                    filterable: true, // Add filter capability
+                    width: 12,
+                    minWidth: 120
+                },
+                { 
+                    key: 'Spec Section Name', 
+                    label: 'Spec Section Name', 
+                    sortable: true, 
+                    width: 16,
+                    minWidth: 140,
+                    expandable: true
+                },
+                { 
+                    key: 'Paragraph Number', 
+                    label: 'Para #', 
+                    sortable: true, 
+                    width: 8,
+                    minWidth: 70
+                },
+                { 
+                    key: 'item_type', 
+                    label: 'Item Type', 
+                    sortable: true, 
+                    filterable: true, // Add filter capability
+                    width: 12,
+                    minWidth: 110,
+                    render: (value, row, rowIndex) => {
+                        return getQAOptionLabel(value);
+                    }
+                },
+                { 
+                    key: 'Requirement Text', 
+                    label: 'Requirement', 
+                    sortable: true, 
+                    width: 28,
+                    minWidth: 200,
+                    expandable: true
+                },
+                { 
+                    key: 'Responsible Party', 
+                    label: 'Responsible Party', 
+                    sortable: true, 
+                    filterable: true, // Add filter capability
+                    width: 12,
+                    minWidth: 110
+                },
+                { 
+                    key: 'When Due', 
+                    label: 'When Due', 
+                    sortable: true, 
+                    width: 12,
+                    minWidth: 110
+                }
+            ];
         }
         return [];
     };
@@ -156,12 +284,25 @@ const LogViewer = ({
             return;
         }
         
+        console.log('🔄 LogViewer: Sort requested for column:', columnName, 'order:', order);
+        
         setSorting({ column: columnName, order });
         // Reset pagination when sorting changes
         setPagination({ currentPage: 1, pageSize: 50 });
         
         try {
-            const sortedData = await handleSortedLogData(projectId, logMessage.questionid, backendFieldName, order);
+            // Use handleFilteredLogData to preserve current filter and search state when sorting
+            const sortedData = await handleFilteredLogData(
+                projectId, 
+                logMessage.questionid, 
+                filterValues,    // Preserve current filters
+                backendFieldName, 
+                order,
+                searchValue,     // Preserve current search
+                1,
+                50
+            );
+            
             if (sortedData) {
                 setLogMessage(prev => ({ 
                     ...prev, 
@@ -175,10 +316,85 @@ const LogViewer = ({
     };
 
     // Handle filtering
-    const handleFilter = (columnName) => {
-        // For now, just log the filter request
-        // This can be expanded to show a filter modal or handle filtering
-        console.log('Filter requested for column:', columnName);
+    const handleFilter = async (columnName, selectedValues) => {
+        if (!logMessage?.questionid) {
+            return;
+        }
+        
+        console.log('🔽 LogViewer: Filter requested for column:', columnName, 'with values:', selectedValues);
+        
+        // Update filter values
+        setFilterValues(prev => ({
+            ...prev,
+            [columnName]: selectedValues
+        }));
+        
+        // Reset pagination when filter changes
+        setPagination({ currentPage: 1, pageSize: 50 });
+        
+        try {
+            // Use current sort field or default to created_at
+            const orderBy = sorting.column ? fieldMapping[sorting.column] : 'created_at';
+            
+            const filteredData = await handleFilteredLogData(
+                projectId, 
+                logMessage.questionid, 
+                { ...filterValues, [columnName]: selectedValues },
+                orderBy, 
+                sorting.order,
+                searchValue,
+                1,
+                50
+            );
+            
+            if (filteredData) {
+                setLogMessage(prev => ({ 
+                    ...prev, 
+                    data: filteredData.data,
+                    pagination: filteredData.pagination || null
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching filtered data:', error);
+        }
+    };
+
+    // Handle search
+    const handleSearch = async (searchTerm) => {
+        if (!logMessage?.questionid) {
+            return;
+        }
+        
+        console.log('🔍 LogViewer: Search requested for term:', searchTerm);
+        setSearchValue(searchTerm);
+        
+        // Reset pagination when search changes
+        setPagination({ currentPage: 1, pageSize: 50 });
+        
+        try {
+            // Use current sort field or default to created_at
+            const orderBy = sorting.column ? fieldMapping[sorting.column] : 'created_at';
+            
+            const searchedData = await handleSearchedLogData(
+                projectId, 
+                logMessage.questionid, 
+                searchTerm,
+                orderBy, 
+                sorting.order,
+                1,
+                50
+            );
+            
+            if (searchedData) {
+                setLogMessage(prev => ({ 
+                    ...prev, 
+                    data: searchedData.data,
+                    pagination: searchedData.pagination || null
+                }));
+            }
+        } catch (error) {
+            console.error('Error fetching searched data:', error);
+        }
     };
 
     // Handle pagination
@@ -235,6 +451,60 @@ const LogViewer = ({
         }
     };
 
+    // Fetch searched log data using the API utility
+    const handleSearchedLogData = async (projectId, logId, searchTerm, orderBy = 'created_at', order = 'desc', page = 1, pageSize = 50) => {
+        try {
+            const logDetail = await fetchSearchedLogData(projectId, logId, searchTerm, orderBy, order, page, pageSize);
+            
+            if (logDetail && logDetail.log_data) {
+                return {
+                    data: logDetail.log_data,
+                    pagination: logDetail.pagination
+                };
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching searched log data:', error);
+            return null;
+        }
+    };
+
+    // Fetch filtered log data using the API utility
+    const handleFilteredLogData = async (projectId, logId, filters, orderBy = 'created_at', order = 'desc', searchTerm = '', page = 1, pageSize = 50) => {
+        try {
+            const logDetail = await fetchFilteredLogData(projectId, logId, filters, orderBy, order, searchTerm, page, pageSize);
+            
+            if (logDetail && logDetail.log_data) {
+                return {
+                    data: logDetail.log_data,
+                    pagination: logDetail.pagination
+                };
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching filtered log data:', error);
+            return null;
+        }
+    };
+
+    // Fetch available filter values from the backend
+    const loadFilterValues = async () => {
+        if (!logMessage?.questionid) {
+            return;
+        }
+        
+        try {
+            const filterData = await fetchLogFilterValues(projectId, logMessage.questionid);
+            if (filterData && filterData.filter_values) {
+                setAvailableFilterValues(filterData.filter_values);
+            }
+        } catch (error) {
+            console.error('Error fetching filter values:', error);
+        }
+    };
+
     useEffect(() => {
         if (initialLogData) {
             
@@ -272,6 +542,13 @@ const LogViewer = ({
             loadLogDetail();
         }
     }, [logId, initialLogData]);
+
+    // Load filter values when log message is available
+    useEffect(() => {
+        if (logMessage?.questionid) {
+            loadFilterValues();
+        }
+    }, [logMessage?.questionid, projectId]);
 
     useEffect(() => {
         let intervalId = null;
@@ -371,6 +648,13 @@ const LogViewer = ({
             return;
         }
         
+        // Special handling for QA planner logs - open modal for option selection
+        if (logType === 'qa_planner' && onQAPlannerRegenerate) {
+            console.log('Opening QA planner modal for regeneration');
+            onQAPlannerRegenerate();
+            return;
+        }
+        
         setIsRegenerating(true);
         try {
             const result = await generateAiLog(projectId, projectVersionId, logType);
@@ -398,6 +682,8 @@ const LogViewer = ({
                 return 'Owner Deliverables';
             case 'owner_deliverables':
                 return 'Owner Deliverables';
+            case 'qa_planner':
+                return 'QA Planner';
             default:
                 return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
@@ -539,7 +825,7 @@ const LogViewer = ({
                 {logMessage ? (
                     <Box p={6} h="100%" overflowY="auto">
                         {(() => {
-                            const shouldShowTable = logMessage.data_format === 'structured' && logMessage.data && logMessage.data.length > 0;
+                            const shouldShowTable = logMessage.data_format === 'structured';
                             
                             if (shouldShowTable) {
 
@@ -553,7 +839,16 @@ const LogViewer = ({
                                         filterValues={filterValues}
                                         onPageChange={handlePageChange}
                                         pagination={logMessage.pagination}
+                                        onSearch={handleSearch}
+                                        searchValue={searchValue}
+                                        enableSearch={true}
+                                        searchPlaceholder="Search across all fields..."
+                                        availableFilterValues={availableFilterValues}
+                                        formatFilterLabel={formatFilterLabel}
                                         enableExpansion={false}
+                                        enableExport={true}
+                                        onExport={handleExportExcel}
+                                        exportLabel="Export to Excel"
                                         className="log-viewer-table"
                                     />
                                 );
