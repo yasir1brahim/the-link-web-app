@@ -1,23 +1,31 @@
 import React, { useState } from 'react';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Form, FormGroup, Label, Input } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, Button, Form, FormGroup, Label, Input } from 'reactstrap';
 
 const ManageVersionModal = ({
-    showVersionModal,
-    toggleVersionModal,
-    projectVersionIdToEdit,
-    initialProjectVersionName,
-    handleCreateProjectVersion,
-    handleUpdateProjectVersion,
+  showVersionModal,
+  toggleVersionModal,
+  projectVersionIdToEdit,
+  initialProjectVersionName,
+  handleCreateProjectVersion,
+  handleUpdateProjectVersion,
 }) => {
-    const [versionName, setVersionName] = useState(initialProjectVersionName);
+  const [versionName, setVersionName] = useState(initialProjectVersionName || '');
 
-    const handleSaveVersion = () => {
-        if (projectVersionIdToEdit) {
-            handleUpdateProjectVersion(projectVersionIdToEdit, versionName);
-        } else {
-            handleCreateProjectVersion(versionName);
-        }
+  const handleSaveVersion = () => {
+    if (versionName.trim()) {
+      if (projectVersionIdToEdit) {
+        handleUpdateProjectVersion(projectVersionIdToEdit, versionName);
+      } else {
+        handleCreateProjectVersion(versionName);
+      }
+      toggleVersionModal(); // Close modal after save
     }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault(); 
+    handleSaveVersion();
+  };
 
   return (
     <Modal
@@ -26,18 +34,32 @@ const ManageVersionModal = ({
       toggle={toggleVersionModal}
       className="new-user modal-md"
     >
-      <ModalHeader toggle={toggleVersionModal}>{projectVersionIdToEdit ? "Edit Version" : "Create Version"}</ModalHeader>
+      <ModalHeader toggle={toggleVersionModal}>
+        {projectVersionIdToEdit ? 'Edit Version' : 'Create Version'}
+      </ModalHeader>
       <ModalBody>
-        <Form>
-            <FormGroup>
-                <Label>Version Name</Label>
-                <Input type="text" value={versionName} onChange={(e) => setVersionName(e.target.value)} />
-            </FormGroup>
-            <Button color="primary" className="mb-3" onClick={handleSaveVersion}>Save</Button>
+        <Form onSubmit={handleSubmit}>
+          <FormGroup>
+            <Label>Version Name</Label>
+            <Input
+              type="text"
+              value={versionName}
+              onChange={(e) => setVersionName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault(); 
+                  handleSaveVersion();
+                }
+              }}
+            />
+          </FormGroup>
+          <Button color="primary" className="mb-3" onClick={handleSaveVersion}>
+            Save
+          </Button>
         </Form>
       </ModalBody>
     </Modal>
-  )
-}
+  );
+};
 
 export default ManageVersionModal;
