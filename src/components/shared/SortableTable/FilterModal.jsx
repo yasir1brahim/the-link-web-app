@@ -23,6 +23,8 @@ const FilterModal = ({
   onApply,
   formatLabel = null
 }) => {
+  console.log('FilterModal: Column name', columnName);
+  console.log('FilterModal: Available values', availableValues);
   const [searchValue, setSearchValue] = useState('');
   const [localSelectedValues, setLocalSelectedValues] = useState([...selectedValues]);
 
