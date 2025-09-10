@@ -435,43 +435,6 @@ const LogViewer = ({
         }
     };
 
-    // Fetch sorted log data using the API utility
-    const handleSortedLogData = async (projectId, logId, orderBy, order, page = 1, pageSize = 50) => {
-        try {
-            const logDetail = await fetchSortedLogData(projectId, logId, orderBy, order, page, pageSize);
-            
-            if (logDetail && logDetail.log_data) {
-                return {
-                    data: logDetail.log_data,
-                    pagination: logDetail.pagination
-                };
-            } else {
-                return null;
-            }
-        } catch (error) {
-            console.error('Error fetching sorted log data:', error);
-            return null;
-        }
-    };
-
-    // Fetch searched log data using the API utility
-    const handleSearchedLogData = async (projectId, logId, searchTerm, orderBy = 'created_at', order = 'desc', page = 1, pageSize = 50) => {
-        try {
-            const logDetail = await fetchSearchedLogData(projectId, logId, searchTerm, orderBy, order, page, pageSize);
-            
-            if (logDetail && logDetail.log_data) {
-                return {
-                    data: logDetail.log_data,
-                    pagination: logDetail.pagination
-                };
-            } else {
-                return null;
-            }
-        } catch (error) {
-            console.error('Error fetching searched log data:', error);
-            return null;
-        }
-    };
 
     // Fetch filtered log data using the API utility
     const handleFilteredLogData = async (projectId, logId, filters, orderBy = 'created_at', order = 'desc', searchTerm = '', page = 1, pageSize = 50) => {
@@ -492,108 +455,64 @@ const LogViewer = ({
         }
     };
 
-    // Fetch available filter values from the backend
-    const loadFilterValues = async () => {
-        if (!logMessage?.questionid) {
-            return;
-        }
-        
-        try {
-            const filterData = await fetchLogFilterValues(projectId, logMessage.questionid);
-            if (filterData && filterData.filter_values) {
-                setAvailableFilterValues(filterData.filter_values);
-            }
-        } catch (error) {
-            console.error('Error fetching filter values:', error);
-        }
-    };
-
     useEffect(() => {
-        if (initialLogData) {
-            
-            const messageType = logType === 'inspection_log'
-                ? MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG
-                : logType === 'owner_deliverables_log'
-                ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
-                : logType === 'owner_deliverables'
-                ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
-                : 'ASSISTANT';
-            
-
-            const logMessageData = {
-                type: messageType,
-                message: initialLogData.log_table,
-                data: initialLogData.log_data, // Add structured data
-                data_format: initialLogData.data_format, // Add data format
-                pagination: initialLogData.pagination, // Add pagination data
-                session_id: null,
-                questionid: initialLogData.id,
-                sources: null,
-                created_at: initialLogData.created_at,
-                log_status: initialLogData.log_status,
-            };
-            
-
-            
-            setLogMessage(logMessageData);
-            
-            if (initialLogData.log_status === 'PROCESSING') {
-                setIsPolling(true);
+        const initializeLog = async () => {
+            if (initialLogData) {
+                await handleLogDetailSetup(initialLogData);
+                setLoading(false);
+            } else if (logId) {
+                loadLogDetail();
             }
-            setLoading(false);
-        } else if (logId) {
-            loadLogDetail();
-        }
+        };
+        
+        initializeLog();
     }, [logId, initialLogData]);
 
-    // Load filter values when log message is available
-    useEffect(() => {
-        if (logMessage?.questionid) {
-            loadFilterValues();
+
+    const handleLogDetailSetup = async (logDetail) => {
+        const messageType = logType === 'inspection_log'
+            ? MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG
+            : logType === 'owner_deliverables_log'
+            ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
+            : logType === 'owner_deliverables'
+            ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
+            : 'ASSISTANT';
+                
+                
+        const logMessageData = {
+            type: messageType,
+            message: logDetail.log_table,
+            data: logDetail.log_data, // Add structured data
+            data_format: logDetail.data_format, // Add data format
+            pagination: logDetail.pagination, // Add pagination data
+            session_id: null,
+            questionid: logDetail.id,
+            sources: null,
+            created_at: logDetail.created_at,
+            log_status: logDetail.log_status,
+        };
+        
+
+        const allFilterValues = await fetchLogFilterValues(projectId, logDetail.id);
+        if (allFilterValues) {
+            setAvailableFilterValues(allFilterValues?.filter_values || {});
         }
-    }, [logMessage?.questionid, projectId]);
+        
+        if (logDetail.log_status === 'PROCESSING') {
+            setIsPolling(true);
+        } else {
+            setLogMessage(logMessageData);
+            setIsPolling(false);
+            setIsRegenerating(false);
+        }
+    }
+
 
     useEffect(() => {
         let intervalId = null;
         if (isPolling && logMessage?.questionid) {
             intervalId = setInterval(async () => {
-                try {
-                    const logDetail = await fetchAiGeneratedLogDetail(projectId, logMessage.questionid);
-                    if (!logDetail) return;
-                    
-                    const messageType = logType === 'inspection_log'
-                        ? MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG
-                        : logType === 'owner_deliverables_log'
-                        ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
-                        : logType === 'owner_deliverables'
-                        ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
-                        : 'ASSISTANT';
-                    
-
-                    
-                    const logMessageData = {
-                        type: messageType,
-                        message: logDetail.log_table,
-                        data: logDetail.log_data, // Add structured data
-                        data_format: logDetail.data_format, // Add data format
-                        pagination: logDetail.pagination, // Add pagination data
-                        session_id: null,
-                        questionid: logDetail.id,
-                        sources: null,
-                        created_at: logDetail.created_at,
-                        log_status: logDetail.log_status,
-                    };
-                    
-
-                    
-                    setLogMessage(logMessageData);
-                    
-                    if (logDetail.log_status !== 'PROCESSING') {
-                        setIsPolling(false);
-                    }
-                } catch (e) {
-                    setIsPolling(false);
-                }
+                loadLogDetail();
             }, 2000);
         }
         return () => {
@@ -602,40 +521,10 @@ const LogViewer = ({
     }, [isPolling, logMessage?.questionid, projectId, logType]);
 
     const loadLogDetail = async () => {
-        setLoading(true);
         try {
-            const logDetail = await fetchAiGeneratedLogDetail(projectId, logId);
+            const logDetail = await fetchAiGeneratedLogDetail(projectId, logMessage?.questionid);
             if (logDetail) {
-                const messageType = logType === 'inspection_log'
-                    ? MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG
-                    : logType === 'owner_deliverables_log'
-                    ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
-                    : logType === 'owner_deliverables'
-                    ? MESSAGE_ROLE_TYPE.AI_OWNER_DELIVERABLES_LOG
-                    : 'ASSISTANT';
-                
-
-                
-                const logMessageData = {
-                    type: messageType,
-                    message: logDetail.log_table,
-                    data: logDetail.log_data, // Add structured data
-                    data_format: logDetail.data_format, // Add data format
-                    pagination: logDetail.pagination, // Add pagination data
-                    session_id: null,
-                    questionid: logDetail.id,
-                    sources: null,
-                    created_at: logDetail.created_at,
-                    log_status: logDetail.log_status,
-                };
-                
-
-                
-                setLogMessage(logMessageData);
-                
-                if (logDetail.log_status === 'PROCESSING') {
-                    setIsPolling(true);
-                }
+                await handleLogDetailSetup(logDetail);
             }
         } catch (error) {
             console.error('Error loading log detail:', error);
