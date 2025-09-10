@@ -303,9 +303,6 @@ const Chat = ({
         setIsGeneratingQALogs(true);
         setShowQAPlannerModal(false);
 
-        setCurrentLogType('qa_planner');
-        setShowLogViewer(true);
-        
         try {
             // Call the new QA Planner endpoint
             const result = await generateQAPlannerLog(projectId, projectVersionId, selectedOptions);
@@ -324,6 +321,8 @@ const Chat = ({
                     }, {})
                 };
                 setCurrentLogData(newLogData);
+                setCurrentLogType('qa_planner');
+                setShowLogViewer(true);
             }
         } catch (error) {
             console.error('Error handling QA Planner submission:', error);

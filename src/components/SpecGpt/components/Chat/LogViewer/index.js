@@ -31,6 +31,8 @@ const LogViewer = ({
     teamId,
     onQAPlannerRegenerate
 }) => {
+    console.log('LogViewer: Log type', logType);
+    console.log('LogViewer: Initial log data', initialLogData);
     const [logMessage, setLogMessage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isPolling, setIsPolling] = useState(false);
@@ -458,7 +460,7 @@ const LogViewer = ({
     useEffect(() => {
         const initializeLog = async () => {
             if (initialLogData) {
-                await handleLogDetailSetup(initialLogData);
+                await handleLogDetailSetup(initialLogData, true);
                 setLoading(false);
             } else if (logId) {
                 loadLogDetail();
@@ -469,7 +471,8 @@ const LogViewer = ({
     }, [logId, initialLogData]);
 
 
-    const handleLogDetailSetup = async (logDetail) => {
+    const handleLogDetailSetup = async (logDetail, isInitial = false) => {
+        console.log('LogViewer: handleLogDetailSetup Log detail', logDetail);
         const messageType = logType === 'inspection_log'
             ? MESSAGE_ROLE_TYPE.AI_INSPECTION_LOG
             : logType === 'owner_deliverables_log'
@@ -491,7 +494,9 @@ const LogViewer = ({
             created_at: logDetail.created_at,
             log_status: logDetail.log_status,
         };
-        
+        if (isInitial) {
+            setLogMessage(logMessageData);
+        }
 
         const allFilterValues = await fetchLogFilterValues(projectId, logDetail.id);
         if (allFilterValues) {
