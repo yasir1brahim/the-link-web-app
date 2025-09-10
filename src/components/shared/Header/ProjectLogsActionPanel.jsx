@@ -101,7 +101,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
               className="table-top-btn selection-btn mr-2 mb-1"
               onClick={props.getProjectLists}
             >
-<EyeIcon />
+              <EyeIcon />
               <span>View Saved Lists</span>
             </button>}
           </div>
@@ -114,7 +114,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
               onClick={props.toggleSaveListName}
               disabled={props.selected?.length === 0}
             >
-<BookmarkIcon fill={props.selected?.length === 0 ? '#374151' : '#0E2332'} />
+              <BookmarkIcon fill={props.selected?.length === 0 ? '#374151' : '#0E2332'} />
               <span>Save Selection</span>
             </button>
           )}
@@ -138,7 +138,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                 props.handleClearSelection();
               }}
             >
-<CloseXIcon />
+              <CloseXIcon />
               <span>Clear Selection</span>
             </button>
           ) : null}
@@ -203,10 +203,8 @@ const ProjectLogsActionPanel = ({ ...props }) => {
         </div>
       </div>
       <div className="col-6 d-flex justify-content-end">
-        {/* Main container for right side content */}
         <div className="d-flex w-100 align-items-center justify-content-end">
           
-          {/* Group 1: Document uploaded and submittals info */}
           <div className={`${props.showSearch ? "d-none" : "d-flex align-items-center mr-3"}`}>
             {props?.docParsed ? (
               <div
@@ -225,11 +223,9 @@ const ProjectLogsActionPanel = ({ ...props }) => {
             </div>
           </div>
 
-          {/* Group 2: Upload document and search buttons */}
           <div className="d-flex align-items-center">
-            {/* Search functionality */}
             {props.searchEnabled ? (
-              <div className={`header-right-swap header-right ${props.showSearch ? "w-100 mr-2" : "mr-2"}`}>
+              <div className={`header-right-swap header-right ${props.showSearch ? "w-auto mr-2" : "mr-0"}`}>
                 <div className={props.showSearch ? "log-search w-100" : "log-search search-disable"}>
                   {props.showSearch && (
                     <input
@@ -245,33 +241,25 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                     className="search-icon"
                     onClick={props.handleSearchClick}
                   >
-<SearchIcon />
+                    <SearchIcon />
                   </span>
                   {props.showSearch && (
                     <span
                       className="clear-icon"
                       onClick={props.handleClearSearch}
                     >
-<CloseClearIcon />
+                      <CloseClearIcon />
                     </span>
                   )}
                 </div>
               </div>
             ) : null}
 
-            {/* Upload document button */}
             {props.showBtn && (
               <button
                 type="button"
                 className={`light-btn ${props.btnSize === 'small' ? 'btn-small' : ''}`}
-                style={{ 
-                  padding: '5px 10px', 
-                  minWidth: '140px',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
+                style={{ padding: '5px 10px', minWidth: '140px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}
                 onClick={props.toggleModal}
               >
                 <PlusUploadIcon />
