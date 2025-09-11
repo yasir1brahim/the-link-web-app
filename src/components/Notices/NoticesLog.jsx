@@ -18,7 +18,6 @@ import { SortIcon } from "../shared/icons/sortIcon";
 import { FilterIcon } from "../shared/icons/filterIcon";
 import { useRef } from "react";
 import { updateSubmittalItem, addSubmittalItem } from "../../api/ProjectLogs/api";
-import DocumentDeletedModal from "../ProjectLogs/documentDeletedModal";
 
 export default function NoticesLog(props) {
   const {
@@ -52,7 +51,6 @@ export default function NoticesLog(props) {
   const [shouldShowExpansionButton, setShouldShowExpansionButton] = useState(
     []
   );
-  const [showDocumentDeletedModal, setShowDocumentDeletedModal] = useState(false);
   const rowRefs = useRef([]);
   const logRowRefs = useRef([]);
   const stickyHeaderRef = useRef(null);
@@ -135,12 +133,6 @@ export default function NoticesLog(props) {
     submittalId,
     additionalTextLocations
   ) => {
-    // Check if the document has been deleted (empty pdfUrl)
-    if (!pdfUrl || pdfUrl === "") {
-      setShowDocumentDeletedModal(true);
-      return;
-    }
-
     props.setPdfData({
       ...props.pdfData,
       url: pdfUrl,
@@ -414,6 +406,9 @@ export default function NoticesLog(props) {
                           showPdf && (
                             <span
                               onClick={() => {
+                                if (!log.document?.document_link || log.document.document_link === "") {
+                                  return;
+                                }
                                 handleViewPdf(
                                   log.document.document_link,
                                   formatPrimaryTextLocation(log),
@@ -424,10 +419,10 @@ export default function NoticesLog(props) {
                                 );
                                 props.setLogInViewer(log);
                               }}
-                              style={{ cursor: "pointer" }}
+                              style={{ cursor: (!log.document?.document_link || log.document.document_link === "") ? "not-allowed" : "pointer", opacity: (!log.document?.document_link || log.document.document_link === "") ? 0.5 : 1 }}
                               className="pdf-button"
                             >
-                              <StyledTooltip title="View Pdf" arrow>
+                              <StyledTooltip title={(!log.document?.document_link || log.document.document_link === "") ? "Cannot open - document deleted" : "View Pdf"} arrow>
                                 <svg id={"Pdf-Tooltip-" + index + 1} width="18px" height="18px" viewBox="0 0 1.08 1.08" fill="none" xmlns="http://www.w3.org/2000/svg">
                                   <path width="48" height="48" fill="white" fill-opacity="0.01" d="M0 0H1.08V1.08H0V0z"/>
                                   <path d="M1.08 0H0v1.08h1.08z" fill="white" fill-opacity="0.01"/>
@@ -518,10 +513,6 @@ export default function NoticesLog(props) {
           </span>
         </div>
       )}
-      <DocumentDeletedModal
-        isOpen={showDocumentDeletedModal}
-        toggle={() => setShowDocumentDeletedModal(false)}
-      />
     </div>
   );
 }

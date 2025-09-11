@@ -112,14 +112,15 @@ export const UploadDocuments = (props) => {
         fade={false}
         toggle={toggleModal}
         className="upload-doc-popup modal-lg"
+        style={{ position: 'relative' }}
       >
         <ModalHeader toggle={toggleModal}>Upload Document</ModalHeader>
-        <ModalBody>
+        <ModalBody style={{ position: 'relative' }}>
           <form
             className={`upload-document-form ${dragOver ? 'drag-over' : ''}`}
-            onDrop={handleFileDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
+            onDrop={!isUploadLoading ? handleFileDrop : undefined}
+            onDragOver={!isUploadLoading ? handleDragOver : undefined}
+            onDragLeave={!isUploadLoading ? handleDragLeave : undefined}
           >
             <div className="upload-document-content">
               <div className="select-File">
@@ -130,6 +131,7 @@ export const UploadDocuments = (props) => {
                   accept="application/pdf"
                   multiple
                   onChange={handleFileChange}
+                  disabled={isUploadLoading}
                 />
                 <label htmlFor="uploadDocs">
                   <div className="upload-text d-flex align-items-center justify-content-center">
@@ -154,7 +156,13 @@ export const UploadDocuments = (props) => {
                         <small>{`${(file.size / 1000).toFixed(2)} KB`}</small>
                       </div>
                       <div className="ml-auto">
-                        <Close onClick={() => removeFile(file.name)} />
+                        <Close 
+                          onClick={() => !isUploadLoading && removeFile(file.name)} 
+                          style={{ 
+                            cursor: isUploadLoading ? 'not-allowed' : 'pointer',
+                            opacity: isUploadLoading ? 0.5 : 1
+                          }} 
+                        />
                       </div>
                     </div>
                   ))}
@@ -176,10 +184,12 @@ export const UploadDocuments = (props) => {
             </ModalFooter>
           </form>
 
-          {isUploadLoading && (
-            <Loader showComponentLoader={true} showProcessing={true} componentScoped={true} />
-          )}
         </ModalBody>
+        {isUploadLoading && (
+          <div className="upload-modal-loader-overlay">
+            <Loader showComponentLoader={true} showProcessing={true} componentScoped={true} />
+          </div>
+        )}
       </Modal>
 
       <Modal

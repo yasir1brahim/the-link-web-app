@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import axiosInstance from '../../config/axios';
-import { toast } from 'react-toastify';
+import { ToastService } from '../shared/Toast/Toast';
 import { MaskedInput } from '../shared/MaskedInput/maskedInput';
 import { handleUserInvitation } from '../../api/Authentication/api';
 import handleError from "../../config/errorHandler";
@@ -61,21 +61,7 @@ const CreateEmployee = ({
   };
 
   const showToast = (message, type = 'success') => {
-    const toastConfig = {
-      position: "bottom-center",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    };
-    if (type === 'success') {
-      toast.success(message, toastConfig);
-    } else if (type === 'info') {
-      toast.info(message, toastConfig);
-    } else {
-      toast.error(message, toastConfig);
-    }
+    ToastService.show(message, type);
   };
   
   const handleError = (error) => {
