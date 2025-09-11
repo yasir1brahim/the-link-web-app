@@ -206,16 +206,16 @@ const ProjectLogsActionPanel = ({ ...props }) => {
         <div className="d-flex w-100 align-items-center justify-content-end">
           
           <div className={`${props.showSearch ? "d-none" : "d-flex align-items-center mr-3"}`}>
-            {props?.docParsed ? (
+            {props?.docParsed > 0 ? (
               <div
                 className="total-count-documents"
                 style={{ cursor: "pointer", fontSize: "0.9em" }}
                 onClick={props.onShowDocumentListModal}
               >
-                {props?.docParsed} document{props?.docParsed > 1 ? 's' : ''} uploaded
+                {props.docParsed} document{props.docParsed > 1 ? 's' : ''} uploaded
               </div>
             ) : null}
-            {props?.docParsed && (
+            {props?.docParsed > 0 && (
               <div className="mx-2" style={{ color: '#ccc' }}>|</div>
             )}
             <div className="total-count-submittals">
