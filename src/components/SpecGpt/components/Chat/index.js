@@ -302,7 +302,7 @@ const Chat = ({
     const onQAPlannerSubmit = async (selectedOptions) => {
         setIsGeneratingQALogs(true);
         setShowQAPlannerModal(false);
-        
+
         try {
             // Call the new QA Planner endpoint
             const result = await generateQAPlannerLog(projectId, projectVersionId, selectedOptions);
