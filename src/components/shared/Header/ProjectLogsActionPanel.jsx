@@ -225,7 +225,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
 
           <div className="d-flex align-items-center">
             {props.searchEnabled ? (
-              <div className={`header-right-swap header-right ${props.showSearch ? "w-auto mr-2" : "mr-0"}`}>
+              <div className={`header-right-swap header-right ${props.showSearch ? "w-auto mr-2" : "mr-2"}`}>
                 <div className={props.showSearch ? "log-search w-100" : "log-search search-disable"}>
                   {props.showSearch && (
                     <input
