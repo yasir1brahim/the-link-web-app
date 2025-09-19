@@ -605,7 +605,7 @@
                     flex: 1 1 100% !important;
                     height: 32px !important;
                     bottom: 0;
-                    position: sticky !important;
+                    // position: sticky !important;
                   }
 
                   .rbt-input-main {
@@ -656,7 +656,7 @@
         margin-top: 24px;
         bottom: 0;
         display: flex;
-        position: sticky;
+        // position: sticky;
         align-items: center;
         background-color: #fff;
         gap: 12px;
