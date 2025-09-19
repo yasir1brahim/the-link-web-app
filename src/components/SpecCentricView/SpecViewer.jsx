@@ -66,6 +66,9 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   }, [selectedSection, projectId, projectVersionId]);
 
   const handleSectionChange = (section) => {
+    console.log('Selected section:', section);
+    console.log('PDF URL:', section?.pdf_url);
+    console.log('PDF URL type:', typeof section?.pdf_url);
     setSelectedSection(section);
   };
 
@@ -153,7 +156,8 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
                     highlights={sectionContent.submittal_highlights || []}
                     highlightsEnabled={highlightsEnabled}
                     onHighlightClick={handleHighlightClick}
-                    documentContent={null} // This would contain the actual document content
+                    documentUrl={selectedSection?.pdf_url}
+                    documentId={selectedSection?.document_id}
                   />
                 </div>
               </div>
