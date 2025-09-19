@@ -42,7 +42,7 @@ const SpecViewerSidebar = ({
           selectedSection={selectedSection}
           onSectionChange={onSectionChange}
           loading={loading}
-          compact={true}
+          compact={false}
         />
       </div>
 

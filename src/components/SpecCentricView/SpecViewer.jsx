@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getSpecCentricData, getSpecSectionContent } from '../../api/SpecCentricView/api';
 import SpecViewerSidebar from './SpecViewerSidebar';
-import SpecSectionNavigation from './SpecSectionNavigation';
 import SubmittalHighlights from './SubmittalHighlights';
 import DocumentHighlighter from './DocumentHighlighter';
 import HighlightTooltip from './HighlightTooltip';
@@ -138,14 +137,6 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
       </div>
       
       <div className="spec-viewer-main">
-        <div className="spec-viewer-header">
-          <SpecSectionNavigation
-            sections={specData.spec_sections}
-            selectedSection={selectedSection}
-            onSectionChange={handleSectionChange}
-          />
-        </div>
-        
         <div className="spec-viewer-content">
           {selectedSection && sectionContent ? (
             <div className="spec-document-container">
@@ -165,13 +156,6 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
                     documentContent={null} // This would contain the actual document content
                   />
                 </div>
-                
-                {highlightsEnabled && sectionContent.submittal_highlights && (
-                  <SubmittalHighlights
-                    highlights={sectionContent.submittal_highlights}
-                    onHighlightClick={handleHighlightClick}
-                  />
-                )}
               </div>
             </div>
           ) : (
