@@ -121,7 +121,6 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
               <NavLink
                 className={activeTab === 'documents' ? 'active' : ''}
                 onClick={() => setActiveTab('documents')}
-                style={{ cursor: 'pointer' , color: 'pink' }} //1976d2
               >
                 Documents ({documents?.length || 0})
               </NavLink>
@@ -130,7 +129,6 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
               <NavLink
                 className={activeTab === 'spec-sections' ? 'active' : ''}
                 onClick={() => setActiveTab('spec-sections')}
-                style={{ cursor: 'pointer' }}
               >
                 Spec Sections ({specSectionCount})
               </NavLink>

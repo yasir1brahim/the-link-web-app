@@ -67,10 +67,10 @@ const SpecSectionsTab = ({ projectId, projectVersionId }) => {
           <table className="table" style={{ minWidth: "600px" }}>
             <thead>
               <tr>
-                <th style={{ width: "15%" }}>Spec Section</th>
-                <th style={{ width: "45%" }}>Document Name</th>
+                <th style={{ width: "20%" }}>Spec Section</th>
+                <th style={{ width: "50%" }}>Document Name</th>
                 <th style={{ width: "20%" }}>Created Date</th>
-                <th style={{ width: "20%" }}>Actions</th>
+                <th style={{ width: "10%" }}>Action</th>
               </tr>
             </thead>
             <tbody>
