@@ -40,6 +40,7 @@ import useCompanyDetails from "../../hooks/useCompanyDetails";
 import useDocumentRefresh from "../../hooks/useDocumentRefresh";
 import DocumentListModal from "./DocumentListModal";
 import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
+import SpecViewer from "../SpecCentricView/SpecViewer";
 
 
 const ProjectLogs = () => {
@@ -49,7 +50,8 @@ const ProjectLogs = () => {
     isVersionComparisonSearchFlagActive,
     isSpecGptFlagActive, 
     isInspectionLogFlagActive,
-    isQaPlannerFlagActive
+    isQaPlannerFlagActive,
+    isSpecCenteredViewFlagActive
   } = useFeatureFlags();
 
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
@@ -528,7 +530,7 @@ const ProjectLogs = () => {
   // Handle activeTab changes from URL parameters
   useEffect(() => {
     const tabFromUrl = searchParams.get("tab");
-    if (tabFromUrl && (tabFromUrl === 'submittal' || tabFromUrl === 'compass')) {
+    if (tabFromUrl && (tabFromUrl === 'submittal' || tabFromUrl === 'compass' || tabFromUrl === 'spec-view')) {
       setActiveTab(tabFromUrl);
     }
   }, [searchParams]);
@@ -1610,6 +1612,7 @@ const ProjectLogs = () => {
             setEditingVersionName={setEditingVersionName}
             onViewArchivedVersions={handleViewArchivedVersions}
             isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
+            isSpecCenteredViewFlagActive={isSpecCenteredViewFlagActive(teamId)}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
           />
@@ -1842,6 +1845,15 @@ const ProjectLogs = () => {
                 />
               </ChakraProvider>
               </div>
+            </>
+          }
+          {activeTab == 'spec-view' && 
+            <>
+            <SpecViewer 
+              projectId={projectId}
+              projectVersionId={projectVersionId}
+              teamId={teamId}
+            />
             </>
           }
         </div>
