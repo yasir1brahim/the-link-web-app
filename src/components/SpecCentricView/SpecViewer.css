@@ -1,8 +1,19 @@
-/* SpecViewer Main Container */
+/* SpecViewer Main Container - Scoped to prevent global conflicts */
 .spec-viewer-container {
   display: flex;
   height: 100vh;
   background-color: #f8f9fa;
+  /* Ensure all child elements are scoped */
+  box-sizing: border-box;
+  /* Reset any inherited styles that might conflict */
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Ensure all child elements inherit proper scoping */
+.spec-viewer-container * {
+  box-sizing: border-box;
 }
 
 .spec-viewer-sidebar {

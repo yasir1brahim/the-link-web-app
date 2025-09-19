@@ -3,6 +3,8 @@ import { getSpecCentricData, getSpecSectionContent } from '../../api/SpecCentric
 import SpecViewerSidebar from './SpecViewerSidebar';
 import SpecSectionNavigation from './SpecSectionNavigation';
 import SubmittalHighlights from './SubmittalHighlights';
+import DocumentHighlighter from './DocumentHighlighter';
+import HighlightTooltip from './HighlightTooltip';
 import './SpecViewer.css';
 
 const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
@@ -12,6 +14,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   const [highlightsEnabled, setHighlightsEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [tooltip, setTooltip] = useState({ visible: false, highlight: null, position: { x: 0, y: 0 } });
 
   // Load initial spec data
   useEffect(() => {
@@ -69,6 +72,23 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
 
   const handleHighlightsToggle = (enabled) => {
     setHighlightsEnabled(enabled);
+  };
+
+  const handleHighlightClick = (highlight) => {
+    setTooltip({
+      visible: true,
+      highlight: highlight,
+      position: { x: 100, y: 100 } // This would be calculated from mouse position
+    });
+  };
+
+  const handleTooltipClose = () => {
+    setTooltip({ visible: false, highlight: null, position: { x: 0, y: 0 } });
+  };
+
+  const handleViewDetails = (highlight) => {
+    console.log('Viewing details for highlight:', highlight);
+    // This could open a detailed modal or navigate to a details page
   };
 
   if (loading && !specData) {
@@ -138,20 +158,18 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
               
               <div className="spec-document-content">
                 <div className="spec-document-viewer">
-                  {/* Placeholder for actual document viewer */}
-                  <div className="document-placeholder">
-                    <p>Document viewer will be implemented here</p>
-                    <p>This will show the actual spec document with highlights</p>
-                  </div>
+                  <DocumentHighlighter
+                    highlights={sectionContent.submittal_highlights || []}
+                    highlightsEnabled={highlightsEnabled}
+                    onHighlightClick={handleHighlightClick}
+                    documentContent={null} // This would contain the actual document content
+                  />
                 </div>
                 
                 {highlightsEnabled && sectionContent.submittal_highlights && (
                   <SubmittalHighlights
                     highlights={sectionContent.submittal_highlights}
-                    onHighlightClick={(highlight) => {
-                      console.log('Highlight clicked:', highlight);
-                      // Handle highlight interaction
-                    }}
+                    onHighlightClick={handleHighlightClick}
                   />
                 )}
               </div>
@@ -163,6 +181,15 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
           )}
         </div>
       </div>
+
+      {/* Highlight Tooltip */}
+      <HighlightTooltip
+        highlight={tooltip.highlight}
+        isVisible={tooltip.visible}
+        position={tooltip.position}
+        onClose={handleTooltipClose}
+        onViewDetails={handleViewDetails}
+      />
     </div>
   );
 };
