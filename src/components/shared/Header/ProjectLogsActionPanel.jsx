@@ -23,7 +23,7 @@ import { ReactComponent as PlusUploadIcon } from "../../../assets/images/plus-up
 // @ts-ignore
 const ProjectLogsActionPanel = ({ ...props }) => {
   return (
-    <div className="header-wrapper-swap row mx-0 my-4">
+    <div className="header-wrapper-swap row mx-0 my-3">
       <div className="col-6 row">
         <div className="d-flex p-0">
           <div className="mr-2 mb-1">
