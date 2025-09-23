@@ -212,7 +212,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                 style={{ cursor: "pointer", fontSize: "0.9em" }}
                 onClick={props.onShowDocumentListModal}
               >
-                {props.docParsed} document{props.docParsed > 1 ? 's' : ''} uploaded
+                {props.docParsed} document{props.docParsed > 1 ? 's' : ''}{props.specSectionCount > 0 ? ` , ${props.specSectionCount} spec section${props.specSectionCount > 1 ? 's' : ''}` : ''}
               </div>
             ) : null}
             {props?.docParsed > 0 && (
