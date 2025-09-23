@@ -86,14 +86,30 @@ const ProjectLogsReader = ({
   const updateTxtView = (_webViewer) => {
     let tmpViewer = _webViewer ?? webViewer;
 
+    console.log('[SPEC_VIEWER_DEBUG] updateTxtView called with:', {
+      textLoc,
+      additionalTextLocations,
+      additionalTextLocationsLength: additionalTextLocations?.length,
+      hasViewer: !!tmpViewer
+    });
+
     tmpViewer.Core.annotationManager.deleteAnnotations(annotations);
 
     if (tmpViewer && textLoc?.page_no && textLoc?.x && textLoc?.y) {
-      tmpViewer.Core.documentViewer.displayPageLocation(
-        textLoc?.page_no,
-        textLoc?.x,
-        textLoc?.y
-      );
+      console.log('[SPEC_VIEWER_DEBUG] Creating main highlight annotation:', textLoc);
+      
+      // Check if document is loaded before trying to access it
+      if (tmpViewer.Core.documentViewer.getDocument() && tmpViewer.Core.documentViewer.getPageCount() > 0) {
+        console.log('[SPEC_VIEWER_DEBUG] Document is loaded, proceeding with highlights');
+        tmpViewer.Core.documentViewer.displayPageLocation(
+          textLoc?.page_no,
+          textLoc?.x,
+          textLoc?.y
+        );
+      } else {
+        console.log('[SPEC_VIEWER_DEBUG] Document not loaded yet, skipping highlights');
+        return;
+      }
 
       // Add rectangular highlight
       const annotationManager = tmpViewer.Core.annotationManager;
@@ -112,8 +128,10 @@ const ProjectLogsReader = ({
       annotationManager.addAnnotation(rectangleAnnot);
       annotationManager.redrawAnnotation(rectangleAnnot);
 
+      console.log('[SPEC_VIEWER_DEBUG] Processing additional text locations:', additionalTextLocations?.length);
       for (let i = 0; i < additionalTextLocations?.length; i++) {
         const additionalTextLocation = additionalTextLocations[i];
+        console.log(`[SPEC_VIEWER_DEBUG] Creating additional highlight ${i + 1}:`, additionalTextLocation);
         const rectangleAnnot = new Annotations.RectangleAnnotation({
           PageNumber: additionalTextLocation?.page_no,
           X: additionalTextLocation?.x,
@@ -126,9 +144,19 @@ const ProjectLogsReader = ({
         _annotations.push(rectangleAnnot);
         annotationManager.addAnnotation(rectangleAnnot);
         annotationManager.redrawAnnotation(rectangleAnnot);
+        console.log(`[SPEC_VIEWER_DEBUG] Added additional highlight ${i + 1} to annotations`);
       }
 
       setAnnotations(_annotations);
+      console.log('[SPEC_VIEWER_DEBUG] All annotations created and set:', _annotations.length);
+    } else {
+      console.log('[SPEC_VIEWER_DEBUG] Not creating highlights - conditions not met:', {
+        hasViewer: !!tmpViewer,
+        hasTextLoc: !!textLoc,
+        textLocPageNo: textLoc?.page_no,
+        textLocX: textLoc?.x,
+        textLocY: textLoc?.y
+      });
     }
   };
 
