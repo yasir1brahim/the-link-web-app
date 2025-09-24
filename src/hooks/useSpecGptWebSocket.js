@@ -9,8 +9,16 @@ export const useSpecGptWebSocket = (projectId, onMessage, onError, onComplete) =
     const [isConnected, setIsConnected] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
 
+    const getWsUrl = useCallback(() => {
+        const baseUrl = window.location.href.includes('https://app.thelink.ai')
+            ? 'wss://app.thelink.ai'
+            : window.location.href.includes('https://app-dj.thelink.ai')
+            ? 'wss://app-dj.thelink.ai'
+            : 'ws://localhost:8000';
+        return `${baseUrl}/ws/specgpt/${projectId}/?token=${token}`;
+    }, [projectId, token]);
+
     const connect = useCallback(async () => {
-        // Prevent duplicate connects
         if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
             return;
         }
@@ -28,7 +36,7 @@ export const useSpecGptWebSocket = (projectId, onMessage, onError, onComplete) =
 
         setIsConnecting(true);
         try {
-            const wsUrl = `${process.env.REACT_APP_WS_URL || 'ws://localhost:8000'}/ws/specgpt/${projectId}/?token=${token}`;
+            const wsUrl = getWsUrl();
             console.log('Connecting to WebSocket:', wsUrl);
             
             wsRef.current = new WebSocket(wsUrl);
@@ -59,7 +67,6 @@ export const useSpecGptWebSocket = (projectId, onMessage, onError, onComplete) =
                 setIsConnected(false);
                 setIsConnecting(false);
                 
-                // Attempt to reconnect if not closed intentionally
                 if (!unmountedRef.current && event.code !== 1000 && projectId) {
                     if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
                     reconnectTimeoutRef.current = setTimeout(() => {
@@ -73,7 +80,7 @@ export const useSpecGptWebSocket = (projectId, onMessage, onError, onComplete) =
             onError(error);
             setIsConnecting(false);
         }
-    }, [projectId, token, onMessage, onError]);
+    }, [projectId, token, onMessage, onError, getWsUrl]);
 
     const disconnect = useCallback(() => {
         if (wsRef.current) {
@@ -112,4 +119,4 @@ export const useSpecGptWebSocket = (projectId, onMessage, onError, onComplete) =
         isConnected,
         isConnecting
     };
-}; 
+};
