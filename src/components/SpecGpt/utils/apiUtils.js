@@ -231,6 +231,7 @@ const fetchFilteredLogData = async (projectId, logId, filters = {}, orderBy = 'c
  * @returns {Promise<Object|null>} Available filter values or null on error
  */
 const fetchLogFilterValues = async (projectId, logId) => {
+    console.log('fetchLogFilterValues: Requesting filter values from backend');
     try {
         const url = `/api/deliverables/${projectId}/ai-generated-logs/${logId}/filter_values/`;
         
@@ -238,7 +239,6 @@ const fetchLogFilterValues = async (projectId, logId) => {
             method: 'GET',
             url: url
         });
-        
         return response.data;
     } catch (error) {
         handleError(error);

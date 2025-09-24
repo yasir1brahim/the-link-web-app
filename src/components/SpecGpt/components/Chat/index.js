@@ -13,6 +13,7 @@ import LogsList from './LogsList'
 import LogViewer from './LogViewer'
 import QAPlannerModal from './QAPlannerModal'
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Loader from '../../../shared/Loader/Loader'
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { fetchChatHistory, fetchChatSessionHistory, fetchInspectionLog, fetchOwnerDeliverablesLog, fetchMostRecentLog, generateAiLog, generateQAPlannerLog } from '../../utils/apiUtils';
@@ -48,6 +49,7 @@ const Chat = ({
     // Feature flags and WebSocket
     const { isSpecGptWebsocketsFlagActive } = useFeatureFlags();
     const [isStreaming, setIsStreaming] = useState(false);
+    const [isLoading, setLoading] = useState(false);
     
     const endOfMessagesRef = useRef(null);
     const k = 21;
@@ -446,9 +448,10 @@ const Chat = ({
     }
 
     const onQAPlannerSubmit = async (selectedOptions) => {
+        setLoading(true);
         setIsGeneratingQALogs(true);
         setShowQAPlannerModal(false);
-        
+
         try {
             // Call the new QA Planner endpoint
             const result = await generateQAPlannerLog(projectId, projectVersionId, selectedOptions);
@@ -474,6 +477,7 @@ const Chat = ({
             console.error('Error handling QA Planner submission:', error);
         } finally {
             setIsGeneratingQALogs(false);
+            setLoading(false);
         }
     }
 
@@ -681,6 +685,9 @@ const Chat = ({
                 onSubmit={onQAPlannerSubmit}
                 isLoading={isGeneratingQALogs}
             />
+
+          <Loader showComponentLoader={isLoading} />
+            
         </>
     )
 }

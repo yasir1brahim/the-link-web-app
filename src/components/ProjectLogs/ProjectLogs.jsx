@@ -3,8 +3,7 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import NavbarTop from "../shared/NavbarTop/NavbarTop";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import Toast, { ToastService } from "../shared/Toast/Toast";
 import axiosInstance from "../../config/axios";
 import CombinedLogs from "./combinedLogs";
 import { debounce, get } from "lodash";
@@ -25,7 +24,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion , getArchivedVersions} from "../../api/Projects/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
-import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData } from "../../api/ProjectLogs/api";
+import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem, getSpecSections } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
@@ -251,6 +250,7 @@ const ProjectLogs = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [docParsed, setDocParsed] = useState(0);
+  const [specSectionCount, setSpecSectionCount] = useState(0);
 
   const getProcoreAccessTokenData = async () => {
     try {
@@ -314,15 +314,7 @@ const ProjectLogs = () => {
       const response = await createProjectVersion(projectId, versionName);
       console.log("create version response", response);
       if (response.status === 201) {
-        toast.success("New version created successfully", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        ToastService.success("New version created successfully");
         toggleVersionModal();
         
         const projectResponse = await getProjectDetails(projectId);
@@ -335,15 +327,7 @@ const ProjectLogs = () => {
     } catch (error) {
       console.log("Error response", error.response);
       if (error.response.data[0] === "Version name must be different from all active and archived versions") {
-        toast.error("Version name must be different from all active and archived versions", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        ToastService.error("Version name must be different from all active and archived versions");
       } else {
         handleError(error);
       }
@@ -354,15 +338,7 @@ const ProjectLogs = () => {
     try {
       const response = await updateProjectVersion(projectId, versionId, updatedVersionName);
       if (response.status === 200) {
-        toast.success("Version updated successfully", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        ToastService.success("Version updated successfully");
         setAvailableVersions(availableVersions.map((version) => version.id === versionId ? response.data : version));
         toggleVersionModal();
       } else {
@@ -371,15 +347,7 @@ const ProjectLogs = () => {
     } catch (error) {
       console.log("Error response", error);
       if (error.response.data[0] === "Version name must be different from all active and archived versions") {
-        toast.error("Version name must be different from all active and archived versions", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        ToastService.error("Version name must be different from all active and archived versions");
       } else {
         handleError(error);
       }
@@ -437,6 +405,7 @@ const ProjectLogs = () => {
             submittalId: submittalLogs[submittalIdx].id,
             additionalTextLocations: submittalLogs[submittalIdx].additional_text_locations,
           });
+          setLogInViewer(submittalLogs[submittalIdx]); // Set the initial log in viewer
         } else if (page === 1) {
           setPdfData({
             url: "",
@@ -446,6 +415,7 @@ const ProjectLogs = () => {
             submittalId: null,
             additionalTextLocations: [],
           });
+          setLogInViewer(null); // Clear log in viewer when no valid submittal
         }
       }
 
@@ -481,6 +451,18 @@ const ProjectLogs = () => {
     } finally {
       setIsDataLoading(false);
       setLoadingView(false);
+    }
+  };
+
+  const fetchSpecSectionCount = async () => {
+    if (projectId === null) return;
+    
+    try {
+      const response = await getSpecSections(projectId, projectVersionId);
+      setSpecSectionCount(response.data?.length || 0);
+    } catch (error) {
+      console.error("Error fetching spec section count:", error);
+      setSpecSectionCount(0);
     }
   };
 
@@ -536,6 +518,7 @@ const ProjectLogs = () => {
         
         // Fetch log data with the correct version
         await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
+        await fetchSpecSectionCount();
         
       } catch (error) {
         console.log("error", error);
@@ -685,7 +668,7 @@ const ProjectLogs = () => {
           // If there were also successful uploads, show them in the success message later
           if (response.data.async_processing && response.data.async_processing.length > 0) {
             // Show success toast for uploaded files while showing confirmation modal for duplicates
-            toast.success(`${response.data.async_processing.length} files uploaded successfully. Please confirm action for duplicate files.`);
+            ToastService.success(`${response.data.async_processing.length} files uploaded successfully. Please confirm action for duplicate files.`);
           }
         } else {
           setModal(false);
@@ -908,15 +891,7 @@ const ProjectLogs = () => {
       if (resp.status === 200) {
         // setProjectMappingsNoContent(false)
         setLoading(false);
-        toast.success("Successfully exported to Procore!", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        ToastService.success("Successfully exported to Procore!");
         localStorage.setItem("selectedRows", "");
         setSelected([]);
       }
@@ -936,27 +911,11 @@ const ProjectLogs = () => {
         await deleteSubmittalItems(state?.projectId || projectId, selected);
         setPageRefresh(!pageRefresh);
         setSelected([]);
-        toast.success("Successfully Deleted Logs!", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        ToastService.success("Successfully Deleted Logs!");
       } catch (error) {
         // console.log(error.message);
         setSelected([]);
-        toast.error(error.response.data.message, {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        ToastService.error(error.response.data.message);
       }
     }
   };
@@ -1115,6 +1074,7 @@ const ProjectLogs = () => {
         submittalId: data.id,
         additionalTextLocations: data.additional_text_locations,
       });
+      setLogInViewer(data); // Update logInViewer to the currently active log
       setSubmittalIdParam(data.id);
       return;
     }
@@ -1153,6 +1113,7 @@ const ProjectLogs = () => {
               submittalId: firstData.id,
               additionalTextLocations: firstData.additional_text_locations,
             });
+            setLogInViewer(firstData); // Update logInViewer to the currently active log
             setSubmittalIdParam(firstData.id);
             return;
           }
@@ -1198,6 +1159,7 @@ const ProjectLogs = () => {
               submittalId: lastData.id,
               additionalTextLocations: lastData.additional_text_locations,
             });
+            setLogInViewer(lastData); // Update logInViewer to the currently active log
             setSubmittalIdParam(lastData.id);
             return;
           }
@@ -1232,9 +1194,7 @@ const ProjectLogs = () => {
         await createSubmittalList(state?.projectId || projectId, listName.value, currentUser.id, selected, projectVersionId);
         resetListName();
         setToggleSaveListNameModal(false);
-        toast.success("List created successfully", {
-          position: "bottom-center",
-        });
+        ToastService.success("List created successfully");
         setSelected([]);
       } catch (error) {
         handleError(error);
@@ -1319,26 +1279,67 @@ const ProjectLogs = () => {
           ? paraNo.codePointAt(paraNo.search("-") + 1)
           : 96
       );
-      const logObj = {
-        ...logInViewer,
-        para_no:
-          dashIndex !== -1
-            ? logInViewer.para_no.slice(0, dashIndex + 1) +
-              String.fromCharCode(Math.max(...charArray) + 1)
-            : `${logInViewer.para_no}-${String.fromCharCode(
-                Math.max(...charArray) + 1
-              )}`,
-        para_context: content,
-      };
-      const result = insertElement(logData, index + 1, logObj);
-      // setLogData(result)
-      setFilteredLogData(result);
-
-      setNewRowIndex(index + 1);
-      handleEditToggle(logObj, index + 1);
-      if (pdfData.url) {
-        let docElement = document.getElementsByClassName("l-table-wrapper");
-        docElement[0].scrollTo(890, 0);
+      
+      // Get the full URL from pdfData instead of logInViewer.doc_link
+      // This ensures we get the complete URL with the correct path and parameters
+      const fullDocLink = pdfData.url;
+      
+      // Generate new para_no
+      const newParaNo = dashIndex !== -1
+        ? logInViewer.para_no.slice(0, dashIndex + 1) +
+          String.fromCharCode(Math.max(...charArray) + 1)
+        : `${logInViewer.para_no}-${String.fromCharCode(
+            Math.max(...charArray) + 1
+          )}`;
+      
+      // Create a new log entry in the backend
+      try {
+        // Use the addSubmittalItem API to create the log in the backend
+        const response = await addSubmittalItem(
+          projectId,
+          logInViewer.spec_section,
+          newParaNo,
+          content,
+          logInViewer.item_desc,
+          logInViewer.type,
+          logInViewer.id, // Add as a child of the current log
+          projectVersionId,
+          logInViewer.section_title
+        );
+        
+        console.log("Created new log in backend:", response.data);
+        
+        // Refresh the log data to get the newly created log
+        await fetchLogData(page, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
+        
+        // Find the newly created log in the refreshed data
+        const newLogIndex = logData.findIndex(log => 
+          log.para_no === newParaNo && 
+          log.para_context === content
+        );
+        
+        if (newLogIndex !== -1) {
+          // Select the newly created log
+          const newLog = logData[newLogIndex];
+          
+          // Set the PDF data to show the newly created log
+          setPdfData({
+            url: fullDocLink, // Use the full document URL
+            textLoc: logInViewer.text_loc,
+            index: newLogIndex,
+            docId: logInViewer.doc_id,
+            submittalId: newLog.id,
+            additionalTextLocations: [],
+          });
+          
+          // Set the log in viewer
+          setLogInViewer(newLog);
+        }
+        
+        ToastService.success("New log entry created successfully");
+      } catch (apiError) {
+        console.error("Failed to create log in backend:", apiError);
+        ToastService.error("Failed to create new log entry");
       }
     } catch (error) {
       console.log("error", error);
@@ -1347,12 +1348,75 @@ const ProjectLogs = () => {
 
   const handleAppendToSelectedRow = async (content) => {
     try {
-      let index = logData?.findIndex((item) => item === logInViewer);
-      const logObj = {
-        ...logInViewer,
-        para_context: `${logInViewer.para_context} \n\n${content}`,
-      };
-      handleEditToggle(logObj, index);
+      // Get the current submittal ID from the URL to avoid race conditions
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentSubmittalId = parseInt(urlParams.get('submittal_id'));
+      
+      // Find the current log using the URL parameter instead of pdfData.submittalId
+      const currentLog = logData?.find((item) => item.id === currentSubmittalId);
+      
+      
+      if (!currentLog) {
+        console.error("Could not find current log to append to");
+        ToastService.error("Could not find current log to append to");
+        return;
+      }
+      
+      let index = logData?.findIndex((item) => item.id === currentSubmittalId);
+      
+      // Get the full URL from pdfData instead of currentLog.doc_link
+      const fullDocLink = pdfData.url;
+      
+      // Create the updated content by appending the new content
+      const updatedContent = `${currentLog.para_context} \n\n${content}`;
+      
+      
+      // Update the log entry in the backend
+      try {
+        // Use the updateSubmittalItem API to update the log in the backend
+        const response = await updateSubmittalItem(
+          projectId,
+          currentLog.id,
+          currentLog.spec_section,
+          currentLog.para_no,
+          updatedContent,
+          currentLog.item_desc,
+          currentLog.type,
+          projectVersionId,
+          currentLog.section_title
+        );
+        
+        console.log("Updated log in backend:", response.data);
+        
+        // Refresh the log data to get the updated log
+        await fetchLogData(page, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
+        
+        // Find the updated log in the refreshed data
+        const updatedLogIndex = logData.findIndex(log => log.id === currentLog.id);
+        
+        if (updatedLogIndex !== -1) {
+          // Select the updated log
+          const updatedLog = logData[updatedLogIndex];
+          
+          // Set the PDF data to show the updated log
+          setPdfData({
+            url: fullDocLink, // Use the full document URL
+            textLoc: currentLog.text_loc,
+            index: updatedLogIndex,
+            docId: currentLog.doc_id,
+            submittalId: currentLog.id,
+            additionalTextLocations: currentLog.additional_text_locations,
+          });
+          
+          // Set the log in viewer
+          setLogInViewer(updatedLog);
+        }
+        
+        ToastService.success("Log entry updated successfully");
+      } catch (apiError) {
+        console.error("Failed to update log in backend:", apiError);
+        ToastService.error("Failed to update log entry");
+      }
     } catch (error) {
       console.log("error", error);
     }
@@ -1403,21 +1467,12 @@ const ProjectLogs = () => {
   const handleProceedWithExport = () => {
     handleExportToProcore();
     setExportToProcoreModal(false);
-    toast.info(
+    ToastService.info(
       `Exporting ${
         selectedRows === "All"
           ? logIdList.length
           : JSON.parse(selectedRows).length
-      } submittals to ${procoreProjectName} project in Procore...`,
-      {
-        position: "bottom-center",
-        autoClose: 6000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      }
+      } submittals to ${procoreProjectName} project in Procore...`
     );
   };
 
@@ -1516,14 +1571,7 @@ const ProjectLogs = () => {
     } catch (error) {
         handleError(error);
         setArchivedVersions([]);
-        toast.error("Failed to fetch archived versions.", {
-            position: "bottom-center",
-            autoClose: 5000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-        });
+        ToastService.error("Failed to fetch archived versions.");
     }
 };  
 
@@ -1532,14 +1580,7 @@ const ProjectLogs = () => {
     try {
       const response = await archiveProjectVersion(projectId, versionId , 'restore');
       if (response.status === 200) {
-        toast.success("Version unarchived successfully!", {
-          position: "bottom-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        ToastService.success("Version unarchived successfully!");
         // Refresh archived versions
         await fetchArchivedVersions();
         // Update available versions
@@ -1548,14 +1589,7 @@ const ProjectLogs = () => {
       }
     } catch (error) {
       handleError(error);
-      toast.error("Failed to unarchive version.", {
-        position: "bottom-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      ToastService.error("Failed to unarchive version.");
     } finally {
       setLoadingUnarchiveId(null);
     }
@@ -1653,6 +1687,7 @@ const ProjectLogs = () => {
               handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
               onShowDocumentListModal={() => setShowDocumentListModal(true)}
               docParsed={documentData?.length || 0}
+              specSectionCount={specSectionCount}
               totalCount={totalCount}
               showBtn={"Upload Documents"}
               toggleModal={toggleModal}
@@ -1847,17 +1882,7 @@ const ProjectLogs = () => {
           }
         </div>
       )}
-      <ToastContainer
-        position="bottom-center"
-        autoClose={5000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <Toast />
       <UploadDocuments
         modal={modal}
         toggleModal={toggleModal}
@@ -2160,6 +2185,9 @@ const ProjectLogs = () => {
         documents={documentData}
         onAfterReprocess={refreshDocumentsAndSubmittals}
         onAfterDelete={refreshDocumentsAndSubmittals}
+        projectId={projectId}
+        projectVersionId={projectVersionId}
+        specSectionCount={specSectionCount}
       />
 
       {showVersionModal && <ManageVersionModal

@@ -93,7 +93,7 @@ const CollaborationPdfReader = ({
       {
         path: '/webviewer/lib',
         licenseKey:
-          'Thelinkai, Inc. (thelink.ai):PWS:Thelinkai::B+2:D0333312DD61815C33A681734AA1DD04DD5EB88FFD89F8DBFE1FBDE14C08D8EFE6EE4ED826BD',
+          'Thelinkai  Inc :PWS:Thelinkai  Inc ::B+2:9D34C842CB60BB40A8EF77436A7DEE579B3C140AD8EFE6EE4ED826BD',
         initialDoc: collabDocs[0].section_file_path,
         extension: 'pdf',
         documentXFDFRetriever: () =>
