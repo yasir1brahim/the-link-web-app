@@ -23,7 +23,7 @@ import { ReactComponent as PlusUploadIcon } from "../../../assets/images/plus-up
 // @ts-ignore
 const ProjectLogsActionPanel = ({ ...props }) => {
   return (
-    <div className="header-wrapper-swap row mx-0 my-4">
+    <div className="header-wrapper-swap row mx-0 my-3">
       <div className="col-6 row">
         <div className="d-flex p-0">
           <div className="mr-2 mb-1">
@@ -212,7 +212,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                 style={{ cursor: "pointer", fontSize: "0.9em" }}
                 onClick={props.onShowDocumentListModal}
               >
-                {props.docParsed} document{props.docParsed > 1 ? 's' : ''} uploaded
+                {props.docParsed} document{props.docParsed > 1 ? 's' : ''}{props.specSectionCount > 0 ? ` , ${props.specSectionCount} spec section${props.specSectionCount > 1 ? 's' : ''}` : ''}
               </div>
             ) : null}
             {props?.docParsed > 0 && (

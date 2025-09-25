@@ -24,7 +24,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion , getArchivedVersions} from "../../api/Projects/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
-import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem } from "../../api/ProjectLogs/api";
+import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem, getSpecSections } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
@@ -250,6 +250,7 @@ const ProjectLogs = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [docParsed, setDocParsed] = useState(0);
+  const [specSectionCount, setSpecSectionCount] = useState(0);
 
   const getProcoreAccessTokenData = async () => {
     try {
@@ -453,6 +454,18 @@ const ProjectLogs = () => {
     }
   };
 
+  const fetchSpecSectionCount = async () => {
+    if (projectId === null) return;
+    
+    try {
+      const response = await getSpecSections(projectId, projectVersionId);
+      setSpecSectionCount(response.data?.length || 0);
+    } catch (error) {
+      console.error("Error fetching spec section count:", error);
+      setSpecSectionCount(0);
+    }
+  };
+
   useEffect(() => {
     const initLoading = async () => {
       await getProcoreAccessTokenData();
@@ -505,6 +518,7 @@ const ProjectLogs = () => {
         
         // Fetch log data with the correct version
         await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
+        await fetchSpecSectionCount();
         
       } catch (error) {
         console.log("error", error);
@@ -1673,6 +1687,7 @@ const ProjectLogs = () => {
               handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
               onShowDocumentListModal={() => setShowDocumentListModal(true)}
               docParsed={documentData?.length || 0}
+              specSectionCount={specSectionCount}
               totalCount={totalCount}
               showBtn={"Upload Documents"}
               toggleModal={toggleModal}
@@ -1804,10 +1819,11 @@ const ProjectLogs = () => {
                   <div
                     style={{
                       position: "absolute",
-                      marginTop: "10px",
+                      marginTop: "5px",
                       fontStyle: "italic",
-                      fontSize: "14px",
-                      width: "30%"
+                      fontSize: "11px",
+                      width: "30%",
+                      zIndex: "1000"
                     }}
                   >
                       <strong>Note: </strong>
@@ -2169,6 +2185,9 @@ const ProjectLogs = () => {
         documents={documentData}
         onAfterReprocess={refreshDocumentsAndSubmittals}
         onAfterDelete={refreshDocumentsAndSubmittals}
+        projectId={projectId}
+        projectVersionId={projectVersionId}
+        specSectionCount={specSectionCount}
       />
 
       {showVersionModal && <ManageVersionModal

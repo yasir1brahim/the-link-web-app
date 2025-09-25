@@ -13,6 +13,7 @@ import LogsList from './LogsList'
 import LogViewer from './LogViewer'
 import QAPlannerModal from './QAPlannerModal'
 import React, { useState, useEffect, useRef } from 'react';
+import Loader from '../../../shared/Loader/Loader'
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { fetchChatHistory, fetchChatSessionHistory, fetchInspectionLog, fetchOwnerDeliverablesLog, fetchMostRecentLog, generateAiLog, generateQAPlannerLog } from '../../utils/apiUtils';
@@ -41,6 +42,7 @@ const Chat = ({
 }) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const DEFAULT_MAX_CHAT_MESSAGES = 10;
+    const [isLoading, setLoading] = useState(false);
     
     const endOfMessagesRef = useRef(null);
     const k = 21;
@@ -300,6 +302,7 @@ const Chat = ({
     }
 
     const onQAPlannerSubmit = async (selectedOptions) => {
+        setLoading(true);
         setIsGeneratingQALogs(true);
         setShowQAPlannerModal(false);
 
@@ -328,6 +331,7 @@ const Chat = ({
             console.error('Error handling QA Planner submission:', error);
         } finally {
             setIsGeneratingQALogs(false);
+            setLoading(false);
         }
     }
 
@@ -535,6 +539,9 @@ const Chat = ({
                 onSubmit={onQAPlannerSubmit}
                 isLoading={isGeneratingQALogs}
             />
+
+          <Loader showComponentLoader={isLoading} />
+            
         </>
     )
 }
