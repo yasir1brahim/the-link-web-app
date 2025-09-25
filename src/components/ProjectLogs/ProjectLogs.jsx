@@ -1819,10 +1819,11 @@ const ProjectLogs = () => {
                   <div
                     style={{
                       position: "absolute",
-                      marginTop: "10px",
+                      marginTop: "5px",
                       fontStyle: "italic",
-                      fontSize: "14px",
-                      width: "30%"
+                      fontSize: "11px",
+                      width: "30%",
+                      zIndex: "1000"
                     }}
                   >
                       <strong>Note: </strong>
