@@ -27,6 +27,7 @@ const ProjectLogsReader = ({
 
   console.log('[SPEC_VIEWER_DEBUG] ProjectLogsReader props:', {
     url,
+    highlightLocationsLength: highlightLocations?.length || 0,
     highlightLocations,
     docId,
     setPdfData,
@@ -147,7 +148,7 @@ const ProjectLogsReader = ({
         return;
       }
 
-    if (tmpViewer && highlightLocations[0]?.page_no && highlightLocations[0]?.x && highlightLocations[0]?.y) {
+    if (tmpViewer && highlightLocations && highlightLocations.length > 0 && highlightLocations[0]?.page_no && highlightLocations[0]?.x && highlightLocations[0]?.y) {
       console.log('[SPEC_VIEWER_DEBUG] setting initial page location:', highlightLocations[0]);
       
       // Check if document is loaded before trying to access it
@@ -191,13 +192,8 @@ const ProjectLogsReader = ({
       setAnnotations(_annotations);
       console.log('[SPEC_VIEWER_DEBUG] All annotations created and set:', _annotations.length);
     } else {
-      console.log('[SPEC_VIEWER_DEBUG] Not creating highlights - conditions not met:', {
-        hasViewer: !!tmpViewer,
-        hasTextLoc: !!highlightLocations[0],
-        textLocPageNo: highlightLocations[0]?.page_no,
-        textLocX: highlightLocations[0]?.x,
-        textLocY: highlightLocations[0]?.y
-      });
+      console.log('[SPEC_VIEWER_DEBUG] No highlights to display - clearing annotations');
+      setAnnotations([]);
     }
     } catch (error) {
       console.error('[SPEC_VIEWER_DEBUG] Error in updateTxtView:', error);

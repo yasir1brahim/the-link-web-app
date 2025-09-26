@@ -47,8 +47,15 @@ const DocumentHighlighter = ({
 
   // Update highlights when the highlights prop changes
   useEffect(() => {
-    console.log('[SPEC_VIEWER_DEBUG] DocumentHighlighter highlights changed:', highlights);
+    console.log('[SPEC_VIEWER_DEBUG] DocumentHighlighter highlights changed:', {
+      highlightsLength: highlights?.length || 0,
+      highlights: highlights
+    });
     const newHighlights = mapHighlightLocations(highlights);
+    console.log('[SPEC_VIEWER_DEBUG] Mapped highlights:', {
+      newHighlightsLength: newHighlights?.length || 0,
+      newHighlights: newHighlights
+    });
     setCurrentHighlights(newHighlights);
   }, [highlights]);
 
