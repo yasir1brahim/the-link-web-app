@@ -17,6 +17,7 @@ const ProjectLogsReader = ({
   loading,
   setLoading,
   onError,
+  highlightsEnabled = true,
 }) => {
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
@@ -49,13 +50,14 @@ const ProjectLogsReader = ({
   }, [url]);
 
   useEffect(() => {
-    console.log('[SPEC_VIEWER_DEBUG] Highlight locations or document loaded changed:', {
+    console.log('[SPEC_VIEWER_DEBUG] Highlight locations, document loaded, or highlights enabled changed:', {
       url,
       currentUrl,
       hasWebViewer: !!webViewer,
       documentLoaded,
       highlightLocationsLength: highlightLocations?.length,
-      highlightLocations
+      highlightLocations,
+      highlightsEnabled
     });
     
     if (url === currentUrl && webViewer && documentLoaded) {
@@ -68,7 +70,7 @@ const ProjectLogsReader = ({
         documentLoaded
       });
     }
-  }, [highlightLocations, documentLoaded]);
+  }, [highlightLocations, documentLoaded, highlightsEnabled]);
 
   const handleClose = () => {
     setLogInViewer(null);
@@ -93,10 +95,12 @@ const ProjectLogsReader = ({
         },
       });
       if (response.status === 200) {
+        console.log('[SPEC_VIEWER_DEBUG] Loading server annotations:', response.data.data?.length || 0);
         response.data.data?.map(async (item) => {
           const annotations = await annotationManager.importAnnotationCommand(
             item.xfdf_string
           );
+          console.log('[SPEC_VIEWER_DEBUG] Imported server annotations:', annotations.length);
           annotations.forEach((annotation) => {
             annotationManager.redrawAnnotation(annotation);
           });
@@ -115,7 +119,8 @@ const ProjectLogsReader = ({
       console.log('[SPEC_VIEWER_DEBUG] updateTxtView called with:', {
         highlightLocations,
         highlightLocationsLength: highlightLocations?.length,
-        hasViewer: !!tmpViewer
+        hasViewer: !!tmpViewer,
+        highlightsEnabled
       });
 
       // Safety check to ensure WebViewer is fully initialized
@@ -130,7 +135,17 @@ const ProjectLogsReader = ({
         return;
       }
 
-      tmpViewer.Core.annotationManager.deleteAnnotations(annotations);
+      // Delete all annotations (both our created ones and server-loaded ones)
+      const allAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
+      console.log('[SPEC_VIEWER_DEBUG] Deleting all annotations:', allAnnotations.length);
+      tmpViewer.Core.annotationManager.deleteAnnotations(allAnnotations);
+
+      // If highlights are disabled, just clear existing annotations and return
+      if (!highlightsEnabled) {
+        console.log('[SPEC_VIEWER_DEBUG] Highlights disabled, clearing annotations');
+        setAnnotations([]);
+        return;
+      }
 
     if (tmpViewer && highlightLocations[0]?.page_no && highlightLocations[0]?.x && highlightLocations[0]?.y) {
       console.log('[SPEC_VIEWER_DEBUG] setting initial page location:', highlightLocations[0]);

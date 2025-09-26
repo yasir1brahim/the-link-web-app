@@ -43,7 +43,7 @@ const DocumentHighlighter = ({
   };
 
   const [currentHighlights, setCurrentHighlights] = useState(mapHighlightLocations(highlights));
-  const [currentHighlightsEnabled, setCurrentHighlightsEnabled] = useState(true);
+  const [currentHighlightsEnabled, setCurrentHighlightsEnabled] = useState(highlightsEnabled);
 
   // Update highlights when the highlights prop changes
   useEffect(() => {
@@ -51,6 +51,12 @@ const DocumentHighlighter = ({
     const newHighlights = mapHighlightLocations(highlights);
     setCurrentHighlights(newHighlights);
   }, [highlights]);
+
+  // Update highlights enabled state when prop changes
+  useEffect(() => {
+    console.log('[SPEC_VIEWER_DEBUG] DocumentHighlighter highlightsEnabled changed:', highlightsEnabled);
+    setCurrentHighlightsEnabled(highlightsEnabled);
+  }, [highlightsEnabled]);
 
 
   if (!documentUrl) {
@@ -82,6 +88,7 @@ const DocumentHighlighter = ({
         loading={false}
         setLoading={() => {}}
         onError={() => {}}
+        highlightsEnabled={currentHighlightsEnabled}
       />
     </div>
   );
