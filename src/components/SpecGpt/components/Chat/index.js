@@ -13,6 +13,7 @@ import LogsList from './LogsList'
 import LogViewer from './LogViewer'
 import QAPlannerModal from './QAPlannerModal'
 import React, { useState, useEffect, useRef } from 'react';
+import Loader from '../../../shared/Loader/Loader'
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { fetchChatHistory, fetchChatSessionHistory, fetchInspectionLog, fetchOwnerDeliverablesLog, fetchMostRecentLog, generateAiLog, generateQAPlannerLog } from '../../utils/apiUtils';
@@ -41,6 +42,7 @@ const Chat = ({
 }) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const DEFAULT_MAX_CHAT_MESSAGES = 10;
+    const [isLoading, setLoading] = useState(false);
     
     const endOfMessagesRef = useRef(null);
     const k = 21;
@@ -104,6 +106,14 @@ const Chat = ({
         setShowQAPlannerModal(false);
         setIsGeneratingQALogs(false);
     }
+    // Helper function to refresh chat history
+    const refreshChatHistory = () => {
+        fetchChatHistory(projectId).then((data) => {
+            console.log("chat history refreshed", data);
+            setChatHistory(data);
+        });
+    }
+
 
     const getChatResponse = (userMessage) => {
         console.log('Submit message: ', userMessage);
@@ -149,6 +159,9 @@ const Chat = ({
                     ];
                 });
                 setMaxChatMessages(newMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
+                
+                // Refresh chat history after every message to update the sidebar
+                refreshChatHistory();
             }
             setIsLoadingMessage(false);
         });
@@ -300,6 +313,7 @@ const Chat = ({
     }
 
     const onQAPlannerSubmit = async (selectedOptions) => {
+        setLoading(true);
         setIsGeneratingQALogs(true);
         setShowQAPlannerModal(false);
 
@@ -328,6 +342,7 @@ const Chat = ({
             console.error('Error handling QA Planner submission:', error);
         } finally {
             setIsGeneratingQALogs(false);
+            setLoading(false);
         }
     }
 
@@ -378,14 +393,12 @@ const Chat = ({
 
     const onFirstAIResponse = (chatSessionId, userMessage) => {
         console.log("onFirstAIResponse", chatSessionId, userMessage);
-        // only set the chat session id if it's a new chat, we don't want to change the chat session id if the user is continuing a different chat
-        if (chatSessionId === null) {
+        // Set the chat session id when starting a new chat (when current session is null)
+        if (chatSessionIdRef.current === null) {
             setChatSessionId(chatSessionId);
         }
-        fetchChatHistory(projectId).then((data) => {
-            console.log("chat history", data);
-            setChatHistory(data);
-        });
+        // Always refresh chat history to update the sidebar
+        refreshChatHistory();
     }
 
     // Render log viewer if active
@@ -535,6 +548,9 @@ const Chat = ({
                 onSubmit={onQAPlannerSubmit}
                 isLoading={isGeneratingQALogs}
             />
+
+          <Loader showComponentLoader={isLoading} />
+            
         </>
     )
 }

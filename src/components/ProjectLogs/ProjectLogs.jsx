@@ -24,7 +24,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion , getArchivedVersions} from "../../api/Projects/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
-import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem } from "../../api/ProjectLogs/api";
+import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem, getSpecSections } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
@@ -252,6 +252,7 @@ const ProjectLogs = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [docParsed, setDocParsed] = useState(0);
+  const [specSectionCount, setSpecSectionCount] = useState(0);
 
   const getProcoreAccessTokenData = async () => {
     try {
@@ -406,6 +407,7 @@ const ProjectLogs = () => {
             submittalId: submittalLogs[submittalIdx].id,
             additionalTextLocations: submittalLogs[submittalIdx].additional_text_locations,
           });
+          setLogInViewer(submittalLogs[submittalIdx]); // Set the initial log in viewer
         } else if (page === 1) {
           setPdfData({
             url: "",
@@ -415,6 +417,7 @@ const ProjectLogs = () => {
             submittalId: null,
             additionalTextLocations: [],
           });
+          setLogInViewer(null); // Clear log in viewer when no valid submittal
         }
       }
 
@@ -450,6 +453,18 @@ const ProjectLogs = () => {
     } finally {
       setIsDataLoading(false);
       setLoadingView(false);
+    }
+  };
+
+  const fetchSpecSectionCount = async () => {
+    if (projectId === null) return;
+    
+    try {
+      const response = await getSpecSections(projectId, projectVersionId);
+      setSpecSectionCount(response.data?.length || 0);
+    } catch (error) {
+      console.error("Error fetching spec section count:", error);
+      setSpecSectionCount(0);
     }
   };
 
@@ -505,6 +520,7 @@ const ProjectLogs = () => {
         
         // Fetch log data with the correct version
         await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
+        await fetchSpecSectionCount();
         
       } catch (error) {
         console.log("error", error);
@@ -1060,6 +1076,7 @@ const ProjectLogs = () => {
         submittalId: data.id,
         additionalTextLocations: data.additional_text_locations,
       });
+      setLogInViewer(data); // Update logInViewer to the currently active log
       setSubmittalIdParam(data.id);
       return;
     }
@@ -1098,6 +1115,7 @@ const ProjectLogs = () => {
               submittalId: firstData.id,
               additionalTextLocations: firstData.additional_text_locations,
             });
+            setLogInViewer(firstData); // Update logInViewer to the currently active log
             setSubmittalIdParam(firstData.id);
             return;
           }
@@ -1143,6 +1161,7 @@ const ProjectLogs = () => {
               submittalId: lastData.id,
               additionalTextLocations: lastData.additional_text_locations,
             });
+            setLogInViewer(lastData); // Update logInViewer to the currently active log
             setSubmittalIdParam(lastData.id);
             return;
           }
@@ -1331,27 +1350,42 @@ const ProjectLogs = () => {
 
   const handleAppendToSelectedRow = async (content) => {
     try {
-      let index = logData?.findIndex((item) => item === logInViewer);
+      // Get the current submittal ID from the URL to avoid race conditions
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentSubmittalId = parseInt(urlParams.get('submittal_id'));
       
-      // Get the full URL from pdfData instead of logInViewer.doc_link
+      // Find the current log using the URL parameter instead of pdfData.submittalId
+      const currentLog = logData?.find((item) => item.id === currentSubmittalId);
+      
+      
+      if (!currentLog) {
+        console.error("Could not find current log to append to");
+        ToastService.error("Could not find current log to append to");
+        return;
+      }
+      
+      let index = logData?.findIndex((item) => item.id === currentSubmittalId);
+      
+      // Get the full URL from pdfData instead of currentLog.doc_link
       const fullDocLink = pdfData.url;
       
       // Create the updated content by appending the new content
-      const updatedContent = `${logInViewer.para_context} \n\n${content}`;
+      const updatedContent = `${currentLog.para_context} \n\n${content}`;
+      
       
       // Update the log entry in the backend
       try {
         // Use the updateSubmittalItem API to update the log in the backend
         const response = await updateSubmittalItem(
           projectId,
-          logInViewer.id,
-          logInViewer.spec_section,
-          logInViewer.para_no,
+          currentLog.id,
+          currentLog.spec_section,
+          currentLog.para_no,
           updatedContent,
-          logInViewer.item_desc,
-          logInViewer.type,
+          currentLog.item_desc,
+          currentLog.type,
           projectVersionId,
-          logInViewer.section_title
+          currentLog.section_title
         );
         
         console.log("Updated log in backend:", response.data);
@@ -1360,7 +1394,7 @@ const ProjectLogs = () => {
         await fetchLogData(page, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
         
         // Find the updated log in the refreshed data
-        const updatedLogIndex = logData.findIndex(log => log.id === logInViewer.id);
+        const updatedLogIndex = logData.findIndex(log => log.id === currentLog.id);
         
         if (updatedLogIndex !== -1) {
           // Select the updated log
@@ -1369,11 +1403,11 @@ const ProjectLogs = () => {
           // Set the PDF data to show the updated log
           setPdfData({
             url: fullDocLink, // Use the full document URL
-            textLoc: logInViewer.text_loc,
+            textLoc: currentLog.text_loc,
             index: updatedLogIndex,
-            docId: logInViewer.doc_id,
-            submittalId: logInViewer.id,
-            additionalTextLocations: logInViewer.additional_text_locations,
+            docId: currentLog.doc_id,
+            submittalId: currentLog.id,
+            additionalTextLocations: currentLog.additional_text_locations,
           });
           
           // Set the log in viewer
@@ -1656,6 +1690,7 @@ const ProjectLogs = () => {
               handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
               onShowDocumentListModal={() => setShowDocumentListModal(true)}
               docParsed={documentData?.length || 0}
+              specSectionCount={specSectionCount}
               totalCount={totalCount}
               showBtn={"Upload Documents"}
               toggleModal={toggleModal}
@@ -1787,10 +1822,11 @@ const ProjectLogs = () => {
                   <div
                     style={{
                       position: "absolute",
-                      marginTop: "10px",
+                      marginTop: "5px",
                       fontStyle: "italic",
-                      fontSize: "14px",
-                      width: "30%"
+                      fontSize: "11px",
+                      width: "30%",
+                      zIndex: "1000"
                     }}
                   >
                       <strong>Note: </strong>
@@ -2161,6 +2197,9 @@ const ProjectLogs = () => {
         documents={documentData}
         onAfterReprocess={refreshDocumentsAndSubmittals}
         onAfterDelete={refreshDocumentsAndSubmittals}
+        projectId={projectId}
+        projectVersionId={projectVersionId}
+        specSectionCount={specSectionCount}
       />
 
       {showVersionModal && <ManageVersionModal

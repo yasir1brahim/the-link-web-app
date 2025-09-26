@@ -439,6 +439,72 @@ const getSemanticallyProcessedSpecItems = async (projectId, search, page_number,
     }
 }
 
+const getSpecSections = async (projectId, projectVersionId = null) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/projects/${projectId}/spec-sections/`,
+            params: {
+                ...(projectVersionId && { project_version_id: projectVersionId }),
+            }
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
+const downloadSpecSection = async (sectionId) => {
+    try {
+        const response = await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/spec-sections/${sectionId}/download/`,
+        });
+        
+        if (response.data.download_url) {
+            const downloadUrl = response.data.download_url;
+            const fileName = response.data.file_name;
+            
+            try {
+                const fileResponse = await fetch(downloadUrl);
+                
+                if (!fileResponse.ok) {
+                    throw new Error(`Download failed: HTTP ${fileResponse.status}`);
+                }
+                
+                const blob = await fileResponse.blob();
+                
+                const blobUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = fileName;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up blob URL to prevent memory leaks
+                window.URL.revokeObjectURL(blobUrl);
+                
+            } catch (downloadError) {
+                console.warn('Blob download failed, opening in new tab:', downloadError);
+                
+                // Fallback: Open in new tab if blob download fails
+                const newWindow = window.open(downloadUrl, '_blank');
+                
+                if (!newWindow) {
+                    throw new Error('Download failed and popup was blocked. Please allow popups and try again.');
+                }
+            }
+        }
+        
+        return response;
+    } catch (error) {
+        console.log("error in downloadSpecSection", error);
+        handleError(error);
+        throw error;
+    }
+}
 
 export {
     getSavedLogs,
@@ -462,4 +528,6 @@ export {
     getVersionComparison,
     getFilteredVersionComparison,
     getSemanticallyProcessedSpecItems,
+    getSpecSections,
+    downloadSpecSection,
 }
