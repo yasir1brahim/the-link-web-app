@@ -30,9 +30,6 @@ const SpecViewerSidebar = ({
             />
             <span className="control-text">Show Submittal Highlights</span>
           </label>
-          <p className="control-description">
-            Toggle highlighting of submittal items within the spec document
-          </p>
         </div>
       </div>
 

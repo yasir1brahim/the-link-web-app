@@ -52,7 +52,6 @@ const SpecSectionNavigation = ({
     <div className={`section-navigation ${compact ? 'compact' : ''}`}>
       {!compact && (
         <div className="navigation-header">
-          <h4>Spec Sections</h4>
           <div className="navigation-controls">
             <div className="search-control">
               <input
@@ -63,7 +62,7 @@ const SpecSectionNavigation = ({
                 className="search-input"
               />
             </div>
-            <div className="sort-control">
+            {/* <div className="sort-control">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -72,7 +71,7 @@ const SpecSectionNavigation = ({
                 <option value="number">Sort by Number</option>
                 <option value="title">Sort by Title</option>
               </select>
-            </div>
+            </div> */}
           </div>
         </div>
       )}
@@ -94,9 +93,6 @@ const SpecSectionNavigation = ({
             >
               <div className="item-header">
                 <span className="item-number">{section.masterformat_number}</span>
-                <span className="item-status">
-                  {section.processing_status === 'COMPLETED' ? '✓' : '⏳'}
-                </span>
               </div>
               <div className="item-title">
                 {section.custom_section_title || section.masterformat_title}
