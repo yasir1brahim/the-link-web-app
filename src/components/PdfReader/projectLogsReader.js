@@ -21,6 +21,7 @@ const ProjectLogsReader = ({
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
   const [annotations, setAnnotations] = useState([]);
+  const [documentLoaded, setDocumentLoaded] = useState(false);
   const { handleError, ErrorModal } = useS3LinkValidation();
 
   console.log('[SPEC_VIEWER_DEBUG] ProjectLogsReader props:', {
@@ -41,16 +42,33 @@ const ProjectLogsReader = ({
         }
 
         setCurrentUrl(url);
+        setDocumentLoaded(false); // Reset document loaded state
         await loadPDF();
       })();
     }
   }, [url]);
 
   useEffect(() => {
-    if (url === currentUrl && webViewer) {
+    console.log('[SPEC_VIEWER_DEBUG] Highlight locations or document loaded changed:', {
+      url,
+      currentUrl,
+      hasWebViewer: !!webViewer,
+      documentLoaded,
+      highlightLocationsLength: highlightLocations?.length,
+      highlightLocations
+    });
+    
+    if (url === currentUrl && webViewer && documentLoaded) {
+      console.log('[SPEC_VIEWER_DEBUG] Conditions met, calling updateTxtView');
       updateTxtView();
+    } else {
+      console.log('[SPEC_VIEWER_DEBUG] Conditions not met for updateTxtView:', {
+        urlMatch: url === currentUrl,
+        hasWebViewer: !!webViewer,
+        documentLoaded
+      });
     }
-  }, [highlightLocations]);
+  }, [highlightLocations, documentLoaded]);
 
   const handleClose = () => {
     setLogInViewer(null);
@@ -91,21 +109,34 @@ const ProjectLogsReader = ({
   };
 
   const updateTxtView = (_webViewer) => {
-    let tmpViewer = _webViewer ?? webViewer;
+    try {
+      let tmpViewer = _webViewer ?? webViewer;
 
-    console.log('[SPEC_VIEWER_DEBUG] updateTxtView called with:', {
-      highlightLocations,
-      highlightLocationsLength: highlightLocations?.length,
-      hasViewer: !!tmpViewer
-    });
+      console.log('[SPEC_VIEWER_DEBUG] updateTxtView called with:', {
+        highlightLocations,
+        highlightLocationsLength: highlightLocations?.length,
+        hasViewer: !!tmpViewer
+      });
 
-    tmpViewer.Core.annotationManager.deleteAnnotations(annotations);
+      // Safety check to ensure WebViewer is fully initialized
+      if (!tmpViewer || !tmpViewer.Core || !tmpViewer.Core.annotationManager) {
+        console.log('[SPEC_VIEWER_DEBUG] WebViewer not fully initialized, skipping highlights');
+        return;
+      }
+
+      // Additional safety check for document viewer
+      if (!tmpViewer.Core.documentViewer) {
+        console.log('[SPEC_VIEWER_DEBUG] Document viewer not available, skipping highlights');
+        return;
+      }
+
+      tmpViewer.Core.annotationManager.deleteAnnotations(annotations);
 
     if (tmpViewer && highlightLocations[0]?.page_no && highlightLocations[0]?.x && highlightLocations[0]?.y) {
       console.log('[SPEC_VIEWER_DEBUG] setting initial page location:', highlightLocations[0]);
       
       // Check if document is loaded before trying to access it
-      if (tmpViewer.Core.documentViewer.getDocument() && tmpViewer.Core.documentViewer.getPageCount() > 0) {
+      if (tmpViewer.Core.documentViewer && tmpViewer.Core.documentViewer.getDocument() && tmpViewer.Core.documentViewer.getPageCount() > 0) {
         console.log('[SPEC_VIEWER_DEBUG] Document is loaded, proceeding with highlights');
         tmpViewer.Core.documentViewer.displayPageLocation(
           highlightLocations[0]?.page_no,
@@ -122,6 +153,13 @@ const ProjectLogsReader = ({
       for (let i = 0; i < highlightLocations?.length; i++) {
         const annotationManager = tmpViewer.Core.annotationManager;
         const Annotations = tmpViewer.Core.Annotations;
+        
+        // Safety check for annotation creation
+        if (!annotationManager || !Annotations || !Annotations.RectangleAnnotation) {
+          console.log('[SPEC_VIEWER_DEBUG] Annotation manager or Annotations not available, skipping annotation creation');
+          continue;
+        }
+        
         const rectangleAnnot = new Annotations.RectangleAnnotation({
           PageNumber: highlightLocations[i]?.page_no,
           X: highlightLocations[i]?.x,
@@ -146,6 +184,10 @@ const ProjectLogsReader = ({
         textLocY: highlightLocations[0]?.y
       });
     }
+    } catch (error) {
+      console.error('[SPEC_VIEWER_DEBUG] Error in updateTxtView:', error);
+      // Don't re-throw the error to prevent component crashes
+    }
   };
 
   const loadPDF = async () => {
@@ -162,6 +204,7 @@ const ProjectLogsReader = ({
 
     try {
       setLoading(true);
+      setDocumentLoaded(false); // Reset document loaded state
       
       const pdfViewer = document.getElementById("pdf-div");
       const newPdfViewer = document.createElement("div");
@@ -183,14 +226,28 @@ const ProjectLogsReader = ({
         },
         viewer
       );
-      setWebViewer(_webViewer);
+      
+      // Wait a bit for WebViewer to fully initialize
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Verify WebViewer is properly initialized before setting it
+      if (_webViewer && _webViewer.Core && _webViewer.Core.documentViewer) {
+        setWebViewer(_webViewer);
+      } else {
+        console.error('[SPEC_VIEWER_DEBUG] WebViewer failed to initialize properly');
+        throw new Error('WebViewer initialization failed');
+      }
 
       _webViewer.UI.enableFeatures([_webViewer.UI.Feature.InlineComment]);
       handleDocumentLoaded(_webViewer.Core.annotationManager);
       _webViewer.UI.setZoomLevel("100%");
 
       _webViewer.Core.documentViewer.addEventListener("documentLoaded", () => {
-        updateTxtView(_webViewer);
+        setDocumentLoaded(true);
+        // Add a small delay to ensure WebViewer is fully ready
+        setTimeout(() => {
+          updateTxtView(_webViewer);
+        }, 200);
         setLoading(false);
       });
 

@@ -45,6 +45,13 @@ const DocumentHighlighter = ({
   const [currentHighlights, setCurrentHighlights] = useState(mapHighlightLocations(highlights));
   const [currentHighlightsEnabled, setCurrentHighlightsEnabled] = useState(true);
 
+  // Update highlights when the highlights prop changes
+  useEffect(() => {
+    console.log('[SPEC_VIEWER_DEBUG] DocumentHighlighter highlights changed:', highlights);
+    const newHighlights = mapHighlightLocations(highlights);
+    setCurrentHighlights(newHighlights);
+  }, [highlights]);
+
 
   if (!documentUrl) {
     return (
@@ -63,7 +70,7 @@ const DocumentHighlighter = ({
   return (
     <div className="document-highlighter-container">
       <ProjectLogsReader
-        key={`${documentUrl}-${currentHighlights}`} // Force re-render when document loads
+        key={`${documentUrl}-${JSON.stringify(currentHighlights)}`} // Force re-render when document or highlights change
         url={documentUrl}
         highlightLocations={currentHighlights}
         docId={documentId}
