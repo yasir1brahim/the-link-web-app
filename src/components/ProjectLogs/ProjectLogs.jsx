@@ -24,7 +24,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion , getArchivedVersions} from "../../api/Projects/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
-import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem, getSpecSections } from "../../api/ProjectLogs/api";
+import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
@@ -456,17 +456,6 @@ const ProjectLogs = () => {
     }
   };
 
-  const fetchSpecSectionCount = async () => {
-    if (projectId === null) return;
-    
-    try {
-      const response = await getSpecSections(projectId, projectVersionId);
-      setSpecSectionCount(response.data?.length || 0);
-    } catch (error) {
-      console.error("Error fetching spec section count:", error);
-      setSpecSectionCount(0);
-    }
-  };
 
   useEffect(() => {
     const initLoading = async () => {
@@ -520,7 +509,7 @@ const ProjectLogs = () => {
         
         // Fetch log data with the correct version
         await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
-        await fetchSpecSectionCount();
+        // Note: specSectionCount is now handled by SpecViewer component when needed
         
       } catch (error) {
         console.log("error", error);
