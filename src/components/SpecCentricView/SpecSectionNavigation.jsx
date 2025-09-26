@@ -27,17 +27,19 @@ const SpecSectionNavigation = ({
       if (!searchTerm) return true;
       const searchLower = searchTerm.toLowerCase();
       return (
-        section.masterformat_number.toLowerCase().includes(searchLower) ||
-        section.masterformat_title.toLowerCase().includes(searchLower) ||
+        (section.masterformat_number && section.masterformat_number.toLowerCase().includes(searchLower)) ||
+        (section.masterformat_title && section.masterformat_title.toLowerCase().includes(searchLower)) ||
         (section.custom_section_title && section.custom_section_title.toLowerCase().includes(searchLower))
       );
     })
     .sort((a, b) => {
       if (sortBy === 'number') {
-        return a.masterformat_number.localeCompare(b.masterformat_number, undefined, { numeric: true });
+        const numA = a.masterformat_number || '';
+        const numB = b.masterformat_number || '';
+        return numA.localeCompare(numB, undefined, { numeric: true });
       } else {
-        const titleA = a.custom_section_title || a.masterformat_title;
-        const titleB = b.custom_section_title || b.masterformat_title;
+        const titleA = a.custom_section_title || a.masterformat_title || '';
+        const titleB = b.custom_section_title || b.masterformat_title || '';
         return titleA.localeCompare(titleB);
       }
     });
