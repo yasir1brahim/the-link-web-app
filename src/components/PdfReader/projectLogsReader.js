@@ -23,6 +23,14 @@ const ProjectLogsReader = ({
   const [annotations, setAnnotations] = useState([]);
   const { handleError, ErrorModal } = useS3LinkValidation();
 
+  console.log('[SPEC_VIEWER_DEBUG] ProjectLogsReader props:', {
+    url,
+    highlightLocations,
+    docId,
+    setPdfData,
+    setSubmittalIdParam,
+  });
+
   useEffect(() => {
     if (url) {
       (async () => {
