@@ -7,9 +7,8 @@ import { useS3LinkValidation } from "../../hooks/useS3LinkValidation.js";
 
 const ProjectLogsReader = ({
   url,
-  textLoc,
+  highlightLocations,
   docId,
-  additionalTextLocations,
   setPdfData,
   setSubmittalIdParam,
   handleAddNewRow,
@@ -43,7 +42,7 @@ const ProjectLogsReader = ({
     if (url === currentUrl && webViewer) {
       updateTxtView();
     }
-  }, [textLoc]);
+  }, [highlightLocations]);
 
   const handleClose = () => {
     setLogInViewer(null);
@@ -87,24 +86,23 @@ const ProjectLogsReader = ({
     let tmpViewer = _webViewer ?? webViewer;
 
     console.log('[SPEC_VIEWER_DEBUG] updateTxtView called with:', {
-      textLoc,
-      additionalTextLocations,
-      additionalTextLocationsLength: additionalTextLocations?.length,
+      highlightLocations,
+      highlightLocationsLength: highlightLocations?.length,
       hasViewer: !!tmpViewer
     });
 
     tmpViewer.Core.annotationManager.deleteAnnotations(annotations);
 
-    if (tmpViewer && textLoc?.page_no && textLoc?.x && textLoc?.y) {
-      console.log('[SPEC_VIEWER_DEBUG] Creating main highlight annotation:', textLoc);
+    if (tmpViewer && highlightLocations[0]?.page_no && highlightLocations[0]?.x && highlightLocations[0]?.y) {
+      console.log('[SPEC_VIEWER_DEBUG] setting initial page location:', highlightLocations[0]);
       
       // Check if document is loaded before trying to access it
       if (tmpViewer.Core.documentViewer.getDocument() && tmpViewer.Core.documentViewer.getPageCount() > 0) {
         console.log('[SPEC_VIEWER_DEBUG] Document is loaded, proceeding with highlights');
         tmpViewer.Core.documentViewer.displayPageLocation(
-          textLoc?.page_no,
-          textLoc?.x,
-          textLoc?.y
+          highlightLocations[0]?.page_no,
+          highlightLocations[0]?.x,
+          highlightLocations[0]?.y
         );
       } else {
         console.log('[SPEC_VIEWER_DEBUG] Document not loaded yet, skipping highlights');
@@ -112,50 +110,32 @@ const ProjectLogsReader = ({
       }
 
       // Add rectangular highlight
-      const annotationManager = tmpViewer.Core.annotationManager;
-      const Annotations = tmpViewer.Core.Annotations;
       const _annotations = [];
-      const rectangleAnnot = new Annotations.RectangleAnnotation({
-        PageNumber: textLoc?.page_no,
-        X: textLoc?.x,
-        Y: textLoc?.y,
-        Width: textLoc?.width ?? 10000,
-        Height: textLoc?.height ?? 30,
-        Color: new Annotations.Color(213, 231, 62, 0.25),
-        FillColor: new Annotations.Color(213, 231, 62, 0.25),
-      });
-      _annotations.push(rectangleAnnot);
-      annotationManager.addAnnotation(rectangleAnnot);
-      annotationManager.redrawAnnotation(rectangleAnnot);
-
-      console.log('[SPEC_VIEWER_DEBUG] Processing additional text locations:', additionalTextLocations?.length);
-      for (let i = 0; i < additionalTextLocations?.length; i++) {
-        const additionalTextLocation = additionalTextLocations[i];
-        console.log(`[SPEC_VIEWER_DEBUG] Creating additional highlight ${i + 1}:`, additionalTextLocation);
+      for (let i = 0; i < highlightLocations?.length; i++) {
+        const annotationManager = tmpViewer.Core.annotationManager;
+        const Annotations = tmpViewer.Core.Annotations;
         const rectangleAnnot = new Annotations.RectangleAnnotation({
-          PageNumber: additionalTextLocation?.page_no,
-          X: additionalTextLocation?.x,
-          Y: additionalTextLocation?.y,
-          Width: additionalTextLocation?.width,
-          Height: additionalTextLocation?.height,
-          Color: new Annotations.Color(213, 231, 62, 0),
+          PageNumber: highlightLocations[i]?.page_no,
+          X: highlightLocations[i]?.x,
+          Y: highlightLocations[i]?.y,
+          Width: highlightLocations[i]?.width ?? 10000,
+          Height: highlightLocations[i]?.height ?? 30,
+          Color: new Annotations.Color(213, 231, 62, 0.25),
           FillColor: new Annotations.Color(213, 231, 62, 0.25),
         });
         _annotations.push(rectangleAnnot);
         annotationManager.addAnnotation(rectangleAnnot);
         annotationManager.redrawAnnotation(rectangleAnnot);
-        console.log(`[SPEC_VIEWER_DEBUG] Added additional highlight ${i + 1} to annotations`);
       }
-
       setAnnotations(_annotations);
       console.log('[SPEC_VIEWER_DEBUG] All annotations created and set:', _annotations.length);
     } else {
       console.log('[SPEC_VIEWER_DEBUG] Not creating highlights - conditions not met:', {
         hasViewer: !!tmpViewer,
-        hasTextLoc: !!textLoc,
-        textLocPageNo: textLoc?.page_no,
-        textLocX: textLoc?.x,
-        textLocY: textLoc?.y
+        hasTextLoc: !!highlightLocations[0],
+        textLocPageNo: highlightLocations[0]?.page_no,
+        textLocX: highlightLocations[0]?.x,
+        textLocY: highlightLocations[0]?.y
       });
     }
   };
