@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
 import { reprocessDocument, downloadDocument, deleteDocument } from "../../api/ProjectLogs/api";
 import { toast } from "react-toastify";
@@ -10,13 +10,19 @@ import { ReactComponent as TrashIcon } from "../../assets/images/trash.svg";
 import StyledTooltip from "../shared/StyledTooltip/StyledTooltip";
 import SpecSectionsTab from "./SpecSectionsTab";
 
-const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfterDelete, projectId, projectVersionId, specSectionCount = 0 }) => {
+const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfterDelete, projectId, projectVersionId, specSectionCount = 0, defaultTab = "documents",  }) => {
   const [isReprocessing, setIsReprocessing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState(null);
-  const [activeTab, setActiveTab] = useState('documents');
+  const [activeTab, setActiveTab] = useState(defaultTab);
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(defaultTab);
+    }
+  }, [isOpen, defaultTab]);
 
   // Check if we're in production environment
   const isProduction = window.location.hostname === 'app.thelink.ai';

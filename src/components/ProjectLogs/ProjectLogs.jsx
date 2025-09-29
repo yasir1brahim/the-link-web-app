@@ -53,7 +53,7 @@ const ProjectLogs = () => {
     isQaPlannerFlagActive,
     isSpecCenteredViewFlagActive
   } = useFeatureFlags();
-
+  const [defaultTab, setDefaultTab] = useState("documents"); 
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
   const [showDuplicateFilesModal, setShowDuplicateFilesModal] = useState(false);
   const [duplicateFiles, setDuplicateFiles] = useState([]);
@@ -253,6 +253,10 @@ const ProjectLogs = () => {
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [docParsed, setDocParsed] = useState(0);
   const [specSectionCount, setSpecSectionCount] = useState(0);
+  const openDocumentModal = (tabName) => {
+    setDefaultTab(tabName);
+    setShowDocumentListModal(true);
+  };
 
   const getProcoreAccessTokenData = async () => {
     try {
@@ -1677,7 +1681,8 @@ const ProjectLogs = () => {
               procoreAccessToken={procoreAccessToken}
               procoreAuthUrl={procoreAuthUrl}
               handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
-              onShowDocumentListModal={() => setShowDocumentListModal(true)}
+              onShowDocumentListModal={() => openDocumentModal('documents')}
+              onShowSpecSectionListModal={() => openDocumentModal('spec-sections')}
               docParsed={documentData?.length || 0}
               specSectionCount={specSectionCount}
               totalCount={totalCount}
@@ -2189,6 +2194,7 @@ const ProjectLogs = () => {
         projectId={projectId}
         projectVersionId={projectVersionId}
         specSectionCount={specSectionCount}
+        defaultTab={defaultTab}
       />
 
       {showVersionModal && <ManageVersionModal
