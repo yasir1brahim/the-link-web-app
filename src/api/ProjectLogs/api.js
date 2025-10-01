@@ -443,7 +443,7 @@ const getSpecSections = async (projectId, projectVersionId = null) => {
     try {
         return await axiosInstance({
             method: 'get',
-            url: `/api/deliverables/projects/${projectId}/spec-sections/`,
+            url: `/api/deliverables/${projectId}/spec-sections/`,
             params: {
                 ...(projectVersionId && { project_version_id: projectVersionId }),
             }

@@ -72,3 +72,4 @@ export const SPEC_GPT_WEBSOCKETS_FEATURE_FLAG_NAME = "specgpt_websockets";
 export const INSPECTION_LOG_FEATURE_FLAG_NAME = "inspection_log";
 export const INSPECTION_LOG_USE_DATA_TABLES_FEATURE_FLAG_NAME = "inspection_log_use_data_tables";
 export const QA_PLANNER_FEATURE_FLAG_NAME = "qa_planner";
+export const SPEC_CENTERED_VIEW_FEATURE_FLAG_NAME = "spec_centered_view";

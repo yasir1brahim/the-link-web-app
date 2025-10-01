@@ -229,6 +229,14 @@ const Chat = ({
         setShowQAPlannerModal(false);
         setIsGeneratingQALogs(false);
     }
+    // Helper function to refresh chat history
+    const refreshChatHistory = () => {
+        fetchChatHistory(projectId).then((data) => {
+            console.log("chat history refreshed", data);
+            setChatHistory(data);
+        });
+    }
+
 
     const getChatResponse = (userMessage) => {
         console.log('Submit message: ', userMessage);
@@ -283,6 +291,10 @@ const Chat = ({
                 fetchPromptAnswer(userMessage, k, chatSessionId, projectId, projectVersionId).then((newMessage) => {
                     handleHttpResponse(newMessage, userMessage);
                 });
+                setMaxChatMessages(newMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
+                
+                // Refresh chat history after every message to update the sidebar
+                refreshChatHistory();
             }
         } else {
             setMessages(prev => [
@@ -528,14 +540,12 @@ const Chat = ({
 
     const onFirstAIResponse = (chatSessionId, userMessage) => {
         console.log("onFirstAIResponse", chatSessionId, userMessage);
-        // only set the chat session id if it's a new chat, we don't want to change the chat session id if the user is continuing a different chat
-        if (chatSessionId === null) {
+        // Set the chat session id when starting a new chat (when current session is null)
+        if (chatSessionIdRef.current === null) {
             setChatSessionId(chatSessionId);
         }
-        fetchChatHistory(projectId).then((data) => {
-            console.log("chat history", data);
-            setChatHistory(data);
-        });
+        // Always refresh chat history to update the sidebar
+        refreshChatHistory();
     }
 
     // Render log viewer if active

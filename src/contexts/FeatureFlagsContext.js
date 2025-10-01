@@ -11,7 +11,8 @@ import {
     SPEC_GPT_WEBSOCKETS_FEATURE_FLAG_NAME,
     INSPECTION_LOG_FEATURE_FLAG_NAME,
     INSPECTION_LOG_USE_DATA_TABLES_FEATURE_FLAG_NAME,
-    QA_PLANNER_FEATURE_FLAG_NAME
+    QA_PLANNER_FEATURE_FLAG_NAME,
+    SPEC_CENTERED_VIEW_FEATURE_FLAG_NAME
 } from '../constants';
 
 const FeatureFlagsContext = createContext();
@@ -134,6 +135,7 @@ export const FeatureFlagsProvider = ({ children }) => {
     const isInspectionLogFlagActive = (teamId) => isFlagActive(INSPECTION_LOG_FEATURE_FLAG_NAME, teamId);
     const isInspectionLogUseDataTablesFlagActive = (teamId) => isFlagActive(INSPECTION_LOG_USE_DATA_TABLES_FEATURE_FLAG_NAME, teamId);
     const isQaPlannerFlagActive = (teamId) => isFlagActive(QA_PLANNER_FEATURE_FLAG_NAME, teamId);
+    const isSpecCenteredViewFlagActive = (teamId) => isFlagActive(SPEC_CENTERED_VIEW_FEATURE_FLAG_NAME, teamId);
 
     // Refresh flags (useful when flags might have changed)
     const refreshFlags = async () => {
@@ -170,6 +172,7 @@ export const FeatureFlagsProvider = ({ children }) => {
         isInspectionLogFlagActive,
         isInspectionLogUseDataTablesFlagActive,
         isQaPlannerFlagActive,
+        isSpecCenteredViewFlagActive,
         refreshFlags
     };
 
