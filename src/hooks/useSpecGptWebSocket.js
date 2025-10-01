@@ -10,7 +10,7 @@ export const useSpecGptWebSocket = (projectId, onMessage, onError, onComplete) =
     const [isConnecting, setIsConnecting] = useState(false);
 
     const getWsUrl = useCallback(() => {
-        const baseURL = window.location.href.includes('https://app-dj.thelink.ai') 
+        const baseUrl = window.location.href.includes('https://app-dj.thelink.ai') 
             ? 'wss://app-dj-qa-api.thelink.ai'
             : window.location.href.includes('https://app.thelink.ai')
             ? 'wss://log-manager-api-prod.thelink.ai'
