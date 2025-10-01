@@ -10,10 +10,10 @@ export const useSpecGptWebSocket = (projectId, onMessage, onError, onComplete) =
     const [isConnecting, setIsConnecting] = useState(false);
 
     const getWsUrl = useCallback(() => {
-        const baseUrl = window.location.href.includes('https://app.thelink.ai')
-            ? 'wss://app.thelink.ai'
-            : window.location.href.includes('https://app-dj.thelink.ai')
-            ? 'wss://app-dj.thelink.ai'
+        const baseURL = window.location.href.includes('https://app-dj.thelink.ai') 
+            ? 'wss://app-dj-qa-api.thelink.ai'
+            : window.location.href.includes('https://app.thelink.ai')
+            ? 'wss://log-manager-api-prod.thelink.ai'
             : 'ws://localhost:8000';
         return `${baseUrl}/ws/specgpt/${projectId}/?token=${token}`;
     }, [projectId, token]);
