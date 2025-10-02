@@ -53,11 +53,30 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
             >
               Compass
             </button>
+            {props.isSpecCenteredViewFlagActive && (
+              <button
+                className={`tab-button ${props.activeTab === 'spec-view' ? 'active' : ''}`}
+                onClick={() => props.setActiveTab('spec-view')}
+                style={{
+                  padding: '12px 24px',
+                  border: 'none',
+                  backgroundColor: props.activeTab === 'spec-view' ? '#fff' : '#f5f5f5',
+                  borderBottom: props.activeTab === 'spec-view' ? '2px solid #007bff' : '2px solid transparent',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: props.activeTab === 'spec-view' ? '600' : '400',
+                  color: props.activeTab === 'spec-view' ? '#007bff' : '#666',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Spec View
+              </button>
+            )}
           </div>
         )}
       </div>
       <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '0px' }}>
-        {props.isVersioningEnabled && (props.activeTab === 'submittal' || props.activeTab === 'compass') && (
+        {props.isVersioningEnabled && (props.activeTab === 'submittal' || props.activeTab === 'compass' || props.activeTab === 'spec-view') && (
           <>
             {props.isVersionComparisonEnabled && props.activeTab === 'submittal' && (
               <button
