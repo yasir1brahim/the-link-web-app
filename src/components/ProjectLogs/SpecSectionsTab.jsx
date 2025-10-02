@@ -21,7 +21,8 @@ const SpecSectionsTab = ({ projectId, projectVersionId }) => {
     setIsLoading(true);
     try {
       const response = await getSpecSections(projectId, projectVersionId);
-      setSpecSections(response.data || []);
+      const sections = response.data.spec_sections || [];
+      setSpecSections(sections || []);
     } catch (error) {
       console.error('Error fetching spec sections:', error);
       toast.error('Failed to load spec sections');
@@ -68,8 +69,7 @@ const SpecSectionsTab = ({ projectId, projectVersionId }) => {
             <thead>
               <tr>
                 <th style={{ width: "20%" }}>Spec Section</th>
-                <th style={{ width: "50%" }}>Document Name</th>
-                <th style={{ width: "20%" }}>Created Date</th>
+                <th style={{ width: "70%" }}>Document Name</th>
                 <th style={{ width: "10%" }}>Action</th>
               </tr>
             </thead>
@@ -81,9 +81,6 @@ const SpecSectionsTab = ({ projectId, projectVersionId }) => {
                   </td>
                   <td style={{ fontSize: "14px" }}>
                     {section.document_name}
-                  </td>
-                  <td style={{ fontSize: "14px" }}>
-                    {section.created_at ? new Date(section.created_at).toLocaleDateString() : "-"}
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '4px' }}>
