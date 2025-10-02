@@ -261,7 +261,7 @@ const ProjectLogs = () => {
   const fetchSpecSectionCount = async () => {
     try {
       const response = await getSpecSections(projectId, projectVersionId);
-      const count = response.data.spec_sections?.length || 0;
+      const count = response.data?.total_sections || 0;
       setSpecSectionCount(count);
     } catch (error) {
       console.error('Error fetching spec section count:', error);
