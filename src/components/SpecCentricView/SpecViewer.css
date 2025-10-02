@@ -39,7 +39,6 @@
 
 .spec-viewer-content {
   flex: 1;
-  overflow-y: auto;
   padding: 0px;
 }
 
@@ -117,12 +116,12 @@
 
 .spec-document-header {
   background-color: #f8f9fa;
-  padding: 10px 24px;
+  padding: 6px 16px;
   border-bottom: 1px solid #dee2e6;
 }
 
 .spec-document-header h2 {
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
   color: #212529;
   font-size: 1.5rem;
 }
@@ -135,11 +134,11 @@
 }
 
 .spec-document-content {
-  padding: 20px;
+  padding: 8px;
 }
 
 .spec-document-viewer {
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 
 .document-placeholder {
@@ -152,7 +151,7 @@
 }
 
 .document-placeholder p {
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
 }
 
 .document-placeholder p:last-child {
