@@ -24,7 +24,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion , getArchivedVersions} from "../../api/Projects/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
-import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem } from "../../api/ProjectLogs/api";
+import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem, getSpecSections } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
@@ -256,6 +256,17 @@ const ProjectLogs = () => {
   const openDocumentModal = (tabName) => {
     setDefaultTab(tabName);
     setShowDocumentListModal(true);
+  };
+
+  const fetchSpecSectionCount = async () => {
+    try {
+      const response = await getSpecSections(projectId, projectVersionId);
+      const count = response.data?.total_sections || 0;
+      setSpecSectionCount(count);
+    } catch (error) {
+      console.error('Error fetching spec section count:', error);
+      setSpecSectionCount(0);
+    }
   };
 
   const getProcoreAccessTokenData = async () => {
@@ -513,7 +524,8 @@ const ProjectLogs = () => {
         
         // Fetch log data with the correct version
         await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
-        // Note: specSectionCount is now handled by SpecViewer component when needed
+        // Fetch spec section count
+        await fetchSpecSectionCount();
         
       } catch (error) {
         console.log("error", error);
@@ -1541,12 +1553,13 @@ const ProjectLogs = () => {
       
       setDocumentData(projectResponse.data.document_details);
       await fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+      await fetchSpecSectionCount();
     } catch (e) {
       handleError(e);
     } finally {
       setIsDataLoading(false);
     }
-  }, [projectId, projectVersionId, rowsPerPage]);
+  }, [projectId, projectVersionId, rowsPerPage, fetchSpecSectionCount]);
 
   const handleViewArchivedVersions = async () => {
     try {
