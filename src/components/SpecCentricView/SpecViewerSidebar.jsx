@@ -43,18 +43,6 @@ const SpecViewerSidebar = ({
         />
       </div>
 
-      <div className="sidebar-footer">
-        <div className="sidebar-info">
-          <p className="info-text">
-            <strong>Selected:</strong> {selectedSection ? selectedSection.masterformat_number : 'None'}
-          </p>
-          {selectedSection && (
-            <p className="info-text">
-              <strong>Document:</strong> {selectedSection.document_name}
-            </p>
-          )}
-        </div>
-      </div>
     </div>
   );
 };
