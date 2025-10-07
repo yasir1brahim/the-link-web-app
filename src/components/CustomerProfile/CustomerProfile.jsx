@@ -514,7 +514,6 @@ const CustomerProfile = (props) => {
       {isLoading && <Loader showComponentLoader={true} />}
       <Procore
         companyId={customerId}
-        companyList={companyList}
         procoreModal={procoreModal}
         projectId={null}
         toggleProcoreModal={toggleProcoreModal}
