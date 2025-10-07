@@ -8,56 +8,162 @@ import handleError from '../../config/errorHandler';
 
 const Procore = ({
   companyId,
-  companyList,
   procoreModal,
   projectId,
   toggleProcoreModal,
   setProcoreModal,
   setExportToProcoreModal,
-  isFromCustomerScreen = false
+  isFromCustomerScreen = false,
+  existingCompanyName = null,
+  existingProjectName = null,
+  existingSubmittalManagerName = null,
+  existingCompanyId = null,
+  existingProjectId = null,
+  existingSubmittalManagerId = null,
 }) => {
   const [partnerCompany, setPartnerCompany] = useState([]);
   const [projectName, setProjectName] = useState([]);
   const [submittalManager, setSubmittalManager] = useState([]);
   const [projectList, setProjectList] = useState([]);
   const [submittalList, setSubmittalList] = useState([]);
+  const [fetchedCompanyList, setFetchedCompanyList] = useState([]);
 
-  console.log("companyList", companyList)
+  // Initialize modal with proper data fetching sequence
+  useEffect(() => {
+    console.log("useEffect triggered - procoreModal:", procoreModal);
+    if (procoreModal) {
+      console.log("Modal is open, starting initialization...");
+      const initializeModal = async () => {
+        try {
+          console.log("Step 1: Fetching companies list...");
+          // Step 1: Fetch companies list
+          const companyResp = await axiosInstance({
+            method: "get",
+            url: "/api/deliverables/procore/companies/",
+          });
+          console.log("Fetched companies:", companyResp?.data);
+          setFetchedCompanyList(companyResp?.data || []);
+          
+          // Step 2: Set existing company if available
+          console.log("Checking existing values:", {
+            existingCompanyName,
+            existingCompanyId,
+            existingProjectName,
+            existingProjectId,
+            existingSubmittalManagerName,
+            existingSubmittalManagerId
+          });
+          
+          if (existingCompanyName && existingCompanyId) {
+            console.log("Setting existing company:", existingCompanyName);
+            setPartnerCompany([{
+              label: existingCompanyName,
+              value: existingCompanyId
+            }]);
+            
+            // Step 3: Fetch projects for the existing company
+            console.log("Step 3: Fetching projects for company:", existingCompanyId);
+            const projectListResp = await axiosInstance({
+              method: 'get',
+              url: `/api/deliverables/procore/projects/${existingCompanyId}/`
+            });
+            console.log("Fetched projects:", projectListResp?.data);
+            setProjectList(projectListResp?.data?.data || []);
+            
+            // Step 4: Set existing project if available
+            if (existingProjectName && existingProjectId) {
+              console.log("Setting existing project:", existingProjectName);
+              setProjectName([{
+                label: existingProjectName,
+                value: existingProjectId
+              }]);
+              
+              // Step 5: Fetch managers for the existing project
+              console.log("Step 5: Fetching managers for project:", existingProjectId);
+              const submittalManagerResp = await axiosInstance({
+                method: 'get',
+                url: `/api/deliverables/procore/managers/${existingProjectId}/`
+              });
+              console.log("Fetched managers:", submittalManagerResp?.data);
+              setSubmittalList(submittalManagerResp?.data?.data || []);
+              
+              // Step 6: Set existing manager if available
+              if (existingSubmittalManagerName && existingSubmittalManagerId) {
+                console.log("Setting existing manager:", existingSubmittalManagerName);
+                setSubmittalManager([{
+                  label: existingSubmittalManagerName,
+                  value: existingSubmittalManagerId
+                }]);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error initializing modal:", error);
+          handleError(error);
+        }
+      };
+      
+      console.log("Calling initializeModal...");
+      initializeModal();
+    } else {
+      console.log("Modal is not open, skipping initialization");
+    }
+  }, [procoreModal]);
 
   // Once a user selects a partner company, it's respective project fetching API is called
   useEffect(() => {
-    if (partnerCompany[0]?.value) {
-      const fetchData = async () => {
-        const projectListResp = await axiosInstance({
-          method: 'get',
-          url: `/api/deliverables/procore/projects/${partnerCompany[0]?.value}/`
+    if (partnerCompany[0]?.value && procoreModal) {
+      // Only fetch if this is a user-initiated change (not during initialization)
+      const isInitialization = existingCompanyId && partnerCompany[0]?.value === existingCompanyId;
+      if (!isInitialization) {
+        const fetchData = async () => {
+          const projectListResp = await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/procore/projects/${partnerCompany[0]?.value}/`
+          });
+          console.log("projectListResp", projectListResp);
+          console.log("projectListResp?.data", projectListResp?.data);
+          setProjectList(projectListResp?.data?.data || []);
+        };
+        fetchData().catch((error) => {
+          handleError(error);
         });
-        console.log("projectListResp", projectListResp);
-        console.log("projectListResp?.data", projectListResp?.data);
-        setProjectList(projectListResp?.data?.data || []);
-      };
-      fetchData().catch((error) => {
-        handleError(error);
-      });
+      }
     }
-  }, [partnerCompany]);
+  }, [partnerCompany, procoreModal, existingCompanyId]);
 
   // Further after selecting a project it's respective submittall manager API is called
   useEffect(() => {
-    if (projectName[0]?.label) {
-      const fetchData = async () => {
-        const submittalManagerResp = await axiosInstance({
-          method: 'get',
-          url: `/api/deliverables/procore/managers/${projectName[0]?.value}/`
-        });
-        setSubmittalList(submittalManagerResp?.data?.data || []);
-      };
+    if (projectName[0]?.label && procoreModal) {
+      // Only fetch if this is a user-initiated change (not during initialization)
+      const isInitialization = existingProjectId && projectName[0]?.value === existingProjectId;
+      if (!isInitialization) {
+        const fetchData = async () => {
+          const submittalManagerResp = await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/procore/managers/${projectName[0]?.value}/`
+          });
+          setSubmittalList(submittalManagerResp?.data?.data || []);
+        };
 
-      fetchData().catch((error) => {
-        handleError(error);
-      });
+        fetchData().catch((error) => {
+          handleError(error);
+        });
+      }
     }
-  }, [projectName]);
+  }, [projectName, procoreModal, existingProjectId]);
+
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!procoreModal) {
+      setPartnerCompany([]);
+      setProjectName([]);
+      setSubmittalManager([]);
+      setProjectList([]);
+      setSubmittalList([]);
+      setFetchedCompanyList([]);
+    }
+  }, [procoreModal]);
 
   const handleProjectMapping = async () => {
     try {
@@ -139,8 +245,8 @@ const Procore = ({
                   <SelectDropdown
                     label={'Select Partner Company'}
                     setSelected={setPartnerCompany}
-                    selected={partnerCompany?.label}
-                    options={companyList?.map((company) => {
+                    selected={partnerCompany}
+                    options={fetchedCompanyList?.map((company) => {
                       return {
                         label: company.name,
                         value: company.id
@@ -158,7 +264,7 @@ const Procore = ({
                     <SelectDropdown
                       label={'Select Project Name'}
                       setSelected={setProjectName}
-                      selected={projectName?.label}
+                      selected={projectName}
                       options={projectList?.map((project) => {
                         return {
                           value: project.key,
@@ -178,7 +284,7 @@ const Procore = ({
                     <SelectDropdown
                       label={'Select  Submittal Manager'}
                       setSelected={setSubmittalManager}
-                      selected={submittalManager?.label}
+                      selected={submittalManager}
                       options={submittalList?.map((manager) => {
                         return {
                           value: manager.key,
