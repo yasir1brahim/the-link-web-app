@@ -1918,15 +1918,6 @@ const ProjectLogs = () => {
         alreadyExistingFiles={alreadyExistingFiles}
         uploadErrorMessage={uploadErrorMessage}
       />
-      <Procore
-        companyId={companyId}
-        companyList={companyList}
-        procoreModal={procoreModal}
-        projectId={projectId}
-        toggleProcoreModal={toggleProcoreModal}
-        setProcoreModal={setProcoreModal}
-        setExportToProcoreModal={setExportToProcoreModal}
-      />
       <ManageProcore
         procoreAuthUserInfo={procoreAuthUserInfo}
         companyId={companyId}

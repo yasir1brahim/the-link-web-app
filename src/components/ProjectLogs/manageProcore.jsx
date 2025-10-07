@@ -19,7 +19,6 @@ const ManageProcore = ({
   toggleManageProcoreModal,
   setManageProcoreModal,
   toggleChangeProcoreAccountModal,
-  setLoadingProjectDetails,
   setCompanyId,
   setProcoreCompanyName,
   setProcoreProjectId,
@@ -33,6 +32,7 @@ const ManageProcore = ({
   const [companyList, setCompanyList] = useState([]);
   const [projectList, setProjectList] = useState([]);
   const [submittalManagerList, setSubmittalManagerList] = useState([]);
+  const [loadingProjectDetails, setLoadingProjectDetails] = useState(false);
 
   const getCompanyList = async () => {
     const companyResp = await axiosInstance({
