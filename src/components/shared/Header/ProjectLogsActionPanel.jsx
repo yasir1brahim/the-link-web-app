@@ -207,13 +207,26 @@ const ProjectLogsActionPanel = ({ ...props }) => {
           
           <div className={`${props.showSearch ? "d-none" : "d-flex align-items-center mr-3"}`}>
             {props?.docParsed > 0 ? (
-              <div
-                className="total-count-documents"
-                style={{ cursor: "pointer", fontSize: "0.9em" }}
-                onClick={props.onShowDocumentListModal}
-              >
-                {props.docParsed} document{props.docParsed > 1 ? 's' : ''} uploaded
+              <div className="total-count-documents d-flex align-items-center" style={{ fontSize: '0.9em' }}>
+                <div
+                  style={{ cursor: 'pointer' }}
+                  onClick={props.onShowDocumentListModal}
+                >
+                  {props.docParsed} document{props.docParsed > 1 ? 's' : ''}
+                </div>
+
+                {props.specSectionCount > 0 && <div style={{ margin: '0 6px' }}>|</div>}
+
+                {props.specSectionCount > 0 && (
+                  <div
+                    style={{ cursor: 'pointer' }}
+                    onClick={props.onShowSpecSectionListModal}
+                  >
+                    {props.specSectionCount} spec section{props.specSectionCount > 1 ? 's' : ''}
+                  </div>
+                )}
               </div>
+
             ) : null}
             {props?.docParsed > 0 && (
               <div className="mx-2" style={{ color: '#ccc' }}>|</div>

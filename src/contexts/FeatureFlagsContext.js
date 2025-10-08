@@ -8,9 +8,11 @@ import {
     VERSION_COMPARISON_SEARCH_FEATURE_FLAG_NAME,
     FULL_SPEC_PROCESSING_FEATURE_FLAG_NAME,
     SPEC_GPT_FEATURE_FLAG_NAME,
+    SPEC_GPT_WEBSOCKETS_FEATURE_FLAG_NAME,
     INSPECTION_LOG_FEATURE_FLAG_NAME,
     INSPECTION_LOG_USE_DATA_TABLES_FEATURE_FLAG_NAME,
-    QA_PLANNER_FEATURE_FLAG_NAME
+    QA_PLANNER_FEATURE_FLAG_NAME,
+    SPEC_CENTERED_VIEW_FEATURE_FLAG_NAME
 } from '../constants';
 
 const FeatureFlagsContext = createContext();
@@ -129,9 +131,11 @@ export const FeatureFlagsProvider = ({ children }) => {
     const isVersionComparisonSearchFlagActive = (teamId) => isFlagActive(VERSION_COMPARISON_SEARCH_FEATURE_FLAG_NAME, teamId);
     const isFullSpecProcessingFlagActive = (teamId) => isFlagActive(FULL_SPEC_PROCESSING_FEATURE_FLAG_NAME, teamId);
     const isSpecGptFlagActive = (teamId) => isFlagActive(SPEC_GPT_FEATURE_FLAG_NAME, teamId);
+    const isSpecGptWebsocketsFlagActive = (teamId) => isFlagActive(SPEC_GPT_WEBSOCKETS_FEATURE_FLAG_NAME, teamId);
     const isInspectionLogFlagActive = (teamId) => isFlagActive(INSPECTION_LOG_FEATURE_FLAG_NAME, teamId);
     const isInspectionLogUseDataTablesFlagActive = (teamId) => isFlagActive(INSPECTION_LOG_USE_DATA_TABLES_FEATURE_FLAG_NAME, teamId);
     const isQaPlannerFlagActive = (teamId) => isFlagActive(QA_PLANNER_FEATURE_FLAG_NAME, teamId);
+    const isSpecCenteredViewFlagActive = (teamId) => isFlagActive(SPEC_CENTERED_VIEW_FEATURE_FLAG_NAME, teamId);
 
     // Refresh flags (useful when flags might have changed)
     const refreshFlags = async () => {
@@ -164,9 +168,11 @@ export const FeatureFlagsProvider = ({ children }) => {
         isVersionComparisonSearchFlagActive,
         isFullSpecProcessingFlagActive,
         isSpecGptFlagActive,
+        isSpecGptWebsocketsFlagActive,
         isInspectionLogFlagActive,
         isInspectionLogUseDataTablesFlagActive,
         isQaPlannerFlagActive,
+        isSpecCenteredViewFlagActive,
         refreshFlags
     };
 

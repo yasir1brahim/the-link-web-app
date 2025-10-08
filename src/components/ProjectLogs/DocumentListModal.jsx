@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "reactstrap";
+import React, { useState,useEffect } from "react";
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
 import { reprocessDocument, downloadDocument, deleteDocument } from "../../api/ProjectLogs/api";
 import { toast } from "react-toastify";
 import Loader from "../shared/Loader/Loader";
@@ -8,13 +8,21 @@ import { ReactComponent as ReprocessIcon } from "../../assets/images/file-reproc
 import { ReactComponent as DownloadIcon } from "../../assets/images/file-download.svg";
 import { ReactComponent as TrashIcon } from "../../assets/images/trash.svg";
 import StyledTooltip from "../shared/StyledTooltip/StyledTooltip";
+import SpecSectionsTab from "./SpecSectionsTab";
 
-const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfterDelete }) => {
+const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfterDelete, projectId, projectVersionId, specSectionCount = 0, defaultTab = "documents",  }) => {
   const [isReprocessing, setIsReprocessing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState(null);
+  const [activeTab, setActiveTab] = useState(defaultTab);
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(defaultTab);
+    }
+  }, [isOpen, defaultTab]);
 
   // Check if we're in production environment
   const isProduction = window.location.hostname === 'app.thelink.ai';
@@ -112,86 +120,119 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
   return (
     <>
       <Modal isOpen={isOpen} toggle={toggle} fade={false} className="new-customer modal-lg">
-        <ModalHeader toggle={toggle}>Uploaded Documents</ModalHeader>
+        <ModalHeader toggle={toggle}>Project Files</ModalHeader>
         <ModalBody>
-          {documents?.length ? (
-            <div style={{ overflowX: "auto" }}>
-              <table className="table" style={{ minWidth: "600px" }}>
-                <thead>
-                  <tr>
-                    <th style={{ width: "60%" }}>File Name</th>
-                    <th style={{ width: "20%" }}>Date Uploaded</th>
-                    <th style={{ width: "20%" }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {documents.map((doc) => (
-                    <tr key={doc.document_id}>
-                      <td style={{ fontSize: "14px" }}>{doc.document_name}</td>
-                      <td style={{ fontSize: "14px" }}>
-                        {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "-"}
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                          {!isProduction && (
-                            <StyledTooltip title="Reprocess Document" arrow>
-                              <span>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleReprocess(doc.document_id, doc.document_name)}
-                                  disabled={isReprocessing || isDownloading || isDeleting}
-                                  style={{ 
-                                    color: '#1976d2',
-                                    // padding: '4px'
-                                  }}
-                                >
-                                  <ReprocessIcon style={{ width: '20px', height: '20px' }}/>
-                                </IconButton>
-                              </span>
-                            </StyledTooltip>
-                          )}
-                          <StyledTooltip title="Download Document" arrow>
-                            <span>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleDownload(doc.document_id, doc.document_name)}
-                                disabled={isReprocessing || isDownloading || isDeleting}
-                                style={{ 
-                                  color: '#1976d2',
-                                  padding: '4px'
-                                }}
-                              >
-                                <DownloadIcon style={{ width: '20px', height: '20px' }}/>  
-                              </IconButton>
-                            </span>
-                          </StyledTooltip>
-                          {!isProduction && (
-                            <StyledTooltip title="Delete Document" arrow>
-                              <span>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleDeleteClick(doc.document_id, doc.document_name)}
-                                  disabled={isReprocessing || isDownloading || isDeleting}
-                                  style={{ 
-                                    color: '#d32f2f',
-                                    padding: '4px'
-                                  }}
-                                >
-                                  <TrashIcon style={{ width: '20px', height: '20px' }}/>  
-                                </IconButton>
-                              </span>
-                            </StyledTooltip>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div>No documents uploaded yet.</div>
-          )}
+          <Nav tabs>
+            <NavItem>
+              <NavLink
+                className={activeTab === 'documents' ? 'active' : ''}
+                onClick={() => setActiveTab('documents')}
+              >
+                Documents ({documents?.length || 0})
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink
+                className={activeTab === 'spec-sections' ? 'active' : ''}
+                onClick={() => setActiveTab('spec-sections')}
+              >
+                Spec Sections ({specSectionCount})
+              </NavLink>
+            </NavItem>
+          </Nav>
+          <TabContent activeTab={activeTab}>
+            <TabPane tabId="documents">
+              <div style={{ marginTop: '20px' }}>
+                <div>
+                  {documents?.length ? (
+                    <div style={{ overflowX: "auto" }}>
+                      <table className="table" style={{ minWidth: "600px" }}>
+                        <thead>
+                          <tr>
+                            <th style={{ width: "60%" }}>File Name</th>
+                            <th style={{ width: "20%" }}>Date Uploaded</th>
+                            <th style={{ width: "20%" }}>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {documents.map((doc) => (
+                            <tr key={doc.document_id}>
+                              <td style={{ fontSize: "14px" }}>{doc.document_name}</td>
+                              <td style={{ fontSize: "14px" }}>
+                                {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "-"}
+                              </td>
+                              <td>
+                                <div style={{ display: 'flex', gap: '4px' }}>
+                                  {!isProduction && (
+                                    <StyledTooltip title="Reprocess Document" arrow>
+                                      <span>
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleReprocess(doc.document_id, doc.document_name)}
+                                          disabled={isReprocessing || isDownloading || isDeleting}
+                                          style={{ 
+                                            color: '#1976d2',
+                                          }}
+                                        >
+                                          <ReprocessIcon style={{ width: '20px', height: '20px' }}/>
+                                        </IconButton>
+                                      </span>
+                                    </StyledTooltip>
+                                  )}
+                                  <StyledTooltip title="Download Document" arrow>
+                                    <span>
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleDownload(doc.document_id, doc.document_name)}
+                                        disabled={isReprocessing || isDownloading || isDeleting}
+                                        style={{ 
+                                          color: '#1976d2',
+                                          padding: '4px'
+                                        }}
+                                      >
+                                        <DownloadIcon style={{ width: '20px', height: '20px' }}/>  
+                                      </IconButton>
+                                    </span>
+                                  </StyledTooltip>
+                                  {!isProduction && (
+                                    <StyledTooltip title="Delete Document" arrow>
+                                      <span>
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleDeleteClick(doc.document_id, doc.document_name)}
+                                          disabled={isReprocessing || isDownloading || isDeleting}
+                                          style={{ 
+                                            color: '#d32f2f',
+                                            padding: '4px'
+                                          }}
+                                        >
+                                          <TrashIcon style={{ width: '20px', height: '20px' }}/>  
+                                        </IconButton>
+                                      </span>
+                                    </StyledTooltip>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div>No documents uploaded yet.</div>
+                  )}
+                </div>
+              </div>
+            </TabPane>
+            <TabPane tabId="spec-sections">
+              <div style={{ marginTop: '20px' }}>
+                <SpecSectionsTab 
+                  projectId={projectId} 
+                  projectVersionId={projectVersionId} 
+                />
+              </div>
+            </TabPane>
+          </TabContent>
         </ModalBody>
         <ModalFooter>
           <Button color="secondary" onClick={toggle} disabled={isReprocessing || isDownloading || isDeleting}>

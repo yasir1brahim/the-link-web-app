@@ -24,7 +24,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion , getArchivedVersions} from "../../api/Projects/api";
 import { getUserRoleInTeam } from "../../api/Authentication/api";
-import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem } from "../../api/ProjectLogs/api";
+import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem, getSpecSections } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
 import ProjectLogsActionPanel from "../shared/Header/ProjectLogsActionPanel";
@@ -40,6 +40,7 @@ import useCompanyDetails from "../../hooks/useCompanyDetails";
 import useDocumentRefresh from "../../hooks/useDocumentRefresh";
 import DocumentListModal from "./DocumentListModal";
 import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
+import SpecViewer from "../SpecCentricView/SpecViewer";
 
 
 const ProjectLogs = () => {
@@ -49,9 +50,10 @@ const ProjectLogs = () => {
     isVersionComparisonSearchFlagActive,
     isSpecGptFlagActive, 
     isInspectionLogFlagActive,
-    isQaPlannerFlagActive
+    isQaPlannerFlagActive,
+    isSpecCenteredViewFlagActive
   } = useFeatureFlags();
-
+  const [defaultTab, setDefaultTab] = useState("documents"); 
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
   const [showDuplicateFilesModal, setShowDuplicateFilesModal] = useState(false);
   const [duplicateFiles, setDuplicateFiles] = useState([]);
@@ -250,6 +252,22 @@ const ProjectLogs = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [docParsed, setDocParsed] = useState(0);
+  const [specSectionCount, setSpecSectionCount] = useState(0);
+  const openDocumentModal = (tabName) => {
+    setDefaultTab(tabName);
+    setShowDocumentListModal(true);
+  };
+
+  const fetchSpecSectionCount = async () => {
+    try {
+      const response = await getSpecSections(projectId, projectVersionId);
+      const count = response.data?.total_sections || 0;
+      setSpecSectionCount(count);
+    } catch (error) {
+      console.error('Error fetching spec section count:', error);
+      setSpecSectionCount(0);
+    }
+  };
 
   const getProcoreAccessTokenData = async () => {
     try {
@@ -453,6 +471,7 @@ const ProjectLogs = () => {
     }
   };
 
+
   useEffect(() => {
     const initLoading = async () => {
       await getProcoreAccessTokenData();
@@ -505,6 +524,8 @@ const ProjectLogs = () => {
         
         // Fetch log data with the correct version
         await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
+        // Fetch spec section count
+        await fetchSpecSectionCount();
         
       } catch (error) {
         console.log("error", error);
@@ -530,7 +551,7 @@ const ProjectLogs = () => {
   // Handle activeTab changes from URL parameters
   useEffect(() => {
     const tabFromUrl = searchParams.get("tab");
-    if (tabFromUrl && (tabFromUrl === 'submittal' || tabFromUrl === 'compass')) {
+    if (tabFromUrl && (tabFromUrl === 'submittal' || tabFromUrl === 'compass' || tabFromUrl === 'spec-view')) {
       setActiveTab(tabFromUrl);
     }
   }, [searchParams]);
@@ -1532,12 +1553,13 @@ const ProjectLogs = () => {
       
       setDocumentData(projectResponse.data.document_details);
       await fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+      await fetchSpecSectionCount();
     } catch (e) {
       handleError(e);
     } finally {
       setIsDataLoading(false);
     }
-  }, [projectId, projectVersionId, rowsPerPage]);
+  }, [projectId, projectVersionId, rowsPerPage, fetchSpecSectionCount]);
 
   const handleViewArchivedVersions = async () => {
     try {
@@ -1630,6 +1652,7 @@ const ProjectLogs = () => {
             setEditingVersionName={setEditingVersionName}
             onViewArchivedVersions={handleViewArchivedVersions}
             isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
+            isSpecCenteredViewFlagActive={isSpecCenteredViewFlagActive(teamId)}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
           />
@@ -1671,8 +1694,10 @@ const ProjectLogs = () => {
               procoreAccessToken={procoreAccessToken}
               procoreAuthUrl={procoreAuthUrl}
               handleExportToProcoreButtonClick={handleExportToProcoreButtonClick}
-              onShowDocumentListModal={() => setShowDocumentListModal(true)}
+              onShowDocumentListModal={() => openDocumentModal('documents')}
+              onShowSpecSectionListModal={() => openDocumentModal('spec-sections')}
               docParsed={documentData?.length || 0}
+              specSectionCount={specSectionCount}
               totalCount={totalCount}
               showBtn={"Upload Documents"}
               toggleModal={toggleModal}
@@ -1804,10 +1829,11 @@ const ProjectLogs = () => {
                   <div
                     style={{
                       position: "absolute",
-                      marginTop: "10px",
+                      marginTop: "5px",
                       fontStyle: "italic",
-                      fontSize: "14px",
-                      width: "30%"
+                      fontSize: "11px",
+                      width: "30%",
+                      zIndex: "1000"
                     }}
                   >
                       <strong>Note: </strong>
@@ -1859,9 +1885,19 @@ const ProjectLogs = () => {
                   setIsGeneratingLog={setIsSpecGptGeneratingLog}
                   isChatEnabled={isSpecGptChatEnabled}
                   setIsChatEnabled={setIsSpecGptChatEnabled}
+                  teamId={teamId}
                 />
               </ChakraProvider>
               </div>
+            </>
+          }
+          {activeTab == 'spec-view' && 
+            <>
+            <SpecViewer 
+              projectId={projectId}
+              projectVersionId={projectVersionId}
+              teamId={teamId}
+            />
             </>
           }
         </div>
@@ -1881,15 +1917,6 @@ const ProjectLogs = () => {
         toggleSuccessModal={toggleSuccessModal}
         alreadyExistingFiles={alreadyExistingFiles}
         uploadErrorMessage={uploadErrorMessage}
-      />
-      <Procore
-        companyId={companyId}
-        companyList={companyList}
-        procoreModal={procoreModal}
-        projectId={projectId}
-        toggleProcoreModal={toggleProcoreModal}
-        setProcoreModal={setProcoreModal}
-        setExportToProcoreModal={setExportToProcoreModal}
       />
       <ManageProcore
         procoreAuthUserInfo={procoreAuthUserInfo}
@@ -2169,6 +2196,10 @@ const ProjectLogs = () => {
         documents={documentData}
         onAfterReprocess={refreshDocumentsAndSubmittals}
         onAfterDelete={refreshDocumentsAndSubmittals}
+        projectId={projectId}
+        projectVersionId={projectVersionId}
+        specSectionCount={specSectionCount}
+        defaultTab={defaultTab}
       />
 
       {showVersionModal && <ManageVersionModal

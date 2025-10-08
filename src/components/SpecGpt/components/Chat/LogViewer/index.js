@@ -613,13 +613,16 @@ const LogViewer = ({
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
+        const datePart = date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
         });
+        const timePart = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+        return { datePart, timePart };
     };
 
     if (loading) {
@@ -666,23 +669,44 @@ const LogViewer = ({
                                     <Box w="100%" bg="#24314D" p={4} borderRadius="8px">
                                         <VStack align="start" spacing={2}>
                                             <HStack justify="space-between" w="100%">
-                                                {logMessage.log_status != 'SUCCESS' && (
+                                                {logMessage.log_status === 'PROCESSING' ? (
+                                                    <Badge 
+                                                        colorScheme={getStatusColor(logMessage.log_status)} 
+                                                        variant="subtle"
+                                                        w="100%"
+                                                        display="flex"
+                                                        justifyContent="center"
+                                                        alignItems="center"
+                                                        gap={2}
+                                                    >
+                                                        <Spinner size="xs" color={`${getStatusColor(logMessage.log_status)}.400`} />
+                                                        {logMessage.log_status}
+                                                    </Badge>
+                                                ) : logMessage.log_status != 'SUCCESS' ? (
                                                     <HStack spacing={2}>
-                                                        {logMessage.log_status === 'PROCESSING' ? (
-                                                            <Spinner size="xs" color={`${getStatusColor(logMessage.log_status)}.400`} />
-                                                        ) : (
-                                                            getStatusIcon(logMessage.log_status) && 
+                                                        {getStatusIcon(logMessage.log_status) && 
                                                             <Icon as={getStatusIcon(logMessage.log_status)} color={`${getStatusColor(logMessage.log_status)}.400`} />
-                                                        )}
+                                                        }
                                                         <Badge colorScheme={getStatusColor(logMessage.log_status)} variant="subtle">
                                                             {logMessage.log_status}
                                                         </Badge>
                                                     </HStack>
-                                                )}
+                                                ) : null}
 
-                                                <Text fontSize="s" color="#676F74">
-                                                    {logMessage.log_status === 'SUCCESS' ? `Generated on ${formatDate(logMessage.created_at)}` : `Last updated on ${formatDate(logMessage.created_at)}`}
-                                                </Text>
+                                                {logMessage.log_status === 'SUCCESS' && (
+                                                   <VStack align="start" spacing={0}>
+                                                   <Text fontSize="s" color="#ffffff" lineHeight="1.1">
+                                                     Last Generated:
+                                                   </Text>
+                                                   <Text fontSize="s" color="#ffffff" lineHeight="1.1">
+                                                     {formatDate(logMessage.created_at).datePart}
+                                                   </Text>
+                                                   <Text fontSize="s" color="#ffffff" lineHeight="1.1">
+                                                     {formatDate(logMessage.created_at).timePart}
+                                                   </Text>
+                                                 </VStack>
+                                                 
+                                                )}
                                             </HStack>
                                         </VStack>
                                     </Box>

@@ -1,0 +1,200 @@
+/* DocumentHighlighter Styles */
+.document-highlighter-container {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 200px);
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.document-content {
+  padding: 12px;
+  line-height: 1.6;
+  color: #333;
+  font-size: 14px;
+}
+
+.document-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 200px);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+}
+
+.placeholder-content {
+  text-align: center;
+  color: #6c757d;
+  max-width: 400px;
+  padding: 20px;
+}
+
+.placeholder-content h3 {
+  margin: 0 0 16px 0;
+  color: #495057;
+  font-size: 1.5rem;
+}
+
+.placeholder-content p {
+  margin: 0 0 24px 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.placeholder-features {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.feature-icon {
+  font-size: 1.2rem;
+}
+
+/* Highlight Overlay Styles */
+.document-highlight-overlay {
+  position: absolute;
+  pointer-events: auto;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.document-highlight-overlay:hover {
+  z-index: 20;
+}
+
+/* Highlights Legend */
+.highlights-legend {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 12px 16px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(4px);
+  z-index: 5;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #495057;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* Interactive States */
+.document-highlighter-container:focus-within .document-highlight-overlay {
+  opacity: 0.8;
+}
+
+.document-highlighter-container:focus-within .document-highlight-overlay:hover {
+  opacity: 1;
+}
+
+/* Animation for highlight appearance */
+@keyframes highlightAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.document-highlight-overlay {
+  animation: highlightAppear 0.3s ease-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .document-content {
+    padding: 16px;
+    font-size: 13px;
+  }
+  
+  .placeholder-content {
+    padding: 16px;
+  }
+  
+  .placeholder-content h3 {
+    font-size: 1.3rem;
+  }
+  
+  .feature-item {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .highlights-legend {
+    top: 12px;
+    right: 12px;
+    padding: 8px 12px;
+  }
+  
+  .legend-item {
+    font-size: 0.8rem;
+  }
+  
+  .legend-color {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .document-highlighter-container {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  .document-highlight-overlay {
+    background-color: transparent !important;
+    border: 2px solid #000 !important;
+  }
+  
+  .highlights-legend {
+    display: none;
+  }
+}
+
+/* Spec Viewer specific overrides */
+.document-highlighter-container #pdf-div {
+  height: calc(100vh - 180px) !important;
+}
+
+
+/* Spec Viewer specific overrides */
+.spec-viewer-pdf-wrapper #pdf-div {
+  height: calc(100vh - 180px) !important;
+}
+
+.spec-viewer-pdf-wrapper #pdf-div > div {
+  height: calc(100vh - 180px) !important;
+}
