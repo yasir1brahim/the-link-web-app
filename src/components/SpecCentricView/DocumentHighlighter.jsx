@@ -68,7 +68,7 @@ const DocumentHighlighter = ({
 
   if (!documentUrl) {
     return (
-      <div className="document-highlighter-container">
+      <div className="document-highlighter-container spec-viewer-pdf-wrapper">
         <div className="document-placeholder">
           <div className="placeholder-content">
             <h3>Document Viewer</h3>
@@ -81,7 +81,7 @@ const DocumentHighlighter = ({
 
 
   return (
-    <div className="document-highlighter-container">
+    <div className="document-highlighter-container spec-viewer-pdf-wrapper">
       <ProjectLogsReader
         key={`${documentUrl}-${JSON.stringify(currentHighlights)}`} // Force re-render when document or highlights change
         url={documentUrl}
