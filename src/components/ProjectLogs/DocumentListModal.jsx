@@ -1,14 +1,10 @@
 import React, { useState,useEffect } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap";
-import { reprocessDocument, downloadDocument, deleteDocument } from "../../api/ProjectLogs/api";
+import { deleteDocument } from "../../api/ProjectLogs/api";
 import { toast } from "react-toastify";
 import Loader from "../shared/Loader/Loader";
-import { IconButton } from "@mui/material";
-import { ReactComponent as ReprocessIcon } from "../../assets/images/file-reprocess.svg";
-import { ReactComponent as DownloadIcon } from "../../assets/images/file-download.svg";
-import { ReactComponent as TrashIcon } from "../../assets/images/trash.svg";
-import StyledTooltip from "../shared/StyledTooltip/StyledTooltip";
 import SpecSectionsTab from "./SpecSectionsTab";
+import DocumentsTab from "./DocumentsTab";
 
 const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfterDelete, projectId, projectVersionId, specSectionCount = 0, defaultTab = "documents",  }) => {
   const [isReprocessing, setIsReprocessing] = useState(false);
@@ -27,56 +23,6 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
   // Check if we're in production environment
   const isProduction = window.location.hostname === 'app.thelink.ai';
 
-  const handleReprocess = async (documentId, documentName) => {
-    setIsReprocessing(true);
-    try {
-      console.log('Reprocessing document:', { documentId, documentName });
-      await reprocessDocument(documentId);
-
-      toast.success("Document reprocessing started successfully");
-
-      setIsReprocessing(false);
-      toggle();
-
-      if (onAfterReprocess) {
-        onAfterReprocess(documentId);
-      }
-
-    } catch (error) {
-      console.error('Error reprocessing document:', error);
-      const errorMessage = error.response?.data?.detail || 'Failed to reprocess document';
-      toast.error(`Error: ${errorMessage}`);
-    } finally {
-      setIsReprocessing(false);
-    }
-  };
-
-  const handleDownload = async (documentId, documentName) => {
-    setIsDownloading(true);
-    try {
-      await downloadDocument(documentId);
-      toast.success("Document Downloaded Successfully");
-    } catch (error) {
-      console.error('Error downloading document:', error);
-      
-      // Provide more specific error messages
-      let errorMessage = 'Failed to download document';
-      
-      if (error.message?.includes('popup was blocked')) {
-        errorMessage = 'Download failed and popup was blocked. Please allow popups and try again.';
-      } else if (error.message?.includes('HTTP')) {
-        errorMessage = 'Document is temporarily unavailable. Please try again later.';
-      } else if (error.response?.data?.detail) {
-        errorMessage = error.response.data.detail;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      toast.error(`Error: ${errorMessage}`);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
 
   const handleDeleteClick = (documentId, documentName) => {
     setDocumentToDelete({ id: documentId, name: documentName });
@@ -143,85 +89,12 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
           <TabContent activeTab={activeTab}>
             <TabPane tabId="documents">
               <div style={{ marginTop: '20px' }}>
-                <div>
-                  {documents?.length ? (
-                    <div style={{ overflowX: "auto" }}>
-                      <table className="table" style={{ minWidth: "600px" }}>
-                        <thead>
-                          <tr>
-                            <th style={{ width: "60%" }}>File Name</th>
-                            <th style={{ width: "20%" }}>Date Uploaded</th>
-                            <th style={{ width: "20%" }}>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {documents.map((doc) => (
-                            <tr key={doc.document_id}>
-                              <td style={{ fontSize: "14px" }}>{doc.document_name}</td>
-                              <td style={{ fontSize: "14px" }}>
-                                {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "-"}
-                              </td>
-                              <td>
-                                <div style={{ display: 'flex', gap: '4px' }}>
-                                  {!isProduction && (
-                                    <StyledTooltip title="Reprocess Document" arrow>
-                                      <span>
-                                        <IconButton
-                                          size="small"
-                                          onClick={() => handleReprocess(doc.document_id, doc.document_name)}
-                                          disabled={isReprocessing || isDownloading || isDeleting}
-                                          style={{ 
-                                            color: '#1976d2',
-                                          }}
-                                        >
-                                          <ReprocessIcon style={{ width: '20px', height: '20px' }}/>
-                                        </IconButton>
-                                      </span>
-                                    </StyledTooltip>
-                                  )}
-                                  <StyledTooltip title="Download Document" arrow>
-                                    <span>
-                                      <IconButton
-                                        size="small"
-                                        onClick={() => handleDownload(doc.document_id, doc.document_name)}
-                                        disabled={isReprocessing || isDownloading || isDeleting}
-                                        style={{ 
-                                          color: '#1976d2',
-                                          padding: '4px'
-                                        }}
-                                      >
-                                        <DownloadIcon style={{ width: '20px', height: '20px' }}/>  
-                                      </IconButton>
-                                    </span>
-                                  </StyledTooltip>
-                                  {!isProduction && (
-                                    <StyledTooltip title="Delete Document" arrow>
-                                      <span>
-                                        <IconButton
-                                          size="small"
-                                          onClick={() => handleDeleteClick(doc.document_id, doc.document_name)}
-                                          disabled={isReprocessing || isDownloading || isDeleting}
-                                          style={{ 
-                                            color: '#d32f2f',
-                                            padding: '4px'
-                                          }}
-                                        >
-                                          <TrashIcon style={{ width: '20px', height: '20px' }}/>  
-                                        </IconButton>
-                                      </span>
-                                    </StyledTooltip>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <div>No documents uploaded yet.</div>
-                  )}
-                </div>
+                <DocumentsTab 
+                  documents={documents}
+                  onAfterReprocess={onAfterReprocess}
+                  onAfterDelete={onAfterDelete}
+                  isProduction={isProduction}
+                />
               </div>
             </TabPane>
             <TabPane tabId="spec-sections">
