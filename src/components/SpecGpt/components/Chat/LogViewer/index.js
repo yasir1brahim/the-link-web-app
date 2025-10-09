@@ -214,7 +214,8 @@ const LogViewer = ({
             return [
                 { 
                     key: 'Spec Section #', 
-                    label: 'Spec Section #', 
+                    // label: 'Spec Section #',
+                    label: (<span>Spec<br />Section#</span>), 
                     sortable: true, 
                     filterable: true, // Add filter capability
                     width: 12,
@@ -222,10 +223,10 @@ const LogViewer = ({
                 },
                 { 
                     key: 'Spec Section Name', 
-                    label: 'Spec Section Name', 
+                    label: (<span>Spec Section<br/>Name</span>), 
                     sortable: true, 
                     width: 16,
-                    minWidth: 140,
+                    minWidth: 100,
                     expandable: true
                 },
                 { 
@@ -256,7 +257,7 @@ const LogViewer = ({
                 },
                 { 
                     key: 'Responsible Party', 
-                    label: 'Responsible Party', 
+                    label: (<span>Responsible<br/>Party</span>), 
                     sortable: true, 
                     filterable: true, // Add filter capability
                     width: 12,

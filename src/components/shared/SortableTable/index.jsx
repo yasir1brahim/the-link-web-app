@@ -195,39 +195,41 @@ const SortableTable = ({
             style={{ width: `${tableWidths[index]}px` }}
           >
             <div className="d-flex">
-                      <span>{column.label}</span>
-            {column.sortable && (
-              <span
-                style={{ cursor: "pointer", marginLeft: "6px" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSorting(column.key);
-                }}
-              >
-                <SortIcon />
-              </span>
-            )}
-            {column.filterable && (
-              <span
-                style={{ cursor: "pointer", marginLeft: "6px" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleFilterClick(column.key);
-                }}
-              >
-                <FilterIcon 
-                  isActive={filterValues[column.key] && filterValues[column.key].length > 0}
-                />
-              </span>
-            )}
-              {column.resizable !== false && (
-                <div
-                  className="resizer"
-                  onMouseDown={(e) => handleMouseDown(e, index)}
-                >
-                  |
-                </div>
-              )}
+              <span style={{width:'80%'}}>{column.label}</span>
+              <div className="d-flex align-items-center justify-content-center gap-0">
+                {column.sortable && (
+                  <span
+                    style={{ cursor: "pointer" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSorting(column.key);
+                    }}
+                  >
+                    <SortIcon />
+                  </span>
+                )}
+                {column.filterable && (
+                  <span
+                    style={{ cursor: "pointer" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFilterClick(column.key);
+                    }}
+                  >
+                    <FilterIcon
+                      isActive={filterValues[column.key] && filterValues[column.key].length > 0}
+                    />
+                  </span>
+                )}
+                {column.resizable !== false && (
+                  <div
+                    className="resizer"
+                    onMouseDown={(e) => handleMouseDown(e, index)}
+                  >
+                    |
+                  </div>
+                )}
+              </div>
             </div>
           </th>
           );
