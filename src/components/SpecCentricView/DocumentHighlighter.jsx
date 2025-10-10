@@ -8,7 +8,8 @@ const DocumentHighlighter = ({
   highlightsEnabled = true, 
   onHighlightClick,
   documentUrl = null,
-  documentId = null
+  documentId = null,
+  activeFilters = new Set()
 }) => {
 
   // ensure highlight locations are in the correct format
@@ -43,7 +44,7 @@ const DocumentHighlighter = ({
     return highlightLocations;
   };
 
-  // Map AI log highlights to location format
+  // Map AI log highlights to location format with type information
   const mapAiLogHighlightLocations = (aiLogHighlights) => {
     const highlightLocations = [];
     for (const logItem of aiLogHighlights) {
@@ -53,18 +54,22 @@ const DocumentHighlighter = ({
         continue;
       }
       
-      // Add all pdf_locations for this log item
+      // Add all pdf_locations for this log item with type information
       for (const location of logItem.pdf_locations) {
         highlightLocations.push({
           page_no: location.page_no,
           x: location.x,
           y: location.y,
           width: location.width,
-          height: location.height
+          height: location.height,
+          // Include type information for color coding
+          extraction_type: logItem.extraction_type, // e.g., 'qa_planner', 'inspection_log'
+          item_type: logItem.item_type, // e.g., 'inspections', 'warranties', 'certificates'
+          requirement_text: logItem.requirement_text
         });
       }
     }
-    console.log('[SPEC_VIEWER_DEBUG] Mapped AI log highlights:', highlightLocations);
+    console.log('[SPEC_VIEWER_DEBUG] Mapped AI log highlights with types:', highlightLocations);
     return highlightLocations;
   };
 
@@ -124,7 +129,7 @@ const DocumentHighlighter = ({
   return (
     <div className="document-highlighter-container spec-viewer-pdf-wrapper">
       <ProjectLogsReader
-        key={`${documentUrl}-${JSON.stringify(currentHighlights)}-${JSON.stringify(currentAiLogHighlights)}`} // Force re-render when document or highlights change
+        key={`${documentUrl}-${JSON.stringify(currentHighlights)}-${JSON.stringify(currentAiLogHighlights)}-${Array.from(activeFilters).join(',')}`} // Force re-render when document, highlights, or filters change
         url={documentUrl}
         highlightLocations={currentHighlights}
         aiLogHighlightLocations={currentAiLogHighlights}
@@ -138,6 +143,7 @@ const DocumentHighlighter = ({
         setLoading={() => {}}
         onError={() => {}}
         highlightsEnabled={currentHighlightsEnabled}
+        activeFilters={activeFilters}
       />
     </div>
   );

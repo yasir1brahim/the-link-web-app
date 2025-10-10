@@ -19,6 +19,7 @@ const ProjectLogsReader = ({
   setLoading,
   onError,
   highlightsEnabled = true,
+  activeFilters = new Set(),
 }) => {
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
@@ -53,7 +54,7 @@ const ProjectLogsReader = ({
   }, [url]);
 
   useEffect(() => {
-    console.log('[SPEC_VIEWER_DEBUG] Highlight locations, document loaded, or highlights enabled changed:', {
+    console.log('[SPEC_VIEWER_DEBUG] Highlight locations, document loaded, highlights enabled, or filters changed:', {
       url,
       currentUrl,
       hasWebViewer: !!webViewer,
@@ -62,7 +63,8 @@ const ProjectLogsReader = ({
       aiLogHighlightLocationsLength: aiLogHighlightLocations?.length,
       highlightLocations,
       aiLogHighlightLocations,
-      highlightsEnabled
+      highlightsEnabled,
+      activeFilters: Array.from(activeFilters)
     });
     
     if (url === currentUrl && webViewer && documentLoaded) {
@@ -75,7 +77,7 @@ const ProjectLogsReader = ({
         documentLoaded
       });
     }
-  }, [highlightLocations, aiLogHighlightLocations, documentLoaded, highlightsEnabled]);
+  }, [highlightLocations, aiLogHighlightLocations, documentLoaded, highlightsEnabled, activeFilters]);
 
   const handleClose = () => {
     setLogInViewer(null);
@@ -219,40 +221,102 @@ const ProjectLogsReader = ({
       }
       
       // Add submittal highlights (yellow/green color)
-      for (let i = 0; i < highlightLocations?.length; i++) {
-        const rectangleAnnot = new Annotations.RectangleAnnotation({
-          PageNumber: highlightLocations[i]?.page_no,
-          X: highlightLocations[i]?.x,
-          Y: highlightLocations[i]?.y,
-          Width: highlightLocations[i]?.width ?? 10000,
-          Height: highlightLocations[i]?.height ?? 30,
-          Color: new Annotations.Color(213, 231, 62, 0.25),
-          FillColor: new Annotations.Color(213, 231, 62, 0.25),
-        });
-        rectangleAnnot.Subject = 'Submittal Highlight';
-        _annotations.push(rectangleAnnot);
-        annotationManager.addAnnotation(rectangleAnnot);
-        annotationManager.redrawAnnotation(rectangleAnnot);
+      // Apply filter: if filters are active and 'submittal' is not in the filter set, skip
+      const shouldShowSubmittals = activeFilters.size === 0 || activeFilters.has('submittal');
+      if (shouldShowSubmittals) {
+        for (let i = 0; i < highlightLocations?.length; i++) {
+          const rectangleAnnot = new Annotations.RectangleAnnotation({
+            PageNumber: highlightLocations[i]?.page_no,
+            X: highlightLocations[i]?.x,
+            Y: highlightLocations[i]?.y,
+            Width: highlightLocations[i]?.width ?? 10000,
+            Height: highlightLocations[i]?.height ?? 30,
+            Color: new Annotations.Color(213, 231, 62, 0.25),
+            FillColor: new Annotations.Color(213, 231, 62, 0.25),
+          });
+          rectangleAnnot.Subject = 'Submittal Highlight';
+          rectangleAnnot.CustomData = {
+            item_type: 'submittal',
+            extraction_type: 'submittal'
+          };
+          _annotations.push(rectangleAnnot);
+          annotationManager.addAnnotation(rectangleAnnot);
+          annotationManager.redrawAnnotation(rectangleAnnot);
+        }
+        console.log('[SPEC_VIEWER_DEBUG] Created submittal annotations:', highlightLocations?.length || 0);
+      } else {
+        console.log('[SPEC_VIEWER_DEBUG] Submittal annotations filtered out by active filters');
       }
-      console.log('[SPEC_VIEWER_DEBUG] Created submittal annotations:', highlightLocations?.length || 0);
       
-      // Add AI log highlights (blue/purple color)
+      // Helper function to get color based on AI log item type
+      const getColorForItemType = (itemType, extractionType) => {
+        // QA Planner item types with distinct colors
+        const qaColorMap = {
+          'inspections': { r: 255, g: 99, b: 71 },         // Tomato red
+          'warranties': { r: 60, g: 179, b: 113 },         // Medium sea green
+          'certificates': { r: 255, g: 165, b: 0 },        // Orange
+          'closeout_submittals': { r: 138, g: 43, b: 226 }, // Blue violet
+          'test_reports': { r: 30, g: 144, b: 255 },       // Dodger blue
+          'commissioning': { r: 255, g: 20, b: 147 },      // Deep pink
+          'delegated_design': { r: 75, g: 0, b: 130 },     // Indigo
+          'mock_ups_sample_construction': { r: 218, g: 165, b: 32 }, // Goldenrod
+          'pre_installation_meetings': { r: 32, g: 178, b: 170 }, // Light sea green
+        };
+        
+        // Extraction type colors (fallback if item type not found)
+        const extractionColorMap = {
+          'qa_planner': { r: 100, g: 149, b: 237 },        // Cornflower blue (default)
+          'inspection_log': { r: 255, g: 127, b: 80 },     // Coral
+          'owner_deliverables_log': { r: 147, g: 112, b: 219 }, // Medium purple
+        };
+        
+        // Try to get color from item type first, then extraction type, then default
+        let color = qaColorMap[itemType] || extractionColorMap[extractionType] || { r: 100, g: 149, b: 237 };
+        
+        return new Annotations.Color(color.r, color.g, color.b, 0.25);
+      };
+      
+      // Add AI log highlights with different colors based on type
+      // Apply filter: if filters are active, only show highlights whose item_type is in the filter set
+      let filteredCount = 0;
+      let addedCount = 0;
       for (let i = 0; i < aiLogHighlightLocations?.length; i++) {
+        const location = aiLogHighlightLocations[i];
+        const itemType = location?.item_type;
+        
+        // Check if this highlight should be shown based on active filters
+        const shouldShow = activeFilters.size === 0 || activeFilters.has(itemType);
+        
+        if (!shouldShow) {
+          filteredCount++;
+          console.log('[SPEC_VIEWER_DEBUG] Filtering out AI log highlight with item_type:', itemType);
+          continue;
+        }
+        
+        console.log('[SPEC_VIEWER_DEBUG] Adding AI log highlight:', location);
+        const color = getColorForItemType(location?.item_type, location?.extraction_type);
+        
         const rectangleAnnot = new Annotations.RectangleAnnotation({
-          PageNumber: aiLogHighlightLocations[i]?.page_no,
-          X: aiLogHighlightLocations[i]?.x,
-          Y: aiLogHighlightLocations[i]?.y,
-          Width: aiLogHighlightLocations[i]?.width ?? 10000,
-          Height: aiLogHighlightLocations[i]?.height ?? 30,
-          Color: new Annotations.Color(100, 149, 237, 0.25), // Cornflower blue
-          FillColor: new Annotations.Color(100, 149, 237, 0.25),
+          PageNumber: location?.page_no,
+          X: location?.x,
+          Y: location?.y,
+          Width: location?.width ?? 10000,
+          Height: location?.height ?? 30,
+          Color: color,
+          FillColor: color,
         });
-        rectangleAnnot.Subject = 'AI Log Highlight';
+        rectangleAnnot.Subject = `AI Log Highlight - ${location?.item_type || location?.extraction_type || 'Unknown'}`;
+        rectangleAnnot.CustomData = {
+          item_type: location?.item_type,
+          extraction_type: location?.extraction_type,
+          requirement_text: location?.requirement_text
+        };
         _annotations.push(rectangleAnnot);
         annotationManager.addAnnotation(rectangleAnnot);
         annotationManager.redrawAnnotation(rectangleAnnot);
+        addedCount++;
       }
-      console.log('[SPEC_VIEWER_DEBUG] Created AI log annotations:', aiLogHighlightLocations?.length || 0);
+      console.log('[SPEC_VIEWER_DEBUG] Created AI log annotations with color coding:', addedCount, 'filtered out:', filteredCount);
       
       setAnnotations(_annotations);
       console.log('[SPEC_VIEWER_DEBUG] All annotations created and set:', _annotations.length);
