@@ -4,6 +4,7 @@ import SpecViewerSidebar from './SpecViewerSidebar';
 import SubmittalHighlights from './SubmittalHighlights';
 import DocumentHighlighter from './DocumentHighlighter';
 import HighlightTooltip from './HighlightTooltip';
+import HighlightLegend from './HighlightLegend';
 import './SpecViewer.css';
 
 const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
@@ -14,6 +15,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tooltip, setTooltip] = useState({ visible: false, highlight: null, position: { x: 0, y: 0 } });
+  const [activeFilters, setActiveFilters] = useState(new Set());
 
   // Load initial spec data
   useEffect(() => {
@@ -93,6 +95,11 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
     // This could open a detailed modal or navigate to a details page
   };
 
+  const handleFilterChange = (newFilters) => {
+    console.log('[SPEC_VIEWER_DEBUG] Active filters changed:', newFilters);
+    setActiveFilters(newFilters);
+  };
+
   if (loading && !specData) {
     return (
       <div className="spec-viewer-loading">
@@ -154,10 +161,12 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
                 <div className="spec-document-viewer">
                   <DocumentHighlighter
                     highlights={sectionContent.submittal_highlights || []}
+                    aiLogHighlights={sectionContent.ai_log_highlights || []}
                     highlightsEnabled={highlightsEnabled}
                     onHighlightClick={handleHighlightClick}
                     documentUrl={selectedSection?.pdf_url}
                     documentId={selectedSection?.document_id}
+                    activeFilters={activeFilters}
                   />
                 </div>
               </div>
@@ -178,6 +187,15 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
         onClose={handleTooltipClose}
         onViewDetails={handleViewDetails}
       />
+      
+      {/* Highlight Color Legend */}
+      {highlightsEnabled && selectedSection && sectionContent && (
+        <HighlightLegend 
+          submittalHighlights={sectionContent.submittal_highlights || []}
+          aiLogHighlights={sectionContent.ai_log_highlights || []}
+          onFilterChange={handleFilterChange}
+        />
+      )}
     </div>
   );
 };
