@@ -8,6 +8,7 @@ import { useS3LinkValidation } from "../../hooks/useS3LinkValidation.js";
 const ProjectLogsReader = ({
   url,
   highlightLocations,
+  aiLogHighlightLocations = [],
   docId,
   setPdfData,
   setSubmittalIdParam,
@@ -28,6 +29,7 @@ const ProjectLogsReader = ({
   console.log('[SPEC_VIEWER_DEBUG] ProjectLogsReader props:', {
     url,
     highlightLocationsLength: highlightLocations?.length || 0,
+    aiLogHighlightLocationsLength: aiLogHighlightLocations?.length || 0,
     highlightLocations,
     docId,
     setPdfData,
@@ -57,7 +59,9 @@ const ProjectLogsReader = ({
       hasWebViewer: !!webViewer,
       documentLoaded,
       highlightLocationsLength: highlightLocations?.length,
+      aiLogHighlightLocationsLength: aiLogHighlightLocations?.length,
       highlightLocations,
+      aiLogHighlightLocations,
       highlightsEnabled
     });
     
@@ -71,7 +75,7 @@ const ProjectLogsReader = ({
         documentLoaded
       });
     }
-  }, [highlightLocations, documentLoaded, highlightsEnabled]);
+  }, [highlightLocations, aiLogHighlightLocations, documentLoaded, highlightsEnabled]);
 
   const handleClose = () => {
     setLogInViewer(null);
@@ -113,6 +117,31 @@ const ProjectLogsReader = ({
     });
   };
 
+  const getInitialPageLocation = (highlightLocations, aiLogHighlightLocations) => {
+    // Combine both arrays, filtering out any null/undefined items and invalid page numbers
+    const allLocations = [
+      ...(highlightLocations || []),
+      ...(aiLogHighlightLocations || [])
+    ].filter(location => 
+      location && 
+      typeof location.page_no === 'number' && 
+      location.page_no > 0 // PDF pages are 1-indexed, filter out 0 or negative
+    );
+    
+    if (allLocations.length === 0) {
+      console.warn('[SPEC_VIEWER_DEBUG] No valid page locations found (all page numbers were 0 or invalid)');
+      return null;
+    }
+    
+    // Find the object with the lowest page_no
+    const lowestPageObject = allLocations.reduce((lowest, current) => {
+      return (current.page_no < lowest.page_no) ? current : lowest;
+    });
+    
+    console.log('[SPEC_VIEWER_DEBUG] Found valid initial location with page_no:', lowestPageObject.page_no);
+    return lowestPageObject;
+  };
+
   const updateTxtView = (_webViewer) => {
     try {
       let tmpViewer = _webViewer ?? webViewer;
@@ -148,34 +177,49 @@ const ProjectLogsReader = ({
         return;
       }
 
-    if (tmpViewer && highlightLocations && highlightLocations.length > 0 && highlightLocations[0]?.page_no && highlightLocations[0]?.x && highlightLocations[0]?.y) {
-      console.log('[SPEC_VIEWER_DEBUG] setting initial page location:', highlightLocations[0]);
+      const highlightsAreAvailable = highlightLocations && highlightLocations.length > 0 && highlightLocations[0]?.page_no && highlightLocations[0]?.x && highlightLocations[0]?.y;
+      const aiLogHighlightsAreAvailable = aiLogHighlightLocations && aiLogHighlightLocations.length > 0;
+      console.log('[SPEC_VIEWER_DEBUG] Highlights are available:', highlightsAreAvailable);
+      console.log('[SPEC_VIEWER_DEBUG] AI log highlights are available:', aiLogHighlightsAreAvailable);
+
+    if (tmpViewer && (highlightsAreAvailable || aiLogHighlightsAreAvailable)) {
+      const initialLocation = getInitialPageLocation(highlightLocations, aiLogHighlightLocations);
+      console.log('[SPEC_VIEWER_DEBUG] setting initial page location:', initialLocation);
       
       // Check if document is loaded before trying to access it
       if (tmpViewer.Core.documentViewer && tmpViewer.Core.documentViewer.getDocument() && tmpViewer.Core.documentViewer.getPageCount() > 0) {
         console.log('[SPEC_VIEWER_DEBUG] Document is loaded, proceeding with highlights');
-        tmpViewer.Core.documentViewer.displayPageLocation(
-          highlightLocations[0]?.page_no,
-          highlightLocations[0]?.x,
-          highlightLocations[0]?.y
-        );
+        
+        // Only call displayPageLocation if we have a valid initial location
+        if (initialLocation && initialLocation.page_no > 0) {
+          tmpViewer.Core.documentViewer.displayPageLocation(
+            initialLocation.page_no,
+            initialLocation.x,
+            initialLocation.y
+          );
+          console.log('[SPEC_VIEWER_DEBUG] successfully set initial page location:', initialLocation);
+        } else {
+          console.warn('[SPEC_VIEWER_DEBUG] No valid initial location found, skipping displayPageLocation');
+        }
       } else {
         console.log('[SPEC_VIEWER_DEBUG] Document not loaded yet, skipping highlights');
         return;
       }
 
-      // Add rectangular highlight
+      // Add rectangular highlight annotations
       const _annotations = [];
+      const annotationManager = tmpViewer.Core.annotationManager;
+      const Annotations = tmpViewer.Core.Annotations;
+      
+      // Safety check for annotation creation
+      if (!annotationManager || !Annotations || !Annotations.RectangleAnnotation) {
+        console.log('[SPEC_VIEWER_DEBUG] Annotation manager or Annotations not available, skipping annotation creation');
+        setAnnotations([]);
+        return;
+      }
+      
+      // Add submittal highlights (yellow/green color)
       for (let i = 0; i < highlightLocations?.length; i++) {
-        const annotationManager = tmpViewer.Core.annotationManager;
-        const Annotations = tmpViewer.Core.Annotations;
-        
-        // Safety check for annotation creation
-        if (!annotationManager || !Annotations || !Annotations.RectangleAnnotation) {
-          console.log('[SPEC_VIEWER_DEBUG] Annotation manager or Annotations not available, skipping annotation creation');
-          continue;
-        }
-        
         const rectangleAnnot = new Annotations.RectangleAnnotation({
           PageNumber: highlightLocations[i]?.page_no,
           X: highlightLocations[i]?.x,
@@ -185,10 +229,31 @@ const ProjectLogsReader = ({
           Color: new Annotations.Color(213, 231, 62, 0.25),
           FillColor: new Annotations.Color(213, 231, 62, 0.25),
         });
+        rectangleAnnot.Subject = 'Submittal Highlight';
         _annotations.push(rectangleAnnot);
         annotationManager.addAnnotation(rectangleAnnot);
         annotationManager.redrawAnnotation(rectangleAnnot);
       }
+      console.log('[SPEC_VIEWER_DEBUG] Created submittal annotations:', highlightLocations?.length || 0);
+      
+      // Add AI log highlights (blue/purple color)
+      for (let i = 0; i < aiLogHighlightLocations?.length; i++) {
+        const rectangleAnnot = new Annotations.RectangleAnnotation({
+          PageNumber: aiLogHighlightLocations[i]?.page_no,
+          X: aiLogHighlightLocations[i]?.x,
+          Y: aiLogHighlightLocations[i]?.y,
+          Width: aiLogHighlightLocations[i]?.width ?? 10000,
+          Height: aiLogHighlightLocations[i]?.height ?? 30,
+          Color: new Annotations.Color(100, 149, 237, 0.25), // Cornflower blue
+          FillColor: new Annotations.Color(100, 149, 237, 0.25),
+        });
+        rectangleAnnot.Subject = 'AI Log Highlight';
+        _annotations.push(rectangleAnnot);
+        annotationManager.addAnnotation(rectangleAnnot);
+        annotationManager.redrawAnnotation(rectangleAnnot);
+      }
+      console.log('[SPEC_VIEWER_DEBUG] Created AI log annotations:', aiLogHighlightLocations?.length || 0);
+      
       setAnnotations(_annotations);
       console.log('[SPEC_VIEWER_DEBUG] All annotations created and set:', _annotations.length);
     } else {

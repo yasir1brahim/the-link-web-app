@@ -4,6 +4,7 @@ import './DocumentHighlighter.css';
 
 const DocumentHighlighter = ({ 
   highlights = [], 
+  aiLogHighlights = [],
   highlightsEnabled = true, 
   onHighlightClick,
   documentUrl = null,
@@ -42,7 +43,33 @@ const DocumentHighlighter = ({
     return highlightLocations;
   };
 
+  // Map AI log highlights to location format
+  const mapAiLogHighlightLocations = (aiLogHighlights) => {
+    const highlightLocations = [];
+    for (const logItem of aiLogHighlights) {
+      console.log('[SPEC_VIEWER_DEBUG] Mapping AI log highlight locations:', logItem);
+
+      if (!logItem.pdf_locations || !Array.isArray(logItem.pdf_locations)) {
+        continue;
+      }
+      
+      // Add all pdf_locations for this log item
+      for (const location of logItem.pdf_locations) {
+        highlightLocations.push({
+          page_no: location.page_no,
+          x: location.x,
+          y: location.y,
+          width: location.width,
+          height: location.height
+        });
+      }
+    }
+    console.log('[SPEC_VIEWER_DEBUG] Mapped AI log highlights:', highlightLocations);
+    return highlightLocations;
+  };
+
   const [currentHighlights, setCurrentHighlights] = useState(mapHighlightLocations(highlights));
+  const [currentAiLogHighlights, setCurrentAiLogHighlights] = useState(mapAiLogHighlightLocations(aiLogHighlights));
   const [currentHighlightsEnabled, setCurrentHighlightsEnabled] = useState(highlightsEnabled);
 
   // Update highlights when the highlights prop changes
@@ -58,6 +85,20 @@ const DocumentHighlighter = ({
     });
     setCurrentHighlights(newHighlights);
   }, [highlights]);
+
+  // Update AI log highlights when the prop changes
+  useEffect(() => {
+    console.log('[SPEC_VIEWER_DEBUG] DocumentHighlighter AI log highlights changed:', {
+      aiLogHighlightsLength: aiLogHighlights?.length || 0,
+      aiLogHighlights: aiLogHighlights
+    });
+    const newAiLogHighlights = mapAiLogHighlightLocations(aiLogHighlights);
+    console.log('[SPEC_VIEWER_DEBUG] Mapped AI log highlights:', {
+      newAiLogHighlightsLength: newAiLogHighlights?.length || 0,
+      newAiLogHighlights: newAiLogHighlights
+    });
+    setCurrentAiLogHighlights(newAiLogHighlights);
+  }, [aiLogHighlights]);
 
   // Update highlights enabled state when prop changes
   useEffect(() => {
@@ -83,9 +124,10 @@ const DocumentHighlighter = ({
   return (
     <div className="document-highlighter-container spec-viewer-pdf-wrapper">
       <ProjectLogsReader
-        key={`${documentUrl}-${JSON.stringify(currentHighlights)}`} // Force re-render when document or highlights change
+        key={`${documentUrl}-${JSON.stringify(currentHighlights)}-${JSON.stringify(currentAiLogHighlights)}`} // Force re-render when document or highlights change
         url={documentUrl}
         highlightLocations={currentHighlights}
+        aiLogHighlightLocations={currentAiLogHighlights}
         docId={documentId}
         setPdfData={() => {}}
         setSubmittalIdParam={() => {}}

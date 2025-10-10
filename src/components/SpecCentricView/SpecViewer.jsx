@@ -154,6 +154,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
                 <div className="spec-document-viewer">
                   <DocumentHighlighter
                     highlights={sectionContent.submittal_highlights || []}
+                    aiLogHighlights={sectionContent.ai_log_highlights || []}
                     highlightsEnabled={highlightsEnabled}
                     onHighlightClick={handleHighlightClick}
                     documentUrl={selectedSection?.pdf_url}
