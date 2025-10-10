@@ -290,8 +290,8 @@ const Chat = ({
                 ]);
                 fetchPromptAnswer(userMessage, k, chatSessionId, projectId, projectVersionId).then((newMessage) => {
                     handleHttpResponse(newMessage, userMessage);
+                    setMaxChatMessages(newMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
                 });
-                setMaxChatMessages(newMessage?.max_chat_messages || DEFAULT_MAX_CHAT_MESSAGES);
                 
                 // Refresh chat history after every message to update the sidebar
                 refreshChatHistory();
