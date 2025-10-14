@@ -421,7 +421,6 @@ const ProjectLogsReader = ({
         "squigglyToolGroupButton",
         "strikeoutToolGroupButton",
         "toolbarGroup-Insert",
-        // "toolsHeader",
         'freeTextToolGroupButton',
         "ribbons",
         "textUnderlineToolButton",
