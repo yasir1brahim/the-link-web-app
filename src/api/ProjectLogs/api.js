@@ -506,6 +506,60 @@ const downloadSpecSection = async (sectionId) => {
     }
 }
 
+const getAnnotations = async (projectId, specSectionId) => {
+  try {
+    return await axiosInstance({
+      method: "get",
+      url: `/api/pdf-annotations/`,
+      params: {
+        project: projectId,
+        spec_section: specSectionId,
+      },
+    });
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+const createAnnotation = async ({
+  projectId,
+  specSectionId,
+  pageNumber,
+  color,
+  quads,
+  xfdfData,
+  tag = "",
+}) => {
+  try {
+    return await axiosInstance({
+      method: "post",
+      url: `/api/pdf-annotations/`,
+      data: {
+        project: projectId,
+        spec_section: specSectionId,
+        page_number: pageNumber,
+        color: color,
+        quads: quads,
+        xfdf_data: xfdfData,
+        tag: tag,
+      },
+    });
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+const deleteAnnotation = async (annotationId) => {
+  try {
+    return await axiosInstance({
+      method: "delete",
+      url: `/api/pdf-annotations/${annotationId}/`,
+    });
+  } catch (error) {
+    handleError(error);
+  }
+};
+
 export {
     getSavedLogs,
     getSubmittalItemById,
@@ -530,4 +584,7 @@ export {
     getSemanticallyProcessedSpecItems,
     getSpecSections,
     downloadSpecSection,
+    createAnnotation,
+    getAnnotations,
+    deleteAnnotation,
 }

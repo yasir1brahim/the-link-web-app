@@ -4,7 +4,7 @@ import WebViewer from "@pdftron/webviewer";
 import axiosInstance from "../../config/axios";
 import { validateS3Link, isS3LinkExpiredError } from "../../utils/s3LinkValidator.js";
 import { useS3LinkValidation } from "../../hooks/useS3LinkValidation.js";
-
+import { getAnnotations, createAnnotation, deleteAnnotation } from "../../api/ProjectLogs/api.js";
 const ProjectLogsReader = ({
   url,
   highlightLocations,
@@ -370,6 +370,7 @@ const ProjectLogsReader = ({
       // Wait a bit for WebViewer to fully initialize
       await new Promise(resolve => setTimeout(resolve, 100));
       
+      const { annotationManager, documentViewer, Annotations} = _webViewer
       // Verify WebViewer is properly initialized before setting it
       if (_webViewer && _webViewer.Core && _webViewer.Core.documentViewer) {
         setWebViewer(_webViewer);
@@ -389,8 +390,46 @@ const ProjectLogsReader = ({
           updateTxtView(_webViewer);
         }, 200);
         setLoading(false);
+
+
       });
 
+      _webViewer.UI.documentViewer.addEventListener("documentLoaded", async () => {
+        try {
+          const res = await getAnnotations(1, 1);
+          const xfdfData = res.data.map(a => a.xfdf_data).join("\n");
+          await annotationManager.importAnnotations(xfdfData);
+        } catch (err) {
+          console.error("Error loading saved highlights:", err);
+        }
+      });
+      annotationManager.addEventListener("annotationChanged", async (annotations, action, options) => {
+        if (options.imported) return; // ignore loaded annotations
+
+        const textHighlights = annotations.filter(a => a instanceof Annotations.TextHighlightAnnotation);
+
+        for (const annotation of textHighlights) {
+          const xfdfString = await annotationManager.exportAnnotations({ annotationList: [annotation] });
+
+          if (action === "add") {
+            await createAnnotation({
+              proectId: 1,
+              specSectionId: 1,
+              pageNumber: annotation.PageNumber,
+              color: annotation.Color?.toHexString(),
+              quads: annotation.Quads,
+              xfdfData: xfdfString,
+              tag: annotation.Subject || "",
+            });
+          }
+
+          if (action === "delete") {
+            await deleteAnnotation(annotation.Id);
+          }
+        }
+      });
+
+      
       // Error handling
       _webViewer.Core.documentViewer.addEventListener("documentError", (error) => {
         if (isS3LinkExpiredError(error)) {
@@ -563,6 +602,8 @@ const ProjectLogsReader = ({
       handleError({ message: 'Failed to load PDF viewer.' });
     }
   };
+
+    
 
   return (
     <>
