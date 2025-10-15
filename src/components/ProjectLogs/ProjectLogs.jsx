@@ -980,6 +980,10 @@ const ProjectLogs = () => {
     setAppliedFilters(initFilter);
     
     navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}&tab=${activeTab}`);
+    setChatMessages([]);
+    setChatId(null);
+    setChatHistory([]);
+    setSpecGptUserInput('');
   }
 
   // useEffect(() => {
