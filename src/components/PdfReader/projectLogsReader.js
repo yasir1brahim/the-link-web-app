@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import WebViewer from "@pdftron/webviewer";
 import axiosInstance from "../../config/axios";
 import { validateS3Link, isS3LinkExpiredError } from "../../utils/s3LinkValidator.js";
@@ -26,6 +26,7 @@ const ProjectLogsReader = ({
   const [annotations, setAnnotations] = useState([]);
   const [documentLoaded, setDocumentLoaded] = useState(false);
   const { handleError, ErrorModal } = useS3LinkValidation();
+  const previousHighlightLocation = useRef(null);
 
   console.log('[SPEC_VIEWER_DEBUG] ProjectLogsReader props:', {
     url,
@@ -48,6 +49,7 @@ const ProjectLogsReader = ({
 
         setCurrentUrl(url);
         setDocumentLoaded(false); // Reset document loaded state
+        previousHighlightLocation.current = null; // Reset previous location for new document
         await loadPDF();
       })();
     }
@@ -192,16 +194,27 @@ const ProjectLogsReader = ({
       if (tmpViewer.Core.documentViewer && tmpViewer.Core.documentViewer.getDocument() && tmpViewer.Core.documentViewer.getPageCount() > 0) {
         console.log('[SPEC_VIEWER_DEBUG] Document is loaded, proceeding with highlights');
         
-        // Only call displayPageLocation if we have a valid initial location
-        if (initialLocation && initialLocation.page_no > 0) {
+        // Check if the highlight location has changed
+        const prevLocation = previousHighlightLocation.current;
+        const locationHasChanged = !prevLocation || 
+          prevLocation.page_no !== initialLocation.page_no ||
+          prevLocation.x !== initialLocation.x ||
+          prevLocation.y !== initialLocation.y;
+        
+        if (locationHasChanged && initialLocation && initialLocation.page_no > 0) {
           tmpViewer.Core.documentViewer.displayPageLocation(
             initialLocation.page_no,
             initialLocation.x,
             initialLocation.y
           );
-          console.log('[SPEC_VIEWER_DEBUG] successfully set initial page location:', initialLocation);
+          previousHighlightLocation.current = {
+            page_no: initialLocation.page_no,
+            x: initialLocation.x,
+            y: initialLocation.y
+          };
+          console.log('[SPEC_VIEWER_DEBUG] Highlight location changed, scrolled to new position');
         } else {
-          console.warn('[SPEC_VIEWER_DEBUG] No valid initial location found, skipping displayPageLocation');
+          console.log('[SPEC_VIEWER_DEBUG] Highlight location unchanged, skipping scroll');
         }
       } else {
         console.log('[SPEC_VIEWER_DEBUG] Document not loaded yet, skipping highlights');
