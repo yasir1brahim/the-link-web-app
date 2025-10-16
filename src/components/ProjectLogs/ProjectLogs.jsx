@@ -1002,11 +1002,22 @@ const ProjectLogs = () => {
     );
   }, [selected]);
 
-  const handleExportExcel = async (recordData, fileName) => {
+  const handleExportExcel = async (recordData = null, fileName = null) => {
     try {
+      console.log("starting export excel", recordData);
+      console.log("selectedRows", selectedRows);
+      if (!recordData && selectedRows) {
+        try {
+          recordData = JSON.parse(selectedRows);
+        } catch (parseError) {
+          console.error("Error parsing selectedRows:", parseError, "selectedRows:", selectedRows);
+          recordData = null;
+        }
+      }
+      console.log("recordData", recordData);
       const exportExcelData = await getExportExcelData(
-        state?.projectId || projectId,
-        recordData || localStorage.getItem("filteredIds")?.split(",")?.map((item) => Number(item)),
+        projectId,
+        recordData,
         filterValues,
         projectVersionId
       );
@@ -1025,11 +1036,19 @@ const ProjectLogs = () => {
     }
   };
 
-  const handleExportJetBuild = async (recordData) => {
+  const handleExportJetBuild = async (recordData = null) => {
     try {
+      if (!recordData) {
+        try {
+          recordData = JSON.parse(selectedRows);
+        } catch (parseError) {
+          console.error("Error parsing selectedRows:", parseError, "selectedRows:", selectedRows);
+          recordData = null;
+        }
+      }
       const exportExcelData = await getExportJetBuildData(
-        state?.projectId || projectId,
-        recordData || localStorage.getItem("filteredIds")?.split(",")?.map((item) => Number(item)),
+        projectId,
+        recordData,
         filterValues,
         projectVersionId
       );
