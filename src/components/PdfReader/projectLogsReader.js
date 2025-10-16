@@ -27,6 +27,21 @@ const ProjectLogsReader = ({
   const [documentLoaded, setDocumentLoaded] = useState(false);
   const { handleError, ErrorModal } = useS3LinkValidation();
   const previousHighlightLocation = useRef(null);
+  
+  // Convert activeFilters Set to a stable string representation for dependency tracking
+  const activeFiltersString = React.useMemo(() => {
+    return Array.from(activeFilters).sort().join(',');
+  }, [activeFilters]);
+  
+  // Create stable references for highlight locations to prevent infinite re-renders
+  // Only update when the actual content changes, not just the array reference
+  const stableHighlightLocations = React.useMemo(() => {
+    return highlightLocations;
+  }, [JSON.stringify(highlightLocations)]);
+  
+  const stableAiLogHighlightLocations = React.useMemo(() => {
+    return aiLogHighlightLocations;
+  }, [JSON.stringify(aiLogHighlightLocations)]);
 
   console.log('[SPEC_VIEWER_DEBUG] ProjectLogsReader props:', {
     url,
@@ -61,12 +76,13 @@ const ProjectLogsReader = ({
       currentUrl,
       hasWebViewer: !!webViewer,
       documentLoaded,
-      highlightLocationsLength: highlightLocations?.length,
-      aiLogHighlightLocationsLength: aiLogHighlightLocations?.length,
-      highlightLocations,
-      aiLogHighlightLocations,
+      highlightLocationsLength: stableHighlightLocations?.length,
+      aiLogHighlightLocationsLength: stableAiLogHighlightLocations?.length,
+      highlightLocations: stableHighlightLocations,
+      aiLogHighlightLocations: stableAiLogHighlightLocations,
       highlightsEnabled,
-      activeFilters: Array.from(activeFilters)
+      activeFilters: Array.from(activeFilters),
+      activeFiltersString
     });
     
     if (url === currentUrl && webViewer && documentLoaded) {
@@ -79,7 +95,7 @@ const ProjectLogsReader = ({
         documentLoaded
       });
     }
-  }, [highlightLocations, aiLogHighlightLocations, documentLoaded, highlightsEnabled, activeFilters]);
+  }, [stableHighlightLocations, stableAiLogHighlightLocations, documentLoaded, highlightsEnabled, activeFiltersString]);
 
   const handleClose = () => {
     setLogInViewer(null);
@@ -151,8 +167,8 @@ const ProjectLogsReader = ({
       let tmpViewer = _webViewer ?? webViewer;
 
       console.log('[SPEC_VIEWER_DEBUG] updateTxtView called with:', {
-        highlightLocations,
-        highlightLocationsLength: highlightLocations?.length,
+        highlightLocations: stableHighlightLocations,
+        highlightLocationsLength: stableHighlightLocations?.length,
         hasViewer: !!tmpViewer,
         highlightsEnabled
       });
@@ -181,13 +197,13 @@ const ProjectLogsReader = ({
         return;
       }
 
-      const highlightsAreAvailable = highlightLocations && highlightLocations.length > 0 && highlightLocations[0]?.page_no && highlightLocations[0]?.x && highlightLocations[0]?.y;
-      const aiLogHighlightsAreAvailable = aiLogHighlightLocations && aiLogHighlightLocations.length > 0;
+      const highlightsAreAvailable = stableHighlightLocations && stableHighlightLocations.length > 0 && stableHighlightLocations[0]?.page_no && stableHighlightLocations[0]?.x && stableHighlightLocations[0]?.y;
+      const aiLogHighlightsAreAvailable = stableAiLogHighlightLocations && stableAiLogHighlightLocations.length > 0;
       console.log('[SPEC_VIEWER_DEBUG] Highlights are available:', highlightsAreAvailable);
       console.log('[SPEC_VIEWER_DEBUG] AI log highlights are available:', aiLogHighlightsAreAvailable);
 
     if (tmpViewer && (highlightsAreAvailable || aiLogHighlightsAreAvailable)) {
-      const initialLocation = getInitialPageLocation(highlightLocations, aiLogHighlightLocations);
+      const initialLocation = getInitialPageLocation(stableHighlightLocations, stableAiLogHighlightLocations);
       console.log('[SPEC_VIEWER_DEBUG] setting initial page location:', initialLocation);
       
       // Check if document is loaded before trying to access it
@@ -237,13 +253,13 @@ const ProjectLogsReader = ({
       // Apply filter: if filters are active and 'submittal' is not in the filter set, skip
       const shouldShowSubmittals = activeFilters.size === 0 || activeFilters.has('submittal');
       if (shouldShowSubmittals) {
-        for (let i = 0; i < highlightLocations?.length; i++) {
+        for (let i = 0; i < stableHighlightLocations?.length; i++) {
           const rectangleAnnot = new Annotations.RectangleAnnotation({
-            PageNumber: highlightLocations[i]?.page_no,
-            X: highlightLocations[i]?.x,
-            Y: highlightLocations[i]?.y,
-            Width: highlightLocations[i]?.width ?? 10000,
-            Height: highlightLocations[i]?.height ?? 30,
+            PageNumber: stableHighlightLocations[i]?.page_no,
+            X: stableHighlightLocations[i]?.x,
+            Y: stableHighlightLocations[i]?.y,
+            Width: stableHighlightLocations[i]?.width ?? 10000,
+            Height: stableHighlightLocations[i]?.height ?? 30,
             Color: new Annotations.Color(213, 231, 62, 0.25),
             FillColor: new Annotations.Color(213, 231, 62, 0.25),
           });
@@ -256,7 +272,7 @@ const ProjectLogsReader = ({
           annotationManager.addAnnotation(rectangleAnnot);
           annotationManager.redrawAnnotation(rectangleAnnot);
         }
-        console.log('[SPEC_VIEWER_DEBUG] Created submittal annotations:', highlightLocations?.length || 0);
+        console.log('[SPEC_VIEWER_DEBUG] Created submittal annotations:', stableHighlightLocations?.length || 0);
       } else {
         console.log('[SPEC_VIEWER_DEBUG] Submittal annotations filtered out by active filters');
       }
@@ -293,8 +309,8 @@ const ProjectLogsReader = ({
       // Apply filter: if filters are active, only show highlights whose item_type is in the filter set
       let filteredCount = 0;
       let addedCount = 0;
-      for (let i = 0; i < aiLogHighlightLocations?.length; i++) {
-        const location = aiLogHighlightLocations[i];
+      for (let i = 0; i < stableAiLogHighlightLocations?.length; i++) {
+        const location = stableAiLogHighlightLocations[i];
         const itemType = location?.item_type;
         
         // Check if this highlight should be shown based on active filters
