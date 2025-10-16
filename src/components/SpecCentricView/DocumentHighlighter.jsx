@@ -4,10 +4,12 @@ import './DocumentHighlighter.css';
 
 const DocumentHighlighter = ({ 
   highlights = [], 
+  aiLogHighlights = [],
   highlightsEnabled = true, 
   onHighlightClick,
   documentUrl = null,
-  documentId = null
+  documentId = null,
+  activeFilters = new Set()
 }) => {
 
   // ensure highlight locations are in the correct format
@@ -42,7 +44,37 @@ const DocumentHighlighter = ({
     return highlightLocations;
   };
 
+  // Map AI log highlights to location format with type information
+  const mapAiLogHighlightLocations = (aiLogHighlights) => {
+    const highlightLocations = [];
+    for (const logItem of aiLogHighlights) {
+      console.log('[SPEC_VIEWER_DEBUG] Mapping AI log highlight locations:', logItem);
+
+      if (!logItem.pdf_locations || !Array.isArray(logItem.pdf_locations)) {
+        continue;
+      }
+      
+      // Add all pdf_locations for this log item with type information
+      for (const location of logItem.pdf_locations) {
+        highlightLocations.push({
+          page_no: location.page_no,
+          x: location.x,
+          y: location.y,
+          width: location.width,
+          height: location.height,
+          // Include type information for color coding
+          extraction_type: logItem.extraction_type, // e.g., 'qa_planner', 'inspection_log'
+          item_type: logItem.item_type, // e.g., 'inspections', 'warranties', 'certificates'
+          requirement_text: logItem.requirement_text
+        });
+      }
+    }
+    console.log('[SPEC_VIEWER_DEBUG] Mapped AI log highlights with types:', highlightLocations);
+    return highlightLocations;
+  };
+
   const [currentHighlights, setCurrentHighlights] = useState(mapHighlightLocations(highlights));
+  const [currentAiLogHighlights, setCurrentAiLogHighlights] = useState(mapAiLogHighlightLocations(aiLogHighlights));
   const [currentHighlightsEnabled, setCurrentHighlightsEnabled] = useState(highlightsEnabled);
 
   // Update highlights when the highlights prop changes
@@ -59,6 +91,20 @@ const DocumentHighlighter = ({
     setCurrentHighlights(newHighlights);
   }, [highlights]);
 
+  // Update AI log highlights when the prop changes
+  useEffect(() => {
+    console.log('[SPEC_VIEWER_DEBUG] DocumentHighlighter AI log highlights changed:', {
+      aiLogHighlightsLength: aiLogHighlights?.length || 0,
+      aiLogHighlights: aiLogHighlights
+    });
+    const newAiLogHighlights = mapAiLogHighlightLocations(aiLogHighlights);
+    console.log('[SPEC_VIEWER_DEBUG] Mapped AI log highlights:', {
+      newAiLogHighlightsLength: newAiLogHighlights?.length || 0,
+      newAiLogHighlights: newAiLogHighlights
+    });
+    setCurrentAiLogHighlights(newAiLogHighlights);
+  }, [aiLogHighlights]);
+
   // Update highlights enabled state when prop changes
   useEffect(() => {
     console.log('[SPEC_VIEWER_DEBUG] DocumentHighlighter highlightsEnabled changed:', highlightsEnabled);
@@ -68,7 +114,7 @@ const DocumentHighlighter = ({
 
   if (!documentUrl) {
     return (
-      <div className="document-highlighter-container">
+      <div className="document-highlighter-container spec-viewer-pdf-wrapper">
         <div className="document-placeholder">
           <div className="placeholder-content">
             <h3>Document Viewer</h3>
@@ -81,11 +127,12 @@ const DocumentHighlighter = ({
 
 
   return (
-    <div className="document-highlighter-container">
+    <div className="document-highlighter-container spec-viewer-pdf-wrapper">
       <ProjectLogsReader
-        key={`${documentUrl}-${JSON.stringify(currentHighlights)}`} // Force re-render when document or highlights change
+        key={`${documentUrl}-${JSON.stringify(currentHighlights)}-${JSON.stringify(currentAiLogHighlights)}-${Array.from(activeFilters).join(',')}`} // Force re-render when document, highlights, or filters change
         url={documentUrl}
         highlightLocations={currentHighlights}
+        aiLogHighlightLocations={currentAiLogHighlights}
         docId={documentId}
         setPdfData={() => {}}
         setSubmittalIdParam={() => {}}
@@ -96,6 +143,7 @@ const DocumentHighlighter = ({
         setLoading={() => {}}
         onError={() => {}}
         highlightsEnabled={currentHighlightsEnabled}
+        activeFilters={activeFilters}
       />
     </div>
   );

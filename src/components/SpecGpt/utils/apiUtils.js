@@ -16,11 +16,12 @@ const fetchPdf = async (projectId, s3Bucket, s3Key) => {
     }
 }
 
-const fetchChatHistory = async (projectId) => {
+const fetchChatHistory = async (projectId, projectVersionId) => {
     try {
         const response = await axiosInstance({
             method: 'GET',
             url: `/api/deliverables/${projectId}/specgpt-chats/`,
+            params: projectVersionId ? { project_version_id: projectVersionId } : {}
         });
         return [...response.data.results];
     } catch (error) {
@@ -268,6 +269,34 @@ const fetchMostRecentLog = async (projectId, projectVersionId, logType) => {
 
 const ERROR_MESSAGE = "I'm unable to answer that question, can you please restate? Try to make it more specific or narrower if possible."
 
+const fetchPromptAnswerWebSocket = async (userInput, k, chatSessionId, projectId, projectVersionId, onChunk, onComplete, onError) => {
+    try {
+        const response = await axiosInstance({
+            method: 'POST',
+            url: `/api/deliverables/${projectId}/specgpt-chats/generate-response/`,
+            data: {
+                'user_input': userInput,
+                'k': k,
+                'response_type': 'standard',
+                ...(projectVersionId ? {'project_version_id': projectVersionId} : {}),
+                ...(chatSessionId ? {'chat_id': chatSessionId} : {}),
+            },
+        });
+
+        // Check if WebSocket is required
+        if (response.data.websocket_enabled) {
+            // Use WebSocket connection instead
+            return { websocket_required: true };
+        }
+
+        // Fallback to existing HTTP implementation
+        return fetchPromptAnswer(userInput, k, chatSessionId, projectId, projectVersionId);
+    } catch (error) {
+        onError(error);
+        return { session_id: chatSessionId, questionid: '', role: MESSAGE_ROLE_TYPE.ERROR, message: ERROR_MESSAGE };
+    }
+};
+
 const fetchPromptAnswer = async (userInput, k, chatSessionId, projectId, projectVersionId, responseType = 'standard') => {
     try {
         const response = await axiosInstance({
@@ -465,6 +494,7 @@ export {
     fetchChatHistory,
     fetchChatSessionHistory,
     fetchPromptAnswer,
+    fetchPromptAnswerWebSocket,
     countUserDocs,
     ProcessingStatus,
     loadUserDocs,
