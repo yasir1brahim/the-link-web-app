@@ -24,7 +24,7 @@ const ProjectLogsReader = ({
   const [annotations, setAnnotations] = useState([]);
   const [documentLoaded, setDocumentLoaded] = useState(false);
   const { handleError, ErrorModal } = useS3LinkValidation();
-  const hasSetInitialPosition = useRef(false);
+  const previousHighlightLocation = useRef(null);
 
   console.log('[SPEC_VIEWER_DEBUG] ProjectLogsReader props:', {
     url,
@@ -46,7 +46,7 @@ const ProjectLogsReader = ({
 
         setCurrentUrl(url);
         setDocumentLoaded(false); // Reset document loaded state
-        hasSetInitialPosition.current = false; // Reset position flag for new document
+        previousHighlightLocation.current = null; // Reset previous location for new document
         await loadPDF();
       })();
     }
@@ -157,17 +157,28 @@ const ProjectLogsReader = ({
       if (tmpViewer.Core.documentViewer && tmpViewer.Core.documentViewer.getDocument() && tmpViewer.Core.documentViewer.getPageCount() > 0) {
         console.log('[SPEC_VIEWER_DEBUG] Document is loaded, proceeding with highlights');
         
-        // Only scroll to initial position once per document load
-        if (!hasSetInitialPosition.current) {
+        // Check if the highlight location has changed
+        const currentLocation = highlightLocations[0];
+        const prevLocation = previousHighlightLocation.current;
+        const locationHasChanged = !prevLocation || 
+          prevLocation.page_no !== currentLocation.page_no ||
+          prevLocation.x !== currentLocation.x ||
+          prevLocation.y !== currentLocation.y;
+        
+        if (locationHasChanged) {
           tmpViewer.Core.documentViewer.displayPageLocation(
             highlightLocations[0]?.page_no,
             highlightLocations[0]?.x,
             highlightLocations[0]?.y
           );
-          hasSetInitialPosition.current = true;
-          console.log('[SPEC_VIEWER_DEBUG] Initial position set, will not scroll again on subsequent renders');
+          previousHighlightLocation.current = {
+            page_no: currentLocation.page_no,
+            x: currentLocation.x,
+            y: currentLocation.y
+          };
+          console.log('[SPEC_VIEWER_DEBUG] Highlight location changed, scrolled to new position');
         } else {
-          console.log('[SPEC_VIEWER_DEBUG] Initial position already set, skipping scroll');
+          console.log('[SPEC_VIEWER_DEBUG] Highlight location unchanged, skipping scroll');
         }
       } else {
         console.log('[SPEC_VIEWER_DEBUG] Document not loaded yet, skipping highlights');
