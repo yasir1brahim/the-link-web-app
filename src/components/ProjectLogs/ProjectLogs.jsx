@@ -1025,12 +1025,11 @@ const ProjectLogs = () => {
       let blob = new Blob([exportExcelData.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      FileDownload(
-        blob,
-        `${
-          state?.project.project_name || `Project`
-        }_logs_${new Date().toLocaleDateString("en-US", { day: 'numeric' })}_${new Date().toLocaleDateString("en-US", { month: 'short' })}_${new Date().toLocaleDateString("en-US", { year: 'numeric' })}.xlsx`
-      );
+      const now = new Date();
+      const fileName = `${
+        state?.project.project_name || `Project`
+      }_logs_${now.toLocaleDateString("en-US", { day: 'numeric' })}_${now.toLocaleDateString("en-US", { month: 'short' })}_${now.toLocaleDateString("en-US", { year: 'numeric' })}_${now.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '')}.xlsx`;
+      FileDownload(blob, fileName);
     } catch (error) {
       handleError(error);
     }
@@ -1056,12 +1055,11 @@ const ProjectLogs = () => {
       let blob = new Blob([exportExcelData.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      FileDownload(
-        blob,
-        `${
-          state?.project.project_name || `Project`
-        }_logs_${new Date().toLocaleDateString("en-US", { day: 'numeric' })}_${new Date().toLocaleDateString("en-US", { month: 'short' })}_${new Date().toLocaleDateString("en-US", { year: 'numeric' })}.xlsx`
-      );
+      const now = new Date();
+      const fileName = `${
+        state?.project.project_name || `Project`
+      }_logs_${now.toLocaleDateString("en-US", { day: 'numeric' })}_${now.toLocaleDateString("en-US", { month: 'short' })}_${now.toLocaleDateString("en-US", { year: 'numeric' })}_${now.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '')}.xlsx`;
+      FileDownload(blob, fileName);
     } catch (error) {
       handleError(error);
     }
