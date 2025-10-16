@@ -582,6 +582,7 @@ const ProjectLogs = () => {
               console.log('previous documentIsProcessing', documentIsProcessing(documentData));
               console.log('new documentIsProcessing', documentIsProcessing(responseDocumentData));
               fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+              fetchSpecSectionCount();
             }
             setDocumentData(responseDocumentData);  
             console.log('documentIsProcessing', documentIsProcessing(responseDocumentData));
@@ -662,6 +663,7 @@ const ProjectLogs = () => {
         setDocumentData(check_response.data.document_details);
         if (!documentIsProcessing(check_response.data.document_details)) {
           fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+          fetchSpecSectionCount();
         }
         setUploadLoading(false);
         setAlreadyExistingFiles(response.data.already_exist);
@@ -978,6 +980,10 @@ const ProjectLogs = () => {
     setAppliedFilters(initFilter);
     
     navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}&tab=${activeTab}`);
+    setChatMessages([]);
+    setChatId(null);
+    setChatHistory([]);
+    setSpecGptUserInput('');
   }
 
   // useEffect(() => {
@@ -1902,6 +1908,7 @@ const ProjectLogs = () => {
                   setIsGeneratingLog={setIsSpecGptGeneratingLog}
                   isChatEnabled={isSpecGptChatEnabled}
                   setIsChatEnabled={setIsSpecGptChatEnabled}
+                  teamId={teamId}
                 />
               </ChakraProvider>
               </div>

@@ -6,7 +6,7 @@
 }
 
 .sidebar-header {
-  padding: 20px 16px;
+  padding: 10px 16px;
   border-bottom: 1px solid #dee2e6;
   background-color: #f8f9fa;
 }
@@ -15,16 +15,17 @@
   margin: 0 0 4px 0;
   color: #212529;
   font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .sidebar-subtitle {
   margin: 0;
   color: #6c757d;
-  font-size: 0.85rem;
+  font-size: 0.80rem;
 }
 
 .sidebar-controls {
-  padding: 16px;
+  padding: 10px 16px;
   border-bottom: 1px solid #dee2e6;
 }
 
@@ -47,6 +48,7 @@
 .control-text {
   font-weight: 500;
   color: #212529;
+  font-size: 0.85rem;
 }
 
 .control-description {
@@ -58,12 +60,14 @@
 
 .sidebar-sections {
   flex: 1;
-  overflow-y: auto;
-  padding: 8px 0;
+  overflow: hidden;
+  padding: 0px 0;
+  border-bottom: 1px solid #dee2e6; 
+  margin-bottom: 8px; 
 }
 
 .sidebar-footer {
-  padding: 16px;
+  padding: 10px 16px;
   border-top: 1px solid #dee2e6;
   background-color: #f8f9fa;
 }
