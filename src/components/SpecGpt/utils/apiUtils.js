@@ -16,11 +16,12 @@ const fetchPdf = async (projectId, s3Bucket, s3Key) => {
     }
 }
 
-const fetchChatHistory = async (projectId) => {
+const fetchChatHistory = async (projectId, projectVersionId) => {
     try {
         const response = await axiosInstance({
             method: 'GET',
             url: `/api/deliverables/${projectId}/specgpt-chats/`,
+            params: projectVersionId ? { project_version_id: projectVersionId } : {}
         });
         return [...response.data.results];
     } catch (error) {

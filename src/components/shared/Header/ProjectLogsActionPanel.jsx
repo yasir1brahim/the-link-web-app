@@ -58,7 +58,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                   <DropdownItem
                     className="text-center"
                     style={{ backgroundColor: 'white', padding: '8px' }}
-                    onClick={() => props.handleExportExcel(['All'])}
+                    onClick={() => props.handleExportExcel()}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                   >
@@ -85,7 +85,7 @@ const ProjectLogsActionPanel = ({ ...props }) => {
                     style={{ backgroundColor: 'white', padding: '8px' }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0eaf7'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                    onClick={() => props.handleExportJetBuild(['All'])}
+                    onClick={() => props.handleExportJetBuild()}
                   >
                     <JetBuildLogo style={{ height: '30px', width: '100%', objectFit: 'contain' }} />
                   </DropdownItem>
