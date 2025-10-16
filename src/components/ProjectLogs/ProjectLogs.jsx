@@ -1002,11 +1002,22 @@ const ProjectLogs = () => {
     );
   }, [selected]);
 
-  const handleExportExcel = async (recordData, fileName) => {
+  const handleExportExcel = async (recordData = null, fileName = null) => {
     try {
+      console.log("starting export excel", recordData);
+      console.log("selectedRows", selectedRows);
+      if (!recordData && selectedRows) {
+        try {
+          recordData = JSON.parse(selectedRows);
+        } catch (parseError) {
+          console.error("Error parsing selectedRows:", parseError, "selectedRows:", selectedRows);
+          recordData = null;
+        }
+      }
+      console.log("recordData", recordData);
       const exportExcelData = await getExportExcelData(
-        state?.projectId || projectId,
-        recordData || localStorage.getItem("filteredIds")?.split(",")?.map((item) => Number(item)),
+        projectId,
+        recordData,
         filterValues,
         projectVersionId
       );
@@ -1014,22 +1025,29 @@ const ProjectLogs = () => {
       let blob = new Blob([exportExcelData.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      FileDownload(
-        blob,
-        `${
-          state?.project.project_name || `Project`
-        }_logs_${new Date().toLocaleDateString("en-US", { day: 'numeric' })}_${new Date().toLocaleDateString("en-US", { month: 'short' })}_${new Date().toLocaleDateString("en-US", { year: 'numeric' })}.xlsx`
-      );
+      const now = new Date();
+      const fileName = `${
+        state?.project.project_name || `Project`
+      }_logs_${now.toLocaleDateString("en-US", { day: 'numeric' })}_${now.toLocaleDateString("en-US", { month: 'short' })}_${now.toLocaleDateString("en-US", { year: 'numeric' })}_${now.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '')}.xlsx`;
+      FileDownload(blob, fileName);
     } catch (error) {
       handleError(error);
     }
   };
 
-  const handleExportJetBuild = async (recordData) => {
+  const handleExportJetBuild = async (recordData = null) => {
     try {
+      if (!recordData) {
+        try {
+          recordData = JSON.parse(selectedRows);
+        } catch (parseError) {
+          console.error("Error parsing selectedRows:", parseError, "selectedRows:", selectedRows);
+          recordData = null;
+        }
+      }
       const exportExcelData = await getExportJetBuildData(
-        state?.projectId || projectId,
-        recordData || localStorage.getItem("filteredIds")?.split(",")?.map((item) => Number(item)),
+        projectId,
+        recordData,
         filterValues,
         projectVersionId
       );
@@ -1037,12 +1055,11 @@ const ProjectLogs = () => {
       let blob = new Blob([exportExcelData.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      FileDownload(
-        blob,
-        `${
-          state?.project.project_name || `Project`
-        }_logs_${new Date().toLocaleDateString("en-US", { day: 'numeric' })}_${new Date().toLocaleDateString("en-US", { month: 'short' })}_${new Date().toLocaleDateString("en-US", { year: 'numeric' })}.xlsx`
-      );
+      const now = new Date();
+      const fileName = `${
+        state?.project.project_name || `Project`
+      }_logs_${now.toLocaleDateString("en-US", { day: 'numeric' })}_${now.toLocaleDateString("en-US", { month: 'short' })}_${now.toLocaleDateString("en-US", { year: 'numeric' })}_${now.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '')}.xlsx`;
+      FileDownload(blob, fileName);
     } catch (error) {
       handleError(error);
     }
