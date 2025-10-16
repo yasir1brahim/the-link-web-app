@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import WebViewer from "@pdftron/webviewer";
 import axiosInstance from "../../config/axios";
 import { validateS3Link, isS3LinkExpiredError } from "../../utils/s3LinkValidator.js";
@@ -24,6 +24,7 @@ const ProjectLogsReader = ({
   const [annotations, setAnnotations] = useState([]);
   const [documentLoaded, setDocumentLoaded] = useState(false);
   const { handleError, ErrorModal } = useS3LinkValidation();
+  const hasSetInitialPosition = useRef(false);
 
   console.log('[SPEC_VIEWER_DEBUG] ProjectLogsReader props:', {
     url,
@@ -45,6 +46,7 @@ const ProjectLogsReader = ({
 
         setCurrentUrl(url);
         setDocumentLoaded(false); // Reset document loaded state
+        hasSetInitialPosition.current = false; // Reset position flag for new document
         await loadPDF();
       })();
     }
@@ -154,11 +156,19 @@ const ProjectLogsReader = ({
       // Check if document is loaded before trying to access it
       if (tmpViewer.Core.documentViewer && tmpViewer.Core.documentViewer.getDocument() && tmpViewer.Core.documentViewer.getPageCount() > 0) {
         console.log('[SPEC_VIEWER_DEBUG] Document is loaded, proceeding with highlights');
-        tmpViewer.Core.documentViewer.displayPageLocation(
-          highlightLocations[0]?.page_no,
-          highlightLocations[0]?.x,
-          highlightLocations[0]?.y
-        );
+        
+        // Only scroll to initial position once per document load
+        if (!hasSetInitialPosition.current) {
+          tmpViewer.Core.documentViewer.displayPageLocation(
+            highlightLocations[0]?.page_no,
+            highlightLocations[0]?.x,
+            highlightLocations[0]?.y
+          );
+          hasSetInitialPosition.current = true;
+          console.log('[SPEC_VIEWER_DEBUG] Initial position set, will not scroll again on subsequent renders');
+        } else {
+          console.log('[SPEC_VIEWER_DEBUG] Initial position already set, skipping scroll');
+        }
       } else {
         console.log('[SPEC_VIEWER_DEBUG] Document not loaded yet, skipping highlights');
         return;
