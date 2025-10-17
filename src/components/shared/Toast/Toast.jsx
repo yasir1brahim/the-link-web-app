@@ -23,7 +23,7 @@ class ToastService {
   }
 
   static info(message, customConfig = {}) {
-    toast.info(message, { ...this.defaultConfig, ...customConfig });
+    return toast.info(message, { ...this.defaultConfig, ...customConfig });
   }
 
   static warning(message, customConfig = {}) {
@@ -46,6 +46,10 @@ class ToastService {
         this.success(message, customConfig);
         break;
     }
+  }
+
+  static dismiss(toastId) {
+    toast.dismiss(toastId);
   }
 }
 
