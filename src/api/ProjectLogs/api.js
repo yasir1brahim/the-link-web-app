@@ -506,14 +506,15 @@ const downloadSpecSection = async (sectionId) => {
     }
 }
 
-const getAnnotations = async (projectId, specSectionId) => {
+const getAnnotations = async (projectId, specSectionId, projectVersionId) => {
   try {
     return await axiosInstance({
       method: "get",
-      url: `/api/pdf-annotations/`,
+      url: `/api/deliverables/projects/${projectId}/pdf-annotations/`,
       params: {
-        project: projectId,
-        spec_section: specSectionId,
+        project: 1,
+        spec_section: 1,
+        project_version: 1,
       },
     });
   } catch (error) {
@@ -523,6 +524,7 @@ const getAnnotations = async (projectId, specSectionId) => {
 
 const createAnnotation = async ({
   projectId,
+  projectVersionId,
   specSectionId,
   pageNumber,
   color,
@@ -533,9 +535,10 @@ const createAnnotation = async ({
   try {
     return await axiosInstance({
       method: "post",
-      url: `/api/pdf-annotations/`,
+      url: `/api/deliverables/projects/${projectId}/pdf-annotations/`,
       data: {
         project: projectId,
+        project_version: projectVersionId,
         spec_section: specSectionId,
         page_number: pageNumber,
         color: color,
@@ -549,11 +552,11 @@ const createAnnotation = async ({
   }
 };
 
-const deleteAnnotation = async (annotationId) => {
+const deleteAnnotation = async (projectId, annotationId) => {
   try {
     return await axiosInstance({
       method: "delete",
-      url: `/api/pdf-annotations/${annotationId}/`,
+      url: `/api/deliverables/projects/${projectId}/pdf-annotations/${annotationId}/`,
     });
   } catch (error) {
     handleError(error);

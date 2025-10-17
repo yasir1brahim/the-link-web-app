@@ -144,7 +144,7 @@ const ProjectLogsReader = ({
     return lowestPageObject;
   };
 
-  const updateTxtView = (_webViewer) => {
+  const updateTxtView = async (_webViewer) => {
     try {
       let tmpViewer = _webViewer ?? webViewer;
 
@@ -169,8 +169,16 @@ const ProjectLogsReader = ({
 
       // Delete all annotations (both our created ones and server-loaded ones)
       const allAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
-      console.log('[SPEC_VIEWER_DEBUG] Deleting all annotations:', allAnnotations.length);
-      tmpViewer.Core.annotationManager.deleteAnnotations(allAnnotations);
+      
+// Filter out TextMarkup-type annotations (these include highlights, underlines, etc.)
+const annotationsToDelete = allAnnotations.filter(
+  (annot) => !(annot instanceof tmpViewer.Core.Annotations.TextMarkupAnnotation)
+);
+
+console.log('[SPEC_VIEWER_DEBUG] Deleting all non-highlight annotations:', annotationsToDelete.length);
+
+// Delete only the filtered ones
+tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
 
       // If highlights are disabled, just clear existing annotations and return
       if (!highlightsEnabled) {
@@ -244,6 +252,7 @@ const ProjectLogsReader = ({
           annotationManager.redrawAnnotation(rectangleAnnot);
         }
         console.log('[SPEC_VIEWER_DEBUG] Created submittal annotations:', highlightLocations?.length || 0);
+        
       } else {
         console.log('[SPEC_VIEWER_DEBUG] Submittal annotations filtered out by active filters');
       }
@@ -320,6 +329,8 @@ const ProjectLogsReader = ({
       
       setAnnotations(_annotations);
       console.log('[SPEC_VIEWER_DEBUG] All annotations created and set:', _annotations.length);
+
+
     } else {
       console.log('[SPEC_VIEWER_DEBUG] No highlights to display - clearing annotations');
       setAnnotations([]);
@@ -352,84 +363,110 @@ const ProjectLogsReader = ({
       newPdfViewer.style.position = "relative";
       newPdfViewer.style.overflow = "hidden";
       newPdfViewer.style.width = "100%";
-
+      
       const viewer = pdfViewer.appendChild(newPdfViewer);
 
       const _webViewer = await WebViewer(
         {
           path: "/webviewer/lib",
           licenseKey:
-            'Thelinkai  Inc :PWS:Thelinkai  Inc ::B+2:9D34C842CB60BB40A8EF77436A7DEE579B3C140AD8EFE6EE4ED826BD',
+          'Thelinkai  Inc :PWS:Thelinkai  Inc ::B+2:9D34C842CB60BB40A8EF77436A7DEE579B3C140AD8EFE6EE4ED826BD',
           initialDoc: url,
           extension: "pdf",
           css: "./index.css",
         },
         viewer
       );
+      const { annotationManager, Annotations } = _webViewer.Core;
       
       // Wait a bit for WebViewer to fully initialize
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const { annotationManager, documentViewer, Annotations} = _webViewer
-      // Verify WebViewer is properly initialized before setting it
-      if (_webViewer && _webViewer.Core && _webViewer.Core.documentViewer) {
-        setWebViewer(_webViewer);
-      } else {
-        console.error('[SPEC_VIEWER_DEBUG] WebViewer failed to initialize properly');
-        throw new Error('WebViewer initialization failed');
-      }
+      
 
       _webViewer.UI.enableFeatures([_webViewer.UI.Feature.InlineComment]);
       handleDocumentLoaded(_webViewer.Core.annotationManager);
       _webViewer.UI.setZoomLevel("100%");
-
-      _webViewer.Core.documentViewer.addEventListener("documentLoaded", () => {
+      let response;
+      _webViewer.Core.documentViewer.addEventListener("documentLoaded", async () => {
         setDocumentLoaded(true);
         // Add a small delay to ensure WebViewer is fully ready
         setTimeout(() => {
           updateTxtView(_webViewer);
-        }, 200);
+        }, 1000);
         setLoading(false);
 
+            try{
+            //TODO:  Make the projectId, projectVersionId and specId dynamic (currently hardcoded)
+            response = await getAnnotations(1, 1, 1);
+            // console.log("Fetching annotations for", projectId, projectVersionId, specSectionId);
+            const xfdfStrings = response?.data.results || [];
+            console.log('get api response',response)
+            if (xfdfStrings.length > 0) {
+              // Import all XFDF data back into viewer
+              const xfdfData = xfdfStrings.map(a => a.xfdf_data).join("");
+              
+              await annotationManager.importAnnotations(xfdfData);
+            }
+          } catch (error) {
+            console.error("Failed to load annotations:", error);
+          }
+      })
 
-      });
-
-      _webViewer.UI.documentViewer.addEventListener("documentLoaded", async () => {
-        try {
-          const res = await getAnnotations(1, 1);
-          const xfdfData = res.data.map(a => a.xfdf_data).join("\n");
-          await annotationManager.importAnnotations(xfdfData);
-        } catch (err) {
-          console.error("Error loading saved highlights:", err);
-        }
-      });
+        
       annotationManager.addEventListener("annotationChanged", async (annotations, action, options) => {
-        if (options.imported) return; // ignore loaded annotations
-
-        const textHighlights = annotations.filter(a => a instanceof Annotations.TextHighlightAnnotation);
-
-        for (const annotation of textHighlights) {
-          const xfdfString = await annotationManager.exportAnnotations({ annotationList: [annotation] });
-
+      if (options.imported) return; // Prevent loops when importing XFDF
+      if (!(annotations[0] instanceof Annotations.TextMarkupAnnotation)) return; // Prevent the event to fire when other type of annotation changes
+      for (const annotation of annotations) {
+        try {
+          const xfdfData = await annotationManager.exportAnnotations({ annotationList: [annotation] });
+          const pageNumber = annotation.PageNumber;
+          const color = annotation.Color?.toHex?.() || "#FFDD00";
+          const quads = annotation.Quads || [];
+          const tag = annotation.Subject || "";
           if (action === "add") {
-            await createAnnotation({
-              proectId: 1,
+            console.log("Saving annotation:", annotation.Id);
+            const newAnnot = await createAnnotation({
+              projectId: 1, //TODO Make these 3 field dynamic
+              projectVersionId: 1,
               specSectionId: 1,
-              pageNumber: annotation.PageNumber,
-              color: annotation.Color?.toHexString(),
-              quads: annotation.Quads,
-              xfdfData: xfdfString,
-              tag: annotation.Subject || "",
+              pageNumber,
+              color,
+              quads,
+              xfdfData,
+              tag,
             });
+            response = await getAnnotations(1, 1, 1);
+            
+          } else if (action === "delete") {
+            console.log("Deleting annotation:", annotation.Id);
+            if (annotation.Id) {
+              console.log('the eventListener annotation', annotations)
+              let xfdfDelete = annotation.xfdf_string
+              console.log('frontend annotation', xfdfDelete);
+              const deletionArray = response.data.results || [];
+              console.log(deletionArray);
+              let realAnnotId;
+              for (const annot of deletionArray){
+                if (annot.xfdfData === xfdfDelete){
+                  console.log('xfdfDelete: ', xfdfDelete)
+                  realAnnotId = annot.id;
+                  console.log("realAnnotId: "+realAnnotId);
+                  console.log("annot.id: "+annot.id);
+                  break;
+                }
+              }
+              await new Promise(resolve => setTimeout(resolve, 300)); // small delay
+              await deleteAnnotation(1, realAnnotId);
+            }
           }
-
-          if (action === "delete") {
-            await deleteAnnotation(annotation.Id);
-          }
+        } catch (error) {
+          console.error("Annotation sync failed:", error);
         }
-      });
+      }
+    });
 
-      
+
       // Error handling
       _webViewer.Core.documentViewer.addEventListener("documentError", (error) => {
         if (isS3LinkExpiredError(error)) {
