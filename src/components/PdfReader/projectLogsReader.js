@@ -170,7 +170,7 @@ const ProjectLogsReader = ({
       // Delete all annotations (both our created ones and server-loaded ones)
       const allAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
       
-// Filter out TextMarkup-type annotations (these include highlights, underlines, etc.)
+// (WIP-Annotations) Filter out TextMarkup-type annotations (these include highlights, underlines, etc.)
 const annotationsToDelete = allAnnotations.filter(
   (annot) => !(annot instanceof tmpViewer.Core.Annotations.TextMarkupAnnotation)
 );
@@ -377,6 +377,7 @@ tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
         },
         viewer
       );
+      // (WIP-Annotations)
       const { annotationManager, Annotations } = _webViewer.Core;
       
       // Wait a bit for WebViewer to fully initialize
@@ -415,7 +416,7 @@ tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
 
         
       annotationManager.addEventListener("annotationChanged", async (annotations, action, options) => {
-      if (options.imported) return; // Prevent loops when importing XFDF
+      if (options.imported) return; // Prevent loops when importing XFDFg
       if (!(annotations[0] instanceof Annotations.TextMarkupAnnotation)) return; // Prevent the event to fire when other type of annotation changes
       for (const annotation of annotations) {
         try {

@@ -511,6 +511,7 @@ const getAnnotations = async (projectId, specSectionId, projectVersionId) => {
     return await axiosInstance({
       method: "get",
       url: `/api/deliverables/projects/${projectId}/pdf-annotations/`,
+    //   TODO: Turn this hardcoded parameters to dynamic
       params: {
         project: 1,
         spec_section: 1,
