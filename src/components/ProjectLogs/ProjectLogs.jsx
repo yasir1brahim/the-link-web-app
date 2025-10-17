@@ -101,6 +101,7 @@ const ProjectLogs = () => {
   const [searchValue, setSearchValue] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const [exportToProcoreToastId, setExportToProcoreToastId] = useState(null);
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({
     url: "",
@@ -892,14 +893,16 @@ const ProjectLogs = () => {
         url: "/api/deliverables/procore/create_submittals/",
         data: {
           project_id: Number(projectId),
-          records: JSON.parse(selectedRows), // array of ids
+          records: selectedRows === 'All' ? [] : JSON.parse(selectedRows), // array of ids
           project_version_id: projectVersionId,
+          export_all: selectedRows === 'All' ? true : false,
           // status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
         },
       });
       if (resp.status === 200) {
         // setProjectMappingsNoContent(false)
         setLoading(false);
+        ToastService.dismiss();
         ToastService.success("Successfully exported to Procore!");
         localStorage.setItem("selectedRows", "");
         setSelected([]);
@@ -907,6 +910,7 @@ const ProjectLogs = () => {
       // setLoading(false);
     } catch (error) {
       setLoading(false);
+      ToastService.dismiss();
       console.log("error", error);
       localStorage.setItem("selectedRows", "");
       setSelected([]);
@@ -1497,13 +1501,16 @@ const ProjectLogs = () => {
   const handleProceedWithExport = () => {
     handleExportToProcore();
     setExportToProcoreModal(false);
-    ToastService.info(
+    const toastId = ToastService.info(
       `Exporting ${
         selectedRows === "All"
           ? logIdList.length
           : JSON.parse(selectedRows).length
-      } submittals to ${procoreProjectName} project in Procore...`
+      } submittals to ${procoreProjectName} project in Procore...`,
+      {autoClose: false}
     );
+    console.log("toastId", toastId);
+    setExportToProcoreToastId(toastId);
   };
 
   const handleManageProcoreButtonClick = async () => {
