@@ -26,6 +26,7 @@ const ProjectLogsReader = ({
   const [documentLoaded, setDocumentLoaded] = useState(false);
   const { handleError, ErrorModal } = useS3LinkValidation();
   const previousHighlightLocation = useRef(null);
+  const annotationsCreated = useRef(false);
   
   // Convert activeFilters Set to a stable string representation for dependency tracking
   const activeFiltersString = React.useMemo(() => {
@@ -41,6 +42,11 @@ const ProjectLogsReader = ({
   const stableAiLogHighlightLocations = React.useMemo(() => {
     return aiLogHighlightLocations;
   }, [JSON.stringify(aiLogHighlightLocations)]);
+  
+  // Reset annotations flag when highlight data changes
+  useEffect(() => {
+    annotationsCreated.current = false;
+  }, [stableHighlightLocations, stableAiLogHighlightLocations]);
 
   console.log('[SPEC_VIEWER_DEBUG] ProjectLogsReader props:', {
     url,
@@ -64,6 +70,7 @@ const ProjectLogsReader = ({
         setCurrentUrl(url);
         setDocumentLoaded(false); // Reset document loaded state
         previousHighlightLocation.current = null; // Reset previous location for new document
+        annotationsCreated.current = false; // Reset annotations flag for new document
         await loadPDF();
       })();
     }
@@ -167,7 +174,8 @@ const ProjectLogsReader = ({
       console.log('[SPEC_VIEWER_DEBUG] updateTxtView called with:', {
         highlightLocations: stableHighlightLocations,
         highlightLocationsLength: stableHighlightLocations?.length,
-        hasViewer: !!tmpViewer
+        hasViewer: !!tmpViewer,
+        annotationsCreated: annotationsCreated.current
       });
 
       // Safety check to ensure WebViewer is fully initialized
@@ -182,15 +190,42 @@ const ProjectLogsReader = ({
         return;
       }
 
-      // Delete all annotations (both our created ones and server-loaded ones)
-      const allAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
-      console.log('[SPEC_VIEWER_DEBUG] Deleting all annotations:', allAnnotations.length);
-      tmpViewer.Core.annotationManager.deleteAnnotations(allAnnotations);
-
       const highlightsAreAvailable = stableHighlightLocations && stableHighlightLocations.length > 0 && stableHighlightLocations[0]?.page_no && stableHighlightLocations[0]?.x && stableHighlightLocations[0]?.y;
       const aiLogHighlightsAreAvailable = stableAiLogHighlightLocations && stableAiLogHighlightLocations.length > 0;
       console.log('[SPEC_VIEWER_DEBUG] Highlights are available:', highlightsAreAvailable);
       console.log('[SPEC_VIEWER_DEBUG] AI log highlights are available:', aiLogHighlightsAreAvailable);
+      
+      // If annotations have already been created, just toggle visibility
+      if (annotationsCreated.current && annotations.length > 0) {
+        console.log('[SPEC_VIEWER_DEBUG] Annotations already exist, toggling visibility');
+        const annotationManager = tmpViewer.Core.annotationManager;
+        
+        // Batch hide/show annotations based on active filters
+        const annotationsToUpdate = [];
+        annotations.forEach(annot => {
+          const itemType = annot.CustomData?.item_type;
+          const shouldShow = activeFilters.has(itemType);
+          
+          if (annot.Hidden === shouldShow) { // Only update if state needs to change
+            annot.Hidden = !shouldShow;
+            annotationsToUpdate.push(annot);
+          }
+        });
+        
+        if (annotationsToUpdate.length > 0) {
+          console.log('[SPEC_VIEWER_DEBUG] Updating visibility for', annotationsToUpdate.length, 'annotations');
+          // Batch redraw for better performance - use redraw instead of draw for existing annotations
+          annotationsToUpdate.forEach(annot => annotationManager.redrawAnnotation(annot));
+        }
+        return;
+      }
+      
+      // Need to create new annotations - first delete any existing ones
+      const existingAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
+      if (existingAnnotations.length > 0) {
+        console.log('[SPEC_VIEWER_DEBUG] Deleting existing annotations before creating new ones:', existingAnnotations.length);
+        tmpViewer.Core.annotationManager.deleteAnnotations(existingAnnotations);
+      }
 
     if (tmpViewer && (highlightsAreAvailable || aiLogHighlightsAreAvailable)) {
       const initialLocation = getInitialPageLocation(stableHighlightLocations, stableAiLogHighlightLocations);
@@ -240,32 +275,27 @@ const ProjectLogsReader = ({
       }
       
       // Add submittal highlights (yellow/green color)
-      // Apply filter: only show if 'submittal' is in the active filter set
+      // Create all annotations, set Hidden based on active filters
       const shouldShowSubmittals = activeFilters.has('submittal');
-      if (shouldShowSubmittals) {
-        for (let i = 0; i < stableHighlightLocations?.length; i++) {
-          const rectangleAnnot = new Annotations.RectangleAnnotation({
-            PageNumber: stableHighlightLocations[i]?.page_no,
-            X: stableHighlightLocations[i]?.x,
-            Y: stableHighlightLocations[i]?.y,
-            Width: stableHighlightLocations[i]?.width ?? 10000,
-            Height: stableHighlightLocations[i]?.height ?? 30,
-            Color: new Annotations.Color(213, 231, 62, 0.25),
-            FillColor: new Annotations.Color(213, 231, 62, 0.25),
-          });
-          rectangleAnnot.Subject = 'Submittal Highlight';
-          rectangleAnnot.CustomData = {
-            item_type: 'submittal',
-            extraction_type: 'submittal'
-          };
-          _annotations.push(rectangleAnnot);
-          annotationManager.addAnnotation(rectangleAnnot);
-          annotationManager.redrawAnnotation(rectangleAnnot);
-        }
-        console.log('[SPEC_VIEWER_DEBUG] Created submittal annotations:', stableHighlightLocations?.length || 0);
-      } else {
-        console.log('[SPEC_VIEWER_DEBUG] Submittal annotations filtered out by active filters');
+      for (let i = 0; i < stableHighlightLocations?.length; i++) {
+        const rectangleAnnot = new Annotations.RectangleAnnotation({
+          PageNumber: stableHighlightLocations[i]?.page_no,
+          X: stableHighlightLocations[i]?.x,
+          Y: stableHighlightLocations[i]?.y,
+          Width: stableHighlightLocations[i]?.width ?? 10000,
+          Height: stableHighlightLocations[i]?.height ?? 30,
+          Color: new Annotations.Color(213, 231, 62, 0.25),
+          FillColor: new Annotations.Color(213, 231, 62, 0.25),
+        });
+        rectangleAnnot.Subject = 'Submittal Highlight';
+        rectangleAnnot.CustomData = {
+          item_type: 'submittal',
+          extraction_type: 'submittal'
+        };
+        rectangleAnnot.Hidden = !shouldShowSubmittals;
+        _annotations.push(rectangleAnnot);
       }
+      console.log('[SPEC_VIEWER_DEBUG] Created submittal annotations:', stableHighlightLocations?.length || 0);
       
       // Helper function to get color based on AI log item type
       const getColorForItemType = (itemType, extractionType) => {
@@ -296,21 +326,13 @@ const ProjectLogsReader = ({
       };
       
       // Add AI log highlights with different colors based on type
-      // Apply filter: only show highlights whose item_type is in the active filter set
-      let filteredCount = 0;
-      let addedCount = 0;
+      // Create all annotations, set Hidden based on active filters
       for (let i = 0; i < stableAiLogHighlightLocations?.length; i++) {
         const location = stableAiLogHighlightLocations[i];
         const itemType = location?.item_type;
         
         // Check if this highlight should be shown based on active filters
         const shouldShow = activeFilters.has(itemType);
-        
-        if (!shouldShow) {
-          filteredCount++;
-          console.log('[SPEC_VIEWER_DEBUG] Filtering out AI log highlight with item_type:', itemType);
-          continue;
-        }
         
         console.log('[SPEC_VIEWER_DEBUG] Adding AI log highlight:', location);
         const color = getColorForItemType(location?.item_type, location?.extraction_type);
@@ -330,14 +352,17 @@ const ProjectLogsReader = ({
           extraction_type: location?.extraction_type,
           requirement_text: location?.requirement_text
         };
+        rectangleAnnot.Hidden = !shouldShow;
         _annotations.push(rectangleAnnot);
-        annotationManager.addAnnotation(rectangleAnnot);
-        annotationManager.redrawAnnotation(rectangleAnnot);
-        addedCount++;
       }
-      console.log('[SPEC_VIEWER_DEBUG] Created AI log annotations with color coding:', addedCount, 'filtered out:', filteredCount);
+      console.log('[SPEC_VIEWER_DEBUG] Created AI log annotations with color coding:', stableAiLogHighlightLocations?.length || 0);
+      
+      // Add all annotations in batch for better performance
+      annotationManager.addAnnotations(_annotations);
+      annotationManager.drawAnnotationsFromList(_annotations);
       
       setAnnotations(_annotations);
+      annotationsCreated.current = true;
       console.log('[SPEC_VIEWER_DEBUG] All annotations created and set:', _annotations.length);
     } else {
       console.log('[SPEC_VIEWER_DEBUG] No highlights to display - clearing annotations');
