@@ -6,8 +6,6 @@ const SpecViewerSidebar = ({
   specSections,
   selectedSection,
   onSectionChange,
-  highlightsEnabled,
-  onHighlightsToggle,
   loading
 }) => {
   return (
@@ -17,20 +15,6 @@ const SpecViewerSidebar = ({
         <p className="sidebar-subtitle">
           {specSections ? specSections.length : 0} sections available
         </p>
-      </div>
-
-      <div className="sidebar-controls">
-        <div className="control-group">
-          <label className="control-label">
-            <input
-              type="checkbox"
-              checked={highlightsEnabled}
-              onChange={(e) => onHighlightsToggle(e.target.checked)}
-              className="control-checkbox"
-            />
-            <span className="control-text">Show Submittal Highlights</span>
-          </label>
-        </div>
       </div>
 
       <div className="sidebar-sections">

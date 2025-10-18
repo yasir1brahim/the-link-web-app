@@ -5,7 +5,6 @@ import './DocumentHighlighter.css';
 const DocumentHighlighter = ({ 
   highlights = [], 
   aiLogHighlights = [],
-  highlightsEnabled = true, 
   onHighlightClick,
   documentUrl = null,
   documentId = null,
@@ -75,7 +74,6 @@ const DocumentHighlighter = ({
 
   const [currentHighlights, setCurrentHighlights] = useState(mapHighlightLocations(highlights));
   const [currentAiLogHighlights, setCurrentAiLogHighlights] = useState(mapAiLogHighlightLocations(aiLogHighlights));
-  const [currentHighlightsEnabled, setCurrentHighlightsEnabled] = useState(highlightsEnabled);
 
   // Update highlights when the highlights prop changes
   useEffect(() => {
@@ -104,12 +102,6 @@ const DocumentHighlighter = ({
     });
     setCurrentAiLogHighlights(newAiLogHighlights);
   }, [aiLogHighlights]);
-
-  // Update highlights enabled state when prop changes
-  useEffect(() => {
-    console.log('[SPEC_VIEWER_DEBUG] DocumentHighlighter highlightsEnabled changed:', highlightsEnabled);
-    setCurrentHighlightsEnabled(highlightsEnabled);
-  }, [highlightsEnabled]);
 
 
   if (!documentUrl) {
@@ -142,7 +134,6 @@ const DocumentHighlighter = ({
         loading={false}
         setLoading={() => {}}
         onError={() => {}}
-        highlightsEnabled={currentHighlightsEnabled}
         activeFilters={activeFilters}
       />
     </div>

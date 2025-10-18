@@ -18,7 +18,6 @@ const ProjectLogsReader = ({
   loading,
   setLoading,
   onError,
-  highlightsEnabled = true,
   activeFilters = new Set(),
 }) => {
   const [webViewer, setWebViewer] = useState(null);
@@ -71,7 +70,7 @@ const ProjectLogsReader = ({
   }, [url]);
 
   useEffect(() => {
-    console.log('[SPEC_VIEWER_DEBUG] Highlight locations, document loaded, highlights enabled, or filters changed:', {
+    console.log('[SPEC_VIEWER_DEBUG] Highlight locations, document loaded, or filters changed:', {
       url,
       currentUrl,
       hasWebViewer: !!webViewer,
@@ -80,7 +79,6 @@ const ProjectLogsReader = ({
       aiLogHighlightLocationsLength: stableAiLogHighlightLocations?.length,
       highlightLocations: stableHighlightLocations,
       aiLogHighlightLocations: stableAiLogHighlightLocations,
-      highlightsEnabled,
       activeFilters: Array.from(activeFilters),
       activeFiltersString
     });
@@ -95,7 +93,7 @@ const ProjectLogsReader = ({
         documentLoaded
       });
     }
-  }, [stableHighlightLocations, stableAiLogHighlightLocations, documentLoaded, highlightsEnabled, activeFiltersString]);
+  }, [stableHighlightLocations, stableAiLogHighlightLocations, documentLoaded, activeFiltersString]);
 
   const handleClose = () => {
     setLogInViewer(null);
@@ -169,8 +167,7 @@ const ProjectLogsReader = ({
       console.log('[SPEC_VIEWER_DEBUG] updateTxtView called with:', {
         highlightLocations: stableHighlightLocations,
         highlightLocationsLength: stableHighlightLocations?.length,
-        hasViewer: !!tmpViewer,
-        highlightsEnabled
+        hasViewer: !!tmpViewer
       });
 
       // Safety check to ensure WebViewer is fully initialized
@@ -189,13 +186,6 @@ const ProjectLogsReader = ({
       const allAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
       console.log('[SPEC_VIEWER_DEBUG] Deleting all annotations:', allAnnotations.length);
       tmpViewer.Core.annotationManager.deleteAnnotations(allAnnotations);
-
-      // If highlights are disabled, just clear existing annotations and return
-      if (!highlightsEnabled) {
-        console.log('[SPEC_VIEWER_DEBUG] Highlights disabled, clearing annotations');
-        setAnnotations([]);
-        return;
-      }
 
       const highlightsAreAvailable = stableHighlightLocations && stableHighlightLocations.length > 0 && stableHighlightLocations[0]?.page_no && stableHighlightLocations[0]?.x && stableHighlightLocations[0]?.y;
       const aiLogHighlightsAreAvailable = stableAiLogHighlightLocations && stableAiLogHighlightLocations.length > 0;

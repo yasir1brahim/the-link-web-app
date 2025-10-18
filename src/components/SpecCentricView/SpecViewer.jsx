@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getSpecCentricData, getSpecSectionContent } from '../../api/SpecCentricView/api';
 import SpecViewerSidebar from './SpecViewerSidebar';
-import SubmittalHighlights from './SubmittalHighlights';
 import DocumentHighlighter from './DocumentHighlighter';
 import HighlightTooltip from './HighlightTooltip';
 import HighlightLegend from './HighlightLegend';
@@ -11,7 +10,6 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   const [specData, setSpecData] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [sectionContent, setSectionContent] = useState(null);
-  const [highlightsEnabled, setHighlightsEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tooltip, setTooltip] = useState({ visible: false, highlight: null, position: { x: 0, y: 0 } });
@@ -72,10 +70,6 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
     console.log('PDF URL:', section?.pdf_url);
     console.log('PDF URL type:', typeof section?.pdf_url);
     setSelectedSection(section);
-  };
-
-  const handleHighlightsToggle = (enabled) => {
-    setHighlightsEnabled(enabled);
   };
 
   const handleHighlightClick = (highlight) => {
@@ -140,8 +134,6 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
           specSections={specData.spec_sections}
           selectedSection={selectedSection}
           onSectionChange={handleSectionChange}
-          highlightsEnabled={highlightsEnabled}
-          onHighlightsToggle={handleHighlightsToggle}
           loading={loading}
         />
       </div>
@@ -162,7 +154,6 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
                   <DocumentHighlighter
                     highlights={sectionContent.submittal_highlights || []}
                     aiLogHighlights={sectionContent.ai_log_highlights || []}
-                    highlightsEnabled={highlightsEnabled}
                     onHighlightClick={handleHighlightClick}
                     documentUrl={selectedSection?.pdf_url}
                     documentId={selectedSection?.document_id}
@@ -189,7 +180,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
       />
       
       {/* Highlight Color Legend */}
-      {highlightsEnabled && selectedSection && sectionContent && (
+      {selectedSection && sectionContent && (
         <HighlightLegend 
           submittalHighlights={sectionContent.submittal_highlights || []}
           aiLogHighlights={sectionContent.ai_log_highlights || []}
