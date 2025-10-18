@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './HighlightLegend.css';
 
 const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFilterChange }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [statistics, setStatistics] = useState({});
+  const isInitialMount = useRef(true);
 
   const highlightTypes = [
     { type: 'Submittals', color: 'rgba(213, 231, 62, 0.6)', key: 'submittal' },
@@ -43,7 +44,22 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
     
     console.log('[LEGEND_DEBUG] Calculated statistics:', stats);
     setStatistics(stats);
-  }, [submittalHighlights, aiLogHighlights]);
+    
+    // Initialize activeFilters with all available highlight types (start with all checked)
+    // Only do this on initial mount to preserve user's filter selections when switching sections
+    if (isInitialMount.current) {
+      const availableTypes = Object.keys(stats);
+      const newActiveFilters = new Set(availableTypes);
+      setActiveFilters(newActiveFilters);
+      
+      // Notify parent component of initial filters
+      if (onFilterChange) {
+        onFilterChange(newActiveFilters);
+      }
+      
+      isInitialMount.current = false;
+    }
+  }, [submittalHighlights, aiLogHighlights, onFilterChange]);
 
   const handleFilterToggle = (key) => {
     const newFilters = new Set(activeFilters);
@@ -84,7 +100,7 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
                   key={item.key} 
                   className={`legend-item ${isAvailable ? 'clickable' : 'disabled'} ${isActive ? 'active' : ''}`}
                   onClick={() => isAvailable && handleFilterToggle(item.key)}
-                  title={isAvailable ? (isActive ? 'Click to hide' : 'Click to show only this type') : 'No highlights of this type'}
+                  title={isAvailable ? (isActive ? 'Click to hide this type' : 'Click to show this type') : 'No highlights of this type'}
                 >
                   <div 
                     className="legend-color-box" 
@@ -100,19 +116,20 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
             })}
           </div>
           
-          {activeFilters.size > 0 && (
+          {activeFilters.size < Object.keys(statistics).length && Object.keys(statistics).length > 0 && (
             <div className="legend-actions">
               <button 
                 className="legend-clear-btn"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActiveFilters(new Set());
+                  const allTypes = new Set(Object.keys(statistics));
+                  setActiveFilters(allTypes);
                   if (onFilterChange) {
-                    onFilterChange(new Set());
+                    onFilterChange(allTypes);
                   }
                 }}
               >
-                Clear All Filters
+                Show All
               </button>
             </div>
           )}

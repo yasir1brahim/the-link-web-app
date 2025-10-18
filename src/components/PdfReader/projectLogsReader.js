@@ -250,8 +250,8 @@ const ProjectLogsReader = ({
       }
       
       // Add submittal highlights (yellow/green color)
-      // Apply filter: if filters are active and 'submittal' is not in the filter set, skip
-      const shouldShowSubmittals = activeFilters.size === 0 || activeFilters.has('submittal');
+      // Apply filter: only show if 'submittal' is in the active filter set
+      const shouldShowSubmittals = activeFilters.has('submittal');
       if (shouldShowSubmittals) {
         for (let i = 0; i < stableHighlightLocations?.length; i++) {
           const rectangleAnnot = new Annotations.RectangleAnnotation({
@@ -306,7 +306,7 @@ const ProjectLogsReader = ({
       };
       
       // Add AI log highlights with different colors based on type
-      // Apply filter: if filters are active, only show highlights whose item_type is in the filter set
+      // Apply filter: only show highlights whose item_type is in the active filter set
       let filteredCount = 0;
       let addedCount = 0;
       for (let i = 0; i < stableAiLogHighlightLocations?.length; i++) {
@@ -314,7 +314,7 @@ const ProjectLogsReader = ({
         const itemType = location?.item_type;
         
         // Check if this highlight should be shown based on active filters
-        const shouldShow = activeFilters.size === 0 || activeFilters.has(itemType);
+        const shouldShow = activeFilters.has(itemType);
         
         if (!shouldShow) {
           filteredCount++;
