@@ -18,6 +18,7 @@ const ProjectLogsReader = ({
   loading,
   setLoading,
   onError,
+  highlightsEnabled = true,
   activeFilters = new Set(),
   projectId = null,
   projectVersionId = null,
@@ -195,16 +196,15 @@ const ProjectLogsReader = ({
 
       // Delete all annotations (both our created ones and server-loaded ones)
       const allAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
-      
-// (WIP-Annotations) Filter out TextMarkup-type annotations (these include highlights, underlines, etc.)
-const annotationsToDelete = allAnnotations.filter(
-  (annot) => !(annot instanceof tmpViewer.Core.Annotations.TextMarkupAnnotation)
-);
+            
+      const annotationsToDelete = allAnnotations.filter(
+        (annot) => !(annot instanceof tmpViewer.Core.Annotations.TextMarkupAnnotation)
+      );
 
-console.log('[SPEC_VIEWER_DEBUG] Deleting all non-highlight annotations:', annotationsToDelete.length);
+      console.log('[SPEC_VIEWER_DEBUG] Deleting all non-highlight annotations:', annotationsToDelete.length);
 
-// Delete only the filtered ones
-tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
+      // Delete only the filtered ones
+      tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
 
       // If highlights are disabled, just clear existing annotations and return
       if (!highlightsEnabled) {
@@ -215,7 +215,6 @@ tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
 
       const highlightsAreAvailable = stableHighlightLocations && stableHighlightLocations.length > 0 && stableHighlightLocations[0]?.page_no && stableHighlightLocations[0]?.x && stableHighlightLocations[0]?.y;
       const aiLogHighlightsAreAvailable = stableAiLogHighlightLocations && stableAiLogHighlightLocations.length > 0;
-      
       console.log('[SPEC_VIEWER_DEBUG] Highlights are available:', highlightsAreAvailable);
       console.log('[SPEC_VIEWER_DEBUG] AI log highlights are available:', aiLogHighlightsAreAvailable);
       
@@ -249,7 +248,10 @@ tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
       const existingAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
       if (existingAnnotations.length > 0) {
         console.log('[SPEC_VIEWER_DEBUG] Deleting existing annotations before creating new ones:', existingAnnotations.length);
-        tmpViewer.Core.annotationManager.deleteAnnotations(existingAnnotations);
+        const annotationsToDelete2 = existingAnnotations.filter(
+        (annot) => !(annot instanceof tmpViewer.Core.Annotations.TextMarkupAnnotation)
+      );
+        tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete2);
       }
 
     if (tmpViewer && (highlightsAreAvailable || aiLogHighlightsAreAvailable)) {
@@ -322,7 +324,6 @@ tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
         _annotations.push(rectangleAnnot);
       }
       console.log('[SPEC_VIEWER_DEBUG] Created submittal annotations:', stableHighlightLocations?.length || 0);
-        
       
       // Helper function to get color based on AI log item type
       const getColorForItemType = (itemType, extractionType) => {
@@ -440,7 +441,6 @@ tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
         },
         viewer
       );
-      // (WIP-Annotations)
       const { annotationManager, Annotations } = _webViewer.Core;
       
       // Wait a bit for WebViewer to fully initialize
