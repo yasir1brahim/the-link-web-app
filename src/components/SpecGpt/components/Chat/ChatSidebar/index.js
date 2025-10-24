@@ -13,7 +13,7 @@ const ChatSidebar = ({
     isQaPlannerFlagActive
 }) => {
     return (
-        <Box w="100%" bgColor="#1F2A43" h="100vh" display="flex" flexDirection="column">
+        <Box w="100%" bgColor="#1F2A43" h="100%" display="flex" flexDirection="column">
             <Box px={{ base: "24px", lg: "30px" }} flexShrink={0}>
                 <Flex py="20px" align={"center"} justifyContent={"space-between"}>
                     <Heading as="h4" fontSize={{ base: "18px", lg: "24px" }} fontWeight="semibold" color="#FFFFFF">
@@ -51,7 +51,7 @@ const ChatSidebar = ({
                 minH={0}
                 className="sidebar-scroller"
             >
-                <Flex flexDir="column" gap={6} pb={40}>
+                <Flex flexDir="column" gap={6} pb={4}>
                     {chatHistory?.map((chat, index) => {
                         return chat.chats.length > 0 && (
                             <Box key={index}>
@@ -81,6 +81,24 @@ const ChatSidebar = ({
                         )
                     })}
                 </Flex>
+            </Box>
+
+            {/* Disclaimer at the bottom */}
+            <Box 
+                px={{ base: "24px", lg: "30px" }} 
+                py={4}
+                flexShrink={0}
+                borderTop="1px solid"
+                borderColor="#FFFFFF22"
+            >
+                <Text 
+                    fontSize="11px" 
+                    color="#9CA3AF" 
+                    lineHeight="1.5"
+                    textAlign="center"
+                >
+                    AI results may vary. Please double check original sources to ensure completeness and accuracy.
+                </Text>
             </Box>
         </Box>
     )

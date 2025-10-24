@@ -578,6 +578,193 @@ const updateAnnotation = async (projectId, annotationId, updateData) => {
     throw error; // Re-throw to handle in the calling function
   }
 };
+const bulkDownloadSpecSections = async (sectionIds) => {
+    try {
+        const response = await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/spec-sections/download-multiple/`,
+            params: {
+                section_ids: sectionIds.join(',')
+            }
+        });
+        
+        if (response.data.single_file) {
+            // Single file download
+            const downloadUrl = response.data.download_url;
+            const fileName = response.data.file_name;
+            
+            try {
+                const fileResponse = await fetch(downloadUrl);
+                
+                if (!fileResponse.ok) {
+                    throw new Error(`Download failed: HTTP ${fileResponse.status}`);
+                }
+                
+                const blob = await fileResponse.blob();
+                
+                const blobUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = fileName;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up blob URL to prevent memory leaks
+                window.URL.revokeObjectURL(blobUrl);
+                
+            } catch (downloadError) {
+                console.warn('Blob download failed, opening in new tab:', downloadError);
+                
+                // Fallback: Open in new tab if blob download fails
+                const newWindow = window.open(downloadUrl, '_blank');
+                
+                if (!newWindow) {
+                    throw new Error('Download failed and popup was blocked. Please allow popups and try again.');
+                }
+            }
+        } else {
+            // Multiple files download - now handled as single zip file
+            const downloadUrl = response.data.download_url;
+            const fileName = response.data.file_name;
+            
+            try {
+                const fileResponse = await fetch(downloadUrl);
+                
+                if (!fileResponse.ok) {
+                    throw new Error(`Download failed: HTTP ${fileResponse.status}`);
+                }
+                
+                const blob = await fileResponse.blob();
+                
+                const blobUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = fileName;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up blob URL to prevent memory leaks
+                window.URL.revokeObjectURL(blobUrl);
+                
+            } catch (downloadError) {
+                console.warn('Blob download failed, opening in new tab:', downloadError);
+                
+                // Fallback: Open in new tab if blob download fails
+                const newWindow = window.open(downloadUrl, '_blank');
+                
+                if (!newWindow) {
+                    throw new Error('Download failed and popup was blocked. Please allow popups and try again.');
+                }
+            }
+        }
+        
+        return response;
+    } catch (error) {
+        console.log("error in bulkDownloadSpecSections", error);
+        handleError(error);
+        throw error;
+    }
+}
+
+const bulkDownloadDocuments = async (documentIds) => {
+    try {
+        const response = await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/documents/download-multiple/`,
+            params: {
+                document_ids: documentIds.join(',')
+            }
+        });
+        
+        if (response.data.single_file) {
+            // Single file download
+            const downloadUrl = response.data.download_url;
+            const fileName = response.data.file_name;
+            
+            try {
+                const fileResponse = await fetch(downloadUrl);
+                
+                if (!fileResponse.ok) {
+                    throw new Error(`Download failed: HTTP ${fileResponse.status}`);
+                }
+                
+                const blob = await fileResponse.blob();
+                
+                const blobUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = fileName;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up blob URL to prevent memory leaks
+                window.URL.revokeObjectURL(blobUrl);
+                
+            } catch (downloadError) {
+                console.warn('Blob download failed, opening in new tab:', downloadError);
+                
+                // Fallback: Open in new tab if blob download fails
+                const newWindow = window.open(downloadUrl, '_blank');
+                
+                if (!newWindow) {
+                    throw new Error('Download failed and popup was blocked. Please allow popups and try again.');
+                }
+            }
+        }
+        
+        return response;
+    } catch (error) {
+        console.log("error in bulkDownloadDocuments", error);
+        handleError(error);
+        throw error;
+    }
+}
+
+const bulkReprocessDocuments = async (documentIds) => {
+    try {
+        const response = await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/documents/reprocess-multiple/`,
+            data: {
+                document_ids: documentIds
+            }
+        });
+        
+        return response;
+    } catch (error) {
+        console.log("error in bulkReprocessDocuments", error);
+        handleError(error);
+        throw error;
+    }
+}
+
+const bulkDeleteDocuments = async (documentIds) => {
+    try {
+        const response = await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/documents/delete-multiple/`,
+            data: {
+                document_ids: documentIds
+            }
+        });
+        
+        return response;
+    } catch (error) {
+        console.log("error in bulkDeleteDocuments", error);
+        handleError(error);
+        throw error;
+    }
+}
+
 export {
     getSavedLogs,
     getSubmittalItemById,
@@ -606,4 +793,8 @@ export {
     getAnnotations,
     deleteAnnotation,
     updateAnnotation,
+    bulkDownloadSpecSections,
+    bulkDownloadDocuments,
+    bulkReprocessDocuments,
+    bulkDeleteDocuments,
 }

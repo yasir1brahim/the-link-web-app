@@ -23,19 +23,10 @@ const handleError = (error) => {
       draggable: true,
       progress: undefined
     });
+  } else {
+    // anything else (e.g., JSON parse errors, runtime errors, etc.)
+    console.error("Error:", error);
   }
-  // else {
-  //   // anything else
-  //   return toast.error("Something went wrong", {
-  //     position: "bottom-center",
-  //     autoClose: 5000,
-  //     hideProgressBar: true,
-  //     closeOnClick: true,
-  //     pauseOnHover: true,
-  //     draggable: true,
-  //     progress: undefined,
-  //   });
-  // }
 };
 
 export default handleError;

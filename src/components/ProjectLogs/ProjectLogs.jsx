@@ -101,6 +101,7 @@ const ProjectLogs = () => {
   const [searchValue, setSearchValue] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const [exportToProcoreToastId, setExportToProcoreToastId] = useState(null);
   const [listId, setListId] = useState(null);
   const [pdfData, setPdfData] = useState({
     url: "",
@@ -582,6 +583,7 @@ const ProjectLogs = () => {
               console.log('previous documentIsProcessing', documentIsProcessing(documentData));
               console.log('new documentIsProcessing', documentIsProcessing(responseDocumentData));
               fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+              fetchSpecSectionCount();
             }
             setDocumentData(responseDocumentData);  
             console.log('documentIsProcessing', documentIsProcessing(responseDocumentData));
@@ -662,6 +664,7 @@ const ProjectLogs = () => {
         setDocumentData(check_response.data.document_details);
         if (!documentIsProcessing(check_response.data.document_details)) {
           fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+          fetchSpecSectionCount();
         }
         setUploadLoading(false);
         setAlreadyExistingFiles(response.data.already_exist);
@@ -890,14 +893,16 @@ const ProjectLogs = () => {
         url: "/api/deliverables/procore/create_submittals/",
         data: {
           project_id: Number(projectId),
-          records: JSON.parse(selectedRows), // array of ids
+          records: selectedRows === 'All' ? [] : JSON.parse(selectedRows), // array of ids
           project_version_id: projectVersionId,
+          export_all: selectedRows === 'All' ? true : false,
           // status_id: statusResp?.data?.data?.find((sts) => sts.name === 'Open').id || 1
         },
       });
       if (resp.status === 200) {
         // setProjectMappingsNoContent(false)
         setLoading(false);
+        ToastService.dismiss();
         ToastService.success("Successfully exported to Procore!");
         localStorage.setItem("selectedRows", "");
         setSelected([]);
@@ -905,6 +910,7 @@ const ProjectLogs = () => {
       // setLoading(false);
     } catch (error) {
       setLoading(false);
+      ToastService.dismiss();
       console.log("error", error);
       localStorage.setItem("selectedRows", "");
       setSelected([]);
@@ -978,6 +984,10 @@ const ProjectLogs = () => {
     setAppliedFilters(initFilter);
     
     navigate(`/project-logs?projectDetails=${projectId}&projectVersion=${versionId}&tab=${activeTab}`);
+    setChatMessages([]);
+    setChatId(null);
+    setChatHistory([]);
+    setSpecGptUserInput('');
   }
 
   // useEffect(() => {
@@ -1002,11 +1012,22 @@ const ProjectLogs = () => {
     );
   }, [selected]);
 
-  const handleExportExcel = async (recordData, fileName) => {
+  const handleExportExcel = async (recordData = null, fileName = null) => {
     try {
+      console.log("starting export excel", recordData);
+      console.log("selectedRows", selectedRows);
+      if (!recordData && selectedRows) {
+        try {
+          recordData = JSON.parse(selectedRows);
+        } catch (parseError) {
+          console.error("Error parsing selectedRows:", parseError, "selectedRows:", selectedRows);
+          recordData = null;
+        }
+      }
+      console.log("recordData", recordData);
       const exportExcelData = await getExportExcelData(
-        state?.projectId || projectId,
-        recordData || localStorage.getItem("filteredIds")?.split(",")?.map((item) => Number(item)),
+        projectId,
+        recordData,
         filterValues,
         projectVersionId
       );
@@ -1014,22 +1035,29 @@ const ProjectLogs = () => {
       let blob = new Blob([exportExcelData.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      FileDownload(
-        blob,
-        `${
-          state?.project.project_name || `Project`
-        }_logs_${new Date().toLocaleDateString("en-US", { day: 'numeric' })}_${new Date().toLocaleDateString("en-US", { month: 'short' })}_${new Date().toLocaleDateString("en-US", { year: 'numeric' })}.xlsx`
-      );
+      const now = new Date();
+      const fileName = `${
+        state?.project.project_name || `Project`
+      }_logs_${now.toLocaleDateString("en-US", { day: 'numeric' })}_${now.toLocaleDateString("en-US", { month: 'short' })}_${now.toLocaleDateString("en-US", { year: 'numeric' })}_${now.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '')}.xlsx`;
+      FileDownload(blob, fileName);
     } catch (error) {
       handleError(error);
     }
   };
 
-  const handleExportJetBuild = async (recordData) => {
+  const handleExportJetBuild = async (recordData = null) => {
     try {
+      if (!recordData) {
+        try {
+          recordData = JSON.parse(selectedRows);
+        } catch (parseError) {
+          console.error("Error parsing selectedRows:", parseError, "selectedRows:", selectedRows);
+          recordData = null;
+        }
+      }
       const exportExcelData = await getExportJetBuildData(
-        state?.projectId || projectId,
-        recordData || localStorage.getItem("filteredIds")?.split(",")?.map((item) => Number(item)),
+        projectId,
+        recordData,
         filterValues,
         projectVersionId
       );
@@ -1037,12 +1065,11 @@ const ProjectLogs = () => {
       let blob = new Blob([exportExcelData.data], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      FileDownload(
-        blob,
-        `${
-          state?.project.project_name || `Project`
-        }_logs_${new Date().toLocaleDateString("en-US", { day: 'numeric' })}_${new Date().toLocaleDateString("en-US", { month: 'short' })}_${new Date().toLocaleDateString("en-US", { year: 'numeric' })}.xlsx`
-      );
+      const now = new Date();
+      const fileName = `${
+        state?.project.project_name || `Project`
+      }_logs_${now.toLocaleDateString("en-US", { day: 'numeric' })}_${now.toLocaleDateString("en-US", { month: 'short' })}_${now.toLocaleDateString("en-US", { year: 'numeric' })}_${now.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false }).replace(':', '')}.xlsx`;
+      FileDownload(blob, fileName);
     } catch (error) {
       handleError(error);
     }
@@ -1474,13 +1501,16 @@ const ProjectLogs = () => {
   const handleProceedWithExport = () => {
     handleExportToProcore();
     setExportToProcoreModal(false);
-    ToastService.info(
+    const toastId = ToastService.info(
       `Exporting ${
         selectedRows === "All"
           ? logIdList.length
           : JSON.parse(selectedRows).length
-      } submittals to ${procoreProjectName} project in Procore...`
+      } submittals to ${procoreProjectName} project in Procore...`,
+      {autoClose: false}
     );
+    console.log("toastId", toastId);
+    setExportToProcoreToastId(toastId);
   };
 
   const handleManageProcoreButtonClick = async () => {

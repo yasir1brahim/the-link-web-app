@@ -176,11 +176,11 @@ const Chat = ({
     };
 
     useEffect(() => {
-        fetchChatHistory(projectId).then((data) => {
+        fetchChatHistory(projectId, projectVersionId).then((data) => {
             console.log("chat history", data);
             setChatHistory(data);
         });
-    }, []);
+    }, [projectId, projectVersionId]);
 
     // Connect to WebSocket if feature flag is active
     useEffect(() => {
@@ -231,7 +231,7 @@ const Chat = ({
     }
     // Helper function to refresh chat history
     const refreshChatHistory = () => {
-        fetchChatHistory(projectId).then((data) => {
+        fetchChatHistory(projectId, projectVersionId).then((data) => {
             console.log("chat history refreshed", data);
             setChatHistory(data);
         });
