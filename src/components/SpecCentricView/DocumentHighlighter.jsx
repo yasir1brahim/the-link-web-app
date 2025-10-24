@@ -9,7 +9,10 @@ const DocumentHighlighter = ({
   onHighlightClick,
   documentUrl = null,
   documentId = null,
-  activeFilters = new Set()
+  activeFilters = new Set(),
+  projectId = null,
+  projectVersionId = null,
+  specSectionId = null
 }) => {
 
   // ensure highlight locations are in the correct format
@@ -144,6 +147,9 @@ const DocumentHighlighter = ({
         onError={() => {}}
         highlightsEnabled={currentHighlightsEnabled}
         activeFilters={activeFilters}
+        projectId = {projectId}
+        projectVersionId={projectVersionId}
+        specSectionId={specSectionId}
       />
     </div>
   );

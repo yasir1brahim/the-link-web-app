@@ -4,7 +4,7 @@ import WebViewer from "@pdftron/webviewer";
 import axiosInstance from "../../config/axios";
 import { validateS3Link, isS3LinkExpiredError } from "../../utils/s3LinkValidator.js";
 import { useS3LinkValidation } from "../../hooks/useS3LinkValidation.js";
-import { getAnnotations, createAnnotation, deleteAnnotation } from "../../api/ProjectLogs/api.js";
+import { getAnnotations, createAnnotation, deleteAnnotation, updateAnnotation } from "../../api/ProjectLogs/api.js";
 const ProjectLogsReader = ({
   url,
   highlightLocations,
@@ -20,6 +20,9 @@ const ProjectLogsReader = ({
   onError,
   highlightsEnabled = true,
   activeFilters = new Set(),
+  projectId = null,
+  projectVersionId = null,
+  specSectionId = null
 }) => {
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
@@ -388,7 +391,7 @@ tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
       _webViewer.UI.enableFeatures([_webViewer.UI.Feature.InlineComment]);
       handleDocumentLoaded(_webViewer.Core.annotationManager);
       _webViewer.UI.setZoomLevel("100%");
-      let response;
+      let response; 
       _webViewer.Core.documentViewer.addEventListener("documentLoaded", async () => {
         setDocumentLoaded(true);
         // Add a small delay to ensure WebViewer is fully ready
@@ -398,9 +401,7 @@ tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
         setLoading(false);
 
             try{
-            //TODO:  Make the projectId, projectVersionId and specId dynamic (currently hardcoded)
-            response = await getAnnotations(1, 1, 1);
-            // console.log("Fetching annotations for", projectId, projectVersionId, specSectionId);
+            response = await getAnnotations(projectId, specSectionId, projectVersionId);
             const xfdfStrings = response?.data.results || [];
             console.log('get api response',response)
             if (xfdfStrings.length > 0) {
@@ -425,42 +426,103 @@ tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
           const color = annotation.Color?.toHex?.() || "#FFDD00";
           const quads = annotation.Quads || [];
           const tag = annotation.Subject || "";
+          const annotationId = annotation.Id
           if (action === "add") {
             console.log("Saving annotation:", annotation.Id);
-            const newAnnot = await createAnnotation({
-              projectId: 1, //TODO Make these 3 field dynamic
-              projectVersionId: 1,
-              specSectionId: 1,
+            
+            // Create a clean XFDF that only contains this specific annotation
+            const cleanXfdfData = await annotationManager.exportAnnotations({ 
+              widgets: false,
+              links: false,
+              annotationList: [annotation] 
+            });
+            
+            const pageNumber = annotation.PageNumber;
+            const color = annotation.Color?.toHex?.() || "#FFDD00";
+            const quads = annotation.Quads || [];
+            const tag = annotation.Subject || "";
+            
+            await createAnnotation({
+              annotationId: annotation.Id,
+              projectId: projectId,
+              projectVersionId: projectVersionId,
+              specSectionId: specSectionId,
               pageNumber,
               color,
               quads,
-              xfdfData,
+              xfdfData: cleanXfdfData,
               tag,
             });
-            response = await getAnnotations(1, 1, 1);
             
-          } else if (action === "delete") {
-            console.log("Deleting annotation:", annotation.Id);
-            if (annotation.Id) {
-              console.log('the eventListener annotation', annotations)
-              let xfdfDelete = annotation.xfdf_string
-              console.log('frontend annotation', xfdfDelete);
-              const deletionArray = response.data.results || [];
-              console.log(deletionArray);
-              let realAnnotId;
-              for (const annot of deletionArray){
-                if (annot.xfdfData === xfdfDelete){
-                  console.log('xfdfDelete: ', xfdfDelete)
-                  realAnnotId = annot.id;
-                  console.log("realAnnotId: "+realAnnotId);
-                  console.log("annot.id: "+annot.id);
-                  break;
-                }
+            console.log('[ANNOTATION_DEBUG] Saved clean annotation XFDF');
+          }  else if (action === "delete") {
+              console.log("Deleting annotation:", annotation.Id);
+              const annotationId = annotation.Id;
+              
+              if (annotationId) {
+                await new Promise(resolve => setTimeout(resolve, 300));
+                await deleteAnnotation(projectId, annotationId);
+
+                setTimeout(async () => {
+                  try {
+                    const verifyResponse = await getAnnotations(projectId, specSectionId, projectVersionId);
+                    const currentAnnotations = verifyResponse?.data.results || [];
+                    
+                    const affectedAnnotations = currentAnnotations.filter(annot => 
+                      annot.xfdf_data?.includes(annotationId)
+                    );
+                    
+                    console.log('[ANNOTATION_DEBUG] Annotations containing deleted ID:', affectedAnnotations.length);
+                    
+                    // Get all current annotations from the viewer
+                    const annotationManager = _webViewer.Core.annotationManager;
+                    const allViewerAnnotations = annotationManager.getAnnotationsList();
+                    
+                    // Clean up each affected annotation by regenerating from viewer state
+                    for (const affectedAnnot of affectedAnnotations) {
+                      try {
+                        // Find the corresponding annotation in the current viewer state
+                        const viewerAnnotation = allViewerAnnotations.find(
+                          annot => annot.Id === affectedAnnot.annotation_id
+                        );
+                        
+                        if (viewerAnnotation) {
+                          // Regenerate clean XFDF for just this annotation
+                          const cleanXfdfData = await annotationManager.exportAnnotations({ 
+                            widgets: false,
+                            links: false,
+                            annotationList: [viewerAnnotation] 
+                          });
+                          
+                          // Update the database with clean XFDF using the new update API
+                          await updateAnnotation(projectId, affectedAnnot.annotation_id, {
+                            xfdf_data: cleanXfdfData
+                            // You can also update other fields if needed:
+                            // page_number: viewerAnnotation.PageNumber,
+                            // color: viewerAnnotation.Color?.toHex?.(),
+                            // quads: viewerAnnotation.Quads || [],
+                          });
+                          
+                          console.log(`[ANNOTATION_DEBUG] Regenerated clean XFDF for ${affectedAnnot.annotation_id}`);
+                        } else {
+                          console.warn(`[ANNOTATION_DEBUG] Annotation ${affectedAnnot.annotation_id} not found in viewer - it may have been deleted`);
+                          
+                          // If the annotation doesn't exist in the viewer anymore, delete it from DB too
+                          await deleteAnnotation(projectId, affectedAnnot.annotation_id);
+                          console.log(`[ANNOTATION_DEBUG] Deleted orphaned annotation ${affectedAnnot.annotation_id}`);
+                        }
+                        
+                      } catch (cleanError) {
+                        console.error(`[ANNOTATION_DEBUG] Failed to regenerate annotation ${affectedAnnot.annotation_id}:`, cleanError);
+                      }
+                    }
+                    
+                  } catch (verifyError) {
+                    console.error('[ANNOTATION_DEBUG] Verification failed:', verifyError);
+                  }
+                }, 100);
               }
-              await new Promise(resolve => setTimeout(resolve, 300)); // small delay
-              await deleteAnnotation(1, realAnnotId);
             }
-          }
         } catch (error) {
           console.error("Annotation sync failed:", error);
         }

@@ -511,11 +511,10 @@ const getAnnotations = async (projectId, specSectionId, projectVersionId) => {
     return await axiosInstance({
       method: "get",
       url: `/api/deliverables/projects/${projectId}/pdf-annotations/`,
-    //   TODO: Turn this hardcoded parameters to dynamic
       params: {
-        project: 1,
-        spec_section: 1,
-        project_version: 1,
+        project: projectId,
+        spec_section: specSectionId,
+        project_version: projectVersionId,
       },
     });
   } catch (error) {
@@ -524,6 +523,7 @@ const getAnnotations = async (projectId, specSectionId, projectVersionId) => {
 };
 
 const createAnnotation = async ({
+  annotationId,
   projectId,
   projectVersionId,
   specSectionId,
@@ -538,6 +538,7 @@ const createAnnotation = async ({
       method: "post",
       url: `/api/deliverables/projects/${projectId}/pdf-annotations/`,
       data: {
+        annotation_id: annotationId,
         project: projectId,
         project_version: projectVersionId,
         spec_section: specSectionId,
@@ -564,6 +565,19 @@ const deleteAnnotation = async (projectId, annotationId) => {
   }
 };
 
+const updateAnnotation = async (projectId, annotationId, updateData) => {
+  try {
+    return await axiosInstance({
+      method: "patch", // Use PATCH for partial updates
+      url: `/api/deliverables/projects/${projectId}/pdf-annotations/${annotationId}/`, // Using projectId=1 as in your other calls
+      data: updateData,
+    });
+  } catch (error) {
+    console.error('[ANNOTATION_DEBUG] Update annotation failed:', error);
+    handleError(error);
+    throw error; // Re-throw to handle in the calling function
+  }
+};
 export {
     getSavedLogs,
     getSubmittalItemById,
@@ -591,4 +605,5 @@ export {
     createAnnotation,
     getAnnotations,
     deleteAnnotation,
+    updateAnnotation,
 }
