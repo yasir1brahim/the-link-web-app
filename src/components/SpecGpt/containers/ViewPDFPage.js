@@ -4,6 +4,7 @@ import { useS3LinkValidation } from '../../../hooks/useS3LinkValidation.js';
 
 const ViewPDFPage = () => {
     const [pdfUrl, setPdfUrl] = useState(null);
+    const [loading, setLoading] = useState(false);
     const { handleError, ErrorModal } = useS3LinkValidation();
 
     useEffect(() => {
@@ -16,7 +17,9 @@ const ViewPDFPage = () => {
             <ErrorModal />
             {pdfUrl && (
                 <ProjectLogsReader 
-                    url={pdfUrl} 
+                    url={pdfUrl}
+                    loading={loading}
+                    setLoading={setLoading}
                     onError={handleError}
                 />
             )}
