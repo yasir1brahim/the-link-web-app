@@ -158,6 +158,9 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
                     documentUrl={selectedSection?.pdf_url}
                     documentId={selectedSection?.document_id}
                     activeFilters={activeFilters}
+                    projectId= {projectId}
+                    projectVersionId={projectVersionId}
+                    specSectionId = {selectedSection.id}
                   />
                 </div>
               </div>
