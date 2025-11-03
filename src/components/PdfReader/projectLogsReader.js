@@ -4,7 +4,7 @@ import WebViewer from "@pdftron/webviewer";
 import axiosInstance from "../../config/axios";
 import { validateS3Link, isS3LinkExpiredError } from "../../utils/s3LinkValidator.js";
 import { useS3LinkValidation } from "../../hooks/useS3LinkValidation.js";
-import { getAnnotations, createAnnotation, deleteAnnotation, updateAnnotation } from "../../api/ProjectLogs/api.js";
+
 const ProjectLogsReader = ({
   url,
   highlightLocations,
@@ -18,11 +18,7 @@ const ProjectLogsReader = ({
   loading,
   setLoading,
   onError,
-  highlightsEnabled = true,
   activeFilters = new Set(),
-  projectId = null,
-  projectVersionId = null,
-  specSectionId = null
 }) => {
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
@@ -171,7 +167,7 @@ const ProjectLogsReader = ({
     return lowestPageObject;
   };
 
-  const updateTxtView = async (_webViewer) => {
+  const updateTxtView = (_webViewer) => {
     try {
       let tmpViewer = _webViewer ?? webViewer;
 
@@ -191,25 +187,6 @@ const ProjectLogsReader = ({
       // Additional safety check for document viewer
       if (!tmpViewer.Core.documentViewer) {
         console.log('[SPEC_VIEWER_DEBUG] Document viewer not available, skipping highlights');
-        return;
-      }
-
-      // Delete all annotations (both our created ones and server-loaded ones)
-      const allAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
-            
-      const annotationsToDelete = allAnnotations.filter(
-        (annot) => !(annot instanceof tmpViewer.Core.Annotations.TextMarkupAnnotation)
-      );
-
-      console.log('[SPEC_VIEWER_DEBUG] Deleting all non-highlight annotations:', annotationsToDelete.length);
-
-      // Delete only the filtered ones
-      tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete);
-
-      // If highlights are disabled, just clear existing annotations and return
-      if (!highlightsEnabled) {
-        console.log('[SPEC_VIEWER_DEBUG] Highlights disabled, clearing annotations');
-        setAnnotations([]);
         return;
       }
 
@@ -248,10 +225,7 @@ const ProjectLogsReader = ({
       const existingAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
       if (existingAnnotations.length > 0) {
         console.log('[SPEC_VIEWER_DEBUG] Deleting existing annotations before creating new ones:', existingAnnotations.length);
-        const annotationsToDelete2 = existingAnnotations.filter(
-        (annot) => !(annot instanceof tmpViewer.Core.Annotations.TextMarkupAnnotation)
-      );
-        tmpViewer.Core.annotationManager.deleteAnnotations(annotationsToDelete2);
+        tmpViewer.Core.annotationManager.deleteAnnotations(existingAnnotations);
       }
 
     if (tmpViewer && (highlightsAreAvailable || aiLogHighlightsAreAvailable)) {
@@ -393,8 +367,6 @@ const ProjectLogsReader = ({
       setAnnotations(_annotations);
       annotationsCreated.current = true;
       console.log('[SPEC_VIEWER_DEBUG] All annotations created and set:', _annotations.length);
-
-
     } else {
       console.log('[SPEC_VIEWER_DEBUG] No highlights to display - clearing annotations');
       setAnnotations([]);
@@ -427,168 +399,44 @@ const ProjectLogsReader = ({
       newPdfViewer.style.position = "relative";
       newPdfViewer.style.overflow = "hidden";
       newPdfViewer.style.width = "100%";
-      
+
       const viewer = pdfViewer.appendChild(newPdfViewer);
 
       const _webViewer = await WebViewer(
         {
           path: "/webviewer/lib",
           licenseKey:
-          'Thelinkai  Inc :PWS:Thelinkai  Inc ::B+2:9D34C842CB60BB40A8EF77436A7DEE579B3C140AD8EFE6EE4ED826BD',
+            'Thelinkai  Inc :PWS:Thelinkai  Inc ::B+2:9D34C842CB60BB40A8EF77436A7DEE579B3C140AD8EFE6EE4ED826BD',
           initialDoc: url,
           extension: "pdf",
           css: "./index.css",
         },
         viewer
       );
-      const { annotationManager, Annotations } = _webViewer.Core;
       
       // Wait a bit for WebViewer to fully initialize
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 100));
       
-      
+      // Verify WebViewer is properly initialized before setting it
+      if (_webViewer && _webViewer.Core && _webViewer.Core.documentViewer) {
+        setWebViewer(_webViewer);
+      } else {
+        console.error('[SPEC_VIEWER_DEBUG] WebViewer failed to initialize properly');
+        throw new Error('WebViewer initialization failed');
+      }
 
       _webViewer.UI.enableFeatures([_webViewer.UI.Feature.InlineComment]);
       handleDocumentLoaded(_webViewer.Core.annotationManager);
       _webViewer.UI.setZoomLevel("100%");
-      let response; 
-      _webViewer.Core.documentViewer.addEventListener("documentLoaded", async () => {
+
+      _webViewer.Core.documentViewer.addEventListener("documentLoaded", () => {
         setDocumentLoaded(true);
         // Add a small delay to ensure WebViewer is fully ready
         setTimeout(() => {
           updateTxtView(_webViewer);
-        }, 1000);
+        }, 200);
         setLoading(false);
-
-            try{
-            response = await getAnnotations(projectId, specSectionId, projectVersionId);
-            const xfdfStrings = response?.data.results || [];
-            console.log('get api response',response)
-            if (xfdfStrings.length > 0) {
-              // Import all XFDF data back into viewer
-              const xfdfData = xfdfStrings.map(a => a.xfdf_data).join("");
-              
-              await annotationManager.importAnnotations(xfdfData);
-            }
-          } catch (error) {
-            console.error("Failed to load annotations:", error);
-          }
-      })
-
-        
-      annotationManager.addEventListener("annotationChanged", async (annotations, action, options) => {
-      if (options.imported) return; // Prevent loops when importing XFDFg
-      if (!(annotations[0] instanceof Annotations.TextMarkupAnnotation)) return; // Prevent the event to fire when other type of annotation changes
-      for (const annotation of annotations) {
-        try {
-          const xfdfData = await annotationManager.exportAnnotations({ annotationList: [annotation] });
-          const pageNumber = annotation.PageNumber;
-          const color = annotation.Color?.toHex?.() || "#FFDD00";
-          const quads = annotation.Quads || [];
-          const tag = annotation.Subject || "";
-          const annotationId = annotation.Id
-          if (action === "add") {
-            console.log("Saving annotation:", annotation.Id);
-            
-            // Create a clean XFDF that only contains this specific annotation
-            const cleanXfdfData = await annotationManager.exportAnnotations({ 
-              widgets: false,
-              links: false,
-              annotationList: [annotation] 
-            });
-            
-            const pageNumber = annotation.PageNumber;
-            const color = annotation.Color?.toHex?.() || "#FFDD00";
-            const quads = annotation.Quads || [];
-            const tag = annotation.Subject || "";
-            
-            await createAnnotation({
-              annotationId: annotation.Id,
-              projectId: projectId,
-              projectVersionId: projectVersionId,
-              specSectionId: specSectionId,
-              pageNumber,
-              color,
-              quads,
-              xfdfData: cleanXfdfData,
-              tag,
-            });
-            
-            console.log('[ANNOTATION_DEBUG] Saved clean annotation XFDF');
-          }  else if (action === "delete") {
-              console.log("Deleting annotation:", annotation.Id);
-              const annotationId = annotation.Id;
-              
-              if (annotationId) {
-                await new Promise(resolve => setTimeout(resolve, 300));
-                await deleteAnnotation(projectId, annotationId);
-
-                setTimeout(async () => {
-                  try {
-                    const verifyResponse = await getAnnotations(projectId, specSectionId, projectVersionId);
-                    const currentAnnotations = verifyResponse?.data.results || [];
-                    
-                    const affectedAnnotations = currentAnnotations.filter(annot => 
-                      annot.xfdf_data?.includes(annotationId)
-                    );
-                    
-                    console.log('[ANNOTATION_DEBUG] Annotations containing deleted ID:', affectedAnnotations.length);
-                    
-                    // Get all current annotations from the viewer
-                    const annotationManager = _webViewer.Core.annotationManager;
-                    const allViewerAnnotations = annotationManager.getAnnotationsList();
-                    
-                    // Clean up each affected annotation by regenerating from viewer state
-                    for (const affectedAnnot of affectedAnnotations) {
-                      try {
-                        // Find the corresponding annotation in the current viewer state
-                        const viewerAnnotation = allViewerAnnotations.find(
-                          annot => annot.Id === affectedAnnot.annotation_id
-                        );
-                        
-                        if (viewerAnnotation) {
-                          // Regenerate clean XFDF for just this annotation
-                          const cleanXfdfData = await annotationManager.exportAnnotations({ 
-                            widgets: false,
-                            links: false,
-                            annotationList: [viewerAnnotation] 
-                          });
-                          
-                          // Update the database with clean XFDF using the new update API
-                          await updateAnnotation(projectId, affectedAnnot.annotation_id, {
-                            xfdf_data: cleanXfdfData
-                            // You can also update other fields if needed:
-                            // page_number: viewerAnnotation.PageNumber,
-                            // color: viewerAnnotation.Color?.toHex?.(),
-                            // quads: viewerAnnotation.Quads || [],
-                          });
-                          
-                          console.log(`[ANNOTATION_DEBUG] Regenerated clean XFDF for ${affectedAnnot.annotation_id}`);
-                        } else {
-                          console.warn(`[ANNOTATION_DEBUG] Annotation ${affectedAnnot.annotation_id} not found in viewer - it may have been deleted`);
-                          
-                          // If the annotation doesn't exist in the viewer anymore, delete it from DB too
-                          await deleteAnnotation(projectId, affectedAnnot.annotation_id);
-                          console.log(`[ANNOTATION_DEBUG] Deleted orphaned annotation ${affectedAnnot.annotation_id}`);
-                        }
-                        
-                      } catch (cleanError) {
-                        console.error(`[ANNOTATION_DEBUG] Failed to regenerate annotation ${affectedAnnot.annotation_id}:`, cleanError);
-                      }
-                    }
-                    
-                  } catch (verifyError) {
-                    console.error('[ANNOTATION_DEBUG] Verification failed:', verifyError);
-                  }
-                }, 100);
-              }
-            }
-        } catch (error) {
-          console.error("Annotation sync failed:", error);
-        }
-      }
-    });
-
+      });
 
       // Error handling
       _webViewer.Core.documentViewer.addEventListener("documentError", (error) => {
@@ -620,7 +468,7 @@ const ProjectLogsReader = ({
         "squigglyToolGroupButton",
         "strikeoutToolGroupButton",
         "toolbarGroup-Insert",
-        'freeTextToolGroupButton',
+        "toolsHeader",
         "ribbons",
         "textUnderlineToolButton",
         "textSquigglyToolButton",
@@ -762,8 +610,6 @@ const ProjectLogsReader = ({
       handleError({ message: 'Failed to load PDF viewer.' });
     }
   };
-
-    
 
   return (
     <>
