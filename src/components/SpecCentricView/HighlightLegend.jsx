@@ -45,18 +45,19 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
     console.log('[LEGEND_DEBUG] Calculated statistics:', stats);
     setStatistics(stats);
     
-    // Initialize activeFilters with all available highlight types (start with all checked)
+    // Initialize activeFilters with all known highlight types (start with all checked)
     // Only do this on initial mount to preserve user's filter selections when switching sections
     if (isInitialMount.current) {
-      const availableTypes = Object.keys(stats);
-      const newActiveFilters = new Set(availableTypes);
+      // Initialize with all known highlight types, not just ones with data
+      const allTypes = highlightTypes.map(item => item.key);
+      const newActiveFilters = new Set(allTypes);
       setActiveFilters(newActiveFilters);
-      
+
       // Notify parent component of initial filters
       if (onFilterChange) {
         onFilterChange(newActiveFilters);
       }
-      
+
       isInitialMount.current = false;
     }
   }, [submittalHighlights, aiLogHighlights, onFilterChange]);
