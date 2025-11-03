@@ -506,78 +506,6 @@ const downloadSpecSection = async (sectionId) => {
     }
 }
 
-const getAnnotations = async (projectId, specSectionId, projectVersionId) => {
-  try {
-    return await axiosInstance({
-      method: "get",
-      url: `/api/deliverables/projects/${projectId}/pdf-annotations/`,
-      params: {
-        project: projectId,
-        spec_section: specSectionId,
-        project_version: projectVersionId,
-      },
-    });
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-const createAnnotation = async ({
-  annotationId,
-  projectId,
-  projectVersionId,
-  specSectionId,
-  pageNumber,
-  color,
-  quads,
-  xfdfData,
-  tag = "",
-}) => {
-  try {
-    return await axiosInstance({
-      method: "post",
-      url: `/api/deliverables/projects/${projectId}/pdf-annotations/`,
-      data: {
-        annotation_id: annotationId,
-        project: projectId,
-        project_version: projectVersionId,
-        spec_section: specSectionId,
-        page_number: pageNumber,
-        color: color,
-        quads: quads,
-        xfdf_data: xfdfData,
-        tag: tag,
-      },
-    });
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-const deleteAnnotation = async (projectId, annotationId) => {
-  try {
-    return await axiosInstance({
-      method: "delete",
-      url: `/api/deliverables/projects/${projectId}/pdf-annotations/${annotationId}/`,
-    });
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-const updateAnnotation = async (projectId, annotationId, updateData) => {
-  try {
-    return await axiosInstance({
-      method: "patch", // Use PATCH for partial updates
-      url: `/api/deliverables/projects/${projectId}/pdf-annotations/${annotationId}/`, // Using projectId=1 as in your other calls
-      data: updateData,
-    });
-  } catch (error) {
-    console.error('[ANNOTATION_DEBUG] Update annotation failed:', error);
-    handleError(error);
-    throw error; // Re-throw to handle in the calling function
-  }
-};
 const bulkDownloadSpecSections = async (sectionIds) => {
     try {
         const response = await axiosInstance({
@@ -789,10 +717,6 @@ export {
     getSemanticallyProcessedSpecItems,
     getSpecSections,
     downloadSpecSection,
-    createAnnotation,
-    getAnnotations,
-    deleteAnnotation,
-    updateAnnotation,
     bulkDownloadSpecSections,
     bulkDownloadDocuments,
     bulkReprocessDocuments,
