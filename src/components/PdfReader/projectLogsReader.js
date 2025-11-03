@@ -201,11 +201,10 @@ const ProjectLogsReader = ({
         const annotationManager = tmpViewer.Core.annotationManager;
         
         // Batch hide/show annotations based on active filters
-        // If no filters are active (empty set), show all by default
         const annotationsToUpdate = [];
         annotations.forEach(annot => {
           const itemType = annot.CustomData?.item_type;
-          const shouldShow = activeFilters.size === 0 || activeFilters.has(itemType);
+          const shouldShow = activeFilters.has(itemType);
           
           if (annot.Hidden === shouldShow) { // Only update if state needs to change
             annot.Hidden = !shouldShow;
@@ -277,8 +276,7 @@ const ProjectLogsReader = ({
       
       // Add submittal highlights (yellow/green color)
       // Create all annotations, set Hidden based on active filters
-      // If no filters are active (empty set), show all by default
-      const shouldShowSubmittals = activeFilters.size === 0 || activeFilters.has('submittal');
+      const shouldShowSubmittals = activeFilters.has('submittal');
       for (let i = 0; i < stableHighlightLocations?.length; i++) {
         const rectangleAnnot = new Annotations.RectangleAnnotation({
           PageNumber: stableHighlightLocations[i]?.page_no,
@@ -329,13 +327,12 @@ const ProjectLogsReader = ({
       
       // Add AI log highlights with different colors based on type
       // Create all annotations, set Hidden based on active filters
-      // If no filters are active (empty set), show all by default
       for (let i = 0; i < stableAiLogHighlightLocations?.length; i++) {
         const location = stableAiLogHighlightLocations[i];
         const itemType = location?.item_type;
-        
+
         // Check if this highlight should be shown based on active filters
-        const shouldShow = activeFilters.size === 0 || activeFilters.has(itemType);
+        const shouldShow = activeFilters.has(itemType);
         
         console.log('[SPEC_VIEWER_DEBUG] Adding AI log highlight:', location);
         const color = getColorForItemType(location?.item_type, location?.extraction_type);
