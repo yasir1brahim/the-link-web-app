@@ -19,6 +19,7 @@ const ProjectLogsReader = ({
   setLoading,
   onError,
   activeFilters = new Set(),
+  useFiltering = false,
 }) => {
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
@@ -159,11 +160,11 @@ const ProjectLogsReader = ({
       if (annotationsCreated.current && annotationsRef.current.length > 0) {
         const annotationManager = tmpViewer.Core.annotationManager;
 
-        // Batch hide/show annotations based on active filters
+        // Batch hide/show annotations based on active filters (if filtering enabled)
         const annotationsToUpdate = [];
         annotationsRef.current.forEach(annot => {
           const itemType = annot.CustomData?.item_type;
-          const shouldShow = activeFilters.has(itemType);
+          const shouldShow = !useFiltering || activeFilters.has(itemType);
 
           if (annot.Hidden === shouldShow) { // Only update if state needs to change
             annot.Hidden = !shouldShow;
@@ -225,8 +226,8 @@ const ProjectLogsReader = ({
       }
       
       // Add submittal highlights (yellow/green color)
-      // Create all annotations, set Hidden based on active filters
-      const shouldShowSubmittals = activeFilters.has('submittal');
+      // Create all annotations, set Hidden based on active filters (if filtering is enabled)
+      const shouldShowSubmittals = !useFiltering || activeFilters.has('submittal');
       for (let i = 0; i < stableHighlightLocations?.length; i++) {
         const rectangleAnnot = new Annotations.RectangleAnnotation({
           PageNumber: stableHighlightLocations[i]?.page_no,
@@ -275,13 +276,13 @@ const ProjectLogsReader = ({
       };
       
       // Add AI log highlights with different colors based on type
-      // Create all annotations, set Hidden based on active filters
+      // Create all annotations, set Hidden based on active filters (if filtering is enabled)
       for (let i = 0; i < stableAiLogHighlightLocations?.length; i++) {
         const location = stableAiLogHighlightLocations[i];
         const itemType = location?.item_type;
 
-        // Check if this highlight should be shown based on active filters
-        const shouldShow = activeFilters.has(itemType);
+        // Check if this highlight should be shown based on active filters (if filtering enabled)
+        const shouldShow = !useFiltering || activeFilters.has(itemType);
 
         const color = getColorForItemType(location?.item_type, location?.extraction_type);
         

@@ -114,6 +114,7 @@ const DocumentHighlighter = ({
         setLoading={() => {}}
         onError={() => {}}
         activeFilters={activeFilters}
+        useFiltering={true}
       />
     </div>
   );
