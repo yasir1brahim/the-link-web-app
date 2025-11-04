@@ -198,7 +198,6 @@ const ProjectLogsReader = ({
       
       // If annotations have already been created, just toggle visibility
       if (annotationsCreated.current && annotationsRef.current.length > 0) {
-        console.log('[SPEC_FLASH_DEBUG] Annotations already exist, toggling visibility based on filters:', Array.from(activeFilters));
         const annotationManager = tmpViewer.Core.annotationManager;
 
         // Batch hide/show annotations based on active filters
@@ -214,7 +213,6 @@ const ProjectLogsReader = ({
         });
 
         if (annotationsToUpdate.length > 0) {
-          console.log('[SPEC_FLASH_DEBUG] Toggled visibility for', annotationsToUpdate.length, 'annotations');
           // Batch redraw for better performance - use redraw instead of draw for existing annotations
           annotationsToUpdate.forEach(annot => annotationManager.redrawAnnotation(annot));
         }
@@ -224,7 +222,6 @@ const ProjectLogsReader = ({
       // Need to create new annotations - first delete any existing ones
       const existingAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
       if (existingAnnotations.length > 0) {
-        console.log('[SPEC_VIEWER_DEBUG] Deleting existing annotations before creating new ones:', existingAnnotations.length);
         tmpViewer.Core.annotationManager.deleteAnnotations(existingAnnotations);
       }
 
@@ -367,7 +364,6 @@ const ProjectLogsReader = ({
       annotationsRef.current = _annotations;
       setAnnotations(_annotations);
       annotationsCreated.current = true;
-      console.log('[SPEC_FLASH_DEBUG] All annotations created and displayed:', _annotations.length, 'with activeFilters:', Array.from(activeFilters));
     } else {
       console.log('[SPEC_VIEWER_DEBUG] No highlights to display - clearing annotations');
       annotationsRef.current = [];

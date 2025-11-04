@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { HIGHLIGHT_TYPES } from './highlightConstants';
 import './HighlightLegend.css';
 
 const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFilterChange }) => {
@@ -6,19 +7,6 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [statistics, setStatistics] = useState({});
   const isInitialMount = useRef(true);
-
-  const highlightTypes = [
-    { type: 'Submittals', color: 'rgba(213, 231, 62, 0.6)', key: 'submittal' },
-    { type: 'Inspections', color: 'rgba(255, 99, 71, 0.6)', key: 'inspections' },
-    { type: 'Warranties', color: 'rgba(60, 179, 113, 0.6)', key: 'warranties' },
-    { type: 'Certificates', color: 'rgba(255, 165, 0, 0.6)', key: 'certificates' },
-    { type: 'Closeout Submittals', color: 'rgba(138, 43, 226, 0.6)', key: 'closeout_submittals' },
-    { type: 'Test Reports', color: 'rgba(30, 144, 255, 0.6)', key: 'test_reports' },
-    { type: 'Commissioning', color: 'rgba(255, 20, 147, 0.6)', key: 'commissioning' },
-    { type: 'Delegated Design', color: 'rgba(75, 0, 130, 0.6)', key: 'delegated_design' },
-    { type: 'Mock-ups/Sample Construction', color: 'rgba(218, 165, 32, 0.6)', key: 'mock_ups_sample_construction' },
-    { type: 'Pre-installation Meetings', color: 'rgba(32, 178, 170, 0.6)', key: 'pre_installation_meetings' },
-  ];
 
   // Calculate statistics whenever highlights change
   useEffect(() => {
@@ -42,21 +30,18 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
     // Merge counts into stats
     Object.assign(stats, itemTypeCounts);
     
-    console.log('[SPEC_FLASH_DEBUG] HighlightLegend calculated statistics:', stats);
     setStatistics(stats);
 
     // Initialize activeFilters with all known highlight types (start with all checked)
     // Only do this on initial mount to preserve user's filter selections when switching sections
     if (isInitialMount.current) {
       // Initialize with all known highlight types, not just ones with data
-      const allTypes = highlightTypes.map(item => item.key);
+      const allTypes = HIGHLIGHT_TYPES.map(item => item.key);
       const newActiveFilters = new Set(allTypes);
-      console.log('[SPEC_FLASH_DEBUG] HighlightLegend initializing all filters:', allTypes);
       setActiveFilters(newActiveFilters);
 
       // Notify parent component of initial filters
       if (onFilterChange) {
-        console.log('[SPEC_FLASH_DEBUG] HighlightLegend calling onFilterChange with initial filters');
         onFilterChange(newActiveFilters);
       }
 
@@ -93,7 +78,7 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
       {isExpanded && (
         <div className="legend-content">
           <div className="legend-items">
-            {highlightTypes.map((item) => {
+            {HIGHLIGHT_TYPES.map((item) => {
               const count = statistics[item.key] || 0;
               const isActive = activeFilters.has(item.key);
               const isAvailable = count > 0;
