@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getSpecCentricData, getSpecSectionContent } from '../../api/SpecCentricView/api';
 import SpecViewerSidebar from './SpecViewerSidebar';
 import DocumentHighlighter from './DocumentHighlighter';
@@ -13,19 +13,26 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tooltip, setTooltip] = useState({ visible: false, highlight: null, position: { x: 0, y: 0 } });
-  const [activeFilters, setActiveFilters] = useState(new Set());
+  // Initialize with all filter types to prevent empty filters from hiding annotations on mount
+  const [activeFilters, setActiveFilters] = useState(new Set([
+    'submittal', 'inspections', 'warranties', 'certificates', 'closeout_submittals',
+    'test_reports', 'commissioning', 'delegated_design', 'mock_ups_sample_construction',
+    'pre_installation_meetings'
+  ]));
 
   // Load initial spec data
   useEffect(() => {
     const loadSpecData = async () => {
       try {
+        console.log('[SPEC_FLASH_DEBUG] SpecViewer mounted/projectId changed:', { projectId, projectVersionId, activeFilters: Array.from(activeFilters) });
         setLoading(true);
         setError(null);
         const response = await getSpecCentricData(projectId, projectVersionId);
         setSpecData(response.data);
-        
+
         // Select first section by default
         if (response.data.spec_sections && response.data.spec_sections.length > 0) {
+          console.log('[SPEC_FLASH_DEBUG] Auto-selecting first section');
           setSelectedSection(response.data.spec_sections[0]);
         }
       } catch (err) {
@@ -46,12 +53,17 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
     const loadSectionContent = async () => {
       if (selectedSection) {
         try {
+          console.log('[SPEC_FLASH_DEBUG] Section selected, loading content for section:', selectedSection.id);
           setLoading(true);
           const response = await getSpecSectionContent(
-            projectId, 
-            selectedSection.id, 
+            projectId,
+            selectedSection.id,
             projectVersionId
           );
+          console.log('[SPEC_FLASH_DEBUG] Section content loaded, highlights count:', {
+            submittal: response.data.submittal_highlights?.length,
+            aiLog: response.data.ai_log_highlights?.length
+          });
           setSectionContent(response.data);
         } catch (err) {
           console.error('Error loading section content:', err);
@@ -89,10 +101,10 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
     // This could open a detailed modal or navigate to a details page
   };
 
-  const handleFilterChange = (newFilters) => {
-    console.log('[SPEC_VIEWER_DEBUG] Active filters changed:', newFilters);
+  const handleFilterChange = useCallback((newFilters) => {
+    console.log('[SPEC_FLASH_DEBUG] Filter change triggered:', Array.from(newFilters));
     setActiveFilters(newFilters);
-  };
+  }, []);
 
   if (loading && !specData) {
     return (

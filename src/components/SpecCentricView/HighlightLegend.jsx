@@ -42,19 +42,21 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
     // Merge counts into stats
     Object.assign(stats, itemTypeCounts);
     
-    console.log('[LEGEND_DEBUG] Calculated statistics:', stats);
+    console.log('[SPEC_FLASH_DEBUG] HighlightLegend calculated statistics:', stats);
     setStatistics(stats);
-    
+
     // Initialize activeFilters with all known highlight types (start with all checked)
     // Only do this on initial mount to preserve user's filter selections when switching sections
     if (isInitialMount.current) {
       // Initialize with all known highlight types, not just ones with data
       const allTypes = highlightTypes.map(item => item.key);
       const newActiveFilters = new Set(allTypes);
+      console.log('[SPEC_FLASH_DEBUG] HighlightLegend initializing all filters:', allTypes);
       setActiveFilters(newActiveFilters);
 
       // Notify parent component of initial filters
       if (onFilterChange) {
+        console.log('[SPEC_FLASH_DEBUG] HighlightLegend calling onFilterChange with initial filters');
         onFilterChange(newActiveFilters);
       }
 

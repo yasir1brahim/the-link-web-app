@@ -27,6 +27,7 @@ const ProjectLogsReader = ({
   const { handleError, ErrorModal } = useS3LinkValidation();
   const previousHighlightLocation = useRef(null);
   const annotationsCreated = useRef(false);
+  const annotationsRef = useRef([]);
   
   // Convert activeFilters Set to a stable string representation for dependency tracking
   const activeFiltersString = React.useMemo(() => {
@@ -196,24 +197,24 @@ const ProjectLogsReader = ({
       console.log('[SPEC_VIEWER_DEBUG] AI log highlights are available:', aiLogHighlightsAreAvailable);
       
       // If annotations have already been created, just toggle visibility
-      if (annotationsCreated.current && annotations.length > 0) {
-        console.log('[SPEC_VIEWER_DEBUG] Annotations already exist, toggling visibility');
+      if (annotationsCreated.current && annotationsRef.current.length > 0) {
+        console.log('[SPEC_FLASH_DEBUG] Annotations already exist, toggling visibility based on filters:', Array.from(activeFilters));
         const annotationManager = tmpViewer.Core.annotationManager;
-        
+
         // Batch hide/show annotations based on active filters
         const annotationsToUpdate = [];
-        annotations.forEach(annot => {
+        annotationsRef.current.forEach(annot => {
           const itemType = annot.CustomData?.item_type;
           const shouldShow = activeFilters.has(itemType);
-          
+
           if (annot.Hidden === shouldShow) { // Only update if state needs to change
             annot.Hidden = !shouldShow;
             annotationsToUpdate.push(annot);
           }
         });
-        
+
         if (annotationsToUpdate.length > 0) {
-          console.log('[SPEC_VIEWER_DEBUG] Updating visibility for', annotationsToUpdate.length, 'annotations');
+          console.log('[SPEC_FLASH_DEBUG] Toggled visibility for', annotationsToUpdate.length, 'annotations');
           // Batch redraw for better performance - use redraw instead of draw for existing annotations
           annotationsToUpdate.forEach(annot => annotationManager.redrawAnnotation(annot));
         }
@@ -270,6 +271,7 @@ const ProjectLogsReader = ({
       // Safety check for annotation creation
       if (!annotationManager || !Annotations || !Annotations.RectangleAnnotation) {
         console.log('[SPEC_VIEWER_DEBUG] Annotation manager or Annotations not available, skipping annotation creation');
+        annotationsRef.current = [];
         setAnnotations([]);
         return;
       }
@@ -360,12 +362,15 @@ const ProjectLogsReader = ({
       // Add all annotations in batch for better performance
       annotationManager.addAnnotations(_annotations);
       annotationManager.drawAnnotationsFromList(_annotations);
-      
+
+      // Keep ref in sync with state to avoid closure issues
+      annotationsRef.current = _annotations;
       setAnnotations(_annotations);
       annotationsCreated.current = true;
-      console.log('[SPEC_VIEWER_DEBUG] All annotations created and set:', _annotations.length);
+      console.log('[SPEC_FLASH_DEBUG] All annotations created and displayed:', _annotations.length, 'with activeFilters:', Array.from(activeFilters));
     } else {
       console.log('[SPEC_VIEWER_DEBUG] No highlights to display - clearing annotations');
+      annotationsRef.current = [];
       setAnnotations([]);
     }
     } catch (error) {
