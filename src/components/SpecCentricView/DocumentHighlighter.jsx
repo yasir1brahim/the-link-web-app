@@ -100,7 +100,7 @@ const DocumentHighlighter = ({
   return (
     <div className="document-highlighter-container spec-viewer-pdf-wrapper">
       <ProjectLogsReader
-        key={`${documentUrl}-${JSON.stringify(currentHighlights)}-${JSON.stringify(currentAiLogHighlights)}`} // Force re-render only when document or highlights change, not filters
+        key={documentUrl} // Only remount when document URL changes, not on highlight or filter changes
         url={documentUrl}
         highlightLocations={currentHighlights}
         aiLogHighlightLocations={currentAiLogHighlights}
