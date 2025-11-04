@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import './SpecSectionNavigation.css';
 
-const SpecSectionNavigation = ({
+const SpecSectionNavigation = memo(({
   sections,
   selectedSection,
   onSectionChange,
@@ -114,6 +114,6 @@ const SpecSectionNavigation = ({
       )}
     </div>
   );
-};
+});
 
 export default SpecSectionNavigation;

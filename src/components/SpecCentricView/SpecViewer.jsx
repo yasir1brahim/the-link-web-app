@@ -67,12 +67,9 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
     loadSectionContent();
   }, [selectedSection, projectId, projectVersionId]);
 
-  const handleSectionChange = (section) => {
-    console.log('Selected section:', section);
-    console.log('PDF URL:', section?.pdf_url);
-    console.log('PDF URL type:', typeof section?.pdf_url);
+  const handleSectionChange = useCallback((section) => {
     setSelectedSection(section);
-  };
+  }, []);
 
   const handleHighlightClick = (highlight) => {
     setTooltip({
