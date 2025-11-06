@@ -1921,12 +1921,13 @@ const ProjectLogs = () => {
               </div>
             </>
           }
-          {activeTab == 'spec-view' && 
+          {activeTab == 'spec-view' &&
             <>
-            <SpecViewer 
+            <SpecViewer
               projectId={projectId}
               projectVersionId={projectVersionId}
               teamId={teamId}
+              onNavigateToDocuments={() => setActiveTab('submittal')}
             />
             </>
           }

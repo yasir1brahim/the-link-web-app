@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getSpecCentricData, getSpecSectionContent } from '../../api/SpecCentricView/api';
+import { toast } from 'react-toastify';
 import SpecViewerSidebar from './SpecViewerSidebar';
 import DocumentHighlighter from './DocumentHighlighter';
 import HighlightTooltip from './HighlightTooltip';
@@ -7,7 +8,7 @@ import HighlightLegend from './HighlightLegend';
 import { DEFAULT_FILTER_KEYS } from './highlightConstants';
 import './SpecViewer.css';
 
-const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
+const SpecViewer = ({ projectId, projectVersionId, onNavigateToDocuments }) => {
   const [specData, setSpecData] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [sectionContent, setSectionContent] = useState(null);
@@ -119,8 +120,39 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   if (!specData || !specData.spec_sections || specData.spec_sections.length === 0) {
     return (
       <div className="spec-viewer-empty">
+        <div className="empty-state-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
         <h3>No Spec Sections Found</h3>
-        <p>No spec sections are available for this project.</p>
+        <p className="empty-state-description">
+          This project's documents were processed before spec sections were available.
+          To view the spec-centric view, you'll need to reprocess the documents.
+        </p>
+        <div className="empty-state-actions">
+          <p className="empty-state-instructions">
+            <strong>How to fix this:</strong>
+          </p>
+          <ol className="empty-state-steps">
+            <li>Go to the <strong>Documents</strong> tab</li>
+            <li>Select the spec documents you want to view</li>
+            <li>Click the <strong>Reprocess</strong> button</li>
+            <li>Return here once processing is complete</li>  
+          </ol>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              if (onNavigateToDocuments) {
+                onNavigateToDocuments();
+              } else {
+                toast.info('Please go to the Documents tab to reprocess your spec documents.');
+              }
+            }}
+          >
+            Go to Documents Tab
+          </button>
+        </div>
       </div>
     );
   }
