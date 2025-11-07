@@ -172,9 +172,9 @@ const DocumentsTab = ({
     if (count === 0) {
       return "Select documents to download";
     } else if (count === 1) {
-      return "Download document";
+      return "Download selected";
     } else {
-      return "Download all";
+      return "Download selected";
     }
   };
 
