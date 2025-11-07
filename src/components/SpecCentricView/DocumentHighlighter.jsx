@@ -5,7 +5,6 @@ import './DocumentHighlighter.css';
 const DocumentHighlighter = ({ 
   highlights = [], 
   aiLogHighlights = [],
-  highlightsEnabled = true, 
   onHighlightClick,
   documentUrl = null,
   documentId = null,
@@ -16,8 +15,6 @@ const DocumentHighlighter = ({
   const mapHighlightLocations = (highlights) => {
     const highlightLocations = [];
     for (const highlight of highlights) {
-      console.log('[SPEC_VIEWER_DEBUG] Mapping highlight locations:', highlight);
-
       if (!highlight.text_location) {
         continue;
       }
@@ -48,8 +45,6 @@ const DocumentHighlighter = ({
   const mapAiLogHighlightLocations = (aiLogHighlights) => {
     const highlightLocations = [];
     for (const logItem of aiLogHighlights) {
-      console.log('[SPEC_VIEWER_DEBUG] Mapping AI log highlight locations:', logItem);
-
       if (!logItem.pdf_locations || !Array.isArray(logItem.pdf_locations)) {
         continue;
       }
@@ -69,47 +64,23 @@ const DocumentHighlighter = ({
         });
       }
     }
-    console.log('[SPEC_VIEWER_DEBUG] Mapped AI log highlights with types:', highlightLocations);
     return highlightLocations;
   };
 
   const [currentHighlights, setCurrentHighlights] = useState(mapHighlightLocations(highlights));
   const [currentAiLogHighlights, setCurrentAiLogHighlights] = useState(mapAiLogHighlightLocations(aiLogHighlights));
-  const [currentHighlightsEnabled, setCurrentHighlightsEnabled] = useState(highlightsEnabled);
 
   // Update highlights when the highlights prop changes
   useEffect(() => {
-    console.log('[SPEC_VIEWER_DEBUG] DocumentHighlighter highlights changed:', {
-      highlightsLength: highlights?.length || 0,
-      highlights: highlights
-    });
     const newHighlights = mapHighlightLocations(highlights);
-    console.log('[SPEC_VIEWER_DEBUG] Mapped highlights:', {
-      newHighlightsLength: newHighlights?.length || 0,
-      newHighlights: newHighlights
-    });
     setCurrentHighlights(newHighlights);
   }, [highlights]);
 
   // Update AI log highlights when the prop changes
   useEffect(() => {
-    console.log('[SPEC_VIEWER_DEBUG] DocumentHighlighter AI log highlights changed:', {
-      aiLogHighlightsLength: aiLogHighlights?.length || 0,
-      aiLogHighlights: aiLogHighlights
-    });
     const newAiLogHighlights = mapAiLogHighlightLocations(aiLogHighlights);
-    console.log('[SPEC_VIEWER_DEBUG] Mapped AI log highlights:', {
-      newAiLogHighlightsLength: newAiLogHighlights?.length || 0,
-      newAiLogHighlights: newAiLogHighlights
-    });
     setCurrentAiLogHighlights(newAiLogHighlights);
   }, [aiLogHighlights]);
-
-  // Update highlights enabled state when prop changes
-  useEffect(() => {
-    console.log('[SPEC_VIEWER_DEBUG] DocumentHighlighter highlightsEnabled changed:', highlightsEnabled);
-    setCurrentHighlightsEnabled(highlightsEnabled);
-  }, [highlightsEnabled]);
 
 
   if (!documentUrl) {
@@ -129,7 +100,7 @@ const DocumentHighlighter = ({
   return (
     <div className="document-highlighter-container spec-viewer-pdf-wrapper">
       <ProjectLogsReader
-        key={`${documentUrl}-${JSON.stringify(currentHighlights)}-${JSON.stringify(currentAiLogHighlights)}-${Array.from(activeFilters).join(',')}`} // Force re-render when document, highlights, or filters change
+        key={documentUrl} // Only remount when document URL changes, not on highlight or filter changes
         url={documentUrl}
         highlightLocations={currentHighlights}
         aiLogHighlightLocations={currentAiLogHighlights}
@@ -142,8 +113,8 @@ const DocumentHighlighter = ({
         loading={false}
         setLoading={() => {}}
         onError={() => {}}
-        highlightsEnabled={currentHighlightsEnabled}
         activeFilters={activeFilters}
+        useFiltering={true}
       />
     </div>
   );

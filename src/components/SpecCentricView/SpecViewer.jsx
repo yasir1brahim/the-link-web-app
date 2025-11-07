@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getSpecCentricData, getSpecSectionContent } from '../../api/SpecCentricView/api';
 import SpecViewerSidebar from './SpecViewerSidebar';
-import SubmittalHighlights from './SubmittalHighlights';
 import DocumentHighlighter from './DocumentHighlighter';
 import HighlightTooltip from './HighlightTooltip';
 import HighlightLegend from './HighlightLegend';
+import { DEFAULT_FILTER_KEYS } from './highlightConstants';
 import './SpecViewer.css';
 
 const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   const [specData, setSpecData] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [sectionContent, setSectionContent] = useState(null);
-  const [highlightsEnabled, setHighlightsEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tooltip, setTooltip] = useState({ visible: false, highlight: null, position: { x: 0, y: 0 } });
-  const [activeFilters, setActiveFilters] = useState(new Set());
+  // Initialize with all filter types to prevent empty filters from hiding annotations on mount
+  const [activeFilters, setActiveFilters] = useState(new Set(DEFAULT_FILTER_KEYS));
 
   // Load initial spec data
   useEffect(() => {
@@ -25,7 +25,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
         setError(null);
         const response = await getSpecCentricData(projectId, projectVersionId);
         setSpecData(response.data);
-        
+
         // Select first section by default
         if (response.data.spec_sections && response.data.spec_sections.length > 0) {
           setSelectedSection(response.data.spec_sections[0]);
@@ -50,8 +50,8 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
         try {
           setLoading(true);
           const response = await getSpecSectionContent(
-            projectId, 
-            selectedSection.id, 
+            projectId,
+            selectedSection.id,
             projectVersionId
           );
           setSectionContent(response.data);
@@ -67,16 +67,9 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
     loadSectionContent();
   }, [selectedSection, projectId, projectVersionId]);
 
-  const handleSectionChange = (section) => {
-    console.log('Selected section:', section);
-    console.log('PDF URL:', section?.pdf_url);
-    console.log('PDF URL type:', typeof section?.pdf_url);
+  const handleSectionChange = useCallback((section) => {
     setSelectedSection(section);
-  };
-
-  const handleHighlightsToggle = (enabled) => {
-    setHighlightsEnabled(enabled);
-  };
+  }, []);
 
   const handleHighlightClick = (highlight) => {
     setTooltip({
@@ -95,10 +88,9 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
     // This could open a detailed modal or navigate to a details page
   };
 
-  const handleFilterChange = (newFilters) => {
-    console.log('[SPEC_VIEWER_DEBUG] Active filters changed:', newFilters);
+  const handleFilterChange = useCallback((newFilters) => {
     setActiveFilters(newFilters);
-  };
+  }, []);
 
   if (loading && !specData) {
     return (
@@ -140,8 +132,6 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
           specSections={specData.spec_sections}
           selectedSection={selectedSection}
           onSectionChange={handleSectionChange}
-          highlightsEnabled={highlightsEnabled}
-          onHighlightsToggle={handleHighlightsToggle}
           loading={loading}
         />
       </div>
@@ -162,7 +152,6 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
                   <DocumentHighlighter
                     highlights={sectionContent.submittal_highlights || []}
                     aiLogHighlights={sectionContent.ai_log_highlights || []}
-                    highlightsEnabled={highlightsEnabled}
                     onHighlightClick={handleHighlightClick}
                     documentUrl={selectedSection?.pdf_url}
                     documentId={selectedSection?.document_id}
@@ -189,7 +178,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
       />
       
       {/* Highlight Color Legend */}
-      {highlightsEnabled && selectedSection && sectionContent && (
+      {selectedSection && sectionContent && (
         <HighlightLegend 
           submittalHighlights={sectionContent.submittal_highlights || []}
           aiLogHighlights={sectionContent.ai_log_highlights || []}
