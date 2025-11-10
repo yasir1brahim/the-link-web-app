@@ -7,6 +7,9 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   max-width: 300px;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
   transition: all 0.3s ease;
 }
 
@@ -24,6 +27,7 @@
   font-weight: 500;
   color: #333;
   transition: background-color 0.2s;
+  flex-shrink: 0;
 }
 
 .legend-toggle:hover {
@@ -54,8 +58,9 @@
 
 .legend-content {
   padding: 0 16px 16px 16px;
-  max-height: 400px;
   overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .legend-items {
@@ -179,11 +184,14 @@
   .highlight-legend {
     bottom: 10px;
     right: 10px;
-    max-width: calc(100vw - 20px);
+    left: 10px;
+    max-width: none;
+    width: auto;
+    max-height: 60vh;
   }
-  
+
   .highlight-legend.expanded {
-    width: calc(100vw - 20px);
+    width: auto;
   }
 }
 
