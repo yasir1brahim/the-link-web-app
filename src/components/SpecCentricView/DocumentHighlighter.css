@@ -198,3 +198,118 @@
 .spec-viewer-pdf-wrapper #pdf-div > div {
   height: calc(100vh - 180px) !important;
 }
+
+/* Manual Highlight Picker */
+.highlight-picker-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(33, 37, 41, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.highlight-picker-modal {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  padding: 24px;
+  max-width: 420px;
+  width: 100%;
+}
+
+.highlight-picker-modal h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  color: #1f2933;
+}
+
+.highlight-picker-context {
+  margin: 0 0 16px 0;
+  font-size: 0.95rem;
+  color: #4b5563;
+  background: #f8fafc;
+  border-left: 3px solid #a855f7;
+  padding: 12px;
+  border-radius: 4px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.highlight-picker-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.highlight-picker-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  font-size: 0.95rem;
+  color: #1f2937;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.highlight-picker-option:hover:not(:disabled) {
+  border-color: #7c3aed;
+  color: #5b21b6;
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.highlight-picker-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.highlight-picker-error {
+  margin-top: -6px;
+  margin-bottom: 16px;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.highlight-picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.highlight-picker-cancel {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #374151;
+  transition: all 0.15s ease;
+}
+
+.highlight-picker-cancel:hover:not(:disabled) {
+  border-color: #9ca3af;
+  background: #f3f4f6;
+}
+
+.highlight-picker-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.highlight-picker-empty {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}

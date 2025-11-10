@@ -20,6 +20,8 @@ const ProjectLogsReader = ({
   onError,
   activeFilters = new Set(),
   useFiltering = false,
+  isSpecViewMode = false,
+  onRequestAddHighlight = null,
 }) => {
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
@@ -114,6 +116,107 @@ const ProjectLogsReader = ({
     });
   };
 
+  const buildSelectionPayload = React.useCallback((documentViewer) => {
+    if (!documentViewer || typeof documentViewer.getSelectedText !== "function") {
+      return null;
+    }
+
+    const selectedText = documentViewer.getSelectedText();
+    if (!selectedText || !selectedText.trim()) {
+      return null;
+    }
+
+    const normalizePageNumber = (entry) => {
+      if (typeof entry?.pageNumber === "number") {
+        return entry.pageNumber;
+      }
+      if (typeof entry?.pageIndex === "number") {
+        return entry.pageIndex + 1;
+      }
+      if (typeof entry === "number") {
+        return entry + 1;
+      }
+      return null;
+    };
+
+    const applyQuad = (pageNumber, quad) => {
+      if (!quad) {
+        return null;
+      }
+
+      const xs = [quad.x1, quad.x2, quad.x3, quad.x4].filter((value) => typeof value === "number");
+      const ys = [quad.y1, quad.y2, quad.y3, quad.y4].filter((value) => typeof value === "number");
+
+      if (xs.length === 0 || ys.length === 0) {
+        return null;
+      }
+
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+
+      if (!Number.isFinite(minX) || !Number.isFinite(maxX) || !Number.isFinite(minY) || !Number.isFinite(maxY)) {
+        return null;
+      }
+
+      return {
+        page_no: pageNumber,
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY,
+      };
+    };
+
+    const quadsSource =
+      typeof documentViewer.getSelectedTextQuads === "function"
+        ? documentViewer.getSelectedTextQuads()
+        : null;
+
+    const locations = [];
+
+    if (Array.isArray(quadsSource)) {
+      quadsSource.forEach((entry) => {
+        const pageNumber = normalizePageNumber(entry);
+        if (!pageNumber || !Array.isArray(entry?.quads)) {
+          return;
+        }
+
+        entry.quads.forEach((quad) => {
+          const location = applyQuad(pageNumber, quad);
+          if (location) {
+            locations.push(location);
+          }
+        });
+      });
+    } else if (quadsSource && typeof quadsSource === "object") {
+      Object.keys(quadsSource).forEach((key) => {
+        const pageIdx = Number(key);
+        const pageNumber = Number.isNaN(pageIdx) ? null : pageIdx + 1;
+        if (!pageNumber || !Array.isArray(quadsSource[key])) {
+          return;
+        }
+
+        quadsSource[key].forEach((quad) => {
+          const location = applyQuad(pageNumber, quad);
+          if (location) {
+            locations.push(location);
+          }
+        });
+      });
+    }
+
+    if (locations.length === 0) {
+      return null;
+    }
+
+    return {
+      selectedText: selectedText.trim(),
+      locations,
+    };
+  }, []);
+
   const getInitialPageLocation = (highlightLocations, aiLogHighlightLocations) => {
     // Combine both arrays, filtering out any null/undefined items and invalid page numbers
     const allLocations = [
@@ -157,8 +260,9 @@ const ProjectLogsReader = ({
       const aiLogHighlightsAreAvailable = stableAiLogHighlightLocations && stableAiLogHighlightLocations.length > 0;
       
       // If annotations have already been created, just toggle visibility
+      const annotationManager = tmpViewer.Core.annotationManager;
+
       if (annotationsCreated.current && annotationsRef.current.length > 0) {
-        const annotationManager = tmpViewer.Core.annotationManager;
 
         // Batch hide/show annotations based on active filters (if filtering enabled)
         const annotationsToUpdate = [];
@@ -178,11 +282,11 @@ const ProjectLogsReader = ({
         }
         return;
       }
-      
-      // Need to create new annotations - first delete any existing ones
-      const existingAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
-      if (existingAnnotations.length > 0) {
-        tmpViewer.Core.annotationManager.deleteAnnotations(existingAnnotations);
+
+      // Remove only previously created highlight annotations before adding new ones
+      if (annotationsRef.current.length > 0) {
+        annotationManager.deleteAnnotations(annotationsRef.current);
+        annotationsRef.current = [];
       }
 
     if (tmpViewer && (highlightsAreAvailable || aiLogHighlightsAreAvailable)) {
@@ -215,7 +319,6 @@ const ProjectLogsReader = ({
 
       // Add rectangular highlight annotations
       const _annotations = [];
-      const annotationManager = tmpViewer.Core.annotationManager;
       const Annotations = tmpViewer.Core.Annotations;
       
       // Safety check for annotation creation
@@ -484,73 +587,102 @@ const ProjectLogsReader = ({
 
       // Custom context menu items
       const contextMenuItems = _webViewer.UI.textPopup.getItems();
-      const lastItem = contextMenuItems[contextMenuItems.length - 1];
-      _webViewer.UI.textPopup.add(
-        {
-          type: "actionButton",
-          label: "Add New Row",
-          img: `<svg
-                width="20"
-                height="20"
-                viewBox="0 0 50 50"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-              >
-                <g
-                  transform="translate(0.000000,50.000000) scale(0.100000,-0.100000)"
-                  fill="#000000"
-                  stroke="none"
-                >
-                  <path
-                    d="M50 250 l0 -110 30 0 c29 0 30 -1 30 -52 0 -51 0 -51 -20 -33 -34 31 -36 6 -2 -28 l32 -32 32 32 c34 34 32 59 -2 28 -20 -18 -20 -18 -20 33 l0 52 80 0 c47 0 80 4 80 10 0 6 -43 10 -110 10 l-110 0 0 90 0 90 180 0 180 0 0 -65 c0 -37 4 -65 10 -65 6 0 10 32 10 75 l0 75 -200 0 -200 0 0 -110z"
-                  />
-                  <path
-                    d="M351 186 c-87 -48 -50 -186 49 -186 51 0 100 49 100 99 0 75 -83 124 -149 87z m104 -31 c50 -49 15 -135 -55 -135 -41 0 -80 39 -80 80 0 70 86 105 135 55z"
-                  />
-                  <path
-                    d="M390 135 c0 -20 -5 -25 -25 -25 -14 0 -25 -4 -25 -10 0 -5 11 -10 25 -10 20 0 25 -5 25 -25 0 -14 5 -25 10 -25 6 0 10 11 10 25 0 20 5 25 25 25 14 0 25 5 25 10 0 6 -11 10 -25 10 -20 0 -25 5 -25 25 0 14 -4 25 -10 25 -5 0 -10 -11 -10 -25z"
-                  />
-                </g>
-              </svg>`,
-          onClick: () =>
-            handleAddNewRow(_webViewer.Core.documentViewer.getSelectedText()),
-        },
-        lastItem.dataElement
-      );
-      _webViewer.UI.textPopup.add(
-        {
-          type: "actionButton",
-          label: "Append to Selected Row",
-          img: `<svg
-                width="20"
-                height="20"
-                viewBox="0 0 50 50"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-              >
-                <g
-                  transform="translate(0.000000,50.000000) scale(0.100000,-0.100000)"
-                  fill="#000000"
-                  stroke="none"
-                >
-                  <path
-                    d="M85 470 c-31 -33 -27 -54 5 -25 20 18 20 18 20 -33 0 -51 -1 -52 -30 -52 l-30 0 0 -110 0 -110 120 0 c73 0 120 4 120 10 0 6 -43 10 -110 10 l-110 0 0 90 0 90 180 0 180 0 0 -65 c0 -37 4 -65 10 -65 6 0 10 32 10 75 l0 75 -160 0 -160 0 0 52 c0 51 0 51 20 33 32 -29 36 -8 5 25 -16 17 -32 30 -35 30 -3 0 -19 -13 -35 -30z"
-                  />
-                  <path
-                    d="M351 186 c-87 -48 -50 -186 49 -186 51 0 100 49 100 99 0 75 -83 124 -149 87z m104 -31 c50 -49 15 -135 -55 -135 -41 0 -80 39 -80 80 0 70 86 105 135 55z"
-                  />
-                  <path
-                    d="M390 135 c0 -20 -5 -25 -25 -25 -14 0 -25 -4 -25 -10 0 -5 11 -10 25 -10 20 0 25 -5 25 -25 0 -14 5 -25 10 -25 6 0 10 11 10 25 0 20 5 25 25 25 14 0 25 5 25 10 0 6 -11 10 -25 10 -20 0 -25 5 -25 25 0 14 -4 25 -10 25 -5 0 -10 -11 -10 -25z"
-                  />
-                </g>
-              </svg>`,
-          onClick: () =>
-            handleAppendToSelectedRow(
-              _webViewer.Core.documentViewer.getSelectedText()
-            ),
-        },
-        lastItem.dataElement
-      );
+      const insertionReference =
+        contextMenuItems.length > 0
+          ? contextMenuItems[contextMenuItems.length - 1].dataElement
+          : null;
+
+      if (isSpecViewMode && typeof onRequestAddHighlight === "function") {
+        _webViewer.UI.textPopup.add(
+          {
+            type: "actionButton",
+            label: "Add New Highlight",
+            dataElement: "specViewAddHighlightButton",
+            onClick: () => {
+              const documentViewer = _webViewer.Core?.documentViewer;
+              const selectionPayload = buildSelectionPayload(documentViewer);
+              if (!selectionPayload) {
+                console.warn("[SPEC_VIEWER_DEBUG] No valid selection for manual highlight creation");
+                return;
+              }
+              onRequestAddHighlight(selectionPayload);
+            },
+          },
+          insertionReference
+        );
+      } else {
+        if (typeof handleAddNewRow === "function") {
+          _webViewer.UI.textPopup.add(
+            {
+              type: "actionButton",
+              label: "Add New Row",
+              img: `<svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 50 50"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                  >
+                    <g
+                      transform="translate(0.000000,50.000000) scale(0.100000,-0.100000)"
+                      fill="#000000"
+                      stroke="none"
+                    >
+                      <path
+                        d="M50 250 l0 -110 30 0 c29 0 30 -1 30 -52 0 -51 0 -51 -20 -33 -34 31 -36 6 -2 -28 l32 -32 32 32 c34 34 32 59 -2 28 -20 -18 -20 -18 -20 33 l0 52 80 0 c47 0 80 4 80 10 0 6 -43 10 -110 10 l-110 0 0 90 0 90 180 0 180 0 0 -65 c0 -37 4 -65 10 -65 6 0 10 32 10 75 l0 75 -200 0 -200 0 0 -110z"
+                      />
+                      <path
+                        d="M351 186 c-87 -48 -50 -186 49 -186 51 0 100 49 100 99 0 75 -83 124 -149 87z m104 -31 c50 -49 15 -135 -55 -135 -41 0 -80 39 -80 80 0 70 86 105 135 55z"
+                      />
+                      <path
+                        d="M390 135 c0 -20 -5 -25 -25 -25 -14 0 -25 -4 -25 -10 0 -5 11 -10 25 -10 20 0 25 -5 25 -25 0 -14 5 -25 10 -25 6 0 10 11 10 25 0 20 5 25 25 25 14 0 25 5 25 10 0 6 -11 10 -25 10 -20 0 -25 5 -25 25 0 14 -4 25 -10 25 -5 0 -10 -11 -10 -25z"
+                      />
+                    </g>
+                  </svg>`,
+              onClick: () =>
+                handleAddNewRow(_webViewer.Core.documentViewer.getSelectedText()),
+            },
+            insertionReference
+          );
+        }
+
+        if (typeof handleAppendToSelectedRow === "function") {
+          _webViewer.UI.textPopup.add(
+            {
+              type: "actionButton",
+              label: "Append to Selected Row",
+              img: `<svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 50 50"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                  >
+                    <g
+                      transform="translate(0.000000,50.000000) scale(0.100000,-0.100000)"
+                      fill="#000000"
+                      stroke="none"
+                    >
+                      <path
+                        d="M85 470 c-31 -33 -27 -54 5 -25 20 18 20 18 20 -33 0 -51 -1 -52 -30 -52 l-30 0 0 -110 0 -110 120 0 c73 0 120 4 120 10 0 6 -43 10 -110 10 l-110 0 0 90 0 90 180 0 180 0 0 -65 c0 -37 4 -65 10 -65 6 0 10 32 10 75 l0 75 -160 0 -160 0 0 52 c0 51 0 51 20 33 32 -29 36 -8 5 25 -16 17 -32 30 -35 30 -3 0 -19 -13 -35 -30z"
+                      />
+                      <path
+                        d="M351 186 c-87 -48 -50 -186 49 -186 51 0 100 49 100 99 0 75 -83 124 -149 87z m104 -31 c50 -49 15 -135 -55 -135 -41 0 -80 39 -80 80 0 70 86 105 135 55z"
+                      />
+                      <path
+                        d="M390 135 c0 -20 -5 -25 -25 -25 -14 0 -25 -4 -25 -10 0 -5 11 -10 25 -10 20 0 25 -5 25 -25 0 -14 5 -25 10 -25 6 0 10 11 10 25 0 20 5 25 25 25 14 0 25 5 25 10 0 6 -11 10 -25 10 -20 0 -25 5 -25 25 0 14 -4 25 -10 25 -5 0 -10 -11 -10 -25z"
+                      />
+                    </g>
+                  </svg>`,
+              onClick: () =>
+                handleAppendToSelectedRow(
+                  _webViewer.Core.documentViewer.getSelectedText()
+                ),
+            },
+            insertionReference
+          );
+        }
+      }
     } catch (error) {
       setLoading(false);
       handleError({ message: 'Failed to load PDF viewer.' });

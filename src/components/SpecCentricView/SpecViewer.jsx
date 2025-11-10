@@ -44,31 +44,34 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   }, [projectId, projectVersionId]);
 
   // Load section content when section changes
-  useEffect(() => {
-    const loadSectionContent = async () => {
-      if (selectedSection) {
-        try {
-          setLoading(true);
-          const response = await getSpecSectionContent(
-            projectId,
-            selectedSection.id,
-            projectVersionId
-          );
-          setSectionContent(response.data);
-        } catch (err) {
-          console.error('Error loading section content:', err);
-          setError('Failed to load section content. Please try again.');
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
+  const refreshSectionContent = useCallback(async () => {
+    if (!selectedSection) {
+      return;
+    }
 
-    loadSectionContent();
-  }, [selectedSection, projectId, projectVersionId]);
+    try {
+      setLoading(true);
+      const response = await getSpecSectionContent(
+        projectId,
+        selectedSection.id,
+        projectVersionId
+      );
+      setSectionContent(response.data);
+    } catch (err) {
+      console.error('Error loading section content:', err);
+      setError('Failed to load section content. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId, projectVersionId, selectedSection]);
+
+  useEffect(() => {
+    refreshSectionContent();
+  }, [refreshSectionContent]);
 
   const handleSectionChange = useCallback((section) => {
     setSelectedSection(section);
+    setSectionContent(null);
   }, []);
 
   const handleHighlightClick = (highlight) => {
@@ -156,6 +159,10 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
                     documentUrl={selectedSection?.pdf_url}
                     documentId={selectedSection?.document_id}
                     activeFilters={activeFilters}
+                    projectId={projectId}
+                    projectVersionId={projectVersionId}
+                    specSection={selectedSection}
+                    onRefreshSectionContent={refreshSectionContent}
                   />
                 </div>
               </div>
