@@ -11,13 +11,47 @@ const toTitleCase = (value = '') =>
     .trim()
     .replace(/\b\w/g, (char) => char.toUpperCase());
 
+const QA_COLOR_MAP = {
+  inspections: { r: 255, g: 99, b: 71 },
+  warranties: { r: 60, g: 179, b: 113 },
+  certificates: { r: 255, g: 165, b: 0 },
+  closeout_submittals: { r: 138, g: 43, b: 226 },
+  test_reports: { r: 30, g: 144, b: 255 },
+  commissioning: { r: 255, g: 20, b: 147 },
+  delegated_design: { r: 75, g: 0, b: 130 },
+  mock_ups_sample_construction: { r: 218, g: 165, b: 32 },
+  pre_installation_meetings: { r: 32, g: 178, b: 170 },
+};
+
+const EXTRACTION_COLOR_MAP = {
+  qa_planner: { r: 100, g: 149, b: 237 },
+  inspection_log: { r: 255, g: 127, b: 80 },
+  owner_deliverables_log: { r: 147, g: 112, b: 219 },
+  manual_highlight: { r: 59, g: 130, b: 246 },
+};
+
+const rgbaString = ({ r, g, b }, alpha = 0.16) => `rgba(${r}, ${g}, ${b}, ${alpha})`;
+
+const getSwatchColor = (itemType, extractionType) => {
+  const key = itemType || extractionType;
+  return (
+    QA_COLOR_MAP[key] ||
+    EXTRACTION_COLOR_MAP[extractionType] ||
+    { r: 59, g: 130, b: 246 }
+  );
+};
+
 const buildFallbackOptions = () =>
-  HIGHLIGHT_TYPES.map((item) => ({
-    key: `qa_planner__${item.key}`,
-    label: item.type,
-    extractionType: 'qa_planner',
-    itemType: item.key,
-  }));
+  HIGHLIGHT_TYPES.map((item) => {
+    const color = getSwatchColor(item.key, 'qa_planner');
+    return {
+      key: `qa_planner__${item.key}`,
+      label: item.type,
+      extractionType: 'qa_planner',
+      itemType: item.key,
+      swatch: color,
+    };
+  });
 
 const truncateText = (value = '', maxLength = 200) => {
   if (!value) {
@@ -122,11 +156,14 @@ const DocumentHighlighter = ({
           ? toTitleCase(item.item_type)
           : toTitleCase(item?.extraction_type || 'Highlight');
 
+        const swatchColor = getSwatchColor(item?.item_type, item?.extraction_type);
+
         optionsMap.set(mapKey, {
           key: mapKey,
           label,
           extractionType: item?.extraction_type || 'manual_highlight',
           itemType: item?.item_type || null,
+          swatch: swatchColor,
         });
       }
     });
@@ -275,10 +312,20 @@ const DocumentHighlighter = ({
                   <button
                     key={option.key}
                     className="highlight-picker-option"
+                    style={{
+                      '--highlight-border': rgbaString(option.swatch, 0.35),
+                      '--highlight-border-hover': rgbaString(option.swatch, 1),
+                      '--highlight-background': rgbaString(option.swatch, 0.12),
+                      '--highlight-background-hover': rgbaString(option.swatch, 0.2),
+                      '--highlight-text': rgbaString(option.swatch, 0.95),
+                      '--highlight-text-hover': rgbaString(option.swatch, 1),
+                      '--highlight-swatch': rgbaString(option.swatch, 0.85),
+                    }}
                     onClick={() => handleHighlightTypeSelect(option)}
                     disabled={isSavingHighlight}
                   >
-                    {option.label}
+                    <span className="highlight-picker-swatch" />
+                    <span>{option.label}</span>
                   </button>
                 ))
               )}
