@@ -443,7 +443,8 @@ const ProjectLogs = () => {
       );
       setLogIdList(submittalItems.data.log_id_list);
       setErrorMessage("");
-      
+      setTotalCount(submittalItems?.data?.total_count);
+
       if (submittalItems.data.message?.length === 0) {
         const filterHasValues = Object.values(filterValues).some(arr => arr.length > 0);
         if (documentData?.length > 0 && !filterHasValues) {
@@ -463,7 +464,6 @@ const ProjectLogs = () => {
           return;
         }
       }
-      setTotalCount(submittalItems?.data?.total_count);
     } catch (error) {
       handleError(error);
     } finally {
@@ -922,6 +922,26 @@ const ProjectLogs = () => {
     if (selected?.length !== 0) {
       try {
         await deleteSubmittalItems(state?.projectId || projectId, selected);
+        // Calculate the new total count after deletion
+        const newTotalCount = totalCount - selected.length;
+        const lastValidPage = Math.max(1, Math.ceil(newTotalCount / rowsPerPage)); // Calculate the last valid page
+        // If current page is greater than the last valid page, navigate to the last valid page
+        const targetPage = page > lastValidPage ? lastValidPage : page;
+
+        if (targetPage !== page) {
+          setPage(targetPage);
+        }
+
+        await fetchLogData(
+          targetPage,
+          rowsPerPage,
+          searchValue,
+          listId,
+          appliedFilters,
+          null, // orderCol (default to null if no sorting active)
+          null, // order (default to null if no sorting active)
+          projectVersionId
+        );
         setPageRefresh(!pageRefresh);
         setSelected([]);
         ToastService.success("Successfully Deleted Logs!");
