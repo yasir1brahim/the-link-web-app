@@ -193,7 +193,7 @@ const ProjectLogsReader = ({
     } else if (quadsSource && typeof quadsSource === "object") {
       Object.keys(quadsSource).forEach((key) => {
         const pageIdx = Number(key);
-        const pageNumber = Number.isNaN(pageIdx) ? null : pageIdx + 1;
+        const pageNumber = Number.isNaN(pageIdx) ? null : pageIdx;
         if (!pageNumber || !Array.isArray(quadsSource[key])) {
           return;
         }
