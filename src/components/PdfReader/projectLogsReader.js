@@ -1,9 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useRef } from "react";
+import ReactDOMServer from "react-dom/server";
 import WebViewer from "@pdftron/webviewer";
 import axiosInstance from "../../config/axios";
 import { validateS3Link, isS3LinkExpiredError } from "../../utils/s3LinkValidator.js";
 import { useS3LinkValidation } from "../../hooks/useS3LinkValidation.js";
+import { ReactComponent as AddButton } from "../../assets/images/circle-add.svg";
 
 const ProjectLogsReader = ({
   url,
@@ -592,12 +594,15 @@ const ProjectLogsReader = ({
           ? contextMenuItems[contextMenuItems.length - 1].dataElement
           : null;
 
+      const addPlusIconSvg = ReactDOMServer.renderToStaticMarkup(<AddButton />);
+
       if (isSpecViewMode && typeof onRequestAddHighlight === "function") {
         _webViewer.UI.textPopup.add(
           {
             type: "actionButton",
             label: "Add New Highlight",
             dataElement: "specViewAddHighlightButton",
+            img: addPlusIconSvg,
             onClick: () => {
               const documentViewer = _webViewer.Core?.documentViewer;
               const selectionPayload = buildSelectionPayload(documentViewer);
@@ -616,29 +621,7 @@ const ProjectLogsReader = ({
             {
               type: "actionButton",
               label: "Add New Row",
-              img: `<svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 50 50"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                  >
-                    <g
-                      transform="translate(0.000000,50.000000) scale(0.100000,-0.100000)"
-                      fill="#000000"
-                      stroke="none"
-                    >
-                      <path
-                        d="M50 250 l0 -110 30 0 c29 0 30 -1 30 -52 0 -51 0 -51 -20 -33 -34 31 -36 6 -2 -28 l32 -32 32 32 c34 34 32 59 -2 28 -20 -18 -20 -18 -20 33 l0 52 80 0 c47 0 80 4 80 10 0 6 -43 10 -110 10 l-110 0 0 90 0 90 180 0 180 0 0 -65 c0 -37 4 -65 10 -65 6 0 10 32 10 75 l0 75 -200 0 -200 0 0 -110z"
-                      />
-                      <path
-                        d="M351 186 c-87 -48 -50 -186 49 -186 51 0 100 49 100 99 0 75 -83 124 -149 87z m104 -31 c50 -49 15 -135 -55 -135 -41 0 -80 39 -80 80 0 70 86 105 135 55z"
-                      />
-                      <path
-                        d="M390 135 c0 -20 -5 -25 -25 -25 -14 0 -25 -4 -25 -10 0 -5 11 -10 25 -10 20 0 25 -5 25 -25 0 -14 5 -25 10 -25 6 0 10 11 10 25 0 20 5 25 25 25 14 0 25 5 25 10 0 6 -11 10 -25 10 -20 0 -25 5 -25 25 0 14 -4 25 -10 25 -5 0 -10 -11 -10 -25z"
-                      />
-                    </g>
-                  </svg>`,
+              img: addPlusIconSvg,
               onClick: () =>
                 handleAddNewRow(_webViewer.Core.documentViewer.getSelectedText()),
             },
