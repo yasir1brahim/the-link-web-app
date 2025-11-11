@@ -223,6 +223,9 @@
   max-width: 440px;
   width: 100%;
   border: 1px solid #e5e7eb;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .highlight-picker-modal h3 {
@@ -230,6 +233,7 @@
   font-size: 1.1rem;
   color: #0f172a;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .highlight-picker-context {
@@ -242,6 +246,7 @@
   border-radius: 6px;
   max-height: 140px;
   overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .highlight-picker-options {
@@ -249,6 +254,10 @@
   grid-template-columns: 1fr;
   gap: 10px;
   margin-bottom: 18px;
+  overflow-y: auto;
+  flex-shrink: 1;
+  min-height: 0;
+  padding-right: 4px;
 }
 
 .highlight-picker-option {
@@ -294,12 +303,14 @@
   margin-bottom: 16px;
   color: #dc2626;
   font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
 .highlight-picker-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .highlight-picker-manage {
