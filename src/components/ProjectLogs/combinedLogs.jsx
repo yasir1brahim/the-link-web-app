@@ -250,41 +250,61 @@ export default function CombinedLogs(props) {
   const handleAddRow = async (log) => {
     try {
       let index = props.logData?.findIndex((item) => item === log);
-      const dashIndex = log.para_no.search("-");
-      // Below we are making an array of para_nos then filtering them like if log.para_no = 1.04, paraNos will have all entries of 1.04 i.e. 1.04-a, 1.04-b etc.
-      const paraNos = props.logData
-        ?.map((log) => log.para_no)
-        .filter((paraNo) =>
-          paraNo.includes(
-            dashIndex !== -1 ? log.para_no.slice(0, dashIndex) : log.para_no
-          )
-        );
-      //Now we are making an array containing the ascii character values of elements after '-' in paraNos
-      const charArray = paraNos.map((paraNo) =>
-        paraNo.search("-") !== -1
-          ? paraNo.codePointAt(paraNo.search("-") + 1)
-          : 96
-      );
+
+      // Check if the current row ends with a manually-added suffix (dash followed by lowercase letter)
+      const lastDashIndex = log.para_no.lastIndexOf("-");
+      const hasManualSuffix = lastDashIndex !== -1 &&
+        log.para_no.length > lastDashIndex + 1 &&
+        /^[a-z]$/.test(log.para_no[lastDashIndex + 1]);
+
+      let newParaNo;
+
+      if (hasManualSuffix) {
+        // Current row is manually added (e.g., "1.04-a" or "1.04-A-1-a")
+        // Add a SIBLING (e.g., "1.04-b" or "1.04-A-1-b")
+        const parent = log.para_no.slice(0, lastDashIndex);
+
+        // Find all siblings (children of the same parent)
+        const siblings = props.logData
+          ?.map((item) => item.para_no)
+          .filter((paraNo) => paraNo.startsWith(parent + "-"));
+
+        // Get suffix characters of all siblings
+        const charArray = siblings.map((paraNo) => {
+          const suffixStart = parent.length + 1;
+          return paraNo.length > suffixStart ? paraNo.codePointAt(suffixStart) : 96;
+        });
+
+        const maxChar = charArray.length > 0 ? Math.max(...charArray) : 96;
+        newParaNo = `${parent}-${String.fromCharCode(maxChar + 1)}`;
+      } else {
+        // Current row is NOT manually added (e.g., "1.04" or "1.04-A-1")
+        // Add a CHILD (e.g., "1.04-a" or "1.04-A-1-a")
+        const children = props.logData
+          ?.map((item) => item.para_no)
+          .filter((paraNo) => paraNo.startsWith(log.para_no + "-"));
+
+        // Get suffix characters of all children
+        const charArray = children.map((paraNo) => {
+          const suffixStart = log.para_no.length + 1;
+          return paraNo.length > suffixStart ? paraNo.codePointAt(suffixStart) : 96;
+        });
+
+        const maxChar = charArray.length > 0 ? Math.max(...charArray) : 96;
+        newParaNo = `${log.para_no}-${String.fromCharCode(maxChar + 1)}`;
+      }
+
       const logObj = {
         ...log,
-        //Here we are checking if para_no already contains a character after '-'.
-        // If yes, we are increasing the ascii value of the character by 1 for ex.- if it's a it will make it b.
-        // If No, it will add '-a' to para_no
-        para_no:
-          dashIndex !== -1
-            ? log.para_no.slice(0, dashIndex + 1) +
-              String.fromCharCode(Math.max(...charArray) + 1)
-            : `${log.para_no}-${String.fromCharCode(
-                Math.max(...charArray) + 1
-              )}`,
+        para_no: newParaNo,
         // customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
         submittal_number: null,
-
-        // Only used to help BE determine what to do when inserted
         added_under_submittal_id: log.id,
+        manually_added: true,
       };
       const result = insertElement(props.logData, index + 1, logObj);
       props.setFilteredLogData(result);
+      props.setLogData(result);
 
       setNewRowIndex(index + 1);
       handleEditToggle(logObj, index + 1)
@@ -300,6 +320,7 @@ export default function CombinedLogs(props) {
       });
     }
   };
+  
   useEffect(() => {
     setEditRow("");
   }, [props.searchValue]);
