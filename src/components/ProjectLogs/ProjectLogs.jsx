@@ -36,6 +36,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
 import ArchivedVersionsModal from "./archivedVersionModal";
+import { isLogEligibleForChildEntry } from "./projectLogsUtils";
 import useCompanyDetails from "../../hooks/useCompanyDetails";
 import useDocumentRefresh from "../../hooks/useDocumentRefresh";
 import DocumentListModal from "./DocumentListModal";
@@ -381,14 +382,19 @@ const ProjectLogs = () => {
     orderCol = "",
     order = "",
     projectVersionId = null,
+    resetViewer = true,
   ) => {
-    if (projectId === null) return;
+    if (projectId === null) return [];
     
     if (!isInitialLoading) {
       setIsDataLoading(true);
     }
     setLoadingView(true);
-    setLogInViewer(null);
+    if (resetViewer) {
+      setLogInViewer(null);
+    }
+
+    let submittalLogs = [];
 
     try {
       const submittalItems = await getSubmittalItems(
@@ -406,7 +412,7 @@ const ProjectLogs = () => {
       console.log("responseData", submittalItems.data);
       setSelectedFilterValue(submittalItems.data.all_filter_vals);
       setAvailableMasterformatNumbers(submittalItems.data.all_masterformat_numbers_for_project || []);
-      const submittalLogs = submittalItems.data.message;
+      submittalLogs = submittalItems.data.message;
       setLogData(submittalLogs);
       setFilteredLogData(submittalLogs); 
       setHasPlaceholderSubmittals(submittalItems.data.has_placeholder_submittals || false);
@@ -448,24 +454,26 @@ const ProjectLogs = () => {
         const filterHasValues = Object.values(filterValues).some(arr => arr.length > 0);
         if (documentData?.length > 0 && !filterHasValues) {
           setErrorMessage("No submittals were detected in the uploaded document(s)");
-          return;
+          return [];
         }
         if (search || filterHasValues) {
           setErrorMessage("Sorry, no results found for your search query.");
-          return;
+          return [];
         }
         if (documentData?.length === 0) {
           setErrorMessage("Upload spec documents to generate submittal log");
-          return;
+          return [];
         }
         if (documentIsProcessing(documentData)) {
           setErrorMessage("Documents are being processed...");
-          return;
+          return [];
         }
       }
       setTotalCount(submittalItems?.data?.total_count);
+      return submittalLogs;
     } catch (error) {
       handleError(error);
+      return [];
     } finally {
       setIsDataLoading(false);
       setLoadingView(false);
@@ -1295,36 +1303,49 @@ const ProjectLogs = () => {
 
   const handleAddNewRow = async (content) => {
     try {
-      let index = logData?.findIndex((item) => item === logInViewer);
+      if (!isLogEligibleForChildEntry(logInViewer)) {
+        ToastService.error("Select a log entry before adding a new row.");
+        return;
+      }
+
       const dashIndex = logInViewer.para_no.search("-");
+      const baseParaNoPrefix =
+        dashIndex !== -1
+          ? logInViewer.para_no.slice(0, dashIndex)
+          : logInViewer.para_no;
       // Below we are making an array of para_nos then filtering them like if log.para_no = 1.04, paraNos will have all entries of 1.04 i.e. 1.04-a, 1.04-b etc.
-      const paraNos = logData
-        ?.map((log) => log.para_no)
-        .filter((paraNo) =>
-          paraNo.includes(
-            dashIndex !== -1
-              ? logInViewer.para_no.slice(0, dashIndex)
-              : logInViewer.para_no
-          )
-        );
+      const paraNos = Array.isArray(logData)
+        ? logData
+            .map((log) => log?.para_no)
+            .filter(
+              (paraNo) =>
+                typeof paraNo === "string" && paraNo.startsWith(baseParaNoPrefix)
+            )
+        : [];
       //Now we are making an array containing the ascii character values of elements after '-' in paraNos
-      const charArray = paraNos.map((paraNo) =>
-        paraNo.search("-") !== -1
-          ? paraNo.codePointAt(paraNo.search("-") + 1)
-          : 96
-      );
+      const charArray =
+        paraNos.length > 0
+          ? paraNos.map((paraNo) =>
+              paraNo.search("-") !== -1
+                ? paraNo.codePointAt(paraNo.search("-") + 1)
+                : 96
+            )
+          : [96];
+      const highestCharCode = Math.max(...charArray);
       
       // Get the full URL from pdfData instead of logInViewer.doc_link
       // This ensures we get the complete URL with the correct path and parameters
-      const fullDocLink = pdfData.url;
+      const fullDocLink = pdfData?.url || logInViewer.doc_link || "";
       
       // Generate new para_no
-      const newParaNo = dashIndex !== -1
-        ? logInViewer.para_no.slice(0, dashIndex + 1) +
-          String.fromCharCode(Math.max(...charArray) + 1)
-        : `${logInViewer.para_no}-${String.fromCharCode(
-            Math.max(...charArray) + 1
-          )}`;
+      const newParaNo =
+        dashIndex !== -1
+          ? `${logInViewer.para_no.slice(0, dashIndex + 1)}${String.fromCharCode(
+              highestCharCode + 1
+            )}`
+          : `${logInViewer.para_no}-${String.fromCharCode(
+              highestCharCode + 1
+            )}`;
       
       // Create a new log entry in the backend
       try {
@@ -1341,33 +1362,57 @@ const ProjectLogs = () => {
           logInViewer.section_title
         );
         
-        console.log("Created new log in backend:", response.data);
-        
+        const createdLog = response?.data;
+
         // Refresh the log data to get the newly created log
-        await fetchLogData(page, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
-        
-        // Find the newly created log in the refreshed data
-        const newLogIndex = logData.findIndex(log => 
-          log.para_no === newParaNo && 
-          log.para_context === content
+        const refreshedLogs = await fetchLogData(
+          page,
+          rowsPerPage,
+          searchValue,
+          listId,
+          null,
+          null,
+          null,
+          projectVersionId,
+          false
         );
-        
-        if (newLogIndex !== -1) {
-          // Select the newly created log
-          const newLog = logData[newLogIndex];
-          
-          // Set the PDF data to show the newly created log
+
+        const logsAfterInsert = Array.isArray(refreshedLogs) ? refreshedLogs : [];
+        const matchedLogById =
+          createdLog?.id != null
+            ? logsAfterInsert.find((log) => log.id === createdLog.id)
+            : null;
+        const matchedLog =
+          matchedLogById ||
+          logsAfterInsert.find((log) => log.para_no === newParaNo) ||
+          null;
+
+        if (matchedLog) {
+          const matchedLogIndex = logsAfterInsert.findIndex(
+            (log) => log.id === matchedLog.id
+          );
+
           setPdfData({
-            url: fullDocLink, // Use the full document URL
-            textLoc: logInViewer.text_loc,
-            index: newLogIndex,
-            docId: logInViewer.doc_id,
-            submittalId: newLog.id,
-            additionalTextLocations: [],
+            url: matchedLog.doc_link || fullDocLink,
+            textLoc: matchedLog.text_loc || logInViewer.text_loc,
+            index: matchedLogIndex !== -1 ? matchedLogIndex : pdfData.index,
+            docId: matchedLog.doc_id || logInViewer.doc_id,
+            submittalId: matchedLog.id,
+            additionalTextLocations: matchedLog.additional_text_locations || [],
           });
-          
-          // Set the log in viewer
-          setLogInViewer(newLog);
+
+          setLogInViewer(matchedLog);
+        } else if (createdLog) {
+          setPdfData({
+            url: createdLog.doc_link || fullDocLink,
+            textLoc: createdLog.text_loc || logInViewer.text_loc,
+            index: pdfData.index,
+            docId: createdLog.doc_id || logInViewer.doc_id,
+            submittalId: createdLog.id,
+            additionalTextLocations: createdLog.additional_text_locations || [],
+          });
+
+          setLogInViewer(createdLog);
         }
         
         ToastService.success("New log entry created successfully");

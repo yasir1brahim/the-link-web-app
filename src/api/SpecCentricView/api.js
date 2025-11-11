@@ -109,10 +109,30 @@ const getSpecSectionSubmittals = async (projectId, sectionId, projectVersionId =
     }
 };
 
+/**
+ * Create a manual highlight (ExtractedData) entry
+ * @param {number} projectId - The project ID
+ * @param {object} payload - Highlight payload matching ExtractedDataCreateSerializer
+ * @returns {Promise} API response
+ */
+const createManualHighlight = async (projectId, payload) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/${projectId}/extracted-data/`,
+            data: payload,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
 export {
     getSpecSections,
     getSpecSectionContent,
     getSubmittalHighlights,
     getSpecCentricData,
-    getSpecSectionSubmittals
+    getSpecSectionSubmittals,
+    createManualHighlight
 };

@@ -43,6 +43,7 @@ describe('QAPlannerModal', () => {
         expect(screen.getByText('Reports')).toBeInTheDocument();
     });
 
+
     it('allows selecting multiple options', () => {
         renderWithChakra(
             <QAPlannerModal
