@@ -168,13 +168,11 @@ const DocumentHighlighter = ({
       }
     });
 
-    if (optionsMap.size === 0) {
-      buildFallbackOptions().forEach((option) => {
-        if (!optionsMap.has(option.key)) {
-          optionsMap.set(option.key, option);
-        }
-      });
-    }
+    buildFallbackOptions().forEach((option) => {
+      if (!optionsMap.has(option.key)) {
+        optionsMap.set(option.key, option);
+      }
+    });
 
     return Array.from(optionsMap.values()).sort((a, b) => a.label.localeCompare(b.label));
   }, [localAiHighlights]);
