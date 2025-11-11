@@ -252,7 +252,7 @@ const LogViewer = ({
                     label: 'Requirement', 
                     sortable: true, 
                     width: 28,
-                    minWidth: 200,
+                    minWidth: 180,
                     expandable: true
                 },
                 { 
@@ -261,14 +261,14 @@ const LogViewer = ({
                     sortable: true, 
                     filterable: true, // Add filter capability
                     width: 12,
-                    minWidth: 110
+                    minWidth: 130
                 },
                 { 
                     key: 'When Due', 
                     label: 'When Due', 
                     sortable: true, 
                     width: 12,
-                    minWidth: 110
+                    minWidth: 100
                 }
             ];
         }
