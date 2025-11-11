@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { HIGHLIGHT_TYPES } from './highlightConstants';
 import './HighlightLegend.css';
 
@@ -7,6 +7,11 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [statistics, setStatistics] = useState({});
   const isInitialMount = useRef(true);
+
+  const sortedHighlightTypes = useMemo(
+    () => [...HIGHLIGHT_TYPES].sort((a, b) => a.type.localeCompare(b.type)),
+    []
+  );
 
   // Calculate statistics whenever highlights change
   useEffect(() => {
@@ -36,7 +41,7 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
     // Only do this on initial mount to preserve user's filter selections when switching sections
     if (isInitialMount.current) {
       // Initialize with all known highlight types, not just ones with data
-      const allTypes = HIGHLIGHT_TYPES.map(item => item.key);
+      const allTypes = sortedHighlightTypes.map(item => item.key);
       const newActiveFilters = new Set(allTypes);
       setActiveFilters(newActiveFilters);
 
@@ -47,7 +52,7 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
 
       isInitialMount.current = false;
     }
-  }, [submittalHighlights, aiLogHighlights, onFilterChange]);
+  }, [submittalHighlights, aiLogHighlights, onFilterChange, sortedHighlightTypes]);
 
   const handleFilterToggle = (key) => {
     const newFilters = new Set(activeFilters);
@@ -78,7 +83,7 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
       {isExpanded && (
         <div className="legend-content">
           <div className="legend-items">
-            {HIGHLIGHT_TYPES.map((item) => {
+            {sortedHighlightTypes.map((item) => {
               const count = statistics[item.key] || 0;
               const isActive = activeFilters.has(item.key);
               const isAvailable = count > 0;
