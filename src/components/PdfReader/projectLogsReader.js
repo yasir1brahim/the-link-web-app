@@ -386,10 +386,11 @@ const ProjectLogsReader = ({
         const location = stableAiLogHighlightLocations[i];
         const itemType = location?.item_type;
 
-        // Check if this highlight should be shown based on active filters (if filtering enabled)
         const shouldShow = !useFiltering || activeFilters.has(itemType);
 
-        const color = getColorForItemType(location?.item_type, location?.extraction_type);
+        const color = location?.color
+          ? new Annotations.Color(location.color.r, location.color.g, location.color.b, 0.25)
+          : getColorForItemType(location?.item_type, location?.extraction_type);
         
         const rectangleAnnot = new Annotations.RectangleAnnotation({
           PageNumber: location?.page_no,

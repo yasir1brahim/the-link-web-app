@@ -14,3 +14,25 @@ export const HIGHLIGHT_TYPES = [
 
 // Extract just the keys for filter initialization
 export const DEFAULT_FILTER_KEYS = HIGHLIGHT_TYPES.map(item => item.key);
+
+export const formatCustomTypes = (customTypes = []) =>
+  customTypes.map((type) => ({
+    key: `custom_${type.id}`,
+    type: type.name,
+    color: `${type.color}A6`,
+    isCustom: true,
+    customTypeId: type.id,
+  }));
+
+export const isCustomHighlight = (highlight) =>
+  highlight?.extraction_type === 'custom_highlights' && !!highlight?.custom_item_type;
+
+export const getHighlightColor = (highlight, customTypes = []) => {
+  if (isCustomHighlight(highlight)) {
+    const match = customTypes.find((type) => type.id === highlight.custom_item_type?.id);
+    return match ? `${match.color}A6` : 'rgba(128, 128, 128, 0.6)';
+  }
+
+  const standard = HIGHLIGHT_TYPES.find((type) => type.key === highlight?.item_type);
+  return standard ? standard.color : 'rgba(128, 128, 128, 0.6)';
+};
