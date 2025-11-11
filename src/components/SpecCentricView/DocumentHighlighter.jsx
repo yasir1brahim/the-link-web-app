@@ -141,10 +141,23 @@ const DocumentHighlighter = ({
       }
 
       const isCustom = isCustomHighlight(logItem);
-      const customTypeId = logItem?.custom_item_type?.id;
-      const itemTypeKey = isCustom && customTypeId ? `custom_${customTypeId}` : logItem.item_type;
-      const matchedType = isCustom ? customItemTypes.find((type) => type.id === customTypeId) : null;
-      const swatchColor = isCustom && matchedType ? hexToRgb(matchedType.color) : getSwatchColor(logItem.item_type, logItem.extraction_type);
+
+      // Extract custom type ID from either custom_item_type object or item_type pattern
+      let customTypeId = logItem?.custom_item_type?.id;
+      if (!customTypeId && logItem?.item_type?.startsWith('custom_')) {
+        customTypeId = parseInt(logItem.item_type.replace('custom_', ''), 10);
+      }
+
+      const itemTypeKey = customTypeId ? `custom_${customTypeId}` : logItem.item_type;
+      const matchedType = customTypeId ? customItemTypes.find((type) => type.id === customTypeId) : null;
+
+      // Determine if this is a custom highlight (either by full check or by item_type pattern)
+      const isCustomType = isCustom || (logItem?.extraction_type === 'custom_highlights' && !!customTypeId);
+
+      const highlightColorHex = isCustomType
+        ? logItem?.custom_item_type?.color || matchedType?.color || logItem?.color
+        : logItem?.color;
+      const swatchColor = highlightColorHex ? hexToRgb(highlightColorHex) : getSwatchColor(logItem.item_type, logItem.extraction_type);
       const color = swatchColor || { r: 128, g: 128, b: 128 };
 
       for (const location of logItem.pdf_locations) {

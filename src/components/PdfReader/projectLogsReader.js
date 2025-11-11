@@ -261,8 +261,32 @@ const ProjectLogsReader = ({
       const highlightsAreAvailable = stableHighlightLocations && stableHighlightLocations.length > 0 && stableHighlightLocations[0]?.page_no && stableHighlightLocations[0]?.x && stableHighlightLocations[0]?.y;
       const aiLogHighlightsAreAvailable = stableAiLogHighlightLocations && stableAiLogHighlightLocations.length > 0;
       
-      // If annotations have already been created, just toggle visibility
       const annotationManager = tmpViewer.Core.annotationManager;
+      const Annotations = tmpViewer.Core.Annotations;
+
+      const createAnnotationColor = (colorData) => new Annotations.Color(colorData.r, colorData.g, colorData.b, 0.25);
+      const getColorDataForHighlight = (itemType, extractionType) => {
+        const qaColorMap = {
+          'inspections': { r: 255, g: 99, b: 71 },         // Tomato red
+          'warranties': { r: 60, g: 179, b: 113 },         // Medium sea green
+          'certificates': { r: 255, g: 165, b: 0 },        // Orange
+          'closeout_submittals': { r: 138, g: 43, b: 226 }, // Blue violet
+          'test_reports': { r: 30, g: 144, b: 255 },       // Dodger blue
+          'commissioning': { r: 255, g: 20, b: 147 },      // Deep pink
+          'delegated_design': { r: 75, g: 0, b: 130 },     // Indigo
+          'mock_ups_sample_construction': { r: 218, g: 165, b: 32 }, // Goldenrod
+          'pre_installation_meetings': { r: 32, g: 178, b: 170 }, // Light sea green
+        };
+
+        const extractionColorMap = {
+          'qa_planner': { r: 100, g: 149, b: 237 },        // Cornflower blue (default)
+          'inspection_log': { r: 255, g: 127, b: 80 },     // Coral
+          'owner_deliverables_log': { r: 147, g: 112, b: 219 }, // Medium purple
+        };
+
+        return qaColorMap[itemType] || extractionColorMap[extractionType] || { r: 100, g: 149, b: 237 };
+      };
+      const SUBMITTAL_COLOR = { r: 213, g: 231, b: 62 };
 
       if (annotationsCreated.current && annotationsRef.current.length > 0) {
 
@@ -271,9 +295,35 @@ const ProjectLogsReader = ({
         annotationsRef.current.forEach(annot => {
           const itemType = annot.CustomData?.item_type;
           const shouldShow = !useFiltering || activeFilters.has(itemType);
+          let needsRedraw = false;
 
           if (annot.Hidden === shouldShow) { // Only update if state needs to change
             annot.Hidden = !shouldShow;
+            needsRedraw = true;
+          }
+
+          if (annot.CustomData?.source === 'ai' && Array.isArray(stableAiLogHighlightLocations)) {
+            const locationIndex = annot.CustomData.index;
+            const location = stableAiLogHighlightLocations[locationIndex];
+            if (location) {
+              const colorData = location?.color || annot.CustomData.color || getColorDataForHighlight(location?.item_type, location?.extraction_type);
+              const existingColor = annot.CustomData.color;
+              if (
+                !existingColor ||
+                existingColor.r !== colorData.r ||
+                existingColor.g !== colorData.g ||
+                existingColor.b !== colorData.b
+              ) {
+                const nextColor = createAnnotationColor(colorData);
+                annot.Color = nextColor;
+                annot.FillColor = nextColor;
+                annot.CustomData.color = colorData;
+                needsRedraw = true;
+              }
+            }
+          }
+
+          if (needsRedraw) {
             annotationsToUpdate.push(annot);
           }
         });
@@ -321,7 +371,6 @@ const ProjectLogsReader = ({
 
       // Add rectangular highlight annotations
       const _annotations = [];
-      const Annotations = tmpViewer.Core.Annotations;
       
       // Safety check for annotation creation
       if (!annotationManager || !Annotations || !Annotations.RectangleAnnotation) {
@@ -329,57 +378,33 @@ const ProjectLogsReader = ({
         setAnnotations([]);
         return;
       }
-      
+
       // Add submittal highlights (yellow/green color)
       // Create all annotations, set Hidden based on active filters (if filtering is enabled)
       const shouldShowSubmittals = !useFiltering || activeFilters.has('submittal');
       for (let i = 0; i < stableHighlightLocations?.length; i++) {
+        const annotationColor = createAnnotationColor(SUBMITTAL_COLOR);
         const rectangleAnnot = new Annotations.RectangleAnnotation({
           PageNumber: stableHighlightLocations[i]?.page_no,
           X: stableHighlightLocations[i]?.x,
           Y: stableHighlightLocations[i]?.y,
           Width: stableHighlightLocations[i]?.width ?? 10000,
           Height: stableHighlightLocations[i]?.height ?? 30,
-          Color: new Annotations.Color(213, 231, 62, 0.25),
-          FillColor: new Annotations.Color(213, 231, 62, 0.25),
+          Color: annotationColor,
+          FillColor: annotationColor,
         });
         rectangleAnnot.Subject = 'Submittal Highlight';
         rectangleAnnot.CustomData = {
           item_type: 'submittal',
-          extraction_type: 'submittal'
+          extraction_type: 'submittal',
+          color: SUBMITTAL_COLOR,
+          source: 'submittal',
+          index: i,
         };
         rectangleAnnot.Hidden = !shouldShowSubmittals;
         _annotations.push(rectangleAnnot);
       }
 
-      // Helper function to get color based on AI log item type
-      const getColorForItemType = (itemType, extractionType) => {
-        // QA Planner item types with distinct colors
-        const qaColorMap = {
-          'inspections': { r: 255, g: 99, b: 71 },         // Tomato red
-          'warranties': { r: 60, g: 179, b: 113 },         // Medium sea green
-          'certificates': { r: 255, g: 165, b: 0 },        // Orange
-          'closeout_submittals': { r: 138, g: 43, b: 226 }, // Blue violet
-          'test_reports': { r: 30, g: 144, b: 255 },       // Dodger blue
-          'commissioning': { r: 255, g: 20, b: 147 },      // Deep pink
-          'delegated_design': { r: 75, g: 0, b: 130 },     // Indigo
-          'mock_ups_sample_construction': { r: 218, g: 165, b: 32 }, // Goldenrod
-          'pre_installation_meetings': { r: 32, g: 178, b: 170 }, // Light sea green
-        };
-        
-        // Extraction type colors (fallback if item type not found)
-        const extractionColorMap = {
-          'qa_planner': { r: 100, g: 149, b: 237 },        // Cornflower blue (default)
-          'inspection_log': { r: 255, g: 127, b: 80 },     // Coral
-          'owner_deliverables_log': { r: 147, g: 112, b: 219 }, // Medium purple
-        };
-        
-        // Try to get color from item type first, then extraction type, then default
-        let color = qaColorMap[itemType] || extractionColorMap[extractionType] || { r: 100, g: 149, b: 237 };
-        
-        return new Annotations.Color(color.r, color.g, color.b, 0.25);
-      };
-      
       // Add AI log highlights with different colors based on type
       // Create all annotations, set Hidden based on active filters (if filtering is enabled)
       for (let i = 0; i < stableAiLogHighlightLocations?.length; i++) {
@@ -388,9 +413,8 @@ const ProjectLogsReader = ({
 
         const shouldShow = !useFiltering || activeFilters.has(itemType);
 
-        const color = location?.color
-          ? new Annotations.Color(location.color.r, location.color.g, location.color.b, 0.25)
-          : getColorForItemType(location?.item_type, location?.extraction_type);
+        const colorData = location?.color || getColorDataForHighlight(location?.item_type, location?.extraction_type);
+        const color = createAnnotationColor(colorData);
         
         const rectangleAnnot = new Annotations.RectangleAnnotation({
           PageNumber: location?.page_no,
@@ -405,7 +429,10 @@ const ProjectLogsReader = ({
         rectangleAnnot.CustomData = {
           item_type: location?.item_type,
           extraction_type: location?.extraction_type,
-          requirement_text: location?.requirement_text
+          requirement_text: location?.requirement_text,
+          color: colorData,
+          source: 'ai',
+          index: i,
         };
         rectangleAnnot.Hidden = !shouldShow;
         _annotations.push(rectangleAnnot);
