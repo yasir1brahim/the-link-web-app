@@ -1,38 +1,21 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import {
   getCustomItemTypes,
   createCustomItemType,
   updateCustomItemType,
   deleteCustomItemType,
-  getCustomTypeColorPalette,
 } from '../../../api/SpecCentricView/api';
 import { toast } from 'react-toastify';
+import ColorPickerPopover from './ColorPickerPopover';
 import './CustomItemTypesManager.css';
 
-const DEFAULT_PALETTE = [
-  '#FF6B6B',
-  '#FF922B',
-  '#F7B801',
-  '#6BCB77',
-  '#4D96FF',
-  '#9C89B8',
-  '#4ECDC4',
-  '#F38BA0',
-];
-
-const derivePalette = (serverPalette) => {
-  if (!Array.isArray(serverPalette) || serverPalette.length === 0) {
-    return DEFAULT_PALETTE;
-  }
-
-  return serverPalette;
-};
+const FALLBACK_COLOR = '#4D96FF';
 
 const buildInitialTypeState = (types) =>
   (types || []).map((item) => ({
     id: item.id,
     name: item.name || '',
-    color: item.color || DEFAULT_PALETTE[0],
+    color: item.color || FALLBACK_COLOR,
     isPersisted: true,
   }));
 
@@ -45,11 +28,12 @@ const CustomItemTypesManager = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [types, setTypes] = useState(() => buildInitialTypeState(initialTypes));
-  const [palette, setPalette] = useState(DEFAULT_PALETTE);
   const [newTypeName, setNewTypeName] = useState('');
-  const [newTypeColor, setNewTypeColor] = useState(DEFAULT_PALETTE[0]);
+  const [newTypeColor, setNewTypeColor] = useState(FALLBACK_COLOR);
   const [savingTypeId, setSavingTypeId] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [activeColorPicker, setActiveColorPicker] = useState(null);
+  const colorSwatchRefs = useRef({});
 
   useEffect(() => {
     setTypes(buildInitialTypeState(initialTypes));
@@ -62,15 +46,8 @@ const CustomItemTypesManager = ({
 
     setIsLoading(true);
     try {
-      const [typesResponse, paletteResponse] = await Promise.all([
-        getCustomItemTypes(projectId),
-        getCustomTypeColorPalette(projectId),
-      ]);
-
+      const typesResponse = await getCustomItemTypes(projectId);
       setTypes(buildInitialTypeState(typesResponse?.data?.results || []));
-      const derivedPalette = derivePalette(paletteResponse?.data?.colors);
-      setPalette(derivedPalette);
-      setNewTypeColor(derivedPalette[0] || DEFAULT_PALETTE[0]);
     } catch (error) {
       console.error('Failed to load custom item types', error);
       toast.error('Unable to load custom highlight types. Please try again.');
@@ -78,6 +55,22 @@ const CustomItemTypesManager = ({
       setIsLoading(false);
     }
   }, [projectId]);
+
+  const handleToggleColorPicker = useCallback((pickerId) => {
+    setActiveColorPicker((current) => (current === pickerId ? null : pickerId));
+  }, []);
+
+  const handleColorChange = useCallback((pickerId, color) => {
+    if (pickerId === 'new') {
+      setNewTypeColor(color);
+    } else {
+      handleTypeColorChange(pickerId, color);
+    }
+  }, []);
+
+  const handleCloseColorPicker = useCallback(() => {
+    setActiveColorPicker(null);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
