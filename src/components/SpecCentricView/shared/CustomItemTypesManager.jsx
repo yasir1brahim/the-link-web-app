@@ -215,9 +215,16 @@ const CustomItemTypesManager = ({
         ) : (
           <>
             <form className="custom-types-create-form" onSubmit={handleCreate}>
-              <label className="custom-types-label" htmlFor="custom-type-name">
-                New Type Name
-              </label>
+              <button
+                type="button"
+                ref={(el) => (colorSwatchRefs.current['new'] = el)}
+                className={`custom-types-color-swatch ${
+                  activeColorPicker === 'new' ? 'active' : ''
+                }`}
+                style={{ backgroundColor: newTypeColor }}
+                onClick={() => handleToggleColorPicker('new')}
+                aria-label="Select color for new type"
+              />
               <input
                 id="custom-type-name"
                 aria-label="New type name"
@@ -225,30 +232,25 @@ const CustomItemTypesManager = ({
                 type="text"
                 value={newTypeName}
                 onChange={(event) => setNewTypeName(event.target.value)}
-                placeholder="Enter a label"
+                placeholder="Enter type name"
               />
-
-              <div className="custom-types-palette">
-                {palette.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    className={`custom-types-color ${newTypeColor === color ? 'selected' : ''}`}
-                    style={{ backgroundColor: color }}
-                    onClick={() => setNewTypeColor(color)}
-                    aria-label={`Select color ${color}`}
-                  />
-                ))}
-              </div>
-
               <button
                 type="submit"
                 className="custom-types-primary"
                 disabled={isCreating}
               >
-                Add Type
+                Add
               </button>
             </form>
+
+            {activeColorPicker === 'new' && (
+              <ColorPickerPopover
+                color={newTypeColor}
+                onChange={(color) => handleColorChange('new', color)}
+                onClose={handleCloseColorPicker}
+                anchorRef={{ current: colorSwatchRefs.current['new'] }}
+              />
+            )}
 
             <div className="custom-types-list">
               {sortedTypes.length === 0 ? (
@@ -256,59 +258,54 @@ const CustomItemTypesManager = ({
               ) : (
                 sortedTypes.map((type) => (
                   <div key={type.id} className="custom-types-row">
-                    <div className="custom-types-row-main">
-                      <label
-                        className="custom-types-label"
-                        htmlFor={`custom-type-name-${type.id}`}
-                      >
-                        Name for {type.name || 'custom type'}
-                      </label>
-                      <input
-                        id={`custom-type-name-${type.id}`}
-                        aria-label={`Name for ${type.name || 'custom type'}`}
-                        className="custom-types-input"
-                        type="text"
-                        value={type.name}
-                        onChange={(event) =>
-                          handleTypeNameChange(type.id, event.target.value)
-                        }
+                    <button
+                      type="button"
+                      ref={(el) => (colorSwatchRefs.current[type.id] = el)}
+                      className={`custom-types-color-swatch ${
+                        activeColorPicker === type.id ? 'active' : ''
+                      }`}
+                      style={{ backgroundColor: type.color }}
+                      onClick={() => handleToggleColorPicker(type.id)}
+                      aria-label={`Select color for ${type.name || 'custom type'}`}
+                    />
+                    <input
+                      id={`custom-type-name-${type.id}`}
+                      aria-label={`Name for ${type.name || 'custom type'}`}
+                      className="custom-types-input"
+                      type="text"
+                      value={type.name}
+                      onChange={(event) =>
+                        handleTypeNameChange(type.id, event.target.value)
+                      }
+                      placeholder="Type name"
+                    />
+                    <button
+                      type="button"
+                      className="custom-types-secondary"
+                      onClick={() => handleSaveType(type)}
+                      disabled={savingTypeId === type.id}
+                      aria-label={`Save ${type.name || 'type'}`}
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      className="custom-types-danger"
+                      onClick={() => handleDeleteType(type.id)}
+                      disabled={savingTypeId === type.id}
+                      aria-label={`Delete ${type.name || 'custom type'}`}
+                    >
+                      Delete
+                    </button>
+
+                    {activeColorPicker === type.id && (
+                      <ColorPickerPopover
+                        color={type.color}
+                        onChange={(color) => handleColorChange(type.id, color)}
+                        onClose={handleCloseColorPicker}
+                        anchorRef={{ current: colorSwatchRefs.current[type.id] }}
                       />
-                    </div>
-
-                    <div className="custom-types-row-controls">
-                      <div className="custom-types-palette">
-                        {palette.map((color) => (
-                          <button
-                            key={`${type.id}-${color}`}
-                            type="button"
-                            className={`custom-types-color ${type.color === color ? 'selected' : ''}`}
-                            style={{ backgroundColor: color }}
-                            onClick={() => handleTypeColorChange(type.id, color)}
-                            aria-label={`Select color ${color} for ${type.name || 'custom type'}`}
-                          />
-                        ))}
-                      </div>
-
-                      <div className="custom-types-actions">
-                        <button
-                          type="button"
-                          className="custom-types-secondary"
-                          onClick={() => handleSaveType(type)}
-                          disabled={savingTypeId === type.id}
-                        >
-                          Save {type.name || 'type'}
-                        </button>
-                        <button
-                          type="button"
-                          className="custom-types-danger"
-                          onClick={() => handleDeleteType(type.id)}
-                          disabled={savingTypeId === type.id}
-                          aria-label={`Delete ${type.name || 'custom type'}`}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 ))
               )}
