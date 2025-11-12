@@ -221,7 +221,8 @@ const DocumentHighlighter = ({
     const optionsMap = new Map();
 
     localAiHighlights.forEach((item) => {
-      if (isCustomHighlight(item)) {
+      // Skip custom highlights - they're handled by customHighlightOptions
+      if (isCustomHighlight(item) || item?.item_type?.startsWith('custom_')) {
         return;
       }
 
