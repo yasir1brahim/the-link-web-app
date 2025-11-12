@@ -1,0 +1,52 @@
+.color-picker-popover {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.color-picker-hex-display {
+  display: flex;
+  justify-content: center;
+}
+
+.color-picker-hex-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #d7dce0;
+  border-radius: 6px;
+  text-align: center;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: #304050;
+  background: #f7f9fb;
+  cursor: default;
+}
+
+.color-picker-hex-input:focus {
+  outline: none;
+  border-color: #4d96ff;
+}
+
+/* react-colorful overrides for consistent styling */
+.color-picker-popover .react-colorful {
+  width: 200px;
+  height: 200px;
+}
+
+.color-picker-popover .react-colorful__saturation {
+  border-radius: 8px 8px 0 0;
+}
+
+.color-picker-popover .react-colorful__hue {
+  border-radius: 0 0 8px 8px;
+  height: 24px;
+}
+
+.color-picker-popover .react-colorful__pointer {
+  width: 20px;
+  height: 20px;
+}
