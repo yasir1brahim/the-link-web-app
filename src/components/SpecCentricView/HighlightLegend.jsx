@@ -7,6 +7,7 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [statistics, setStatistics] = useState({});
   const isInitialMount = useRef(true);
+  const previousCustomTypeIds = useRef(new Set());
 
   const sortedHighlightTypes = useMemo(
     () => [...HIGHLIGHT_TYPES].sort((a, b) => a.type.localeCompare(b.type)),
@@ -76,12 +77,26 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
       }
 
       isInitialMount.current = false;
-    } else if (customKeys.some((key) => !activeFilters.has(key))) {
-      const updatedFilters = new Set(activeFilters);
-      customKeys.forEach((key) => updatedFilters.add(key));
-      setActiveFilters(updatedFilters);
-      if (onFilterChange) {
-        onFilterChange(updatedFilters);
+      // Track all initial custom type IDs
+      const initialCustomIds = new Set(formattedCustomTypes.map(t => t.customTypeId));
+      previousCustomTypeIds.current = initialCustomIds;
+    } else {
+      // Only auto-enable genuinely NEW custom types, not ones the user toggled off
+      const currentCustomIds = new Set(formattedCustomTypes.map(t => t.customTypeId));
+      const newCustomIds = [...currentCustomIds].filter(id => !previousCustomTypeIds.current.has(id));
+
+      if (newCustomIds.length > 0) {
+        const updatedFilters = new Set(activeFilters);
+        newCustomIds.forEach(id => {
+          const key = `custom_${id}`;
+          updatedFilters.add(key);
+        });
+        setActiveFilters(updatedFilters);
+        if (onFilterChange) {
+          onFilterChange(updatedFilters);
+        }
+        // Update the ref to include the new IDs
+        previousCustomTypeIds.current = currentCustomIds;
       }
     }
   }, [
