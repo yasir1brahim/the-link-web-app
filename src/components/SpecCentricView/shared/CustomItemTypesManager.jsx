@@ -142,19 +142,6 @@ const CustomItemTypesManager = ({
     );
   };
 
-  const handleTypeColorChange = (id, color) => {
-    setTypes((previous) =>
-      previous.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              color,
-            }
-          : item
-      )
-    );
-  };
-
   const handleSaveType = async (type) => {
     if (!projectId || !type?.id) {
       return;

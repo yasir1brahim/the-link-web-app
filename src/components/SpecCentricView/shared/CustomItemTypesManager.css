@@ -43,24 +43,22 @@
 }
 
 .custom-types-create-form {
-  display: grid;
-  gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background: #f7f9fb;
   border-radius: 10px;
-  padding: 16px;
-}
-
-.custom-types-label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #304050;
+  padding: 10px 12px;
+  position: relative;
 }
 
 .custom-types-input {
   border: 1px solid #d7dce0;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 0.95rem;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  flex: 1;
+  height: 36px;
 }
 
 .custom-types-input:focus {
@@ -69,47 +67,53 @@
   box-shadow: 0 0 0 3px rgba(77, 150, 255, 0.2);
 }
 
-.custom-types-palette {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.custom-types-color {
+.custom-types-color-swatch {
   width: 32px;
   height: 32px;
+  min-width: 32px;
   border-radius: 50%;
-  border: 2px solid transparent;
+  border: 2px solid rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  padding: 0;
+  background: none;
 }
 
-.custom-types-color.selected {
-  border-color: #0d6efd;
+.custom-types-color-swatch:hover {
   transform: scale(1.05);
 }
 
-.custom-types-color:focus-visible {
+.custom-types-color-swatch.active {
+  box-shadow: 0 0 0 3px rgba(77, 150, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.custom-types-color-swatch:focus-visible {
   outline: none;
-  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(77, 150, 255, 0.4);
 }
 
 .custom-types-primary,
 .custom-types-secondary,
 .custom-types-danger {
-  border-radius: 8px;
+  border-radius: 6px;
   border: none;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  padding: 10px 16px;
+  padding: 8px 12px;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.1s ease;
+  height: 36px;
+  white-space: nowrap;
 }
 
 .custom-types-primary {
   background: #0d6efd;
   color: white;
-  justify-self: flex-start;
+}
+
+.custom-types-primary:hover:not(:disabled) {
+  background: #0b5ed7;
 }
 
 .custom-types-primary:disabled {
@@ -122,6 +126,10 @@
   color: #0e2332;
 }
 
+.custom-types-secondary:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
 .custom-types-secondary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -130,6 +138,10 @@
 .custom-types-danger {
   background: #f97066;
   color: #fff;
+}
+
+.custom-types-danger:hover:not(:disabled) {
+  background: #f85a4f;
 }
 
 .custom-types-danger:disabled {
@@ -147,28 +159,13 @@
 
 .custom-types-row {
   border: 1px solid #e0e7ef;
-  border-radius: 10px;
-  padding: 16px;
-  display: grid;
-  gap: 12px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background: white;
-}
-
-.custom-types-row-main {
-  display: grid;
-  gap: 8px;
-}
-
-.custom-types-row-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.custom-types-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  position: relative;
 }
 
 .custom-types-empty {
