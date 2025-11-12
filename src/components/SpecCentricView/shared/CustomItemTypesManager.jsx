@@ -64,7 +64,11 @@ const CustomItemTypesManager = ({
     if (pickerId === 'new') {
       setNewTypeColor(color);
     } else {
-      handleTypeColorChange(pickerId, color);
+      setTypes((previous) =>
+        previous.map((item) =>
+          item.id === pickerId ? { ...item, color } : item
+        )
+      );
     }
   }, []);
 
