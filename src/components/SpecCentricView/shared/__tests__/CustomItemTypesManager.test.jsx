@@ -7,7 +7,6 @@ jest.mock('../../../../api/SpecCentricView/api', () => ({
   createCustomItemType: jest.fn(),
   updateCustomItemType: jest.fn(),
   deleteCustomItemType: jest.fn(),
-  getCustomTypeColorPalette: jest.fn(),
 }));
 
 jest.mock('react-toastify', () => ({
@@ -23,7 +22,6 @@ const {
   createCustomItemType,
   updateCustomItemType,
   deleteCustomItemType,
-  getCustomTypeColorPalette,
 } = require('../../../../api/SpecCentricView/api');
 
 const { toast } = require('react-toastify');
@@ -54,12 +52,6 @@ describe('CustomItemTypesManager', () => {
       },
     });
 
-    getCustomTypeColorPalette.mockResolvedValue({
-      data: {
-        colors: ['#FF0000', '#00FF00'],
-      },
-    });
-
     createCustomItemType.mockResolvedValue({
       data: { id: 88, name: 'Commissioning', color: '#00FF00' },
     });
@@ -71,12 +63,11 @@ describe('CustomItemTypesManager', () => {
     deleteCustomItemType.mockResolvedValue({});
   });
 
-  it('fetches custom types and color palette when opened', async () => {
+  it('fetches custom types when opened', async () => {
     renderManager();
 
     await waitFor(() => {
       expect(getCustomItemTypes).toHaveBeenCalledWith(PROJECT_ID);
-      expect(getCustomTypeColorPalette).toHaveBeenCalledWith(PROJECT_ID);
     });
 
     expect(await screen.findByDisplayValue('Safety')).toBeInTheDocument();
@@ -90,14 +81,12 @@ describe('CustomItemTypesManager', () => {
       target: { value: 'Commissioning' },
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Select color #00FF00' }));
-
-    fireEvent.click(screen.getByRole('button', { name: /add type/i }));
+    fireEvent.click(screen.getByRole('button', { name: /add/i }));
 
     await waitFor(() => {
       expect(createCustomItemType).toHaveBeenCalledWith(PROJECT_ID, {
         name: 'Commissioning',
-        color: '#00FF00',
+        color: expect.any(String),
       });
     });
 
@@ -109,11 +98,6 @@ describe('CustomItemTypesManager', () => {
     const onRefresh = jest.fn();
     renderManager({ onRefresh });
 
-    const colorButton = await screen.findByRole('button', {
-      name: 'Select color #00FF00 for Safety',
-    });
-    fireEvent.click(colorButton);
-
     const nameInput = await screen.findByLabelText(/name for Safety/i);
     fireEvent.change(nameInput, { target: { value: 'Safety Updated' } });
 
@@ -122,7 +106,7 @@ describe('CustomItemTypesManager', () => {
     await waitFor(() => {
       expect(updateCustomItemType).toHaveBeenCalledWith(PROJECT_ID, 77, {
         name: 'Safety Updated',
-        color: '#00FF00',
+        color: expect.any(String),
       });
     });
 

@@ -5,7 +5,6 @@ import {
   createCustomItemType,
   updateCustomItemType,
   deleteCustomItemType,
-  getCustomTypeColorPalette,
 } from '../api';
 
 jest.mock('../../../config/axios', () => jest.fn());
@@ -54,14 +53,6 @@ describe('SpecCentricView custom item type API helpers', () => {
       {
         method: 'delete',
         url: `/api/deliverables/projects/${PROJECT_ID}/custom-item-types/${TYPE_ID}/`,
-      },
-    ],
-    [
-      'getCustomTypeColorPalette',
-      () => getCustomTypeColorPalette(PROJECT_ID),
-      {
-        method: 'get',
-        url: `/api/deliverables/projects/${PROJECT_ID}/custom-item-types/color-palette/`,
       },
     ],
   ])('%s delegates to axiosInstance with the expected configuration', async (_, invoke, expectedConfig) => {
