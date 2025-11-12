@@ -1,58 +1,112 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { HIGHLIGHT_TYPES } from './highlightConstants';
+import { HIGHLIGHT_TYPES, formatCustomTypes, isCustomHighlight } from './highlightConstants';
 import './HighlightLegend.css';
 
-const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFilterChange }) => {
+const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFilterChange, customItemTypes = [] }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [statistics, setStatistics] = useState({});
   const isInitialMount = useRef(true);
+  const previousCustomTypeIds = useRef(new Set());
 
   const sortedHighlightTypes = useMemo(
     () => [...HIGHLIGHT_TYPES].sort((a, b) => a.type.localeCompare(b.type)),
     []
   );
 
+  const formattedCustomTypes = useMemo(
+    () => formatCustomTypes(customItemTypes).sort((a, b) => a.type.localeCompare(b.type)),
+    [customItemTypes]
+  );
+
+  const combinedHighlightTypes = useMemo(
+    () => [...sortedHighlightTypes, ...formattedCustomTypes],
+    [sortedHighlightTypes, formattedCustomTypes]
+  );
+
   // Calculate statistics whenever highlights change
   useEffect(() => {
     const stats = {};
     
-    // Count submittals (count unique highlights, not individual locations)
     const submittalCount = submittalHighlights.length;
     if (submittalCount > 0) {
       stats['submittal'] = submittalCount;
     }
     
-    // Count AI log highlights by item_type
-    const itemTypeCounts = {};
-    aiLogHighlights.forEach(highlight => {
+    aiLogHighlights.forEach((highlight) => {
+      if (!highlight) {
+        return;
+      }
+
+      if (isCustomHighlight(highlight)) {
+        const customId = highlight.custom_item_type?.id;
+        if (!customId) {
+          return;
+        }
+        const key = `custom_${customId}`;
+        stats[key] = (stats[key] || 0) + 1;
+        return;
+      }
+
       const itemType = highlight.item_type;
       if (itemType) {
-        itemTypeCounts[itemType] = (itemTypeCounts[itemType] || 0) + 1;
+        stats[itemType] = (stats[itemType] || 0) + 1;
+      }
+    });
+
+    formattedCustomTypes.forEach((type) => {
+      if (!Object.prototype.hasOwnProperty.call(stats, type.key)) {
+        stats[type.key] = 0;
       }
     });
     
-    // Merge counts into stats
-    Object.assign(stats, itemTypeCounts);
-    
     setStatistics(stats);
 
-    // Initialize activeFilters with all known highlight types (start with all checked)
-    // Only do this on initial mount to preserve user's filter selections when switching sections
+    const customKeys = formattedCustomTypes.map((type) => type.key);
+
     if (isInitialMount.current) {
-      // Initialize with all known highlight types, not just ones with data
-      const allTypes = sortedHighlightTypes.map(item => item.key);
+      const allTypes = [
+        ...sortedHighlightTypes.map((item) => item.key),
+        ...customKeys,
+      ];
       const newActiveFilters = new Set(allTypes);
       setActiveFilters(newActiveFilters);
 
-      // Notify parent component of initial filters
       if (onFilterChange) {
         onFilterChange(newActiveFilters);
       }
 
       isInitialMount.current = false;
+      // Track all initial custom type IDs
+      const initialCustomIds = new Set(formattedCustomTypes.map(t => t.customTypeId));
+      previousCustomTypeIds.current = initialCustomIds;
+    } else {
+      // Only auto-enable genuinely NEW custom types, not ones the user toggled off
+      const currentCustomIds = new Set(formattedCustomTypes.map(t => t.customTypeId));
+      const newCustomIds = [...currentCustomIds].filter(id => !previousCustomTypeIds.current.has(id));
+
+      if (newCustomIds.length > 0) {
+        const updatedFilters = new Set(activeFilters);
+        newCustomIds.forEach(id => {
+          const key = `custom_${id}`;
+          updatedFilters.add(key);
+        });
+        setActiveFilters(updatedFilters);
+        if (onFilterChange) {
+          onFilterChange(updatedFilters);
+        }
+        // Update the ref to include the new IDs
+        previousCustomTypeIds.current = currentCustomIds;
+      }
     }
-  }, [submittalHighlights, aiLogHighlights, onFilterChange, sortedHighlightTypes]);
+  }, [
+    submittalHighlights,
+    aiLogHighlights,
+    onFilterChange,
+    sortedHighlightTypes,
+    formattedCustomTypes,
+    activeFilters,
+  ]);
 
   const handleFilterToggle = (key) => {
     const newFilters = new Set(activeFilters);
@@ -83,7 +137,7 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
       {isExpanded && (
         <div className="legend-content">
           <div className="legend-items">
-            {sortedHighlightTypes.map((item) => {
+            {combinedHighlightTypes.map((item) => {
               const count = statistics[item.key] || 0;
               const isActive = activeFilters.has(item.key);
               const isAvailable = count > 0;
@@ -101,6 +155,7 @@ const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFil
                   />
                   <span className="legend-label">
                     {item.type}
+                    {item.isCustom && <span className="legend-color-custom-badge">Custom</span>}
                     {isAvailable && <span className="legend-count"> ({count})</span>}
                   </span>
                   {isActive && <span className="legend-check">✓</span>}

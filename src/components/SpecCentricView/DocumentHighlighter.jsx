@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import ProjectLogsReader from '../PdfReader/projectLogsReader';
 import { createManualHighlight } from '../../api/SpecCentricView/api';
-import { HIGHLIGHT_TYPES } from './highlightConstants';
+import {
+  HIGHLIGHT_TYPES,
+  formatCustomTypes,
+  isCustomHighlight,
+  getHighlightColor,
+} from './highlightConstants';
+import CustomItemTypesManager from './shared/CustomItemTypesManager';
 import './DocumentHighlighter.css';
 
 const toTitleCase = (value = '') =>
@@ -30,6 +36,28 @@ const EXTRACTION_COLOR_MAP = {
   manual_highlight: { r: 59, g: 130, b: 246 },
 };
 
+const hexToRgb = (value) => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const sanitized = value.trim().replace(/^#/, '').slice(0, 6);
+  if (sanitized.length !== 6) {
+    return null;
+  }
+
+  const numeric = Number.parseInt(sanitized, 16);
+  if (Number.isNaN(numeric)) {
+    return null;
+  }
+
+  return {
+    r: (numeric >> 16) & 255,
+    g: (numeric >> 8) & 255,
+    b: numeric & 255,
+  };
+};
+
 const rgbaString = ({ r, g, b }, alpha = 0.16) => `rgba(${r}, ${g}, ${b}, ${alpha})`;
 
 const getSwatchColor = (itemType, extractionType) => {
@@ -50,6 +78,8 @@ const buildFallbackOptions = () =>
       extractionType: 'qa_planner',
       itemType: item.key,
       swatch: color,
+      isCustom: false,
+      customTypeId: null,
     };
   });
 
@@ -71,6 +101,8 @@ const DocumentHighlighter = ({
   projectVersionId = null,
   specSection = null,
   onRefreshSectionContent = () => {},
+  customItemTypes = [],
+  onCustomTypesUpdate,
 }) => {
   const mapHighlightLocations = useCallback((submittalHighlights) => {
     const highlightLocations = [];
@@ -108,6 +140,26 @@ const DocumentHighlighter = ({
         continue;
       }
 
+      const isCustom = isCustomHighlight(logItem);
+
+      // Extract custom type ID from either custom_item_type object or item_type pattern
+      let customTypeId = logItem?.custom_item_type?.id;
+      if (!customTypeId && logItem?.item_type?.startsWith('custom_')) {
+        customTypeId = parseInt(logItem.item_type.replace('custom_', ''), 10);
+      }
+
+      const itemTypeKey = customTypeId ? `custom_${customTypeId}` : logItem.item_type;
+      const matchedType = customTypeId ? customItemTypes.find((type) => type.id === customTypeId) : null;
+
+      // Determine if this is a custom highlight (either by full check or by item_type pattern)
+      const isCustomType = isCustom || (logItem?.extraction_type === 'custom_highlights' && !!customTypeId);
+
+      const highlightColorHex = isCustomType
+        ? logItem?.custom_item_type?.color || matchedType?.color || logItem?.color
+        : logItem?.color;
+      const swatchColor = highlightColorHex ? hexToRgb(highlightColorHex) : getSwatchColor(logItem.item_type, logItem.extraction_type);
+      const color = swatchColor || { r: 128, g: 128, b: 128 };
+
       for (const location of logItem.pdf_locations) {
         highlightLocations.push({
           page_no: location.page_no,
@@ -116,13 +168,15 @@ const DocumentHighlighter = ({
           width: location.width,
           height: location.height,
           extraction_type: logItem.extraction_type,
-          item_type: logItem.item_type,
+          item_type: itemTypeKey,
           requirement_text: logItem.requirement_text,
+          custom_item_type: logItem.custom_item_type,
+          color,
         });
       }
     }
     return highlightLocations;
-  }, []);
+  }, [customItemTypes]);
 
   const [currentHighlights, setCurrentHighlights] = useState(() => mapHighlightLocations(highlights));
   const [localAiHighlights, setLocalAiHighlights] = useState(aiLogHighlights);
@@ -133,6 +187,23 @@ const DocumentHighlighter = ({
   const [pendingHighlight, setPendingHighlight] = useState(null);
   const [highlightError, setHighlightError] = useState(null);
   const [isSavingHighlight, setIsSavingHighlight] = useState(false);
+  const [showCustomTypesManager, setShowCustomTypesManager] = useState(false);
+
+  const customHighlightOptions = useMemo(() =>
+    (customItemTypes || []).map((type) => {
+      const swatch = hexToRgb(type.color) || { r: 128, g: 128, b: 128 };
+      return {
+        key: `custom_${type.id}`,
+        label: type.name,
+        extractionType: 'custom_highlights',
+        itemType: null,
+        customTypeId: type.id,
+        swatch,
+        isCustom: true,
+      };
+    }),
+  [customItemTypes]
+  );
 
   useEffect(() => {
     setCurrentHighlights(mapHighlightLocations(highlights));
@@ -150,6 +221,11 @@ const DocumentHighlighter = ({
     const optionsMap = new Map();
 
     localAiHighlights.forEach((item) => {
+      // Skip custom highlights - they're handled by customHighlightOptions
+      if (isCustomHighlight(item) || item?.item_type?.startsWith('custom_')) {
+        return;
+      }
+
       const mapKey = `${item?.extraction_type || 'manual'}__${item?.item_type || 'general'}`;
       if (!optionsMap.has(mapKey)) {
         const label = item?.item_type
@@ -164,6 +240,8 @@ const DocumentHighlighter = ({
           extractionType: item?.extraction_type || 'manual_highlight',
           itemType: item?.item_type || null,
           swatch: swatchColor,
+          isCustom: false,
+          customTypeId: null,
         });
       }
     });
@@ -174,8 +252,11 @@ const DocumentHighlighter = ({
       }
     });
 
-    return Array.from(optionsMap.values()).sort((a, b) => a.label.localeCompare(b.label));
-  }, [localAiHighlights]);
+    const standardOptions = Array.from(optionsMap.values()).sort((a, b) => a.label.localeCompare(b.label));
+    const customOptions = [...customHighlightOptions].sort((a, b) => a.label.localeCompare(b.label));
+
+    return [...standardOptions, ...customOptions];
+  }, [localAiHighlights, customHighlightOptions]);
 
   const handleRequestAddHighlight = useCallback((selectionPayload) => {
     if (!selectionPayload?.locations || selectionPayload.locations.length === 0) {
@@ -192,6 +273,19 @@ const DocumentHighlighter = ({
     setPendingHighlight(null);
     setHighlightError(null);
   }, []);
+
+  const handleOpenCustomTypesManager = useCallback(() => {
+    setHighlightPickerOpen(false);
+    setShowCustomTypesManager(true);
+  }, []);
+
+  const handleCloseCustomTypesManager = useCallback(() => {
+    setShowCustomTypesManager(false);
+    if (pendingHighlight) {
+      setHighlightPickerOpen(true);
+    }
+    onCustomTypesUpdate?.();
+  }, [pendingHighlight, onCustomTypesUpdate]);
 
   const handleHighlightCreationSuccess = useCallback(
     (newHighlight) => {
@@ -231,15 +325,33 @@ const DocumentHighlighter = ({
           pdf_locations: pendingHighlight.locations,
         };
 
+        if (option.isCustom && option.customTypeId) {
+          payload.custom_item_type_id = option.customTypeId;
+          payload.extraction_type = 'custom_highlights';
+          payload.item_type = `custom_${option.customTypeId}`;
+        }
+
         const response = await createManualHighlight(projectId, payload);
 
         const createdHighlight = {
           ...(response?.data || {}),
-          extraction_type: response?.data?.extraction_type ?? option.extractionType,
-          item_type: response?.data?.item_type ?? option.itemType,
+          extraction_type: response?.data?.extraction_type ?? payload.extraction_type,
+          item_type: response?.data?.item_type ?? payload.item_type,
           requirement_text: response?.data?.requirement_text ?? pendingHighlight.selectedText,
           pdf_locations: response?.data?.pdf_locations ?? pendingHighlight.locations,
         };
+
+        if (option.isCustom && option.customTypeId) {
+          const matchedType = customItemTypes.find((type) => type.id === option.customTypeId);
+          createdHighlight.custom_item_type =
+            response?.data?.custom_item_type ||
+            matchedType ||
+            {
+              id: option.customTypeId,
+              name: option.label,
+              color: matchedType?.color,
+            };
+        }
 
         handleHighlightCreationSuccess(createdHighlight);
       } catch (error) {
@@ -256,6 +368,7 @@ const DocumentHighlighter = ({
       projectId,
       projectVersionId,
       specSection,
+      customItemTypes,
     ]
   );
 
@@ -333,6 +446,13 @@ const DocumentHighlighter = ({
 
             <div className="highlight-picker-actions">
               <button
+                className="highlight-picker-manage"
+                onClick={handleOpenCustomTypesManager}
+                disabled={isSavingHighlight}
+              >
+                Manage custom types
+              </button>
+              <button
                 className="highlight-picker-cancel"
                 onClick={handleCloseHighlightPicker}
                 disabled={isSavingHighlight}
@@ -342,6 +462,16 @@ const DocumentHighlighter = ({
             </div>
           </div>
         </div>
+      )}
+
+      {showCustomTypesManager && (
+        <CustomItemTypesManager
+          projectId={projectId}
+          isOpen={showCustomTypesManager}
+          onClose={handleCloseCustomTypesManager}
+          onRefresh={onCustomTypesUpdate}
+          initialTypes={customItemTypes}
+        />
       )}
     </div>
   );
