@@ -13,6 +13,7 @@ import { getTeamDetails } from "../../api/Authentication/api";
 import { updateProject } from "../../api/Projects/api";
 import UserSelector from "./UserSelector";
 import BaseProjectForm from "./BaseProjectForm";
+import { PROJECT_TYPES } from "../../constants";
 const EditProject = ({
   modal,
   toggleModal,
@@ -28,7 +29,8 @@ const EditProject = ({
   const typeaheadRef = useRef(null);
   const [projectName, setProjectName] = useState({ value: project?.name || "", errors: "" });
   const [projectNumber, setProjectNumber] = useState({ value: project?.project_number || "", errors: "" });
-  const [projectType, setProjectType] = useState([{ value: project?.project_type || "", label: project?.project_type || "" }]);
+  const [projectType, setProjectType] = useState({ value: [{ value: project?.project_type || "", label: project?.project_type || "" }], errors: "" });
+  const [projectTypeInputText, setProjectTypeInputText] = useState("");
   const [startDate, setStartDate] = useState(project?.start_date ? new Date(project?.start_date + "T00:00:00") : new Date());
   const [endDate, setEndDate] = useState(project?.end_date ? new Date(project?.end_date + "T00:00:00") : new Date());
 
@@ -41,7 +43,8 @@ const EditProject = ({
     if (!modal) {
       setProjectName({ value: "", errors: "" });
       setProjectNumber({ value: "", errors: "" });
-      setProjectType([{ value: "", label: "" }]);
+      setProjectType({ value: [{ value: "", label: "" }], errors: "" });
+      setProjectTypeInputText("");
       typeaheadRef?.current?.clear();
       setStartDate(new Date());
       setEndDate(new Date());
@@ -97,6 +100,23 @@ const EditProject = ({
       error = true;
     }
 
+    // Validate project type - check if the entered value matches a valid option
+    const selectedProjectType = projectType.value[0]?.value || projectType.value[0]?.label || projectType.value[0] || "";
+    const validProjectTypes = PROJECT_TYPES.map(pt => pt.name);
+
+    // Check both the selected value and the typed input text
+    const valueToValidate = selectedProjectType || projectTypeInputText;
+
+    if (valueToValidate) {
+      if (!validProjectTypes.includes(valueToValidate)) {
+        setProjectType({
+          ...projectType,
+          errors: "Please select a valid project type from the list.",
+        });
+        error = true;
+      }
+    }
+
     return error;
   };
 
@@ -106,12 +126,12 @@ const EditProject = ({
       try {
         const response = await updateProject(
           project?.id,
-          projectName.value || project?.name, 
+          projectName.value || project?.name,
           projectNumber.value || project?.project_number,
-          projectType[0].label || project?.project_type,
-          selectedStandardMembersList.map((emp) => emp.value), 
-          selectedAdminMembersList.map((emp) => emp.value), 
-          startDate, 
+          projectType.value[0].value || project?.project_type,
+          selectedStandardMembersList.map((emp) => emp.value),
+          selectedAdminMembersList.map((emp) => emp.value),
+          startDate,
           endDate
         )
         
@@ -135,6 +155,7 @@ const EditProject = ({
       projectNumber={projectNumber}
       projectType={projectType}
       setProjectType={setProjectType}
+      setProjectTypeInputText={setProjectTypeInputText}
       fullEmployeeList={fullEmployeeList}
       selectedAdminMembersList={selectedAdminMembersList}
       setSelectedAdminMembersList={setSelectedAdminMembersList}
