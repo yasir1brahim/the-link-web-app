@@ -261,6 +261,66 @@ const destroyWebViewer = (instance, container) => {
   }
 };
 
+/**
+ * Create Apryse annotations from highlight data
+ */
+const createAnnotationsFromHighlights = (instance, highlights) => {
+  const { Annotations } = instance.Core;
+  const annotationManager = instance.Core.annotationManager;
+  const createdAnnotations = [];
+
+  highlights.forEach((highlight) => {
+    try {
+      // Create annotation
+      const annotation = new Annotations.TextHighlightAnnotation();
+
+      // Set page (Apryse uses 1-based page numbers)
+      annotation.PageNumber = highlight.page_no;
+
+      // Create quad from highlight bounds
+      const quad = new Annotations.Quad();
+      quad.x1 = highlight.x;
+      quad.y1 = highlight.y;
+      quad.x2 = highlight.x + highlight.width;
+      quad.y2 = highlight.y;
+      quad.x3 = highlight.x + highlight.width;
+      quad.y3 = highlight.y + highlight.height;
+      quad.x4 = highlight.x;
+      quad.y4 = highlight.y + highlight.height;
+
+      annotation.Quads = [quad];
+
+      // Set color (with alpha for visibility)
+      annotation.StrokeColor = new Annotations.Color(
+        highlight.color.r,
+        highlight.color.g,
+        highlight.color.b,
+        0.25
+      );
+      annotation.FillColor = new Annotations.Color(
+        highlight.color.r,
+        highlight.color.g,
+        highlight.color.b,
+        0.25
+      );
+
+      // Add metadata
+      annotation.Subject = highlight.item_type || 'highlight';
+
+      // Add to annotation manager
+      annotationManager.addAnnotation(annotation);
+      createdAnnotations.push(annotation);
+    } catch (error) {
+      console.warn('Failed to create annotation:', error, highlight);
+    }
+  });
+
+  // Trigger redraw
+  annotationManager.drawAnnotationsFromList(createdAnnotations);
+
+  return createdAnnotations;
+};
+
 export const exportSections = async (config) => {
   // Implementation coming in next steps
   return null;
