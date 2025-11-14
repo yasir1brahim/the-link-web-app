@@ -70,18 +70,21 @@ const getSwatchColor = (itemType, extractionType) => {
 };
 
 const buildFallbackOptions = () =>
-  HIGHLIGHT_TYPES.map((item) => {
-    const color = getSwatchColor(item.key, 'qa_planner');
-    return {
-      key: `qa_planner__${item.key}`,
-      label: item.type,
-      extractionType: 'qa_planner',
-      itemType: item.key,
-      swatch: color,
-      isCustom: false,
-      customTypeId: null,
-    };
-  });
+  HIGHLIGHT_TYPES
+    // Filter out 'submittal' - submittals use a different data model
+    .filter((item) => item.key !== 'submittal')
+    .map((item) => {
+      const color = getSwatchColor(item.key, 'qa_planner');
+      return {
+        key: `qa_planner__${item.key}`,
+        label: item.type,
+        extractionType: 'qa_planner',
+        itemType: item.key,
+        swatch: color,
+        isCustom: false,
+        customTypeId: null,
+      };
+    });
 
 const truncateText = (value = '', maxLength = 200) => {
   if (!value) {
