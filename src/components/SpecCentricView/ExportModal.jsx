@@ -5,7 +5,13 @@ import './ExportModal.css';
  * Export Modal Component
  * Displays a modal for selecting and exporting spec section PDFs
  */
-const ExportModal = ({ isOpen, onClose, sections = [], onExport }) => {
+const ExportModal = ({
+  isOpen,
+  onClose,
+  sections = [],
+  onExport,
+  exportProgress = null,
+}) => {
   const [selectedSections, setSelectedSections] = useState(new Set());
 
   // Initialize with all sections selected
@@ -55,6 +61,12 @@ const ExportModal = ({ isOpen, onClose, sections = [], onExport }) => {
   const allSelected = availableSections.length > 0 && selectedSections.size === availableSections.length;
   const someSelected = selectedSections.size > 0 && selectedSections.size < availableSections.length;
 
+  // Determine states based on progress
+  const isExporting = exportProgress?.status === 'exporting';
+  const isComplete = exportProgress?.status === 'complete';
+  const isError = exportProgress?.status === 'error';
+  const hasProgress = exportProgress != null;
+
   return (
     <div className="export-modal-overlay" onClick={onClose}>
       <div
@@ -66,26 +78,64 @@ const ExportModal = ({ isOpen, onClose, sections = [], onExport }) => {
           <button
             className="export-modal-close"
             onClick={onClose}
-            aria-label="Close"
+            aria-label="Close dialog"
           >
             ×
           </button>
         </div>
 
         <div className="export-modal-body">
-          <div className="export-modal-info">
-            Select the sections you want to export as PDF files.
-            {selectedSections.size > 1 &&
-              ' Multiple sections will be packaged as a ZIP file.'}
-          </div>
+          {hasProgress ? (
+            <div className="export-modal-progress">
+              {isExporting && (
+                <>
+                  <div className="export-modal-progress-bar">
+                    <div
+                      className="export-modal-progress-fill"
+                      style={{
+                        width: exportProgress.total
+                          ? `${(exportProgress.current / exportProgress.total) * 100}%`
+                          : '0%',
+                      }}
+                    />
+                  </div>
+                  <div className="export-modal-progress-text">
+                    {exportProgress.message || 'Exporting...'}
+                  </div>
+                  {exportProgress.current && exportProgress.total && (
+                    <div className="export-modal-progress-count">
+                      {exportProgress.current} of {exportProgress.total}
+                    </div>
+                  )}
+                </>
+              )}
+              {isComplete && (
+                <div className="export-modal-progress-complete">
+                  {exportProgress.message || 'Export complete!'}
+                </div>
+              )}
+              {isError && (
+                <div className="export-modal-progress-error">
+                  {exportProgress.message || 'Export failed'}
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="export-modal-info">
+                Select the sections you want to export as PDF files.
+                {selectedSections.size > 1 &&
+                  ' Multiple sections will be packaged as a ZIP file.'}
+              </div>
 
-          <div className="export-modal-section-list">
+              <div className="export-modal-section-list">
             {availableSections.length > 1 && (
               <div className="export-modal-section-item export-modal-select-all">
                 <label>
                   <input
                     type="checkbox"
                     checked={allSelected}
+                    disabled={isExporting}
                     ref={(el) => {
                       if (el) {
                         el.indeterminate = someSelected;
@@ -121,7 +171,7 @@ const ExportModal = ({ isOpen, onClose, sections = [], onExport }) => {
                     <input
                       type="checkbox"
                       checked={isSelected}
-                      disabled={!hasPdf}
+                      disabled={!hasPdf || isExporting}
                       onChange={() => handleToggleSection(section.id)}
                     />
                     <span className="export-modal-section-label">
@@ -144,22 +194,37 @@ const ExportModal = ({ isOpen, onClose, sections = [], onExport }) => {
               );
             })}
           </div>
+            </>
+          )}
         </div>
 
         <div className="export-modal-footer">
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={handleExport}
-            disabled={selectedSections.size === 0}
-          >
-            Export
-          </button>
+          {!isExporting && (isComplete || isError) ? (
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={onClose}
+            >
+              Close
+            </button>
+          ) : (
+            <>
+              {!isExporting && (
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={onClose}
+                >
+                  Cancel
+                </button>
+              )}
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={handleExport}
+                disabled={selectedSections.size === 0 || isExporting}
+              >
+                Export
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

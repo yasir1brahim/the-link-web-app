@@ -177,4 +177,154 @@ describe('ExportModal', () => {
     expect(screen.getByText(/03 00 00/)).toBeInTheDocument();
     expect(screen.getByText(/Concrete/)).toBeInTheDocument();
   });
+
+  describe('Progress State', () => {
+    it('should display progress when exporting', () => {
+      const exportProgress = {
+        status: 'exporting',
+        current: 1,
+        total: 2,
+        message: 'Exporting section 1 of 2...',
+      };
+
+      render(
+        <ExportModal
+          isOpen={true}
+          onClose={() => {}}
+          sections={mockSections}
+          onExport={() => {}}
+          exportProgress={exportProgress}
+        />
+      );
+
+      expect(screen.getByText(/exporting/i)).toBeInTheDocument();
+      expect(screen.getByText('1 of 2')).toBeInTheDocument();
+    });
+
+    it('should display completion message when done', () => {
+      const exportProgress = {
+        status: 'complete',
+        message: 'Export complete!',
+      };
+
+      render(
+        <ExportModal
+          isOpen={true}
+          onClose={() => {}}
+          sections={mockSections}
+          onExport={() => {}}
+          exportProgress={exportProgress}
+        />
+      );
+
+      expect(screen.getByText(/complete/i)).toBeInTheDocument();
+    });
+
+    it('should display error message when export fails', () => {
+      const exportProgress = {
+        status: 'error',
+        message: 'Export failed: Network error',
+      };
+
+      render(
+        <ExportModal
+          isOpen={true}
+          onClose={() => {}}
+          sections={mockSections}
+          onExport={() => {}}
+          exportProgress={exportProgress}
+        />
+      );
+
+      expect(screen.getByText(/failed/i)).toBeInTheDocument();
+    });
+
+    it('should disable section selection during export', () => {
+      const exportProgress = {
+        status: 'exporting',
+        current: 1,
+        total: 2,
+      };
+
+      render(
+        <ExportModal
+          isOpen={true}
+          onClose={() => {}}
+          sections={mockSections}
+          onExport={() => {}}
+          exportProgress={exportProgress}
+        />
+      );
+
+      // Section list should not be visible during export
+      const checkboxes = screen.queryAllByRole('checkbox');
+      expect(checkboxes).toHaveLength(0);
+    });
+
+    it('should disable export button during export', () => {
+      const exportProgress = {
+        status: 'exporting',
+        current: 1,
+        total: 2,
+      };
+
+      render(
+        <ExportModal
+          isOpen={true}
+          onClose={() => {}}
+          sections={mockSections}
+          onExport={() => {}}
+          exportProgress={exportProgress}
+        />
+      );
+
+      const exportButton = screen.getByRole('button', { name: /^export$/i });
+      expect(exportButton).toBeDisabled();
+    });
+
+    it('should hide cancel button during export', () => {
+      const exportProgress = {
+        status: 'exporting',
+        current: 1,
+        total: 2,
+      };
+
+      render(
+        <ExportModal
+          isOpen={true}
+          onClose={() => {}}
+          sections={mockSections}
+          onExport={() => {}}
+          exportProgress={exportProgress}
+        />
+      );
+
+      const cancelButton = screen.queryByRole('button', { name: /cancel/i });
+      expect(cancelButton).not.toBeInTheDocument();
+    });
+
+    it('should show close button after export completes', () => {
+      const exportProgress = {
+        status: 'complete',
+        message: 'Export complete!',
+      };
+
+      render(
+        <ExportModal
+          isOpen={true}
+          onClose={() => {}}
+          sections={mockSections}
+          onExport={() => {}}
+          exportProgress={exportProgress}
+        />
+      );
+
+      // Should have a Close button in footer (not just the × button)
+      const closeButtons = screen.getAllByRole('button', { name: /close/i });
+      expect(closeButtons.length).toBeGreaterThan(0);
+      // The footer close button should have the exact text "Close"
+      const footerCloseButton = screen.getByRole('button', { name: 'Close' });
+      expect(footerCloseButton).toBeInTheDocument();
+    });
+  });
 });
