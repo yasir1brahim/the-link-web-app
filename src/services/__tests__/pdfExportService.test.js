@@ -1,4 +1,4 @@
-import { exportSections, generatePdfFilename, hexToRgb, getHighlightColor, processHighlightsForSection } from '../pdfExportService';
+import { exportSections, generatePdfFilename, hexToRgb, getHighlightColor, processHighlightsForSection, createZipArchive } from '../pdfExportService';
 
 describe('PdfExportService', () => {
   describe('exportSections', () => {
@@ -157,6 +157,43 @@ describe('PdfExportService', () => {
       expect(results).toHaveLength(1);
       expect(results[0]).toHaveProperty('error');
       expect(results[0].error).toContain('no PDF URL');
+    });
+  });
+
+  describe('createZipArchive', () => {
+    it('should create ZIP from PDF blobs', async () => {
+      const files = [
+        {
+          filename: '01 00 00 - General.pdf',
+          blob: new Blob(['fake pdf 1'], { type: 'application/pdf' }),
+        },
+        {
+          filename: '02 00 00 - Site.pdf',
+          blob: new Blob(['fake pdf 2'], { type: 'application/pdf' }),
+        },
+      ];
+
+      const zipBlob = await createZipArchive(files);
+
+      expect(zipBlob).toBeInstanceOf(Blob);
+      expect(zipBlob.type).toBe('application/zip');
+      expect(zipBlob.size).toBeGreaterThan(0);
+    });
+
+    it('should skip files with errors', async () => {
+      const files = [
+        {
+          filename: '01 00 00 - General.pdf',
+          blob: new Blob(['fake pdf'], { type: 'application/pdf' }),
+        },
+        {
+          filename: '02 00 00 - Error.pdf',
+          error: 'Failed to load',
+        },
+      ];
+
+      const zipBlob = await createZipArchive(files);
+      expect(zipBlob).toBeInstanceOf(Blob);
     });
   });
 });

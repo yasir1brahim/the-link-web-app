@@ -4,6 +4,7 @@
  */
 
 import WebViewer from '@pdftron/webviewer';
+import JSZip from 'jszip';
 import {
   QA_COLOR_MAP,
   EXTRACTION_COLOR_MAP,
@@ -461,4 +462,32 @@ export const exportSections = async (config) => {
   }
 
   return results;
+};
+
+/**
+ * Create ZIP archive from multiple PDF files
+ */
+export const createZipArchive = async (files) => {
+  const zip = new JSZip();
+
+  files.forEach((file) => {
+    // Skip files with errors
+    if (file.error || !file.blob) {
+      return;
+    }
+
+    zip.file(file.filename, file.blob);
+  });
+
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  return zipBlob;
+};
+
+/**
+ * Generate ZIP filename with timestamp
+ */
+export const generateZipFilename = () => {
+  const date = new Date();
+  const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
+  return `Spec Sections Export - ${dateStr}.zip`;
 };
