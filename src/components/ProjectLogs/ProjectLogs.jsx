@@ -32,6 +32,7 @@ import { getCurrentUserData } from "../../api/Authentication/api";
 import ArchiveConfirmationModal from "./archiveConfirmationModal";
 import VersionComparisonModal from "./versionComparisonModal";
 import Chat from "../SpecGpt/components/Chat";
+import InspectionQA from "../SpecGpt/components/InspectionQA";
 import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
@@ -1749,6 +1750,8 @@ const ProjectLogs = () => {
             onViewArchivedVersions={handleViewArchivedVersions}
             isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
             isSpecCenteredViewFlagActive={isSpecCenteredViewFlagActive(teamId)}
+            isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+            isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
           />
@@ -1967,8 +1970,6 @@ const ProjectLogs = () => {
                   projectVersionId={projectVersionId} 
                   chatSessionId={chatId} 
                   setChatSessionId={setChatId}
-                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
-                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
                   messages={chatMessages}
                   setMessages={setChatMessages}
                   chatHistory={chatHistory}
@@ -1977,11 +1978,29 @@ const ProjectLogs = () => {
                   setIsLoadingMessage={setIsSpecGptLoadingMessage}
                   userInput={specGptUserInput}
                   setUserInput={setSpecGptUserInput}
-                  isGeneratingLog={isSpecGptGeneratingLog}
-                  setIsGeneratingLog={setIsSpecGptGeneratingLog}
                   isChatEnabled={isSpecGptChatEnabled}
                   setIsChatEnabled={setIsSpecGptChatEnabled}
                   teamId={teamId}
+                />
+              </ChakraProvider>
+              </div>
+            </>
+          }
+          {activeTab == 'inspection-qa' &&
+            <>
+            <div className="compass-chat-viewport">
+              <ProcessingIndicator
+                documentIsProcessing={documentIsBeingEmbedded}
+                documentData={documentData}
+                toggleDocumentStatusModal={toggleSpecGptProcessingModal}
+                indicatorText={"Compass is processing your documents..."}
+              />
+              <ChakraProvider>
+                <InspectionQA
+                  projectId={projectId}
+                  projectVersionId={projectVersionId}
+                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
                 />
               </ChakraProvider>
               </div>
