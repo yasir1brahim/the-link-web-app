@@ -120,6 +120,13 @@
   border-bottom: 1px solid #dee2e6;
 }
 
+.spec-document-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
 .spec-document-header h2 {
   margin: 0 0 4px 0;
   color: #212529;
