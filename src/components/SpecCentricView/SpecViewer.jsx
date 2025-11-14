@@ -125,7 +125,11 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
 
   const handleExport = useCallback(async (sectionsToExport) => {
     try {
-      setExportProgress({ status: 'exporting', current: 0, total: sectionsToExport.length });
+      setExportProgress({
+        status: 'exporting',
+        total: sectionsToExport.length,
+        message: 'Preparing export...'
+      });
 
       // Build highlights map for selected sections
       const highlightsBySectionId = {};

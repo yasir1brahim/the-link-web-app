@@ -343,7 +343,6 @@ const exportSingleSection = async (
 
   if (progressCallback) {
     progressCallback({
-      status: 'loading',
       message: `Loading ${sectionLabel || 'section'}...`,
     });
   }
@@ -361,7 +360,6 @@ const exportSingleSection = async (
 
     if (progressCallback) {
       progressCallback({
-        status: 'processing',
         message: `Preparing annotations for ${sectionLabel || 'section'}...`,
       });
     }
@@ -389,7 +387,6 @@ const exportSingleSection = async (
 
     if (progressCallback) {
       progressCallback({
-        status: 'exporting',
         message: `Exporting ${sectionLabel || 'section'}...`,
       });
     }
@@ -468,10 +465,9 @@ export const exportSections = async (config) => {
 
     if (progressCallback) {
       progressCallback({
-        status: 'progress',
         current: i + 1,
         total: sections.length,
-        section,
+        message: `Exporting section ${i + 1} of ${sections.length}...`,
       });
     }
 
