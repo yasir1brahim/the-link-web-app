@@ -4,6 +4,9 @@ import SpecViewerSidebar from './SpecViewerSidebar';
 import DocumentHighlighter from './DocumentHighlighter';
 import HighlightTooltip from './HighlightTooltip';
 import HighlightLegend from './HighlightLegend';
+import ExportButton from './ExportButton';
+import ExportModal from './ExportModal';
+import { processHighlightsForSection, exportSections, downloadExportResults } from '../../services/pdfExportService';
 import { DEFAULT_FILTER_KEYS } from './highlightConstants';
 import './SpecViewer.css';
 
@@ -17,6 +20,8 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   // Initialize with all filter types to prevent empty filters from hiding annotations on mount
   const [activeFilters, setActiveFilters] = useState(new Set(DEFAULT_FILTER_KEYS));
   const [customItemTypes, setCustomItemTypes] = useState([]);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportProgress, setExportProgress] = useState(null);
 
   const refreshCustomTypes = useCallback(async () => {
     if (!projectId) {
@@ -118,6 +123,84 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
     setActiveFilters(newFilters);
   }, []);
 
+  const handleExport = useCallback(async (sectionsToExport) => {
+    try {
+      setExportProgress({
+        status: 'exporting',
+        total: sectionsToExport.length,
+        message: 'Preparing export...'
+      });
+
+      // Build highlights map for selected sections
+      const highlightsBySectionId = {};
+      for (const section of sectionsToExport) {
+        try {
+          // Fetch section content for highlights
+          const response = await getSpecSectionContent(projectId, section.id, projectVersionId);
+          const highlights = processHighlightsForSection(
+            response.data,
+            activeFilters,
+            customItemTypes
+          );
+          highlightsBySectionId[section.id] = highlights;
+        } catch (error) {
+          console.error(`Failed to load highlights for section ${section.id}:`, error);
+          highlightsBySectionId[section.id] = [];
+        }
+      }
+
+      // Progress callback
+      const progressCallback = (progress) => {
+        setExportProgress((prev) => ({
+          ...prev,
+          ...progress,
+        }));
+      };
+
+      // Export sections
+      const results = await exportSections({
+        sections: sectionsToExport,
+        highlightsBySectionId,
+        activeFilters,
+        customItemTypes,
+        progressCallback,
+        currentSectionId: selectedSection?.id,
+        currentViewerContext: null, // Could pass WebViewer instance if available
+      });
+
+      // Check for errors
+      const hasErrors = results.some((result) => result.error);
+      if (hasErrors) {
+        const errorCount = results.filter((result) => result.error).length;
+        const successCount = results.length - errorCount;
+        setExportProgress({
+          status: 'complete',
+          message: `Export completed with ${errorCount} error(s). ${successCount} section(s) exported successfully.`,
+        });
+      } else {
+        setExportProgress({
+          status: 'complete',
+          message: 'Export complete!',
+        });
+      }
+
+      // Download results
+      await downloadExportResults(results);
+
+      // Auto-close modal after successful download
+      setTimeout(() => {
+        setShowExportModal(false);
+        setExportProgress(null);
+      }, 2000);
+    } catch (error) {
+      console.error('Export failed:', error);
+      setExportProgress({
+        status: 'error',
+        message: error.message || 'Export failed. Please try again.',
+      });
+    }
+  }, [projectId, projectVersionId, activeFilters, customItemTypes, selectedSection]);
+
   if (loading && !specData) {
     return (
       <div className="spec-viewer-loading">
@@ -167,10 +250,15 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
           {selectedSection && sectionContent ? (
             <div className="spec-document-container">
               <div className="spec-document-header">
-                <h2>{selectedSection.custom_section_title || selectedSection.masterformat_title}</h2>
-                <p className="spec-section-info">
-                  {selectedSection.masterformat_number} - {selectedSection.document_name}
-                </p>
+                <div className="spec-document-header-content">
+                  <div>
+                    <h2>{selectedSection.custom_section_title || selectedSection.masterformat_title}</h2>
+                    <p className="spec-section-info">
+                      {selectedSection.masterformat_number} - {selectedSection.document_name}
+                    </p>
+                  </div>
+                  <ExportButton onClick={() => setShowExportModal(true)} />
+                </div>
               </div>
               
               <div className="spec-document-content">
@@ -211,13 +299,25 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
       
       {/* Highlight Color Legend */}
       {selectedSection && sectionContent && (
-        <HighlightLegend 
+        <HighlightLegend
           submittalHighlights={sectionContent.submittal_highlights || []}
           aiLogHighlights={sectionContent.ai_log_highlights || []}
           onFilterChange={handleFilterChange}
           customItemTypes={customItemTypes}
         />
       )}
+
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => {
+          setShowExportModal(false);
+          setExportProgress(null);
+        }}
+        sections={specData?.spec_sections || []}
+        onExport={handleExport}
+        exportProgress={exportProgress}
+      />
     </div>
   );
 };
