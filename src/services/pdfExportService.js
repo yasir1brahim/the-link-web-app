@@ -3,6 +3,7 @@
  * Handles exporting PDFs with annotations from Spec View
  */
 
+import WebViewer from '@pdftron/webviewer';
 import {
   QA_COLOR_MAP,
   EXTRACTION_COLOR_MAP,
@@ -194,6 +195,70 @@ export const processHighlightsForSection = (sectionContent, activeFilters, custo
   }
 
   return highlights;
+};
+
+/**
+ * Create a hidden WebViewer instance for exporting
+ */
+const createHiddenWebViewer = async (pdfUrl) => {
+  // Create hidden container
+  const container = document.createElement('div');
+  container.style.display = 'none';
+  container.style.width = '1px';
+  container.style.height = '1px';
+  document.body.appendChild(container);
+
+  try {
+    const instance = await WebViewer(
+      {
+        path: '/webviewer/lib',
+        initialDoc: pdfUrl,
+        disabledElements: ['ribbons'],
+      },
+      container
+    );
+
+    // Wait for document to load
+    await new Promise((resolve, reject) => {
+      const { documentViewer } = instance.Core;
+
+      if (documentViewer.getDocument()) {
+        resolve();
+      } else {
+        documentViewer.addEventListener('documentLoaded', resolve);
+        documentViewer.addEventListener('error', reject);
+      }
+    });
+
+    return { instance, container };
+  } catch (error) {
+    // Clean up container if WebViewer creation fails
+    if (container.parentNode) {
+      container.parentNode.removeChild(container);
+    }
+    throw error;
+  }
+};
+
+/**
+ * Destroy WebViewer instance and clean up DOM
+ */
+const destroyWebViewer = (instance, container) => {
+  try {
+    if (instance?.UI?.dispose) {
+      instance.UI.dispose();
+    }
+  } catch (error) {
+    console.warn('Error disposing WebViewer:', error);
+  }
+
+  try {
+    if (container?.parentNode) {
+      container.parentNode.removeChild(container);
+    }
+  } catch (error) {
+    console.warn('Error removing container:', error);
+  }
 };
 
 export const exportSections = async (config) => {
