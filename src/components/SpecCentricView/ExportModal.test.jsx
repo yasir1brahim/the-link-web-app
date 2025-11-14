@@ -1,0 +1,180 @@
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import ExportModal from './ExportModal';
+
+describe('ExportModal', () => {
+  const mockSections = [
+    {
+      id: 1,
+      masterformat_number: '01 00 00',
+      custom_section_title: 'General Requirements',
+      pdf_url: 'https://example.com/01.pdf',
+    },
+    {
+      id: 2,
+      masterformat_number: '02 00 00',
+      custom_section_title: 'Site Construction',
+      pdf_url: 'https://example.com/02.pdf',
+    },
+  ];
+
+  it('should render export modal when open', () => {
+    render(
+      <ExportModal
+        isOpen={true}
+        onClose={() => {}}
+        sections={mockSections}
+        onExport={() => {}}
+      />
+    );
+
+    expect(screen.getByText(/export spec sections/i)).toBeInTheDocument();
+  });
+
+  it('should not render when closed', () => {
+    const { container } = render(
+      <ExportModal
+        isOpen={false}
+        onClose={() => {}}
+        sections={mockSections}
+        onExport={() => {}}
+      />
+    );
+
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('should display all sections', () => {
+    render(
+      <ExportModal
+        isOpen={true}
+        onClose={() => {}}
+        sections={mockSections}
+        onExport={() => {}}
+      />
+    );
+
+    expect(screen.getByText(/01 00 00/)).toBeInTheDocument();
+    expect(screen.getByText(/General Requirements/)).toBeInTheDocument();
+    expect(screen.getByText(/02 00 00/)).toBeInTheDocument();
+    expect(screen.getByText(/Site Construction/)).toBeInTheDocument();
+  });
+
+  it('should have all sections selected by default', () => {
+    render(
+      <ExportModal
+        isOpen={true}
+        onClose={() => {}}
+        sections={mockSections}
+        onExport={() => {}}
+      />
+    );
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    checkboxes.forEach((checkbox) => {
+      expect(checkbox).toBeChecked();
+    });
+  });
+
+  it('should allow toggling section selection', () => {
+    render(
+      <ExportModal
+        isOpen={true}
+        onClose={() => {}}
+        sections={mockSections}
+        onExport={() => {}}
+      />
+    );
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    const firstCheckbox = checkboxes[1]; // Skip "select all" if present
+
+    fireEvent.click(firstCheckbox);
+    expect(firstCheckbox).not.toBeChecked();
+
+    fireEvent.click(firstCheckbox);
+    expect(firstCheckbox).toBeChecked();
+  });
+
+  it('should call onClose when cancel button clicked', () => {
+    const mockOnClose = jest.fn();
+    render(
+      <ExportModal
+        isOpen={true}
+        onClose={mockOnClose}
+        sections={mockSections}
+        onExport={() => {}}
+      />
+    );
+
+    const cancelButton = screen.getByRole('button', { name: /cancel/i });
+    fireEvent.click(cancelButton);
+
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call onExport with selected sections when export clicked', () => {
+    const mockOnExport = jest.fn();
+    render(
+      <ExportModal
+        isOpen={true}
+        onClose={() => {}}
+        sections={mockSections}
+        onExport={mockOnExport}
+      />
+    );
+
+    const exportButton = screen.getByRole('button', { name: /^export$/i });
+    fireEvent.click(exportButton);
+
+    expect(mockOnExport).toHaveBeenCalledTimes(1);
+    expect(mockOnExport).toHaveBeenCalledWith(mockSections);
+  });
+
+  it('should disable export button when no sections selected', () => {
+    render(
+      <ExportModal
+        isOpen={true}
+        onClose={() => {}}
+        sections={mockSections}
+        onExport={() => {}}
+      />
+    );
+
+    // Uncheck all sections
+    const checkboxes = screen.getAllByRole('checkbox');
+    checkboxes.forEach((checkbox) => {
+      if (checkbox.checked) {
+        fireEvent.click(checkbox);
+      }
+    });
+
+    const exportButton = screen.getByRole('button', { name: /^export$/i });
+    expect(exportButton).toBeDisabled();
+  });
+
+  it('should handle sections without PDF URLs', () => {
+    const sectionsWithoutPdf = [
+      ...mockSections,
+      {
+        id: 3,
+        masterformat_number: '03 00 00',
+        custom_section_title: 'Concrete',
+        pdf_url: null,
+      },
+    ];
+
+    render(
+      <ExportModal
+        isOpen={true}
+        onClose={() => {}}
+        sections={sectionsWithoutPdf}
+        onExport={() => {}}
+      />
+    );
+
+    // Section without PDF should be displayed but disabled
+    expect(screen.getByText(/03 00 00/)).toBeInTheDocument();
+    expect(screen.getByText(/Concrete/)).toBeInTheDocument();
+  });
+});
