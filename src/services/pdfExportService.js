@@ -491,3 +491,48 @@ export const generateZipFilename = () => {
   const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
   return `Spec Sections Export - ${dateStr}.zip`;
 };
+
+/**
+ * Trigger browser download for a blob
+ */
+export const triggerDownload = (blob, filename) => {
+  const url = URL.createObjectURL(blob);
+
+  try {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } finally {
+    // Clean up the object URL
+    URL.revokeObjectURL(url);
+  }
+};
+
+/**
+ * Handle download for export results
+ * - Single file: Download PDF directly
+ * - Multiple files: Create and download ZIP
+ */
+export const downloadExportResults = async (results) => {
+  // Filter out results with errors
+  const successfulResults = results.filter((result) => result.blob && !result.error);
+
+  if (successfulResults.length === 0) {
+    throw new Error('No successful exports to download');
+  }
+
+  if (successfulResults.length === 1) {
+    // Single file - download directly
+    triggerDownload(successfulResults[0].blob, successfulResults[0].filename);
+  } else {
+    // Multiple files - create ZIP
+    const zipBlob = await createZipArchive(successfulResults);
+    const zipFilename = generateZipFilename();
+    triggerDownload(zipBlob, zipFilename);
+  }
+};

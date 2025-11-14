@@ -1,4 +1,4 @@
-import { exportSections, generatePdfFilename, hexToRgb, getHighlightColor, processHighlightsForSection, createZipArchive } from '../pdfExportService';
+import { exportSections, generatePdfFilename, hexToRgb, getHighlightColor, processHighlightsForSection, createZipArchive, triggerDownload, downloadExportResults } from '../pdfExportService';
 
 describe('PdfExportService', () => {
   describe('exportSections', () => {
@@ -194,6 +194,158 @@ describe('PdfExportService', () => {
 
       const zipBlob = await createZipArchive(files);
       expect(zipBlob).toBeInstanceOf(Blob);
+    });
+  });
+
+  describe('triggerDownload', () => {
+    let mockAnchor;
+    let createElementSpy;
+    let originalURL;
+
+    beforeEach(() => {
+      mockAnchor = {
+        href: '',
+        download: '',
+        click: jest.fn(),
+        style: {},
+      };
+
+      // Save original URL and mock it
+      originalURL = global.URL;
+      global.URL = {
+        createObjectURL: jest.fn().mockReturnValue('blob:mock-url'),
+        revokeObjectURL: jest.fn(),
+      };
+
+      createElementSpy = jest.spyOn(document, 'createElement').mockReturnValue(mockAnchor);
+      jest.spyOn(document.body, 'appendChild').mockImplementation(() => {});
+      jest.spyOn(document.body, 'removeChild').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      global.URL = originalURL;
+    });
+
+    it('should trigger download for a blob', () => {
+      const blob = new Blob(['test'], { type: 'application/pdf' });
+      const filename = 'test.pdf';
+
+      triggerDownload(blob, filename);
+
+      expect(createElementSpy).toHaveBeenCalledWith('a');
+      expect(global.URL.createObjectURL).toHaveBeenCalledWith(blob);
+      expect(mockAnchor.href).toBe('blob:mock-url');
+      expect(mockAnchor.download).toBe(filename);
+      expect(mockAnchor.click).toHaveBeenCalled();
+      expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+    });
+
+    it('should handle cleanup even if download fails', () => {
+      const blob = new Blob(['test'], { type: 'application/pdf' });
+      mockAnchor.click.mockImplementation(() => {
+        throw new Error('Download failed');
+      });
+
+      expect(() => triggerDownload(blob, 'test.pdf')).toThrow('Download failed');
+      expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+    });
+  });
+
+  describe('downloadExportResults', () => {
+    let originalURL;
+    let mockCreateObjectURL;
+    let mockRevokeObjectURL;
+
+    beforeEach(() => {
+      // Save original URL and mock it
+      originalURL = global.URL;
+      mockCreateObjectURL = jest.fn().mockReturnValue('blob:mock-url');
+      mockRevokeObjectURL = jest.fn();
+      global.URL = {
+        createObjectURL: mockCreateObjectURL,
+        revokeObjectURL: mockRevokeObjectURL,
+      };
+
+      // Mock document methods
+      document.createElement = jest.fn().mockReturnValue({
+        href: '',
+        download: '',
+        click: jest.fn(),
+        style: {},
+      });
+      document.body.appendChild = jest.fn();
+      document.body.removeChild = jest.fn();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      global.URL = originalURL;
+    });
+
+    it('should download single PDF directly', async () => {
+      const results = [
+        {
+          filename: '01 00 00 - General.pdf',
+          blob: new Blob(['pdf content'], { type: 'application/pdf' }),
+        },
+      ];
+
+      await downloadExportResults(results);
+
+      // Verify triggerDownload was called with correct parameters
+      expect(mockCreateObjectURL).toHaveBeenCalledWith(results[0].blob);
+      expect(document.createElement).toHaveBeenCalledWith('a');
+      const mockAnchor = document.createElement.mock.results[0].value;
+      expect(mockAnchor.download).toBe(results[0].filename);
+    });
+
+    it('should create ZIP for multiple PDFs', async () => {
+      const results = [
+        {
+          filename: '01 00 00 - General.pdf',
+          blob: new Blob(['pdf 1'], { type: 'application/pdf' }),
+        },
+        {
+          filename: '02 00 00 - Site.pdf',
+          blob: new Blob(['pdf 2'], { type: 'application/pdf' }),
+        },
+      ];
+
+      await downloadExportResults(results);
+
+      // Verify a blob was created and downloaded
+      expect(mockCreateObjectURL).toHaveBeenCalledTimes(1);
+      const downloadedBlob = mockCreateObjectURL.mock.calls[0][0];
+      expect(downloadedBlob).toBeInstanceOf(Blob);
+
+      // Verify filename matches ZIP pattern
+      const mockAnchor = document.createElement.mock.results[0].value;
+      expect(mockAnchor.download).toMatch(/Spec Sections Export - \d{4}-\d{2}-\d{2}\.zip/);
+    });
+
+    it('should skip results with errors when creating ZIP', async () => {
+      const results = [
+        {
+          filename: '01 00 00 - General.pdf',
+          blob: new Blob(['pdf 1'], { type: 'application/pdf' }),
+        },
+        {
+          filename: '02 00 00 - Error.pdf',
+          error: 'Failed to export',
+        },
+      ];
+
+      await downloadExportResults(results);
+
+      // Verify a blob was created (only from the successful result)
+      expect(mockCreateObjectURL).toHaveBeenCalledTimes(1);
+      const downloadedBlob = mockCreateObjectURL.mock.calls[0][0];
+      expect(downloadedBlob).toBeInstanceOf(Blob);
+
+      // Since there's only 1 successful result, it should download directly (not ZIP)
+      const mockAnchor = document.createElement.mock.results[0].value;
+      expect(mockAnchor.download).toBe('01 00 00 - General.pdf');
     });
   });
 });
