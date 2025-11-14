@@ -264,60 +264,64 @@ const destroyWebViewer = (instance, container) => {
 
 /**
  * Create Apryse annotations from highlight data
+ * Uses RectangleAnnotation to match the existing DocumentHighlighter implementation
  */
 const createAnnotationsFromHighlights = (instance, highlights) => {
   const { Annotations } = instance.Core;
   const annotationManager = instance.Core.annotationManager;
   const createdAnnotations = [];
 
-  highlights.forEach((highlight) => {
+  highlights.forEach((highlight, index) => {
     try {
-      // Create annotation
-      const annotation = new Annotations.TextHighlightAnnotation();
+      // Debug first highlight to understand data structure
+      if (index === 0) {
+        console.log('Sample highlight data:', highlight);
+      }
 
-      // Set page (Apryse uses 1-based page numbers)
-      annotation.PageNumber = highlight.page_no;
-
-      // Create quad from highlight bounds
-      const quad = new Annotations.Quad();
-      quad.x1 = highlight.x;
-      quad.y1 = highlight.y;
-      quad.x2 = highlight.x + highlight.width;
-      quad.y2 = highlight.y;
-      quad.x3 = highlight.x + highlight.width;
-      quad.y3 = highlight.y + highlight.height;
-      quad.x4 = highlight.x;
-      quad.y4 = highlight.y + highlight.height;
-
-      annotation.Quads = [quad];
-
-      // Set color (with alpha for visibility)
-      annotation.StrokeColor = new Annotations.Color(
+      // Create color (alpha channel may not work well with flattening)
+      const annotationColor = new Annotations.Color(
         highlight.color.r,
         highlight.color.g,
-        highlight.color.b,
-        0.25
+        highlight.color.b
       );
-      annotation.FillColor = new Annotations.Color(
-        highlight.color.r,
-        highlight.color.g,
-        highlight.color.b,
-        0.25
-      );
+
+      // Create RectangleAnnotation (matches projectLogsReader.js implementation)
+      const annotation = new Annotations.RectangleAnnotation({
+        PageNumber: highlight.page_no,
+        X: highlight.x,
+        Y: highlight.y,
+        Width: highlight.width ?? 10000,
+        Height: highlight.height ?? 30,
+        Color: annotationColor,
+        FillColor: annotationColor,
+      });
+
+      // Set opacity explicitly (0.25 = 25% opacity, 75% transparency)
+      // This is more reliable than alpha channel when flattening
+      annotation.Opacity = 0.25;
+      annotation.FillOpacity = 0.25;
 
       // Add metadata
       annotation.Subject = highlight.item_type || 'highlight';
+      annotation.CustomData = {
+        item_type: highlight.item_type,
+        extraction_type: highlight.extraction_type,
+        color: highlight.color,
+        source: 'export',
+      };
 
-      // Add to annotation manager
-      annotationManager.addAnnotation(annotation);
+      // Add to list
       createdAnnotations.push(annotation);
     } catch (error) {
       console.warn('Failed to create annotation:', error, highlight);
     }
   });
 
-  // Trigger redraw
+  // Add all annotations in batch for better performance
+  annotationManager.addAnnotations(createdAnnotations);
   annotationManager.drawAnnotationsFromList(createdAnnotations);
+
+  console.log(`Created ${createdAnnotations.length} annotations for export`);
 
   return createdAnnotations;
 };
@@ -365,6 +369,24 @@ const exportSingleSection = async (
     // Create annotations and remember what we added so we can clean up if reused
     annotationsToCleanup = createAnnotationsFromHighlights(instance, highlights) || [];
 
+    // Store debug info globally so it persists even if console clears
+    if (!window.__pdfExportDebug) window.__pdfExportDebug = [];
+
+    const debugInfo = {
+      timestamp: new Date().toISOString(),
+      section: sectionLabel,
+      highlightsCount: highlights.length,
+      annotationsCreated: annotationsToCleanup.length,
+      sampleHighlight: highlights[0]
+    };
+
+    window.__pdfExportDebug.push(debugInfo);
+    console.log('Export debug (also stored in window.__pdfExportDebug):', debugInfo);
+
+    // Wait for annotations to be fully committed to the document
+    // This is necessary because Apryse processes annotations asynchronously
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     if (progressCallback) {
       progressCallback({
         status: 'exporting',
@@ -372,8 +394,22 @@ const exportSingleSection = async (
       });
     }
 
+    // Export PDF with annotations included
+    // CRITICAL: We need to use the annotation manager to export with annotations
     const doc = instance.Core.documentViewer.getDocument();
-    const data = await doc.getFileData({ downloadType: 'pdf' });
+    const annotationManager = instance.Core.annotationManager;
+
+    // Export the document with annotations flattened/burned into the PDF
+    const xfdfString = await annotationManager.exportAnnotations();
+    debugInfo.xfdfLength = xfdfString?.length || 0;
+    console.log('XFDF annotations length:', xfdfString?.length);
+
+    const data = await doc.getFileData({
+      // Flags to ensure annotations are included
+      xfdfString,
+      flatten: true,
+      downloadType: 'pdf'
+    });
     const blob = new Blob([data], { type: 'application/pdf' });
 
     return {
