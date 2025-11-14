@@ -7,6 +7,7 @@ import {
   QA_COLOR_MAP,
   EXTRACTION_COLOR_MAP,
   DEFAULT_RGB_COLOR,
+  SUBMITTAL_RGB_COLOR,
 } from '../components/SpecCentricView/highlightColorMaps';
 
 const DEFAULT_COLOR = DEFAULT_RGB_COLOR;
@@ -87,6 +88,112 @@ export const getHighlightColor = (itemType, extractionType, customColorHex) => {
   }
 
   return DEFAULT_COLOR;
+};
+
+/**
+ * Check if highlight is a custom type
+ */
+const isCustomHighlight = (highlight) => {
+  return highlight?.extraction_type === 'custom_highlights' ||
+         highlight?.custom_item_type?.id != null;
+};
+
+/**
+ * Process highlights from section content into unified format
+ */
+export const processHighlightsForSection = (sectionContent, activeFilters, customItemTypes = []) => {
+  const highlights = [];
+
+  // Process submittal highlights
+  if (sectionContent?.submittal_highlights) {
+    sectionContent.submittal_highlights.forEach((highlight) => {
+      if (!highlight?.text_location) return;
+
+      const itemType = 'submittal';
+      if (activeFilters && activeFilters.size > 0 && !activeFilters.has(itemType)) {
+        return;
+      }
+
+      const color = SUBMITTAL_RGB_COLOR;
+
+      // Main location
+      highlights.push({
+        page_no: highlight.text_location.page_no,
+        x: highlight.text_location.x,
+        y: highlight.text_location.y,
+        width: highlight.text_location.width,
+        height: highlight.text_location.height,
+        color,
+        item_type: itemType,
+      });
+
+      // Additional locations
+      if (highlight.additional_text_locations) {
+        highlight.additional_text_locations.forEach((loc) => {
+          highlights.push({
+            page_no: loc.page_no,
+            x: loc.x,
+            y: loc.y,
+            width: loc.width,
+            height: loc.height,
+            color,
+            item_type: itemType,
+          });
+        });
+      }
+    });
+  }
+
+  // Process AI log highlights
+  if (sectionContent?.ai_log_highlights) {
+    sectionContent.ai_log_highlights.forEach((logItem) => {
+      if (!logItem?.pdf_locations || !Array.isArray(logItem.pdf_locations)) {
+        return;
+      }
+
+      const isCustom = isCustomHighlight(logItem);
+      let customTypeId = logItem?.custom_item_type?.id;
+      if (!customTypeId && logItem?.item_type?.startsWith('custom_')) {
+        customTypeId = parseInt(logItem.item_type.replace('custom_', ''), 10);
+      }
+
+      const itemTypeKey = customTypeId ? `custom_${customTypeId}` : logItem.item_type;
+
+      // Check filter
+      if (activeFilters && activeFilters.size > 0 && !activeFilters.has(itemTypeKey)) {
+        return;
+      }
+
+      const matchedType = customTypeId
+        ? customItemTypes.find((type) => type.id === customTypeId)
+        : null;
+
+      const highlightColorHex = isCustom
+        ? logItem?.custom_item_type?.color || matchedType?.color || logItem?.color
+        : logItem?.color;
+
+      const color = getHighlightColor(
+        logItem.item_type,
+        logItem.extraction_type,
+        highlightColorHex
+      );
+
+      logItem.pdf_locations.forEach((location) => {
+        highlights.push({
+          page_no: location.page_no,
+          x: location.x,
+          y: location.y,
+          width: location.width,
+          height: location.height,
+          color,
+          item_type: itemTypeKey,
+          extraction_type: logItem.extraction_type,
+        });
+      });
+    });
+  }
+
+  return highlights;
 };
 
 export const exportSections = async (config) => {

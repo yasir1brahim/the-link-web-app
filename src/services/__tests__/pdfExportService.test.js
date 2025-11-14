@@ -1,4 +1,4 @@
-import { exportSections, generatePdfFilename, hexToRgb, getHighlightColor } from '../pdfExportService';
+import { exportSections, generatePdfFilename, hexToRgb, getHighlightColor, processHighlightsForSection } from '../pdfExportService';
 
 describe('PdfExportService', () => {
   describe('exportSections', () => {
@@ -72,6 +72,65 @@ describe('PdfExportService', () => {
     it('should return default color if no match', () => {
       const result = getHighlightColor(null, null, null);
       expect(result).toEqual({ r: 59, g: 130, b: 246 });
+    });
+  });
+
+  describe('processHighlightsForSection', () => {
+    const sectionContent = {
+      submittal_highlights: [
+        {
+          text_location: {
+            page_no: 1,
+            x: 100,
+            y: 200,
+            width: 150,
+            height: 20
+          },
+          additional_text_locations: []
+        }
+      ],
+      ai_log_highlights: [
+        {
+          item_type: 'inspections',
+          extraction_type: 'qa_planner',
+          pdf_locations: [
+            {
+              page_no: 2,
+              x: 50,
+              y: 100,
+              width: 200,
+              height: 30
+            }
+          ]
+        }
+      ]
+    };
+
+    const activeFilters = new Set(['inspections', 'submittal']);
+
+    it('should process highlights into unified format', () => {
+      const result = processHighlightsForSection(sectionContent, activeFilters, []);
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('should filter highlights based on active filters', () => {
+      const filteredOut = new Set(['warranties']);
+      const result = processHighlightsForSection(sectionContent, filteredOut, []);
+
+      // Should not include inspections highlight
+      const hasInspections = result.some(h => h.item_type === 'inspections');
+      expect(hasInspections).toBe(false);
+    });
+
+    it('should include color data for each highlight', () => {
+      const result = processHighlightsForSection(sectionContent, activeFilters, []);
+      result.forEach(highlight => {
+        expect(highlight.color).toBeDefined();
+        expect(highlight.color.r).toBeDefined();
+        expect(highlight.color.g).toBeDefined();
+        expect(highlight.color.b).toBeDefined();
+      });
     });
   });
 });

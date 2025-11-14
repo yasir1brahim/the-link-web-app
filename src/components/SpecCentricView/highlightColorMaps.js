@@ -22,3 +22,5 @@ export const EXTRACTION_COLOR_MAP = {
 };
 
 export const DEFAULT_RGB_COLOR = { r: 59, g: 130, b: 246 };
+
+export const SUBMITTAL_RGB_COLOR = { r: 213, g: 231, b: 62 };
