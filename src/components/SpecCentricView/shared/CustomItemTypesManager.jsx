@@ -1,0 +1,307 @@
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import {
+  getCustomItemTypes,
+  createCustomItemType,
+  updateCustomItemType,
+  deleteCustomItemType,
+} from '../../../api/SpecCentricView/api';
+import { toast } from 'react-toastify';
+import ColorPickerPopover from './ColorPickerPopover';
+import './CustomItemTypesManager.css';
+
+const FALLBACK_COLOR = '#4D96FF';
+
+const buildInitialTypeState = (types) =>
+  (types || []).map((item) => ({
+    id: item.id,
+    name: item.name || '',
+    color: item.color || FALLBACK_COLOR,
+    isPersisted: true,
+  }));
+
+const CustomItemTypesManager = ({
+  projectId,
+  isOpen,
+  onClose,
+  onRefresh,
+  initialTypes = [],
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [types, setTypes] = useState(() => buildInitialTypeState(initialTypes));
+  const [newTypeName, setNewTypeName] = useState('');
+  const [newTypeColor, setNewTypeColor] = useState(FALLBACK_COLOR);
+  const [savingTypeId, setSavingTypeId] = useState(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [activeColorPicker, setActiveColorPicker] = useState(null);
+  const colorSwatchRefs = useRef({});
+
+  useEffect(() => {
+    setTypes(buildInitialTypeState(initialTypes));
+  }, [initialTypes]);
+
+  const loadManagerData = useCallback(async () => {
+    if (!projectId) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const typesResponse = await getCustomItemTypes(projectId);
+      setTypes(buildInitialTypeState(typesResponse?.data?.results || []));
+    } catch (error) {
+      console.error('Failed to load custom item types', error);
+      toast.error('Unable to load custom highlight types. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [projectId]);
+
+  const handleToggleColorPicker = useCallback((pickerId) => {
+    setActiveColorPicker((current) => (current === pickerId ? null : pickerId));
+  }, []);
+
+  const handleColorChange = useCallback((pickerId, color) => {
+    if (pickerId === 'new') {
+      setNewTypeColor(color);
+    } else {
+      setTypes((previous) =>
+        previous.map((item) =>
+          item.id === pickerId ? { ...item, color } : item
+        )
+      );
+    }
+  }, []);
+
+  const handleCloseColorPicker = useCallback(() => {
+    setActiveColorPicker(null);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadManagerData();
+    }
+  }, [isOpen, loadManagerData]);
+
+  const sortedTypes = useMemo(
+    () => [...types].sort((a, b) => a.name.localeCompare(b.name)),
+    [types]
+  );
+
+  const handleCreate = async (event) => {
+    event.preventDefault();
+
+    if (!newTypeName.trim()) {
+      toast.warning('Please provide a name for the custom type.');
+      return;
+    }
+
+    if (!newTypeColor) {
+      toast.warning('Please select a color for the custom type.');
+      return;
+    }
+
+    try {
+      setIsCreating(true);
+      const payload = {
+        name: newTypeName.trim(),
+        color: newTypeColor,
+      };
+      const response = await createCustomItemType(projectId, payload);
+      const created = response?.data || payload;
+
+      setTypes((previous) => [
+        ...previous,
+        {
+          id: created.id,
+          name: created.name,
+          color: created.color,
+          isPersisted: true,
+        },
+      ]);
+      setNewTypeName('');
+      toast.success('Custom highlight type created.');
+      onRefresh?.();
+    } catch (error) {
+      console.error('Failed to create custom type', error);
+      toast.error('Unable to create custom highlight type.');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleTypeNameChange = (id, name) => {
+    setTypes((previous) =>
+      previous.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              name,
+            }
+          : item
+      )
+    );
+  };
+
+  const handleSaveType = async (type) => {
+    if (!projectId || !type?.id) {
+      return;
+    }
+
+    try {
+      setSavingTypeId(type.id);
+      const payload = {
+        name: type.name.trim(),
+        color: type.color,
+      };
+      await updateCustomItemType(projectId, type.id, payload);
+      toast.success('Custom highlight type updated.');
+      onRefresh?.();
+    } catch (error) {
+      console.error('Failed to update custom type', error);
+      toast.error('Unable to update custom highlight type.');
+    } finally {
+      setSavingTypeId(null);
+    }
+  };
+
+  const handleDeleteType = async (typeId) => {
+    if (!projectId || !typeId) {
+      return;
+    }
+
+    try {
+      setSavingTypeId(typeId);
+      await deleteCustomItemType(projectId, typeId);
+      setTypes((previous) => previous.filter((item) => item.id !== typeId));
+      toast.success('Custom highlight type removed.');
+      onRefresh?.();
+    } catch (error) {
+      console.error('Failed to delete custom type', error);
+      toast.error('Unable to delete custom highlight type.');
+    } finally {
+      setSavingTypeId(null);
+    }
+  };
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <div className="highlight-picker-overlay custom-types-manager-overlay">
+      <div className="highlight-picker-modal custom-types-manager-modal">
+        <div className="custom-types-manager-header">
+          <h3>Manage Custom Highlight Types</h3>
+          <button type="button" className="custom-types-close" onClick={onClose}>
+            ✕
+          </button>
+        </div>
+
+        {isLoading ? (
+          <div className="custom-types-loading">Loading custom types…</div>
+        ) : (
+          <>
+            <form className="custom-types-create-form" onSubmit={handleCreate}>
+              <button
+                type="button"
+                ref={(el) => (colorSwatchRefs.current['new'] = el)}
+                className={`custom-types-color-swatch ${
+                  activeColorPicker === 'new' ? 'active' : ''
+                }`}
+                style={{ backgroundColor: newTypeColor }}
+                onClick={() => handleToggleColorPicker('new')}
+                aria-label="Select color for new type"
+              />
+              <input
+                id="custom-type-name"
+                aria-label="New type name"
+                className="custom-types-input"
+                type="text"
+                value={newTypeName}
+                onChange={(event) => setNewTypeName(event.target.value)}
+                placeholder="Enter type name"
+              />
+              <button
+                type="submit"
+                className="custom-types-primary"
+                disabled={isCreating}
+              >
+                Add
+              </button>
+            </form>
+
+            {activeColorPicker === 'new' && (
+              <ColorPickerPopover
+                color={newTypeColor}
+                onChange={(color) => handleColorChange('new', color)}
+                onClose={handleCloseColorPicker}
+                anchorRef={{ current: colorSwatchRefs.current['new'] }}
+              />
+            )}
+
+            <div className="custom-types-list">
+              {sortedTypes.length === 0 ? (
+                <p className="custom-types-empty">No custom types have been created yet.</p>
+              ) : (
+                sortedTypes.map((type) => (
+                  <div key={type.id} className="custom-types-row">
+                    <button
+                      type="button"
+                      ref={(el) => (colorSwatchRefs.current[type.id] = el)}
+                      className={`custom-types-color-swatch ${
+                        activeColorPicker === type.id ? 'active' : ''
+                      }`}
+                      style={{ backgroundColor: type.color }}
+                      onClick={() => handleToggleColorPicker(type.id)}
+                      aria-label={`Select color for ${type.name || 'custom type'}`}
+                    />
+                    <input
+                      id={`custom-type-name-${type.id}`}
+                      aria-label={`Name for ${type.name || 'custom type'}`}
+                      className="custom-types-input"
+                      type="text"
+                      value={type.name}
+                      onChange={(event) =>
+                        handleTypeNameChange(type.id, event.target.value)
+                      }
+                      placeholder="Type name"
+                    />
+                    <button
+                      type="button"
+                      className="custom-types-secondary"
+                      onClick={() => handleSaveType(type)}
+                      disabled={savingTypeId === type.id}
+                      aria-label={`Save ${type.name || 'type'}`}
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      className="custom-types-danger"
+                      onClick={() => handleDeleteType(type.id)}
+                      disabled={savingTypeId === type.id}
+                      aria-label={`Delete ${type.name || 'custom type'}`}
+                    >
+                      Delete
+                    </button>
+
+                    {activeColorPicker === type.id && (
+                      <ColorPickerPopover
+                        color={type.color}
+                        onChange={(color) => handleColorChange(type.id, color)}
+                        onClose={handleCloseColorPicker}
+                        anchorRef={{ current: colorSwatchRefs.current[type.id] }}
+                      />
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CustomItemTypesManager;

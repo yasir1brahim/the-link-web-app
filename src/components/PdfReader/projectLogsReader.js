@@ -1,9 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useRef } from "react";
+import ReactDOMServer from "react-dom/server";
 import WebViewer from "@pdftron/webviewer";
 import axiosInstance from "../../config/axios";
 import { validateS3Link, isS3LinkExpiredError } from "../../utils/s3LinkValidator.js";
 import { useS3LinkValidation } from "../../hooks/useS3LinkValidation.js";
+import { ReactComponent as AddButton } from "../../assets/images/circle-add.svg";
 
 const ProjectLogsReader = ({
   url,
@@ -20,6 +22,8 @@ const ProjectLogsReader = ({
   onError,
   activeFilters = new Set(),
   useFiltering = false,
+  isSpecViewMode = false,
+  onRequestAddHighlight = null,
 }) => {
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
@@ -114,6 +118,107 @@ const ProjectLogsReader = ({
     });
   };
 
+  const buildSelectionPayload = React.useCallback((documentViewer) => {
+    if (!documentViewer || typeof documentViewer.getSelectedText !== "function") {
+      return null;
+    }
+
+    const selectedText = documentViewer.getSelectedText();
+    if (!selectedText || !selectedText.trim()) {
+      return null;
+    }
+
+    const normalizePageNumber = (entry) => {
+      if (typeof entry?.pageNumber === "number") {
+        return entry.pageNumber;
+      }
+      if (typeof entry?.pageIndex === "number") {
+        return entry.pageIndex + 1;
+      }
+      if (typeof entry === "number") {
+        return entry + 1;
+      }
+      return null;
+    };
+
+    const applyQuad = (pageNumber, quad) => {
+      if (!quad) {
+        return null;
+      }
+
+      const xs = [quad.x1, quad.x2, quad.x3, quad.x4].filter((value) => typeof value === "number");
+      const ys = [quad.y1, quad.y2, quad.y3, quad.y4].filter((value) => typeof value === "number");
+
+      if (xs.length === 0 || ys.length === 0) {
+        return null;
+      }
+
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+
+      if (!Number.isFinite(minX) || !Number.isFinite(maxX) || !Number.isFinite(minY) || !Number.isFinite(maxY)) {
+        return null;
+      }
+
+      return {
+        page_no: pageNumber,
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY,
+      };
+    };
+
+    const quadsSource =
+      typeof documentViewer.getSelectedTextQuads === "function"
+        ? documentViewer.getSelectedTextQuads()
+        : null;
+
+    const locations = [];
+
+    if (Array.isArray(quadsSource)) {
+      quadsSource.forEach((entry) => {
+        const pageNumber = normalizePageNumber(entry);
+        if (!pageNumber || !Array.isArray(entry?.quads)) {
+          return;
+        }
+
+        entry.quads.forEach((quad) => {
+          const location = applyQuad(pageNumber, quad);
+          if (location) {
+            locations.push(location);
+          }
+        });
+      });
+    } else if (quadsSource && typeof quadsSource === "object") {
+      Object.keys(quadsSource).forEach((key) => {
+        const pageIdx = Number(key);
+        const pageNumber = Number.isNaN(pageIdx) ? null : pageIdx;
+        if (!pageNumber || !Array.isArray(quadsSource[key])) {
+          return;
+        }
+
+        quadsSource[key].forEach((quad) => {
+          const location = applyQuad(pageNumber, quad);
+          if (location) {
+            locations.push(location);
+          }
+        });
+      });
+    }
+
+    if (locations.length === 0) {
+      return null;
+    }
+
+    return {
+      selectedText: selectedText.trim(),
+      locations,
+    };
+  }, []);
+
   const getInitialPageLocation = (highlightLocations, aiLogHighlightLocations) => {
     // Combine both arrays, filtering out any null/undefined items and invalid page numbers
     const allLocations = [
@@ -156,18 +261,69 @@ const ProjectLogsReader = ({
       const highlightsAreAvailable = stableHighlightLocations && stableHighlightLocations.length > 0 && stableHighlightLocations[0]?.page_no && stableHighlightLocations[0]?.x && stableHighlightLocations[0]?.y;
       const aiLogHighlightsAreAvailable = stableAiLogHighlightLocations && stableAiLogHighlightLocations.length > 0;
       
-      // If annotations have already been created, just toggle visibility
+      const annotationManager = tmpViewer.Core.annotationManager;
+      const Annotations = tmpViewer.Core.Annotations;
+
+      const createAnnotationColor = (colorData) => new Annotations.Color(colorData.r, colorData.g, colorData.b, 0.25);
+      const getColorDataForHighlight = (itemType, extractionType) => {
+        const qaColorMap = {
+          'inspections': { r: 255, g: 99, b: 71 },         // Tomato red
+          'warranties': { r: 60, g: 179, b: 113 },         // Medium sea green
+          'certificates': { r: 255, g: 165, b: 0 },        // Orange
+          'closeout_submittals': { r: 138, g: 43, b: 226 }, // Blue violet
+          'test_reports': { r: 30, g: 144, b: 255 },       // Dodger blue
+          'commissioning': { r: 255, g: 20, b: 147 },      // Deep pink
+          'delegated_design': { r: 75, g: 0, b: 130 },     // Indigo
+          'mock_ups_sample_construction': { r: 218, g: 165, b: 32 }, // Goldenrod
+          'pre_installation_meetings': { r: 32, g: 178, b: 170 }, // Light sea green
+        };
+
+        const extractionColorMap = {
+          'qa_planner': { r: 100, g: 149, b: 237 },        // Cornflower blue (default)
+          'inspection_log': { r: 255, g: 127, b: 80 },     // Coral
+          'owner_deliverables_log': { r: 147, g: 112, b: 219 }, // Medium purple
+        };
+
+        return qaColorMap[itemType] || extractionColorMap[extractionType] || { r: 100, g: 149, b: 237 };
+      };
+      const SUBMITTAL_COLOR = { r: 213, g: 231, b: 62 };
+
       if (annotationsCreated.current && annotationsRef.current.length > 0) {
-        const annotationManager = tmpViewer.Core.annotationManager;
 
         // Batch hide/show annotations based on active filters (if filtering enabled)
         const annotationsToUpdate = [];
         annotationsRef.current.forEach(annot => {
           const itemType = annot.CustomData?.item_type;
           const shouldShow = !useFiltering || activeFilters.has(itemType);
+          let needsRedraw = false;
 
           if (annot.Hidden === shouldShow) { // Only update if state needs to change
             annot.Hidden = !shouldShow;
+            needsRedraw = true;
+          }
+
+          if (annot.CustomData?.source === 'ai' && Array.isArray(stableAiLogHighlightLocations)) {
+            const locationIndex = annot.CustomData.index;
+            const location = stableAiLogHighlightLocations[locationIndex];
+            if (location) {
+              const colorData = location?.color || annot.CustomData.color || getColorDataForHighlight(location?.item_type, location?.extraction_type);
+              const existingColor = annot.CustomData.color;
+              if (
+                !existingColor ||
+                existingColor.r !== colorData.r ||
+                existingColor.g !== colorData.g ||
+                existingColor.b !== colorData.b
+              ) {
+                const nextColor = createAnnotationColor(colorData);
+                annot.Color = nextColor;
+                annot.FillColor = nextColor;
+                annot.CustomData.color = colorData;
+                needsRedraw = true;
+              }
+            }
+          }
+
+          if (needsRedraw) {
             annotationsToUpdate.push(annot);
           }
         });
@@ -178,11 +334,11 @@ const ProjectLogsReader = ({
         }
         return;
       }
-      
-      // Need to create new annotations - first delete any existing ones
-      const existingAnnotations = tmpViewer.Core.annotationManager.getAnnotationsList();
-      if (existingAnnotations.length > 0) {
-        tmpViewer.Core.annotationManager.deleteAnnotations(existingAnnotations);
+
+      // Remove only previously created highlight annotations before adding new ones
+      if (annotationsRef.current.length > 0) {
+        annotationManager.deleteAnnotations(annotationsRef.current);
+        annotationsRef.current = [];
       }
 
     if (tmpViewer && (highlightsAreAvailable || aiLogHighlightsAreAvailable)) {
@@ -215,8 +371,6 @@ const ProjectLogsReader = ({
 
       // Add rectangular highlight annotations
       const _annotations = [];
-      const annotationManager = tmpViewer.Core.annotationManager;
-      const Annotations = tmpViewer.Core.Annotations;
       
       // Safety check for annotation creation
       if (!annotationManager || !Annotations || !Annotations.RectangleAnnotation) {
@@ -224,67 +378,43 @@ const ProjectLogsReader = ({
         setAnnotations([]);
         return;
       }
-      
+
       // Add submittal highlights (yellow/green color)
       // Create all annotations, set Hidden based on active filters (if filtering is enabled)
       const shouldShowSubmittals = !useFiltering || activeFilters.has('submittal');
       for (let i = 0; i < stableHighlightLocations?.length; i++) {
+        const annotationColor = createAnnotationColor(SUBMITTAL_COLOR);
         const rectangleAnnot = new Annotations.RectangleAnnotation({
           PageNumber: stableHighlightLocations[i]?.page_no,
           X: stableHighlightLocations[i]?.x,
           Y: stableHighlightLocations[i]?.y,
           Width: stableHighlightLocations[i]?.width ?? 10000,
           Height: stableHighlightLocations[i]?.height ?? 30,
-          Color: new Annotations.Color(213, 231, 62, 0.25),
-          FillColor: new Annotations.Color(213, 231, 62, 0.25),
+          Color: annotationColor,
+          FillColor: annotationColor,
         });
         rectangleAnnot.Subject = 'Submittal Highlight';
         rectangleAnnot.CustomData = {
           item_type: 'submittal',
-          extraction_type: 'submittal'
+          extraction_type: 'submittal',
+          color: SUBMITTAL_COLOR,
+          source: 'submittal',
+          index: i,
         };
         rectangleAnnot.Hidden = !shouldShowSubmittals;
         _annotations.push(rectangleAnnot);
       }
 
-      // Helper function to get color based on AI log item type
-      const getColorForItemType = (itemType, extractionType) => {
-        // QA Planner item types with distinct colors
-        const qaColorMap = {
-          'inspections': { r: 255, g: 99, b: 71 },         // Tomato red
-          'warranties': { r: 60, g: 179, b: 113 },         // Medium sea green
-          'certificates': { r: 255, g: 165, b: 0 },        // Orange
-          'closeout_submittals': { r: 138, g: 43, b: 226 }, // Blue violet
-          'test_reports': { r: 30, g: 144, b: 255 },       // Dodger blue
-          'commissioning': { r: 255, g: 20, b: 147 },      // Deep pink
-          'delegated_design': { r: 75, g: 0, b: 130 },     // Indigo
-          'mock_ups_sample_construction': { r: 218, g: 165, b: 32 }, // Goldenrod
-          'pre_installation_meetings': { r: 32, g: 178, b: 170 }, // Light sea green
-        };
-        
-        // Extraction type colors (fallback if item type not found)
-        const extractionColorMap = {
-          'qa_planner': { r: 100, g: 149, b: 237 },        // Cornflower blue (default)
-          'inspection_log': { r: 255, g: 127, b: 80 },     // Coral
-          'owner_deliverables_log': { r: 147, g: 112, b: 219 }, // Medium purple
-        };
-        
-        // Try to get color from item type first, then extraction type, then default
-        let color = qaColorMap[itemType] || extractionColorMap[extractionType] || { r: 100, g: 149, b: 237 };
-        
-        return new Annotations.Color(color.r, color.g, color.b, 0.25);
-      };
-      
       // Add AI log highlights with different colors based on type
       // Create all annotations, set Hidden based on active filters (if filtering is enabled)
       for (let i = 0; i < stableAiLogHighlightLocations?.length; i++) {
         const location = stableAiLogHighlightLocations[i];
         const itemType = location?.item_type;
 
-        // Check if this highlight should be shown based on active filters (if filtering enabled)
         const shouldShow = !useFiltering || activeFilters.has(itemType);
 
-        const color = getColorForItemType(location?.item_type, location?.extraction_type);
+        const colorData = location?.color || getColorDataForHighlight(location?.item_type, location?.extraction_type);
+        const color = createAnnotationColor(colorData);
         
         const rectangleAnnot = new Annotations.RectangleAnnotation({
           PageNumber: location?.page_no,
@@ -299,7 +429,10 @@ const ProjectLogsReader = ({
         rectangleAnnot.CustomData = {
           item_type: location?.item_type,
           extraction_type: location?.extraction_type,
-          requirement_text: location?.requirement_text
+          requirement_text: location?.requirement_text,
+          color: colorData,
+          source: 'ai',
+          index: i,
         };
         rectangleAnnot.Hidden = !shouldShow;
         _annotations.push(rectangleAnnot);
@@ -484,73 +617,83 @@ const ProjectLogsReader = ({
 
       // Custom context menu items
       const contextMenuItems = _webViewer.UI.textPopup.getItems();
-      const lastItem = contextMenuItems[contextMenuItems.length - 1];
-      _webViewer.UI.textPopup.add(
-        {
-          type: "actionButton",
-          label: "Add New Row",
-          img: `<svg
-                width="20"
-                height="20"
-                viewBox="0 0 50 50"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-              >
-                <g
-                  transform="translate(0.000000,50.000000) scale(0.100000,-0.100000)"
-                  fill="#000000"
-                  stroke="none"
-                >
-                  <path
-                    d="M50 250 l0 -110 30 0 c29 0 30 -1 30 -52 0 -51 0 -51 -20 -33 -34 31 -36 6 -2 -28 l32 -32 32 32 c34 34 32 59 -2 28 -20 -18 -20 -18 -20 33 l0 52 80 0 c47 0 80 4 80 10 0 6 -43 10 -110 10 l-110 0 0 90 0 90 180 0 180 0 0 -65 c0 -37 4 -65 10 -65 6 0 10 32 10 75 l0 75 -200 0 -200 0 0 -110z"
-                  />
-                  <path
-                    d="M351 186 c-87 -48 -50 -186 49 -186 51 0 100 49 100 99 0 75 -83 124 -149 87z m104 -31 c50 -49 15 -135 -55 -135 -41 0 -80 39 -80 80 0 70 86 105 135 55z"
-                  />
-                  <path
-                    d="M390 135 c0 -20 -5 -25 -25 -25 -14 0 -25 -4 -25 -10 0 -5 11 -10 25 -10 20 0 25 -5 25 -25 0 -14 5 -25 10 -25 6 0 10 11 10 25 0 20 5 25 25 25 14 0 25 5 25 10 0 6 -11 10 -25 10 -20 0 -25 5 -25 25 0 14 -4 25 -10 25 -5 0 -10 -11 -10 -25z"
-                  />
-                </g>
-              </svg>`,
-          onClick: () =>
-            handleAddNewRow(_webViewer.Core.documentViewer.getSelectedText()),
-        },
-        lastItem.dataElement
-      );
-      _webViewer.UI.textPopup.add(
-        {
-          type: "actionButton",
-          label: "Append to Selected Row",
-          img: `<svg
-                width="20"
-                height="20"
-                viewBox="0 0 50 50"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-              >
-                <g
-                  transform="translate(0.000000,50.000000) scale(0.100000,-0.100000)"
-                  fill="#000000"
-                  stroke="none"
-                >
-                  <path
-                    d="M85 470 c-31 -33 -27 -54 5 -25 20 18 20 18 20 -33 0 -51 -1 -52 -30 -52 l-30 0 0 -110 0 -110 120 0 c73 0 120 4 120 10 0 6 -43 10 -110 10 l-110 0 0 90 0 90 180 0 180 0 0 -65 c0 -37 4 -65 10 -65 6 0 10 32 10 75 l0 75 -160 0 -160 0 0 52 c0 51 0 51 20 33 32 -29 36 -8 5 25 -16 17 -32 30 -35 30 -3 0 -19 -13 -35 -30z"
-                  />
-                  <path
-                    d="M351 186 c-87 -48 -50 -186 49 -186 51 0 100 49 100 99 0 75 -83 124 -149 87z m104 -31 c50 -49 15 -135 -55 -135 -41 0 -80 39 -80 80 0 70 86 105 135 55z"
-                  />
-                  <path
-                    d="M390 135 c0 -20 -5 -25 -25 -25 -14 0 -25 -4 -25 -10 0 -5 11 -10 25 -10 20 0 25 -5 25 -25 0 -14 5 -25 10 -25 6 0 10 11 10 25 0 20 5 25 25 25 14 0 25 5 25 10 0 6 -11 10 -25 10 -20 0 -25 5 -25 25 0 14 -4 25 -10 25 -5 0 -10 -11 -10 -25z"
-                  />
-                </g>
-              </svg>`,
-          onClick: () =>
-            handleAppendToSelectedRow(
-              _webViewer.Core.documentViewer.getSelectedText()
-            ),
-        },
-        lastItem.dataElement
-      );
+      const insertionReference =
+        contextMenuItems.length > 0
+          ? contextMenuItems[contextMenuItems.length - 1].dataElement
+          : null;
+
+      const addPlusIconSvg = ReactDOMServer.renderToStaticMarkup(<AddButton />);
+
+      if (isSpecViewMode && typeof onRequestAddHighlight === "function") {
+        _webViewer.UI.textPopup.add(
+          {
+            type: "actionButton",
+            label: "Add New Highlight",
+            dataElement: "specViewAddHighlightButton",
+            img: addPlusIconSvg,
+            onClick: () => {
+              const documentViewer = _webViewer.Core?.documentViewer;
+              const selectionPayload = buildSelectionPayload(documentViewer);
+              if (!selectionPayload) {
+                console.warn("[SPEC_VIEWER_DEBUG] No valid selection for manual highlight creation");
+                return;
+              }
+              onRequestAddHighlight(selectionPayload);
+            },
+          },
+          insertionReference
+        );
+      } else {
+        if (typeof handleAddNewRow === "function") {
+          _webViewer.UI.textPopup.add(
+            {
+              type: "actionButton",
+              label: "Add New Row",
+              img: addPlusIconSvg,
+              onClick: () =>
+                handleAddNewRow(_webViewer.Core.documentViewer.getSelectedText()),
+            },
+            insertionReference
+          );
+        }
+
+        if (typeof handleAppendToSelectedRow === "function") {
+          _webViewer.UI.textPopup.add(
+            {
+              type: "actionButton",
+              label: "Append to Selected Row",
+              img: `<svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 50 50"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                  >
+                    <g
+                      transform="translate(0.000000,50.000000) scale(0.100000,-0.100000)"
+                      fill="#000000"
+                      stroke="none"
+                    >
+                      <path
+                        d="M85 470 c-31 -33 -27 -54 5 -25 20 18 20 18 20 -33 0 -51 -1 -52 -30 -52 l-30 0 0 -110 0 -110 120 0 c73 0 120 4 120 10 0 6 -43 10 -110 10 l-110 0 0 90 0 90 180 0 180 0 0 -65 c0 -37 4 -65 10 -65 6 0 10 32 10 75 l0 75 -160 0 -160 0 0 52 c0 51 0 51 20 33 32 -29 36 -8 5 25 -16 17 -32 30 -35 30 -3 0 -19 -13 -35 -30z"
+                      />
+                      <path
+                        d="M351 186 c-87 -48 -50 -186 49 -186 51 0 100 49 100 99 0 75 -83 124 -149 87z m104 -31 c50 -49 15 -135 -55 -135 -41 0 -80 39 -80 80 0 70 86 105 135 55z"
+                      />
+                      <path
+                        d="M390 135 c0 -20 -5 -25 -25 -25 -14 0 -25 -4 -25 -10 0 -5 11 -10 25 -10 20 0 25 -5 25 -25 0 -14 5 -25 10 -25 6 0 10 11 10 25 0 20 5 25 25 25 14 0 25 5 25 10 0 6 -11 10 -25 10 -20 0 -25 5 -25 25 0 14 -4 25 -10 25 -5 0 -10 -11 -10 -25z"
+                      />
+                    </g>
+                  </svg>`,
+              onClick: () =>
+                handleAppendToSelectedRow(
+                  _webViewer.Core.documentViewer.getSelectedText()
+                ),
+            },
+            insertionReference
+          );
+        }
+      }
     } catch (error) {
       setLoading(false);
       handleError({ message: 'Failed to load PDF viewer.' });

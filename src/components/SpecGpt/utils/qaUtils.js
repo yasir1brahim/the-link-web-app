@@ -20,10 +20,12 @@ export const getQAOptionLabel = (optionId) => {
 
 // Get all QA options with labels for dropdowns/selects
 export const getQAOptionsWithLabels = () => {
-    return Object.entries(QA_OPTION_LABELS).map(([id, label]) => ({
-        id,
-        label
-    }));
+    return Object.entries(QA_OPTION_LABELS)
+        .map(([id, label]) => ({
+            id,
+            label
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
 };
 
 // Convert item_type from log data to display format

@@ -15,6 +15,7 @@ const BaseProjectForm = ({
     projectNumber,
     projectType,
     setProjectType,
+    setProjectTypeInputText,
     fullEmployeeList,
     selectedAdminMembersList,
     setSelectedAdminMembersList,
@@ -170,9 +171,9 @@ const BaseProjectForm = ({
                                 <div className="form-group">
                                     <SelectDropdown
                                     label={'Project Type'}
-                                    setSelected={setProjectType}
-                                    selected={projectType}
-                                    defaultInputValue={projectType.value}
+                                    setSelected={(value) => setProjectType({ value, errors: "" })}
+                                    selected={projectType.value}
+                                    defaultInputValue={projectType.value[0]?.value}
                                     options={PROJECT_TYPES.map((project_type) => {
                                         return {
                                             value: project_type?.name,
@@ -180,7 +181,13 @@ const BaseProjectForm = ({
                                         };
                                     })}
                                     className="form-control"
+                                    onInputBlur={(text) => setProjectTypeInputText(text)}
                                     />
+                                    {projectType.errors && (
+                                        <small className="form-error" style={{ color: "red" }}>
+                                            {projectType.errors}
+                                        </small>
+                                    )}
                                 </div>
                                 <div className="form-group">
                                 </div>

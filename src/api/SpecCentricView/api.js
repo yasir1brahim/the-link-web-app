@@ -109,10 +109,98 @@ const getSpecSectionSubmittals = async (projectId, sectionId, projectVersionId =
     }
 };
 
+/**
+ * Create a manual highlight (ExtractedData) entry
+ * @param {number} projectId - The project ID
+ * @param {object} payload - Highlight payload matching ExtractedDataCreateSerializer
+ * @returns {Promise} API response
+ */
+const createManualHighlight = async (projectId, payload) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/${projectId}/extracted-data/`,
+            data: payload,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+// Custom item type helpers
+const getCustomItemTypes = async (projectId) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/projects/${projectId}/custom-item-types/`,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+const createCustomItemType = async (projectId, payload) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/projects/${projectId}/custom-item-types/`,
+            data: payload,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+const updateCustomItemType = async (projectId, typeId, payload) => {
+    try {
+        return await axiosInstance({
+            method: 'patch',
+            url: `/api/deliverables/projects/${projectId}/custom-item-types/${typeId}/`,
+            data: payload,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+const deleteCustomItemType = async (projectId, typeId) => {
+    try {
+        return await axiosInstance({
+            method: 'delete',
+            url: `/api/deliverables/projects/${projectId}/custom-item-types/${typeId}/`,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+const getCustomTypeColorPalette = async (projectId) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/projects/${projectId}/custom-item-types/color-palette/`,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
 export {
     getSpecSections,
     getSpecSectionContent,
     getSubmittalHighlights,
     getSpecCentricData,
-    getSpecSectionSubmittals
+    getSpecSectionSubmittals,
+    createManualHighlight,
+    getCustomItemTypes,
+    createCustomItemType,
+    updateCustomItemType,
+    deleteCustomItemType,
+    getCustomTypeColorPalette
 };

@@ -134,23 +134,23 @@ const LogViewer = ({
                 },
                 { 
                     key: 'Spec Section Name', 
-                    label: 'Spec Section Name', 
+                    label:(<span>Spec <br/>Section Name</span>), 
                     sortable: true, 
                     width: 25,
-                    minWidth: 150,
+                    minWidth: 120,
                     expandable: true
                 },
                 { 
                     key: 'Inspection Type And Requirements', 
-                    label: 'Inspection Type & Requirements', 
+                    label: (<span>Inspection Type & <br/>Requirements</span>), 
                     sortable: true, 
                     width: 30,
-                    minWidth: 200,
+                    minWidth: 230,
                     expandable: true
                 },
                 { 
                     key: 'Inspection Frequency', 
-                    label: 'Inspection Frequency', 
+                    label: (<span>Inspection <br/> Frequency </span>), 
                     sortable: true, 
                     width: 15,
                     minWidth: 120
@@ -252,7 +252,7 @@ const LogViewer = ({
                     label: 'Requirement', 
                     sortable: true, 
                     width: 28,
-                    minWidth: 200,
+                    minWidth: 180,
                     expandable: true
                 },
                 { 
@@ -261,14 +261,14 @@ const LogViewer = ({
                     sortable: true, 
                     filterable: true, // Add filter capability
                     width: 12,
-                    minWidth: 110
+                    minWidth: 130
                 },
                 { 
                     key: 'When Due', 
                     label: 'When Due', 
                     sortable: true, 
                     width: 12,
-                    minWidth: 110
+                    minWidth: 100
                 }
             ];
         }
