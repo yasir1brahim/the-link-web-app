@@ -4,6 +4,7 @@ import "react-bootstrap-typeahead/css/Typeahead.css";
 
 const SelectDropdown = ({ ...props }) => {
   const [focused, setFocused] = useState(false);
+  const [inputValue, setInputValue] = useState("");
   const typeaheadRef = useRef(null);
   const dropdownRef = useRef(null);
 
@@ -54,8 +55,19 @@ const SelectDropdown = ({ ...props }) => {
         }}
         labelKey={props.labelKey}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={() => {
+          setFocused(false);
+          // Capture the typed text on blur
+          if (typeaheadRef.current) {
+            const text = typeaheadRef.current.getInput().value;
+            setInputValue(text);
+            if (props.onInputBlur) {
+              props.onInputBlur(text);
+            }
+          }
+        }}
         onInputChange={(e) => {
+          setInputValue(e);
           props.setSearchValue && props.setSearchValue(e);
         }}
         options={props.options}

@@ -3,12 +3,14 @@ import BaseProjectForm from "./BaseProjectForm";
 import { createProject } from "../../api/Projects/api";
 import { getTeamDetails } from "../../api/Authentication/api";
 import handleError from "../../config/errorHandler";
+import { PROJECT_TYPES } from "../../constants";
 const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefresh, projects, isPersonalProject = false, customerID, isAdminUser }) => {
   const typeaheadRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [projectName, setProjectName] = useState({ value: "", errors: "" });
   const [projectNumber, setProjectNumber] = useState({ value: "", errors: "" });
-  const [projectType, setProjectType] = useState([{ value: "", label: "" }]);
+  const [projectType, setProjectType] = useState({ value: [{ value: "", label: "" }], errors: "" });
+  const [projectTypeInputText, setProjectTypeInputText] = useState("");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
 
@@ -20,7 +22,8 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
     if (!modal) {
       setProjectName({ value: "", errors: "" });
       setProjectNumber({ value: "", errors: "" });
-      setProjectType([{ value: "", label: "" }]);
+      setProjectType({ value: [{ value: "", label: "" }], errors: "" });
+      setProjectTypeInputText("");
       typeaheadRef?.current?.clear();
       setStartDate(new Date());
       setEndDate(new Date());
@@ -80,6 +83,24 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       });
       error = true;
     }
+
+    // Validate project type - check if the entered value matches a valid option
+    const selectedProjectType = projectType.value[0]?.value || projectType.value[0]?.label || projectType.value[0] || "";
+    const validProjectTypes = PROJECT_TYPES.map(pt => pt.name);
+
+    // Check both the selected value and the typed input text
+    const valueToValidate = selectedProjectType || projectTypeInputText;
+
+    if (valueToValidate) {
+      if (!validProjectTypes.includes(valueToValidate)) {
+        setProjectType({
+          ...projectType,
+          errors: "Please select a valid project type from the list.",
+        });
+        error = true;
+      }
+    }
+
     // setDateError({ startError: "", endError: "" });
     // if (startDate === '') {
     //   setDateError({ ...dateError, startError: 'Start Date is required.' });
@@ -100,7 +121,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
         const response = await createProject(
           projectName.value,
           projectNumber.value,
-          projectType[0].value,
+          projectType.value[0].value,
           customer?.customer_id || customerID,
           selectedStandardMembersList.map((emp) => emp.value),
           selectedAdminMembersList.map((emp) => emp.value),
@@ -127,6 +148,7 @@ const CreateProject = ({ modal, toggleModal, customer, pageRefresh, setPageRefre
       projectNumber={projectNumber}
       setProjectType={setProjectType}
       projectType={projectType}
+      setProjectTypeInputText={setProjectTypeInputText}
       fullEmployeeList={fullEmployeeList}
       selectedAdminMembersList={selectedAdminMembersList}
       setSelectedAdminMembersList={setSelectedAdminMembersList}

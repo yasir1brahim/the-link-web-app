@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getSpecCentricData, getSpecSectionContent } from '../../api/SpecCentricView/api';
+import { getSpecCentricData, getSpecSectionContent, getCustomItemTypes } from '../../api/SpecCentricView/api';
 import SpecViewerSidebar from './SpecViewerSidebar';
 import DocumentHighlighter from './DocumentHighlighter';
 import HighlightTooltip from './HighlightTooltip';
@@ -16,6 +16,20 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   const [tooltip, setTooltip] = useState({ visible: false, highlight: null, position: { x: 0, y: 0 } });
   // Initialize with all filter types to prevent empty filters from hiding annotations on mount
   const [activeFilters, setActiveFilters] = useState(new Set(DEFAULT_FILTER_KEYS));
+  const [customItemTypes, setCustomItemTypes] = useState([]);
+
+  const refreshCustomTypes = useCallback(async () => {
+    if (!projectId) {
+      return;
+    }
+
+    try {
+      const response = await getCustomItemTypes(projectId);
+      setCustomItemTypes(response.data.results || []);
+    } catch (err) {
+      console.warn('Unable to load custom item types', err);
+    }
+  }, [projectId]);
 
   // Load initial spec data
   useEffect(() => {
@@ -25,6 +39,15 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
         setError(null);
         const response = await getSpecCentricData(projectId, projectVersionId);
         setSpecData(response.data);
+
+        if (projectId) {
+          try {
+            const customTypesResponse = await getCustomItemTypes(projectId);
+            setCustomItemTypes(customTypesResponse.data.results || []);
+          } catch (err) {
+            console.warn('Unable to load custom item types', err);
+          }
+        }
 
         // Select first section by default
         if (response.data.spec_sections && response.data.spec_sections.length > 0) {
@@ -44,31 +67,34 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   }, [projectId, projectVersionId]);
 
   // Load section content when section changes
-  useEffect(() => {
-    const loadSectionContent = async () => {
-      if (selectedSection) {
-        try {
-          setLoading(true);
-          const response = await getSpecSectionContent(
-            projectId,
-            selectedSection.id,
-            projectVersionId
-          );
-          setSectionContent(response.data);
-        } catch (err) {
-          console.error('Error loading section content:', err);
-          setError('Failed to load section content. Please try again.');
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
+  const refreshSectionContent = useCallback(async () => {
+    if (!selectedSection) {
+      return;
+    }
 
-    loadSectionContent();
-  }, [selectedSection, projectId, projectVersionId]);
+    try {
+      setLoading(true);
+      const response = await getSpecSectionContent(
+        projectId,
+        selectedSection.id,
+        projectVersionId
+      );
+      setSectionContent(response.data);
+    } catch (err) {
+      console.error('Error loading section content:', err);
+      setError('Failed to load section content. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId, projectVersionId, selectedSection]);
+
+  useEffect(() => {
+    refreshSectionContent();
+  }, [refreshSectionContent]);
 
   const handleSectionChange = useCallback((section) => {
     setSelectedSection(section);
+    setSectionContent(null);
   }, []);
 
   const handleHighlightClick = (highlight) => {
@@ -156,6 +182,12 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
                     documentUrl={selectedSection?.pdf_url}
                     documentId={selectedSection?.document_id}
                     activeFilters={activeFilters}
+                    projectId={projectId}
+                    projectVersionId={projectVersionId}
+                    specSection={selectedSection}
+                    onRefreshSectionContent={refreshSectionContent}
+                    customItemTypes={customItemTypes}
+                    onCustomTypesUpdate={refreshCustomTypes}
                   />
                 </div>
               </div>
@@ -183,6 +215,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
           submittalHighlights={sectionContent.submittal_highlights || []}
           aiLogHighlights={sectionContent.ai_log_highlights || []}
           onFilterChange={handleFilterChange}
+          customItemTypes={customItemTypes}
         />
       )}
     </div>

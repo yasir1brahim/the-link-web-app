@@ -76,10 +76,10 @@ const fetchAiGeneratedLogs = async (projectId, projectVersionId, logType) => {
  * @param {string} projectId - Project ID
  * @param {string} logId - Log ID
  * @param {string} orderBy - Field to sort by (optional)
- * @param {string} order - Sort direction ('asc' or 'desc', default: 'desc')
+ * @param {string} order - Sort direction ('asc' or 'desc', default: 'asc')
  * @returns {Promise<Object|null>} Log detail data or null on error
  */
-const fetchAiGeneratedLogDetail = async (projectId, logId, orderBy = null, order = 'desc') => {
+const fetchAiGeneratedLogDetail = async (projectId, logId, orderBy = null, order = 'asc') => {
     try {
         const params = {};
         if (orderBy) {
@@ -104,10 +104,10 @@ const fetchAiGeneratedLogDetail = async (projectId, logId, orderBy = null, order
  * @param {string} projectId - Project ID
  * @param {string} logId - Log ID
  * @param {string} orderBy - Field to sort by
- * @param {string} order - Sort direction ('asc' or 'desc', default: 'desc')
+ * @param {string} order - Sort direction ('asc' or 'desc', default: 'asc')
  * @returns {Promise<Object|null>} Sorted log data or null on error
  */
-const fetchSortedLogData = async (projectId, logId, orderBy, order = 'desc', page = 1, pageSize = 50) => {
+const fetchSortedLogData = async (projectId, logId, orderBy, order = 'asc', page = 1, pageSize = 50) => {
     try {
         if (!orderBy) {
             console.warn('fetchSortedLogData: orderBy parameter is required');
@@ -141,12 +141,12 @@ const fetchSortedLogData = async (projectId, logId, orderBy, order = 'desc', pag
  * @param {string} logId - Log ID
  * @param {string} searchTerm - Search term to filter data
  * @param {string} orderBy - Field to sort by (default: 'created_at')
- * @param {string} order - Sort direction ('asc' or 'desc', default: 'desc')
+ * @param {string} order - Sort direction ('asc' or 'desc', default: 'asc')
  * @param {number} page - Page number (default: 1)
  * @param {number} pageSize - Page size (default: 50)
  * @returns {Promise<Object|null>} Searched log data or null on error
  */
-const fetchSearchedLogData = async (projectId, logId, searchTerm, orderBy = 'created_at', order = 'desc', page = 1, pageSize = 50) => {
+const fetchSearchedLogData = async (projectId, logId, searchTerm, orderBy = 'spec_section_number', order = 'asc', page = 1, pageSize = 50) => {
     try {
         const url = `/api/deliverables/${projectId}/ai-generated-logs/${logId}/`;
         const params = {
@@ -181,13 +181,13 @@ const fetchSearchedLogData = async (projectId, logId, searchTerm, orderBy = 'cre
  * @param {string} logId - Log ID
  * @param {Object} filters - Filter values by column (e.g., {'Spec Section #': ['01 5000'], 'item_type': ['Product']})
  * @param {string} orderBy - Field to sort by (default: 'created_at')
- * @param {string} order - Sort direction ('asc' or 'desc', default: 'desc')
+ * @param {string} order - Sort direction ('asc' or 'desc', default: 'asc')
  * @param {string} searchTerm - Search term to filter data (default: '')
  * @param {number} page - Page number (default: 1)
  * @param {number} pageSize - Page size (default: 50)
  * @returns {Promise<Object|null>} Filtered log data or null on error
  */
-const fetchFilteredLogData = async (projectId, logId, filters = {}, orderBy = 'created_at', order = 'desc', searchTerm = '', page = 1, pageSize = 50) => {
+const fetchFilteredLogData = async (projectId, logId, filters = {}, orderBy = 'spec_section_number', order = 'asc', searchTerm = '', page = 1, pageSize = 50) => {
     try {
         const url = `/api/deliverables/${projectId}/ai-generated-logs/${logId}/`;
         const params = {
@@ -442,11 +442,11 @@ const loadUserDocs = async () => {
  * @param {string} logId - Log ID
  * @param {Object} filters - Filter values by column (e.g., {'Spec Section #': ['01 5000'], 'item_type': ['Product']})
  * @param {string} orderBy - Field to sort by (default: 'created_at')
- * @param {string} order - Sort direction ('asc' or 'desc', default: 'desc')
+ * @param {string} order - Sort direction ('asc' or 'desc', default: 'asc')
  * @param {string} searchTerm - Search term to filter data (default: '')
  * @returns {Promise<Array|null>} Log data array or null on error
  */
-const exportLogDataToExcel = async (projectId, logId, filters = {}, orderBy = 'created_at', order = 'desc', searchTerm = '') => {
+const exportLogDataToExcel = async (projectId, logId, filters = {}, orderBy = 'spec_section_number', order = 'asc', searchTerm = '') => {
     try {
         console.log('🔄 exportLogDataToExcel: Requesting Excel export from backend');
         
