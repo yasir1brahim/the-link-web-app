@@ -2450,3 +2450,84 @@ The implementation includes:
 5. ✅ Integration with SpecViewer
 6. ✅ Manual testing checklist
 7. ✅ Feature documentation
+
+---
+
+## Implementation Notes (2025-11-14)
+
+### Bugs Discovered and Fixed During Implementation
+
+#### 1. Annotation Type Mismatch (Commit: 4bad4f8)
+**Issue:** Annotations were not appearing in exported PDFs.
+
+**Root Cause:** Used `TextHighlightAnnotation` with `Quads`, but the existing codebase uses `RectangleAnnotation` with `X`, `Y`, `Width`, `Height` properties.
+
+**Fix:**
+- Changed to `RectangleAnnotation` to match `projectLogsReader.js` implementation
+- Updated properties to use uppercase (`PageNumber`, `X`, `Y`, `Width`, `Height`)
+- Added XFDF export with `flatten: true` option to burn annotations into PDF permanently
+- Added explicit `Opacity` and `FillOpacity` properties (0.25) for proper transparency
+
+**Files Modified:**
+- `src/services/pdfExportService.js:265-323`
+
+#### 2. Progress Bar Inconsistent Display (Commit: f9e50ea)
+**Issue:** Progress bar would disappear intermittently during multi-section export.
+
+**Root Cause:** `exportSections` was setting `status: 'progress'` in progress callbacks, but `ExportModal` only displays the progress bar when `status === 'exporting'`.
+
+**Fix:**
+- Removed `status` field from progress updates in `exportSingleSection` and `exportSections`
+- Only update `message`, `current`, and `total` fields, preserving initial `status: 'exporting'`
+- Removed `current: 0` from initial state to prevent "0 of X" display
+- Added initial message "Preparing export..." for immediate user feedback
+
+**Files Modified:**
+- `src/services/pdfExportService.js:466-472` (exportSections progress callback)
+- `src/services/pdfExportService.js:344-392` (exportSingleSection progress callbacks)
+- `src/components/SpecCentricView/SpecViewer.jsx:128-132` (initial progress state)
+
+### Key Implementation Decisions
+
+1. **RectangleAnnotation over TextHighlightAnnotation**
+   - Matches existing viewer implementation in `projectLogsReader.js`
+   - More reliable for rectangle-based highlights
+   - Easier to work with X/Y/Width/Height coordinates
+
+2. **XFDF Flattening**
+   - Annotations exported as XFDF and flattened into PDF using `flatten: true`
+   - Ensures annotations are permanently embedded in exported PDFs
+   - Prevents issues with annotation display in external PDF viewers
+
+3. **Explicit Opacity Properties**
+   - Using `annotation.Opacity` and `annotation.FillOpacity` instead of alpha channel in Color
+   - More reliable when flattening annotations
+   - Ensures consistent semi-transparency (25%) in exported PDFs
+
+4. **Debug Logging**
+   - Added `window.__pdfExportDebug` for persistent debugging across console clears
+   - Helpful for troubleshooting annotation creation issues
+
+### Testing Summary
+
+**Automated Tests:** 42 total tests passing
+- 22 tests in `pdfExportService.test.js`
+- 4 tests in `ExportButton.test.jsx`
+- 16 tests in `ExportModal.test.jsx`
+
+**Manual Testing Verified:**
+- ✅ Single section export with annotations
+- ✅ Multiple section export as ZIP
+- ✅ Annotations display with correct colors and transparency
+- ✅ Progress bar displays consistently throughout export
+- ✅ Filter integration (only active filters exported)
+- ✅ Modal UI states (preparing, exporting, complete, error)
+
+### Commits
+
+1. `4bad4f8` - Fix PDF export annotations to use RectangleAnnotation with proper opacity
+2. `f9e50ea` - Fix export progress bar to display consistently throughout process
+
+### Dependencies Added
+
+- `jszip@^3.10.1` - For creating ZIP archives when exporting multiple sections
