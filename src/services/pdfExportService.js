@@ -321,7 +321,144 @@ const createAnnotationsFromHighlights = (instance, highlights) => {
   return createdAnnotations;
 };
 
+/**
+ * Export a single section PDF with annotations
+ */
+const exportSingleSection = async (
+  section,
+  highlights,
+  { reuseExisting = false, instance: existingInstance = null } = {},
+  progressCallback
+) => {
+  if (!section?.pdf_url) {
+    throw new Error(`Section ${section?.id} has no PDF URL`);
+  }
+
+  const sectionLabel = `${section.masterformat_number || ''} ${section.custom_section_title || section.masterformat_title || ''}`.trim();
+
+  if (progressCallback) {
+    progressCallback({
+      status: 'loading',
+      message: `Loading ${sectionLabel || 'section'}...`,
+    });
+  }
+
+  let instance = existingInstance;
+  let container = null;
+  let createdInstance = false;
+  let annotationsToCleanup = [];
+
+  try {
+    if (!instance) {
+      ({ instance, container } = await createHiddenWebViewer(section.pdf_url));
+      createdInstance = true;
+    }
+
+    if (progressCallback) {
+      progressCallback({
+        status: 'processing',
+        message: `Preparing annotations for ${sectionLabel || 'section'}...`,
+      });
+    }
+
+    // Create annotations and remember what we added so we can clean up if reused
+    annotationsToCleanup = createAnnotationsFromHighlights(instance, highlights) || [];
+
+    if (progressCallback) {
+      progressCallback({
+        status: 'exporting',
+        message: `Exporting ${sectionLabel || 'section'}...`,
+      });
+    }
+
+    const doc = instance.Core.documentViewer.getDocument();
+    const data = await doc.getFileData({ downloadType: 'pdf' });
+    const blob = new Blob([data], { type: 'application/pdf' });
+
+    return {
+      filename: generatePdfFilename(section),
+      blob,
+      section,
+    };
+  } finally {
+    if (reuseExisting && instance?.Core?.annotationManager && annotationsToCleanup.length > 0) {
+      try {
+        instance.Core.annotationManager.deleteAnnotations(annotationsToCleanup);
+      } catch (cleanupError) {
+        console.warn('Failed to clean up annotations after export:', cleanupError);
+      }
+    }
+
+    if (createdInstance && instance && container) {
+      destroyWebViewer(instance, container);
+    }
+  }
+};
+
+/**
+ * Main export function
+ * @param {Object} config - Export configuration
+ * @param {Array} config.sections - Array of spec sections to export
+ * @param {Object} config.highlightsBySectionId - Map of section ID to highlights array
+ * @param {Set} config.activeFilters - Active filter set
+ * @param {Array} config.customItemTypes - Custom item types
+ * @param {Function} config.progressCallback - Progress callback function
+ * @param {number} config.currentSectionId - ID of the section currently loaded in the viewer
+ * @param {Object} config.currentViewerContext - Active WebViewer instance/context for the current section
+ */
 export const exportSections = async (config) => {
-  // Implementation coming in next steps
-  return null;
+  const {
+    sections,
+    highlightsBySectionId,
+    activeFilters,
+    customItemTypes = [],
+    progressCallback,
+    currentSectionId = null,
+    currentViewerContext = null,
+  } = config;
+
+  if (!sections || sections.length === 0) {
+    throw new Error('No sections provided for export');
+  }
+
+  const results = [];
+
+  // Export sections sequentially to manage memory
+  for (let i = 0; i < sections.length; i++) {
+    const section = sections[i];
+    const highlights = highlightsBySectionId[section.id] || [];
+    const isActiveSection = currentSectionId != null && section.id === currentSectionId && currentViewerContext?.instance;
+
+    if (progressCallback) {
+      progressCallback({
+        status: 'progress',
+        current: i + 1,
+        total: sections.length,
+        section,
+      });
+    }
+
+    try {
+      const result = await exportSingleSection(
+        section,
+        highlights,
+        isActiveSection
+          ? { reuseExisting: true, instance: currentViewerContext.instance }
+          : {},
+        progressCallback
+      );
+      results.push(result);
+    } catch (error) {
+      console.error(`Failed to export section ${section.id}:`, error);
+
+      // Record error but continue with other sections
+      results.push({
+        filename: generatePdfFilename(section),
+        error: error.message,
+        section,
+      });
+    }
+  }
+
+  return results;
 };

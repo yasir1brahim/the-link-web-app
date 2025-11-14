@@ -133,4 +133,30 @@ describe('PdfExportService', () => {
       });
     });
   });
+
+  describe('exportSingleSection (integration)', () => {
+    // Note: This test requires mocking WebViewer, which is complex
+    // For now, we'll test the structure without full WebViewer mock
+
+    it('should return error in results if PDF URL is missing', async () => {
+      const section = {
+        id: 1,
+        pdf_url: null,
+        masterformat_number: '01 00 00',
+        document_name: 'Test.pdf'
+      };
+      const highlights = [];
+
+      const results = await exportSections({
+        sections: [section],
+        highlightsBySectionId: { 1: highlights },
+        activeFilters: new Set(),
+        customItemTypes: []
+      });
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toHaveProperty('error');
+      expect(results[0].error).toContain('no PDF URL');
+    });
+  });
 });
