@@ -7,10 +7,10 @@ import './SortableTable.scss';
 import './FilterModal.scss';
 
 /**
- * SortableTable - A reusable table component with sorting, filtering, search, and pagination capabilities
- * 
+ * SortableTable - A reusable table component with sorting, filtering, search, pagination, and column resizing capabilities
+ *
  * @param {Array} data - Array of data objects to display
- * @param {Array} columns - Array of column definitions
+ * @param {Array} columns - Array of column definitions (supports resizable columns)
  * @param {Function} onSort - Callback function for sorting
  * @param {Object} sorting - Current sorting state { column: string, order: 'asc'|'desc' }
  * @param {Function} onFilter - Callback function for filtering
@@ -55,10 +55,14 @@ const SortableTable = ({
   const [tableWidths, setTableWidths] = useState({});
   const [showMore, setShowMore] = useState([]);
   const [shouldShowExpansionButton, setShouldShowExpansionButton] = useState([]);
-  
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizingColumn, setResizingColumn] = useState(null);
+
   const tableRef = useRef(null);
   const parentRef = useRef(null);
   const rowRefs = useRef([]);
+  const startXRef = useRef(0);
+  const startWidthRef = useRef(0);
 
   // Initialize showMore state when data changes (only if expansion is enabled)
   useEffect(() => {
@@ -96,23 +100,63 @@ const SortableTable = ({
     };
   }, [data, enableExpansion]);
 
-  // Use fixed column widths to prevent layout shifts
+  // Initialize column widths
   useEffect(() => {
     if (columns.length > 0) {
-      const fixedWidths = {};
+      const initialWidths = {};
       columns.forEach((col, index) => {
-        // Use minWidth as fixed width to prevent any changes
-        fixedWidths[index] = col.minWidth || 150;
+        // Use minWidth as initial width
+        initialWidths[index] = col.minWidth || 150;
       });
-      setTableWidths(fixedWidths);
+      setTableWidths(initialWidths);
     }
   }, [columns]);
 
-  // Disable column resizing to prevent layout shifts
+  // Handle column resizing
   const handleMouseDown = (e, colIndex) => {
-    // Disabled to prevent layout shifts
-    return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    setIsResizing(true);
+    setResizingColumn(colIndex);
+    startXRef.current = e.clientX;
+    startWidthRef.current = tableWidths[colIndex] || columns[colIndex].minWidth || 150;
   };
+
+  // Handle mouse move during resize
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isResizing || resizingColumn === null) return;
+
+      const diff = e.clientX - startXRef.current;
+      const newWidth = Math.max(
+        columns[resizingColumn].minWidth || 100,
+        startWidthRef.current + diff
+      );
+
+      setTableWidths(prev => ({
+        ...prev,
+        [resizingColumn]: newWidth
+      }));
+    };
+
+    const handleMouseUp = () => {
+      if (isResizing) {
+        setIsResizing(false);
+        setResizingColumn(null);
+      }
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing, resizingColumn, columns]);
 
   // Handle sorting
   const handleSorting = (columnName) => {
@@ -225,6 +269,10 @@ const SortableTable = ({
                   <div
                     className="resizer"
                     onMouseDown={(e) => handleMouseDown(e, index)}
+                    style={{
+                      cursor: 'col-resize',
+                      userSelect: 'none'
+                    }}
                   >
                     |
                   </div>
