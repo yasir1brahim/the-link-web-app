@@ -7,6 +7,11 @@ import {
   isCustomHighlight,
   getHighlightColor,
 } from './highlightConstants';
+import {
+  QA_COLOR_MAP,
+  EXTRACTION_COLOR_MAP,
+  DEFAULT_RGB_COLOR,
+} from './highlightColorMaps';
 import CustomItemTypesManager from './shared/CustomItemTypesManager';
 import './DocumentHighlighter.css';
 
@@ -16,25 +21,6 @@ const toTitleCase = (value = '') =>
     .replace(/\s+/g, ' ')
     .trim()
     .replace(/\b\w/g, (char) => char.toUpperCase());
-
-const QA_COLOR_MAP = {
-  inspections: { r: 255, g: 99, b: 71 },
-  warranties: { r: 60, g: 179, b: 113 },
-  certificates: { r: 255, g: 165, b: 0 },
-  closeout_submittals: { r: 138, g: 43, b: 226 },
-  test_reports: { r: 30, g: 144, b: 255 },
-  commissioning: { r: 255, g: 20, b: 147 },
-  delegated_design: { r: 75, g: 0, b: 130 },
-  mock_ups_sample_construction: { r: 218, g: 165, b: 32 },
-  pre_installation_meetings: { r: 32, g: 178, b: 170 },
-};
-
-const EXTRACTION_COLOR_MAP = {
-  qa_planner: { r: 100, g: 149, b: 237 },
-  inspection_log: { r: 255, g: 127, b: 80 },
-  owner_deliverables_log: { r: 147, g: 112, b: 219 },
-  manual_highlight: { r: 59, g: 130, b: 246 },
-};
 
 const hexToRgb = (value) => {
   if (typeof value !== 'string') {
@@ -65,23 +51,26 @@ const getSwatchColor = (itemType, extractionType) => {
   return (
     QA_COLOR_MAP[key] ||
     EXTRACTION_COLOR_MAP[extractionType] ||
-    { r: 59, g: 130, b: 246 }
+    DEFAULT_RGB_COLOR
   );
 };
 
 const buildFallbackOptions = () =>
-  HIGHLIGHT_TYPES.map((item) => {
-    const color = getSwatchColor(item.key, 'qa_planner');
-    return {
-      key: `qa_planner__${item.key}`,
-      label: item.type,
-      extractionType: 'qa_planner',
-      itemType: item.key,
-      swatch: color,
-      isCustom: false,
-      customTypeId: null,
-    };
-  });
+  HIGHLIGHT_TYPES
+    // Filter out 'submittal' - submittals use a different data model
+    .filter((item) => item.key !== 'submittal')
+    .map((item) => {
+      const color = getSwatchColor(item.key, 'qa_planner');
+      return {
+        key: `qa_planner__${item.key}`,
+        label: item.type,
+        extractionType: 'qa_planner',
+        itemType: item.key,
+        swatch: color,
+        isCustom: false,
+        customTypeId: null,
+      };
+    });
 
 const truncateText = (value = '', maxLength = 200) => {
   if (!value) {

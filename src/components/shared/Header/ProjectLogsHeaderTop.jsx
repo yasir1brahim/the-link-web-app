@@ -53,6 +53,25 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
             >
               Compass
             </button>
+            {(props.isInspectionLogFeatureFlagActive || props.isQaPlannerFlagActive) && (
+              <button
+                className={`tab-button ${props.activeTab === 'inspection-qa' ? 'active' : ''}`}
+                onClick={() => props.setActiveTab('inspection-qa')}
+                style={{
+                  padding: '12px 24px',
+                  border: 'none',
+                  backgroundColor: props.activeTab === 'inspection-qa' ? '#fff' : '#f5f5f5',
+                  borderBottom: props.activeTab === 'inspection-qa' ? '2px solid #007bff' : '2px solid transparent',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: props.activeTab === 'inspection-qa' ? '600' : '400',
+                  color: props.activeTab === 'inspection-qa' ? '#007bff' : '#666',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Inspection & QA
+              </button>
+            )}
             {props.isSpecCenteredViewFlagActive && (
               <button
                 className={`tab-button ${props.activeTab === 'spec-view' ? 'active' : ''}`}
@@ -76,7 +95,7 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
         )}
       </div>
       <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '0px' }}>
-        {props.isVersioningEnabled && (props.activeTab === 'submittal' || props.activeTab === 'compass' || props.activeTab === 'spec-view') && (
+        {props.isVersioningEnabled && (props.activeTab === 'submittal' || props.activeTab === 'compass' || props.activeTab === 'inspection-qa' || props.activeTab === 'spec-view') && (
           <>
             {props.isVersionComparisonEnabled && props.activeTab === 'submittal' && (
               <button

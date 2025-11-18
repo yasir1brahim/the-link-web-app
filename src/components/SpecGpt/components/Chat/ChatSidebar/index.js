@@ -2,15 +2,10 @@ import { Box, Flex, Heading, List, ListItem, Text } from '@chakra-ui/react'
 import React from 'react'
 import { ChatSvg, CloseIcon, PlusIcon } from '../../../assets/icons'
 
-const ChatSidebar = ({ 
-    chatHistory, 
-    onClickChatLink, 
-    onNewChatClick, 
-    onShowInspectionLogsClick, 
-    onShowOwnerDeliverablesLogsClick,
-    onShowQAPlannerClick,
-    isInspectionLogFeatureFlagActive,
-    isQaPlannerFlagActive
+const ChatSidebar = ({
+    chatHistory,
+    onClickChatLink,
+    onNewChatClick
 }) => {
     return (
         <Box w="100%" bgColor="#1F2A43" h="100%" display="flex" flexDirection="column">
@@ -26,21 +21,6 @@ const ChatSidebar = ({
                         <PlusIcon />
                         <Text marginBottom={0} fontSize="14px" color="#FFFFFF">New chat</Text>
                     </Flex>
-                    {isInspectionLogFeatureFlagActive && (
-                        <>
-                            <Flex onClick={onShowInspectionLogsClick} mb={3} border="1px" borderColor="#FFFFFF33" px={3} py={3} borderRadius="6px" gap={3} align="center" cursor="pointer" _hover={{ bgColor: "#FFFFFF11" }}>
-                                <Text marginBottom={0} fontSize="14px" color="#FFFFFF">Inspection List</Text>
-                            </Flex>
-                            <Flex onClick={onShowOwnerDeliverablesLogsClick} mb={3} border="1px" borderColor="#FFFFFF33" px={3} py={3} borderRadius="6px" gap={3} align="center" cursor="pointer" _hover={{ bgColor: "#FFFFFF11" }}>
-                                <Text marginBottom={0} fontSize="14px" color="#FFFFFF">Owner Deliverables</Text>
-                            </Flex>
-                        </>
-                    )}
-                    {isQaPlannerFlagActive && (
-                        <Flex onClick={onShowQAPlannerClick} mb={3} border="1px" borderColor="#FFFFFF33" px={3} py={3} borderRadius="6px" gap={3} align="center" cursor="pointer" _hover={{ bgColor: "#FFFFFF11" }}>
-                            <Text marginBottom={0} fontSize="14px" color="#FFFFFF">QA Planner</Text>
-                        </Flex>
-                    )}
                 </Box>
             </Box>
 

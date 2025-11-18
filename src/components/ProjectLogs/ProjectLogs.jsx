@@ -31,6 +31,7 @@ import { getCurrentUserData } from "../../api/Authentication/api";
 import ArchiveConfirmationModal from "./archiveConfirmationModal";
 import VersionComparisonModal from "./versionComparisonModal";
 import Chat from "../SpecGpt/components/Chat";
+import InspectionQA from "../SpecGpt/components/InspectionQA";
 import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
@@ -441,7 +442,8 @@ const ProjectLogs = () => {
       );
       setLogIdList(submittalItems.data.log_id_list);
       setErrorMessage("");
-      
+      setTotalCount(submittalItems?.data?.total_count);
+
       if (submittalItems.data.message?.length === 0) {
         const filterHasValues = Object.values(filterValues).some(arr => arr.length > 0);
         if (documentData?.length > 0 && !filterHasValues) {
@@ -925,6 +927,26 @@ const ProjectLogs = () => {
     if (selected?.length !== 0) {
       try {
         await deleteSubmittalItems(state?.projectId || projectId, selected);
+        // Calculate the new total count after deletion
+        const newTotalCount = totalCount - selected.length;
+        const lastValidPage = Math.max(1, Math.ceil(newTotalCount / rowsPerPage)); // Calculate the last valid page
+        // If current page is greater than the last valid page, navigate to the last valid page
+        const targetPage = page > lastValidPage ? lastValidPage : page;
+
+        if (targetPage !== page) {
+          setPage(targetPage);
+        }
+
+        await fetchLogData(
+          targetPage,
+          rowsPerPage,
+          searchValue,
+          listId,
+          appliedFilters,
+          null, // orderCol (default to null if no sorting active)
+          null, // order (default to null if no sorting active)
+          projectVersionId
+        );
         setPageRefresh(!pageRefresh);
         setSelected([]);
         ToastService.success("Successfully Deleted Logs!");
@@ -1723,6 +1745,8 @@ const ProjectLogs = () => {
             onViewArchivedVersions={handleViewArchivedVersions}
             isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
             isSpecCenteredViewFlagActive={isSpecCenteredViewFlagActive(teamId)}
+            isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+            isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
           />
@@ -1941,8 +1965,6 @@ const ProjectLogs = () => {
                   projectVersionId={projectVersionId} 
                   chatSessionId={chatId} 
                   setChatSessionId={setChatId}
-                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
-                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
                   messages={chatMessages}
                   setMessages={setChatMessages}
                   chatHistory={chatHistory}
@@ -1951,11 +1973,29 @@ const ProjectLogs = () => {
                   setIsLoadingMessage={setIsSpecGptLoadingMessage}
                   userInput={specGptUserInput}
                   setUserInput={setSpecGptUserInput}
-                  isGeneratingLog={isSpecGptGeneratingLog}
-                  setIsGeneratingLog={setIsSpecGptGeneratingLog}
                   isChatEnabled={isSpecGptChatEnabled}
                   setIsChatEnabled={setIsSpecGptChatEnabled}
                   teamId={teamId}
+                />
+              </ChakraProvider>
+              </div>
+            </>
+          }
+          {activeTab == 'inspection-qa' &&
+            <>
+            <div className="compass-chat-viewport">
+              <ProcessingIndicator
+                documentIsProcessing={documentIsBeingEmbedded}
+                documentData={documentData}
+                toggleDocumentStatusModal={toggleSpecGptProcessingModal}
+                indicatorText={"Compass is processing your documents..."}
+              />
+              <ChakraProvider>
+                <InspectionQA
+                  projectId={projectId}
+                  projectVersionId={projectVersionId}
+                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
                 />
               </ChakraProvider>
               </div>
