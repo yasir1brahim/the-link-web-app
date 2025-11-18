@@ -23,7 +23,6 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion , getArchivedVersions} from "../../api/Projects/api";
-import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem, getSpecSections } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
@@ -37,7 +36,6 @@ import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
 import ArchivedVersionsModal from "./archivedVersionModal";
 import { isLogEligibleForChildEntry } from "./projectLogsUtils";
-import useCompanyDetails from "../../hooks/useCompanyDetails";
 import useDocumentRefresh from "../../hooks/useDocumentRefresh";
 import DocumentListModal from "./DocumentListModal";
 import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
@@ -240,8 +238,8 @@ const ProjectLogs = () => {
   const [userRole, setUserRole] = useState('');
   const [userRoleInCompany, setUserRoleInCompany] = useState('member');
   const [teamId, setTeamId] = useState(state?.teamId);
-
-  const { companyLogoUrl, companyName, isLoading:headerLoading } = useCompanyDetails(teamId);
+  const [companyLogoUrl, setCompanyLogoUrl] = useState('');
+  const [companyName, setCompanyName] = useState('');
 
   const [hasPlaceholderSubmittals, setHasPlaceholderSubmittals] = useState(false);
 
@@ -306,17 +304,11 @@ const ProjectLogs = () => {
     }
   };
 
-  const getUserRoleInProject = async (projectData, userArgument) => {
-    console.log('user', userArgument);
-    console.log('projectData', projectData);
-    if (userArgument.is_superuser) {
-      return 'Admin';
-    } 
-    const membership = projectData.members.find((member) => member.user_id === userArgument.id);
-    if (membership) {
-      return membership.role === 'admin' ? 'Admin' : 'Member';
+  const getUserRoleInProject = (projectData) => {
+    if (!projectData.current_user_role) {
+      return 'Unauthorized';
     }
-    return 'Unauthorized';
+    return projectData.current_user_role === 'project_admin' ? 'Admin' : 'Member';
   }
 
   const handleGetProjectId = async (submittalId) => {
@@ -520,13 +512,16 @@ const ProjectLogs = () => {
         }
         
         setProjectName(response.data.name);
-        
+
+        setCompanyName(response.data.team_name || '');
+        setCompanyLogoUrl(response.data.team_logo_url || '');
+
         // Documents are already filtered by version from the backend
         setDocumentData(response.data.document_details);
         setDocParsed(response.data.doc_parsed);
-        
-        setUserRole(getUserRoleInProject(response.data, updatedUser));
-        setUserRoleInCompany(await getUserRoleInTeam(updatedUser.id, response.data.team));
+
+        setUserRole(getUserRoleInProject(response.data));
+        setUserRoleInCompany(response.data.current_user_team_role || 'member');
         console.log("response.data.project_versions", response.data.project_versions);
 
         setAvailableVersions(response.data.project_versions);
@@ -2306,7 +2301,7 @@ const ProjectLogs = () => {
         manageExcelExportModal={manageExcelExportModal}
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
-      <Loader showComponentLoader={isInitialLoading || isDataLoading || headerLoading} />
+      <Loader showComponentLoader={isInitialLoading || isDataLoading} />
       
       <DuplicateFileConfirmationModal
         isOpen={showDuplicateFilesModal}
