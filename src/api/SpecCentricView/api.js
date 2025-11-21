@@ -191,6 +191,36 @@ const getCustomTypeColorPalette = async (projectId) => {
     }
 };
 
+// User highlight preference helpers
+const getUserHighlightPreference = async (projectId) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/projects/${projectId}/highlight-preference/`,
+        });
+    } catch (error) {
+        // Return null if no preference exists (404)
+        if (error.response && error.response.status === 404) {
+            return null;
+        }
+        handleError(error);
+        throw error;
+    }
+};
+
+const setUserHighlightPreference = async (projectId, payload) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/projects/${projectId}/highlight-preference/`,
+            data: payload,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
 export {
     getSpecSections,
     getSpecSectionContent,
@@ -202,5 +232,7 @@ export {
     createCustomItemType,
     updateCustomItemType,
     deleteCustomItemType,
-    getCustomTypeColorPalette
+    getCustomTypeColorPalette,
+    getUserHighlightPreference,
+    setUserHighlightPreference
 };

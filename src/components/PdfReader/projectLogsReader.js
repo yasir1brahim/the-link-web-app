@@ -6,6 +6,7 @@ import axiosInstance from "../../config/axios";
 import { validateS3Link, isS3LinkExpiredError } from "../../utils/s3LinkValidator.js";
 import { useS3LinkValidation } from "../../hooks/useS3LinkValidation.js";
 import { ReactComponent as AddButton } from "../../assets/images/circle-add.svg";
+import { ReactComponent as RepeatIcon } from "../../assets/images/repeat-icon.svg";
 
 const ProjectLogsReader = ({
   url,
@@ -24,6 +25,8 @@ const ProjectLogsReader = ({
   useFiltering = false,
   isSpecViewMode = false,
   onRequestAddHighlight = null,
+  onQuickHighlight = null,
+  lastUsedHighlightType = null,
 }) => {
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
@@ -33,6 +36,16 @@ const ProjectLogsReader = ({
   const previousHighlightLocation = useRef(null);
   const annotationsCreated = useRef(false);
   const annotationsRef = useRef([]);
+  const onQuickHighlightRef = useRef(onQuickHighlight);
+  const lastUsedHighlightTypeRef = useRef(lastUsedHighlightType);
+
+  useEffect(() => {
+    onQuickHighlightRef.current = onQuickHighlight;
+  }, [onQuickHighlight]);
+
+  useEffect(() => {
+    lastUsedHighlightTypeRef.current = lastUsedHighlightType;
+  }, [lastUsedHighlightType]);
   
   // Convert activeFilters Set to a stable string representation for dependency tracking
   const activeFiltersString = React.useMemo(() => {
@@ -77,6 +90,81 @@ const ProjectLogsReader = ({
       updateTxtView();
     }
   }, [stableHighlightLocations, stableAiLogHighlightLocations, documentLoaded, activeFiltersString]);
+
+  // Update text popup buttons when lastUsedHighlightType changes
+  useEffect(() => {
+    if (!webViewer || !isSpecViewMode || !documentLoaded) {
+      return;
+    }
+
+    const updateRepeatButton = () => {
+      const currentLastUsedType = lastUsedHighlightTypeRef.current;
+      const currentOnQuickHighlight = onQuickHighlightRef.current;
+
+      try {
+        const contextMenuItems = webViewer.UI.textPopup.getItems();
+
+        // Check if repeat button already exists
+        const existingRepeatButtonIndex = contextMenuItems.findIndex(
+          item => item.dataElement === 'specViewRepeatHighlightButton'
+        );
+
+        const hasRepeatButton = existingRepeatButtonIndex !== -1;
+
+        // If we have a last used type, we need a button
+        if (currentLastUsedType && typeof currentOnQuickHighlight === "function") {
+          const repeatIconSvg = ReactDOMServer.renderToStaticMarkup(<RepeatIcon />);
+
+          const buttonConfig = {
+            type: "actionButton",
+            label: `Mark as ${currentLastUsedType.type_display_name}`,
+            dataElement: "specViewRepeatHighlightButton",
+            img: repeatIconSvg,
+            onClick: () => {
+              const documentViewer = webViewer.Core?.documentViewer;
+              const selectionPayload = buildSelectionPayload(documentViewer);
+              if (!selectionPayload) {
+                console.warn("[SPEC_VIEWER_DEBUG] No valid selection for quick highlight");
+                return;
+              }
+              const currentCallback = onQuickHighlightRef.current;
+              if (currentCallback) {
+                currentCallback(selectionPayload);
+              }
+            },
+          };
+
+          if (hasRepeatButton) {
+            // Update existing button by replacing it in the array
+            const updatedItems = [...contextMenuItems];
+            updatedItems[existingRepeatButtonIndex] = buttonConfig;
+            webViewer.UI.textPopup.update(updatedItems);
+          } else {
+            // Add new button before "Add New Highlight"
+            const addHighlightIndex = contextMenuItems.findIndex(
+              item => item.dataElement === 'specViewAddHighlightButton'
+            );
+
+            const insertionReference = addHighlightIndex >= 0
+              ? contextMenuItems[addHighlightIndex].dataElement
+              : null;
+
+            webViewer.UI.textPopup.add(buttonConfig, insertionReference);
+          }
+        } else if (hasRepeatButton) {
+          // No last used type, but button exists - remove it
+          const filteredItems = contextMenuItems.filter(
+            item => item.dataElement !== 'specViewRepeatHighlightButton'
+          );
+          webViewer.UI.textPopup.update(filteredItems);
+        }
+      } catch (error) {
+        console.error('[REPEAT_BUTTON_ERROR] Failed to update repeat button:', error);
+      }
+    };
+
+    updateRepeatButton();
+  }, [webViewer, lastUsedHighlightType, isSpecViewMode, documentLoaded]);
 
   const handleClose = () => {
     setLogInViewer(null);
