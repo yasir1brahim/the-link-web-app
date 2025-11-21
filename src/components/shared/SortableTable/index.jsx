@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { SortIcon } from '../icons/sortIcon';
 import { FilterIcon } from '../icons/filterIcon';
@@ -123,14 +123,15 @@ const SortableTable = ({
     startWidthRef.current = tableWidths[colIndex] || columns[colIndex].minWidth || 150;
   };
 
-  // Handle mouse move during resize
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!isResizing || resizingColumn === null) return;
+  // Memoized mouse move handler with performance optimization using RAF
+  const handleMouseMove = useCallback((e) => {
+    if (!isResizing || resizingColumn === null) return;
 
+    // Use requestAnimationFrame for smoother performance
+    requestAnimationFrame(() => {
       const diff = e.clientX - startXRef.current;
       const newWidth = Math.max(
-        columns[resizingColumn].minWidth || 100,
+        columns[resizingColumn]?.minWidth || 100,
         startWidthRef.current + diff
       );
 
@@ -138,15 +139,19 @@ const SortableTable = ({
         ...prev,
         [resizingColumn]: newWidth
       }));
-    };
+    });
+  }, [isResizing, resizingColumn, columns]);
 
-    const handleMouseUp = () => {
-      if (isResizing) {
-        setIsResizing(false);
-        setResizingColumn(null);
-      }
-    };
+  // Memoized mouse up handler
+  const handleMouseUp = useCallback(() => {
+    if (isResizing) {
+      setIsResizing(false);
+      setResizingColumn(null);
+    }
+  }, [isResizing]);
 
+  // Handle mouse move during resize
+  useEffect(() => {
     if (isResizing) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -156,7 +161,7 @@ const SortableTable = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isResizing, resizingColumn, columns]);
+  }, [isResizing, handleMouseMove, handleMouseUp]);
 
   // Handle sorting
   const handleSorting = (columnName) => {
