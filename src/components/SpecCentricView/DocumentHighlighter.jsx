@@ -412,19 +412,15 @@ const DocumentHighlighter = ({
                   <button
                     key={option.key}
                     className="highlight-picker-option"
-                    style={{
-                      '--highlight-border': rgbaString(option.swatch, 0.35),
-                      '--highlight-border-hover': rgbaString(option.swatch, 1),
-                      '--highlight-background': rgbaString(option.swatch, 0.12),
-                      '--highlight-background-hover': rgbaString(option.swatch, 0.2),
-                      '--highlight-text': rgbaString(option.swatch, 0.95),
-                      '--highlight-text-hover': rgbaString(option.swatch, 1),
-                      '--highlight-swatch': rgbaString(option.swatch, 0.85),
-                    }}
                     onClick={() => handleHighlightTypeSelect(option)}
                     disabled={isSavingHighlight}
                   >
-                    <span className="highlight-picker-swatch" />
+                    <span
+                      className="highlight-picker-swatch"
+                      style={{
+                        backgroundColor: `rgb(${option.swatch.r}, ${option.swatch.g}, ${option.swatch.b})`
+                      }}
+                    />
                     <span>{option.label}</span>
                   </button>
                 ))
