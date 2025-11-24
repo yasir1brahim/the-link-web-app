@@ -174,6 +174,7 @@ const DocumentHighlighter = ({
   );
   const [highlightPickerOpen, setHighlightPickerOpen] = useState(false);
   const [pendingHighlight, setPendingHighlight] = useState(null);
+  const [pendingNoteText, setPendingNoteText] = useState('');
   const [highlightError, setHighlightError] = useState(null);
   const [isSavingHighlight, setIsSavingHighlight] = useState(false);
   const [showCustomTypesManager, setShowCustomTypesManager] = useState(false);
@@ -285,6 +286,7 @@ const DocumentHighlighter = ({
   const handleCloseHighlightPicker = useCallback(() => {
     setHighlightPickerOpen(false);
     setPendingHighlight(null);
+    setPendingNoteText('');
     setHighlightError(null);
   }, []);
 
@@ -430,6 +432,19 @@ const DocumentHighlighter = ({
           <div className="highlight-picker-modal">
             <h3>Add New Highlight</h3>
             <p className="highlight-picker-context">{truncateText(pendingHighlight.selectedText)}</p>
+
+            {/* Note input section */}
+            <div className="note-input-section">
+              <label htmlFor="highlight-note">Add Note (Optional)</label>
+              <textarea
+                id="highlight-note"
+                className="note-textarea"
+                placeholder="Add a note about this highlight..."
+                value={pendingNoteText}
+                onChange={(e) => setPendingNoteText(e.target.value)}
+                rows={3}
+              />
+            </div>
 
             <div className="highlight-picker-options">
               {highlightTypeOptions.length === 0 ? (
