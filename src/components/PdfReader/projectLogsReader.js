@@ -82,6 +82,65 @@ function findStickyNoteForExtractedData(extractedDataId, annotationManager) {
   );
 }
 
+/**
+ * Create sticky note annotations for an ExtractedData item with notes
+ */
+function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
+  const { annotationManager, Annotations } = webViewer.Core;
+
+  // Safety checks
+  if (!extractedData.notes || extractedData.notes.length === 0) {
+    return;
+  }
+
+  if (!extractedData.pdf_locations || extractedData.pdf_locations.length === 0) {
+    console.warn(`ExtractedData ${extractedData.id} has no PDF locations, skipping notes`);
+    return;
+  }
+
+  const firstLocation = extractedData.pdf_locations[0];
+  const position = calculateStickyPosition(firstLocation, STICKY_NOTE_POSITION);
+
+  // Create parent sticky note
+  const parentSticky = new Annotations.StickyAnnotation({
+    PageNumber: firstLocation.page_no,
+    X: position.x,
+    Y: position.y,
+    Icon: Annotations.StickyAnnotation.IconNames.Comment,
+    StrokeColor: new Annotations.Color(255, 200, 100, 1),
+  });
+
+  parentSticky.setContents('');
+  parentSticky.setOpenInitially(true);
+  parentSticky.setCustomData('extracted_data_id', extractedData.id);
+  parentSticky.ReadOnly = true; // Parent is not editable
+
+  annotationManager.addAnnotation(parentSticky, { imported: true });
+
+  // Create reply annotations for each note
+  const replies = extractedData.notes.map(note => {
+    const reply = new Annotations.StickyAnnotation({
+      PageNumber: firstLocation.page_no,
+      X: position.x,
+      Y: position.y,
+      InReplyTo: parentSticky.Id,
+      ReplyType: 'Group',
+    });
+
+    reply.setContents(note.text);
+    reply.Author = note.created_by_name || 'Unknown';
+    reply.setCustomData('extraction_note_id', note.id);
+    reply.setCustomData('extracted_data_id', extractedData.id);
+    reply.setCustomData('created_by_id', note.created_by_id);
+    reply.ReadOnly = note.created_by_id !== currentUserId;
+
+    return reply;
+  });
+
+  annotationManager.addAnnotations(replies, { imported: true });
+  annotationManager.drawAnnotationsFromList([parentSticky, ...replies]);
+}
+
 const ProjectLogsReader = ({
   url,
   highlightLocations,
@@ -523,6 +582,13 @@ const ProjectLogsReader = ({
 
       // Keep ref in sync with state to avoid closure issues
       annotationsRef.current = _annotations;
+
+      // Create sticky notes for ExtractedData items with notes
+      if (extractedDataItems && extractedDataItems.length > 0) {
+        extractedDataItems.forEach(data => {
+          createNotesForExtractedData(data, tmpViewer, currentUserId);
+        });
+      }
       setAnnotations(_annotations);
       annotationsCreated.current = true;
     } else {
