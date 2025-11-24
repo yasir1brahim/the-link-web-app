@@ -185,11 +185,17 @@ const DocumentHighlighter = ({
 
   // Populate extractedDataItems from localAiHighlights
   useEffect(() => {
-    setExtractedDataItems((localAiHighlights || []).map(item => ({
-      ...item,
-      notes: item.notes || [],
-      pdf_locations: item.pdf_locations || [],
-    })));
+    console.log('[NOTE_DEBUG] localAiHighlights changed:', localAiHighlights?.length || 0);
+    const mapped = (localAiHighlights || []).map(item => {
+      console.log('[NOTE_DEBUG] Item:', item.id, 'has notes:', item.notes?.length || 0);
+      return {
+        ...item,
+        notes: item.notes || [],
+        pdf_locations: item.pdf_locations || [],
+      };
+    });
+    setExtractedDataItems(mapped);
+    console.log('[NOTE_DEBUG] extractedDataItems updated with', mapped.length, 'items');
   }, [localAiHighlights]);
 
   // Memoized lookup map for fast access by ID

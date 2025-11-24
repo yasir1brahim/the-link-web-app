@@ -92,13 +92,16 @@ function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
 
   // Safety checks
   if (!extractedData.notes || extractedData.notes.length === 0) {
+    console.log('[NOTE_DEBUG] No notes for ExtractedData:', extractedData.id);
     return;
   }
 
   if (!extractedData.pdf_locations || extractedData.pdf_locations.length === 0) {
-    console.warn(`ExtractedData ${extractedData.id} has no PDF locations, skipping notes`);
+    console.warn(`[NOTE_DEBUG] ExtractedData ${extractedData.id} has no PDF locations, skipping notes`);
     return;
   }
+
+  console.log('[NOTE_DEBUG] Creating sticky notes for ExtractedData:', extractedData.id, 'with', extractedData.notes.length, 'notes');
 
   const firstLocation = extractedData.pdf_locations[0];
   const position = calculateStickyPosition(firstLocation, STICKY_NOTE_POSITION);
@@ -113,11 +116,12 @@ function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
   });
 
   parentSticky.setContents('');
-  parentSticky.setOpenInitially(true);
   parentSticky.setCustomData('extracted_data_id', extractedData.id);
   parentSticky.ReadOnly = true; // Parent is not editable
 
+  console.log('[NOTE_DEBUG] Adding parent sticky annotation at page:', firstLocation.page_no, 'position:', position);
   annotationManager.addAnnotation(parentSticky, { imported: true });
+  console.log('[NOTE_DEBUG] Parent sticky added with ID:', parentSticky.Id);
 
   // Create reply annotations for each note
   const replies = extractedData.notes.map(note => {
@@ -139,8 +143,11 @@ function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
     return reply;
   });
 
+  console.log('[NOTE_DEBUG] Adding', replies.length, 'reply annotations');
   annotationManager.addAnnotations(replies, { imported: true });
+  console.log('[NOTE_DEBUG] Drawing annotations');
   annotationManager.drawAnnotationsFromList([parentSticky, ...replies]);
+  console.log('[NOTE_DEBUG] Sticky notes creation complete for ExtractedData:', extractedData.id);
 }
 
 const ProjectLogsReader = ({
@@ -216,7 +223,7 @@ const ProjectLogsReader = ({
     if (url === currentUrl && webViewer && documentLoaded) {
       updateTxtView();
     }
-  }, [stableHighlightLocations, stableAiLogHighlightLocations, documentLoaded, activeFiltersString]);
+  }, [stableHighlightLocations, stableAiLogHighlightLocations, documentLoaded, activeFiltersString, extractedDataItems]);
 
   // Set up annotation event listeners for note management
   useEffect(() => {
@@ -361,7 +368,6 @@ const ProjectLogsReader = ({
       });
 
       newSticky.setContents('');
-      newSticky.setOpenInitially(true);
       newSticky.setCustomData('extracted_data_id', extractedDataId);
       newSticky.ReadOnly = true; // Parent is not editable
 
@@ -860,10 +866,23 @@ const ProjectLogsReader = ({
       annotationsRef.current = _annotations;
 
       // Create sticky notes for ExtractedData items with notes
+      // Only create if they don't already exist
       if (extractedDataItems && extractedDataItems.length > 0) {
+        console.log('[NOTE_DEBUG] Processing extractedDataItems:', extractedDataItems.length);
         extractedDataItems.forEach(data => {
+          console.log('[NOTE_DEBUG] Processing item:', data.id, 'notes:', data.notes?.length || 0);
+
+          // Check if sticky note already exists for this extracted data
+          const existingSticky = findStickyNoteForExtractedData(data.id, annotationManager);
+          if (existingSticky) {
+            console.log('[NOTE_DEBUG] Sticky note already exists for item:', data.id);
+            return;
+          }
+
           createNotesForExtractedData(data, tmpViewer, currentUserId);
         });
+      } else {
+        console.log('[NOTE_DEBUG] No extractedDataItems to process');
       }
       setAnnotations(_annotations);
       annotationsCreated.current = true;
