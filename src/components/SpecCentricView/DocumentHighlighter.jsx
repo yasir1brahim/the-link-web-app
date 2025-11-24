@@ -178,6 +178,31 @@ const DocumentHighlighter = ({
   const [isSavingHighlight, setIsSavingHighlight] = useState(false);
   const [showCustomTypesManager, setShowCustomTypesManager] = useState(false);
 
+  // Unified cache for ExtractedData items with notes support
+  const [extractedDataItems, setExtractedDataItems] = useState([]);
+
+  // Populate extractedDataItems from localAiHighlights
+  useEffect(() => {
+    setExtractedDataItems((localAiHighlights || []).map(item => ({
+      ...item,
+      notes: item.notes || [],
+      pdf_locations: item.pdf_locations || [],
+    })));
+  }, [localAiHighlights]);
+
+  // Memoized lookup map for fast access by ID
+  const extractedDataById = useMemo(() => {
+    return new Map(extractedDataItems.map(data => [data.id, data]));
+  }, [extractedDataItems]);
+
+  // Helper callback to pass down
+  const getExtractedDataById = useCallback((id) => {
+    return extractedDataById.get(id);
+  }, [extractedDataById]);
+
+  // Extract current user ID for permissions (set to null if not available)
+  const currentUserId = null; // TODO: Wire up user context when available
+
   const customHighlightOptions = useMemo(() =>
     (customItemTypes || []).map((type) => {
       const swatch = hexToRgb(type.color) || { r: 128, g: 128, b: 128 };
