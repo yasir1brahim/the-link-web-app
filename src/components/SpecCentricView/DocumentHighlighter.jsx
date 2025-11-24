@@ -339,6 +339,7 @@ const DocumentHighlighter = ({
           responsible_party: null,
           metadata: {},
           pdf_locations: pendingHighlight.locations,
+          note_text: pendingNoteText.trim() || null,
         };
 
         if (option.isCustom && option.customTypeId) {
@@ -355,6 +356,7 @@ const DocumentHighlighter = ({
           item_type: response?.data?.item_type ?? payload.item_type,
           requirement_text: response?.data?.requirement_text ?? pendingHighlight.selectedText,
           pdf_locations: response?.data?.pdf_locations ?? pendingHighlight.locations,
+          notes: response?.data?.notes || [],
         };
 
         if (option.isCustom && option.customTypeId) {
@@ -369,6 +371,13 @@ const DocumentHighlighter = ({
             };
         }
 
+        // Update extractedDataItems cache with new highlight
+        setExtractedDataItems(prev => [...prev, {
+          ...createdHighlight,
+          notes: createdHighlight.notes || [],
+          pdf_locations: createdHighlight.pdf_locations || [],
+        }]);
+
         handleHighlightCreationSuccess(createdHighlight);
       } catch (error) {
         console.error('Failed to create highlight:', error);
@@ -381,6 +390,7 @@ const DocumentHighlighter = ({
       handleHighlightCreationSuccess,
       isSavingHighlight,
       pendingHighlight,
+      pendingNoteText,
       projectId,
       projectVersionId,
       specSection,
