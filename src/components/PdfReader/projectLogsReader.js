@@ -304,14 +304,94 @@ const ProjectLogsReader = ({
       });
     };
 
+    /**
+     * Handle annotation deletion with backend sync and rollback
+     */
+    const handleAnnotationDeleted = async (annotations, { imported }) => {
+      if (imported) return;
+
+      for (const annot of annotations) {
+        // Handle reply deletion
+        if (isExtractionNoteReply(annot)) {
+          const noteId = annot.getCustomData('extraction_note_id');
+          const extractedDataId = annot.getCustomData('extracted_data_id');
+
+          // Clone annotation for potential rollback
+          const annotCopy = {
+            contents: annot.getContents(),
+            author: annot.Author,
+            customData: { ...annot.CustomData },
+            position: {
+              x: annot.X,
+              y: annot.Y,
+              page: annot.PageNumber
+            },
+            parentId: annot.InReplyTo
+          };
+
+          try {
+            await api.deleteExtractionNote(
+              projectId,
+              extractedDataId,
+              noteId
+            );
+          } catch (error) {
+            console.error('Failed to delete note:', error);
+
+            // Rollback: recreate the annotation
+            const restored = new Annotations.StickyAnnotation({
+              PageNumber: annotCopy.position.page,
+              X: annotCopy.position.x,
+              Y: annotCopy.position.y,
+              InReplyTo: annotCopy.parentId,
+              ReplyType: 'Group',
+            });
+
+            restored.setContents(annotCopy.contents);
+            restored.Author = annotCopy.author;
+            Object.keys(annotCopy.customData).forEach(key => {
+              restored.setCustomData(key, annotCopy.customData[key]);
+            });
+
+            annotationManager.addAnnotation(restored, { imported: true });
+            annotationManager.drawAnnotationsFromList([restored]);
+          }
+
+          continue;
+        }
+
+        // Handle parent sticky deletion (deletes all child notes)
+        if (isExtractionNoteParent(annot)) {
+          const extractedDataId = annot.getCustomData('extracted_data_id');
+          const replies = annotationManager.getAnnotationsList().filter(a =>
+            a.InReplyTo === annot.Id && isExtractionNoteReply(a)
+          );
+
+          // Delete all notes from backend
+          for (const reply of replies) {
+            const noteId = reply.getCustomData('extraction_note_id');
+            if (noteId) {
+              try {
+                await api.deleteExtractionNote(projectId, extractedDataId, noteId);
+              } catch (error) {
+                console.error('Failed to delete note from backend:', error);
+              }
+            }
+          }
+        }
+      }
+    };
+
     // Register event listeners
     annotationManager.addEventListener('annotationChanged', handleAnnotationChanged);
     annotationManager.addEventListener('annotationSelected', handleAnnotationSelected);
+    annotationManager.addEventListener('annotationDeleted', handleAnnotationDeleted);
 
     // Cleanup function to remove listeners
     return () => {
       annotationManager.removeEventListener('annotationChanged', handleAnnotationChanged);
       annotationManager.removeEventListener('annotationSelected', handleAnnotationSelected);
+      annotationManager.removeEventListener('annotationDeleted', handleAnnotationDeleted);
     };
   }, [webViewer, projectId]);
 
