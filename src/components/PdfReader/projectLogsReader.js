@@ -236,6 +236,14 @@ const ProjectLogsReader = ({
     };
 
     /**
+     * Check if current user can edit annotation
+     */
+    const canEditAnnotation = (annotation, currentUserId) => {
+      const createdById = annotation.getCustomData('created_by_id');
+      return createdById && createdById === currentUserId;
+    };
+
+    /**
      * Handle annotation add/modify events
      */
     const handleAnnotationChanged = async (annotations, action, { imported }) => {
@@ -280,6 +288,19 @@ const ProjectLogsReader = ({
         if (action === 'modify') {
           const noteId = annot.getCustomData('extraction_note_id');
           const extractedDataId = annot.getCustomData('extracted_data_id');
+
+          // Permission check (safety net - ReadOnly should prevent this)
+          if (!canEditAnnotation(annot, currentUserId)) {
+            console.error('Unauthorized note modification attempt');
+            const previousText = annot._originalContents;
+            if (previousText) {
+              annot.setContents(previousText);
+              annotationManager.redrawAnnotation(annot);
+            }
+            toast.error('You can only edit your own notes');
+            continue;
+          }
+
           const newText = annot.getContents();
           const previousText = annot._originalContents || annot.getCustomData('_previous_contents');
 
