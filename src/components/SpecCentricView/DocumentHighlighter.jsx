@@ -419,6 +419,10 @@ const DocumentHighlighter = ({
         useFiltering={true}
         isSpecViewMode
         onRequestAddHighlight={handleRequestAddHighlight}
+        extractedDataItems={extractedDataItems}
+        getExtractedDataById={getExtractedDataById}
+        currentUserId={currentUserId}
+        projectId={projectId}
       />
 
       {highlightPickerOpen && pendingHighlight && (
