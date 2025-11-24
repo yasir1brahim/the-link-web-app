@@ -7,6 +7,81 @@ import { validateS3Link, isS3LinkExpiredError } from "../../utils/s3LinkValidato
 import { useS3LinkValidation } from "../../hooks/useS3LinkValidation.js";
 import { ReactComponent as AddButton } from "../../assets/images/circle-add.svg";
 
+// Configuration for sticky note positioning
+const STICKY_NOTE_POSITION = 'start'; // Options: 'start', 'center', 'end', 'offset'
+
+/**
+ * Calculate sticky note position based on highlight location
+ */
+function calculateStickyPosition(highlightLocation, position = 'start') {
+  const { x, y, width, height } = highlightLocation;
+
+  let calcX, calcY;
+
+  switch(position) {
+    case 'start':
+      calcX = x;
+      calcY = y;
+      break;
+    case 'center':
+      calcX = x + (width || 0) / 2;
+      calcY = y + (height || 0) / 2;
+      break;
+    case 'end':
+      calcX = x + (width || 0);
+      calcY = y + (height || 0);
+      break;
+    case 'offset':
+      calcX = x + (width || 0) + 5;
+      calcY = y - 5;
+      break;
+    default:
+      calcX = x;
+      calcY = y;
+  }
+
+  // Ensure position is within bounds
+  calcX = Math.max(0, calcX);
+  calcY = Math.max(0, calcY);
+
+  return { x: calcX, y: calcY };
+}
+
+/**
+ * Check if annotation is an extraction note parent (sticky without parent)
+ */
+function isExtractionNoteParent(annotation) {
+  return annotation.getCustomData('extracted_data_id') &&
+         !annotation.InReplyTo;
+}
+
+/**
+ * Check if annotation is an extraction note reply
+ */
+function isExtractionNoteReply(annotation) {
+  return annotation.getCustomData('extraction_note_id') &&
+         annotation.InReplyTo;
+}
+
+/**
+ * Check if annotation is a highlight rectangle
+ */
+function isHighlightRectangle(annotation, Annotations) {
+  return annotation instanceof Annotations.RectangleAnnotation &&
+         annotation.getCustomData('extracted_data_id');
+}
+
+/**
+ * Find existing sticky note parent for an ExtractedData ID
+ */
+function findStickyNoteForExtractedData(extractedDataId, annotationManager) {
+  const allAnnotations = annotationManager.getAnnotationsList();
+  return allAnnotations.find(annot =>
+    isExtractionNoteParent(annot) &&
+    annot.getCustomData('extracted_data_id') === extractedDataId
+  );
+}
+
 const ProjectLogsReader = ({
   url,
   highlightLocations,
@@ -24,6 +99,10 @@ const ProjectLogsReader = ({
   useFiltering = false,
   isSpecViewMode = false,
   onRequestAddHighlight = null,
+  extractedDataItems = [],
+  getExtractedDataById = null,
+  currentUserId = null,
+  projectId = null,
 }) => {
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
