@@ -6,6 +6,7 @@ import axiosInstance from "../../config/axios";
 import { validateS3Link, isS3LinkExpiredError } from "../../utils/s3LinkValidator.js";
 import { useS3LinkValidation } from "../../hooks/useS3LinkValidation.js";
 import { ReactComponent as AddButton } from "../../assets/images/circle-add.svg";
+import * as api from '../../api/SpecCentricView/api';
 
 // Configuration for sticky note positioning
 const STICKY_NOTE_POSITION = 'start'; // Options: 'start', 'center', 'end', 'offset'
@@ -215,6 +216,104 @@ const ProjectLogsReader = ({
       updateTxtView();
     }
   }, [stableHighlightLocations, stableAiLogHighlightLocations, documentLoaded, activeFiltersString]);
+
+  // Set up annotation event listeners for note management
+  useEffect(() => {
+    if (!webViewer || !webViewer.Core || !projectId) {
+      return;
+    }
+
+    const { annotationManager, Annotations } = webViewer.Core;
+
+    /**
+     * Handle annotation add/modify events
+     */
+    const handleAnnotationChanged = async (annotations, action, { imported }) => {
+      if (imported) return; // Skip annotations loaded from backend
+
+      for (const annot of annotations) {
+        if (!isExtractionNoteReply(annot)) {
+          continue;
+        }
+
+        if (action === 'add') {
+          const extractedDataId = annot.getCustomData('extracted_data_id');
+          const noteText = annot.getContents();
+
+          if (!noteText || !noteText.trim()) {
+            continue; // Skip empty notes
+          }
+
+          try {
+            const note = await api.createExtractionNote(
+              projectId,
+              extractedDataId,
+              { text: noteText }
+            );
+
+            // Update annotation with backend note ID
+            annot.setCustomData('extraction_note_id', note.id);
+            annot.setCustomData('created_by_id', note.created_by_id);
+            annotationManager.redrawAnnotation(annot);
+          } catch (error) {
+            console.error('Failed to create note:', error);
+            // Rollback: delete the annotation without firing events
+            annotationManager.deleteAnnotation(annot, false, true);
+          }
+
+          continue;
+        }
+
+        if (action === 'modify') {
+          const noteId = annot.getCustomData('extraction_note_id');
+          const extractedDataId = annot.getCustomData('extracted_data_id');
+          const newText = annot.getContents();
+          const previousText = annot._originalContents || annot.getCustomData('_previous_contents');
+
+          try {
+            await api.updateExtractionNote(
+              projectId,
+              extractedDataId,
+              noteId,
+              { text: newText }
+            );
+
+            // Clear cached original
+            delete annot._originalContents;
+          } catch (error) {
+            console.error('Failed to update note:', error);
+
+            // Rollback: restore previous text
+            if (typeof previousText === 'string') {
+              annot.setContents(previousText);
+              annotationManager.redrawAnnotation(annot);
+            }
+          }
+        }
+      }
+    };
+
+    /**
+     * Cache original note contents when selected for edit rollback
+     */
+    const handleAnnotationSelected = (annotations) => {
+      annotations.forEach((annot) => {
+        if (isExtractionNoteReply(annot)) {
+          annot._originalContents = annot.getContents();
+        }
+      });
+    };
+
+    // Register event listeners
+    annotationManager.addEventListener('annotationChanged', handleAnnotationChanged);
+    annotationManager.addEventListener('annotationSelected', handleAnnotationSelected);
+
+    // Cleanup function to remove listeners
+    return () => {
+      annotationManager.removeEventListener('annotationChanged', handleAnnotationChanged);
+      annotationManager.removeEventListener('annotationSelected', handleAnnotationSelected);
+    };
+  }, [webViewer, projectId]);
 
   const handleClose = () => {
     setLogInViewer(null);
