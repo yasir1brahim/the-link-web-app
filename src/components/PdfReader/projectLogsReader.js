@@ -250,8 +250,11 @@ const ProjectLogsReader = ({
           const extractedDataId = annot.getCustomData('extracted_data_id');
           const noteText = annot.getContents();
 
+          // Skip empty notes and show warning
           if (!noteText || !noteText.trim()) {
-            continue; // Skip empty notes
+            annotationManager.deleteAnnotation(annot, false, true);
+            toast.warning('Cannot create empty note');
+            continue;
           }
 
           try {
