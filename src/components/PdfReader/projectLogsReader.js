@@ -294,14 +294,71 @@ const ProjectLogsReader = ({
     };
 
     /**
+     * Handle click on highlight rectangle to open/create notes
+     */
+    const handleHighlightClick = (extractedDataId) => {
+      // Check if sticky note already exists
+      const existingSticky = findStickyNoteForExtractedData(extractedDataId, annotationManager);
+
+      if (existingSticky) {
+        // Open existing sticky note
+        webViewer.UI.openElement('notesPanel');
+        annotationManager.selectAnnotation(existingSticky);
+        return;
+      }
+
+      // Create new sticky note
+      const extractedData = getExtractedDataById ? getExtractedDataById(extractedDataId) : null;
+
+      if (!extractedData || !extractedData.pdf_locations || extractedData.pdf_locations.length === 0) {
+        console.warn(`Cannot create sticky note: ExtractedData ${extractedDataId} has no PDF locations`);
+        return;
+      }
+
+      const firstLocation = extractedData.pdf_locations[0];
+      const position = calculateStickyPosition(firstLocation, STICKY_NOTE_POSITION);
+
+      const newSticky = new Annotations.StickyAnnotation({
+        PageNumber: firstLocation.page_no,
+        X: position.x,
+        Y: position.y,
+        Icon: Annotations.StickyAnnotation.IconNames.Comment,
+        StrokeColor: new Annotations.Color(255, 200, 100, 1),
+      });
+
+      newSticky.setContents('');
+      newSticky.setOpenInitially(true);
+      newSticky.setCustomData('extracted_data_id', extractedDataId);
+      newSticky.ReadOnly = true; // Parent is not editable
+
+      annotationManager.addAnnotation(newSticky);
+      annotationManager.redrawAnnotation(newSticky);
+
+      // Open notes panel and select the new sticky note
+      webViewer.UI.openElement('notesPanel');
+      annotationManager.selectAnnotation(newSticky);
+    };
+
+    /**
      * Cache original note contents when selected for edit rollback
      */
     const handleAnnotationSelected = (annotations) => {
-      annotations.forEach((annot) => {
-        if (isExtractionNoteReply(annot)) {
-          annot._originalContents = annot.getContents();
+      const selectedAnnot = annotations[0];
+
+      if (!selectedAnnot) return;
+
+      // Cache original contents for edit rollback
+      if (isExtractionNoteReply(selectedAnnot)) {
+        selectedAnnot._originalContents = selectedAnnot.getContents();
+      }
+
+      // Handle highlight rectangle clicks
+      if (isHighlightRectangle(selectedAnnot, Annotations)) {
+        const extractedDataId = selectedAnnot.getCustomData('extracted_data_id');
+        if (extractedDataId) {
+          handleHighlightClick(extractedDataId);
         }
-      });
+      }
     };
 
     /**
@@ -744,6 +801,7 @@ const ProjectLogsReader = ({
         });
         rectangleAnnot.Subject = `AI Log Highlight - ${location?.item_type || location?.extraction_type || 'Unknown'}`;
         rectangleAnnot.CustomData = {
+          extracted_data_id: location?.extracted_data_id, // CRITICAL for linking to notes
           item_type: location?.item_type,
           extraction_type: location?.extraction_type,
           requirement_text: location?.requirement_text,

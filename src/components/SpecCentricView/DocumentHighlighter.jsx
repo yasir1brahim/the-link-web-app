@@ -161,6 +161,7 @@ const DocumentHighlighter = ({
           requirement_text: logItem.requirement_text,
           custom_item_type: logItem.custom_item_type,
           color,
+          extracted_data_id: logItem.id, // CRITICAL for linking to notes
         });
       }
     }
