@@ -437,6 +437,11 @@ const ProjectLogsReader = ({
             a.InReplyTo === annot.Id && isExtractionNoteReply(a)
           );
 
+          if (replies.length > 0) {
+            // Show warning
+            toast.info(`Deleting ${replies.length} note(s) from highlight`);
+          }
+
           // Delete all notes from backend
           for (const reply of replies) {
             const noteId = reply.getCustomData('extraction_note_id');
