@@ -7,6 +7,7 @@ import { validateS3Link, isS3LinkExpiredError } from "../../utils/s3LinkValidato
 import { useS3LinkValidation } from "../../hooks/useS3LinkValidation.js";
 import { ReactComponent as AddButton } from "../../assets/images/circle-add.svg";
 import * as api from '../../api/SpecCentricView/api';
+import { toast } from 'react-toastify';
 
 // Configuration for sticky note positioning
 const STICKY_NOTE_POSITION = 'start'; // Options: 'start', 'center', 'end', 'offset'
@@ -226,6 +227,15 @@ const ProjectLogsReader = ({
     const { annotationManager, Annotations } = webViewer.Core;
 
     /**
+     * Display error notification to user
+     */
+    const handleError = (error, context = '') => {
+      const message = error?.response?.data?.message || error.message || 'An error occurred';
+      console.error(`${context}:`, error);
+      toast.error(`${context}: ${message}`);
+    };
+
+    /**
      * Handle annotation add/modify events
      */
     const handleAnnotationChanged = async (annotations, action, { imported }) => {
@@ -256,7 +266,7 @@ const ProjectLogsReader = ({
             annot.setCustomData('created_by_id', note.created_by_id);
             annotationManager.redrawAnnotation(annot);
           } catch (error) {
-            console.error('Failed to create note:', error);
+            handleError(error, 'Failed to create note');
             // Rollback: delete the annotation without firing events
             annotationManager.deleteAnnotation(annot, false, true);
           }
@@ -281,7 +291,7 @@ const ProjectLogsReader = ({
             // Clear cached original
             delete annot._originalContents;
           } catch (error) {
-            console.error('Failed to update note:', error);
+            handleError(error, 'Failed to update note');
 
             // Rollback: restore previous text
             if (typeof previousText === 'string') {
@@ -393,7 +403,7 @@ const ProjectLogsReader = ({
               noteId
             );
           } catch (error) {
-            console.error('Failed to delete note:', error);
+            handleError(error, 'Failed to delete note');
 
             // Rollback: recreate the annotation
             const restored = new Annotations.StickyAnnotation({
