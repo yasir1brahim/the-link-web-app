@@ -146,6 +146,7 @@
 
 .spec-document-viewer {
   margin-bottom: 8px;
+  position: relative; /* Positioning context for highlight legend */
 }
 
 .document-placeholder {

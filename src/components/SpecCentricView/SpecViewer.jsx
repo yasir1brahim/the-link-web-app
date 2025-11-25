@@ -84,6 +84,13 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
         selectedSection.id,
         projectVersionId
       );
+      console.log('[NOTE_DEBUG] Section content loaded:', response.data);
+      console.log('[NOTE_DEBUG] AI log highlights count:', response.data?.ai_log_highlights?.length || 0);
+      if (response.data?.ai_log_highlights) {
+        response.data.ai_log_highlights.forEach(item => {
+          console.log('[NOTE_DEBUG] Item:', item.id, 'notes:', item.notes?.length || 0, 'notes data:', item.notes);
+        });
+      }
       setSectionContent(response.data);
     } catch (err) {
       console.error('Error loading section content:', err);
@@ -277,6 +284,13 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
                     customItemTypes={customItemTypes}
                     onCustomTypesUpdate={refreshCustomTypes}
                   />
+                  {/* Highlight Color Legend - positioned inside viewer area */}
+                  <HighlightLegend
+                    submittalHighlights={sectionContent.submittal_highlights || []}
+                    aiLogHighlights={sectionContent.ai_log_highlights || []}
+                    onFilterChange={handleFilterChange}
+                    customItemTypes={customItemTypes}
+                  />
                 </div>
               </div>
             </div>
@@ -296,16 +310,6 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
         onClose={handleTooltipClose}
         onViewDetails={handleViewDetails}
       />
-      
-      {/* Highlight Color Legend */}
-      {selectedSection && sectionContent && (
-        <HighlightLegend
-          submittalHighlights={sectionContent.submittal_highlights || []}
-          aiLogHighlights={sectionContent.ai_log_highlights || []}
-          onFilterChange={handleFilterChange}
-          customItemTypes={customItemTypes}
-        />
-      )}
 
       {/* Export Modal */}
       <ExportModal

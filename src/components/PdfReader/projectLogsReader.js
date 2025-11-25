@@ -957,10 +957,8 @@ const ProjectLogsReader = ({
             annot instanceof _webViewer.Core.Annotations.StickyAnnotation
           );
 
-          // Auto-expand comment threads so replies are visible
-          if (_webViewer.UI.NotesPanel) {
-            _webViewer.UI.NotesPanel.enableAutoExpandCommentThread();
-          }
+          // Disable reply feature to keep things simple (one comment per highlight)
+          _webViewer.UI.disableReplyForAnnotations(() => true);
         }, 200);
         setLoading(false);
       });
