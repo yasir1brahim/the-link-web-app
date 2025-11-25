@@ -9,42 +9,19 @@ import { ReactComponent as AddButton } from "../../assets/images/circle-add.svg"
 import * as api from '../../api/SpecCentricView/api';
 import { toast } from 'react-toastify';
 
-// Configuration for sticky note positioning
-const STICKY_NOTE_POSITION = 'start'; // Options: 'start', 'center', 'end', 'offset'
+// Sticky note icon vertical offset - Apryse sticky notes anchor from bottom of icon
+const STICKY_NOTE_ICON_OFFSET = 20;
 
 /**
  * Calculate sticky note position based on highlight location
+ * Positions the icon at the right side of the highlight, vertically aligned
  */
-function calculateStickyPosition(highlightLocation, position = 'start') {
-  const { x, y, width, height } = highlightLocation;
+function calculateStickyPosition(highlightLocation) {
+  const { x, y, width } = highlightLocation;
 
-  let calcX, calcY;
-
-  switch(position) {
-    case 'start':
-      calcX = x;
-      calcY = y;
-      break;
-    case 'center':
-      calcX = x + (width || 0) / 2;
-      calcY = y + (height || 0) / 2;
-      break;
-    case 'end':
-      calcX = x + (width || 0);
-      calcY = y + (height || 0);
-      break;
-    case 'offset':
-      calcX = x + (width || 0) + 5;
-      calcY = y - 5;
-      break;
-    default:
-      calcX = x;
-      calcY = y;
-  }
-
-  // Ensure position is within bounds
-  calcX = Math.max(0, calcX);
-  calcY = Math.max(0, calcY);
+  // Position at the right edge of the highlight, offset upward to align with text
+  const calcX = Math.max(0, x + (width || 0));
+  const calcY = Math.max(0, y - STICKY_NOTE_ICON_OFFSET);
 
   return { x: calcX, y: calcY };
 }
@@ -104,7 +81,7 @@ function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
   console.log('[NOTE_DEBUG] Creating sticky notes for ExtractedData:', extractedData.id, 'with', extractedData.notes.length, 'notes');
 
   const firstLocation = extractedData.pdf_locations[0];
-  const position = calculateStickyPosition(firstLocation, STICKY_NOTE_POSITION);
+  const position = calculateStickyPosition(firstLocation);
 
   // Create parent sticky note
   const parentSticky = new Annotations.StickyAnnotation({
@@ -357,7 +334,7 @@ const ProjectLogsReader = ({
       }
 
       const firstLocation = extractedData.pdf_locations[0];
-      const position = calculateStickyPosition(firstLocation, STICKY_NOTE_POSITION);
+      const position = calculateStickyPosition(firstLocation);
 
       const newSticky = new Annotations.StickyAnnotation({
         PageNumber: firstLocation.page_no,
