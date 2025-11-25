@@ -930,6 +930,19 @@ const ProjectLogsReader = ({
         // Add a small delay to ensure WebViewer is fully ready
         setTimeout(() => {
           updateTxtView(_webViewer);
+
+          // Open notes panel by default (Google Docs-style comment sidebar)
+          _webViewer.UI.openElements(['notesPanel']);
+
+          // Filter notes panel to only show sticky annotations (comments), not highlight rectangles
+          _webViewer.UI.setCustomNoteFilter(annot =>
+            annot instanceof _webViewer.Core.Annotations.StickyAnnotation
+          );
+
+          // Auto-expand comment threads so replies are visible
+          if (_webViewer.UI.NotesPanel) {
+            _webViewer.UI.NotesPanel.enableAutoExpandCommentThread();
+          }
         }, 200);
         setLoading(false);
       });
@@ -970,7 +983,7 @@ const ProjectLogsReader = ({
         "textSquigglyToolButton",
         "textStrikeoutToolButton",
         "linkButton",
-        "toggleNotesButton",
+        // Note: toggleNotesButton kept enabled so users can show/hide notes panel
       ]);
 
       // Custom close button
