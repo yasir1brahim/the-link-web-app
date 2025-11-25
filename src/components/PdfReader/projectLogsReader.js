@@ -949,16 +949,19 @@ const ProjectLogsReader = ({
         setTimeout(() => {
           updateTxtView(_webViewer);
 
-          // Open notes panel by default (Google Docs-style comment sidebar)
-          _webViewer.UI.openElements(['notesPanel']);
+          // Only show notes panel in spec view mode
+          if (isSpecViewMode) {
+            // Open notes panel by default (Google Docs-style comment sidebar)
+            _webViewer.UI.openElements(['notesPanel']);
 
-          // Filter notes panel to only show sticky annotations (comments), not highlight rectangles
-          _webViewer.UI.setCustomNoteFilter(annot =>
-            annot instanceof _webViewer.Core.Annotations.StickyAnnotation
-          );
+            // Filter notes panel to only show sticky annotations (comments), not highlight rectangles
+            _webViewer.UI.setCustomNoteFilter(annot =>
+              annot instanceof _webViewer.Core.Annotations.StickyAnnotation
+            );
 
-          // Disable reply feature to keep things simple (one comment per highlight)
-          _webViewer.UI.disableReplyForAnnotations(() => true);
+            // Disable reply feature to keep things simple (one comment per highlight)
+            _webViewer.UI.disableReplyForAnnotations(() => true);
+          }
         }, 200);
         setLoading(false);
       });
@@ -973,7 +976,7 @@ const ProjectLogsReader = ({
       });
 
       // UI Customization - Hide extra toolbar elements
-      _webViewer.UI.disableElements([
+      const elementsToDisable = [
         "downloadButton",
         "printButton",
         "viewControlsDivider2",
@@ -999,8 +1002,14 @@ const ProjectLogsReader = ({
         "textSquigglyToolButton",
         "textStrikeoutToolButton",
         "linkButton",
-        // Note: toggleNotesButton kept enabled so users can show/hide notes panel
-      ]);
+      ];
+
+      // Hide notes toggle button when not in spec view mode
+      if (!isSpecViewMode) {
+        elementsToDisable.push("toggleNotesButton");
+      }
+
+      _webViewer.UI.disableElements(elementsToDisable);
 
       // Custom close button
       const closeButton = () => {
