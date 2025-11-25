@@ -161,6 +161,7 @@ const DocumentHighlighter = ({
           requirement_text: logItem.requirement_text,
           custom_item_type: logItem.custom_item_type,
           color,
+          extracted_data_id: logItem.id, // CRITICAL for linking to notes
         });
       }
     }
@@ -174,9 +175,41 @@ const DocumentHighlighter = ({
   );
   const [highlightPickerOpen, setHighlightPickerOpen] = useState(false);
   const [pendingHighlight, setPendingHighlight] = useState(null);
+  const [pendingNoteText, setPendingNoteText] = useState('');
   const [highlightError, setHighlightError] = useState(null);
   const [isSavingHighlight, setIsSavingHighlight] = useState(false);
   const [showCustomTypesManager, setShowCustomTypesManager] = useState(false);
+
+  // Unified cache for ExtractedData items with notes support
+  const [extractedDataItems, setExtractedDataItems] = useState([]);
+
+  // Populate extractedDataItems from localAiHighlights
+  useEffect(() => {
+    console.log('[NOTE_DEBUG] localAiHighlights changed:', localAiHighlights?.length || 0);
+    const mapped = (localAiHighlights || []).map(item => {
+      console.log('[NOTE_DEBUG] Item:', item.id, 'has notes:', item.notes?.length || 0);
+      return {
+        ...item,
+        notes: item.notes || [],
+        pdf_locations: item.pdf_locations || [],
+      };
+    });
+    setExtractedDataItems(mapped);
+    console.log('[NOTE_DEBUG] extractedDataItems updated with', mapped.length, 'items');
+  }, [localAiHighlights]);
+
+  // Memoized lookup map for fast access by ID
+  const extractedDataById = useMemo(() => {
+    return new Map(extractedDataItems.map(data => [data.id, data]));
+  }, [extractedDataItems]);
+
+  // Helper callback to pass down
+  const getExtractedDataById = useCallback((id) => {
+    return extractedDataById.get(id);
+  }, [extractedDataById]);
+
+  // Extract current user ID for permissions (set to null if not available)
+  const currentUserId = null; // TODO: Wire up user context when available
 
   const customHighlightOptions = useMemo(() =>
     (customItemTypes || []).map((type) => {
@@ -260,6 +293,7 @@ const DocumentHighlighter = ({
   const handleCloseHighlightPicker = useCallback(() => {
     setHighlightPickerOpen(false);
     setPendingHighlight(null);
+    setPendingNoteText('');
     setHighlightError(null);
   }, []);
 
@@ -312,6 +346,7 @@ const DocumentHighlighter = ({
           responsible_party: null,
           metadata: {},
           pdf_locations: pendingHighlight.locations,
+          note_text: pendingNoteText.trim() || null,
         };
 
         if (option.isCustom && option.customTypeId) {
@@ -328,6 +363,7 @@ const DocumentHighlighter = ({
           item_type: response?.data?.item_type ?? payload.item_type,
           requirement_text: response?.data?.requirement_text ?? pendingHighlight.selectedText,
           pdf_locations: response?.data?.pdf_locations ?? pendingHighlight.locations,
+          notes: response?.data?.notes || [],
         };
 
         if (option.isCustom && option.customTypeId) {
@@ -342,6 +378,13 @@ const DocumentHighlighter = ({
             };
         }
 
+        // Update extractedDataItems cache with new highlight
+        setExtractedDataItems(prev => [...prev, {
+          ...createdHighlight,
+          notes: createdHighlight.notes || [],
+          pdf_locations: createdHighlight.pdf_locations || [],
+        }]);
+
         handleHighlightCreationSuccess(createdHighlight);
       } catch (error) {
         console.error('Failed to create highlight:', error);
@@ -354,6 +397,7 @@ const DocumentHighlighter = ({
       handleHighlightCreationSuccess,
       isSavingHighlight,
       pendingHighlight,
+      pendingNoteText,
       projectId,
       projectVersionId,
       specSection,
@@ -394,6 +438,10 @@ const DocumentHighlighter = ({
         useFiltering={true}
         isSpecViewMode
         onRequestAddHighlight={handleRequestAddHighlight}
+        extractedDataItems={extractedDataItems}
+        getExtractedDataById={getExtractedDataById}
+        currentUserId={currentUserId}
+        projectId={projectId}
       />
 
       {highlightPickerOpen && pendingHighlight && (
@@ -401,6 +449,19 @@ const DocumentHighlighter = ({
           <div className="highlight-picker-modal">
             <h3>Add New Highlight</h3>
             <p className="highlight-picker-context">{truncateText(pendingHighlight.selectedText)}</p>
+
+            {/* Note input section */}
+            <div className="note-input-section">
+              <label htmlFor="highlight-note">Add Note (Optional)</label>
+              <textarea
+                id="highlight-note"
+                className="note-textarea"
+                placeholder="Add a note about this highlight..."
+                value={pendingNoteText}
+                onChange={(e) => setPendingNoteText(e.target.value)}
+                rows={3}
+              />
+            </div>
 
             <div className="highlight-picker-options">
               {highlightTypeOptions.length === 0 ? (
