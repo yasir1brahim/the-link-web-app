@@ -83,7 +83,10 @@ function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
   const firstLocation = extractedData.pdf_locations[0];
   const position = calculateStickyPosition(firstLocation);
 
-  // Create parent sticky note
+  // First note becomes the parent sticky (with content), subsequent notes become replies
+  const [firstNote, ...remainingNotes] = extractedData.notes;
+
+  // Create parent sticky note with first note's content
   const parentSticky = new Annotations.StickyAnnotation({
     PageNumber: firstLocation.page_no,
     X: position.x,
@@ -92,16 +95,19 @@ function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
     StrokeColor: new Annotations.Color(255, 200, 100, 1),
   });
 
-  parentSticky.setContents('');
+  parentSticky.setContents(firstNote.text);
+  parentSticky.Author = firstNote.created_by_name || 'Unknown';
   parentSticky.setCustomData('extracted_data_id', extractedData.id);
-  parentSticky.ReadOnly = true; // Parent is not editable
+  parentSticky.setCustomData('extraction_note_id', firstNote.id);
+  parentSticky.setCustomData('created_by_id', firstNote.created_by_id);
+  parentSticky.ReadOnly = firstNote.created_by_id !== currentUserId;
 
   console.log('[NOTE_DEBUG] Adding parent sticky annotation at page:', firstLocation.page_no, 'position:', position);
   annotationManager.addAnnotation(parentSticky, { imported: true });
   console.log('[NOTE_DEBUG] Parent sticky added with ID:', parentSticky.Id);
 
-  // Create reply annotations for each note
-  const replies = extractedData.notes.map(note => {
+  // Create reply annotations for remaining notes (if any)
+  const replies = remainingNotes.map(note => {
     const reply = new Annotations.StickyAnnotation({
       PageNumber: firstLocation.page_no,
       X: position.x,
@@ -120,8 +126,10 @@ function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
     return reply;
   });
 
-  console.log('[NOTE_DEBUG] Adding', replies.length, 'reply annotations');
-  annotationManager.addAnnotations(replies, { imported: true });
+  if (replies.length > 0) {
+    console.log('[NOTE_DEBUG] Adding', replies.length, 'reply annotations');
+    annotationManager.addAnnotations(replies, { imported: true });
+  }
   console.log('[NOTE_DEBUG] Drawing annotations');
   annotationManager.drawAnnotationsFromList([parentSticky, ...replies]);
   console.log('[NOTE_DEBUG] Sticky notes creation complete for ExtractedData:', extractedData.id);
@@ -228,51 +236,31 @@ const ProjectLogsReader = ({
     };
 
     /**
+     * Check if annotation is an extraction note (parent or reply)
+     */
+    const isExtractionNote = (annot) => {
+      return annot instanceof Annotations.StickyAnnotation &&
+             annot.getCustomData('extracted_data_id');
+    };
+
+    /**
      * Handle annotation add/modify events
      */
     const handleAnnotationChanged = async (annotations, action, { imported }) => {
       if (imported) return; // Skip annotations loaded from backend
 
       for (const annot of annotations) {
-        if (!isExtractionNoteReply(annot)) {
+        // Handle both parent sticky notes and replies
+        if (!isExtractionNote(annot)) {
           continue;
         }
 
-        if (action === 'add') {
-          const extractedDataId = annot.getCustomData('extracted_data_id');
-          const noteText = annot.getContents();
+        const extractedDataId = annot.getCustomData('extracted_data_id');
+        const noteId = annot.getCustomData('extraction_note_id');
+        const noteText = annot.getContents();
 
-          // Skip empty notes and show warning
-          if (!noteText || !noteText.trim()) {
-            annotationManager.deleteAnnotation(annot, false, true);
-            toast.warning('Cannot create empty note');
-            continue;
-          }
-
-          try {
-            const note = await api.createExtractionNote(
-              projectId,
-              extractedDataId,
-              { text: noteText }
-            );
-
-            // Update annotation with backend note ID
-            annot.setCustomData('extraction_note_id', note.id);
-            annot.setCustomData('created_by_id', note.created_by_id);
-            annotationManager.redrawAnnotation(annot);
-          } catch (error) {
-            handleError(error, 'Failed to create note');
-            // Rollback: delete the annotation without firing events
-            annotationManager.deleteAnnotation(annot, false, true);
-          }
-
-          continue;
-        }
-
-        if (action === 'modify') {
-          const noteId = annot.getCustomData('extraction_note_id');
-          const extractedDataId = annot.getCustomData('extracted_data_id');
-
+        // Handle modify action (editing existing note)
+        if (action === 'modify' && noteId) {
           // Permission check (safety net - ReadOnly should prevent this)
           if (!canEditAnnotation(annot, currentUserId)) {
             console.error('Unauthorized note modification attempt');
@@ -285,7 +273,6 @@ const ProjectLogsReader = ({
             continue;
           }
 
-          const newText = annot.getContents();
           const previousText = annot._originalContents || annot.getCustomData('_previous_contents');
 
           try {
@@ -293,7 +280,7 @@ const ProjectLogsReader = ({
               projectId,
               extractedDataId,
               noteId,
-              { text: newText }
+              { text: noteText }
             );
 
             // Clear cached original
@@ -307,6 +294,36 @@ const ProjectLogsReader = ({
               annotationManager.redrawAnnotation(annot);
             }
           }
+          continue;
+        }
+
+        // Handle new note creation (either new parent with content, or new reply)
+        if ((action === 'add' || action === 'modify') && !noteId && noteText && noteText.trim()) {
+          try {
+            const note = await api.createExtractionNote(
+              projectId,
+              extractedDataId,
+              { text: noteText }
+            );
+
+            // Update annotation with backend note ID
+            annot.setCustomData('extraction_note_id', note.id);
+            annot.setCustomData('created_by_id', note.created_by_id);
+            // Lock the annotation after saving
+            annot.ReadOnly = note.created_by_id !== currentUserId;
+            annotationManager.redrawAnnotation(annot);
+          } catch (error) {
+            handleError(error, 'Failed to create note');
+            // Rollback: delete the annotation without firing events
+            annotationManager.deleteAnnotation(annot, false, true);
+          }
+          continue;
+        }
+
+        // Handle empty note (user clicked away without typing)
+        if (action === 'modify' && !noteId && (!noteText || !noteText.trim())) {
+          // Delete empty sticky notes that were never saved
+          annotationManager.deleteAnnotation(annot, false, true);
         }
       }
     };
@@ -325,7 +342,7 @@ const ProjectLogsReader = ({
         return;
       }
 
-      // Create new sticky note
+      // Create new sticky note - user will type directly into this
       const extractedData = getExtractedDataById ? getExtractedDataById(extractedDataId) : null;
 
       if (!extractedData || !extractedData.pdf_locations || extractedData.pdf_locations.length === 0) {
@@ -346,7 +363,8 @@ const ProjectLogsReader = ({
 
       newSticky.setContents('');
       newSticky.setCustomData('extracted_data_id', extractedDataId);
-      newSticky.ReadOnly = true; // Parent is not editable
+      // Not read-only - user will type the first comment directly into this
+      newSticky.ReadOnly = false;
 
       annotationManager.addAnnotation(newSticky);
       annotationManager.redrawAnnotation(newSticky);
