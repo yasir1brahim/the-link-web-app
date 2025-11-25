@@ -12,6 +12,10 @@ import { toast } from 'react-toastify';
 // Sticky note icon vertical offset - Apryse sticky notes anchor from bottom of icon
 const STICKY_NOTE_ICON_OFFSET = 20;
 
+// Sticky note appearance configuration
+const STICKY_NOTE_SIZE = 1; // Smaller icon size (default is ~25)
+const STICKY_NOTE_COLOR = { r: 255, g: 245, b: 120 }; // Lighter yellow
+
 /**
  * Calculate sticky note position based on highlight location
  * Positions the icon at the right side of the highlight, vertically aligned
@@ -91,8 +95,10 @@ function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
     PageNumber: firstLocation.page_no,
     X: position.x,
     Y: position.y,
-    Icon: Annotations.StickyAnnotation.IconNames.Comment,
-    StrokeColor: new Annotations.Color(255, 200, 100, 1),
+    SIZE: STICKY_NOTE_SIZE,
+    Icon: Annotations.StickyAnnotation.IconNames.COMMENT,
+    StrokeColor: new Annotations.Color(STICKY_NOTE_COLOR.r, STICKY_NOTE_COLOR.g, STICKY_NOTE_COLOR.b, 1),
+    FillColor: new Annotations.Color(STICKY_NOTE_COLOR.r, STICKY_NOTE_COLOR.g, STICKY_NOTE_COLOR.b, 1),
   });
 
   parentSticky.setContents(firstNote.text);
@@ -112,6 +118,7 @@ function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
       PageNumber: firstLocation.page_no,
       X: position.x,
       Y: position.y,
+      SIZE: STICKY_NOTE_SIZE,
       InReplyTo: parentSticky.Id,
       ReplyType: 'Group',
     });
@@ -357,8 +364,10 @@ const ProjectLogsReader = ({
         PageNumber: firstLocation.page_no,
         X: position.x,
         Y: position.y,
-        Icon: Annotations.StickyAnnotation.IconNames.Comment,
-        StrokeColor: new Annotations.Color(255, 200, 100, 1),
+        SIZE: STICKY_NOTE_SIZE,
+        Icon: Annotations.StickyAnnotation.IconNames.COMMENT,
+        StrokeColor: new Annotations.Color(STICKY_NOTE_COLOR.r, STICKY_NOTE_COLOR.g, STICKY_NOTE_COLOR.b, 1),
+        FillColor: new Annotations.Color(STICKY_NOTE_COLOR.r, STICKY_NOTE_COLOR.g, STICKY_NOTE_COLOR.b, 1),
       });
 
       newSticky.setContents('');
@@ -435,8 +444,12 @@ const ProjectLogsReader = ({
               PageNumber: annotCopy.position.page,
               X: annotCopy.position.x,
               Y: annotCopy.position.y,
+              SIZE: STICKY_NOTE_SIZE, 
               InReplyTo: annotCopy.parentId,
               ReplyType: 'Group',
+              StrokeColor: new Annotations.Color(STICKY_NOTE_COLOR.r, STICKY_NOTE_COLOR.g, STICKY_NOTE_COLOR.b, 1),
+              FillColor: new Annotations.Color(STICKY_NOTE_COLOR.r, STICKY_NOTE_COLOR.g, STICKY_NOTE_COLOR.b, 1),
+              Icon: Annotations.StickyAnnotation.IconNames.COMMENT,
             });
 
             restored.setContents(annotCopy.contents);
