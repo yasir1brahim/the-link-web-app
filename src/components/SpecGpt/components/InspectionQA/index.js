@@ -74,7 +74,7 @@ const InspectionQA = ({
                     // Show the processing log directly
                     setCurrentLogData(mostRecentLog)
                     setShowLogViewer(true)
-                } else if (['SUCCESS', 'FAILURE'].includes(mostRecentLog.log_status)) {
+                } else if (['SUCCESS', 'FAILURE', 'TIMEOUT', 'PARTIAL_SUCCESS'].includes(mostRecentLog.log_status)) {
                     console.log('Showing completed log without starting new generation')
                     // Log is complete, show it
                     setCurrentLogData(mostRecentLog)
@@ -124,7 +124,7 @@ const InspectionQA = ({
                     // Show the processing log directly
                     setCurrentLogData(mostRecentLog)
                     setShowLogViewer(true)
-                } else if (['SUCCESS', 'FAILURE'].includes(mostRecentLog.log_status)) {
+                } else if (['SUCCESS', 'FAILURE', 'TIMEOUT', 'PARTIAL_SUCCESS'].includes(mostRecentLog.log_status)) {
                     // Log is complete, show it
                     setCurrentLogData(mostRecentLog)
                     setShowLogViewer(true)
@@ -174,7 +174,7 @@ const InspectionQA = ({
                     // Show the processing log directly
                     setCurrentLogData(mostRecentLog)
                     setShowLogViewer(true)
-                } else if (['SUCCESS', 'FAILURE'].includes(mostRecentLog.log_status)) {
+                } else if (['SUCCESS', 'FAILURE', 'TIMEOUT', 'PARTIAL_SUCCESS'].includes(mostRecentLog.log_status)) {
                     console.log('Showing completed QA planner log without starting new generation')
                     // Log is complete, show it
                     setCurrentLogData(mostRecentLog)
