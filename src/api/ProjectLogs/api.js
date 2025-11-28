@@ -65,7 +65,9 @@ const addSubmittalItem = async (
     submittalType,
     addedUnderSubmittalId=null,
     projectVersionId=null,
-    specSectionTitle=null
+    specSectionTitle=null,
+    textLocation=null,
+    additionalTextLocations=null
 ) => {
     try {
         return await axiosInstance({
@@ -79,11 +81,49 @@ const addSubmittalItem = async (
                 type: submittalType,
                 added_under_submittal_id: addedUnderSubmittalId,
                 ...(projectVersionId && { project_version: projectVersionId }),
-                ...(specSectionTitle && { spec_section_title: specSectionTitle })
+                ...(specSectionTitle && { spec_section_title: specSectionTitle }),
+                ...(textLocation && { text_location: textLocation }),
+                ...(additionalTextLocations && { additional_text_locations: additionalTextLocations }),
+                parsing_method: 'UNKNOWN',
+                parsing_version: 'UNKNOWN',
             },
         });
     } catch (error) {
         handleError(error);
+    }
+}
+
+const addSubmittalItemFromHighlight = async (
+    projectId,
+    specSectionId,
+    paraNo,
+    paraContext,
+    submittalHeading,
+    submittalType,
+    textLocation,
+    additionalTextLocations,
+    projectVersionId=null,
+    addedUnderSubmittalId=null
+) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/${projectId}/submittal-items/from-highlight/`,
+            data: {
+                spec_section_id: specSectionId,
+                para_no: paraNo,
+                para_context: paraContext,
+                item_desc: submittalHeading,
+                type: submittalType,
+                ...(textLocation && { text_location: textLocation }),
+                ...(additionalTextLocations && additionalTextLocations.length > 0 && { additional_text_locations: additionalTextLocations }),
+                ...(projectVersionId && { project_version: projectVersionId }),
+                ...(addedUnderSubmittalId && { added_under_submittal_id: addedUnderSubmittalId }),
+            },
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
     }
 }
 
@@ -721,4 +761,5 @@ export {
     bulkDownloadDocuments,
     bulkReprocessDocuments,
     bulkDeleteDocuments,
+    addSubmittalItemFromHighlight,
 }

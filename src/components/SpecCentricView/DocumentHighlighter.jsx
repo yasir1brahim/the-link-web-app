@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import ProjectLogsReader from '../PdfReader/projectLogsReader';
 import { createManualHighlight } from '../../api/SpecCentricView/api';
+import { addSubmittalItemFromHighlight } from '../../api/ProjectLogs/api';
 import {
   HIGHLIGHT_TYPES,
   formatCustomTypes,
@@ -57,8 +58,6 @@ const getSwatchColor = (itemType, extractionType) => {
 
 const buildFallbackOptions = () =>
   HIGHLIGHT_TYPES
-    // Filter out 'submittal' - submittals use a different data model
-    .filter((item) => item.key !== 'submittal')
     .map((item) => {
       const color = getSwatchColor(item.key, 'qa_planner');
       return {
@@ -329,63 +328,115 @@ const DocumentHighlighter = ({
         setIsSavingHighlight(true);
         setHighlightError(null);
 
-        const payload = {
-          project: projectId,
-          ...(projectVersionId && { project_version: projectVersionId }),
-          spec_section: specSection.id,
-          spec_section_number: specSection.masterformat_number,
-          spec_section_name:
-            specSection.custom_section_title ||
-            specSection.masterformat_title ||
-            specSection.document_name ||
-            '',
-          extraction_type: option.extractionType,
-          item_type: option.itemType,
-          paragraph_number: null,
-          requirement_text: pendingHighlight.selectedText,
-          responsible_party: null,
-          metadata: {},
-          pdf_locations: pendingHighlight.locations,
-          note_text: pendingNoteText.trim() || null,
-        };
+        if (option.itemType === 'submittal') {
+          const textLocation = pendingHighlight.locations[0] || null;
+          const additionalTextLocations = pendingHighlight.locations.length > 1
+            ? pendingHighlight.locations.slice(1)
+            : [];
 
-        if (option.isCustom && option.customTypeId) {
-          payload.custom_item_type_id = option.customTypeId;
-          payload.extraction_type = 'custom_highlights';
-          payload.item_type = `custom_${option.customTypeId}`;
+          // TODO: Replace hardcoded values with user input or some other suggested approach
+          const response = await addSubmittalItemFromHighlight(
+            projectId,
+            specSection.id,
+            null, // para_no 
+            pendingHighlight.selectedText, // para_context 
+            'Manual Submittal', // submittal_heading (submittal_description) - TEMPORARY HARDCODED
+            'Submittals', // submittal_type - TEMPORARY HARDCODED
+            textLocation, // text_location for PDF highlighting
+            additionalTextLocations, // additional_text_locations for multi-page highlights
+            projectVersionId, // project_version
+            null // added_under_submittal_id
+          );
+
+          if (response?.data) {
+            const newSubmittal = response.data;
+            if (textLocation) {
+              const newHighlightLocations = [
+                {
+                  page_no: textLocation.page_no,
+                  x: textLocation.x,
+                  y: textLocation.y,
+                  width: textLocation.width,
+                  height: textLocation.height,
+                }
+              ];
+              if (additionalTextLocations && additionalTextLocations.length > 0) {
+                additionalTextLocations.forEach(loc => {
+                  newHighlightLocations.push({
+                    page_no: loc.page_no,
+                    x: loc.x,
+                    y: loc.y,
+                    width: loc.width,
+                    height: loc.height,
+                  });
+                });
+              }
+              setCurrentHighlights(prev => [...prev, ...newHighlightLocations]);
+            }
+          }
+
+          onRefreshSectionContent();
+          handleCloseHighlightPicker();
+        } else {
+          // Handle regular highlights (non-submittal)
+          const payload = {
+            project: projectId,
+            ...(projectVersionId && { project_version: projectVersionId }),
+            spec_section: specSection.id,
+            spec_section_number: specSection.masterformat_number,
+            spec_section_name:
+              specSection.custom_section_title ||
+              specSection.masterformat_title ||
+              specSection.document_name ||
+              '',
+            extraction_type: option.extractionType,
+            item_type: option.itemType,
+            paragraph_number: null,
+            requirement_text: pendingHighlight.selectedText,
+            responsible_party: null,
+            metadata: {},
+            pdf_locations: pendingHighlight.locations,
+            note_text: pendingNoteText.trim() || null,
+          };
+
+          if (option.isCustom && option.customTypeId) {
+            payload.custom_item_type_id = option.customTypeId;
+            payload.extraction_type = 'custom_highlights';
+            payload.item_type = `custom_${option.customTypeId}`;
+          }
+
+          const response = await createManualHighlight(projectId, payload);
+
+          const createdHighlight = {
+            ...(response?.data || {}),
+            extraction_type: response?.data?.extraction_type ?? payload.extraction_type,
+            item_type: response?.data?.item_type ?? payload.item_type,
+            requirement_text: response?.data?.requirement_text ?? pendingHighlight.selectedText,
+            pdf_locations: response?.data?.pdf_locations ?? pendingHighlight.locations,
+            notes: response?.data?.notes || [],
+          };
+
+          if (option.isCustom && option.customTypeId) {
+            const matchedType = customItemTypes.find((type) => type.id === option.customTypeId);
+            createdHighlight.custom_item_type =
+              response?.data?.custom_item_type ||
+              matchedType ||
+              {
+                id: option.customTypeId,
+                name: option.label,
+                color: matchedType?.color,
+              };
+          }
+
+          // Update extractedDataItems cache with new highlight
+          setExtractedDataItems(prev => [...prev, {
+            ...createdHighlight,
+            notes: createdHighlight.notes || [],
+            pdf_locations: createdHighlight.pdf_locations || [],
+          }]);
+
+          handleHighlightCreationSuccess(createdHighlight);
         }
-
-        const response = await createManualHighlight(projectId, payload);
-
-        const createdHighlight = {
-          ...(response?.data || {}),
-          extraction_type: response?.data?.extraction_type ?? payload.extraction_type,
-          item_type: response?.data?.item_type ?? payload.item_type,
-          requirement_text: response?.data?.requirement_text ?? pendingHighlight.selectedText,
-          pdf_locations: response?.data?.pdf_locations ?? pendingHighlight.locations,
-          notes: response?.data?.notes || [],
-        };
-
-        if (option.isCustom && option.customTypeId) {
-          const matchedType = customItemTypes.find((type) => type.id === option.customTypeId);
-          createdHighlight.custom_item_type =
-            response?.data?.custom_item_type ||
-            matchedType ||
-            {
-              id: option.customTypeId,
-              name: option.label,
-              color: matchedType?.color,
-            };
-        }
-
-        // Update extractedDataItems cache with new highlight
-        setExtractedDataItems(prev => [...prev, {
-          ...createdHighlight,
-          notes: createdHighlight.notes || [],
-          pdf_locations: createdHighlight.pdf_locations || [],
-        }]);
-
-        handleHighlightCreationSuccess(createdHighlight);
       } catch (error) {
         console.error('Failed to create highlight:', error);
         setHighlightError('Unable to create highlight. Please try again.');
@@ -395,6 +446,7 @@ const DocumentHighlighter = ({
     },
     [
       handleHighlightCreationSuccess,
+      handleCloseHighlightPicker,
       isSavingHighlight,
       pendingHighlight,
       pendingNoteText,
@@ -402,6 +454,7 @@ const DocumentHighlighter = ({
       projectVersionId,
       specSection,
       customItemTypes,
+      onRefreshSectionContent,
     ]
   );
 
