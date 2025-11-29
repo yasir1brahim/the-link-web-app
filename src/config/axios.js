@@ -6,7 +6,7 @@ const baseURL = window.location.href.includes('https://app-dj.thelink.ai')
 : window.location.href.includes('https://app.thelink.ai')
   ? 'https://log-manager-api-prod.thelink.ai'
   : window.location.href.includes('thelink.knyapps.com')
-  ? 'https://api.thelink.knyapps.com'
+  ? 'https://thelinkapi.knyapps.com'
   : 'http://localhost:8000';
 
 const axiosInstance = axios.create({
