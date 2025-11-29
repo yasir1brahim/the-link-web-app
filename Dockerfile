@@ -16,26 +16,23 @@ COPY . .
 # Build the app
 RUN npm run build
 
-# Stage 2: Serve with Apache
-FROM httpd:2.4-alpine
+# Stage 2: Serve with nginx (lighter than Apache, better for Traefik)
+FROM nginx:alpine
 
 # Copy built files from builder stage
-COPY --from=builder /app/build/ /usr/local/apache2/htdocs/
+COPY --from=builder /app/build/ /usr/share/nginx/html/
 
-# Enable mod_rewrite for React Router
-RUN sed -i '/LoadModule rewrite_module/s/^#//g' /usr/local/apache2/conf/httpd.conf && \
-    sed -i 's/AllowOverride None/AllowOverride All/g' /usr/local/apache2/conf/httpd.conf
+# Create nginx configuration for React Router
+RUN echo 'server {' > /etc/nginx/conf.d/default.conf && \
+    echo '    listen 8080;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    server_name _;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    root /usr/share/nginx/html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    index index.html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    location / {' >> /etc/nginx/conf.d/default.conf && \
+    echo '        try_files $uri $uri/ /index.html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    }' >> /etc/nginx/conf.d/default.conf && \
+    echo '}' >> /etc/nginx/conf.d/default.conf
 
-# Create .htaccess for React Router
-RUN echo '<IfModule mod_rewrite.c>' > /usr/local/apache2/htdocs/.htaccess && \
-    echo '  RewriteEngine On' >> /usr/local/apache2/htdocs/.htaccess && \
-    echo '  RewriteBase /' >> /usr/local/apache2/htdocs/.htaccess && \
-    echo '  RewriteRule ^index\.html$ - [L]' >> /usr/local/apache2/htdocs/.htaccess && \
-    echo '  RewriteCond %{REQUEST_FILENAME} !-f' >> /usr/local/apache2/htdocs/.htaccess && \
-    echo '  RewriteCond %{REQUEST_FILENAME} !-d' >> /usr/local/apache2/htdocs/.htaccess && \
-    echo '  RewriteRule . /index.html [L]' >> /usr/local/apache2/htdocs/.htaccess && \
-    echo '</IfModule>' >> /usr/local/apache2/htdocs/.htaccess
+EXPOSE 8080
 
-EXPOSE 80
-
-CMD ["httpd", "-D", "FOREGROUND"]
+CMD ["nginx", "-g", "daemon off;"]
