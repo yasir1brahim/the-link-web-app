@@ -111,6 +111,20 @@ const getTeamDetails = async (teamId) => {
     });
 }
 
+const getTeamLogo = async (teamId) => {
+    return await axiosInstance({
+        method: 'get',
+        url: `/teams/api/teams/${teamId}/logo/`,
+    });
+}
+
+const getTeamFlags = async (teamId) => {
+    return await axiosInstance({
+        method: 'get',
+        url: `/teams/api/teams/${teamId}/flags/`,
+    });
+}
+
 const getUserRoleInTeam = async (userId, teamId) => {
   const team = await getTeamDetails(teamId);
   const members = team.data.members;
@@ -217,6 +231,8 @@ export {
     getCurrentUserData,
     getUserRoleInTeam,
     getTeamDetails,
+    getTeamLogo,
+    getTeamFlags,
     updateTeamDetails, 
     getUserTeams, 
     updateUserTeamMembership,

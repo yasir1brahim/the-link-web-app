@@ -23,8 +23,7 @@ import StyledTooltip from '../shared/StyledTooltip/StyledTooltip';
 import { RestoreProjectModal } from "./restoreProjectModal";
 import { RestoreIcon } from "../shared/icons/restoreIcon";
 import { CalendarIcon } from "../shared/icons/calendarIcon";
-import { toggleProjectStatus, getUserRoleInAllProjects } from "../../api/Projects/api";
-import { getUserRoleInTeam } from '../../api/Authentication/api';
+import { toggleProjectStatus, getProjectDetails } from "../../api/Projects/api";
 
 const ProjectsTable = ({
   customerData,
@@ -43,6 +42,7 @@ const ProjectsTable = ({
   isArchived,
   toggleArchive,
   customerId,
+  currentUserRole,
   noticesFeatureFlagActive,
   fullSpecProcessingFeatureFlagActive,
   onClickNotices,
@@ -70,32 +70,39 @@ const ProjectsTable = ({
 
   useEffect(() => {
     console.log('projectData', projectData);
-    const fetchUserProjectRoles = async () => {
-      const roles = await getUserRoleInAllProjects(userId, customerId);
-      console.log('roles', roles);
-      if (!Array.isArray(roles)) {
-        return;
+    setUserRoleInTeam(currentUserRole);
+    const projectToRolesMap = {};
+    projectData.forEach((project) => {
+      if (project.current_user_role) {
+        projectToRolesMap[project.id] = project.current_user_role;
       }
-      const projectToRolesMap = {};
-      roles.forEach((role) => {
-        projectToRolesMap[role.projectId] = role.role;
-      });
-      setUserProjectToRolesMap(projectToRolesMap);
-    };
-    const fetchUserRoleInTeam = async () => {
-      const roleInTeam = await getUserRoleInTeam(
-        userId, customerId
-      );
-      setUserRoleInTeam(roleInTeam);
+    });
+    setUserProjectToRolesMap(projectToRolesMap);
+  }, [userId, customerId, currentUserRole, projectData]);
+
+
+  const handleEdit = async (project) => {
+    try {
+      // Fetch full project details with members for edit modal
+      const fullProjectResponse = await getProjectDetails(project.id);
+      setActiveProject(fullProjectResponse.data);
+      toggleEditModal();
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+      handleError(error);
     }
-    fetchUserRoleInTeam();
-    fetchUserProjectRoles();
-  }, [userId, customerId]);
+  };
 
-
-  const handleEdit = (project) => {
-    setActiveProject(project);
-    toggleEditModal();
+  const handleAddUsersClick = async (project) => {
+    try {
+      // Fetch full project details with members for add users modal
+      const fullProjectResponse = await getProjectDetails(project.id);
+      setActiveProject(fullProjectResponse.data);
+      toggleAddUsersModal();
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+      handleError(error);
+    }
   };
 
   const getUserRoleForProject = (projectId) => {
@@ -254,7 +261,7 @@ const ProjectsTable = ({
                       <tr key={index}>
                         <td>{project.name}</td>
                         <td>{project.project_number}</td>
-                        <td>{project.members.length}</td>
+                        <td>{project.members_count}</td>
                         <td>{project.start_date}</td>
                         <td>{project.end_date}</td>
                         <td>
@@ -326,10 +333,7 @@ const ProjectsTable = ({
                                 ) : (
                                   <StyledTooltip title="Add Users to Project" arrow placement="left">
                                     <span
-                                      onClick={() => {
-                                        toggleAddUsersModal()
-                                        setActiveProject(project)
-                                      }}
+                                      onClick={() => handleAddUsersClick(project)}
                                       style={{ cursor: "pointer" }}
                                     >
                                       <AddUserIcon />
