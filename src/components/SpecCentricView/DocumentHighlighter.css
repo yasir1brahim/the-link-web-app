@@ -220,7 +220,7 @@
   border-radius: 12px;
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.15);
   padding: 28px;
-  max-width: 440px;
+  max-width: 500px;
   width: 100%;
   border: 1px solid #e5e7eb;
   max-height: 80vh;
@@ -237,8 +237,8 @@
 }
 
 .highlight-picker-context {
-  margin: 0 0 12px 0;
-  font-size: 0.9rem;
+  margin: 0 0 6px 0;
+  font-size: 0.7rem;
   color: #334155;
   background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(59, 130, 246, 0.08));
   border-left: 4px solid #3b82f6;
@@ -360,7 +360,7 @@
 
 /* Note input in highlight creation modal */
 .note-input-section {
-  margin: 12px 0;
+  margin: 6px 0;
   width: 100%;
   flex-shrink: 0;
 }
@@ -368,9 +368,9 @@
 .note-input-section label {
   display: block;
   margin-bottom: 6px;
-  font-weight: 500;
+  font-weight: 600;
   color: #333;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
 }
 
 .note-textarea {

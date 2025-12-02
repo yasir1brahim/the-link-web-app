@@ -1,6 +1,6 @@
 .submittal-form-section {
-  margin-top: 12px;
-  padding: 16px;
+  margin-top: 6px;
+  padding: 6px 12px;
   background-color: #f8f9fa;
   border-radius: 6px;
   border: 1px solid #e0e0e0;
@@ -29,8 +29,8 @@
 .submittal-form-field label {
   display: block;
   margin-bottom: 6px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   color: #333;
 }
 
@@ -50,7 +50,7 @@
   padding: 8px 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 12px;
   font-family: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
