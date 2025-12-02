@@ -55,59 +55,6 @@ const InspectionQA = ({
         };
     }, [showLogViewer, currentLogData, projectId, projectVersionId, currentLogType]);
 
-    // Handler for inspections
-    const onShowInspectionLogsClick = async () => {
-        setIsLoadingLog(true)
-        setCurrentLogType('inspection_log')
-        setSelectedFeature('inspections')
-
-        try {
-            // Try to get the most recent log
-            const mostRecentLog = await fetchMostRecentLog(projectId, projectVersionId, 'inspection_log')
-            console.log('Most recent inspection log:', mostRecentLog)
-
-            if (mostRecentLog) {
-                console.log('Log status:', mostRecentLog.log_status)
-                // Check if the log is still processing
-                if (mostRecentLog.log_status === 'PROCESSING') {
-                    console.log('Showing processing log without starting new generation')
-                    // Show the processing log directly
-                    setCurrentLogData(mostRecentLog)
-                    setShowLogViewer(true)
-                } else if (['SUCCESS', 'FAILURE'].includes(mostRecentLog.log_status)) {
-                    console.log('Showing completed log without starting new generation')
-                    // Log is complete, show it
-                    setCurrentLogData(mostRecentLog)
-                    setShowLogViewer(true)
-                } else {
-                    console.log('Showing log with unknown status')
-                    // Unknown status, show the log anyway
-                    setCurrentLogData(mostRecentLog)
-                    setShowLogViewer(true)
-                }
-            } else {
-                console.log('No log exists, starting generation')
-                // No log exists, start generation
-                const result = await generateAiLog(projectId, projectVersionId, 'inspection_log')
-                if (result && result.id) {
-                    // Create a placeholder log data for the new generation
-                    const newLogData = {
-                        id: result.id,
-                        log_table: '',
-                        created_at: new Date().toISOString(),
-                        log_status: 'PROCESSING'
-                    }
-                    setCurrentLogData(newLogData)
-                    setShowLogViewer(true)
-                }
-            }
-        } catch (error) {
-            console.error('Error handling inspection log:', error)
-        } finally {
-            setIsLoadingLog(false)
-        }
-    }
-
     // Handler for owner deliverables
     const onShowOwnerDeliverablesLogsClick = async () => {
         setIsLoadingLog(true)
@@ -297,7 +244,6 @@ const InspectionQA = ({
                         </Center>
                     ) : (
                         <InspectionQASidebar
-                            onShowInspectionLogsClick={onShowInspectionLogsClick}
                             onShowOwnerDeliverablesLogsClick={onShowOwnerDeliverablesLogsClick}
                             onShowQAPlannerClick={onShowQAPlannerClick}
                             isInspectionLogFeatureFlagActive={isInspectionLogFeatureFlagActive}

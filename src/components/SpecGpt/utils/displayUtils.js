@@ -4,8 +4,6 @@ import { getQAOptionLabel } from './qaUtils';
 // Get display name for log types
 export const getLogTypeDisplayName = (logType) => {
     switch (logType) {
-        case 'inspection_log':
-            return 'Inspections List';
         case 'owner_deliverables_log':
             return 'Owner Deliverables List';
         case 'qa_planner':
@@ -53,8 +51,6 @@ export const formatTimestamp = (timestamp) => {
 // Get appropriate icon for log type
 export const getLogTypeIcon = (logType) => {
     switch (logType) {
-        case 'inspection_log':
-            return '🔍';
         case 'owner_deliverables_log':
             return '📋';
         case 'qa_planner':
