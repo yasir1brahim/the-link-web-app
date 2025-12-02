@@ -2,7 +2,6 @@ import { Box, Flex, Text, Button, VStack, Heading } from '@chakra-ui/react'
 import React from 'react'
 
 const InspectionQASidebar = ({
-    onShowInspectionLogsClick,
     onShowOwnerDeliverablesLogsClick,
     onShowQAPlannerClick,
     isInspectionLogFeatureFlagActive,
@@ -22,25 +21,6 @@ const InspectionQASidebar = ({
                     </Flex>
 
                     <Box pb={4}>
-                        {isInspectionLogFeatureFlagActive && (
-                            <Flex
-                                onClick={onShowInspectionLogsClick}
-                                mb={3}
-                                border="1px"
-                                borderColor="#FFFFFF33"
-                                px={3}
-                                py={3}
-                                borderRadius="6px"
-                                gap={3}
-                                align="center"
-                                cursor="pointer"
-                                _hover={{ bgColor: "#FFFFFF11" }}
-                                bg={selectedFeature === 'inspections' ? '#FFFFFF11' : 'transparent'}
-                            >
-                                <Text marginBottom={0} fontSize="14px" color="#FFFFFF">Inspection List</Text>
-                            </Flex>
-                        )}
-
                         {isInspectionLogFeatureFlagActive && (
                             <Flex
                                 onClick={onShowOwnerDeliverablesLogsClick}
@@ -132,25 +112,8 @@ const InspectionQASidebar = ({
                     textAlign="center"
                     mb={6}
                 >
-                    Select a feature to view and manage your project's inspection logs, owner deliverables, or QA planning data
+                    Select a feature to view and manage your project's owner deliverables or QA planning data
                 </Text>
-
-                {isInspectionLogFeatureFlagActive && (
-                    <Button
-                        onClick={onShowInspectionLogsClick}
-                        w="100%"
-                        h="60px"
-                        bg="#1F2A43"
-                        color="white"
-                        fontSize="16px"
-                        fontWeight="600"
-                        borderRadius="8px"
-                        _hover={{ bg: "#1F2A49" }}
-                        _active={{ bg: "#1F2A49" }}
-                    >
-                        Inspection List
-                    </Button>
-                )}
 
                 {isInspectionLogFeatureFlagActive && (
                     <Button
