@@ -12,7 +12,7 @@ const ChatSidebar = ({
             <Box px={{ base: "24px", lg: "30px" }} flexShrink={0}>
                 <Flex py="20px" align={"center"} justifyContent={"space-between"}>
                     <Heading as="h4" fontSize={{ base: "18px", lg: "24px" }} fontWeight="semibold" color="#FFFFFF">
-                        Compass
+                        Assistant
                     </Heading>
                 </Flex>
                 
