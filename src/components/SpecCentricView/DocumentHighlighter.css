@@ -229,22 +229,22 @@
 }
 
 .highlight-picker-modal h3 {
-  margin: 0 0 12px 0;
-  font-size: 1.1rem;
+  margin: 0 0 10px 0;
+  font-size: 1.05rem;
   color: #0f172a;
   font-weight: 600;
   flex-shrink: 0;
 }
 
 .highlight-picker-context {
-  margin: 0 0 16px 0;
-  font-size: 0.95rem;
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
   color: #334155;
   background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(59, 130, 246, 0.08));
   border-left: 4px solid #3b82f6;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-radius: 6px;
-  max-height: 140px;
+  max-height: 80px;
   overflow-y: auto;
   flex-shrink: 0;
 }
@@ -255,8 +255,9 @@
   gap: 10px;
   margin-bottom: 18px;
   overflow-y: auto;
-  flex-shrink: 1;
-  min-height: 0;
+  flex: 1;
+  min-height: 200px;
+  max-height: 400px;
   padding-right: 4px;
 }
 
@@ -359,26 +360,29 @@
 
 /* Note input in highlight creation modal */
 .note-input-section {
-  margin: 16px 0;
+  margin: 12px 0;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .note-input-section label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-weight: 500;
   color: #333;
+  font-size: 0.9rem;
 }
 
 .note-textarea {
   width: 100%;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   resize: vertical;
-  min-height: 60px;
+  min-height: 50px;
+  max-height: 80px;
 }
 
 .note-textarea:focus {
@@ -389,4 +393,43 @@
 
 .note-textarea::placeholder {
   color: #999;
+}
+
+/* Selected highlight option state */
+.highlight-picker-option.selected {
+  background-color: #e3f2fd;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+/* Confirm button */
+.highlight-picker-confirm {
+  padding: 8px 16px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.highlight-picker-confirm:hover:not(:disabled) {
+  background-color: #1565c0;
+}
+
+.highlight-picker-confirm:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.submittal-option-group {
+  width: 100%;
+}
+
+.submittal-option-group .highlight-picker-option {
+  width: 100%;
+  box-sizing: border-box; 
 }
