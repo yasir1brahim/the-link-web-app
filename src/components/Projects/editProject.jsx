@@ -100,8 +100,8 @@ const EditProject = ({
       error = true;
     }
 
-    // Validate project type - check if the entered value matches a valid option
-    const selectedProjectType = projectType.value[0]?.value || projectType.value[0]?.label || projectType.value[0] || "";
+    // Validate project type - optional field, but if provided must match a valid option
+    const selectedProjectType = projectType.value[0]?.value || projectType.value[0]?.label || "";
     const validProjectTypes = PROJECT_TYPES.map(pt => pt.name);
 
     // Check both the selected value and the typed input text
