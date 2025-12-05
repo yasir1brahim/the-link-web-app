@@ -771,6 +771,8 @@ const LogViewer = ({
                                         enableExport={true}
                                         onExport={handleExportExcel}
                                         exportLabel="Export to Excel"
+                                        exportDisabled={logMessage?.log_status === 'PROCESSING'}
+                                        exportDisabledTooltip="Can't export while generating new log"
                                         className="log-viewer-table"
                                     />
                                 );
