@@ -405,6 +405,11 @@ const ProjectLogsReader = ({
           handleHighlightClick(extractedDataId);
         }
       }
+
+      // Open notes panel when clicking on a sticky annotation (comment icon)
+      if (selectedAnnot instanceof Annotations.StickyAnnotation) {
+        webViewer.UI.openElement('notesPanel');
+      }
     };
 
     /**
