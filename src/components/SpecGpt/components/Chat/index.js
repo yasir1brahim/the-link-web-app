@@ -5,10 +5,13 @@ import {
     DrawerContent,
     Center,
     Spinner,
-    Text
+    Text,
+    ChakraProvider
 } from '@chakra-ui/react'
 import ChatSidebar from './ChatSidebar'
 import ChatMain from './ChatMain'
+import LogViewer from './LogViewer'
+import QAPlannerModal from './QAPlannerModal'
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Loader from '../../../shared/Loader/Loader'
 import { useNavigate } from 'react-router-dom';
@@ -35,6 +38,11 @@ const Chat = ({
     isChatEnabled,
     setIsChatEnabled,
     teamId,
+    // New props for sidebar QA mode
+    useQaTabbedLayout = true,
+    inspectionQA = null,
+    isInspectionLogFeatureFlagActive = false,
+    isQaPlannerFlagActive = false,
 }) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const DEFAULT_MAX_CHAT_MESSAGES = 10;
@@ -48,6 +56,31 @@ const Chat = ({
     const k = 21;
     const [maxChatMessages, setMaxChatMessages] = useState(DEFAULT_MAX_CHAT_MESSAGES);
     const chatSessionIdRef = useRef(chatSessionId);
+
+    // Sidebar mode QA helpers
+    const isSidebarMode = !useQaTabbedLayout;
+    const qaSidebarProps = isSidebarMode
+        ? {
+            onShowOwnerDeliverablesLogsClick: inspectionQA?.onShowOwnerDeliverablesLogsClick,
+            onShowQAPlannerClick: inspectionQA?.onShowQAPlannerClick,
+            isInspectionLogFeatureFlagActive,
+            isQaPlannerFlagActive,
+            selectedFeature: inspectionQA?.selectedFeature,
+            isLoadingLog: inspectionQA?.isLoadingLog,
+        }
+        : {};
+
+    const qaViewerState = {
+        showLogViewer: inspectionQA?.showLogViewer,
+        currentLogData: inspectionQA?.currentLogData,
+        currentLogType: inspectionQA?.currentLogType,
+        onBackFromLogViewer: inspectionQA?.onBackFromLogViewer,
+        onQAPlannerRegenerate: inspectionQA?.onQAPlannerRegenerate,
+        showQAPlannerModal: inspectionQA?.showQAPlannerModal,
+        setShowQAPlannerModal: inspectionQA?.setShowQAPlannerModal,
+        onQAPlannerSubmit: inspectionQA?.onQAPlannerSubmit,
+        isGeneratingQALogs: inspectionQA?.isGeneratingQALogs,
+    };
 
     // WebSocket message handlers
     const handleWebSocketMessage = useCallback((data) => {
@@ -316,11 +349,36 @@ const Chat = ({
                             chatHistory={chatHistory}
                             onClickChatLink={onClickChatLink}
                             onNewChatClick={onNewChatClick}
+                            {...qaSidebarProps}
                         />
                     </Box>
                     <Box w={"280px"}></Box>
                 </Box>
-                <Box w="100%" h="100%" >
+                <Box w="100%" h="100%" position="relative">
+                    {/* LogViewer overlay - shown when viewing a log in sidebar mode */}
+                    {isSidebarMode && qaViewerState.showLogViewer && qaViewerState.currentLogData && (
+                        <Box
+                            position="absolute"
+                            top={0}
+                            left={0}
+                            right={0}
+                            bottom={0}
+                            bg="white"
+                            zIndex={10}
+                            overflow="auto"
+                        >
+                            <LogViewer
+                                projectId={projectId}
+                                projectVersionId={projectVersionId}
+                                initialLogData={qaViewerState.currentLogData}
+                                logType={qaViewerState.currentLogType}
+                                onBack={qaViewerState.onBackFromLogViewer}
+                                onQAPlannerRegenerate={
+                                    qaViewerState.currentLogType === 'qa_planner' ? qaViewerState.onQAPlannerRegenerate : null
+                                }
+                            />
+                        </Box>
+                    )}
                     <ChatMain
                         messages={messages}
                         projectId={projectId}
@@ -346,13 +404,24 @@ const Chat = ({
                             chatHistory={chatHistory}
                             onClickChatLink={onClickChatLink}
                             onNewChatClick={onNewChatClick}
+                            {...qaSidebarProps}
                         />
                     </DrawerBody>
                 </DrawerContent>
             </Drawer>
 
-          <Loader showComponentLoader={isLoading} />
-            
+            {/* QA Planner Modal - shown in sidebar mode */}
+            {isSidebarMode && (
+                <QAPlannerModal
+                    isOpen={qaViewerState.showQAPlannerModal || false}
+                    onClose={() => qaViewerState.setShowQAPlannerModal?.(false)}
+                    onSubmit={qaViewerState.onQAPlannerSubmit}
+                    isLoading={qaViewerState.isGeneratingQALogs || false}
+                />
+            )}
+
+            <Loader showComponentLoader={isLoading} />
+
         </>
     )
 }
