@@ -105,9 +105,9 @@ const EditProject = ({
     const validProjectTypes = PROJECT_TYPES.map(pt => pt.name);
 
     // Check both the selected value and the typed input text
-    const valueToValidate = selectedProjectType || projectTypeInputText;
+    const valueToValidate = selectedProjectType || projectTypeInputText || "";
 
-    if (valueToValidate) {
+    if (valueToValidate && valueToValidate.trim() !== "") {
       if (!validProjectTypes.includes(valueToValidate)) {
         setProjectType({
           ...projectType,
@@ -124,11 +124,15 @@ const EditProject = ({
     let errors = validate();
     if (!errors) {
       try {
+        // Extract project type value, use null if empty
+        const projectTypeValue = projectType.value[0]?.value || projectType.value[0]?.label || project?.project_type || null;
+        const finalProjectType = projectTypeValue && projectTypeValue.trim() !== "" ? projectTypeValue : null;
+
         const response = await updateProject(
           project?.id,
           projectName.value || project?.name,
           projectNumber.value || project?.project_number,
-          projectType.value[0].value || project?.project_type,
+          finalProjectType,
           selectedStandardMembersList.map((emp) => emp.value),
           selectedAdminMembersList.map((emp) => emp.value),
           startDate,
