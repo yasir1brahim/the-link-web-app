@@ -557,8 +557,13 @@ const ProjectLogs = () => {
   // Handle activeTab changes from URL parameters
   useEffect(() => {
     const tabFromUrl = searchParams.get("tab");
-    if (tabFromUrl && (tabFromUrl === 'submittal' || tabFromUrl === 'compass' || tabFromUrl === 'spec-view')) {
-      setActiveTab(tabFromUrl);
+    if (tabFromUrl) {
+      // Support 'compass' for backwards compatibility, map it to 'assistant'
+      if (tabFromUrl === 'compass') {
+        setActiveTab('assistant');
+      } else if (tabFromUrl === 'submittal' || tabFromUrl === 'assistant' || tabFromUrl === 'spec-view') {
+        setActiveTab(tabFromUrl);
+      }
     }
   }, [searchParams]);
 
@@ -1950,14 +1955,14 @@ const ProjectLogs = () => {
               </div>
             </div>
           </div>}
-          {activeTab == 'compass' && 
+          {activeTab == 'assistant' &&
             <>
             <div className="compass-chat-viewport">
               <ProcessingIndicator
                 documentIsProcessing={documentIsBeingEmbedded}
                 documentData={documentData}
                 toggleDocumentStatusModal={toggleSpecGptProcessingModal}
-                indicatorText={"Compass is processing your documents..."}
+                indicatorText={"Assistant is processing your documents..."}
               />
               <ChakraProvider>
                 <Chat 
@@ -1988,7 +1993,7 @@ const ProjectLogs = () => {
                 documentIsProcessing={documentIsBeingEmbedded}
                 documentData={documentData}
                 toggleDocumentStatusModal={toggleSpecGptProcessingModal}
-                indicatorText={"Compass is processing your documents..."}
+                indicatorText={"Assistant is processing your documents..."}
               />
               <ChakraProvider>
                 <InspectionQA
@@ -2196,7 +2201,7 @@ const ProjectLogs = () => {
         className="new-customer modal-xl"
       >
         <ModalHeader toggle={toggleSpecGptProcessingModal}>
-          Compass Processing Status
+          Assistant Processing Status
         </ModalHeader>
         <ModalBody>
           <DocumentStatus documentData={documentData} isSpecGptStatus={true} />

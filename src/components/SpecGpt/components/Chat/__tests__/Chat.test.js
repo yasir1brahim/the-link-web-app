@@ -15,12 +15,9 @@ jest.mock('../../../../utils/apiUtils', () => ({
 
 // Mock the child components
 jest.mock('../ChatSidebar', () => {
-    return function MockChatSidebar({ onShowInspectionLogsClick, onShowOwnerDeliverablesLogsClick }) {
+    return function MockChatSidebar({ onShowOwnerDeliverablesLogsClick }) {
         return (
             <div data-testid="chat-sidebar">
-                <button data-testid="inspection-log-btn" onClick={onShowInspectionLogsClick}>
-                    View Inspection Log
-                </button>
                 <button data-testid="owner-deliverables-btn" onClick={onShowOwnerDeliverablesLogsClick}>
                     View Owner Deliverables Log
                 </button>
@@ -79,142 +76,6 @@ describe('Chat Component - Direct Log Viewing', () => {
         jest.clearAllMocks();
         fetchChatHistory.mockResolvedValue([]);
         fetchChatSessionHistory.mockResolvedValue([]);
-    });
-
-    it('should show inspection log directly when most recent log exists', async () => {
-        const mockLogData = {
-            id: '789',
-            log_table: 'Test inspection log content',
-            created_at: '2024-01-01T00:00:00Z',
-            log_status: 'SUCCESS'
-        };
-        
-        fetchMostRecentLog.mockResolvedValue(mockLogData);
-        
-        renderWithChakra(<Chat {...mockProps} />);
-        
-        const inspectionButton = screen.getByTestId('inspection-log-btn');
-        fireEvent.click(inspectionButton);
-        
-        await waitFor(() => {
-            expect(fetchMostRecentLog).toHaveBeenCalledWith('123', '456', 'inspection_log');
-        });
-        
-        await waitFor(() => {
-            expect(screen.getByTestId('log-viewer')).toBeInTheDocument();
-            expect(screen.getByTestId('log-type')).toHaveTextContent('inspection_log');
-        });
-    });
-
-    it('should start generation when no inspection log exists', async () => {
-        fetchMostRecentLog.mockResolvedValue(null);
-        generateAiLog.mockResolvedValue({ id: 'new-789' });
-        
-        renderWithChakra(<Chat {...mockProps} />);
-        
-        const inspectionButton = screen.getByTestId('inspection-log-btn');
-        fireEvent.click(inspectionButton);
-        
-        await waitFor(() => {
-            expect(fetchMostRecentLog).toHaveBeenCalledWith('123', '456', 'inspection_log');
-        });
-        
-        await waitFor(() => {
-            expect(generateAiLog).toHaveBeenCalledWith('123', '456', 'inspection_log');
-        });
-        
-        await waitFor(() => {
-            expect(screen.getByTestId('log-viewer')).toBeInTheDocument();
-        });
-    });
-
-    it('should show processing log without starting new generation', async () => {
-        const processingLogData = {
-            id: '789',
-            log_table: '',
-            created_at: '2024-01-01T00:00:00Z',
-            log_status: 'PROCESSING'
-        };
-        
-        fetchMostRecentLog.mockResolvedValue(processingLogData);
-        
-        renderWithChakra(<Chat {...mockProps} />);
-        
-        const inspectionButton = screen.getByTestId('inspection-log-btn');
-        fireEvent.click(inspectionButton);
-        
-        await waitFor(() => {
-            expect(fetchMostRecentLog).toHaveBeenCalledWith('123', '456', 'inspection_log');
-        });
-        
-        // Should not call generateAiLog when log is processing
-        await waitFor(() => {
-            expect(generateAiLog).not.toHaveBeenCalled();
-        });
-        
-        await waitFor(() => {
-            expect(screen.getByTestId('log-viewer')).toBeInTheDocument();
-        });
-    });
-
-    it('should handle API response with pagination correctly', async () => {
-        const mockApiResponse = {
-            results: [{
-                id: '789',
-                log_table: 'Test log content',
-                created_at: '2024-01-01T00:00:00Z',
-                log_status: 'SUCCESS'
-            }],
-            count: 1,
-            next: null,
-            previous: null
-        };
-        
-        // Mock the axiosInstance to return the paginated response
-        const axiosInstance = require('../../../config/axios').default;
-        axiosInstance.mockResolvedValue({ data: mockApiResponse });
-        
-        renderWithChakra(<Chat {...mockProps} />);
-        
-        const inspectionButton = screen.getByTestId('inspection-log-btn');
-        fireEvent.click(inspectionButton);
-        
-        await waitFor(() => {
-            expect(fetchMostRecentLog).toHaveBeenCalledWith('123', '456', 'inspection_log');
-        });
-        
-        await waitFor(() => {
-            expect(screen.getByTestId('log-viewer')).toBeInTheDocument();
-        });
-    });
-
-    it('should show completed log without starting new generation', async () => {
-        const completedLogData = {
-            id: '789',
-            log_table: 'Completed log content',
-            created_at: '2024-01-01T00:00:00Z',
-            log_status: 'SUCCESS'
-        };
-        
-        fetchMostRecentLog.mockResolvedValue(completedLogData);
-        
-        renderWithChakra(<Chat {...mockProps} />);
-        
-        const inspectionButton = screen.getByTestId('inspection-log-btn');
-        fireEvent.click(inspectionButton);
-        
-        await waitFor(() => {
-            expect(fetchMostRecentLog).toHaveBeenCalledWith('123', '456', 'inspection_log');
-        });
-        
-        // Should not call generateAiLog when log is completed
-        await waitFor(() => {
-            expect(generateAiLog).not.toHaveBeenCalled();
-        });
-        
-        await waitFor(() => {
-            expect(screen.getByTestId('log-viewer')).toBeInTheDocument();
-        });
     });
 
     it('should show owner deliverables log directly when most recent log exists', async () => {
@@ -295,27 +156,27 @@ describe('Chat Component - Direct Log Viewing', () => {
 
     it('should show loading state while fetching log', async () => {
         fetchMostRecentLog.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(null), 100)));
-        
+
         renderWithChakra(<Chat {...mockProps} />);
-        
-        const inspectionButton = screen.getByTestId('inspection-log-btn');
-        fireEvent.click(inspectionButton);
-        
+
+        const ownerButton = screen.getByTestId('owner-deliverables-btn');
+        fireEvent.click(ownerButton);
+
         expect(screen.getByText('Loading log...')).toBeInTheDocument();
     });
 
     it('should handle API errors gracefully', async () => {
         fetchMostRecentLog.mockRejectedValue(new Error('API Error'));
-        
+
         renderWithChakra(<Chat {...mockProps} />);
-        
-        const inspectionButton = screen.getByTestId('inspection-log-btn');
-        fireEvent.click(inspectionButton);
-        
+
+        const ownerButton = screen.getByTestId('owner-deliverables-btn');
+        fireEvent.click(ownerButton);
+
         await waitFor(() => {
             expect(fetchMostRecentLog).toHaveBeenCalled();
         });
-        
+
         // Should return to chat view after error
         await waitFor(() => {
             expect(screen.getByTestId('chat-main')).toBeInTheDocument();
@@ -329,21 +190,21 @@ describe('Chat Component - Direct Log Viewing', () => {
             created_at: '2024-01-01T00:00:00Z',
             log_status: 'SUCCESS'
         };
-        
+
         fetchMostRecentLog.mockResolvedValue(mockLogData);
-        
+
         renderWithChakra(<Chat {...mockProps} />);
-        
-        const inspectionButton = screen.getByTestId('inspection-log-btn');
-        fireEvent.click(inspectionButton);
-        
+
+        const ownerButton = screen.getByTestId('owner-deliverables-btn');
+        fireEvent.click(ownerButton);
+
         await waitFor(() => {
             expect(screen.getByTestId('log-viewer')).toBeInTheDocument();
         });
-        
+
         const backButton = screen.getByTestId('back-btn');
         fireEvent.click(backButton);
-        
+
         await waitFor(() => {
             expect(screen.getByTestId('chat-main')).toBeInTheDocument();
         });
@@ -356,19 +217,19 @@ describe('Chat Component - Direct Log Viewing', () => {
             created_at: '2024-01-01T00:00:00Z',
             log_status: 'SUCCESS'
         };
-        
+
         fetchMostRecentLog.mockResolvedValue(mockLogData);
-        
+
         renderWithChakra(<Chat {...mockProps} />);
-        
+
         // First, navigate to log viewer
-        const inspectionButton = screen.getByTestId('inspection-log-btn');
-        fireEvent.click(inspectionButton);
-        
+        const ownerButton = screen.getByTestId('owner-deliverables-btn');
+        fireEvent.click(ownerButton);
+
         await waitFor(() => {
             expect(screen.getByTestId('log-viewer')).toBeInTheDocument();
         });
-        
+
         // Then click new chat (this would be handled by the parent component)
         // For this test, we'll verify the state is properly managed
         expect(mockProps.setChatSessionId).toHaveBeenCalledWith(null);

@@ -59,9 +59,11 @@ function isHighlightRectangle(annotation, Annotations) {
  */
 function findStickyNoteForExtractedData(extractedDataId, annotationManager) {
   const allAnnotations = annotationManager.getAnnotationsList();
+  // Convert to string for comparison since WebViewer's getCustomData may return strings
+  const idStr = String(extractedDataId);
   return allAnnotations.find(annot =>
     isExtractionNoteParent(annot) &&
-    annot.getCustomData('extracted_data_id') === extractedDataId
+    String(annot.getCustomData('extracted_data_id')) === idStr
   );
 }
 
