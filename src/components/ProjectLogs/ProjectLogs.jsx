@@ -41,7 +41,11 @@ import useDocumentRefresh from "../../hooks/useDocumentRefresh";
 import DocumentListModal from "./DocumentListModal";
 import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
 import SpecViewer from "../SpecCentricView/SpecViewer";
+import { useInspectionQA } from '../SpecGpt/hooks/useInspectionQA';
 
+// Toggle between tabbed layout (true) and sidebar layout (false)
+// Set to false to show QA features in Compass sidebar instead of separate tab
+const USE_TABBED_QA_LAYOUT = false;
 
 const ProjectLogs = () => {
   const { 
@@ -230,6 +234,9 @@ const ProjectLogs = () => {
   const [isSpecGptGeneratingLog, setIsSpecGptGeneratingLog] = useState(false);
   const [isSpecGptChatEnabled, setIsSpecGptChatEnabled] = useState(true);
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || 'submittal');
+
+  // Shared QA state for both tabbed and sidebar modes
+  const inspectionQA = useInspectionQA(projectId, projectVersionId);
 
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
@@ -1754,6 +1761,7 @@ const ProjectLogs = () => {
             isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
+            useQaTabbedLayout={USE_TABBED_QA_LAYOUT}
           />
           {activeTab === 'submittal' && (
             <ProjectLogsActionPanel
@@ -1965,10 +1973,10 @@ const ProjectLogs = () => {
                 indicatorText={"Assistant is processing your documents..."}
               />
               <ChakraProvider>
-                <Chat 
-                  projectId={projectId} 
-                  projectVersionId={projectVersionId} 
-                  chatSessionId={chatId} 
+                <Chat
+                  projectId={projectId}
+                  projectVersionId={projectVersionId}
+                  chatSessionId={chatId}
                   setChatSessionId={setChatId}
                   messages={chatMessages}
                   setMessages={setChatMessages}
@@ -1981,12 +1989,16 @@ const ProjectLogs = () => {
                   isChatEnabled={isSpecGptChatEnabled}
                   setIsChatEnabled={setIsSpecGptChatEnabled}
                   teamId={teamId}
+                  useQaTabbedLayout={USE_TABBED_QA_LAYOUT}
+                  inspectionQA={inspectionQA}
+                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
                 />
               </ChakraProvider>
               </div>
             </>
           }
-          {activeTab == 'inspection-qa' &&
+          {activeTab == 'inspection-qa' && USE_TABBED_QA_LAYOUT &&
             <>
             <div className="compass-chat-viewport">
               <ProcessingIndicator
@@ -2001,6 +2013,7 @@ const ProjectLogs = () => {
                   projectVersionId={projectVersionId}
                   isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
                   isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
+                  inspectionQA={inspectionQA}
                 />
               </ChakraProvider>
               </div>

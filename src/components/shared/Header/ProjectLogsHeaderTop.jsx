@@ -53,7 +53,7 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
             >
               Assistant
             </button>
-            {(props.isInspectionLogFeatureFlagActive || props.isQaPlannerFlagActive) && (
+            {props.useQaTabbedLayout && (props.isInspectionLogFeatureFlagActive || props.isQaPlannerFlagActive) && (
               <button
                 className={`tab-button ${props.activeTab === 'inspection-qa' ? 'active' : ''}`}
                 onClick={() => props.setActiveTab('inspection-qa')}
