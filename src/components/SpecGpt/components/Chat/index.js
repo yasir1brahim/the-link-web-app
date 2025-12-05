@@ -334,6 +334,36 @@ const Chat = ({
         refreshChatHistory();
     }
 
+    // When LogViewer is shown, render it full-width instead of the normal chat layout
+    if (isSidebarMode && qaViewerState.showLogViewer && qaViewerState.currentLogData) {
+        return (
+            <>
+                <Box w="100%" h="100%" bg="white" overflow="auto">
+                    <LogViewer
+                        projectId={projectId}
+                        projectVersionId={projectVersionId}
+                        initialLogData={qaViewerState.currentLogData}
+                        logType={qaViewerState.currentLogType}
+                        onBack={qaViewerState.onBackFromLogViewer}
+                        onQAPlannerRegenerate={
+                            qaViewerState.currentLogType === 'qa_planner' ? qaViewerState.onQAPlannerRegenerate : null
+                        }
+                    />
+                </Box>
+
+                {/* QA Planner Modal - shown in sidebar mode */}
+                <QAPlannerModal
+                    isOpen={qaViewerState.showQAPlannerModal || false}
+                    onClose={() => qaViewerState.setShowQAPlannerModal?.(false)}
+                    onSubmit={qaViewerState.onQAPlannerSubmit}
+                    isLoading={qaViewerState.isGeneratingQALogs || false}
+                />
+
+                <Loader showComponentLoader={isLoading} />
+            </>
+        );
+    }
+
     return (
         <>
             <Flex
@@ -355,30 +385,6 @@ const Chat = ({
                     <Box w={"280px"}></Box>
                 </Box>
                 <Box w="100%" h="100%" position="relative">
-                    {/* LogViewer overlay - shown when viewing a log in sidebar mode */}
-                    {isSidebarMode && qaViewerState.showLogViewer && qaViewerState.currentLogData && (
-                        <Box
-                            position="absolute"
-                            top={0}
-                            left={0}
-                            right={0}
-                            bottom={0}
-                            bg="white"
-                            zIndex={10}
-                            overflow="auto"
-                        >
-                            <LogViewer
-                                projectId={projectId}
-                                projectVersionId={projectVersionId}
-                                initialLogData={qaViewerState.currentLogData}
-                                logType={qaViewerState.currentLogType}
-                                onBack={qaViewerState.onBackFromLogViewer}
-                                onQAPlannerRegenerate={
-                                    qaViewerState.currentLogType === 'qa_planner' ? qaViewerState.onQAPlannerRegenerate : null
-                                }
-                            />
-                        </Box>
-                    )}
                     <ChatMain
                         messages={messages}
                         projectId={projectId}
