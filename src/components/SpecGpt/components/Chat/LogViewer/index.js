@@ -743,7 +743,7 @@ const LogViewer = ({
             </Box>
 
             {/* Main Content Area */}
-            <Box w="100%" h="100%" bg="white">
+            <Box w="100%" h="100%" bg="white" minW={0} overflow="hidden">
                 {logMessage ? (
                     <Box p={6} h="100%" overflowY="auto">
                         {(() => {
