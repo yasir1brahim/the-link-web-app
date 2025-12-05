@@ -42,17 +42,17 @@ Create `src/components/SpecGpt/hooks/useInspectionQA.js`:
 ```javascript
 import { useState, useEffect, useCallback } from 'react';
 import {
-  createOwnerDeliverablesLog,
-  getMostRecentOwnerDeliverablesLog,
-  getOwnerDeliverablesLogById,
-  createQAPlannerLog,
-  getMostRecentQAPlannerLog,
-  getQAPlannerLogById,
-} from '../../../../api/inspection-list';
+  fetchMostRecentLog,
+  generateAiLog,
+  generateQAPlannerLog,
+} from '../../utils/apiUtils';
 
 /**
  * Shared hook for QA feature state and handlers.
  * Used by both InspectionQA (tabbed mode) and Chat (sidebar mode).
+ *
+ * This hook extracts the state and logic from InspectionQA/index.js
+ * so it can be shared with ChatSidebar in sidebar mode.
  */
 export function useInspectionQA(projectId, projectVersionId) {
   // State
@@ -65,51 +65,65 @@ export function useInspectionQA(projectId, projectVersionId) {
   const [showQAPlannerModal, setShowQAPlannerModal] = useState(false);
   const [isGeneratingQALogs, setIsGeneratingQALogs] = useState(false);
 
-  // Poll for log updates when status is PROCESSING
+  // Poll for log updates when log_status is PROCESSING
   useEffect(() => {
-    if (!currentLogData || currentLogData.status !== 'PROCESSING') return;
+    let pollInterval;
 
-    const pollInterval = setInterval(async () => {
-      try {
-        let updatedLog;
-        if (currentLogType === 'owner_deliverables_log') {
-          updatedLog = await getOwnerDeliverablesLogById(currentLogData.id);
-        } else if (currentLogType === 'qa_planner') {
-          updatedLog = await getQAPlannerLogById(currentLogData.id);
+    if (showLogViewer && currentLogData && currentLogData.log_status === 'PROCESSING') {
+      pollInterval = setInterval(async () => {
+        try {
+          const updatedLog = await fetchMostRecentLog(projectId, projectVersionId, currentLogType);
+          if (updatedLog && updatedLog.id === currentLogData.id) {
+            setCurrentLogData(updatedLog);
+            // Stop polling if log is no longer processing
+            if (updatedLog.log_status !== 'PROCESSING') {
+              clearInterval(pollInterval);
+            }
+          }
+        } catch (error) {
+          console.error('Error polling for log updates:', error);
         }
+      }, 3000);
+    }
 
-        if (updatedLog && updatedLog.status !== 'PROCESSING') {
-          setCurrentLogData(updatedLog);
-        }
-      } catch (error) {
-        console.error('Error polling for log updates:', error);
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
       }
-    }, 3000);
-
-    return () => clearInterval(pollInterval);
-  }, [currentLogData, currentLogType]);
+    };
+  }, [showLogViewer, currentLogData, projectId, projectVersionId, currentLogType]);
 
   // Handler: Show Owner Deliverables Logs
   const onShowOwnerDeliverablesLogsClick = useCallback(async () => {
-    setSelectedFeature('owner-deliverables');
     setIsLoadingLog(true);
+    setCurrentLogType('owner_deliverables_log');
+    setSelectedFeature('owner-deliverables');
 
     try {
-      const existingLog = await getMostRecentOwnerDeliverablesLog(projectId, projectVersionId);
+      // Try to get the most recent log
+      const mostRecentLog = await fetchMostRecentLog(projectId, projectVersionId, 'owner_deliverables');
 
-      if (existingLog) {
-        setCurrentLogData(existingLog);
-        setCurrentLogType('owner_deliverables_log');
+      if (mostRecentLog) {
+        // Show the log regardless of status (PROCESSING, SUCCESS, or FAILURE)
+        setCurrentLogData(mostRecentLog);
         setShowLogViewer(true);
       } else {
-        // No existing log - create one
-        const newLog = await createOwnerDeliverablesLog(projectId, projectVersionId);
-        setCurrentLogData(newLog);
-        setCurrentLogType('owner_deliverables_log');
-        setShowLogViewer(true);
+        // No log exists, start generation
+        const result = await generateAiLog(projectId, projectVersionId, 'owner_deliverables_log');
+        if (result && result.id) {
+          // Create a placeholder log data for the new generation
+          const newLogData = {
+            id: result.id,
+            log_table: '',
+            created_at: new Date().toISOString(),
+            log_status: 'PROCESSING'
+          };
+          setCurrentLogData(newLogData);
+          setShowLogViewer(true);
+        }
       }
     } catch (error) {
-      console.error('Error fetching owner deliverables logs:', error);
+      console.error('Error handling owner deliverables log:', error);
     } finally {
       setIsLoadingLog(false);
     }
@@ -117,22 +131,26 @@ export function useInspectionQA(projectId, projectVersionId) {
 
   // Handler: Show QA Planner
   const onShowQAPlannerClick = useCallback(async () => {
-    setSelectedFeature('qa-planner');
     setIsLoadingLog(true);
+    setCurrentLogType('qa_planner');
+    setSelectedFeature('qa-planner');
 
     try {
-      const existingLog = await getMostRecentQAPlannerLog(projectId, projectVersionId);
+      // Try to get the most recent QA planner log
+      const mostRecentLog = await fetchMostRecentLog(projectId, projectVersionId, 'qa_planner');
 
-      if (existingLog) {
-        setCurrentLogData(existingLog);
-        setCurrentLogType('qa_planner');
+      if (mostRecentLog) {
+        // Show the log regardless of status
+        setCurrentLogData(mostRecentLog);
         setShowLogViewer(true);
       } else {
-        // No existing log - show modal to create one
+        // No log exists, show the modal for option selection
         setShowQAPlannerModal(true);
       }
     } catch (error) {
-      console.error('Error fetching QA planner logs:', error);
+      console.error('Error handling QA planner log:', error);
+      // On error, fall back to showing the modal
+      setShowQAPlannerModal(true);
     } finally {
       setIsLoadingLog(false);
     }
@@ -140,27 +158,41 @@ export function useInspectionQA(projectId, projectVersionId) {
 
   // Handler: QA Planner Submit (from modal)
   const onQAPlannerSubmit = useCallback(async (selectedOptions) => {
-    setShowQAPlannerModal(false);
+    setIsLoading(true);
     setIsGeneratingQALogs(true);
-    setIsLoadingLog(true);
+    setShowQAPlannerModal(false);
 
     try {
-      const newLog = await createQAPlannerLog(projectId, projectVersionId, selectedOptions);
-      setCurrentLogData(newLog);
-      setCurrentLogType('qa_planner');
-      setShowLogViewer(true);
+      const result = await generateQAPlannerLog(projectId, projectVersionId, selectedOptions);
+      if (result && result.id) {
+        // Create log data for the new QA planner generation
+        const newLogData = {
+          id: result.id,
+          log_table: '',
+          log_data: [],
+          created_at: new Date().toISOString(),
+          log_status: 'PROCESSING',
+          qa_options_selected: selectedOptions,
+          completion_status: selectedOptions.reduce((acc, option) => {
+            acc[option] = 'PENDING';
+            return acc;
+          }, {})
+        };
+        setCurrentLogData(newLogData);
+        setCurrentLogType('qa_planner');
+        setShowLogViewer(true);
+      }
     } catch (error) {
-      console.error('Error creating QA planner log:', error);
+      console.error('Error handling QA Planner submission:', error);
     } finally {
       setIsGeneratingQALogs(false);
-      setIsLoadingLog(false);
+      setIsLoading(false);
     }
   }, [projectId, projectVersionId]);
 
   // Handler: QA Planner Regenerate
   const onQAPlannerRegenerate = useCallback(() => {
     setShowLogViewer(false);
-    setCurrentLogData(null);
     setShowQAPlannerModal(true);
   }, []);
 
@@ -644,13 +676,13 @@ Before the closing `</div>` of the main container, render the viewer and modal o
   <ChakraProvider>
     <div className={styles.logViewerOverlay}>
       <LogViewer
-        logData={qaViewerState.currentLogData}
-        logType={qaViewerState.currentLogType}
         projectId={projectId}
         projectVersionId={projectVersionId}
+        initialLogData={qaViewerState.currentLogData}
+        logType={qaViewerState.currentLogType}
         onBack={qaViewerState.onBackFromLogViewer}
         onQAPlannerRegenerate={
-          qaViewerState.currentLogType === 'qa_planner' ? qaViewerState.onQAPlannerRegenerate : undefined
+          qaViewerState.currentLogType === 'qa_planner' ? qaViewerState.onQAPlannerRegenerate : null
         }
       />
     </div>
@@ -744,12 +776,12 @@ function InspectionQA({
     return (
       <ChakraProvider>
         <LogViewer
-          logData={currentLogData}
-          logType={currentLogType}
           projectId={projectId}
           projectVersionId={projectVersionId}
+          initialLogData={currentLogData}
+          logType={currentLogType}
           onBack={onBackFromLogViewer}
-          onQAPlannerRegenerate={currentLogType === 'qa_planner' ? onQAPlannerRegenerate : undefined}
+          onQAPlannerRegenerate={currentLogType === 'qa_planner' ? onQAPlannerRegenerate : null}
         />
         <QAPlannerModal
           isOpen={showQAPlannerModal}
