@@ -51,6 +51,17 @@ export function useInspectionQA(projectId, projectVersionId) {
     };
   }, [showLogViewer, currentLogData, projectId, projectVersionId, currentLogType]);
 
+  // Helper: Check if a log has usable content
+  const hasUsableContent = (log) => {
+    if (!log) return false;
+    // A log is usable if it's currently processing OR has actual content
+    if (log.log_status === 'PROCESSING') return true;
+    // Check if there's actual content (log_table for legacy, log_data for structured)
+    const hasTable = log.log_table && log.log_table.trim().length > 0;
+    const hasData = log.log_data && Array.isArray(log.log_data) && log.log_data.length > 0;
+    return hasTable || hasData;
+  };
+
   // Handler: Show Owner Deliverables Logs
   const onShowOwnerDeliverablesLogsClick = useCallback(async () => {
     setIsLoadingLog(true);
@@ -61,12 +72,12 @@ export function useInspectionQA(projectId, projectVersionId) {
       // Try to get the most recent log
       const mostRecentLog = await fetchMostRecentLog(projectId, projectVersionId, 'owner_deliverables');
 
-      if (mostRecentLog) {
-        // Show the log regardless of status (PROCESSING, SUCCESS, or FAILURE)
+      if (mostRecentLog && hasUsableContent(mostRecentLog)) {
+        // Show the log if it has usable content (processing or completed with data)
         setCurrentLogData(mostRecentLog);
         setShowLogViewer(true);
       } else {
-        // No log exists, start generation
+        // No usable log exists, start generation
         const result = await generateAiLog(projectId, projectVersionId, 'owner_deliverables_log');
         if (result && result.id) {
           // Create a placeholder log data for the new generation
@@ -97,12 +108,12 @@ export function useInspectionQA(projectId, projectVersionId) {
       // Try to get the most recent QA planner log
       const mostRecentLog = await fetchMostRecentLog(projectId, projectVersionId, 'qa_planner');
 
-      if (mostRecentLog) {
-        // Show the log regardless of status
+      if (mostRecentLog && hasUsableContent(mostRecentLog)) {
+        // Show the log if it has usable content (processing or completed with data)
         setCurrentLogData(mostRecentLog);
         setShowLogViewer(true);
       } else {
-        // No log exists, show the modal for option selection
+        // No usable log exists, show the modal for option selection
         setShowQAPlannerModal(true);
       }
     } catch (error) {
