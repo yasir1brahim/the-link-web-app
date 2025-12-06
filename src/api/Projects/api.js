@@ -95,7 +95,9 @@ const createProject = async (projectName, projectNumber, projectType, teamId, li
     const payload = {}
     payload.name = projectName
     payload.project_number = projectNumber
-    payload.project_type = projectType
+    if (projectType) {
+        payload.project_type = projectType
+    }
     payload.team = teamId
     if (listOfMemberUserIds) {
         payload.members = listOfMemberUserIds.map((emp_id) => {

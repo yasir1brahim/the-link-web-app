@@ -743,7 +743,7 @@ const LogViewer = ({
             </Box>
 
             {/* Main Content Area */}
-            <Box w="100%" h="100%" bg="white">
+            <Box w="100%" h="100%" bg="white" minW={0} overflow="hidden">
                 {logMessage ? (
                     <Box p={6} h="100%" overflowY="auto">
                         {(() => {
@@ -771,6 +771,8 @@ const LogViewer = ({
                                         enableExport={true}
                                         onExport={handleExportExcel}
                                         exportLabel="Export to Excel"
+                                        exportDisabled={logMessage?.log_status === 'PROCESSING'}
+                                        exportDisabledTooltip="Can't export while generating new log"
                                         className="log-viewer-table"
                                     />
                                 );
