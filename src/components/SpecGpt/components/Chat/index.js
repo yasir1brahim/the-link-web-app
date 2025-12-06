@@ -5,43 +5,44 @@ import {
     DrawerContent,
     Center,
     Spinner,
-    Text
+    Text,
+    ChakraProvider
 } from '@chakra-ui/react'
 import ChatSidebar from './ChatSidebar'
 import ChatMain from './ChatMain'
-import LogsList from './LogsList'
 import LogViewer from './LogViewer'
 import QAPlannerModal from './QAPlannerModal'
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Loader from '../../../shared/Loader/Loader'
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { fetchChatHistory, fetchChatSessionHistory, fetchInspectionLog, fetchOwnerDeliverablesLog, fetchMostRecentLog, generateAiLog, generateQAPlannerLog } from '../../utils/apiUtils';
+import { fetchChatHistory, fetchChatSessionHistory } from '../../utils/apiUtils';
 import { MESSAGE_ROLE_TYPE } from '../../utils/enums';
 import { fetchPromptAnswer, fetchPromptAnswerWebSocket } from '../../utils/apiUtils';
 import { useSpecGptWebSocket } from '../../../../hooks/useSpecGptWebSocket';
 import { useFeatureFlags } from '../../../../contexts/FeatureFlagsContext';
 
 const Chat = ({
-    projectId, 
-    projectVersionId, 
-    chatSessionId, 
+    projectId,
+    projectVersionId,
+    chatSessionId,
     setChatSessionId,
     messages,
     setMessages,
     chatHistory,
     setChatHistory,
-    isInspectionLogFeatureFlagActive,
-    isQaPlannerFlagActive,
     isLoadingMessage,
     setIsLoadingMessage,
     userInput,
     setUserInput,
-    isGeneratingLog,
-    setIsGeneratingLog,
     isChatEnabled,
     setIsChatEnabled,
     teamId,
+    // New props for sidebar QA mode
+    useQaTabbedLayout = true,
+    inspectionQA = null,
+    isInspectionLogFeatureFlagActive = false,
+    isQaPlannerFlagActive = false,
 }) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const DEFAULT_MAX_CHAT_MESSAGES = 10;
@@ -56,18 +57,30 @@ const Chat = ({
     const [maxChatMessages, setMaxChatMessages] = useState(DEFAULT_MAX_CHAT_MESSAGES);
     const chatSessionIdRef = useRef(chatSessionId);
 
-    // New state for logs list functionality
-    const [showLogsList, setShowLogsList] = useState(false);
-    const [currentLogType, setCurrentLogType] = useState(null);
-    
-    // New state for log viewer functionality
-    const [showLogViewer, setShowLogViewer] = useState(false);
-    const [currentLogData, setCurrentLogData] = useState(null);
-    const [isLoadingLog, setIsLoadingLog] = useState(false);
+    // Sidebar mode QA helpers
+    const isSidebarMode = !useQaTabbedLayout;
+    const qaSidebarProps = isSidebarMode
+        ? {
+            onShowOwnerDeliverablesLogsClick: inspectionQA?.onShowOwnerDeliverablesLogsClick,
+            onShowQAPlannerClick: inspectionQA?.onShowQAPlannerClick,
+            isInspectionLogFeatureFlagActive,
+            isQaPlannerFlagActive,
+            selectedFeature: inspectionQA?.selectedFeature,
+            isLoadingLog: inspectionQA?.isLoadingLog,
+        }
+        : {};
 
-    // New state for QA Planner functionality
-    const [showQAPlannerModal, setShowQAPlannerModal] = useState(false);
-    const [isGeneratingQALogs, setIsGeneratingQALogs] = useState(false);
+    const qaViewerState = {
+        showLogViewer: inspectionQA?.showLogViewer,
+        currentLogData: inspectionQA?.currentLogData,
+        currentLogType: inspectionQA?.currentLogType,
+        onBackFromLogViewer: inspectionQA?.onBackFromLogViewer,
+        onQAPlannerRegenerate: inspectionQA?.onQAPlannerRegenerate,
+        showQAPlannerModal: inspectionQA?.showQAPlannerModal,
+        setShowQAPlannerModal: inspectionQA?.setShowQAPlannerModal,
+        onQAPlannerSubmit: inspectionQA?.onQAPlannerSubmit,
+        isGeneratingQALogs: inspectionQA?.isGeneratingQALogs,
+    };
 
     // WebSocket message handlers
     const handleWebSocketMessage = useCallback((data) => {
@@ -219,15 +232,7 @@ const Chat = ({
         setMessages([]);
         setUserInput('');
         setIsLoadingMessage(false);
-        setIsGeneratingLog(false);
         setIsChatEnabled(true);
-        setShowLogsList(false);
-        setCurrentLogType(null);
-        setShowLogViewer(false);
-        setCurrentLogData(null);
-        setIsLoadingLog(false);
-        setShowQAPlannerModal(false);
-        setIsGeneratingQALogs(false);
     }
     // Helper function to refresh chat history
     const refreshChatHistory = () => {
@@ -314,228 +319,9 @@ const Chat = ({
         }
     }
 
-    // New handlers for direct log viewing functionality
-    const onShowInspectionLogsClick = async () => {
-        setIsLoadingLog(true);
-        setCurrentLogType('inspection_log');
-        
-        try {
-            // Try to get the most recent log
-            const mostRecentLog = await fetchMostRecentLog(projectId, projectVersionId, 'inspection_log');
-            console.log('Most recent inspection log:', mostRecentLog);
-            
-            if (mostRecentLog) {
-                console.log('Log status:', mostRecentLog.log_status);
-                // Check if the log is still processing
-                if (mostRecentLog.log_status === 'PROCESSING') {
-                    console.log('Showing processing log without starting new generation');
-                    // Show the processing log directly
-                    setCurrentLogData(mostRecentLog);
-                    setShowLogViewer(true);
-                } else if (['SUCCESS', 'FAILURE'].includes(mostRecentLog.log_status)) {
-                    console.log('Showing completed log without starting new generation');
-                    // Log is complete, show it
-                    setCurrentLogData(mostRecentLog);
-                    setShowLogViewer(true);
-                } else {
-                    console.log('Showing log with unknown status');
-                    // Unknown status, show the log anyway
-                    setCurrentLogData(mostRecentLog);
-                    setShowLogViewer(true);
-                }
-            } else {
-                console.log('No log exists, starting generation');
-                // No log exists, start generation
-                const result = await generateAiLog(projectId, projectVersionId, 'inspection_log');
-                if (result && result.id) {
-                    // Create a placeholder log data for the new generation
-                    const newLogData = {
-                        id: result.id,
-                        log_table: '',
-                        created_at: new Date().toISOString(),
-                        log_status: 'PROCESSING'
-                    };
-                    setCurrentLogData(newLogData);
-                    setShowLogViewer(true);
-                }
-            }
-        } catch (error) {
-            console.error('Error handling inspection log:', error);
-        } finally {
-            setIsLoadingLog(false);
-        }
-    }
-
-    const onShowOwnerDeliverablesLogsClick = async () => {
-        setIsLoadingLog(true);
-        setCurrentLogType('owner_deliverables_log');
-        
-        try {
-            // Try to get the most recent log
-            const mostRecentLog = await fetchMostRecentLog(projectId, projectVersionId, 'owner_deliverables');
-            
-            if (mostRecentLog) {
-                // Check if the log is still processing
-                if (mostRecentLog.log_status === 'PROCESSING') {
-                    // Show the processing log directly
-                    setCurrentLogData(mostRecentLog);
-                    setShowLogViewer(true);
-                } else if (['SUCCESS', 'FAILURE'].includes(mostRecentLog.log_status)) {
-                    // Log is complete, show it
-                    setCurrentLogData(mostRecentLog);
-                    setShowLogViewer(true);
-                } else {
-                    // Unknown status, show the log anyway
-                    setCurrentLogData(mostRecentLog);
-                    setShowLogViewer(true);
-                }
-            } else {
-                // No log exists, start generation
-                const result = await generateAiLog(projectId, projectVersionId, 'owner_deliverables_log');
-                if (result && result.id) {
-                    // Create a placeholder log data for the new generation
-                    const newLogData = {
-                        id: result.id,
-                        log_table: '',
-                        created_at: new Date().toISOString(),
-                        log_status: 'PROCESSING'
-                    };
-                    setCurrentLogData(newLogData);
-                    setShowLogViewer(true);
-                }
-            }
-        } catch (error) {
-            console.error('Error handling owner deliverables log:', error);
-        } finally {
-            setIsLoadingLog(false);
-        }
-    }
-
-    const onBackFromLogViewer = () => {
-        setShowLogViewer(false);
-        setCurrentLogData(null);
-        setCurrentLogType(null);
-    }
-
-    const onShowQAPlannerClick = async () => {
-        setIsLoadingLog(true);
-        setCurrentLogType('qa_planner');
-        
-        try {
-            // Try to get the most recent QA planner log
-            const mostRecentLog = await fetchMostRecentLog(projectId, projectVersionId, 'qa_planner');
-            console.log('Most recent QA planner log:', mostRecentLog);
-            
-            if (mostRecentLog) {
-                console.log('QA Planner log status:', mostRecentLog.log_status);
-                // Check if the log is still processing
-                if (mostRecentLog.log_status === 'PROCESSING') {
-                    console.log('Showing processing QA planner log without starting new generation');
-                    // Show the processing log directly
-                    setCurrentLogData(mostRecentLog);
-                    setShowLogViewer(true);
-                } else if (['SUCCESS', 'FAILURE'].includes(mostRecentLog.log_status)) {
-                    console.log('Showing completed QA planner log without starting new generation');
-                    // Log is complete, show it
-                    setCurrentLogData(mostRecentLog);
-                    setShowLogViewer(true);
-                } else {
-                    console.log('Showing QA planner log with unknown status');
-                    // Unknown status, show the log anyway
-                    setCurrentLogData(mostRecentLog);
-                    setShowLogViewer(true);
-                }
-            } else {
-                console.log('No QA planner log exists, showing modal for selection');
-                // No log exists, show the modal for option selection
-                setShowQAPlannerModal(true);
-            }
-        } catch (error) {
-            console.error('Error handling QA planner log:', error);
-            // On error, fall back to showing the modal
-            setShowQAPlannerModal(true);
-        } finally {
-            setIsLoadingLog(false);
-        }
-    }
-
-    const onQAPlannerSubmit = async (selectedOptions) => {
-        setLoading(true);
-        setIsGeneratingQALogs(true);
-        setShowQAPlannerModal(false);
-
-        try {
-            // Call the new QA Planner endpoint
-            const result = await generateQAPlannerLog(projectId, projectVersionId, selectedOptions);
-            if (result && result.id) {
-                // Create log data for the new QA planner generation
-                const newLogData = {
-                    id: result.id,
-                    log_table: '',
-                    log_data: [],
-                    created_at: new Date().toISOString(),
-                    log_status: 'PROCESSING',
-                    qa_options_selected: selectedOptions,
-                    completion_status: selectedOptions.reduce((acc, option) => {
-                        acc[option] = 'PENDING';
-                        return acc;
-                    }, {})
-                };
-                setCurrentLogData(newLogData);
-                setCurrentLogType('qa_planner');
-                setShowLogViewer(true);
-            }
-        } catch (error) {
-            console.error('Error handling QA Planner submission:', error);
-        } finally {
-            setIsGeneratingQALogs(false);
-            setLoading(false);
-        }
-    }
-
-    const onQAPlannerRegenerate = () => {
-        // Close the log viewer and open the modal for new option selection
-        setShowLogViewer(false);
-        setShowQAPlannerModal(true);
-    }
-
-    // Legacy handlers for logs list functionality (keeping for backward compatibility)
-    const onShowLogsList = (logType) => {
-        setShowLogsList(true);
-        setCurrentLogType(logType);
-    }
-
-    const onBackFromLogsList = () => {
-        setShowLogsList(false);
-        setCurrentLogType(null);
-    }
-
-    const onGenerateNewLog = (logType) => {
-        // Determine which log generation function to use
-        let logFetchFunction;
-        
-        if (logType === 'inspection_log') {
-            logFetchFunction = fetchInspectionLog;
-        } else if (logType === 'owner_deliverables_log') {
-            logFetchFunction = fetchOwnerDeliverablesLog;
-        } else {
-            console.error('Unknown log type:', logType);
-            return;
-        }
-
-        logFetchFunction(projectId, projectVersionId).then((logMessage) => {
-            console.log("logMessage", logMessage);
-        });
-    }
-
     const onClickChatLink = (chatSessionId) => {
         console.log("onClickChatLink", chatSessionId);
         setChatSessionId(chatSessionId);
-        setShowLogsList(false);
-        setCurrentLogType(null);
-        setShowLogViewer(false);
-        setCurrentLogData(null);
-        setIsLoadingLog(false);
     }
 
     const onFirstAIResponse = (chatSessionId, userMessage) => {
@@ -548,72 +334,32 @@ const Chat = ({
         refreshChatHistory();
     }
 
-    // Render log viewer if active
-    if (showLogViewer && currentLogType && currentLogData) {
+    // When LogViewer is shown, render it full-width instead of the normal chat layout
+    if (isSidebarMode && qaViewerState.showLogViewer && qaViewerState.currentLogData) {
         return (
             <>
-                <LogViewer
-                    projectId={projectId}
-                    projectVersionId={projectVersionId}
-                    logType={currentLogType}
-                    onBack={onBackFromLogViewer}
-                    initialLogData={currentLogData}
-                    onQAPlannerRegenerate={onQAPlannerRegenerate}
-                />
-                <Drawer
-                    isOpen={isOpen}
-                    placement='left'
-                    onClose={onClose}
-                    size={{ base: "xs", sm: 'sm' }}
-                >
-                    <DrawerOverlay />
-                    <DrawerContent w="100%">
-                        <DrawerBody p={"0px"}>
-                            <LogViewer
-                                projectId={projectId}
-                                projectVersionId={projectVersionId}
-                                logType={currentLogType}
-                                onBack={onBackFromLogViewer}
-                                initialLogData={currentLogData}
-                                onQAPlannerRegenerate={onQAPlannerRegenerate}
-                            />
-                        </DrawerBody>
-                    </DrawerContent>
-                </Drawer>
-            </>
-        );
-    }
+                <Box w="100%" h="100%" bg="white" overflow="auto">
+                    <LogViewer
+                        projectId={projectId}
+                        projectVersionId={projectVersionId}
+                        initialLogData={qaViewerState.currentLogData}
+                        logType={qaViewerState.currentLogType}
+                        onBack={qaViewerState.onBackFromLogViewer}
+                        onQAPlannerRegenerate={
+                            qaViewerState.currentLogType === 'qa_planner' ? qaViewerState.onQAPlannerRegenerate : null
+                        }
+                    />
+                </Box>
 
-    // Render logs list if active (legacy functionality)
-    if (showLogsList && currentLogType) {
-        return (
-            <>
-                <LogsList
-                    projectId={projectId}
-                    projectVersionId={projectVersionId}
-                    logType={currentLogType}
-                    onBack={onBackFromLogsList}
-                    onGenerateNewLog={onGenerateNewLog}
+                {/* QA Planner Modal - shown in sidebar mode */}
+                <QAPlannerModal
+                    isOpen={qaViewerState.showQAPlannerModal || false}
+                    onClose={() => qaViewerState.setShowQAPlannerModal?.(false)}
+                    onSubmit={qaViewerState.onQAPlannerSubmit}
+                    isLoading={qaViewerState.isGeneratingQALogs || false}
                 />
-                <Drawer
-                    isOpen={isOpen}
-                    placement='left'
-                    onClose={onClose}
-                    size={{ base: "xs", sm: 'sm' }}
-                >
-                    <DrawerOverlay />
-                    <DrawerContent w="100%">
-                        <DrawerBody p={"0px"}>
-                            <LogsList
-                                projectId={projectId}
-                                projectVersionId={projectVersionId}
-                                logType={currentLogType}
-                                onBack={onBackFromLogsList}
-                                onGenerateNewLog={onGenerateNewLog}
-                            />
-                        </DrawerBody>
-                    </DrawerContent>
-                </Drawer>
+
+                <Loader showComponentLoader={isLoading} />
             </>
         );
     }
@@ -633,36 +379,22 @@ const Chat = ({
                             chatHistory={chatHistory}
                             onClickChatLink={onClickChatLink}
                             onNewChatClick={onNewChatClick}
-                            onShowInspectionLogsClick={onShowInspectionLogsClick}
-                            onShowOwnerDeliverablesLogsClick={onShowOwnerDeliverablesLogsClick}
-                            onShowQAPlannerClick={onShowQAPlannerClick}
-                            isInspectionLogFeatureFlagActive={isInspectionLogFeatureFlagActive}
-                            isQaPlannerFlagActive={isQaPlannerFlagActive}
+                            {...qaSidebarProps}
                         />
                     </Box>
                     <Box w={"280px"}></Box>
                 </Box>
-                <Box w="100%" h="100%" >
-                    {(isGeneratingLog || isLoadingLog) && (
-                        <Center h={"100%"} w={"100%"} flexDirection={"column"} gap={5}>
-                            <Spinner size="xl" color="#1F2A43" />
-                            <Text color="#676F74">
-                                {isLoadingLog ? "Loading log..." : "Generating log..."}
-                            </Text>
-                        </Center>
-                    )}
-                    {!isGeneratingLog && !isLoadingLog && (
-                        <ChatMain 
-                            messages={messages} 
-                            projectId={projectId} 
-                            getChatResponse={getChatResponse}
-                            isLoadingMessage={isLoadingMessage}
-                            userInput={userInput}
-                            setUserInput={setUserInput}
-                            endOfMessagesRef={endOfMessagesRef}
-                            isChatEnabled={isChatEnabled}
-                        />
-                    )}
+                <Box w="100%" h="100%" position="relative">
+                    <ChatMain
+                        messages={messages}
+                        projectId={projectId}
+                        getChatResponse={getChatResponse}
+                        isLoadingMessage={isLoadingMessage}
+                        userInput={userInput}
+                        setUserInput={setUserInput}
+                        endOfMessagesRef={endOfMessagesRef}
+                        isChatEnabled={isChatEnabled}
+                    />
                 </Box>
             </Flex>
             <Drawer
@@ -678,26 +410,24 @@ const Chat = ({
                             chatHistory={chatHistory}
                             onClickChatLink={onClickChatLink}
                             onNewChatClick={onNewChatClick}
-                            onShowInspectionLogsClick={onShowInspectionLogsClick}
-                            onShowOwnerDeliverablesLogsClick={onShowOwnerDeliverablesLogsClick}
-                            onShowQAPlannerClick={onShowQAPlannerClick}
-                            isInspectionLogFeatureFlagActive={isInspectionLogFeatureFlagActive}
-                            isQaPlannerFlagActive={isQaPlannerFlagActive}
+                            {...qaSidebarProps}
                         />
                     </DrawerBody>
                 </DrawerContent>
             </Drawer>
-            
-            {/* QA Planner Modal */}
-            <QAPlannerModal
-                isOpen={showQAPlannerModal}
-                onClose={() => setShowQAPlannerModal(false)}
-                onSubmit={onQAPlannerSubmit}
-                isLoading={isGeneratingQALogs}
-            />
 
-          <Loader showComponentLoader={isLoading} />
-            
+            {/* QA Planner Modal - shown in sidebar mode */}
+            {isSidebarMode && (
+                <QAPlannerModal
+                    isOpen={qaViewerState.showQAPlannerModal || false}
+                    onClose={() => qaViewerState.setShowQAPlannerModal?.(false)}
+                    onSubmit={qaViewerState.onQAPlannerSubmit}
+                    isLoading={qaViewerState.isGeneratingQALogs || false}
+                />
+            )}
+
+            <Loader showComponentLoader={isLoading} />
+
         </>
     )
 }
