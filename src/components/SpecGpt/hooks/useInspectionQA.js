@@ -22,6 +22,8 @@ export function useInspectionQA(projectId, projectVersionId) {
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [showQAPlannerModal, setShowQAPlannerModal] = useState(false);
   const [isGeneratingQALogs, setIsGeneratingQALogs] = useState(false);
+  const [qaPlannerSuccess, setQaPlannerSuccess] = useState(false);
+  const [pendingQAPlannerLogData, setPendingQAPlannerLogData] = useState(null);
 
   // Poll for log updates when log_status is PROCESSING
   useEffect(() => {
@@ -129,7 +131,6 @@ export function useInspectionQA(projectId, projectVersionId) {
   const onQAPlannerSubmit = useCallback(async (selectedOptions) => {
     setIsLoading(true);
     setIsGeneratingQALogs(true);
-    setShowQAPlannerModal(false);
 
     try {
       const result = await generateQAPlannerLog(projectId, projectVersionId, selectedOptions);
@@ -147,17 +148,30 @@ export function useInspectionQA(projectId, projectVersionId) {
             return acc;
           }, {})
         };
-        setCurrentLogData(newLogData);
-        setCurrentLogType('qa_planner');
-        setShowLogViewer(true);
+        // Store the log data but don't navigate yet - show success in modal first
+        setPendingQAPlannerLogData(newLogData);
+        setQaPlannerSuccess(true);
       }
     } catch (error) {
       console.error('Error handling QA Planner submission:', error);
+      setShowQAPlannerModal(false);
     } finally {
       setIsGeneratingQALogs(false);
       setIsLoading(false);
     }
   }, [projectId, projectVersionId]);
+
+  // Handler: Close success modal and navigate to log viewer
+  const onQAPlannerSuccessClose = useCallback(() => {
+    setShowQAPlannerModal(false);
+    setQaPlannerSuccess(false);
+    if (pendingQAPlannerLogData) {
+      setCurrentLogData(pendingQAPlannerLogData);
+      setCurrentLogType('qa_planner');
+      setShowLogViewer(true);
+      setPendingQAPlannerLogData(null);
+    }
+  }, [pendingQAPlannerLogData]);
 
   // Handler: QA Planner Regenerate
   const onQAPlannerRegenerate = useCallback(() => {
@@ -183,6 +197,7 @@ export function useInspectionQA(projectId, projectVersionId) {
     selectedFeature,
     showQAPlannerModal,
     isGeneratingQALogs,
+    qaPlannerSuccess,
 
     // State setters (for direct control)
     setIsLoading,
@@ -194,6 +209,7 @@ export function useInspectionQA(projectId, projectVersionId) {
     onShowQAPlannerClick,
     onQAPlannerSubmit,
     onQAPlannerRegenerate,
+    onQAPlannerSuccessClose,
     onBackFromLogViewer,
   };
 }
