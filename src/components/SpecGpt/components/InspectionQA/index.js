@@ -29,11 +29,13 @@ const InspectionQA = ({
         selectedFeature,
         showQAPlannerModal,
         isGeneratingQALogs,
+        qaPlannerSuccess,
         setShowQAPlannerModal,
         onShowOwnerDeliverablesLogsClick,
         onShowQAPlannerClick,
         onQAPlannerSubmit,
         onQAPlannerRegenerate,
+        onQAPlannerSuccessClose,
         onBackFromLogViewer,
     } = inspectionQA || {};
 
@@ -57,7 +59,9 @@ const InspectionQA = ({
                     isOpen={showQAPlannerModal}
                     onClose={() => setShowQAPlannerModal?.(false)}
                     onSubmit={onQAPlannerSubmit}
+                    onSuccessClose={onQAPlannerSuccessClose}
                     isLoading={isGeneratingQALogs}
+                    isSuccess={qaPlannerSuccess}
                 />
 
                 <Loader showComponentLoader={isLoading} />
@@ -101,7 +105,9 @@ const InspectionQA = ({
                 isOpen={showQAPlannerModal}
                 onClose={() => setShowQAPlannerModal?.(false)}
                 onSubmit={onQAPlannerSubmit}
+                onSuccessClose={onQAPlannerSuccessClose}
                 isLoading={isGeneratingQALogs}
+                isSuccess={qaPlannerSuccess}
             />
 
             <Loader showComponentLoader={isLoading} />
