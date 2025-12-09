@@ -209,10 +209,15 @@ const createHiddenWebViewer = async (pdfUrl) => {
   container.style.height = '1px';
   document.body.appendChild(container);
 
+  // Hardcode base path for QA environment
+  const webviewerPath = window.location.pathname.startsWith('/thelink.knyapps.com') 
+    ? '/thelink.knyapps.com/webviewer/lib'
+    : '/webviewer/lib';
+  
   try {
     const instance = await WebViewer(
       {
-        path: '/webviewer/lib',
+        path: webviewerPath,
         initialDoc: pdfUrl,
         disabledElements: ['ribbons'],
       },

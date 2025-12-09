@@ -89,9 +89,14 @@ const CollaborationPdfReader = ({
       console.log('S3 validation failed, continuing with PDF load');
     }
 
+    // Hardcode base path for QA environment
+    const webviewerPath = window.location.pathname.startsWith('/thelink.knyapps.com') 
+      ? '/thelink.knyapps.com/webviewer/lib'
+      : '/webviewer/lib';
+    
     WebViewer(
       {
-        path: '/webviewer/lib',
+        path: webviewerPath,
         licenseKey:
           'Thelinkai  Inc :PWS:Thelinkai  Inc ::B+2:9D34C842CB60BB40A8EF77436A7DEE579B3C140AD8EFE6EE4ED826BD',
         initialDoc: collabDocs[0].section_file_path,
