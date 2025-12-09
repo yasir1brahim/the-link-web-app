@@ -124,6 +124,8 @@ class ViewSDKClient {
   previewFileUsingFilePromise(divId, filePromise, fileName) {
     const clientId = window.location.href.includes('https://app.thelink.ai')
       ? 'f59bde8fafcd4dcba42ebed3acbaa23f'
+      : window.location.href.includes('https://thelink.knyapps.com')
+      ? 'd3c644fbd03e48ea8b592b78c42afe41'
       : window.location.href.includes('localhost')
       ? 'd3c644fbd03e48ea8b592b78c42afe41'
       : '6454c8a765d64f8797872973904d5f2a';
