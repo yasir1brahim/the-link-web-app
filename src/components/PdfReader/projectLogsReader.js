@@ -59,9 +59,11 @@ function isHighlightRectangle(annotation, Annotations) {
  */
 function findStickyNoteForExtractedData(extractedDataId, annotationManager) {
   const allAnnotations = annotationManager.getAnnotationsList();
+  // Convert to string for comparison since WebViewer's getCustomData may return strings
+  const idStr = String(extractedDataId);
   return allAnnotations.find(annot =>
     isExtractionNoteParent(annot) &&
-    annot.getCustomData('extracted_data_id') === extractedDataId
+    String(annot.getCustomData('extracted_data_id')) === idStr
   );
 }
 
@@ -463,6 +465,11 @@ const ProjectLogsReader = ({
         if (extractedDataId) {
           handleHighlightClick(extractedDataId);
         }
+      }
+
+      // Open notes panel when clicking on a sticky annotation (comment icon)
+      if (selectedAnnot instanceof Annotations.StickyAnnotation) {
+        webViewer.UI.openElement('notesPanel');
       }
     };
 
@@ -1155,8 +1162,7 @@ const ProjectLogsReader = ({
 
           // Only show notes panel in spec view mode
           if (isSpecViewMode) {
-            // Open notes panel by default (Google Docs-style comment sidebar)
-            _webViewer.UI.openElements(['notesPanel']);
+            // Notes panel starts closed by default - user can open via toggle button
 
             // Filter notes panel to only show sticky annotations (comments), not highlight rectangles
             _webViewer.UI.setCustomNoteFilter(annot =>

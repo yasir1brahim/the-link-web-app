@@ -3,7 +3,7 @@ import { HIGHLIGHT_TYPES, formatCustomTypes, isCustomHighlight } from './highlig
 import './HighlightLegend.css';
 
 const HighlightLegend = ({ submittalHighlights = [], aiLogHighlights = [], onFilterChange, customItemTypes = [] }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [statistics, setStatistics] = useState({});
   const isInitialMount = useRef(true);

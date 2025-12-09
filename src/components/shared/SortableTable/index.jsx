@@ -47,6 +47,8 @@ const SortableTable = ({
   enableExport = false, // Enable/disable export functionality
   onExport = null, // Callback function for export
   exportLabel = 'Export', // Label for export button
+  exportDisabled = false, // Disable export button
+  exportDisabledTooltip = '', // Tooltip for disabled export button
   className = '',
   ...props
 }) => {
@@ -423,14 +425,21 @@ const SortableTable = ({
           )}
           
           {enableExport && (
-            <button className="export-button" onClick={handleExport}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <polyline points="7,10 12,15 17,10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              {exportLabel}
-            </button>
+            <div className={`export-button-wrapper ${exportDisabled && exportDisabledTooltip ? 'has-tooltip' : ''}`}
+                 data-tooltip={exportDisabledTooltip}>
+              <button
+                className="export-button"
+                onClick={handleExport}
+                disabled={exportDisabled}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="7,10 12,15 17,10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                {exportLabel}
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -529,6 +538,8 @@ SortableTable.propTypes = {
   enableExport: PropTypes.bool,
   onExport: PropTypes.func,
   exportLabel: PropTypes.string,
+  exportDisabled: PropTypes.bool,
+  exportDisabledTooltip: PropTypes.string,
   className: PropTypes.string,
 };
 
