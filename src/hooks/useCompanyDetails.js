@@ -13,7 +13,7 @@ const useCompanyDetails = (teamId) => {
         setIsLoading(true);
         // Use optimized logo endpoint instead of full team details
         const response = await getTeamLogo(teamId);
-        setCompanyLogoUrl(response.data.logo_url || "");
+        setCompanyLogoUrl(response.data.logo_url || response.data.legacy_logo_url || "");
         setCompanyName(response.data.name || "");
       } catch (error) {
         setCompanyLogoUrl("");

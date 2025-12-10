@@ -65,11 +65,9 @@ const ProjectsTable = ({
   const [userRoleInTeam, setUserRoleInTeam] = useState('member');
   const { state } = useLocation();
   // const customer = state;
-  const roleId = localStorage.getItem('roleId');
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
-    console.log('projectData', projectData);
     setUserRoleInTeam(currentUserRole);
     const projectToRolesMap = {};
     projectData.forEach((project) => {
