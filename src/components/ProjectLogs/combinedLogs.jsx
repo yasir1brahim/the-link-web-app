@@ -18,6 +18,7 @@ import handleError from "../../config/errorHandler";
 import { SortIcon } from "../shared/icons/sortIcon";
 import { FilterIcon } from "../shared/icons/filterIcon";
 import { updateSubmittalItem, addSubmittalItem } from "../../api/ProjectLogs/api";
+import { getNextParaNo } from "./paraNoUtils";
 
 export default function CombinedLogs(props) {
   const {
@@ -249,65 +250,29 @@ export default function CombinedLogs(props) {
 
   const handleAddRow = async (log) => {
     try {
-      let index = props.logData?.findIndex((item) => item === log);
+      const currentLogData = props.logData;
+      const index = currentLogData?.findIndex((item) => item === log);
 
-      // Check if the current row ends with a manually-added suffix (dash followed by lowercase letter)
-      const lastDashIndex = log.para_no.lastIndexOf("-");
-      const hasManualSuffix = lastDashIndex !== -1 &&
-        log.para_no.length > lastDashIndex + 1 &&
-        /^[a-z]$/.test(log.para_no[lastDashIndex + 1]);
+      // Get all existing para_nos for the utility function
+      const existingParaNos = currentLogData?.map((item) => item.para_no) || [];
 
-      let newParaNo;
-
-      if (hasManualSuffix) {
-        // Current row is manually added (e.g., "1.04-a" or "1.04-A-1-a")
-        // Add a SIBLING (e.g., "1.04-b" or "1.04-A-1-b")
-        const parent = log.para_no.slice(0, lastDashIndex);
-
-        // Find all siblings (children of the same parent)
-        const siblings = props.logData
-          ?.map((item) => item.para_no)
-          .filter((paraNo) => paraNo.startsWith(parent + "-"));
-
-        // Get suffix characters of all siblings
-        const charArray = siblings.map((paraNo) => {
-          const suffixStart = parent.length + 1;
-          return paraNo.length > suffixStart ? paraNo.codePointAt(suffixStart) : 96;
-        });
-
-        const maxChar = charArray.length > 0 ? Math.max(...charArray) : 96;
-        newParaNo = `${parent}-${String.fromCharCode(maxChar + 1)}`;
-      } else {
-        // Current row is NOT manually added (e.g., "1.04" or "1.04-A-1")
-        // Add a CHILD (e.g., "1.04-a" or "1.04-A-1-a")
-        const children = props.logData
-          ?.map((item) => item.para_no)
-          .filter((paraNo) => paraNo.startsWith(log.para_no + "-"));
-
-        // Get suffix characters of all children
-        const charArray = children.map((paraNo) => {
-          const suffixStart = log.para_no.length + 1;
-          return paraNo.length > suffixStart ? paraNo.codePointAt(suffixStart) : 96;
-        });
-
-        const maxChar = charArray.length > 0 ? Math.max(...charArray) : 96;
-        newParaNo = `${log.para_no}-${String.fromCharCode(maxChar + 1)}`;
-      }
+      // Use the utility function to generate the next para_no
+      // This handles both sibling and child rows, and supports multi-character suffixes (aa, ab, ..., ba, ...)
+      const newParaNo = getNextParaNo(log.para_no, existingParaNos);
 
       const logObj = {
         ...log,
         para_no: newParaNo,
-        // customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
         submittal_number: null,
         added_under_submittal_id: log.id,
         manually_added: true,
       };
-      const result = insertElement(props.logData, index + 1, logObj);
+      const result = insertElement(currentLogData, index + 1, logObj);
       props.setFilteredLogData(result);
       props.setLogData(result);
 
       setNewRowIndex(index + 1);
-      handleEditToggle(logObj, index + 1)
+      handleEditToggle(logObj, index + 1);
     } catch (error) {
       toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
@@ -320,7 +285,7 @@ export default function CombinedLogs(props) {
       });
     }
   };
-  
+
   useEffect(() => {
     setEditRow("");
   }, [props.searchValue]);
