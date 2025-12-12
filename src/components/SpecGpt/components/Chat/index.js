@@ -79,7 +79,9 @@ const Chat = ({
         showQAPlannerModal: inspectionQA?.showQAPlannerModal,
         setShowQAPlannerModal: inspectionQA?.setShowQAPlannerModal,
         onQAPlannerSubmit: inspectionQA?.onQAPlannerSubmit,
+        onQAPlannerSuccessClose: inspectionQA?.onQAPlannerSuccessClose,
         isGeneratingQALogs: inspectionQA?.isGeneratingQALogs,
+        qaPlannerSuccess: inspectionQA?.qaPlannerSuccess,
     };
 
     // WebSocket message handlers
@@ -356,7 +358,9 @@ const Chat = ({
                     isOpen={qaViewerState.showQAPlannerModal || false}
                     onClose={() => qaViewerState.setShowQAPlannerModal?.(false)}
                     onSubmit={qaViewerState.onQAPlannerSubmit}
+                    onSuccessClose={qaViewerState.onQAPlannerSuccessClose}
                     isLoading={qaViewerState.isGeneratingQALogs || false}
+                    isSuccess={qaViewerState.qaPlannerSuccess || false}
                 />
 
                 <Loader showComponentLoader={isLoading} />
@@ -422,7 +426,9 @@ const Chat = ({
                     isOpen={qaViewerState.showQAPlannerModal || false}
                     onClose={() => qaViewerState.setShowQAPlannerModal?.(false)}
                     onSubmit={qaViewerState.onQAPlannerSubmit}
+                    onSuccessClose={qaViewerState.onQAPlannerSuccessClose}
                     isLoading={qaViewerState.isGeneratingQALogs || false}
+                    isSuccess={qaViewerState.qaPlannerSuccess || false}
                 />
             )}
 

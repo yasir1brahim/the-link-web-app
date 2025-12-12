@@ -7,9 +7,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Loader from "../shared/Loader/Loader";
 import handleError from "../../config/errorHandler";
 import HeaderTabs from "../shared/HeaderTabs/HeaderTabs";
-import { listProjects, getUserRoleInProject } from "../../api/Projects/api";
+import { listProjectsOverview, getUserRoleInProject } from "../../api/Projects/api";
 import { useParams } from 'react-router-dom';
-import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { useFeatureFlags } from "../../contexts/FeatureFlagsContext";
 import useCompanyDetails from "../../hooks/useCompanyDetails";
 
@@ -85,17 +84,17 @@ const ProjectsPage = () => {
   const fetchData = async () => {
     try {
         setIsLoading(true);
-        const userRole = await getUserRoleInTeam(
-          localStorage.getItem("userId"),
-          customerId
-        );
+        // Get user role from localStorage
+        const userTeamRoles = JSON.parse(localStorage.getItem('userTeamRoles') || '{}');
+        const userRole = userTeamRoles[customerId] || 'member';
         setCurrentUserRole(userRole);
-        const response = await listProjects(teamId);
-        
-        const dataToSet = isArchived 
-            ? response.data.results.filter(project => project.is_archived === true) 
+
+        const response = await listProjectsOverview(teamId);
+
+        const dataToSet = isArchived
+            ? response.data.results.filter(project => project.is_archived === true)
             : response.data.results.filter(project => project.is_archived === false) || [];
-            
+
         setProjectData(dataToSet);
     } catch (error) {
         handleError(error);
@@ -160,6 +159,7 @@ useEffect(() => {
             isArchived={isArchived}
             toggleArchive={toggleArchive}
             customerId={customerId}
+            currentUserRole={currentUserRole}
             noticesFeatureFlagActive={isNoticesFlagActive(customerId)}
             fullSpecProcessingFeatureFlagActive={isFullSpecProcessingFlagActive(customerId)}
             onClickNotices={onClickNotices}
