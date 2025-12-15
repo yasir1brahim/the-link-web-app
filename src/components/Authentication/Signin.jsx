@@ -47,7 +47,11 @@ const Signin = (props) => {
         if (response.data.status === 'success') {
           setUserDetails(response.data.jwt);
           localStorage.setItem('jwt', response.data.jwt);
-          
+          // Store user team roles for quick access without API calls
+          if (response.data.team_roles) {
+            localStorage.setItem('userTeamRoles', JSON.stringify(response.data.team_roles));
+          }
+
           // Redirect to the originally requested page if present
           const redirectUrl = localStorage.getItem('postLoginRedirect');
           if (redirectUrl) {

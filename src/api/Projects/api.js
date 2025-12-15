@@ -15,6 +15,20 @@ const listProjects = async (teamId) => {
     }
 }
 
+const listProjectsOverview = async (teamId) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/projects/overview/`,
+            params: {
+                team_id: teamId
+            }
+        });
+    } catch (error) {
+        handleError(error);
+    }
+}
+
 const getProjectDetails = async (projectId, projectVersionId = null) => {
     try {
         const params = {};
@@ -221,6 +235,7 @@ const getUserRoleInAllProjects = async (userId, teamId) => {
 
 export {
     listProjects, 
+    listProjectsOverview,
     updateProject, 
     createProject, 
     getProjectDetails, 
