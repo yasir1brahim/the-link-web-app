@@ -24,8 +24,7 @@ const QAPlannerTimeoutModal = ({ isOpen, onRestart, onCancel }) => {
                             Processing has taken longer than expected
                         </Text>
                         <Text textAlign="center" fontSize="md" color="gray.600">
-                            The QA Planner processing has exceeded the timeout threshold.
-                            You can restart the process or go back to try again later.
+                            Press "Restart QA Planner" to restart the process or "Cancel" to go back and try again later.
                         </Text>
                     </VStack>
                 </ModalBody>
