@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getTeamDetails } from "../api/Authentication/api"; 
+import { getTeamLogo } from "../api/Authentication/api";
 
 const useCompanyDetails = (teamId) => {
   const [companyLogoUrl, setCompanyLogoUrl] = useState("");
@@ -11,8 +11,9 @@ const useCompanyDetails = (teamId) => {
       if (!teamId) return;
       try {
         setIsLoading(true);
-        const response = await getTeamDetails(teamId);
-        setCompanyLogoUrl(response.data.legacy_logo_url || "");
+        // Use optimized logo endpoint instead of full team details
+        const response = await getTeamLogo(teamId);
+        setCompanyLogoUrl(response.data.logo_url || response.data.legacy_logo_url || "");
         setCompanyName(response.data.name || "");
       } catch (error) {
         setCompanyLogoUrl("");

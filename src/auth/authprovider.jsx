@@ -128,6 +128,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('userId');
     localStorage.removeItem('fullName');
+    localStorage.removeItem('userTeamRoles');
   };
 
   const contextValue = {

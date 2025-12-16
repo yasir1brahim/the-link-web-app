@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../auth/authcontext';
-import { getCurrentUserData, getTeamDetails } from '../api/Authentication/api';
+import { getCurrentUserData, getTeamFlags } from '../api/Authentication/api';
 import { 
     NOTICES_FEATURE_FLAG_NAME, 
     VERSIONING_FEATURE_FLAG_NAME, 
@@ -40,6 +40,7 @@ export const FeatureFlagsProvider = ({ children }) => {
     const [teamFlags, setTeamFlags] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [loadingTeamIds, setLoadingTeamIds] = useState(new Set());
+    const [failedTeamIds, setFailedTeamIds] = useState(new Set()); // Track failed attempts
 
     // Load user flags when user is authenticated
     useEffect(() => {
@@ -56,24 +57,44 @@ export const FeatureFlagsProvider = ({ children }) => {
             return teamFlags[teamId] || [];
         }
 
+        // Don't retry if this team already failed
+        if (failedTeamIds.has(teamId)) {
+            console.warn(`Skipping team ${teamId} - previous load attempt failed`);
+            return [];
+        }
+
         // Prevent multiple simultaneous requests for the same team
         if (loadingTeamIds.has(teamId)) {
             return teamFlags[teamId] || [];
         }
 
         setLoadingTeamIds(prev => new Set(prev).add(teamId));
-        setIsLoading(true);
-        
+        setIsLoading(true); 
+
         try {
-            const team = await getTeamDetails(teamId);
-            const flags = team.data.active_flags || [];
+            // Use optimized flags endpoint instead of full team details
+            const response = await getTeamFlags(teamId);
+            const flags = response.data.active_flags || [];
             setTeamFlags(prev => ({
                 ...prev,
                 [teamId]: flags
             }));
+            // Clear from failed list if it was previously there
+            setFailedTeamIds(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(teamId);
+                return newSet;
+            });
             return flags;
         } catch (error) {
-            console.error('Error loading team flags:', error);
+            console.error(`Error loading team flags for team ${teamId}:`, error);
+            // Mark this team as failed to prevent retries
+            setFailedTeamIds(prev => new Set(prev).add(teamId));
+            // Set empty flags for this team to prevent further loading attempts
+            setTeamFlags(prev => ({
+                ...prev,
+                [teamId]: []
+            }));
             return [];
         } finally {
             setLoadingTeamIds(prev => {
@@ -97,8 +118,8 @@ export const FeatureFlagsProvider = ({ children }) => {
             return true;
         }
 
-        // If team flags aren't loaded yet, trigger loading but return false for now
-        if (teamId && !teamFlags[teamId] && !loadingTeamIds.has(teamId)) {
+        // If team flags aren't loaded yet and haven't failed, trigger loading but return false for now
+        if (teamId && !teamFlags[teamId] && !loadingTeamIds.has(teamId) && !failedTeamIds.has(teamId)) {
             // Trigger loading in the background
             loadTeamFlags(teamId).catch(error => {
                 console.error('Error loading team flags for flag check:', error);
@@ -145,8 +166,9 @@ export const FeatureFlagsProvider = ({ children }) => {
         try {
             const userData = await getCurrentUserData();
             setUserFlags(userData.data.active_flags || []);
-            // Clear team flags cache to force reload
+            // Clear team flags cache and failed attempts to force reload
             setTeamFlags({});
+            setFailedTeamIds(new Set());
         } catch (error) {
             console.error('Error refreshing flags:', error);
         } finally {

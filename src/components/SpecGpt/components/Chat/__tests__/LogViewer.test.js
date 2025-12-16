@@ -35,7 +35,7 @@ describe('LogViewer', () => {
     const mockProps = {
         projectId: '123',
         projectVersionId: '456',
-        logType: 'inspection_log',
+        logType: 'owner_deliverables_log',
         onBack: jest.fn(),
         initialLogData: {
             id: '789',
@@ -51,10 +51,10 @@ describe('LogViewer', () => {
 
     it('should render log viewer with initial data', () => {
         renderWithChakra(<LogViewer {...mockProps} />);
-        
-        expect(screen.getByText('Inspections List')).toBeInTheDocument();
+
+        expect(screen.getByText('Owner Deliverables List')).toBeInTheDocument();
         expect(screen.getByText('Back')).toBeInTheDocument();
-        expect(screen.getByText('Regenerate Inspections List')).toBeInTheDocument();
+        expect(screen.getByText('Regenerate Owner Deliverables List')).toBeInTheDocument();
         expect(screen.getByText('SUCCESS')).toBeInTheDocument();
     });
 
@@ -69,16 +69,16 @@ describe('LogViewer', () => {
 
     it('should show loading state when regenerating log', async () => {
         generateAiLog.mockResolvedValue({ id: 'new-789' });
-        
+
         renderWithChakra(<LogViewer {...mockProps} />);
-        
-        const regenerateButton = screen.getByText('Regenerate Inspections List');
+
+        const regenerateButton = screen.getByText('Regenerate Owner Deliverables List');
         fireEvent.click(regenerateButton);
-        
+
         expect(screen.getByText('Regenerating...')).toBeInTheDocument();
-        
+
         await waitFor(() => {
-            expect(generateAiLog).toHaveBeenCalledWith('123', '456', 'inspection_log');
+            expect(generateAiLog).toHaveBeenCalledWith('123', '456', 'owner_deliverables_log');
         });
     });
 
@@ -90,10 +90,10 @@ describe('LogViewer', () => {
                 log_status: 'PROCESSING'
             }
         };
-        
+
         renderWithChakra(<LogViewer {...processingProps} />);
-        
-        const regenerateButton = screen.getByText('Regenerate Inspections List');
+
+        const regenerateButton = screen.getByText('Regenerate Owner Deliverables List');
         expect(regenerateButton).toBeDisabled();
     });
 
@@ -105,12 +105,12 @@ describe('LogViewer', () => {
                 log_status: 'PROCESSING'
             }
         };
-        
+
         renderWithChakra(<LogViewer {...processingProps} />);
-        
-        const regenerateButton = screen.getByText('Regenerate Inspections List');
+
+        const regenerateButton = screen.getByText('Regenerate Owner Deliverables List');
         fireEvent.click(regenerateButton);
-        
+
         await waitFor(() => {
             expect(generateAiLog).not.toHaveBeenCalled();
         });
@@ -144,16 +144,16 @@ describe('LogViewer', () => {
         expect(screen.getByText('FAILURE')).toBeInTheDocument();
     });
 
-    it('should display owner deliverables log type correctly', () => {
-        const ownerProps = {
+    it('should display qa planner log type correctly', () => {
+        const qaProps = {
             ...mockProps,
-            logType: 'owner_deliverables_log'
+            logType: 'qa_planner'
         };
-        
-        renderWithChakra(<LogViewer {...ownerProps} />);
-        
-        expect(screen.getByText('Owner Deliverables List')).toBeInTheDocument();
-        expect(screen.getByText('Regenerate Owner Deliverables List')).toBeInTheDocument();
+
+        renderWithChakra(<LogViewer {...qaProps} />);
+
+        expect(screen.getByText('QA Planner')).toBeInTheDocument();
+        expect(screen.getByText('Regenerate QA Planner')).toBeInTheDocument();
     });
 
     it('should show loading state initially when no initial data provided', () => {
@@ -172,16 +172,16 @@ describe('LogViewer', () => {
 
     it('should handle API errors gracefully', async () => {
         generateAiLog.mockRejectedValue(new Error('API Error'));
-        
+
         renderWithChakra(<LogViewer {...mockProps} />);
-        
-        const regenerateButton = screen.getByText('Regenerate Inspections List');
+
+        const regenerateButton = screen.getByText('Regenerate Owner Deliverables List');
         fireEvent.click(regenerateButton);
-        
+
         await waitFor(() => {
             expect(generateAiLog).toHaveBeenCalled();
         });
-        
+
         // Should not show loading state after error
         expect(screen.queryByText('Regenerating...')).not.toBeInTheDocument();
     });
