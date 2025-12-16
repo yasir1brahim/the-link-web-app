@@ -558,6 +558,14 @@ const DocumentHighlighter = ({
         });
 
         setLocalAiHighlights((previous) => [...previous, createdHighlight]);
+
+        // Update extractedDataItems cache with new highlight (for notes feature consistency)
+        setExtractedDataItems(prev => [...prev, {
+          ...createdHighlight,
+          notes: createdHighlight.notes || [],
+          pdf_locations: createdHighlight.pdf_locations || [],
+        }]);
+
         onRefreshSectionContent();
       } catch (error) {
         console.error('Failed to create quick highlight:', error);

@@ -598,7 +598,7 @@ const ProjectLogsReader = ({
     };
 
     updateRepeatButton();
-  }, [webViewer, lastUsedHighlightType, isSpecViewMode, documentLoaded]);
+  }, [webViewer, lastUsedHighlightType, isSpecViewMode, documentLoaded, buildSelectionPayload]);
 
   const handleClose = () => {
     setLogInViewer(null);
