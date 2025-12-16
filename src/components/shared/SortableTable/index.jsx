@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { SortIcon } from '../icons/sortIcon';
 import { FilterIcon } from '../icons/filterIcon';
@@ -7,10 +7,10 @@ import './SortableTable.scss';
 import './FilterModal.scss';
 
 /**
- * SortableTable - A reusable table component with sorting, filtering, search, and pagination capabilities
- * 
+ * SortableTable - A reusable table component with sorting, filtering, search, pagination, and column resizing capabilities
+ *
  * @param {Array} data - Array of data objects to display
- * @param {Array} columns - Array of column definitions
+ * @param {Array} columns - Array of column definitions (supports resizable columns)
  * @param {Function} onSort - Callback function for sorting
  * @param {Object} sorting - Current sorting state { column: string, order: 'asc'|'desc' }
  * @param {Function} onFilter - Callback function for filtering
@@ -47,6 +47,8 @@ const SortableTable = ({
   enableExport = false, // Enable/disable export functionality
   onExport = null, // Callback function for export
   exportLabel = 'Export', // Label for export button
+  exportDisabled = false, // Disable export button
+  exportDisabledTooltip = '', // Tooltip for disabled export button
   className = '',
   ...props
 }) => {
@@ -55,10 +57,14 @@ const SortableTable = ({
   const [tableWidths, setTableWidths] = useState({});
   const [showMore, setShowMore] = useState([]);
   const [shouldShowExpansionButton, setShouldShowExpansionButton] = useState([]);
-  
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizingColumn, setResizingColumn] = useState(null);
+
   const tableRef = useRef(null);
   const parentRef = useRef(null);
   const rowRefs = useRef([]);
+  const startXRef = useRef(0);
+  const startWidthRef = useRef(0);
 
   // Initialize showMore state when data changes (only if expansion is enabled)
   useEffect(() => {
@@ -96,23 +102,68 @@ const SortableTable = ({
     };
   }, [data, enableExpansion]);
 
-  // Use fixed column widths to prevent layout shifts
+  // Initialize column widths
   useEffect(() => {
     if (columns.length > 0) {
-      const fixedWidths = {};
+      const initialWidths = {};
       columns.forEach((col, index) => {
-        // Use minWidth as fixed width to prevent any changes
-        fixedWidths[index] = col.minWidth || 150;
+        // Use minWidth as initial width
+        initialWidths[index] = col.minWidth || 150;
       });
-      setTableWidths(fixedWidths);
+      setTableWidths(initialWidths);
     }
   }, [columns]);
 
-  // Disable column resizing to prevent layout shifts
+  // Handle column resizing
   const handleMouseDown = (e, colIndex) => {
-    // Disabled to prevent layout shifts
-    return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    setIsResizing(true);
+    setResizingColumn(colIndex);
+    startXRef.current = e.clientX;
+    startWidthRef.current = tableWidths[colIndex] || columns[colIndex].minWidth || 150;
   };
+
+  // Memoized mouse move handler with performance optimization using RAF
+  const handleMouseMove = useCallback((e) => {
+    if (!isResizing || resizingColumn === null) return;
+
+    // Use requestAnimationFrame for smoother performance
+    requestAnimationFrame(() => {
+      const diff = e.clientX - startXRef.current;
+      const newWidth = Math.max(
+        columns[resizingColumn]?.minWidth || 100,
+        startWidthRef.current + diff
+      );
+
+      setTableWidths(prev => ({
+        ...prev,
+        [resizingColumn]: newWidth
+      }));
+    });
+  }, [isResizing, resizingColumn, columns]);
+
+  // Memoized mouse up handler
+  const handleMouseUp = useCallback(() => {
+    if (isResizing) {
+      setIsResizing(false);
+      setResizingColumn(null);
+    }
+  }, [isResizing]);
+
+  // Handle mouse move during resize
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing, handleMouseMove, handleMouseUp]);
 
   // Handle sorting
   const handleSorting = (columnName) => {
@@ -225,6 +276,10 @@ const SortableTable = ({
                   <div
                     className="resizer"
                     onMouseDown={(e) => handleMouseDown(e, index)}
+                    style={{
+                      cursor: 'col-resize',
+                      userSelect: 'none'
+                    }}
                   >
                     |
                   </div>
@@ -370,14 +425,21 @@ const SortableTable = ({
           )}
           
           {enableExport && (
-            <button className="export-button" onClick={handleExport}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <polyline points="7,10 12,15 17,10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              {exportLabel}
-            </button>
+            <div className={`export-button-wrapper ${exportDisabled && exportDisabledTooltip ? 'has-tooltip' : ''}`}
+                 data-tooltip={exportDisabledTooltip}>
+              <button
+                className="export-button"
+                onClick={handleExport}
+                disabled={exportDisabled}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="7,10 12,15 17,10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                {exportLabel}
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -476,6 +538,8 @@ SortableTable.propTypes = {
   enableExport: PropTypes.bool,
   onExport: PropTypes.func,
   exportLabel: PropTypes.string,
+  exportDisabled: PropTypes.bool,
+  exportDisabledTooltip: PropTypes.string,
   className: PropTypes.string,
 };
 

@@ -128,6 +128,70 @@ const createManualHighlight = async (projectId, payload) => {
     }
 };
 
+/**
+ * Create a new note on an ExtractedData
+ * @param {number} projectId - The project ID
+ * @param {number} extractedDataId - The extracted data ID
+ * @param {object} noteData - Note data (text, etc.)
+ * @returns {Promise} API response
+ */
+const createExtractionNote = async (projectId, extractedDataId, noteData) => {
+    try {
+        const { data } = await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/${projectId}/extracted-data/${extractedDataId}/notes/`,
+            data: noteData,
+        });
+
+        return data;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+/**
+ * Update an existing note
+ * @param {number} projectId - The project ID
+ * @param {number} extractedDataId - The extracted data ID
+ * @param {number} noteId - The note ID
+ * @param {object} noteData - Updated note data
+ * @returns {Promise} API response
+ */
+const updateExtractionNote = async (projectId, extractedDataId, noteId, noteData) => {
+    try {
+        const { data } = await axiosInstance({
+            method: 'patch',
+            url: `/api/deliverables/${projectId}/extracted-data/${extractedDataId}/notes/${noteId}/`,
+            data: noteData,
+        });
+
+        return data;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+/**
+ * Delete a note
+ * @param {number} projectId - The project ID
+ * @param {number} extractedDataId - The extracted data ID
+ * @param {number} noteId - The note ID
+ * @returns {Promise} API response
+ */
+const deleteExtractionNote = async (projectId, extractedDataId, noteId) => {
+    try {
+        await axiosInstance({
+            method: 'delete',
+            url: `/api/deliverables/${projectId}/extracted-data/${extractedDataId}/notes/${noteId}/`,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
 // Custom item type helpers
 const getCustomItemTypes = async (projectId) => {
     try {
@@ -228,6 +292,9 @@ export {
     getSpecCentricData,
     getSpecSectionSubmittals,
     createManualHighlight,
+    createExtractionNote,
+    updateExtractionNote,
+    deleteExtractionNote,
     getCustomItemTypes,
     createCustomItemType,
     updateCustomItemType,

@@ -23,7 +23,6 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion , getArchivedVersions} from "../../api/Projects/api";
-import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem, getSpecSections } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
@@ -38,12 +37,15 @@ import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
 import ArchivedVersionsModal from "./archivedVersionModal";
 import { isLogEligibleForChildEntry } from "./projectLogsUtils";
-import useCompanyDetails from "../../hooks/useCompanyDetails";
 import useDocumentRefresh from "../../hooks/useDocumentRefresh";
 import DocumentListModal from "./DocumentListModal";
 import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
 import SpecViewer from "../SpecCentricView/SpecViewer";
+import { useInspectionQA } from '../SpecGpt/hooks/useInspectionQA';
 
+// Toggle between tabbed layout (true) and sidebar layout (false)
+// Set to false to show QA features in Compass sidebar instead of separate tab
+const USE_TABBED_QA_LAYOUT = false;
 
 const ProjectLogs = () => {
   const { 
@@ -233,6 +235,9 @@ const ProjectLogs = () => {
   const [isSpecGptChatEnabled, setIsSpecGptChatEnabled] = useState(true);
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || 'submittal');
 
+  // Shared QA state for both tabbed and sidebar modes
+  const inspectionQA = useInspectionQA(projectId, projectVersionId);
+
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
   const navigate = useNavigate();
@@ -241,8 +246,8 @@ const ProjectLogs = () => {
   const [userRole, setUserRole] = useState('');
   const [userRoleInCompany, setUserRoleInCompany] = useState('member');
   const [teamId, setTeamId] = useState(state?.teamId);
-
-  const { companyLogoUrl, companyName, isLoading:headerLoading } = useCompanyDetails(teamId);
+  const [companyLogoUrl, setCompanyLogoUrl] = useState('');
+  const [companyName, setCompanyName] = useState('');
 
   const [hasPlaceholderSubmittals, setHasPlaceholderSubmittals] = useState(false);
 
@@ -307,17 +312,11 @@ const ProjectLogs = () => {
     }
   };
 
-  const getUserRoleInProject = async (projectData, userArgument) => {
-    console.log('user', userArgument);
-    console.log('projectData', projectData);
-    if (userArgument.is_superuser) {
-      return 'Admin';
-    } 
-    const membership = projectData.members.find((member) => member.user_id === userArgument.id);
-    if (membership) {
-      return membership.role === 'admin' ? 'Admin' : 'Member';
+  const getUserRoleInProject = (projectData) => {
+    if (!projectData.current_user_role) {
+      return 'Unauthorized';
     }
-    return 'Unauthorized';
+    return projectData.current_user_role === 'project_admin' ? 'Admin' : 'Member';
   }
 
   const handleGetProjectId = async (submittalId) => {
@@ -522,13 +521,16 @@ const ProjectLogs = () => {
         }
         
         setProjectName(response.data.name);
-        
+
+        setCompanyName(response.data.team_name || '');
+        setCompanyLogoUrl(response.data.team_logo_url || '');
+
         // Documents are already filtered by version from the backend
         setDocumentData(response.data.document_details);
         setDocParsed(response.data.doc_parsed);
-        
-        setUserRole(getUserRoleInProject(response.data, updatedUser));
-        setUserRoleInCompany(await getUserRoleInTeam(updatedUser.id, response.data.team));
+
+        setUserRole(getUserRoleInProject(response.data));
+        setUserRoleInCompany(response.data.current_user_team_role || 'member');
         console.log("response.data.project_versions", response.data.project_versions);
 
         setAvailableVersions(response.data.project_versions);
@@ -562,8 +564,13 @@ const ProjectLogs = () => {
   // Handle activeTab changes from URL parameters
   useEffect(() => {
     const tabFromUrl = searchParams.get("tab");
-    if (tabFromUrl && (tabFromUrl === 'submittal' || tabFromUrl === 'compass' || tabFromUrl === 'spec-view')) {
-      setActiveTab(tabFromUrl);
+    if (tabFromUrl) {
+      // Support 'compass' for backwards compatibility, map it to 'assistant'
+      if (tabFromUrl === 'compass') {
+        setActiveTab('assistant');
+      } else if (tabFromUrl === 'submittal' || tabFromUrl === 'assistant' || tabFromUrl === 'spec-view') {
+        setActiveTab(tabFromUrl);
+      }
     }
   }, [searchParams]);
 
@@ -1754,6 +1761,7 @@ const ProjectLogs = () => {
             isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
+            useQaTabbedLayout={USE_TABBED_QA_LAYOUT}
           />
           {activeTab === 'submittal' && (
             <ProjectLogsActionPanel
@@ -1955,20 +1963,20 @@ const ProjectLogs = () => {
               </div>
             </div>
           </div>}
-          {activeTab == 'compass' && 
+          {activeTab == 'assistant' &&
             <>
             <div className="compass-chat-viewport">
               <ProcessingIndicator
                 documentIsProcessing={documentIsBeingEmbedded}
                 documentData={documentData}
                 toggleDocumentStatusModal={toggleSpecGptProcessingModal}
-                indicatorText={"Compass is processing your documents..."}
+                indicatorText={"Assistant is processing your documents..."}
               />
               <ChakraProvider>
-                <Chat 
-                  projectId={projectId} 
-                  projectVersionId={projectVersionId} 
-                  chatSessionId={chatId} 
+                <Chat
+                  projectId={projectId}
+                  projectVersionId={projectVersionId}
+                  chatSessionId={chatId}
                   setChatSessionId={setChatId}
                   messages={chatMessages}
                   setMessages={setChatMessages}
@@ -1981,19 +1989,23 @@ const ProjectLogs = () => {
                   isChatEnabled={isSpecGptChatEnabled}
                   setIsChatEnabled={setIsSpecGptChatEnabled}
                   teamId={teamId}
+                  useQaTabbedLayout={USE_TABBED_QA_LAYOUT}
+                  inspectionQA={inspectionQA}
+                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
                 />
               </ChakraProvider>
               </div>
             </>
           }
-          {activeTab == 'inspection-qa' &&
+          {activeTab == 'inspection-qa' && USE_TABBED_QA_LAYOUT &&
             <>
             <div className="compass-chat-viewport">
               <ProcessingIndicator
                 documentIsProcessing={documentIsBeingEmbedded}
                 documentData={documentData}
                 toggleDocumentStatusModal={toggleSpecGptProcessingModal}
-                indicatorText={"Compass is processing your documents..."}
+                indicatorText={"Assistant is processing your documents..."}
               />
               <ChakraProvider>
                 <InspectionQA
@@ -2001,6 +2013,7 @@ const ProjectLogs = () => {
                   projectVersionId={projectVersionId}
                   isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
                   isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
+                  inspectionQA={inspectionQA}
                 />
               </ChakraProvider>
               </div>
@@ -2201,7 +2214,7 @@ const ProjectLogs = () => {
         className="new-customer modal-xl"
       >
         <ModalHeader toggle={toggleSpecGptProcessingModal}>
-          Compass Processing Status
+          Assistant Processing Status
         </ModalHeader>
         <ModalBody>
           <DocumentStatus documentData={documentData} isSpecGptStatus={true} />
@@ -2346,7 +2359,7 @@ const ProjectLogs = () => {
         manageExcelExportModal={manageExcelExportModal}
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
-      <Loader showComponentLoader={isInitialLoading || isDataLoading || headerLoading} />
+      <Loader showComponentLoader={isInitialLoading || isDataLoading} />
       
       <DuplicateFileConfirmationModal
         isOpen={showDuplicateFilesModal}

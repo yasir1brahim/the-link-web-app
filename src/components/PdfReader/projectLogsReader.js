@@ -7,6 +7,143 @@ import { validateS3Link, isS3LinkExpiredError } from "../../utils/s3LinkValidato
 import { useS3LinkValidation } from "../../hooks/useS3LinkValidation.js";
 import { ReactComponent as AddButton } from "../../assets/images/circle-add.svg";
 import { ReactComponent as RepeatIcon } from "../../assets/images/repeat-icon.svg";
+import * as api from '../../api/SpecCentricView/api';
+import { toast } from 'react-toastify';
+
+// Sticky note icon vertical offset - Apryse sticky notes anchor from bottom of icon
+const STICKY_NOTE_ICON_OFFSET = 20;
+
+// Sticky note appearance configuration
+const STICKY_NOTE_SIZE = 1; // Smaller icon size (default is ~25)
+const STICKY_NOTE_COLOR = { r: 255, g: 245, b: 120 }; // Lighter yellow
+
+/**
+ * Calculate sticky note position based on highlight location
+ * Positions the icon at the right side of the highlight, vertically aligned
+ */
+function calculateStickyPosition(highlightLocation) {
+  const { x, y, width } = highlightLocation;
+
+  // Position at the right edge of the highlight, offset upward to align with text
+  const calcX = Math.max(0, x + (width || 0));
+  const calcY = Math.max(0, y - STICKY_NOTE_ICON_OFFSET);
+
+  return { x: calcX, y: calcY };
+}
+
+/**
+ * Check if annotation is an extraction note parent (sticky without parent)
+ */
+function isExtractionNoteParent(annotation) {
+  return annotation.getCustomData('extracted_data_id') &&
+         !annotation.InReplyTo;
+}
+
+/**
+ * Check if annotation is an extraction note reply
+ */
+function isExtractionNoteReply(annotation) {
+  return annotation.getCustomData('extraction_note_id') &&
+         annotation.InReplyTo;
+}
+
+/**
+ * Check if annotation is a highlight rectangle
+ */
+function isHighlightRectangle(annotation, Annotations) {
+  return annotation instanceof Annotations.RectangleAnnotation &&
+         annotation.getCustomData('extracted_data_id');
+}
+
+/**
+ * Find existing sticky note parent for an ExtractedData ID
+ */
+function findStickyNoteForExtractedData(extractedDataId, annotationManager) {
+  const allAnnotations = annotationManager.getAnnotationsList();
+  // Convert to string for comparison since WebViewer's getCustomData may return strings
+  const idStr = String(extractedDataId);
+  return allAnnotations.find(annot =>
+    isExtractionNoteParent(annot) &&
+    String(annot.getCustomData('extracted_data_id')) === idStr
+  );
+}
+
+/**
+ * Create sticky note annotations for an ExtractedData item with notes
+ */
+function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
+  const { annotationManager, Annotations } = webViewer.Core;
+
+  // Safety checks
+  if (!extractedData.notes || extractedData.notes.length === 0) {
+    console.log('[NOTE_DEBUG] No notes for ExtractedData:', extractedData.id);
+    return;
+  }
+
+  if (!extractedData.pdf_locations || extractedData.pdf_locations.length === 0) {
+    console.warn(`[NOTE_DEBUG] ExtractedData ${extractedData.id} has no PDF locations, skipping notes`);
+    return;
+  }
+
+  console.log('[NOTE_DEBUG] Creating sticky notes for ExtractedData:', extractedData.id, 'with', extractedData.notes.length, 'notes');
+
+  const firstLocation = extractedData.pdf_locations[0];
+  const position = calculateStickyPosition(firstLocation);
+
+  // First note becomes the parent sticky (with content), subsequent notes become replies
+  const [firstNote, ...remainingNotes] = extractedData.notes;
+
+  // Create parent sticky note with first note's content
+  const parentSticky = new Annotations.StickyAnnotation({
+    PageNumber: firstLocation.page_no,
+    X: position.x,
+    Y: position.y,
+    SIZE: STICKY_NOTE_SIZE,
+    Icon: Annotations.StickyAnnotation.IconNames.COMMENT,
+    StrokeColor: new Annotations.Color(STICKY_NOTE_COLOR.r, STICKY_NOTE_COLOR.g, STICKY_NOTE_COLOR.b, 1),
+    FillColor: new Annotations.Color(STICKY_NOTE_COLOR.r, STICKY_NOTE_COLOR.g, STICKY_NOTE_COLOR.b, 1),
+  });
+
+  parentSticky.setContents(firstNote.text);
+  parentSticky.Author = firstNote.created_by_name || 'Unknown';
+  parentSticky.setCustomData('extracted_data_id', extractedData.id);
+  parentSticky.setCustomData('extraction_note_id', firstNote.id);
+  parentSticky.setCustomData('created_by_id', firstNote.created_by_id);
+  parentSticky.ReadOnly = firstNote.created_by_id !== currentUserId;
+
+  console.log('[NOTE_DEBUG] Adding parent sticky annotation at page:', firstLocation.page_no, 'position:', position);
+  annotationManager.addAnnotation(parentSticky, { imported: true });
+  console.log('[NOTE_DEBUG] Parent sticky added with ID:', parentSticky.Id);
+
+  // Create reply annotations for remaining notes (if any)
+  const replies = remainingNotes.map(note => {
+    const reply = new Annotations.StickyAnnotation({
+      PageNumber: firstLocation.page_no,
+      X: position.x,
+      Y: position.y,
+      SIZE: STICKY_NOTE_SIZE,
+      InReplyTo: parentSticky.Id,
+      ReplyType: 'Group',
+    });
+
+    reply.setContents(note.text);
+    reply.Author = note.created_by_name || 'Unknown';
+    reply.setCustomData('extraction_note_id', note.id);
+    reply.setCustomData('extracted_data_id', extractedData.id);
+    reply.setCustomData('created_by_id', note.created_by_id);
+    reply.ReadOnly = note.created_by_id !== currentUserId;
+
+    return reply;
+  });
+
+  if (replies.length > 0) {
+    console.log('[NOTE_DEBUG] Adding', replies.length, 'reply annotations');
+    annotationManager.addAnnotations(replies, { imported: true });
+  }
+  console.log('[NOTE_DEBUG] Drawing annotations');
+  annotationManager.drawAnnotationsFromList([parentSticky, ...replies]);
+  console.log('[NOTE_DEBUG] Sticky notes creation complete for ExtractedData:', extractedData.id);
+}
 
 const ProjectLogsReader = ({
   url,
@@ -27,6 +164,10 @@ const ProjectLogsReader = ({
   onRequestAddHighlight = null,
   onQuickHighlight = null,
   lastUsedHighlightType = null,
+  extractedDataItems = [],
+  getExtractedDataById = null,
+  currentUserId = null,
+  projectId = null,
 }) => {
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
@@ -89,7 +230,300 @@ const ProjectLogsReader = ({
     if (url === currentUrl && webViewer && documentLoaded) {
       updateTxtView();
     }
-  }, [stableHighlightLocations, stableAiLogHighlightLocations, documentLoaded, activeFiltersString]);
+  }, [stableHighlightLocations, stableAiLogHighlightLocations, documentLoaded, activeFiltersString, extractedDataItems]);
+
+  // Set up annotation event listeners for note management
+  useEffect(() => {
+    if (!webViewer || !webViewer.Core || !projectId) {
+      return;
+    }
+
+    const { annotationManager, Annotations } = webViewer.Core;
+
+    /**
+     * Display error notification to user
+     */
+    const handleError = (error, context = '') => {
+      const message = error?.response?.data?.message || error.message || 'An error occurred';
+      console.error(`${context}:`, error);
+      toast.error(`${context}: ${message}`);
+    };
+
+    /**
+     * Check if current user can edit annotation
+     */
+    const canEditAnnotation = (annotation, currentUserId) => {
+      const createdById = annotation.getCustomData('created_by_id');
+      return createdById && createdById === currentUserId;
+    };
+
+    /**
+     * Check if annotation is an extraction note (parent or reply)
+     */
+    const isExtractionNote = (annot) => {
+      return annot instanceof Annotations.StickyAnnotation &&
+             annot.getCustomData('extracted_data_id');
+    };
+
+    /**
+     * Handle annotation add/modify events
+     */
+    const handleAnnotationChanged = async (annotations, action, { imported }) => {
+      if (imported) return; // Skip annotations loaded from backend
+
+      for (const annot of annotations) {
+        // Handle both parent sticky notes and replies
+        if (!isExtractionNote(annot)) {
+          continue;
+        }
+
+        const extractedDataId = annot.getCustomData('extracted_data_id');
+        const noteId = annot.getCustomData('extraction_note_id');
+        const noteText = annot.getContents();
+
+        // Handle modify action (editing existing note)
+        if (action === 'modify' && noteId) {
+          // Permission check (safety net - ReadOnly should prevent this)
+          if (!canEditAnnotation(annot, currentUserId)) {
+            console.error('Unauthorized note modification attempt');
+            const previousText = annot._originalContents;
+            if (previousText) {
+              annot.setContents(previousText);
+              annotationManager.redrawAnnotation(annot);
+            }
+            toast.error('You can only edit your own notes');
+            continue;
+          }
+
+          const previousText = annot._originalContents || annot.getCustomData('_previous_contents');
+
+          try {
+            await api.updateExtractionNote(
+              projectId,
+              extractedDataId,
+              noteId,
+              { text: noteText }
+            );
+
+            // Clear cached original
+            delete annot._originalContents;
+          } catch (error) {
+            handleError(error, 'Failed to update note');
+
+            // Rollback: restore previous text
+            if (typeof previousText === 'string') {
+              annot.setContents(previousText);
+              annotationManager.redrawAnnotation(annot);
+            }
+          }
+          continue;
+        }
+
+        // Handle new note creation (either new parent with content, or new reply)
+        if ((action === 'add' || action === 'modify') && !noteId && noteText && noteText.trim()) {
+          try {
+            const note = await api.createExtractionNote(
+              projectId,
+              extractedDataId,
+              { text: noteText }
+            );
+
+            // Update annotation with backend note ID
+            annot.setCustomData('extraction_note_id', note.id);
+            annot.setCustomData('created_by_id', note.created_by_id);
+            // Lock the annotation after saving
+            annot.ReadOnly = note.created_by_id !== currentUserId;
+            annotationManager.redrawAnnotation(annot);
+          } catch (error) {
+            handleError(error, 'Failed to create note');
+            // Rollback: delete the annotation without firing events
+            annotationManager.deleteAnnotation(annot, false, true);
+          }
+          continue;
+        }
+
+        // Handle empty note (user clicked away without typing)
+        if (action === 'modify' && !noteId && (!noteText || !noteText.trim())) {
+          // Delete empty sticky notes that were never saved
+          annotationManager.deleteAnnotation(annot, false, true);
+        }
+      }
+    };
+
+    /**
+     * Handle click on highlight rectangle to open/create notes
+     */
+    const handleHighlightClick = (extractedDataId) => {
+      // Check if sticky note already exists
+      const existingSticky = findStickyNoteForExtractedData(extractedDataId, annotationManager);
+
+      if (existingSticky) {
+        // Open existing sticky note
+        webViewer.UI.openElement('notesPanel');
+        annotationManager.selectAnnotation(existingSticky);
+        return;
+      }
+
+      // Create new sticky note - user will type directly into this
+      const extractedData = getExtractedDataById ? getExtractedDataById(extractedDataId) : null;
+
+      if (!extractedData || !extractedData.pdf_locations || extractedData.pdf_locations.length === 0) {
+        console.warn(`Cannot create sticky note: ExtractedData ${extractedDataId} has no PDF locations`);
+        return;
+      }
+
+      const firstLocation = extractedData.pdf_locations[0];
+      const position = calculateStickyPosition(firstLocation);
+
+      const newSticky = new Annotations.StickyAnnotation({
+        PageNumber: firstLocation.page_no,
+        X: position.x,
+        Y: position.y,
+        SIZE: STICKY_NOTE_SIZE,
+        Icon: Annotations.StickyAnnotation.IconNames.COMMENT,
+        StrokeColor: new Annotations.Color(STICKY_NOTE_COLOR.r, STICKY_NOTE_COLOR.g, STICKY_NOTE_COLOR.b, 1),
+        FillColor: new Annotations.Color(STICKY_NOTE_COLOR.r, STICKY_NOTE_COLOR.g, STICKY_NOTE_COLOR.b, 1),
+      });
+
+      newSticky.setContents('');
+      newSticky.setCustomData('extracted_data_id', extractedDataId);
+      // Not read-only - user will type the first comment directly into this
+      newSticky.ReadOnly = false;
+
+      annotationManager.addAnnotation(newSticky);
+      annotationManager.redrawAnnotation(newSticky);
+
+      // Open notes panel and select the new sticky note
+      webViewer.UI.openElement('notesPanel');
+      annotationManager.selectAnnotation(newSticky);
+    };
+
+    /**
+     * Cache original note contents when selected for edit rollback
+     */
+    const handleAnnotationSelected = (annotations) => {
+      const selectedAnnot = annotations[0];
+
+      if (!selectedAnnot) return;
+
+      // Cache original contents for edit rollback
+      if (isExtractionNoteReply(selectedAnnot)) {
+        selectedAnnot._originalContents = selectedAnnot.getContents();
+      }
+
+      // Handle highlight rectangle clicks
+      if (isHighlightRectangle(selectedAnnot, Annotations)) {
+        const extractedDataId = selectedAnnot.getCustomData('extracted_data_id');
+        if (extractedDataId) {
+          handleHighlightClick(extractedDataId);
+        }
+      }
+
+      // Open notes panel when clicking on a sticky annotation (comment icon)
+      if (selectedAnnot instanceof Annotations.StickyAnnotation) {
+        webViewer.UI.openElement('notesPanel');
+      }
+    };
+
+    /**
+     * Handle annotation deletion with backend sync and rollback
+     */
+    const handleAnnotationDeleted = async (annotations, { imported }) => {
+      if (imported) return;
+
+      for (const annot of annotations) {
+        // Handle reply deletion
+        if (isExtractionNoteReply(annot)) {
+          const noteId = annot.getCustomData('extraction_note_id');
+          const extractedDataId = annot.getCustomData('extracted_data_id');
+
+          // Clone annotation for potential rollback
+          const annotCopy = {
+            contents: annot.getContents(),
+            author: annot.Author,
+            customData: { ...annot.CustomData },
+            position: {
+              x: annot.X,
+              y: annot.Y,
+              page: annot.PageNumber
+            },
+            parentId: annot.InReplyTo
+          };
+
+          try {
+            await api.deleteExtractionNote(
+              projectId,
+              extractedDataId,
+              noteId
+            );
+          } catch (error) {
+            handleError(error, 'Failed to delete note');
+
+            // Rollback: recreate the annotation
+            const restored = new Annotations.StickyAnnotation({
+              PageNumber: annotCopy.position.page,
+              X: annotCopy.position.x,
+              Y: annotCopy.position.y,
+              SIZE: STICKY_NOTE_SIZE, 
+              InReplyTo: annotCopy.parentId,
+              ReplyType: 'Group',
+              StrokeColor: new Annotations.Color(STICKY_NOTE_COLOR.r, STICKY_NOTE_COLOR.g, STICKY_NOTE_COLOR.b, 1),
+              FillColor: new Annotations.Color(STICKY_NOTE_COLOR.r, STICKY_NOTE_COLOR.g, STICKY_NOTE_COLOR.b, 1),
+              Icon: Annotations.StickyAnnotation.IconNames.COMMENT,
+            });
+
+            restored.setContents(annotCopy.contents);
+            restored.Author = annotCopy.author;
+            Object.keys(annotCopy.customData).forEach(key => {
+              restored.setCustomData(key, annotCopy.customData[key]);
+            });
+
+            annotationManager.addAnnotation(restored, { imported: true });
+            annotationManager.drawAnnotationsFromList([restored]);
+          }
+
+          continue;
+        }
+
+        // Handle parent sticky deletion (deletes all child notes)
+        if (isExtractionNoteParent(annot)) {
+          const extractedDataId = annot.getCustomData('extracted_data_id');
+          const replies = annotationManager.getAnnotationsList().filter(a =>
+            a.InReplyTo === annot.Id && isExtractionNoteReply(a)
+          );
+
+          if (replies.length > 0) {
+            // Show warning
+            toast.info(`Deleting ${replies.length} note(s) from highlight`);
+          }
+
+          // Delete all notes from backend
+          for (const reply of replies) {
+            const noteId = reply.getCustomData('extraction_note_id');
+            if (noteId) {
+              try {
+                await api.deleteExtractionNote(projectId, extractedDataId, noteId);
+              } catch (error) {
+                console.error('Failed to delete note from backend:', error);
+              }
+            }
+          }
+        }
+      }
+    };
+
+    // Register event listeners
+    annotationManager.addEventListener('annotationChanged', handleAnnotationChanged);
+    annotationManager.addEventListener('annotationSelected', handleAnnotationSelected);
+    annotationManager.addEventListener('annotationDeleted', handleAnnotationDeleted);
+
+    // Cleanup function to remove listeners
+    return () => {
+      annotationManager.removeEventListener('annotationChanged', handleAnnotationChanged);
+      annotationManager.removeEventListener('annotationSelected', handleAnnotationSelected);
+      annotationManager.removeEventListener('annotationDeleted', handleAnnotationDeleted);
+    };
+  }, [webViewer, projectId]);
 
   // Update text popup buttons when lastUsedHighlightType changes
   useEffect(() => {
@@ -515,6 +949,7 @@ const ProjectLogsReader = ({
         });
         rectangleAnnot.Subject = `AI Log Highlight - ${location?.item_type || location?.extraction_type || 'Unknown'}`;
         rectangleAnnot.CustomData = {
+          extracted_data_id: location?.extracted_data_id, // CRITICAL for linking to notes
           item_type: location?.item_type,
           extraction_type: location?.extraction_type,
           requirement_text: location?.requirement_text,
@@ -532,6 +967,26 @@ const ProjectLogsReader = ({
 
       // Keep ref in sync with state to avoid closure issues
       annotationsRef.current = _annotations;
+
+      // Create sticky notes for ExtractedData items with notes
+      // Only create if they don't already exist
+      if (extractedDataItems && extractedDataItems.length > 0) {
+        console.log('[NOTE_DEBUG] Processing extractedDataItems:', extractedDataItems.length);
+        extractedDataItems.forEach(data => {
+          console.log('[NOTE_DEBUG] Processing item:', data.id, 'notes:', data.notes?.length || 0);
+
+          // Check if sticky note already exists for this extracted data
+          const existingSticky = findStickyNoteForExtractedData(data.id, annotationManager);
+          if (existingSticky) {
+            console.log('[NOTE_DEBUG] Sticky note already exists for item:', data.id);
+            return;
+          }
+
+          createNotesForExtractedData(data, tmpViewer, currentUserId);
+        });
+      } else {
+        console.log('[NOTE_DEBUG] No extractedDataItems to process');
+      }
       setAnnotations(_annotations);
       annotationsCreated.current = true;
     } else {
@@ -601,6 +1056,19 @@ const ProjectLogsReader = ({
         // Add a small delay to ensure WebViewer is fully ready
         setTimeout(() => {
           updateTxtView(_webViewer);
+
+          // Only show notes panel in spec view mode
+          if (isSpecViewMode) {
+            // Notes panel starts closed by default - user can open via toggle button
+
+            // Filter notes panel to only show sticky annotations (comments), not highlight rectangles
+            _webViewer.UI.setCustomNoteFilter(annot =>
+              annot instanceof _webViewer.Core.Annotations.StickyAnnotation
+            );
+
+            // Disable reply feature to keep things simple (one comment per highlight)
+            _webViewer.UI.disableReplyForAnnotations(() => true);
+          }
         }, 200);
         setLoading(false);
       });
@@ -615,7 +1083,7 @@ const ProjectLogsReader = ({
       });
 
       // UI Customization - Hide extra toolbar elements
-      _webViewer.UI.disableElements([
+      const elementsToDisable = [
         "downloadButton",
         "printButton",
         "viewControlsDivider2",
@@ -641,8 +1109,14 @@ const ProjectLogsReader = ({
         "textSquigglyToolButton",
         "textStrikeoutToolButton",
         "linkButton",
-        "toggleNotesButton",
-      ]);
+      ];
+
+      // Hide notes toggle button when not in spec view mode
+      if (!isSpecViewMode) {
+        elementsToDisable.push("toggleNotesButton");
+      }
+
+      _webViewer.UI.disableElements(elementsToDisable);
 
       // Custom close button
       const closeButton = () => {

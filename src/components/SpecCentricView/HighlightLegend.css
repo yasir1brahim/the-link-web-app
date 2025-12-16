@@ -1,13 +1,13 @@
 .highlight-legend {
-  position: fixed;
+  position: absolute;
   bottom: 20px;
-  right: 20px;
+  left: 20px;
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+  z-index: 100;
   max-width: 300px;
-  max-height: 60vh;
+  max-height: 50vh;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
@@ -198,8 +198,8 @@
 @media (max-width: 768px) {
   .highlight-legend {
     bottom: 10px;
-    right: 10px;
     left: 10px;
+    right: auto;
     max-width: none;
     width: auto;
     max-height: 60vh;
