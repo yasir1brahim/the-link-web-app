@@ -20,6 +20,7 @@ import { useFeatureFlags } from '../../../../../contexts/FeatureFlagsContext';
 import SortableTable from '../../../../shared/SortableTable';
 import { generateExportFilename } from '../../../../../utils/exportUtils';
 import FileDownload from 'js-file-download';
+import QAPlannerTimeoutModal from '../QAPlannerTimeoutModal';
 
 const LogViewer = ({ 
     projectId, 
@@ -46,6 +47,7 @@ const LogViewer = ({
     const [availableFilterValues, setAvailableFilterValues] = useState({});
     const [pagination, setPagination] = useState({ currentPage: 1, pageSize: 50 });
     const [searchValue, setSearchValue] = useState('');
+    const [showTimeoutModal, setShowTimeoutModal] = useState(false);
 
     // Handle Excel export
     const handleExportExcel = async () => {
@@ -506,6 +508,14 @@ const LogViewer = ({
         
         if (logDetail.log_status === 'PROCESSING') {
             setIsPolling(true);
+        } else if (logDetail.log_status === 'TIMEOUT') {
+            // Handle timeout this stop polling and show timeout modal for QA planner
+            setIsPolling(false);
+            setIsRegenerating(false);
+            if (logType === 'qa_planner') {
+                setShowTimeoutModal(true);
+            }
+            setLogMessage(logMessageData);
         } else {
             setLogMessage(logMessageData);
             setIsPolling(false);
@@ -595,8 +605,25 @@ const LogViewer = ({
                 return 'red';
             case 'PROCESSING':
                 return 'blue';
+            case 'TIMEOUT':
+                return 'orange';
             default:
                 return 'gray';
+        }
+    };
+
+    // Handle timeout modal actions
+    const handleTimeoutRestart = () => {
+        setShowTimeoutModal(false);
+        if (onQAPlannerRegenerate) {
+            onQAPlannerRegenerate();
+        }
+    };
+
+    const handleTimeoutCancel = () => {
+        setShowTimeoutModal(false);
+        if (onBack) {
+            onBack();
         }
     };
 
@@ -794,6 +821,15 @@ const LogViewer = ({
                     </Center>
                 )}
             </Box>
+
+            {/* QA Planner Timeout Modal */}
+            {logType === 'qa_planner' && (
+                <QAPlannerTimeoutModal
+                    isOpen={showTimeoutModal}
+                    onRestart={handleTimeoutRestart}
+                    onCancel={handleTimeoutCancel}
+                />
+            )}
         </Flex>
     );
 };
