@@ -423,7 +423,7 @@ export default function CombinedLogs(props) {
     <div
       className="l-table-wrapper"
       style={{
-        maxHeight: isProcessingBannerVisible ? "calc(100vh - 310px)" : "calc(100vh - 240px)",
+        maxHeight: isProcessingBannerVisible ? "calc(100vh - 350px)" : "calc(100vh - 240px)",
       }}
       ref={parentRef}
     >
