@@ -41,6 +41,7 @@ export default function CombinedLogs(props) {
     combiningResult,
     setCombiningResult,
     areSameValues,
+    isProcessingBannerVisible,
   } = props;
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
@@ -422,7 +423,7 @@ export default function CombinedLogs(props) {
     <div
       className="l-table-wrapper"
       style={{
-        maxHeight: "calc(100vh - 240px)",
+        maxHeight: isProcessingBannerVisible ? "calc(100vh - 350px)" : "calc(100vh - 240px)",
       }}
       ref={parentRef}
     >
