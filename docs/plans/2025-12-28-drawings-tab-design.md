@@ -70,6 +70,7 @@ Drawing notes are tied to project versions, consistent with submittals.
 
 | Column | Description |
 |--------|-------------|
+| Drawing File | Name of the source PDF |
 | Category | e.g., "GENERAL NOTES", "PLUMBING NOTES" |
 | Text | Note content, truncated with expandable rows |
 
@@ -84,7 +85,7 @@ Drawing notes are tied to project versions, consistent with submittals.
 
 **DrawingsFilters.jsx:**
 - Category dropdown (populated from `all_filter_vals.category`)
-- Drawing File dropdown (populated from `all_filter_vals.drawing_file`)
+- Drawing File dropdown (populated from `all_filter_vals.drawing_files`, which includes IDs)
 - Search input (debounced text search in note content)
 - Clear/reset filters button
 
@@ -99,13 +100,13 @@ Drawing notes are tied to project versions, consistent with submittals.
 **API call:**
 ```javascript
 const formData = new FormData();
-formData.append('file', file);
+formData.append('files', file); // backend expects `files` (multipart)
 formData.append('project_version_id', projectVersionId);
 formData.append('file_type', 'drawing');
 await uploadFiles(formData);
 ```
 
-## Split-Pane & PDF Viewer
+## Split-Pane & PDF Viewer (v1 Core Feature)
 
 **Layout:**
 ```jsx
@@ -120,7 +121,7 @@ await uploadFiles(formData);
     <div className="drawings-right-pane">
       <PdfWrapper
         pdfData={pdfData}
-        highlightLocations={[boundingBoxAnnotation]}
+        highlightLocations={[highlightLocation]}
       />
     </div>
   )}
@@ -129,7 +130,7 @@ await uploadFiles(formData);
 
 **Bounding box conversion:**
 
-API returns `bounding_box: [x1, y1, x2, y2]`. Convert to WebViewer format:
+API returns `bounding_box: [x1, y1, x2, y2]`. Convert to WebViewer format (coordinate normalization depends on backend output):
 ```javascript
 const highlightLocation = {
   x: boundingBox[0],
@@ -140,12 +141,17 @@ const highlightLocation = {
 };
 ```
 
+**Behavior:**
+- Clicking a row selects the note and opens the PDF viewer to the correct page.
+- The note's `bounding_box` is passed to `<PdfWrapper>` to create a temporary highlight/annotation.
+
 **Reused components:**
-- `<PdfWrapper>` / `<ProjectLogsReader>` for PDF viewing with annotations
+- `<PdfWrapper>` / `<ProjectLogsReader>` for PDF viewing with annotations.
+- `useWebViewer` hook or similar for coordinate systems.
 
 ## API Integration
 
-**Endpoint:** `GET /projects/{project_id}/drawing-notes/`
+**Endpoint:** `GET /api/deliverables/projects/{project_id}/drawing-notes/`
 
 **Query parameters:**
 ```javascript
@@ -154,7 +160,7 @@ const params = {
   category: filters.category || undefined,
   drawing_file_id: filters.drawingFileId || undefined,
   search: filters.search || undefined,
-  page_number: pagination.page,
+  page: pagination.page,
   limit: pagination.pageSize
 };
 ```
@@ -163,7 +169,7 @@ const params = {
 ```json
 {
   "count": 156,
-  "next": "/projects/42/drawing-notes/?page_number=2&limit=25",
+  "next": "/api/deliverables/projects/42/drawing-notes/?page=2&limit=25",
   "previous": null,
   "results": {
     "results": [
@@ -185,7 +191,7 @@ const params = {
     ],
     "all_filter_vals": {
       "category": ["GENERAL NOTES", "PLUMBING NOTES", ...],
-      "drawing_file": ["Mechanical IFC Set.pdf", ...]
+      "drawing_files": [{"id": 15, "name": "Mechanical IFC Set.pdf"}, ...]
     },
     "total_count": 156,
     "processing_status": {
@@ -238,6 +244,6 @@ useEffect(() => {
 
 ## Future Considerations (v2)
 
-- PDF Viewer Integration: Use `bounding_box` coordinates to highlight notes
 - Drawing Reference Links: `drawing_references` will link to actual drawing pages
 - Re-extraction: Users may trigger re-extraction for failed pages
+- Batch Operations: Bulk tagging or exporting of notes.
