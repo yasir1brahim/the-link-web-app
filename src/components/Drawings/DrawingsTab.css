@@ -263,3 +263,69 @@
   margin-bottom: 8px;
   color: #333;
 }
+
+/* Upload Modal */
+.drawings-upload-dropzone {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 48px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.drawings-upload-dropzone.drag-over {
+  border-color: #007bff;
+  background-color: #f0f7ff;
+}
+
+.drawings-upload-dropzone p {
+  margin-bottom: 16px;
+  color: #666;
+}
+
+.drawings-upload-file-list {
+  margin-top: 24px;
+}
+
+.drawings-upload-file-list h4 {
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.drawings-upload-file-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.drawings-upload-file-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.drawings-upload-remove-btn {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.drawings-upload-remove-btn:hover {
+  text-decoration: underline;
+}
+
+.drawings-upload-error {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  color: #721c24;
+}
