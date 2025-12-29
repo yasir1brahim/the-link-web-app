@@ -525,6 +525,107 @@ const ProjectLogsReader = ({
     };
   }, [webViewer, projectId]);
 
+  const buildSelectionPayload = React.useCallback((documentViewer) => {
+    if (!documentViewer || typeof documentViewer.getSelectedText !== "function") {
+      return null;
+    }
+
+    const selectedText = documentViewer.getSelectedText();
+    if (!selectedText || !selectedText.trim()) {
+      return null;
+    }
+
+    const normalizePageNumber = (entry) => {
+      if (typeof entry?.pageNumber === "number") {
+        return entry.pageNumber;
+      }
+      if (typeof entry?.pageIndex === "number") {
+        return entry.pageIndex + 1;
+      }
+      if (typeof entry === "number") {
+        return entry + 1;
+      }
+      return null;
+    };
+
+    const applyQuad = (pageNumber, quad) => {
+      if (!quad) {
+        return null;
+      }
+
+      const xs = [quad.x1, quad.x2, quad.x3, quad.x4].filter((value) => typeof value === "number");
+      const ys = [quad.y1, quad.y2, quad.y3, quad.y4].filter((value) => typeof value === "number");
+
+      if (xs.length === 0 || ys.length === 0) {
+        return null;
+      }
+
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+
+      if (!Number.isFinite(minX) || !Number.isFinite(maxX) || !Number.isFinite(minY) || !Number.isFinite(maxY)) {
+        return null;
+      }
+
+      return {
+        page_no: pageNumber,
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY,
+      };
+    };
+
+    const quadsSource =
+      typeof documentViewer.getSelectedTextQuads === "function"
+        ? documentViewer.getSelectedTextQuads()
+        : null;
+
+    const locations = [];
+
+    if (Array.isArray(quadsSource)) {
+      quadsSource.forEach((entry) => {
+        const pageNumber = normalizePageNumber(entry);
+        if (!pageNumber || !Array.isArray(entry?.quads)) {
+          return;
+        }
+
+        entry.quads.forEach((quad) => {
+          const location = applyQuad(pageNumber, quad);
+          if (location) {
+            locations.push(location);
+          }
+        });
+      });
+    } else if (quadsSource && typeof quadsSource === "object") {
+      Object.keys(quadsSource).forEach((key) => {
+        const pageIdx = Number(key);
+        const pageNumber = Number.isNaN(pageIdx) ? null : pageIdx;
+        if (!pageNumber || !Array.isArray(quadsSource[key])) {
+          return;
+        }
+
+        quadsSource[key].forEach((quad) => {
+          const location = applyQuad(pageNumber, quad);
+          if (location) {
+            locations.push(location);
+          }
+        });
+      });
+    }
+
+    if (locations.length === 0) {
+      return null;
+    }
+
+    return {
+      selectedText: selectedText.trim(),
+      locations,
+    };
+  }, []);
+
   // Update text popup buttons when lastUsedHighlightType changes
   useEffect(() => {
     if (!webViewer || !isSpecViewMode || !documentLoaded) {
@@ -639,107 +740,6 @@ const ProjectLogsReader = ({
       console.log(error);
     });
   };
-
-  const buildSelectionPayload = React.useCallback((documentViewer) => {
-    if (!documentViewer || typeof documentViewer.getSelectedText !== "function") {
-      return null;
-    }
-
-    const selectedText = documentViewer.getSelectedText();
-    if (!selectedText || !selectedText.trim()) {
-      return null;
-    }
-
-    const normalizePageNumber = (entry) => {
-      if (typeof entry?.pageNumber === "number") {
-        return entry.pageNumber;
-      }
-      if (typeof entry?.pageIndex === "number") {
-        return entry.pageIndex + 1;
-      }
-      if (typeof entry === "number") {
-        return entry + 1;
-      }
-      return null;
-    };
-
-    const applyQuad = (pageNumber, quad) => {
-      if (!quad) {
-        return null;
-      }
-
-      const xs = [quad.x1, quad.x2, quad.x3, quad.x4].filter((value) => typeof value === "number");
-      const ys = [quad.y1, quad.y2, quad.y3, quad.y4].filter((value) => typeof value === "number");
-
-      if (xs.length === 0 || ys.length === 0) {
-        return null;
-      }
-
-      const minX = Math.min(...xs);
-      const maxX = Math.max(...xs);
-      const minY = Math.min(...ys);
-      const maxY = Math.max(...ys);
-
-      if (!Number.isFinite(minX) || !Number.isFinite(maxX) || !Number.isFinite(minY) || !Number.isFinite(maxY)) {
-        return null;
-      }
-
-      return {
-        page_no: pageNumber,
-        x: minX,
-        y: minY,
-        width: maxX - minX,
-        height: maxY - minY,
-      };
-    };
-
-    const quadsSource =
-      typeof documentViewer.getSelectedTextQuads === "function"
-        ? documentViewer.getSelectedTextQuads()
-        : null;
-
-    const locations = [];
-
-    if (Array.isArray(quadsSource)) {
-      quadsSource.forEach((entry) => {
-        const pageNumber = normalizePageNumber(entry);
-        if (!pageNumber || !Array.isArray(entry?.quads)) {
-          return;
-        }
-
-        entry.quads.forEach((quad) => {
-          const location = applyQuad(pageNumber, quad);
-          if (location) {
-            locations.push(location);
-          }
-        });
-      });
-    } else if (quadsSource && typeof quadsSource === "object") {
-      Object.keys(quadsSource).forEach((key) => {
-        const pageIdx = Number(key);
-        const pageNumber = Number.isNaN(pageIdx) ? null : pageIdx;
-        if (!pageNumber || !Array.isArray(quadsSource[key])) {
-          return;
-        }
-
-        quadsSource[key].forEach((quad) => {
-          const location = applyQuad(pageNumber, quad);
-          if (location) {
-            locations.push(location);
-          }
-        });
-      });
-    }
-
-    if (locations.length === 0) {
-      return null;
-    }
-
-    return {
-      selectedText: selectedText.trim(),
-      locations,
-    };
-  }, []);
 
   const getInitialPageLocation = (highlightLocations, aiLogHighlightLocations) => {
     // Combine both arrays, filtering out any null/undefined items and invalid page numbers
