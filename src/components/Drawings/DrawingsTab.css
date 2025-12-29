@@ -1,0 +1,265 @@
+.drawings-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px;
+}
+
+.drawings-container.side-by-side {
+  flex-direction: row;
+  gap: 20px;
+}
+
+.drawings-left-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.side-by-side .drawings-left-pane {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
+.drawings-right-pane {
+  flex: 0 0 50%;
+  max-width: 50%;
+  height: calc(100vh - 200px);
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.drawings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.drawings-header .btn-primary {
+  white-space: nowrap;
+}
+
+/* Table styles */
+.drawings-table-container {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.drawings-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.drawings-table th,
+.drawings-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.drawings-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.drawings-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.drawings-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.drawings-table tbody tr.selected {
+  background-color: #e3f2fd;
+}
+
+.drawings-table tbody tr.selected:hover {
+  background-color: #bbdefb;
+}
+
+/* Text truncation */
+.drawings-text-cell {
+  max-width: 400px;
+}
+
+.drawings-text-truncated {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drawings-text-full {
+  white-space: pre-wrap;
+}
+
+.drawings-expand-btn {
+  color: #007bff;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.drawings-expand-btn:hover {
+  text-decoration: underline;
+}
+
+/* Filters */
+.drawings-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.drawings-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.drawings-filter-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+}
+
+.drawings-filter-group select,
+.drawings-filter-group input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 180px;
+}
+
+.drawings-filter-group select:focus,
+.drawings-filter-group input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.drawings-clear-filters {
+  align-self: flex-end;
+  padding: 8px 16px;
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.drawings-clear-filters:hover {
+  background-color: #f5f5f5;
+}
+
+/* Pagination */
+.drawings-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fff;
+}
+
+.drawings-pagination-info {
+  color: #666;
+  font-size: 14px;
+}
+
+.drawings-pagination-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.drawings-pagination-controls button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.drawings-pagination-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.drawings-pagination-controls button:not(:disabled):hover {
+  background-color: #f5f5f5;
+}
+
+/* Processing indicator */
+.drawings-processing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+}
+
+.drawings-processing-indicator.error {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.drawings-processing-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ffc107;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Loading state */
+.drawings-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px;
+  color: #666;
+}
+
+/* Empty state */
+.drawings-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #666;
+  text-align: center;
+}
+
+.drawings-empty h3 {
+  margin-bottom: 8px;
+  color: #333;
+}
