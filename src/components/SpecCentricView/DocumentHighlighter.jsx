@@ -251,6 +251,10 @@ const DocumentHighlighter = ({
   const [showCustomTypesManager, setShowCustomTypesManager] = useState(false);
   const [lastUsedHighlightType, setLastUsedHighlightType] = useState(null);
   const [isLoadingPreference, setIsLoadingPreference] = useState(false);
+  const [selectedHighlightType, setSelectedHighlightType] = useState(null);
+  const [submittalParaNo, setSubmittalParaNo] = useState('');
+  const [submittalDescription, setSubmittalDescription] = useState('');
+  const [submittalType, setSubmittalType] = useState('');
 
   // Unified cache for ExtractedData items with notes support
   const [extractedDataItems, setExtractedDataItems] = useState([]);
