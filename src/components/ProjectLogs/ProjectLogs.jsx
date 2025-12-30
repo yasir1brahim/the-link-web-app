@@ -1886,6 +1886,7 @@ const ProjectLogs = () => {
                   handleCombineRows={handleCombineRows}
                   areSameValues={areSameValues}
                   projectVersionId={projectVersionId}
+                  isProcessingBannerVisible={documentIsProcessing(documentData)}
                 />
                 {pdfData.url && (
                   <div style={{ display: "flex", gap: 10 }}>
