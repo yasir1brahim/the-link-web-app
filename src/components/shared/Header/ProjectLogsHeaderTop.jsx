@@ -14,10 +14,14 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
 
   console.log("props.projectVersionId", props.projectVersionId)
   console.log("props.projectVersions", props.projectVersions)
+
+  const hasOtherActiveFlags = props.isSpecGptFlagActive || props.isSpecCenteredViewFlagActive;
+  const shouldShowTabs = props.isInspectionLogFeatureFlagActive && hasOtherActiveFlags;
+  
   return (
     <div className="header-wrapper-swap row mx-0 my-2" style={{ borderBottom: '1px solid #e0e0e0' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-        {props.isSpecGptFlagActive && (
+        {shouldShowTabs && (
           <div className="tab-container" style={{ display: 'flex', gap: '0' }}>
             <button
               className={`tab-button ${props.activeTab === 'submittal' ? 'active' : ''}`}
@@ -36,6 +40,7 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
             >
               Submittal Log
             </button>
+            {props.isSpecGptFlagActive && (
             <button
               className={`tab-button ${props.activeTab === 'assistant' ? 'active' : ''}`}
               onClick={() => props.setActiveTab('assistant')}
@@ -53,6 +58,7 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
             >
               Assistant
             </button>
+            )}
             {props.useQaTabbedLayout && (props.isInspectionLogFeatureFlagActive || props.isQaPlannerFlagActive) && (
               <button
                 className={`tab-button ${props.activeTab === 'inspection-qa' ? 'active' : ''}`}
