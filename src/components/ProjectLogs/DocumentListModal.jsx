@@ -20,6 +20,10 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
     }
   }, [isOpen, defaultTab]);
 
+  // Check if we're in production environment
+  const isProduction = window.location.hostname === 'app.thelink.ai';
+
+
   const handleDeleteClick = (documentId, documentName) => {
     setDocumentToDelete({ id: documentId, name: documentName });
     setDeleteConfirmationModal(true);
@@ -89,6 +93,7 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
                   documents={documents}
                   onAfterReprocess={onAfterReprocess}
                   onAfterDelete={onAfterDelete}
+                  isProduction={isProduction}
                 />
               </div>
             </TabPane>

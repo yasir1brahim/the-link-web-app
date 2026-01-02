@@ -8,10 +8,11 @@ import StyledTooltip from "../shared/StyledTooltip/StyledTooltip";
 import Loader from "../shared/Loader/Loader";
 import {bulkDownloadDocuments, bulkReprocessDocuments, bulkDeleteDocuments } from "../../api/ProjectLogs/api";
 
-const DocumentsTab = ({
-  documents,
-  onAfterReprocess,
-  onAfterDelete
+const DocumentsTab = ({ 
+  documents, 
+  onAfterReprocess, 
+  onAfterDelete, 
+  isProduction = false 
 }) => {
   const [isReprocessing, setIsReprocessing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -184,21 +185,23 @@ const DocumentsTab = ({
           {/* Download button common */}
           <div className="d-flex justify-content-start mb-2">
             <div style={{ display: 'flex', gap: '4px' }}>
-              <StyledTooltip title={isReprocessing ? "Reprocessing documents..." : selectedDocuments.size > 0 ? "Reprocess Selected Documents" : "Select documents to reprocess"} arrow>
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={handleBulkReprocess}
-                    disabled={isReprocessing || isDownloading || isDeleting || selectedDocuments.size === 0}
-                    style={{
-                      color: selectedDocuments.size > 0 ? '#1976d2' : '#999',
-                      padding: '4px'
-                    }}
-                  >
-                    <ReprocessIcon style={{ width: '20px', height: '20px' }} />
-                  </IconButton>
-                </span>
-              </StyledTooltip>
+              {!isProduction && (
+                <StyledTooltip title={isReprocessing ? "Reprocessing documents..." : selectedDocuments.size > 0 ? "Reprocess Selected Documents" : "Select documents to reprocess"} arrow>
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={handleBulkReprocess}
+                      disabled={isReprocessing || isDownloading || isDeleting || selectedDocuments.size === 0}
+                      style={{
+                        color: selectedDocuments.size > 0 ? '#1976d2' : '#999',
+                        padding: '4px'
+                      }}
+                    >
+                      <ReprocessIcon style={{ width: '20px', height: '20px' }} />
+                    </IconButton>
+                  </span>
+                </StyledTooltip>
+              )}
               <StyledTooltip title={isDownloading ? "Downloading documents..." : getDownloadTooltip()} arrow>
                 <span>
                   <IconButton
@@ -214,21 +217,23 @@ const DocumentsTab = ({
                   </IconButton>
                 </span>
               </StyledTooltip>
-              <StyledTooltip title={isDeleting ? "Deleting documents..." : selectedDocuments.size > 0 ? "Delete Selected Documents" : "Select documents to delete"} arrow>
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={handleBulkDelete}
-                    disabled={isReprocessing || isDownloading || isDeleting || selectedDocuments.size === 0}
-                    style={{
-                      color: selectedDocuments.size > 0 ? '#d32f2f' : '#999',
-                      padding: '4px'
-                    }}
-                  >
-                    <TrashIcon style={{ width: '20px', height: '20px' }} />
-                  </IconButton>
-                </span>
-              </StyledTooltip>
+              {!isProduction && (
+                <StyledTooltip title={isDeleting ? "Deleting documents..." : selectedDocuments.size > 0 ? "Delete Selected Documents" : "Select documents to delete"} arrow>
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={handleBulkDelete}
+                      disabled={isReprocessing || isDownloading || isDeleting || selectedDocuments.size === 0}
+                      style={{
+                        color: selectedDocuments.size > 0 ? '#d32f2f' : '#999',
+                        padding: '4px'
+                      }}
+                    >
+                      <TrashIcon style={{ width: '20px', height: '20px' }} />
+                    </IconButton>
+                  </span>
+                </StyledTooltip>
+              )}
             </div>
           </div>
 
