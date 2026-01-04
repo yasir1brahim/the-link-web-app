@@ -85,8 +85,6 @@ function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
     return;
   }
 
-  console.log('[NOTE_DEBUG] Creating sticky notes for ExtractedData:', extractedData.id, 'with', extractedData.notes.length, 'notes');
-
   const firstLocation = extractedData.pdf_locations[0];
   const position = calculateStickyPosition(firstLocation);
 
@@ -876,6 +874,21 @@ const ProjectLogsReader = ({
           prevLocation.y !== initialLocation.y;
 
         if (locationHasChanged && initialLocation && initialLocation.page_no > 0) {
+          // DEBUG: Log what we're sending to displayPageLocation
+          const pageCount = tmpViewer.Core.documentViewer.getPageCount();
+          const doc = tmpViewer.Core.documentViewer.getDocument();
+          const pageInfo = doc ? doc.getPageInfo(initialLocation.page_no) : null;
+          console.log('[VIEWER_DEBUG] ===== displayPageLocation =====');
+          console.log('[VIEWER_DEBUG] Calling displayPageLocation with:', {
+            page_no: initialLocation.page_no,
+            x: initialLocation.x,
+            y: initialLocation.y,
+          });
+          console.log('[VIEWER_DEBUG] Document info:', {
+            pageCount,
+            targetPageInfo: pageInfo ? { width: pageInfo.width, height: pageInfo.height } : 'unavailable',
+          });
+
           tmpViewer.Core.documentViewer.displayPageLocation(
             initialLocation.page_no,
             initialLocation.x,
@@ -905,13 +918,26 @@ const ProjectLogsReader = ({
       // Create all annotations, set Hidden based on active filters (if filtering is enabled)
       const shouldShowSubmittals = !useFiltering || activeFilters.has('submittal');
       for (let i = 0; i < stableHighlightLocations?.length; i++) {
+        const loc = stableHighlightLocations[i];
+        const pageNumber = loc?.page_no;
+        if (!pageNumber) continue;
+
+        // DEBUG: Log each annotation being created
+        console.log(`[VIEWER_DEBUG] Creating RectangleAnnotation[${i}]:`, {
+          PageNumber: pageNumber,
+          X: loc?.x,
+          Y: loc?.y,
+          Width: loc?.width ?? 10000,
+          Height: loc?.height ?? 30,
+        });
+
         const annotationColor = createAnnotationColor(SUBMITTAL_COLOR);
         const rectangleAnnot = new Annotations.RectangleAnnotation({
-          PageNumber: stableHighlightLocations[i]?.page_no,
-          X: stableHighlightLocations[i]?.x,
-          Y: stableHighlightLocations[i]?.y,
-          Width: stableHighlightLocations[i]?.width ?? 10000,
-          Height: stableHighlightLocations[i]?.height ?? 30,
+          PageNumber: pageNumber,
+          X: loc?.x,
+          Y: loc?.y,
+          Width: loc?.width ?? 10000,
+          Height: loc?.height ?? 30,
           Color: annotationColor,
           FillColor: annotationColor,
         });
@@ -931,15 +957,17 @@ const ProjectLogsReader = ({
       // Create all annotations, set Hidden based on active filters (if filtering is enabled)
       for (let i = 0; i < stableAiLogHighlightLocations?.length; i++) {
         const location = stableAiLogHighlightLocations[i];
-        const itemType = location?.item_type;
+        const pageNumber = location?.page_no;
+        if (!pageNumber) continue;
 
+        const itemType = location?.item_type;
         const shouldShow = !useFiltering || activeFilters.has(itemType);
 
         const colorData = location?.color || getColorDataForHighlight(location?.item_type, location?.extraction_type);
         const color = createAnnotationColor(colorData);
         
         const rectangleAnnot = new Annotations.RectangleAnnotation({
-          PageNumber: location?.page_no,
+          PageNumber: pageNumber,
           X: location?.x,
           Y: location?.y,
           Width: location?.width ?? 10000,

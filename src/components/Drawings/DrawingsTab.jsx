@@ -90,6 +90,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     if (note?.drawing_file_url && note?.bounding_box) {
       setPdfLoading(true);
       const [x1, y1, x2, y2] = note.bounding_box;
+      
       setPdfData({
         url: note.drawing_file_url,
         textLoc: {
