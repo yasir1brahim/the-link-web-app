@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 
 const DrawingsTable = ({
   drawingNotes,
@@ -10,35 +10,6 @@ const DrawingsTable = ({
   totalCount,
   onPageChange,
 }) => {
-  const [expandedRows, setExpandedRows] = useState(new Set());
-  const [truncatedRows, setTruncatedRows] = useState(new Set());
-  const textRefs = useRef({});
-
-  // Check which rows need truncation
-  useEffect(() => {
-    const newTruncatedRows = new Set();
-    drawingNotes.forEach((note) => {
-      const ref = textRefs.current[note.id];
-      if (ref && ref.scrollHeight > ref.clientHeight) {
-        newTruncatedRows.add(note.id);
-      }
-    });
-    setTruncatedRows(newTruncatedRows);
-  }, [drawingNotes]);
-
-  const toggleExpand = (e, noteId) => {
-    e.stopPropagation();
-    setExpandedRows((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(noteId)) {
-        newSet.delete(noteId);
-      } else {
-        newSet.add(noteId);
-      }
-      return newSet;
-    });
-  };
-
   const totalPages = Math.ceil(totalCount / pageSize);
   const startItem = (page - 1) * pageSize + 1;
   const endItem = Math.min(page * pageSize, totalCount);
@@ -72,41 +43,19 @@ const DrawingsTable = ({
             </tr>
           </thead>
           <tbody>
-            {drawingNotes.map((note) => {
-              const isExpanded = expandedRows.has(note.id);
-              const needsTruncation = truncatedRows.has(note.id);
-
-              return (
-                <tr
-                  key={note.id}
-                  className={selectedNote?.id === note.id ? "selected" : ""}
-                  onClick={() => onRowSelect(note)}
-                >
-                  <td>{note.drawing_file_name}</td>
-                  <td>{note.category}</td>
-                  <td className="drawings-text-cell">
-                    <div
-                      ref={(el) => (textRefs.current[note.id] = el)}
-                      className={
-                        isExpanded
-                          ? "drawings-text-full"
-                          : "drawings-text-truncated"
-                      }
-                    >
-                      {note.text}
-                    </div>
-                    {(needsTruncation || isExpanded) && (
-                      <button
-                        className="drawings-expand-btn"
-                        onClick={(e) => toggleExpand(e, note.id)}
-                      >
-                        {isExpanded ? "Show less" : "Show more"}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
+            {drawingNotes.map((note) => (
+              <tr
+                key={note.id}
+                className={selectedNote?.id === note.id ? "selected" : ""}
+                onClick={() => onRowSelect(note)}
+              >
+                <td>{note.drawing_file_name}</td>
+                <td>{note.category}</td>
+                <td className="drawings-text-cell">
+                  <div className="drawings-text-full">{note.text}</div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

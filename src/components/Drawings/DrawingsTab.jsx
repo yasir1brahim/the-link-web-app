@@ -38,6 +38,9 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const drawingScrollDebug =
+    typeof window !== "undefined" &&
+    window.localStorage.getItem("drawingsScrollDebug") === "1";
 
   // Fetch drawing notes
   const fetchDrawingNotes = useCallback(async () => {
@@ -90,7 +93,28 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     if (note?.drawing_file_url && note?.bounding_box) {
       setPdfLoading(true);
       const [x1, y1, x2, y2] = note.bounding_box;
-      
+      const scrollToX = x1;
+      const scrollToY = y2;
+
+      if (drawingScrollDebug) {
+        console.groupCollapsed("[DRAWINGS_SCROLL_DEBUG] Note selection");
+        console.log({
+          noteId: note.id,
+          pageNumber: note.page_number,
+          boundingBox: note.bounding_box,
+          scrollTarget: {
+            x: scrollToX,
+            y: scrollToY,
+          },
+          pageRotation: note.page_rotation,
+          pageRotatedWidth: note.page_rotated_width,
+          pageRotatedHeight: note.page_rotated_height,
+          pageUnrotatedWidth: note.page_unrotated_width,
+          pageUnrotatedHeight: note.page_unrotated_height,
+        });
+        console.groupEnd();
+      }
+
       setPdfData({
         url: note.drawing_file_url,
         textLoc: {
@@ -98,6 +122,9 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
           y: y1,
           width: x2 - x1,
           height: y2 - y1,
+          scroll_to_x: scrollToX,
+          scroll_to_y: scrollToY,
+          jump_to_annotation: true,
           page_no: note.page_number,
         },
         docId: note.drawing_file_id,

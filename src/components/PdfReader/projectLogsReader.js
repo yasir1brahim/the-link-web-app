@@ -167,6 +167,9 @@ const ProjectLogsReader = ({
   currentUserId = null,
   projectId = null,
 }) => {
+  const drawingScrollDebug =
+    typeof window !== 'undefined' &&
+    window.localStorage.getItem('drawingsScrollDebug') === '1';
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
   const [annotations, setAnnotations] = useState([]);
@@ -759,9 +762,20 @@ const ProjectLogsReader = ({
     const lowestPageObject = allLocations.reduce((lowest, current) => {
       return (current.page_no < lowest.page_no) ? current : lowest;
     });
-    
+
+    const focusX = typeof lowestPageObject.focus_x === 'number'
+      ? lowestPageObject.focus_x
+      : lowestPageObject.x;
+    const focusY = typeof lowestPageObject.focus_y === 'number'
+      ? lowestPageObject.focus_y
+      : lowestPageObject.y;
+
     console.log('[SPEC_VIEWER_DEBUG] Found valid initial location with page_no:', lowestPageObject.page_no);
-    return lowestPageObject;
+    return {
+      ...lowestPageObject,
+      x: focusX,
+      y: focusY,
+    };
   };
 
   const updateTxtView = (_webViewer) => {
@@ -863,41 +877,105 @@ const ProjectLogsReader = ({
 
     if (tmpViewer && (highlightsAreAvailable || aiLogHighlightsAreAvailable)) {
       const initialLocation = getInitialPageLocation(stableHighlightLocations, stableAiLogHighlightLocations);
+      const jumpIndex = Array.isArray(stableHighlightLocations)
+        ? stableHighlightLocations.findIndex((location) => location?.jump_to_annotation)
+        : -1;
+      const jumpLocation = jumpIndex >= 0 ? stableHighlightLocations[jumpIndex] : null;
+      const focusLocation = jumpLocation || initialLocation;
+      let locationHasChanged = false;
+      let useJumpToAnnotation = false;
 
       // Check if document is loaded before trying to access it
       if (tmpViewer.Core.documentViewer && tmpViewer.Core.documentViewer.getDocument() && tmpViewer.Core.documentViewer.getPageCount() > 0) {
         // Check if the highlight location has changed
         const prevLocation = previousHighlightLocation.current;
-        const locationHasChanged = !prevLocation ||
-          prevLocation.page_no !== initialLocation.page_no ||
-          prevLocation.x !== initialLocation.x ||
-          prevLocation.y !== initialLocation.y;
+        locationHasChanged = Boolean(
+          focusLocation &&
+          (!prevLocation ||
+            prevLocation.page_no !== focusLocation.page_no ||
+            prevLocation.x !== focusLocation.x ||
+            prevLocation.y !== focusLocation.y)
+        );
+        useJumpToAnnotation = Boolean(
+          jumpLocation &&
+          annotationManager &&
+          typeof annotationManager.jumpToAnnotation === 'function'
+        );
 
-        if (locationHasChanged && initialLocation && initialLocation.page_no > 0) {
-          // DEBUG: Log what we're sending to displayPageLocation
-          const pageCount = tmpViewer.Core.documentViewer.getPageCount();
-          const doc = tmpViewer.Core.documentViewer.getDocument();
-          const pageInfo = doc ? doc.getPageInfo(initialLocation.page_no) : null;
-          console.log('[VIEWER_DEBUG] ===== displayPageLocation =====');
-          console.log('[VIEWER_DEBUG] Calling displayPageLocation with:', {
-            page_no: initialLocation.page_no,
-            x: initialLocation.x,
-            y: initialLocation.y,
-          });
-          console.log('[VIEWER_DEBUG] Document info:', {
-            pageCount,
-            targetPageInfo: pageInfo ? { width: pageInfo.width, height: pageInfo.height } : 'unavailable',
-          });
+        if (locationHasChanged && focusLocation && focusLocation.page_no > 0 && !useJumpToAnnotation) {
+          if (drawingScrollDebug) {
+            const pageCount = tmpViewer.Core.documentViewer.getPageCount();
+            const doc = tmpViewer.Core.documentViewer.getDocument();
+            const pageInfo = doc ? doc.getPageInfo(focusLocation.page_no) : null;
+            const pageRotation = doc && typeof doc.getPageRotation === 'function'
+              ? doc.getPageRotation(focusLocation.page_no)
+              : null;
+            const boundsCheck = pageInfo
+              ? {
+                  xInBounds: focusLocation.x >= 0 && focusLocation.x <= pageInfo.width,
+                  yInBounds: focusLocation.y >= 0 && focusLocation.y <= pageInfo.height,
+                }
+              : null;
+
+            console.groupCollapsed('[DRAWINGS_SCROLL_DEBUG] displayPageLocation');
+            console.log('location', {
+              page_no: focusLocation.page_no,
+              x: focusLocation.x,
+              y: focusLocation.y,
+              width: focusLocation.width,
+              height: focusLocation.height,
+            });
+            const zoom =
+              tmpViewer.Core.documentViewer &&
+              typeof tmpViewer.Core.documentViewer.getZoom === 'function'
+                ? tmpViewer.Core.documentViewer.getZoom()
+                : null;
+
+            console.log('document', {
+              pageCount,
+              targetPageInfo: pageInfo ? { width: pageInfo.width, height: pageInfo.height } : 'unavailable',
+              rotation: pageRotation,
+              zoom,
+            });
+            if (boundsCheck) {
+              console.log('bounds', boundsCheck);
+            }
+            console.log('useJumpToAnnotation', useJumpToAnnotation);
+            console.groupEnd();
+          }
+
+          const scrollX = typeof focusLocation.scroll_to_x === 'number'
+            ? focusLocation.scroll_to_x
+            : focusLocation.x;
+          const scrollY = typeof focusLocation.scroll_to_y === 'number'
+            ? focusLocation.scroll_to_y
+            : focusLocation.y;
+
+          if (drawingScrollDebug) {
+            console.log('scrollOverride', {
+              scroll_to_x: focusLocation.scroll_to_x,
+              scroll_to_y: focusLocation.scroll_to_y,
+              scrollX,
+              scrollY,
+              scroll_to_x_type: typeof focusLocation.scroll_to_x,
+              scroll_to_y_type: typeof focusLocation.scroll_to_y,
+            });
+            console.log('displayTarget', {
+              page_no: focusLocation.page_no,
+              x: scrollX,
+              y: scrollY,
+            });
+          }
 
           tmpViewer.Core.documentViewer.displayPageLocation(
-            initialLocation.page_no,
-            initialLocation.x,
-            initialLocation.y
+            focusLocation.page_no,
+            scrollX,
+            scrollY
           );
           previousHighlightLocation.current = {
-            page_no: initialLocation.page_no,
-            x: initialLocation.x,
-            y: initialLocation.y
+            page_no: focusLocation.page_no,
+            x: focusLocation.x,
+            y: focusLocation.y
           };
         }
       } else {
@@ -992,6 +1070,23 @@ const ProjectLogsReader = ({
       // Add all annotations in batch for better performance
       annotationManager.addAnnotations(_annotations);
       annotationManager.drawAnnotationsFromList(_annotations);
+
+      if (useJumpToAnnotation && locationHasChanged && jumpIndex >= 0 && _annotations[jumpIndex]) {
+        if (drawingScrollDebug) {
+          console.log('jumpToAnnotation', {
+            page_no: focusLocation?.page_no,
+            jumpIndex,
+          });
+        }
+        annotationManager.jumpToAnnotation(_annotations[jumpIndex]);
+        if (focusLocation) {
+          previousHighlightLocation.current = {
+            page_no: focusLocation.page_no,
+            x: focusLocation.x,
+            y: focusLocation.y,
+          };
+        }
+      }
 
       // Keep ref in sync with state to avoid closure issues
       annotationsRef.current = _annotations;
