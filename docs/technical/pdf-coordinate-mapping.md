@@ -37,34 +37,16 @@ The transformation maps a visual bounding box `[vx1, vy1, vx2, vy2]` to the inte
 
 ## Implementation Strategy
 
-### Frontend Temporary Fix
-A helper function `transformToInternal` was added to `ProjectLogsReader.js`. It intercepts coordinate objects and applies the rotation-based math before passing them to Apryse.
+### Parser: The Single Source of Truth
+Coordinate transformation is handled exclusively by the parser (AWS Lambda). It provides both coordinate formats plus page dimension metadata, allowing any consumer to use the appropriate coordinates without reimplementing transformation logic.
 
-```javascript
-function transformToInternal(loc, rotation, pageInfo) {
-  const { x, y, width, height } = loc;
-  const { width: pageWidth, height: pageHeight } = pageInfo; // Internal dimensions
+### Backend Strategy
+The Django backend receives the parser's webhook and stores both sets of coordinates:
+*   `unrotated_bounding_box` -> stored in `bounding_box` (for direct use by Apryse)
+*   `rotated_bounding_box` -> stored in `raw_bounding_box` (for debugging/visual reference)
 
-  switch (rotation) {
-    case 270:
-      return {
-        x: pageHeight - y - height,
-        y: x,
-        width: height,
-        height: width,
-      };
-    // ... other cases ...
-  }
-}
-```
-
-### Backend Transition (Recommended)
-The Django backend has been updated to perform these transformations upon receiving the webhook from the parser. 
-
-1.  **Detection**: The parser sends `rotation`, `width`, and `height` metadata.
-2.  **Transformation**: The `drawing_extraction_webhook` applies the math and stores the result in `bounding_box`.
-3.  **Preservation**: The original visual coordinates are stored in `raw_bounding_box`.
-4.  **Flagging**: The API provides an `is_internal` flag. If `true`, the frontend skips its local transformation to avoid double-correcting.
+### Frontend Strategy
+The frontend uses the pre-transformed `bounding_box` directly. No mathematical transformation is performed in the web app.
 
 ## Verification Checklist
 - [x] 270° rotation scrolls to correct page.
