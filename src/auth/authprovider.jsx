@@ -51,6 +51,9 @@ export const AuthProvider = ({ children }) => {
         try {
           userBack = await getCurrentUserData();
           console.log('userBack', userBack);
+          if (userBack.data.team_roles) {
+            localStorage.setItem('userTeamRoles', JSON.stringify(userBack.data.team_roles));
+          }
           // token was still good. we have a valid user session
           setToken(storedToken);
           setIsAuthenticated(true);
@@ -66,6 +69,9 @@ export const AuthProvider = ({ children }) => {
               localStorage.setItem('token', refreshData.data.access);
               setToken(refreshData.data.access);
               userBack = await getCurrentUserData();
+              if (userBack.data.team_roles) {
+                localStorage.setItem('userTeamRoles', JSON.stringify(userBack.data.team_roles));
+              }
               setIsAuthenticated(true);
               setUser(userBack.data);
             } catch (error) {
