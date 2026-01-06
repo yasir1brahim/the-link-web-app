@@ -43,6 +43,7 @@ import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
 import SpecViewer from "../SpecCentricView/SpecViewer";
 import { useInspectionQA } from '../SpecGpt/hooks/useInspectionQA';
 import { DrawingsTab } from "../Drawings";
+import ErrorBoundary from "../ErrorBoundary/ErrorBoundary";
 
 // Toggle between tabbed layout (true) and sidebar layout (false)
 // Set to false to show QA features in Compass sidebar instead of separate tab
@@ -2033,11 +2034,13 @@ const ProjectLogs = () => {
             </>
           }
           {activeTab === 'drawings' &&
-            <DrawingsTab
-              projectId={projectId}
-              projectVersionId={projectVersionId}
-              teamId={teamId}
-            />
+            <ErrorBoundary>
+              <DrawingsTab
+                projectId={projectId}
+                projectVersionId={projectVersionId}
+                teamId={teamId}
+              />
+            </ErrorBoundary>
           }
         </div>
       )}

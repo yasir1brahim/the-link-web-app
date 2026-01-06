@@ -180,6 +180,8 @@ const ProjectLogsReader = ({
   const annotationsRef = useRef([]);
   const onQuickHighlightRef = useRef(onQuickHighlight);
   const lastUsedHighlightTypeRef = useRef(lastUsedHighlightType);
+  const currentUserIdRef = useRef(currentUserId);
+  const getExtractedDataByIdRef = useRef(getExtractedDataById);
 
   useEffect(() => {
     onQuickHighlightRef.current = onQuickHighlight;
@@ -188,7 +190,15 @@ const ProjectLogsReader = ({
   useEffect(() => {
     lastUsedHighlightTypeRef.current = lastUsedHighlightType;
   }, [lastUsedHighlightType]);
-  
+
+  useEffect(() => {
+    currentUserIdRef.current = currentUserId;
+  }, [currentUserId]);
+
+  useEffect(() => {
+    getExtractedDataByIdRef.current = getExtractedDataById;
+  }, [getExtractedDataById]);
+
   // Convert activeFilters Set to a stable string representation for dependency tracking
   const activeFiltersString = React.useMemo(() => {
     return Array.from(activeFilters).sort().join(',');
@@ -285,7 +295,7 @@ const ProjectLogsReader = ({
         // Handle modify action (editing existing note)
         if (action === 'modify' && noteId) {
           // Permission check (safety net - ReadOnly should prevent this)
-          if (!canEditAnnotation(annot, currentUserId)) {
+          if (!canEditAnnotation(annot, currentUserIdRef.current)) {
             console.error('Unauthorized note modification attempt');
             const previousText = annot._originalContents;
             if (previousText) {
@@ -333,7 +343,7 @@ const ProjectLogsReader = ({
             annot.setCustomData('extraction_note_id', note.id);
             annot.setCustomData('created_by_id', note.created_by_id);
             // Lock the annotation after saving
-            annot.ReadOnly = note.created_by_id !== currentUserId;
+            annot.ReadOnly = note.created_by_id !== currentUserIdRef.current;
             annotationManager.redrawAnnotation(annot);
           } catch (error) {
             handleError(error, 'Failed to create note');
@@ -366,7 +376,7 @@ const ProjectLogsReader = ({
       }
 
       // Create new sticky note - user will type directly into this
-      const extractedData = getExtractedDataById ? getExtractedDataById(extractedDataId) : null;
+      const extractedData = getExtractedDataByIdRef.current ? getExtractedDataByIdRef.current(extractedDataId) : null;
 
       if (!extractedData || !extractedData.pdf_locations || extractedData.pdf_locations.length === 0) {
         console.warn(`Cannot create sticky note: ExtractedData ${extractedDataId} has no PDF locations`);
