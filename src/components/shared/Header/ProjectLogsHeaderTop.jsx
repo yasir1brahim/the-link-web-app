@@ -91,11 +91,30 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
                 Spec View
               </button>
             )}
+            {props.isDrawingsFlagActive && (
+              <button
+                className={`tab-button ${props.activeTab === 'drawings' ? 'active' : ''}`}
+                onClick={() => props.setActiveTab('drawings')}
+                style={{
+                  padding: '12px 24px',
+                  border: 'none',
+                  backgroundColor: props.activeTab === 'drawings' ? '#fff' : '#f5f5f5',
+                  borderBottom: props.activeTab === 'drawings' ? '2px solid #007bff' : '2px solid transparent',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: props.activeTab === 'drawings' ? '600' : '400',
+                  color: props.activeTab === 'drawings' ? '#007bff' : '#666',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Drawings
+              </button>
+            )}
           </div>
         )}
       </div>
       <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '0px' }}>
-        {props.isVersioningEnabled && (props.activeTab === 'submittal' || props.activeTab === 'assistant' || props.activeTab === 'inspection-qa' || props.activeTab === 'spec-view') && (
+        {props.isVersioningEnabled && (props.activeTab === 'submittal' || props.activeTab === 'assistant' || props.activeTab === 'inspection-qa' || props.activeTab === 'spec-view' || props.activeTab === 'drawings') && (
           <>
             {props.isVersionComparisonEnabled && props.activeTab === 'submittal' && (
               <button
