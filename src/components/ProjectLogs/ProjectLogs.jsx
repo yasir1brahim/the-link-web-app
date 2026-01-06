@@ -42,6 +42,7 @@ import DocumentListModal from "./DocumentListModal";
 import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
 import SpecViewer from "../SpecCentricView/SpecViewer";
 import { useInspectionQA } from '../SpecGpt/hooks/useInspectionQA';
+import AssistantReprocessBanner from "./AssistantReprocessBanner";
 
 // Toggle between tabbed layout (true) and sidebar layout (false)
 // Set to false to show QA features in Compass sidebar instead of separate tab
@@ -1725,7 +1726,7 @@ const ProjectLogs = () => {
     <div className="page-wrap">
       <NavbarTop
         qaDashboard={state?.qaDashboard}
-        projectTitle={state?.projectName || projectName || ""}
+        projectTitle={state?.projectName || ""}
         handleManageProcoreButtonClick={handleManageProcoreButtonClick}
         handleManageExcelExportButtonClick={handleManageExcelExportButtonClick}
         customerData={customerData}
@@ -1967,6 +1968,11 @@ const ProjectLogs = () => {
           {activeTab == 'assistant' &&
             <>
             <div className="compass-chat-viewport">
+              <AssistantReprocessBanner
+                documentData={documentData}
+                onReprocessComplete={refreshDocuments}
+                isSpecGptEnabled={isSpecGptFlagActive(teamId)}
+              />
               <ProcessingIndicator
                 documentIsProcessing={documentIsBeingEmbedded}
                 documentData={documentData}
