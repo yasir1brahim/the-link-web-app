@@ -533,11 +533,27 @@ const ProjectLogs = () => {
         setDocParsed(response.data.doc_parsed);
 
         setUserRole(getUserRoleInProject(response.data));
-        setUserRoleInCompany(response.data.current_user_team_role || 'member');
+
+        // Check if user is actually a team member
+        // If current_user_team_role is null/undefined, user is not part of the team
+        if (!response.data.current_user_team_role) {
+          setIsInitialLoading(false);
+          setIsDataLoading(false);
+          setLoading(false);
+          navigate('/not-found', {
+            state: {
+              statusCode: 403,
+              message: 'Team Access Required'
+            }
+          });
+          return;
+        }
+
+        setUserRoleInCompany(response.data.current_user_team_role);
         console.log("response.data.project_versions", response.data.project_versions);
 
         setAvailableVersions(response.data.project_versions);
-        
+
         // Fetch log data with the correct version
         await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
         // Fetch spec section count
