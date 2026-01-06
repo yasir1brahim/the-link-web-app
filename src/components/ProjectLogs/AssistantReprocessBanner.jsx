@@ -1,33 +1,35 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { Alert, Button, Spinner } from 'reactstrap';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { reprocessDocument } from '../../api/ProjectLogs/api';
+import { bulkReprocessDocuments } from '../../api/ProjectLogs/api';
 import { ToastService } from '../shared/Toast/Toast';
+import './AssistantReprocessBanner.scss';
 
 /**
- * @param {Object} doc
+ * Determines if a document needs reprocessing for Compass/Assistant feature
+ * @param {Object} doc - Document object with specgpt_processing_status
  * @returns {boolean} - True if document needs reprocessing
  */
 export const needsCompassReprocessing = (doc) => {
+  const status = doc.specgpt_processing_status;
 
-  const needsProcessing = 
-    doc.specgpt_processing_status === "NONE";
-  // Document Not currently being processed in Assistant
-  const notProcessing = !["UPLOADING", "IN_QUEUE", "PROCESSING", "SUBSECTIONS_EXTRACTED"].includes(
-    doc.specgpt_processing_status
-  );
-  
-  return needsProcessing && notProcessing;
+  // Documents that need reprocessing: NONE or FAILED
+  const needsReprocessing = status === "NONE" || status === "FAILED";
+
+  // Don't show if currently processing
+  const isProcessing = ["UPLOADING", "IN_QUEUE", "PROCESSING", "SUBSECTIONS_EXTRACTED"].includes(status);
+
+  return needsReprocessing && !isProcessing;
 };
 
-const AssistantReprocessBanner = ({ 
-  documentData = [], 
+const AssistantReprocessBanner = ({
+  documentData,
   onReprocessComplete,
-  isSpecGptEnabled = true 
+  isSpecGptEnabled
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  
   if (!isSpecGptEnabled) {
     return null;
   }
@@ -42,72 +44,49 @@ const AssistantReprocessBanner = ({
     setIsProcessing(true);
 
     try {
-      let successCount = 0;
-      let failCount = 0;
+      const documentIds = documentsNeedingReprocess.map(doc => doc.document_id);
 
-      for (const doc of documentsNeedingReprocess) {
-        try {
-          await reprocessDocument(doc.document_id);
-          successCount++;
-        } catch (error) {
-          console.error(`Failed to reprocess document ${doc.document_id}:`, error);
-          failCount++;
-        }
-      }
+      // Use bulk API for efficient processing
+      await bulkReprocessDocuments(documentIds);
 
-      if (failCount === 0) {
-        ToastService.success(`${successCount} document${successCount > 1 ? 's' : ''} queued for Assistant processing`);
-      } else if (successCount > 0) {
-        ToastService.warning(`${successCount} document${successCount > 1 ? 's' : ''} queued, ${failCount} failed`);
-      } else {
-        ToastService.error('Failed to queue documents for processing');
-      }
-      
+      ToastService.success(
+        `${documentIds.length} document${documentIds.length > 1 ? 's' : ''} queued for Assistant processing`
+      );
+
+      // Refresh documents to update status and hide banner
       if (onReprocessComplete) {
         onReprocessComplete();
       }
     } catch (error) {
       console.error('Error during reprocessing:', error);
-      ToastService.error('Failed to queue documents for processing');
+      ToastService.error('Failed to queue documents for processing. Please try again.');
     } finally {
       setIsProcessing(false);
     }
   };
 
   return (
-    <Alert 
-      color="info" 
-      className="compass-reprocess-banner"
-      style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        margin: '0 16px 16px 16px',
-        padding: '16px',
-        borderRadius: '8px',
-        backgroundColor: '#e7f3ff',
-        border: '1px solid #b3d7ff',
-      }}
+    <Alert
+      color="info"
+      className="assistant-reprocess-banner"
+      role="alert"
+      aria-live="polite"
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1 }}>
-        <InfoOutlinedIcon style={{ color: '#0066cc', marginTop: '2px' }} />
-        <div style={{ flex: 1 }}>
-          <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#004085', lineHeight: '1.5' }}>
+      <div className="banner-content">
+        <InfoOutlinedIcon className="banner-icon" aria-hidden="true" />
+        <div className="banner-text">
+          <p className="banner-message">
             We noticed that the listed documents are old, please reprocess them to access their information in Assistant.
           </p>
-          <div style={{ marginTop: '8px' }}>
-            <strong style={{ color: '#004085', fontSize: '13px' }}>Documents:</strong>
-            <ul style={{ 
-              margin: '4px 0 0 0', 
-              paddingLeft: '20px',
-              color: '#004085',
-              fontSize: '13px',
-              maxHeight: '150px',
-              overflowY: 'auto'
-            }}>
+          <div className="documents-list-container">
+            <strong className="documents-label">Documents:</strong>
+            <ul className="documents-list" aria-label="Documents needing reprocessing">
               {documentsNeedingReprocess.map((doc) => (
-                <li key={doc.document_id} style={{ marginBottom: '2px' }}>
+                <li key={doc.document_id}>
                   {doc.document_name}
+                  {doc.specgpt_processing_status === "FAILED" && (
+                    <span className="failed-badge" aria-label="Processing failed"> (Failed)</span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -119,11 +98,8 @@ const AssistantReprocessBanner = ({
         size="sm"
         onClick={handleProcessAll}
         disabled={isProcessing}
-        style={{
-          minWidth: '140px',
-          whiteSpace: 'nowrap',
-          alignSelf: 'flex-start',
-        }}
+        className="reprocess-button"
+        aria-busy={isProcessing}
       >
         {isProcessing ? (
           <>
@@ -136,6 +112,24 @@ const AssistantReprocessBanner = ({
       </Button>
     </Alert>
   );
+};
+
+AssistantReprocessBanner.propTypes = {
+  documentData: PropTypes.arrayOf(
+    PropTypes.shape({
+      document_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      document_name: PropTypes.string.isRequired,
+      specgpt_processing_status: PropTypes.string,
+    })
+  ),
+  onReprocessComplete: PropTypes.func,
+  isSpecGptEnabled: PropTypes.bool,
+};
+
+AssistantReprocessBanner.defaultProps = {
+  documentData: [],
+  onReprocessComplete: null,
+  isSpecGptEnabled: true,
 };
 
 export default AssistantReprocessBanner;

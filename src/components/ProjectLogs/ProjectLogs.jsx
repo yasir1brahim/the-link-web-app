@@ -1726,7 +1726,7 @@ const ProjectLogs = () => {
     <div className="page-wrap">
       <NavbarTop
         qaDashboard={state?.qaDashboard}
-        projectTitle={state?.projectName || ""}
+        projectTitle={state?.projectName || projectName || ""}
         handleManageProcoreButtonClick={handleManageProcoreButtonClick}
         handleManageExcelExportButtonClick={handleManageExcelExportButtonClick}
         customerData={customerData}
