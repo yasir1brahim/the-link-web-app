@@ -20,7 +20,7 @@ export const needsCompassReprocessing = (doc) => {
   return needsProcessing && notProcessing;
 };
 
-const CompassReprocessBanner = ({ 
+const AssistantReprocessBanner = ({ 
   documentData = [], 
   onReprocessComplete,
   isSpecGptEnabled = true 
@@ -138,4 +138,4 @@ const CompassReprocessBanner = ({
   );
 };
 
-export default CompassReprocessBanner;
+export default AssistantReprocessBanner;
