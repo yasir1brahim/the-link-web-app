@@ -85,8 +85,6 @@ function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
     return;
   }
 
-  console.log('[NOTE_DEBUG] Creating sticky notes for ExtractedData:', extractedData.id, 'with', extractedData.notes.length, 'notes');
-
   const firstLocation = extractedData.pdf_locations[0];
   const position = calculateStickyPosition(firstLocation);
 
@@ -169,6 +167,9 @@ const ProjectLogsReader = ({
   currentUserId = null,
   projectId = null,
 }) => {
+  const drawingScrollDebug =
+    typeof window !== 'undefined' &&
+    window.localStorage.getItem('drawingsScrollDebug') === '1';
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
   const [annotations, setAnnotations] = useState([]);
@@ -179,6 +180,8 @@ const ProjectLogsReader = ({
   const annotationsRef = useRef([]);
   const onQuickHighlightRef = useRef(onQuickHighlight);
   const lastUsedHighlightTypeRef = useRef(lastUsedHighlightType);
+  const currentUserIdRef = useRef(currentUserId);
+  const getExtractedDataByIdRef = useRef(getExtractedDataById);
 
   useEffect(() => {
     onQuickHighlightRef.current = onQuickHighlight;
@@ -187,7 +190,15 @@ const ProjectLogsReader = ({
   useEffect(() => {
     lastUsedHighlightTypeRef.current = lastUsedHighlightType;
   }, [lastUsedHighlightType]);
-  
+
+  useEffect(() => {
+    currentUserIdRef.current = currentUserId;
+  }, [currentUserId]);
+
+  useEffect(() => {
+    getExtractedDataByIdRef.current = getExtractedDataById;
+  }, [getExtractedDataById]);
+
   // Convert activeFilters Set to a stable string representation for dependency tracking
   const activeFiltersString = React.useMemo(() => {
     return Array.from(activeFilters).sort().join(',');
@@ -345,7 +356,7 @@ const ProjectLogsReader = ({
         // Handle modify action (editing existing note)
         if (action === 'modify' && noteId) {
           // Permission check (safety net - ReadOnly should prevent this)
-          if (!canEditAnnotation(annot, currentUserId)) {
+          if (!canEditAnnotation(annot, currentUserIdRef.current)) {
             console.error('Unauthorized note modification attempt');
             const previousText = annot._originalContents;
             if (previousText) {
@@ -393,7 +404,7 @@ const ProjectLogsReader = ({
             annot.setCustomData('extraction_note_id', note.id);
             annot.setCustomData('created_by_id', note.created_by_id);
             // Lock the annotation after saving
-            annot.ReadOnly = note.created_by_id !== currentUserId;
+            annot.ReadOnly = note.created_by_id !== currentUserIdRef.current;
             annotationManager.redrawAnnotation(annot);
           } catch (error) {
             handleError(error, 'Failed to create note');
@@ -426,7 +437,7 @@ const ProjectLogsReader = ({
       }
 
       // Create new sticky note - user will type directly into this
-      const extractedData = getExtractedDataById ? getExtractedDataById(extractedDataId) : null;
+      const extractedData = getExtractedDataByIdRef.current ? getExtractedDataByIdRef.current(extractedDataId) : null;
 
       if (!extractedData || !extractedData.pdf_locations || extractedData.pdf_locations.length === 0) {
         console.warn(`Cannot create sticky note: ExtractedData ${extractedDataId} has no PDF locations`);
@@ -586,6 +597,107 @@ const ProjectLogsReader = ({
     };
   }, [webViewer, projectId]);
 
+  const buildSelectionPayload = React.useCallback((documentViewer) => {
+    if (!documentViewer || typeof documentViewer.getSelectedText !== "function") {
+      return null;
+    }
+
+    const selectedText = documentViewer.getSelectedText();
+    if (!selectedText || !selectedText.trim()) {
+      return null;
+    }
+
+    const normalizePageNumber = (entry) => {
+      if (typeof entry?.pageNumber === "number") {
+        return entry.pageNumber;
+      }
+      if (typeof entry?.pageIndex === "number") {
+        return entry.pageIndex + 1;
+      }
+      if (typeof entry === "number") {
+        return entry + 1;
+      }
+      return null;
+    };
+
+    const applyQuad = (pageNumber, quad) => {
+      if (!quad) {
+        return null;
+      }
+
+      const xs = [quad.x1, quad.x2, quad.x3, quad.x4].filter((value) => typeof value === "number");
+      const ys = [quad.y1, quad.y2, quad.y3, quad.y4].filter((value) => typeof value === "number");
+
+      if (xs.length === 0 || ys.length === 0) {
+        return null;
+      }
+
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+
+      if (!Number.isFinite(minX) || !Number.isFinite(maxX) || !Number.isFinite(minY) || !Number.isFinite(maxY)) {
+        return null;
+      }
+
+      return {
+        page_no: pageNumber,
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY,
+      };
+    };
+
+    const quadsSource =
+      typeof documentViewer.getSelectedTextQuads === "function"
+        ? documentViewer.getSelectedTextQuads()
+        : null;
+
+    const locations = [];
+
+    if (Array.isArray(quadsSource)) {
+      quadsSource.forEach((entry) => {
+        const pageNumber = normalizePageNumber(entry);
+        if (!pageNumber || !Array.isArray(entry?.quads)) {
+          return;
+        }
+
+        entry.quads.forEach((quad) => {
+          const location = applyQuad(pageNumber, quad);
+          if (location) {
+            locations.push(location);
+          }
+        });
+      });
+    } else if (quadsSource && typeof quadsSource === "object") {
+      Object.keys(quadsSource).forEach((key) => {
+        const pageIdx = Number(key);
+        const pageNumber = Number.isNaN(pageIdx) ? null : pageIdx;
+        if (!pageNumber || !Array.isArray(quadsSource[key])) {
+          return;
+        }
+
+        quadsSource[key].forEach((quad) => {
+          const location = applyQuad(pageNumber, quad);
+          if (location) {
+            locations.push(location);
+          }
+        });
+      });
+    }
+
+    if (locations.length === 0) {
+      return null;
+    }
+
+    return {
+      selectedText: selectedText.trim(),
+      locations,
+    };
+  }, []);
+
   // Update text popup buttons when lastUsedHighlightType changes
   useEffect(() => {
     if (!webViewer || !isSpecViewMode || !documentLoaded) {
@@ -706,107 +818,6 @@ const ProjectLogsReader = ({
     });
   };
 
-  const buildSelectionPayload = React.useCallback((documentViewer) => {
-    if (!documentViewer || typeof documentViewer.getSelectedText !== "function") {
-      return null;
-    }
-
-    const selectedText = documentViewer.getSelectedText();
-    if (!selectedText || !selectedText.trim()) {
-      return null;
-    }
-
-    const normalizePageNumber = (entry) => {
-      if (typeof entry?.pageNumber === "number") {
-        return entry.pageNumber;
-      }
-      if (typeof entry?.pageIndex === "number") {
-        return entry.pageIndex + 1;
-      }
-      if (typeof entry === "number") {
-        return entry + 1;
-      }
-      return null;
-    };
-
-    const applyQuad = (pageNumber, quad) => {
-      if (!quad) {
-        return null;
-      }
-
-      const xs = [quad.x1, quad.x2, quad.x3, quad.x4].filter((value) => typeof value === "number");
-      const ys = [quad.y1, quad.y2, quad.y3, quad.y4].filter((value) => typeof value === "number");
-
-      if (xs.length === 0 || ys.length === 0) {
-        return null;
-      }
-
-      const minX = Math.min(...xs);
-      const maxX = Math.max(...xs);
-      const minY = Math.min(...ys);
-      const maxY = Math.max(...ys);
-
-      if (!Number.isFinite(minX) || !Number.isFinite(maxX) || !Number.isFinite(minY) || !Number.isFinite(maxY)) {
-        return null;
-      }
-
-      return {
-        page_no: pageNumber,
-        x: minX,
-        y: minY,
-        width: maxX - minX,
-        height: maxY - minY,
-      };
-    };
-
-    const quadsSource =
-      typeof documentViewer.getSelectedTextQuads === "function"
-        ? documentViewer.getSelectedTextQuads()
-        : null;
-
-    const locations = [];
-
-    if (Array.isArray(quadsSource)) {
-      quadsSource.forEach((entry) => {
-        const pageNumber = normalizePageNumber(entry);
-        if (!pageNumber || !Array.isArray(entry?.quads)) {
-          return;
-        }
-
-        entry.quads.forEach((quad) => {
-          const location = applyQuad(pageNumber, quad);
-          if (location) {
-            locations.push(location);
-          }
-        });
-      });
-    } else if (quadsSource && typeof quadsSource === "object") {
-      Object.keys(quadsSource).forEach((key) => {
-        const pageIdx = Number(key);
-        const pageNumber = Number.isNaN(pageIdx) ? null : pageIdx;
-        if (!pageNumber || !Array.isArray(quadsSource[key])) {
-          return;
-        }
-
-        quadsSource[key].forEach((quad) => {
-          const location = applyQuad(pageNumber, quad);
-          if (location) {
-            locations.push(location);
-          }
-        });
-      });
-    }
-
-    if (locations.length === 0) {
-      return null;
-    }
-
-    return {
-      selectedText: selectedText.trim(),
-      locations,
-    };
-  }, []);
-
   const getInitialPageLocation = (highlightLocations, aiLogHighlightLocations) => {
     // Combine both arrays, filtering out any null/undefined items and invalid page numbers
     const allLocations = [
@@ -827,9 +838,20 @@ const ProjectLogsReader = ({
     const lowestPageObject = allLocations.reduce((lowest, current) => {
       return (current.page_no < lowest.page_no) ? current : lowest;
     });
-    
+
+    const focusX = typeof lowestPageObject.focus_x === 'number'
+      ? lowestPageObject.focus_x
+      : lowestPageObject.x;
+    const focusY = typeof lowestPageObject.focus_y === 'number'
+      ? lowestPageObject.focus_y
+      : lowestPageObject.y;
+
     console.log('[SPEC_VIEWER_DEBUG] Found valid initial location with page_no:', lowestPageObject.page_no);
-    return lowestPageObject;
+    return {
+      ...lowestPageObject,
+      x: focusX,
+      y: focusY,
+    };
   };
 
   const updateTxtView = async (_webViewer) => {
@@ -975,26 +997,105 @@ const ProjectLogsReader = ({
 
     if (tmpViewer && (highlightsAreAvailable || aiLogHighlightsAreAvailable)) {
       const initialLocation = getInitialPageLocation(stableHighlightLocations, stableAiLogHighlightLocations);
+      const jumpIndex = Array.isArray(stableHighlightLocations)
+        ? stableHighlightLocations.findIndex((location) => location?.jump_to_annotation)
+        : -1;
+      const jumpLocation = jumpIndex >= 0 ? stableHighlightLocations[jumpIndex] : null;
+      const focusLocation = jumpLocation || initialLocation;
+      let locationHasChanged = false;
+      let useJumpToAnnotation = false;
 
       // Check if document is loaded before trying to access it
       if (tmpViewer.Core.documentViewer && tmpViewer.Core.documentViewer.getDocument() && tmpViewer.Core.documentViewer.getPageCount() > 0) {
         // Check if the highlight location has changed
         const prevLocation = previousHighlightLocation.current;
-        const locationHasChanged = !prevLocation ||
-          prevLocation.page_no !== initialLocation.page_no ||
-          prevLocation.x !== initialLocation.x ||
-          prevLocation.y !== initialLocation.y;
+        locationHasChanged = Boolean(
+          focusLocation &&
+          (!prevLocation ||
+            prevLocation.page_no !== focusLocation.page_no ||
+            prevLocation.x !== focusLocation.x ||
+            prevLocation.y !== focusLocation.y)
+        );
+        useJumpToAnnotation = Boolean(
+          jumpLocation &&
+          annotationManager &&
+          typeof annotationManager.jumpToAnnotation === 'function'
+        );
 
-        if (locationHasChanged && initialLocation && initialLocation.page_no > 0) {
+        if (locationHasChanged && focusLocation && focusLocation.page_no > 0 && !useJumpToAnnotation) {
+          if (drawingScrollDebug) {
+            const pageCount = tmpViewer.Core.documentViewer.getPageCount();
+            const doc = tmpViewer.Core.documentViewer.getDocument();
+            const pageInfo = doc ? doc.getPageInfo(focusLocation.page_no) : null;
+            const pageRotation = doc && typeof doc.getPageRotation === 'function'
+              ? doc.getPageRotation(focusLocation.page_no)
+              : null;
+            const boundsCheck = pageInfo
+              ? {
+                  xInBounds: focusLocation.x >= 0 && focusLocation.x <= pageInfo.width,
+                  yInBounds: focusLocation.y >= 0 && focusLocation.y <= pageInfo.height,
+                }
+              : null;
+
+            console.groupCollapsed('[DRAWINGS_SCROLL_DEBUG] displayPageLocation');
+            console.log('location', {
+              page_no: focusLocation.page_no,
+              x: focusLocation.x,
+              y: focusLocation.y,
+              width: focusLocation.width,
+              height: focusLocation.height,
+            });
+            const zoom =
+              tmpViewer.Core.documentViewer &&
+              typeof tmpViewer.Core.documentViewer.getZoom === 'function'
+                ? tmpViewer.Core.documentViewer.getZoom()
+                : null;
+
+            console.log('document', {
+              pageCount,
+              targetPageInfo: pageInfo ? { width: pageInfo.width, height: pageInfo.height } : 'unavailable',
+              rotation: pageRotation,
+              zoom,
+            });
+            if (boundsCheck) {
+              console.log('bounds', boundsCheck);
+            }
+            console.log('useJumpToAnnotation', useJumpToAnnotation);
+            console.groupEnd();
+          }
+
+          const scrollX = typeof focusLocation.scroll_to_x === 'number'
+            ? focusLocation.scroll_to_x
+            : focusLocation.x;
+          const scrollY = typeof focusLocation.scroll_to_y === 'number'
+            ? focusLocation.scroll_to_y
+            : focusLocation.y;
+
+          if (drawingScrollDebug) {
+            console.log('scrollOverride', {
+              scroll_to_x: focusLocation.scroll_to_x,
+              scroll_to_y: focusLocation.scroll_to_y,
+              scrollX,
+              scrollY,
+              scroll_to_x_type: typeof focusLocation.scroll_to_x,
+              scroll_to_y_type: typeof focusLocation.scroll_to_y,
+            });
+            console.log('displayTarget', {
+              page_no: focusLocation.page_no,
+              x: scrollX,
+              y: scrollY,
+            });
+          }
+
           tmpViewer.Core.documentViewer.displayPageLocation(
-            initialLocation.page_no,
-            initialLocation.x,
-            initialLocation.y
+            focusLocation.page_no,
+            scrollX,
+            scrollY
           );
           previousHighlightLocation.current = {
-            page_no: initialLocation.page_no,
-            x: initialLocation.x,
-            y: initialLocation.y
+            page_no: focusLocation.page_no,
+            x: focusLocation.x,
+            y: focusLocation.y
           };
         }
       } else {
@@ -1015,13 +1116,26 @@ const ProjectLogsReader = ({
       // Create all annotations, set Hidden based on active filters (if filtering is enabled)
       const shouldShowSubmittals = !useFiltering || activeFilters.has('submittal');
       for (let i = 0; i < stableHighlightLocations?.length; i++) {
+        const loc = stableHighlightLocations[i];
+        const pageNumber = loc?.page_no;
+        if (!pageNumber) continue;
+
+        // DEBUG: Log each annotation being created
+        console.log(`[VIEWER_DEBUG] Creating RectangleAnnotation[${i}]:`, {
+          PageNumber: pageNumber,
+          X: loc?.x,
+          Y: loc?.y,
+          Width: loc?.width ?? 10000,
+          Height: loc?.height ?? 30,
+        });
+
         const annotationColor = createAnnotationColor(SUBMITTAL_COLOR);
         const rectangleAnnot = new Annotations.RectangleAnnotation({
-          PageNumber: stableHighlightLocations[i]?.page_no,
-          X: stableHighlightLocations[i]?.x,
-          Y: stableHighlightLocations[i]?.y,
-          Width: stableHighlightLocations[i]?.width ?? 10000,
-          Height: stableHighlightLocations[i]?.height ?? 30,
+          PageNumber: pageNumber,
+          X: loc?.x,
+          Y: loc?.y,
+          Width: loc?.width ?? 10000,
+          Height: loc?.height ?? 30,
           Color: annotationColor,
           FillColor: annotationColor,
         });
@@ -1043,15 +1157,17 @@ const ProjectLogsReader = ({
       // Create all annotations, set Hidden based on active filters (if filtering is enabled)
       for (let i = 0; i < stableAiLogHighlightLocations?.length; i++) {
         const location = stableAiLogHighlightLocations[i];
-        const itemType = location?.item_type;
+        const pageNumber = location?.page_no;
+        if (!pageNumber) continue;
 
+        const itemType = location?.item_type;
         const shouldShow = !useFiltering || activeFilters.has(itemType);
 
         const colorData = location?.color || getColorDataForHighlight(location?.item_type, location?.extraction_type);
         const color = createAnnotationColor(colorData);
         
         const rectangleAnnot = new Annotations.RectangleAnnotation({
-          PageNumber: location?.page_no,
+          PageNumber: pageNumber,
           X: location?.x,
           Y: location?.y,
           Width: location?.width ?? 10000,
@@ -1079,6 +1195,23 @@ const ProjectLogsReader = ({
       // Add all annotations in batch for better performance
       annotationManager.addAnnotations(_annotations);
       annotationManager.drawAnnotationsFromList(_annotations);
+
+      if (useJumpToAnnotation && locationHasChanged && jumpIndex >= 0 && _annotations[jumpIndex]) {
+        if (drawingScrollDebug) {
+          console.log('jumpToAnnotation', {
+            page_no: focusLocation?.page_no,
+            jumpIndex,
+          });
+        }
+        annotationManager.jumpToAnnotation(_annotations[jumpIndex]);
+        if (focusLocation) {
+          previousHighlightLocation.current = {
+            page_no: focusLocation.page_no,
+            x: focusLocation.x,
+            y: focusLocation.y,
+          };
+        }
+      }
 
       // Keep ref in sync with state to avoid closure issues
       annotationsRef.current = _annotations;
