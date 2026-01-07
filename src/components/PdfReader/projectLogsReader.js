@@ -1028,6 +1028,7 @@ const ProjectLogsReader = ({
           Height: loc?.height ?? 30,
           Color: annotationColor,
           FillColor: annotationColor,
+          ReadOnly: true,
         });
         rectangleAnnot.Subject = 'Submittal Highlight';
         rectangleAnnot.CustomData = {
@@ -1062,6 +1063,7 @@ const ProjectLogsReader = ({
           Height: location?.height ?? 30,
           Color: color,
           FillColor: color,
+          ReadOnly: true,
         });
         rectangleAnnot.Subject = `AI Log Highlight - ${location?.item_type || location?.extraction_type || 'Unknown'}`;
         rectangleAnnot.CustomData = {
