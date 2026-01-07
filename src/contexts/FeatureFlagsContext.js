@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../auth/authcontext';
 import { getCurrentUserData, getTeamFlags } from '../api/Authentication/api';
-import { 
-    NOTICES_FEATURE_FLAG_NAME, 
-    VERSIONING_FEATURE_FLAG_NAME, 
+import {
+    NOTICES_FEATURE_FLAG_NAME,
+    VERSIONING_FEATURE_FLAG_NAME,
     VERSION_COMPARISON_FEATURE_FLAG_NAME,
     VERSION_COMPARISON_SEARCH_FEATURE_FLAG_NAME,
     FULL_SPEC_PROCESSING_FEATURE_FLAG_NAME,
@@ -12,7 +12,8 @@ import {
     INSPECTION_LOG_FEATURE_FLAG_NAME,
     INSPECTION_LOG_USE_DATA_TABLES_FEATURE_FLAG_NAME,
     QA_PLANNER_FEATURE_FLAG_NAME,
-    SPEC_CENTERED_VIEW_FEATURE_FLAG_NAME
+    SPEC_CENTERED_VIEW_FEATURE_FLAG_NAME,
+    DRAWINGS_FEATURE_FLAG_NAME,
 } from '../constants';
 
 const FeatureFlagsContext = createContext();
@@ -157,6 +158,7 @@ export const FeatureFlagsProvider = ({ children }) => {
     const isInspectionLogUseDataTablesFlagActive = (teamId) => isFlagActive(INSPECTION_LOG_USE_DATA_TABLES_FEATURE_FLAG_NAME, teamId);
     const isQaPlannerFlagActive = (teamId) => isFlagActive(QA_PLANNER_FEATURE_FLAG_NAME, teamId);
     const isSpecCenteredViewFlagActive = (teamId) => isFlagActive(SPEC_CENTERED_VIEW_FEATURE_FLAG_NAME, teamId);
+    const isDrawingsFlagActive = (teamId) => isFlagActive(DRAWINGS_FEATURE_FLAG_NAME, teamId);
 
     // Refresh flags (useful when flags might have changed)
     const refreshFlags = async () => {
@@ -195,6 +197,7 @@ export const FeatureFlagsProvider = ({ children }) => {
         isInspectionLogUseDataTablesFlagActive,
         isQaPlannerFlagActive,
         isSpecCenteredViewFlagActive,
+        isDrawingsFlagActive,
         refreshFlags
     };
 

@@ -87,21 +87,18 @@ const DocumentsTab = ({
     setIsReprocessing(true);
     try {
       const documentIds = Array.from(selectedDocuments);
+      const count = selectedDocuments.size;
       await bulkReprocessDocuments(documentIds);
-      
-      // Only show success message after reprocess is actually started
-      setTimeout(() => {
-        const count = selectedDocuments.size;
-        toast.success(`${count} document${count > 1 ? 's' : ''} reprocessing started successfully`);
-      }, 1000);
-      
+
+      // Call parent callback to refresh data before showing success
+      if (onAfterReprocess) {
+        await onAfterReprocess();
+      }
+
+      toast.success(`${count} document${count > 1 ? 's' : ''} reprocessing started successfully`);
+
       // Clear selection after successful reprocess
       setSelectedDocuments(new Set());
-      
-      // Call parent callback if provided
-      if (onAfterReprocess) {
-        onAfterReprocess();
-      }
     } catch (error) {
       console.error('Error reprocessing documents:', error);
       
@@ -136,19 +133,15 @@ const DocumentsTab = ({
     try {
       const documentIds = Array.from(selectedDocuments);
       await bulkDeleteDocuments(documentIds);
-      
-      // Only show success message after delete is actually completed
-      setTimeout(() => {
-        toast.success(`${count} document${count > 1 ? 's' : ''} deleted successfully`);
-      }, 1000);
-      
+
+      // Call parent callback to refresh data before showing success
+      if (onAfterDelete) {
+        await onAfterDelete();
+      }
+
+      toast.success(`${count} document${count > 1 ? 's' : ''} deleted successfully`);
       // Clear selection after successful delete
       setSelectedDocuments(new Set());
-      
-      // Call parent callback if provided
-      if (onAfterDelete) {
-        onAfterDelete();
-      }
     } catch (error) {
       console.error('Error deleting documents:', error);
       

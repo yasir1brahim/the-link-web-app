@@ -42,20 +42,23 @@ import DocumentListModal from "./DocumentListModal";
 import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
 import SpecViewer from "../SpecCentricView/SpecViewer";
 import { useInspectionQA } from '../SpecGpt/hooks/useInspectionQA';
+import { DrawingsTab } from "../Drawings";
+import ErrorBoundary from "../ErrorBoundary/ErrorBoundary";
 
 // Toggle between tabbed layout (true) and sidebar layout (false)
 // Set to false to show QA features in Compass sidebar instead of separate tab
 const USE_TABBED_QA_LAYOUT = false;
 
 const ProjectLogs = () => {
-  const { 
-    isVersioningFlagActive, 
-    isVersionComparisonFlagActive, 
+  const {
+    isVersioningFlagActive,
+    isVersionComparisonFlagActive,
     isVersionComparisonSearchFlagActive,
-    isSpecGptFlagActive, 
+    isSpecGptFlagActive,
     isInspectionLogFlagActive,
     isQaPlannerFlagActive,
-    isSpecCenteredViewFlagActive
+    isSpecCenteredViewFlagActive,
+    isDrawingsFlagActive,
   } = useFeatureFlags();
   const [defaultTab, setDefaultTab] = useState("documents"); 
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
@@ -530,11 +533,27 @@ const ProjectLogs = () => {
         setDocParsed(response.data.doc_parsed);
 
         setUserRole(getUserRoleInProject(response.data));
-        setUserRoleInCompany(response.data.current_user_team_role || 'member');
+
+        // Check if user is actually a team member
+        // If current_user_team_role is null/undefined, user is not part of the team
+        if (!response.data.current_user_team_role) {
+          setIsInitialLoading(false);
+          setIsDataLoading(false);
+          setLoading(false);
+          navigate('/not-found', {
+            state: {
+              statusCode: 403,
+              message: 'Team Access Required'
+            }
+          });
+          return;
+        }
+
+        setUserRoleInCompany(response.data.current_user_team_role);
         console.log("response.data.project_versions", response.data.project_versions);
 
         setAvailableVersions(response.data.project_versions);
-        
+
         // Fetch log data with the correct version
         await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
         // Fetch spec section count
@@ -568,7 +587,7 @@ const ProjectLogs = () => {
       // Support 'compass' for backwards compatibility, map it to 'assistant'
       if (tabFromUrl === 'compass') {
         setActiveTab('assistant');
-      } else if (tabFromUrl === 'submittal' || tabFromUrl === 'assistant' || tabFromUrl === 'spec-view') {
+      } else if (tabFromUrl === 'submittal' || tabFromUrl === 'assistant' || tabFromUrl === 'spec-view' || tabFromUrl === 'drawings') {
         setActiveTab(tabFromUrl);
       }
     }
@@ -1757,6 +1776,7 @@ const ProjectLogs = () => {
             onViewArchivedVersions={handleViewArchivedVersions}
             isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
             isSpecCenteredViewFlagActive={isSpecCenteredViewFlagActive(teamId)}
+            isDrawingsFlagActive={isDrawingsFlagActive(teamId)}
             isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
             isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
             activeTab={activeTab}
@@ -2020,14 +2040,23 @@ const ProjectLogs = () => {
               </div>
             </>
           }
-          {activeTab == 'spec-view' && 
+          {activeTab == 'spec-view' &&
             <>
-            <SpecViewer 
+            <SpecViewer
               projectId={projectId}
               projectVersionId={projectVersionId}
               teamId={teamId}
             />
             </>
+          }
+          {activeTab === 'drawings' &&
+            <ErrorBoundary>
+              <DrawingsTab
+                projectId={projectId}
+                projectVersionId={projectVersionId}
+                teamId={teamId}
+              />
+            </ErrorBoundary>
           }
         </div>
       )}
