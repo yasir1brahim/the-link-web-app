@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import './SpecSectionNavigation.css';
 
 const SpecSectionNavigation = memo(({
@@ -10,6 +10,17 @@ const SpecSectionNavigation = memo(({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('number'); // 'number' or 'title'
+  const itemRefs = useRef({});
+
+  // Scroll to selected section when it changes or when loading completes
+  useEffect(() => {
+    if (!loading && selectedSection && itemRefs.current[selectedSection.id]) {
+      itemRefs.current[selectedSection.id].scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+  }, [selectedSection, loading]);
 
   if (!sections || sections.length === 0) {
     return (
@@ -88,6 +99,7 @@ const SpecSectionNavigation = memo(({
           filteredSections.map((section) => (
             <div
               key={section.id}
+              ref={el => { itemRefs.current[section.id] = el; }}
               className={`navigation-item ${
                 selectedSection && selectedSection.id === section.id ? 'selected' : ''
               }`}
