@@ -510,11 +510,14 @@ const ProjectLogs = () => {
           setCurrentUser(updatedUser);
         }
         
-        // Determine the active version first
-        const tempResponse = await getProjectDetails(projectId);
-        const activeVersion = projectVersionId || tempResponse.data.project_versions[tempResponse.data.project_versions.length - 1].id;
-        setProjectVersionId(activeVersion);
-        
+        // Determine the active version - only fetch if we don't have a version yet
+        let activeVersion = projectVersionId;
+        if (!activeVersion) {
+          const tempResponse = await getProjectDetails(projectId);
+          activeVersion = tempResponse.data.project_versions[tempResponse.data.project_versions.length - 1].id;
+          setProjectVersionId(activeVersion);
+        }
+
         // Fetch project details with version-specific document filtering
         const response = await getProjectDetails(projectId, activeVersion);
         console.log('projectData', response.data);
@@ -554,10 +557,21 @@ const ProjectLogs = () => {
 
         setAvailableVersions(response.data.project_versions);
 
-        // Fetch log data with the correct version
-        await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
-        // Fetch spec section count
-        await fetchSpecSectionCount();
+        // Fetch tab-specific data in parallel where possible
+        // Spec View and Drawings tabs don't need submittal log data upfront
+        const currentTab = searchParams.get("tab") || 'submittal';
+        const needsSubmittalData = currentTab !== 'spec-view' && currentTab !== 'drawings';
+
+        if (needsSubmittalData) {
+          // Fetch both in parallel for tabs that need submittal data
+          await Promise.all([
+            fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion),
+            fetchSpecSectionCount()
+          ]);
+        } else {
+          // Only fetch spec section count for spec-view/drawings tabs
+          await fetchSpecSectionCount();
+        }
         
       } catch (error) {
         console.log("error", error);
@@ -604,6 +618,16 @@ const ProjectLogs = () => {
       }
     }
   }, [activeTab, projectId, projectVersionId]);
+
+  // Lazy load submittal data when switching to tabs that need it
+  useEffect(() => {
+    const needsSubmittalData = activeTab === 'submittal' || activeTab === 'assistant';
+    const hasSubmittalData = logData && logData.length > 0;
+
+    if (needsSubmittalData && !hasSubmittalData && projectId && projectVersionId && !isInitialLoading) {
+      fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+    }
+  }, [activeTab, projectId, projectVersionId, isInitialLoading]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
