@@ -10,14 +10,24 @@ const SpecSectionNavigation = memo(({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('number'); // 'number' or 'title'
+  const listRef = useRef(null);
   const itemRefs = useRef({});
 
-  // Scroll to selected section when it changes or when loading completes
+  // Scroll to center selected section when it changes or when loading completes
   useEffect(() => {
-    if (!loading && selectedSection && itemRefs.current[selectedSection.id]) {
-      itemRefs.current[selectedSection.id].scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
+    if (!loading && selectedSection && itemRefs.current[selectedSection.id] && listRef.current) {
+      const container = listRef.current;
+      const item = itemRefs.current[selectedSection.id];
+
+      // Calculate scroll position to center the item
+      const containerHeight = container.clientHeight;
+      const itemTop = item.offsetTop - container.offsetTop;
+      const itemHeight = item.offsetHeight;
+      const scrollPosition = itemTop - (containerHeight / 2) + (itemHeight / 2);
+
+      container.scrollTo({
+        top: Math.max(0, scrollPosition),
+        behavior: 'smooth'
       });
     }
   }, [selectedSection, loading]);
@@ -89,7 +99,7 @@ const SpecSectionNavigation = memo(({
         </div>
       )}
 
-      <div className="navigation-list">
+      <div className="navigation-list" ref={listRef}>
         {loading ? (
           <div className="navigation-loading">
             <div className="loading-spinner"></div>
