@@ -13,9 +13,15 @@ import './AssistantReprocessBanner.scss';
  */
 export const needsCompassReprocessing = (doc) => {
   const status = doc.specgpt_processing_status;
+  const doc_status = doc.document_status;
+
+  // Special case: document failed AND specgpt is in queue (stuck state)
+  if ( (doc_status === "FAILED" || doc_status === "SECTION_PROCESSING_FAILED") && status === "IN_QUEUE") {
+    return true;
+  }
 
   // Documents that need reprocessing: NONE or FAILED
-  const needsReprocessing = status === "NONE" || status === "FAILED";
+  const needsReprocessing = status === "NONE" || status === "FAILED" || status === "SECTION_PROCESSING_FAILED";
 
   // Don't show if currently processing
   const isProcessing = ["UPLOADING", "IN_QUEUE", "PROCESSING", "SUBSECTIONS_EXTRACTED"].includes(status);
@@ -76,7 +82,7 @@ const AssistantReprocessBanner = ({
         <InfoOutlinedIcon className="banner-icon" aria-hidden="true" />
         <div className="banner-text">
           <p className="banner-message">
-            We noticed that the listed documents are old, please reprocess them to access their information in Assistant.
+            Please reprocess the listed documents in order to access their information in Assistant.
           </p>
           <div className="documents-list-container">
             <strong className="documents-label">Documents:</strong>
