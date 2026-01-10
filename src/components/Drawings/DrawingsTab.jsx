@@ -153,6 +153,11 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     fetchDrawingNotes();
   };
 
+  // Handle PDF viewer close
+  const handlePdfClose = () => {
+    setSelectedNote(null);
+  };
+
   return (
     <div className={`drawings-container ${selectedNote ? "side-by-side" : ""}`}>
       <div className="drawings-left-pane">
@@ -191,6 +196,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
             setPdfData={setPdfData}
             loading={pdfLoading}
             setLoading={setPdfLoading}
+            onClose={handlePdfClose}
           />
         </div>
       )}
