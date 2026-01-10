@@ -191,13 +191,41 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
 
       {selectedNote && pdfData.url && (
         <div className="drawings-right-pane">
-          <PdfWrapper
-            pdfData={pdfData}
-            setPdfData={setPdfData}
-            loading={pdfLoading}
-            setLoading={setPdfLoading}
-            onClose={handlePdfClose}
-          />
+          <div className="drawings-pdf-header">
+            <span className="drawings-pdf-title">
+              {selectedNote.drawing_file_name || "Drawing"}
+            </span>
+            <button
+              className="drawings-pdf-close-btn"
+              onClick={handlePdfClose}
+              title="Close viewer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M18 6l-12 12" />
+                <path d="M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="drawings-pdf-content">
+            <PdfWrapper
+              pdfData={pdfData}
+              setPdfData={setPdfData}
+              loading={pdfLoading}
+              setLoading={setPdfLoading}
+              onClose={handlePdfClose}
+            />
+          </div>
         </div>
       )}
 
