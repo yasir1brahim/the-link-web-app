@@ -42,20 +42,23 @@ import DocumentListModal from "./DocumentListModal";
 import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
 import SpecViewer from "../SpecCentricView/SpecViewer";
 import { useInspectionQA } from '../SpecGpt/hooks/useInspectionQA';
+import { DrawingsTab } from "../Drawings";
+import ErrorBoundary from "../ErrorBoundary/ErrorBoundary";
 
 // Toggle between tabbed layout (true) and sidebar layout (false)
 // Set to false to show QA features in Compass sidebar instead of separate tab
 const USE_TABBED_QA_LAYOUT = false;
 
 const ProjectLogs = () => {
-  const { 
-    isVersioningFlagActive, 
-    isVersionComparisonFlagActive, 
+  const {
+    isVersioningFlagActive,
+    isVersionComparisonFlagActive,
     isVersionComparisonSearchFlagActive,
-    isSpecGptFlagActive, 
+    isSpecGptFlagActive,
     isInspectionLogFlagActive,
     isQaPlannerFlagActive,
-    isSpecCenteredViewFlagActive
+    isSpecCenteredViewFlagActive,
+    isDrawingsFlagActive,
   } = useFeatureFlags();
   const [defaultTab, setDefaultTab] = useState("documents"); 
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
@@ -507,11 +510,14 @@ const ProjectLogs = () => {
           setCurrentUser(updatedUser);
         }
         
-        // Determine the active version first
-        const tempResponse = await getProjectDetails(projectId);
-        const activeVersion = projectVersionId || tempResponse.data.project_versions[tempResponse.data.project_versions.length - 1].id;
-        setProjectVersionId(activeVersion);
-        
+        // Determine the active version - only fetch if we don't have a version yet
+        let activeVersion = projectVersionId;
+        if (!activeVersion) {
+          const tempResponse = await getProjectDetails(projectId);
+          activeVersion = tempResponse.data.project_versions[tempResponse.data.project_versions.length - 1].id;
+          setProjectVersionId(activeVersion);
+        }
+
         // Fetch project details with version-specific document filtering
         const response = await getProjectDetails(projectId, activeVersion);
         console.log('projectData', response.data);
@@ -530,15 +536,42 @@ const ProjectLogs = () => {
         setDocParsed(response.data.doc_parsed);
 
         setUserRole(getUserRoleInProject(response.data));
-        setUserRoleInCompany(response.data.current_user_team_role || 'member');
+
+        // Check if user is actually a team member
+        // If current_user_team_role is null/undefined, user is not part of the team
+        if (!response.data.current_user_team_role) {
+          setIsInitialLoading(false);
+          setIsDataLoading(false);
+          setLoading(false);
+          navigate('/not-found', {
+            state: {
+              statusCode: 403,
+              message: 'Team Access Required'
+            }
+          });
+          return;
+        }
+
+        setUserRoleInCompany(response.data.current_user_team_role);
         console.log("response.data.project_versions", response.data.project_versions);
 
         setAvailableVersions(response.data.project_versions);
-        
-        // Fetch log data with the correct version
-        await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
-        // Fetch spec section count
-        await fetchSpecSectionCount();
+
+        // Fetch tab-specific data in parallel where possible
+        // Spec View and Drawings tabs don't need submittal log data upfront
+        const currentTab = searchParams.get("tab") || 'submittal';
+        const needsSubmittalData = currentTab !== 'spec-view' && currentTab !== 'drawings';
+
+        if (needsSubmittalData) {
+          // Fetch both in parallel for tabs that need submittal data
+          await Promise.all([
+            fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion),
+            fetchSpecSectionCount()
+          ]);
+        } else {
+          // Only fetch spec section count for spec-view/drawings tabs
+          await fetchSpecSectionCount();
+        }
         
       } catch (error) {
         console.log("error", error);
@@ -568,7 +601,7 @@ const ProjectLogs = () => {
       // Support 'compass' for backwards compatibility, map it to 'assistant'
       if (tabFromUrl === 'compass') {
         setActiveTab('assistant');
-      } else if (tabFromUrl === 'submittal' || tabFromUrl === 'assistant' || tabFromUrl === 'spec-view') {
+      } else if (tabFromUrl === 'submittal' || tabFromUrl === 'assistant' || tabFromUrl === 'spec-view' || tabFromUrl === 'drawings') {
         setActiveTab(tabFromUrl);
       }
     }
@@ -585,6 +618,16 @@ const ProjectLogs = () => {
       }
     }
   }, [activeTab, projectId, projectVersionId]);
+
+  // Lazy load submittal data when switching to tabs that need it
+  useEffect(() => {
+    const needsSubmittalData = activeTab === 'submittal' || activeTab === 'assistant';
+    const hasSubmittalData = logData && logData.length > 0;
+
+    if (needsSubmittalData && !hasSubmittalData && projectId && projectVersionId && !isInitialLoading) {
+      fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+    }
+  }, [activeTab, projectId, projectVersionId, isInitialLoading]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -1757,6 +1800,7 @@ const ProjectLogs = () => {
             onViewArchivedVersions={handleViewArchivedVersions}
             isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
             isSpecCenteredViewFlagActive={isSpecCenteredViewFlagActive(teamId)}
+            isDrawingsFlagActive={isDrawingsFlagActive(teamId)}
             isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
             isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
             activeTab={activeTab}
@@ -2020,14 +2064,23 @@ const ProjectLogs = () => {
               </div>
             </>
           }
-          {activeTab == 'spec-view' && 
+          {activeTab == 'spec-view' &&
             <>
-            <SpecViewer 
+            <SpecViewer
               projectId={projectId}
               projectVersionId={projectVersionId}
               teamId={teamId}
             />
             </>
+          }
+          {activeTab === 'drawings' &&
+            <ErrorBoundary>
+              <DrawingsTab
+                projectId={projectId}
+                projectVersionId={projectVersionId}
+                teamId={teamId}
+              />
+            </ErrorBoundary>
           }
         </div>
       )}
