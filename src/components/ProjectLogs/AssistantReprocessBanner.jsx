@@ -15,14 +15,11 @@ export const needsCompassReprocessing = (doc) => {
   const status = doc.specgpt_processing_status;
   const doc_status = doc.document_status;
 
-  // Special case: document failed AND specgpt is in queue (stuck state)
   if ( (doc_status === "FAILED" || doc_status === "SECTION_PROCESSING_FAILED") && status === "IN_QUEUE") {
     return true;
   }
 
-  // Documents that need reprocessing: NONE or FAILED
   const needsReprocessing = status === "NONE" || status === "FAILED" || status === "SECTION_PROCESSING_FAILED";
-
   // Don't show if currently processing
   const isProcessing = ["UPLOADING", "IN_QUEUE", "PROCESSING", "SUBSECTIONS_EXTRACTED"].includes(status);
 
@@ -51,15 +48,12 @@ const AssistantReprocessBanner = ({
 
     try {
       const documentIds = documentsNeedingReprocess.map(doc => doc.document_id);
-
-      // Use bulk API for efficient processing
       await bulkReprocessDocuments(documentIds);
 
       ToastService.success(
         `${documentIds.length} document${documentIds.length > 1 ? 's' : ''} queued for Assistant processing`
       );
 
-      // Refresh documents to update status and hide banner
       if (onReprocessComplete) {
         onReprocessComplete();
       }

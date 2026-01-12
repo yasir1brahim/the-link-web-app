@@ -1015,7 +1015,7 @@ const ProjectLogs = () => {
 
   const documentIsBeingEmbedded = (documents = []) => {
     return documents.some((doc) => {
-      // Exclude documents that are stuck (FAILED document status + IN_QUEUE specgpt status)
+      // Exclude documents that are stuck
       if ( (doc.document_status === "FAILED" || doc.document_status === "SECTION_PROCESSING_FAILED") && doc.specgpt_processing_status === "IN_QUEUE") {
         return false;
       }
