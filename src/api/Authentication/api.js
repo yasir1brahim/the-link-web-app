@@ -72,6 +72,17 @@ const resetPassword = async (uid, token, new_password1, new_password2) => {
     });
 }
 
+const validateResetToken = async (uid, token) => {
+    return await axiosInstance({
+        method: 'get',
+        url: '/api/auth/password/reset/validate/',
+        params: {
+            uid: uid,
+            token: token
+        }
+    });
+}
+
 const handleUserInvitation = async (email, firstName, lastName, teamId, role = "member") => {
     return await axiosInstance({
         method: 'post',
@@ -242,6 +253,7 @@ export {
     register,
     forgotPassword,
     resetPassword,
+    validateResetToken,
     uploadTeamLogo,
     updateUserStatus,
     handleUserInvitation,

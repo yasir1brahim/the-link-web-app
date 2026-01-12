@@ -17,6 +17,7 @@ import {
   DEFAULT_RGB_COLOR,
 } from './highlightColorMaps';
 import CustomItemTypesManager from './shared/CustomItemTypesManager';
+import SubmittalFormSection from './SubmittalFormSection';
 import './DocumentHighlighter.css';
 
 const toTitleCase = (value = '') =>
@@ -61,8 +62,6 @@ const getSwatchColor = (itemType, extractionType) => {
 
 const buildFallbackOptions = () =>
   HIGHLIGHT_TYPES
-    // Filter out 'submittal' - submittals use a different data model
-    .filter((item) => item.key !== 'submittal')
     .map((item) => {
       const color = getSwatchColor(item.key, 'qa_planner');
       return {
@@ -252,6 +251,10 @@ const DocumentHighlighter = ({
   const [showCustomTypesManager, setShowCustomTypesManager] = useState(false);
   const [lastUsedHighlightType, setLastUsedHighlightType] = useState(null);
   const [isLoadingPreference, setIsLoadingPreference] = useState(false);
+  const [selectedHighlightType, setSelectedHighlightType] = useState(null);
+  const [submittalParaNo, setSubmittalParaNo] = useState('');
+  const [submittalDescription, setSubmittalDescription] = useState('');
+  const [submittalType, setSubmittalType] = useState('');
 
   // Unified cache for ExtractedData items with notes support
   const [extractedDataItems, setExtractedDataItems] = useState([]);
@@ -396,6 +399,10 @@ const DocumentHighlighter = ({
     setPendingHighlight(null);
     setPendingNoteText('');
     setHighlightError(null);
+    setSelectedHighlightType(null);
+    setSubmittalParaNo('');
+    setSubmittalDescription('');
+    setSubmittalType('');
   }, []);
 
   const handleOpenCustomTypesManager = useCallback(() => {
@@ -474,7 +481,7 @@ const DocumentHighlighter = ({
           payload.note_text = pendingNoteText.trim();
         }
 
-        const response = await createManualHighlight(projectId, payload);
+          const response = await createManualHighlight(projectId, payload);
 
         const createdHighlight = buildCreatedHighlight({
           responseData: response?.data,
@@ -488,12 +495,12 @@ const DocumentHighlighter = ({
         // Ensure notes array is included
         createdHighlight.notes = response?.data?.notes || [];
 
-        // Update extractedDataItems cache with new highlight
-        setExtractedDataItems(prev => [...prev, {
-          ...createdHighlight,
-          notes: createdHighlight.notes || [],
-          pdf_locations: createdHighlight.pdf_locations || [],
-        }]);
+          // Update extractedDataItems cache with new highlight
+          setExtractedDataItems(prev => [...prev, {
+            ...createdHighlight,
+            notes: createdHighlight.notes || [],
+            pdf_locations: createdHighlight.pdf_locations || [],
+          }]);
 
         handleHighlightCreationSuccess(createdHighlight);
         await saveHighlightPreference(option);
@@ -506,6 +513,7 @@ const DocumentHighlighter = ({
     },
     [
       handleHighlightCreationSuccess,
+      handleCloseHighlightPicker,
       isSavingHighlight,
       pendingHighlight,
       pendingNoteText,
@@ -586,6 +594,18 @@ const DocumentHighlighter = ({
     ]
   );
 
+  const handleToggleSelection = useCallback((option) => {
+    if (selectedHighlightType?.key === option.key) {
+      // Deselect and reset submittal fields
+      setSelectedHighlightType(null);
+      setSubmittalParaNo('');
+      setSubmittalDescription('');
+      setSubmittalType('');
+    } else {
+      setSelectedHighlightType(option);
+    }
+  }, [selectedHighlightType]);
+
   if (!documentUrl) {
     return (
       <div className="document-highlighter-container spec-viewer-pdf-wrapper">
@@ -652,22 +672,56 @@ const DocumentHighlighter = ({
                   No highlight types are available yet. Generate AI highlights to enable manual tagging.
                 </p>
               ) : (
-                highlightTypeOptions.map((option) => (
-                  <button
-                    key={option.key}
-                    className="highlight-picker-option"
-                    onClick={() => handleHighlightTypeSelect(option)}
-                    disabled={isSavingHighlight}
-                  >
-                    <span
-                      className="highlight-picker-swatch"
-                      style={{
-                        backgroundColor: `rgb(${option.swatch.r}, ${option.swatch.g}, ${option.swatch.b})`
-                      }}
-                    />
-                    <span>{option.label}</span>
-                  </button>
-                ))
+                highlightTypeOptions.map((option) => {
+                  if (option.itemType === 'submittal') {
+                    const isSelected = selectedHighlightType?.key === option.key;
+                    return (
+                      <div key={option.key} role="group" className="submittal-option-group">
+                        <button
+                          className={`highlight-picker-option ${isSelected ? 'selected' : ''}`}
+                          onClick={() => handleToggleSelection(option)}
+                          disabled={isSavingHighlight}
+                        >
+                          <span
+                            className="highlight-picker-swatch"
+                            style={{
+                              backgroundColor: `rgb(${option.swatch.r}, ${option.swatch.g}, ${option.swatch.b})`
+                            }}
+                          />
+                          <span>{option.label}</span>
+                        </button>
+                        {isSelected && (
+                          <SubmittalFormSection
+                            isVisible={true}
+                            paraNo={submittalParaNo}
+                            description={submittalDescription}
+                            type={submittalType}
+                            onParaNoChange={setSubmittalParaNo}
+                            onDescriptionChange={setSubmittalDescription}
+                            onTypeChange={setSubmittalType}
+                          />
+                        )}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={option.key}
+                      className={`highlight-picker-option ${selectedHighlightType?.key === option.key ? 'selected' : ''}`}
+                      onClick={() => setSelectedHighlightType(option)}
+                      disabled={isSavingHighlight}
+                    >
+                      <span
+                        className="highlight-picker-swatch"
+                        style={{
+                          backgroundColor: `rgb(${option.swatch.r}, ${option.swatch.g}, ${option.swatch.b})`
+                        }}
+                      />
+                      <span>{option.label}</span>
+                    </button>
+                  );
+                })
               )}
             </div>
 
@@ -687,6 +741,13 @@ const DocumentHighlighter = ({
                 disabled={isSavingHighlight}
               >
                 Cancel
+              </button>
+              <button
+                className="highlight-picker-confirm"
+                onClick={() => selectedHighlightType && handleHighlightTypeSelect(selectedHighlightType)}
+                disabled={isSavingHighlight || !selectedHighlightType}
+              >
+                {isSavingHighlight ? 'Saving...' : 'Confirm'}
               </button>
             </div>
           </div>

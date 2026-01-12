@@ -1,0 +1,67 @@
+.assistant-reprocess-banner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin: 0 16px 16px 16px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #e7f3ff;
+  border: 1px solid #b3d7ff;
+
+  .banner-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .banner-icon {
+    color: #0066cc;
+    margin-top: 2px;
+  }
+
+  .banner-text {
+    flex: 1;
+  }
+
+  .banner-message {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #004085;
+    line-height: 1.5;
+  }
+
+  .documents-list-container {
+    margin-top: 8px;
+  }
+
+  .documents-label {
+    color: #004085;
+    font-size: 13px;
+  }
+
+  .documents-list {
+    margin: 4px 0 0 0;
+    padding-left: 20px;
+    color: #004085;
+    font-size: 13px;
+    max-height: 150px;
+    overflow-y: auto;
+
+    li {
+      margin-bottom: 2px;
+    }
+  }
+
+  .failed-badge {
+    color: #dc3545;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  .reprocess-button {
+    min-width: 140px;
+    white-space: nowrap;
+    align-self: flex-start;
+  }
+}

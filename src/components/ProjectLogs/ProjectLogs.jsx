@@ -44,6 +44,7 @@ import SpecViewer from "../SpecCentricView/SpecViewer";
 import { useInspectionQA } from '../SpecGpt/hooks/useInspectionQA';
 import { DrawingsTab } from "../Drawings";
 import ErrorBoundary from "../ErrorBoundary/ErrorBoundary";
+import AssistantReprocessBanner from "./AssistantReprocessBanner";
 
 // Toggle between tabbed layout (true) and sidebar layout (false)
 // Set to false to show QA features in Compass sidebar instead of separate tab
@@ -2011,6 +2012,11 @@ const ProjectLogs = () => {
           {activeTab == 'assistant' &&
             <>
             <div className="compass-chat-viewport">
+              <AssistantReprocessBanner
+                documentData={documentData}
+                onReprocessComplete={refreshDocuments}
+                isSpecGptEnabled={isSpecGptFlagActive(teamId)}
+              />
               <ProcessingIndicator
                 documentIsProcessing={documentIsBeingEmbedded}
                 documentData={documentData}

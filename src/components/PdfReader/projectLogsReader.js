@@ -228,10 +228,35 @@ const ProjectLogsReader = ({
           pdfViewer.innerHTML = '';
         }
 
+        // Clean up any existing annotations before loading new PDF
+        // This prevents opaque boxes from previous records from persisting
+        if (webViewer && webViewer.Core && webViewer.Core.annotationManager) {
+          const annotationManager = webViewer.Core.annotationManager;
+          const allAnnotations = annotationManager.getAnnotationsList();
+          const annotationsToCleanup = [];
+          
+          allAnnotations.forEach(annot => {
+            if (annot instanceof webViewer.Core.Annotations.RectangleAnnotation) {
+              const customData = annot.CustomData || {};
+              const source = customData.source;
+              // Delete all RectangleAnnotations without our source marker
+              if (!source || (source !== 'submittal' && source !== 'ai' && source !== 'export')) {
+                annotationsToCleanup.push(annot);
+              }
+            }
+          });
+          
+          if (annotationsToCleanup.length > 0) {
+            console.log('[SPEC_VIEWER_DEBUG] Cleaning up', annotationsToCleanup.length, 'annotations before loading new PDF');
+            annotationManager.deleteAnnotations(annotationsToCleanup);
+          }
+        }
+
         setCurrentUrl(url);
         setDocumentLoaded(false); // Reset document loaded state
         previousHighlightLocation.current = null; // Reset previous location for new document
         annotationsCreated.current = false; // Reset annotations flag for new document
+        annotationsRef.current = []; // Clear annotations ref
         await loadPDF();
       })();
     }
@@ -277,10 +302,46 @@ const ProjectLogsReader = ({
     };
 
     /**
+     * Handle imported annotations to delete opaque RectangleAnnotations immediately
+     */
+    const handleImportedAnnotations = (annotations) => {
+      const annotationsToDelete = [];
+      
+      annotations.forEach(annot => {
+        // Check if it's a RectangleAnnotation that might be an opaque highlight
+        if (annot instanceof Annotations.RectangleAnnotation) {
+          const customData = annot.CustomData || {};
+          const source = customData.source;
+          
+          if (!source || (source !== 'submittal' && source !== 'ai' && source !== 'export')) {
+            const subject = annot.Subject || '';
+            const hasHighlightInSubject = subject.includes('Highlight') || subject.includes('Submittal');
+            const isOpaque = !annot.Opacity || annot.Opacity === 1.0;
+            
+            // Delete if it looks like a highlight (has highlight-related subject OR is opaque)
+            if (hasHighlightInSubject || isOpaque) {
+              console.log('[SPEC_VIEWER_DEBUG] Deleting imported opaque RectangleAnnotation:', annot.Id);
+              annotationsToDelete.push(annot);
+            }
+          }
+        }
+      });
+      
+      if (annotationsToDelete.length > 0) {
+        // Delete immediately without firing events to prevent loops
+        annotationManager.deleteAnnotations(annotationsToDelete);
+      }
+    };
+
+    /**
      * Handle annotation add/modify events
      */
     const handleAnnotationChanged = async (annotations, action, { imported }) => {
-      if (imported) return; // Skip annotations loaded from backend
+      // Handle imported annotations to delete opaque ones immediately
+      if (imported) {
+        handleImportedAnnotations(annotations);
+        return;
+      }
 
       for (const annot of annotations) {
         // Handle both parent sticky notes and replies
@@ -736,7 +797,7 @@ const ProjectLogsReader = ({
       });
       if (response.status === 200) {
         console.log('[SPEC_VIEWER_DEBUG] Loading server annotations:', response.data.data?.length || 0);
-        response.data.data?.map(async (item) => {
+        const importPromises = (response.data.data || []).map(async (item) => {
           const annotations = await annotationManager.importAnnotationCommand(
             item.xfdf_string
           );
@@ -744,10 +805,15 @@ const ProjectLogsReader = ({
           annotations.forEach((annotation) => {
             annotationManager.redrawAnnotation(annotation);
           });
+          return annotations;
         });
+        
+        // Wait for all imports to complete
+        await Promise.all(importPromises);
+        console.log('[SPEC_VIEWER_DEBUG] All server annotations loaded');
       }
     };
-    fetchData().catch((error) => {
+    return fetchData().catch((error) => {
       console.log(error);
     });
   };
@@ -788,7 +854,7 @@ const ProjectLogsReader = ({
     };
   };
 
-  const updateTxtView = (_webViewer) => {
+  const updateTxtView = async (_webViewer) => {
     try {
       let tmpViewer = _webViewer ?? webViewer;
 
@@ -808,7 +874,7 @@ const ProjectLogsReader = ({
       const annotationManager = tmpViewer.Core.annotationManager;
       const Annotations = tmpViewer.Core.Annotations;
 
-      const createAnnotationColor = (colorData) => new Annotations.Color(colorData.r, colorData.g, colorData.b, 0.25);
+      const createAnnotationColor = (colorData) => new Annotations.Color(colorData.r, colorData.g, colorData.b);
       const getColorDataForHighlight = (itemType, extractionType) => {
         const qaColorMap = {
           'inspections': { r: 255, g: 99, b: 71 },         // Tomato red
@@ -861,6 +927,8 @@ const ProjectLogsReader = ({
                 const nextColor = createAnnotationColor(colorData);
                 annot.Color = nextColor;
                 annot.FillColor = nextColor;
+                annot.Opacity = 0.25;
+                annot.FillOpacity = 0.25;
                 annot.CustomData.color = colorData;
                 needsRedraw = true;
               }
@@ -883,6 +951,48 @@ const ProjectLogsReader = ({
       if (annotationsRef.current.length > 0) {
         annotationManager.deleteAnnotations(annotationsRef.current);
         annotationsRef.current = [];
+      }
+
+      // Delete ALL existing RectangleAnnotations that match our highlight locations
+      const deleteConflictingAnnotations = () => {
+        const allAnnotations = annotationManager.getAnnotationsList();
+        const annotationsToDelete = [];
+        
+        allAnnotations.forEach(annot => {
+          // Check if it's a RectangleAnnotation that matches our highlight pattern
+          if (annot instanceof Annotations.RectangleAnnotation) {
+            const customData = annot.CustomData || {};
+            const source = customData.source;
+            
+            if (source === 'submittal' || source === 'ai') {
+              annotationsToDelete.push(annot);
+            } else if (!source || (source !== 'submittal' && source !== 'ai' && source !== 'export')) {
+              const subject = annot.Subject || '';
+              const hasHighlightInSubject = subject.includes('Highlight') || subject.includes('Submittal');
+              const isOpaque = !annot.Opacity || annot.Opacity === 1.0;
+              
+              if (hasHighlightInSubject || isOpaque || !source) {
+                annotationsToDelete.push(annot);
+              }
+            }
+          }
+        });
+        
+        if (annotationsToDelete.length > 0) {
+          console.log('[SPEC_VIEWER_DEBUG] Deleting', annotationsToDelete.length, 'existing highlight annotations before creating new ones');
+          annotationManager.deleteAnnotations(annotationsToDelete);
+          return annotationsToDelete.length;
+        }
+        return 0;
+      };
+      
+      // Run deletion multiple times to catch any late-loading annotations
+      let deletedCount = deleteConflictingAnnotations();
+      if (deletedCount > 0) {
+        // Wait a bit for deletions to complete
+        await new Promise(resolve => setTimeout(resolve, 50));
+        // Run again to catch any that loaded during the delay
+        deleteConflictingAnnotations();
       }
 
     if (tmpViewer && (highlightsAreAvailable || aiLogHighlightsAreAvailable)) {
@@ -1030,6 +1140,8 @@ const ProjectLogsReader = ({
           FillColor: annotationColor,
           ReadOnly: true,
         });
+        rectangleAnnot.Opacity = 0.25;
+        rectangleAnnot.FillOpacity = 0.25;
         rectangleAnnot.Subject = 'Submittal Highlight';
         rectangleAnnot.CustomData = {
           item_type: 'submittal',
@@ -1065,6 +1177,9 @@ const ProjectLogsReader = ({
           FillColor: color,
           ReadOnly: true,
         });
+        
+        rectangleAnnot.Opacity = 0.25;
+        rectangleAnnot.FillOpacity = 0.25;
         rectangleAnnot.Subject = `AI Log Highlight - ${location?.item_type || location?.extraction_type || 'Unknown'}`;
         rectangleAnnot.CustomData = {
           extracted_data_id: location?.extracted_data_id, // CRITICAL for linking to notes
@@ -1102,6 +1217,36 @@ const ProjectLogsReader = ({
 
       // Keep ref in sync with state to avoid closure issues
       annotationsRef.current = _annotations;
+      
+      // Run cleanup after a short delay to catch any server annotations
+      // that might have loaded after our annotations were created
+      setTimeout(() => {
+        const allAnnotations = annotationManager.getAnnotationsList();
+        const lateAnnotationsToDelete = [];
+        
+        allAnnotations.forEach(annot => {
+          if (annot instanceof Annotations.RectangleAnnotation) {
+            const customData = annot.CustomData || {};
+            const source = customData.source;
+            // Delete any RectangleAnnotations without our source marker
+            if (!source || (source !== 'submittal' && source !== 'ai' && source !== 'export')) {
+              const subject = annot.Subject || '';
+              const hasHighlightInSubject = subject.includes('Highlight') || subject.includes('Submittal');
+              const isOpaque = !annot.Opacity || annot.Opacity === 1.0;
+              
+              // Delete if it looks like a highlight OR has no source
+              if (hasHighlightInSubject || isOpaque || !source) {
+                lateAnnotationsToDelete.push(annot);
+              }
+            }
+          }
+        });
+        
+        if (lateAnnotationsToDelete.length > 0) {
+          console.log('[SPEC_VIEWER_DEBUG] Post-creation cleanup: Deleting', lateAnnotationsToDelete.length, 'conflicting annotations');
+          annotationManager.deleteAnnotations(lateAnnotationsToDelete);
+        }
+      }, 150);
 
       // Create sticky notes for ExtractedData items with notes
       // Only create if they don't already exist
@@ -1183,14 +1328,60 @@ const ProjectLogsReader = ({
       }
 
       _webViewer.UI.enableFeatures([_webViewer.UI.Feature.InlineComment]);
-      handleDocumentLoaded(_webViewer.Core.annotationManager);
+      const serverAnnotationsPromise = handleDocumentLoaded(_webViewer.Core.annotationManager);
       _webViewer.UI.setZoomLevel("100%");
 
-      _webViewer.Core.documentViewer.addEventListener("documentLoaded", () => {
+      _webViewer.Core.documentViewer.addEventListener("documentLoaded", async () => {
         setDocumentLoaded(true);
-        // Add a small delay to ensure WebViewer is fully ready
-        setTimeout(() => {
-          updateTxtView(_webViewer);
+        
+        // Wait for server annotations to finish loading before creating new highlights
+        try {
+          await serverAnnotationsPromise;
+          console.log('[SPEC_VIEWER_DEBUG] Server annotations loaded, now creating highlights');
+          // Small delay to ensure server annotations are fully processed and rendered
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error) {
+          console.warn('[SPEC_VIEWER_DEBUG] Error loading server annotations, continuing anyway:', error);
+        }
+        
+        // Add a small delay to ensure WebViewer is fully ready after server annotations
+        setTimeout(async () => {
+          await updateTxtView(_webViewer);
+          
+          const cleanupIntervals = [100, 300, 500, 1000]; // Multiple cleanup passes
+          
+          cleanupIntervals.forEach((delay, index) => {
+            setTimeout(() => {
+              const annotationManager = _webViewer.Core.annotationManager;
+              if (!annotationManager) return;
+              
+              const allAnnotations = annotationManager.getAnnotationsList();
+              const lateAnnotationsToDelete = [];
+              
+              allAnnotations.forEach(annot => {
+                if (annot instanceof _webViewer.Core.Annotations.RectangleAnnotation) {
+                  const customData = annot.CustomData || {};
+                  const source = customData.source;
+                  // Delete any RectangleAnnotations without our source marker that look like highlights
+                  if (!source || (source !== 'submittal' && source !== 'ai' && source !== 'export')) {
+                    const subject = annot.Subject || '';
+                    const hasHighlightInSubject = subject.includes('Highlight') || subject.includes('Submittal');
+                    const isOpaque = !annot.Opacity || annot.Opacity === 1.0;
+                    
+                    // Delete if it looks like a highlight OR has no source (more aggressive)
+                    if (hasHighlightInSubject || isOpaque || !source) {
+                      lateAnnotationsToDelete.push(annot);
+                    }
+                  }
+                }
+              });
+              
+              if (lateAnnotationsToDelete.length > 0) {
+                console.log(`[SPEC_VIEWER_DEBUG] Cleanup pass ${index + 1}: Deleting ${lateAnnotationsToDelete.length} late-loading server annotations`);
+                annotationManager.deleteAnnotations(lateAnnotationsToDelete);
+              }
+            }, delay);
+          });
 
           // Only show notes panel in spec view mode
           if (isSpecViewMode) {
