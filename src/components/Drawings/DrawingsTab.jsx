@@ -6,8 +6,6 @@ import DrawingsFilters from "./DrawingsFilters";
 import DrawingsUploadModal from "./DrawingsUploadModal";
 import DrawingsProcessingIndicator from "./DrawingsProcessingIndicator";
 import PdfWrapper from "../../pdfWrapper";
-import { ReactComponent as ExcelLogo } from "../../assets/images/microsoft-excel-symbol.svg";
-import StyledTooltip from "../shared/StyledTooltip/StyledTooltip";
 import "./DrawingsTab.css";
 
 const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
@@ -190,16 +188,18 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
             allFilterVals={allFilterVals}
           />
           <div className="drawings-header-actions">
-            <StyledTooltip title="Export to Excel" arrow>
-              <button
-                className="drawings-export-btn"
-                onClick={handleExportExcel}
-                disabled={totalCount === 0}
-              >
-                <ExcelLogo style={{ height: "18px", width: "18px" }} />
-                Export
-              </button>
-            </StyledTooltip>
+            <button
+              className="drawings-export-btn"
+              onClick={handleExportExcel}
+              disabled={totalCount === 0}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="7,10 12,15 17,10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              Export
+            </button>
             <button
               className="btn btn-primary"
               onClick={() => setUploadModalOpen(true)}
