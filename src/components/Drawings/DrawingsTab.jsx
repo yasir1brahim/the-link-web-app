@@ -192,11 +192,11 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
           <div className="drawings-header-actions">
             <StyledTooltip title="Export to Excel" arrow>
               <button
-                className="btn btn-secondary drawings-export-btn"
+                className="drawings-export-btn"
                 onClick={handleExportExcel}
                 disabled={totalCount === 0}
               >
-                <ExcelLogo style={{ height: "20px", width: "20px" }} />
+                <ExcelLogo style={{ height: "18px", width: "18px" }} />
                 Export
               </button>
             </StyledTooltip>
