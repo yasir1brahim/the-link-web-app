@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { getDrawingNotes } from "../../api/Drawings/api";
+import FileDownload from "js-file-download";
+import { getDrawingNotes, exportDrawingNotesToExcel } from "../../api/Drawings/api";
 import DrawingsTable from "./DrawingsTable";
 import DrawingsFilters from "./DrawingsFilters";
 import DrawingsUploadModal from "./DrawingsUploadModal";
@@ -153,6 +154,30 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     fetchDrawingNotes();
   };
 
+  // Handle Excel export
+  const handleExportExcel = async () => {
+    try {
+      const response = await exportDrawingNotesToExcel(
+        projectId,
+        projectVersionId,
+        {
+          category: filters.category || undefined,
+          drawingFileId: filters.drawingFileId || undefined,
+          search: filters.search || undefined,
+        }
+      );
+
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const now = new Date();
+      const fileName = `drawing_notes_${now.toLocaleDateString("en-US", { day: "numeric" })}_${now.toLocaleDateString("en-US", { month: "short" })}_${now.toLocaleDateString("en-US", { year: "numeric" })}_${now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }).replace(":", "")}.xlsx`;
+      FileDownload(blob, fileName);
+    } catch (error) {
+      console.error("Error exporting drawing notes:", error);
+    }
+  };
+
   // Handle PDF viewer close
   const handlePdfClose = () => {
     setSelectedNote(null);
@@ -167,12 +192,26 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
             onFilterChange={handleFilterChange}
             allFilterVals={allFilterVals}
           />
-          <button
-            className="btn btn-primary"
-            onClick={() => setUploadModalOpen(true)}
-          >
-            Upload Drawings
-          </button>
+          <div className="drawings-header-actions">
+            <button
+              className="drawings-export-btn"
+              onClick={handleExportExcel}
+              disabled={totalCount === 0}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="7,10 12,15 17,10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              Export to Excel
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={() => setUploadModalOpen(true)}
+            >
+              Upload Drawings
+            </button>
+          </div>
         </div>
 
         <DrawingsProcessingIndicator processingStatus={processingStatus} />
