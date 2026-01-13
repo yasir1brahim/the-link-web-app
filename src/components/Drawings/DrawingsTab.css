@@ -47,6 +47,25 @@
   white-space: nowrap;
 }
 
+.drawings-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.drawings-export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+.drawings-export-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Table styles */
 .drawings-table-container {
   flex: 1;

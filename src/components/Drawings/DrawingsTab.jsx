@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { getDrawingNotes } from "../../api/Drawings/api";
+import FileDownload from "js-file-download";
+import { getDrawingNotes, exportDrawingNotesToExcel } from "../../api/Drawings/api";
 import DrawingsTable from "./DrawingsTable";
 import DrawingsFilters from "./DrawingsFilters";
 import DrawingsUploadModal from "./DrawingsUploadModal";
 import DrawingsProcessingIndicator from "./DrawingsProcessingIndicator";
 import PdfWrapper from "../../pdfWrapper";
+import { ReactComponent as ExcelLogo } from "../../assets/images/microsoft-excel-symbol.svg";
+import StyledTooltip from "../shared/StyledTooltip/StyledTooltip";
 import "./DrawingsTab.css";
 
 const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
@@ -153,6 +156,30 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     fetchDrawingNotes();
   };
 
+  // Handle Excel export
+  const handleExportExcel = async () => {
+    try {
+      const response = await exportDrawingNotesToExcel(
+        projectId,
+        projectVersionId,
+        {
+          category: filters.category || undefined,
+          drawingFileId: filters.drawingFileId || undefined,
+          search: filters.search || undefined,
+        }
+      );
+
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const now = new Date();
+      const fileName = `drawing_notes_${now.toLocaleDateString("en-US", { day: "numeric" })}_${now.toLocaleDateString("en-US", { month: "short" })}_${now.toLocaleDateString("en-US", { year: "numeric" })}_${now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }).replace(":", "")}.xlsx`;
+      FileDownload(blob, fileName);
+    } catch (error) {
+      console.error("Error exporting drawing notes:", error);
+    }
+  };
+
   return (
     <div className={`drawings-container ${selectedNote ? "side-by-side" : ""}`}>
       <div className="drawings-left-pane">
@@ -162,12 +189,24 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
             onFilterChange={handleFilterChange}
             allFilterVals={allFilterVals}
           />
-          <button
-            className="btn btn-primary"
-            onClick={() => setUploadModalOpen(true)}
-          >
-            Upload Drawings
-          </button>
+          <div className="drawings-header-actions">
+            <StyledTooltip title="Export to Excel" arrow>
+              <button
+                className="btn btn-secondary drawings-export-btn"
+                onClick={handleExportExcel}
+                disabled={totalCount === 0}
+              >
+                <ExcelLogo style={{ height: "20px", width: "20px" }} />
+                Export
+              </button>
+            </StyledTooltip>
+            <button
+              className="btn btn-primary"
+              onClick={() => setUploadModalOpen(true)}
+            >
+              Upload Drawings
+            </button>
+          </div>
         </div>
 
         <DrawingsProcessingIndicator processingStatus={processingStatus} />
