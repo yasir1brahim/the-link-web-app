@@ -156,6 +156,7 @@ const ProjectLogsReader = ({
   loading,
   setLoading,
   onError,
+  onClose,
   activeFilters = new Set(),
   useFiltering = false,
   isSpecViewMode = false,
@@ -713,7 +714,9 @@ const ProjectLogsReader = ({
   }, [webViewer, lastUsedHighlightType, isSpecViewMode, documentLoaded, buildSelectionPayload]);
 
   const handleClose = () => {
-    setLogInViewer(null);
+    if (typeof setLogInViewer === 'function') {
+      setLogInViewer(null);
+    }
     setPdfData({
       url: "",
       textLoc: {},
@@ -722,7 +725,12 @@ const ProjectLogsReader = ({
       submittalId: null,
       additionalTextLocations: [],
     });
-    setSubmittalIdParam(null);
+    if (typeof setSubmittalIdParam === 'function') {
+      setSubmittalIdParam(null);
+    }
+    if (typeof onClose === 'function') {
+      onClose();
+    }
   };
 
   const handleDocumentLoaded = async (annotationManager) => {
