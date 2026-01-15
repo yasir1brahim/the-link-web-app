@@ -35,6 +35,7 @@ import ChatPage from './components/SpecGpt/containers/ChatPage';
 import ViewPDFPage from './components/SpecGpt/containers/ViewPDFPage';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import SessionExpired from './components/SessionExpired/SessionExpired';
+import { ImpersonateHandler } from './auth/ImpersonateHandler';
 
 const router = createBrowserRouter([
   {
@@ -95,6 +96,8 @@ const router = createBrowserRouter([
   {
     path: "/link-expired",
     element: <ErrorBoundary><LinkExpired /></ErrorBoundary>,
+    path: "/auth/impersonate",
+    element: <ErrorBoundary><ImpersonateHandler /></ErrorBoundary>,
   },
   {
     path: "/pdf-view",

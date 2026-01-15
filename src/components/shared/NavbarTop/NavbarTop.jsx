@@ -8,11 +8,13 @@ import {AuthContext} from '../../../auth/authcontext'
 import { getUserTeams, getUserRoleInTeam } from '../../../api/Authentication/api';
 import { getHomeUrl } from '../../../utils/navigation';
 import { useNavigate } from 'react-router-dom';
+import ImpersonationBanner from '../ImpersonationBanner/ImpersonationBanner';
 
 const NavbarTop = ({...props}) => {
   const [navDrop, setNavDrop] = useState(false);
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [showManageProcore, setShowManageProcore] = useState(false);
+  const [isImpersonating, setIsImpersonating] = useState(false);
   const { user, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -66,14 +68,23 @@ const NavbarTop = ({...props}) => {
     checkAdminRole();
   }, [props.userRole]);
 
+  useEffect(() => {
+    const impersonating = localStorage.getItem('isImpersonating') === 'true';
+    setIsImpersonating(impersonating);
+  }, []);
+
   const isOnProjectPage = window.location.pathname.includes('project-logs');
 
   return (
-    <section className="navigation-wrapper d-flex align-items-center justify-content-center">
-      <Navbar
-        className="navigation justify-content-center justify-content-md-start"
-        expand="sm"
-      >
+    <>
+      {isImpersonating && (
+        <ImpersonationBanner userName={localStorage.getItem('fullName')} />
+      )}
+      <section className="navigation-wrapper d-flex align-items-center justify-content-center">
+        <Navbar
+          className="navigation justify-content-center justify-content-md-start"
+          expand="sm"
+        >
         <div className='row w-100 m-0'>
           <div className='col-4 d-flex'>
             <a href="#" onClick={async (e) => {
@@ -216,6 +227,7 @@ const NavbarTop = ({...props}) => {
         </div>
       </Navbar>
     </section>
+    </>
   );
 };
 
