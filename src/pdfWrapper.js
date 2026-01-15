@@ -25,6 +25,7 @@ const PdfWrapper = (props) => {
         loading={props.loading}
         setLoading={props.setLoading}
         onError={handleError}
+        onClose={props.onClose}
       />
     </div>
   );
