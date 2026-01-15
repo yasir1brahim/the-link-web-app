@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import './SpecSectionNavigation.css';
 
 const SpecSectionNavigation = memo(({
@@ -10,6 +10,27 @@ const SpecSectionNavigation = memo(({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('number'); // 'number' or 'title'
+  const listRef = useRef(null);
+  const itemRefs = useRef({});
+
+  // Scroll to center selected section when it changes or when loading completes
+  useEffect(() => {
+    if (!loading && selectedSection && itemRefs.current[selectedSection.id] && listRef.current) {
+      const container = listRef.current;
+      const item = itemRefs.current[selectedSection.id];
+
+      // Calculate scroll position to center the item
+      const containerHeight = container.clientHeight;
+      const itemTop = item.offsetTop - container.offsetTop;
+      const itemHeight = item.offsetHeight;
+      const scrollPosition = itemTop - (containerHeight / 2) + (itemHeight / 2);
+
+      container.scrollTo({
+        top: Math.max(0, scrollPosition),
+        behavior: 'smooth'
+      });
+    }
+  }, [selectedSection, loading]);
 
   if (!sections || sections.length === 0) {
     return (
@@ -78,7 +99,7 @@ const SpecSectionNavigation = memo(({
         </div>
       )}
 
-      <div className="navigation-list">
+      <div className="navigation-list" ref={listRef}>
         {loading ? (
           <div className="navigation-loading">
             <div className="loading-spinner"></div>
@@ -88,6 +109,7 @@ const SpecSectionNavigation = memo(({
           filteredSections.map((section) => (
             <div
               key={section.id}
+              ref={el => { itemRefs.current[section.id] = el; }}
               className={`navigation-item ${
                 selectedSection && selectedSection.id === section.id ? 'selected' : ''
               }`}
