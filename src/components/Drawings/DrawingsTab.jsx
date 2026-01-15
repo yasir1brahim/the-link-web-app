@@ -1,12 +1,18 @@
-import React, { useState, useEffect, useCallback } from "react";
-import FileDownload from "js-file-download";
-import { getDrawingNotes, exportDrawingNotesToExcel } from "../../api/Drawings/api";
-import DrawingsTable from "./DrawingsTable";
-import DrawingsFilters from "./DrawingsFilters";
-import DrawingsUploadModal from "./DrawingsUploadModal";
-import DrawingsProcessingIndicator from "./DrawingsProcessingIndicator";
-import PdfWrapper from "../../pdfWrapper";
-import "./DrawingsTab.css";
+import React, { useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-toastify';
+import {
+  DataTable,
+  DataTableToolbar,
+  DataTablePagination,
+  SearchInput,
+  ExportDropdown,
+  CountDisplay,
+  PdfViewerPane,
+} from '../shared/DataTable';
+import { getDrawingNotes, exportDrawingNotesToExcel } from '../../api/Drawings/api';
+import DrawingsUploadModal from './DrawingsUploadModal';
+import DrawingsProcessingIndicator from './DrawingsProcessingIndicator';
+import './DrawingsTab.css';
 
 const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   // Data state
@@ -18,19 +24,24 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   const [processingStatus, setProcessingStatus] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
 
-  // Filter state
-  const [filters, setFilters] = useState({
-    category: "",
-    drawingFileId: "",
-    search: "",
+  // Selection state
+  const [selectedNote, setSelectedNote] = useState(null);
+
+  // Sorting state
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState('asc');
+
+  // Filter state (column-based)
+  const [columnFilters, setColumnFilters] = useState({
+    drawing_file_id: null,
+    category: null,
   });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
   // Pagination state
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(25);
-
-  // Selection state
-  const [selectedNote, setSelectedNote] = useState(null);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
 
   // PDF viewer state
   const [pdfData, setPdfData] = useState({ url: null });
@@ -39,39 +50,70 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
-  const drawingScrollDebug =
-    typeof window !== "undefined" &&
-    window.localStorage.getItem("drawingsScrollDebug") === "1";
 
-  // Fetch drawing notes
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Column configuration
+  const columns = [
+    {
+      key: 'drawing_file_name',
+      header: 'Drawing File',
+      sortable: true,
+      filterable: true,
+      filterValueKey: 'id',
+      filterLabelKey: 'name',
+      width: '30%',
+    },
+    {
+      key: 'category',
+      header: 'Category',
+      sortable: true,
+      filterable: true,
+      width: '20%',
+    },
+    {
+      key: 'text',
+      header: 'Text',
+      sortable: true,
+      filterable: false,
+      width: '50%',
+    },
+  ];
+
+  // Fetch data
   const fetchDrawingNotes = useCallback(async () => {
     if (!projectId || !projectVersionId) return;
 
     setIsLoading(true);
     try {
       const response = await getDrawingNotes(projectId, projectVersionId, {
-        category: filters.category || undefined,
-        drawingFileId: filters.drawingFileId || undefined,
-        search: filters.search || undefined,
+        category: columnFilters.category || undefined,
+        drawingFileId: columnFilters.drawing_file_id || undefined,
+        search: debouncedSearch || undefined,
         page,
-        limit: pageSize,
+        limit: rowsPerPage,
+        sortColumn: sortColumn || undefined,
+        sortDirection: sortColumn ? sortDirection : undefined,
       });
 
-      // DRF pagination convention:
-      // - response.data.results is the array of notes
-      // - extra metadata is provided at the top level (added by backend)
       setDrawingNotes(response?.data?.results || []);
       setAllFilterVals(response?.data?.all_filter_vals || { category: [], drawing_files: [] });
       setTotalCount(response?.data?.total_count ?? response?.data?.count ?? 0);
       setProcessingStatus(response?.data?.processing_status || null);
     } catch (error) {
-      console.error("Error fetching drawing notes:", error);
+      console.error('Error fetching drawing notes:', error);
+      toast.error('Failed to load drawing notes');
     } finally {
       setIsLoading(false);
     }
-  }, [projectId, projectVersionId, filters, page, pageSize]);
+  }, [projectId, projectVersionId, columnFilters, debouncedSearch, page, rowsPerPage, sortColumn, sortDirection]);
 
-  // Initial fetch
   useEffect(() => {
     fetchDrawingNotes();
   }, [fetchDrawingNotes]);
@@ -87,34 +129,13 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     return () => clearInterval(interval);
   }, [processingStatus?.is_processing, fetchDrawingNotes]);
 
-  // Handle row selection
+  // Handlers
   const handleRowSelect = (note) => {
     setSelectedNote(note);
 
     if (note?.drawing_file_url && note?.bounding_box) {
       setPdfLoading(true);
       const [x1, y1, x2, y2] = note.bounding_box;
-      const scrollToX = x1;
-      const scrollToY = y2;
-
-      if (drawingScrollDebug) {
-        console.groupCollapsed("[DRAWINGS_SCROLL_DEBUG] Note selection");
-        console.log({
-          noteId: note.id,
-          pageNumber: note.page_number,
-          boundingBox: note.bounding_box,
-          scrollTarget: {
-            x: scrollToX,
-            y: scrollToY,
-          },
-          pageRotation: note.page_rotation,
-          pageRotatedWidth: note.page_rotated_width,
-          pageRotatedHeight: note.page_rotated_height,
-          pageUnrotatedWidth: note.page_unrotated_width,
-          pageUnrotatedHeight: note.page_unrotated_height,
-        });
-        console.groupEnd();
-      }
 
       setPdfData({
         url: note.drawing_file_url,
@@ -123,148 +144,230 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
           y: y1,
           width: x2 - x1,
           height: y2 - y1,
-          scroll_to_x: scrollToX,
-          scroll_to_y: scrollToY,
+          scroll_to_x: x1,
+          scroll_to_y: y2,
           jump_to_annotation: true,
           page_no: note.page_number,
         },
         docId: note.drawing_file_id,
       });
+
+      // Reset loading after a short delay
+      setTimeout(() => setPdfLoading(false), 500);
     }
   };
 
-  // Handle filter changes
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-    setPage(1); // Reset to first page on filter change
-    setSelectedNote(null);
-    setPdfData({ url: null });
+  const handleSort = (column, direction) => {
+    setSortColumn(column);
+    setSortDirection(direction);
+    setPage(1);
   };
 
-  // Handle page change
+  const handleFilter = (columnKey, value) => {
+    // Map column key to filter key
+    const filterKey = columnKey === 'drawing_file_name' ? 'drawing_file_id' : columnKey;
+    setColumnFilters((prev) => ({
+      ...prev,
+      [filterKey]: value,
+    }));
+    setPage(1);
+    setSelectedNote(null);
+  };
+
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    setPage(1);
+    setSelectedNote(null);
+  };
+
+  const handleClearFilters = () => {
+    setColumnFilters({ drawing_file_id: null, category: null });
+    setSearchQuery('');
+    setPage(1);
+    setSelectedNote(null);
+  };
+
   const handlePageChange = (newPage) => {
     setPage(newPage);
     setSelectedNote(null);
-    setPdfData({ url: null });
   };
 
-  // Handle upload success
-  const handleUploadSuccess = () => {
-    setUploadModalOpen(false);
-    fetchDrawingNotes();
-  };
-
-  // Handle Excel export
-  const handleExportExcel = async () => {
-    try {
-      const response = await exportDrawingNotesToExcel(
-        projectId,
-        projectVersionId,
-        {
-          category: filters.category || undefined,
-          drawingFileId: filters.drawingFileId || undefined,
-          search: filters.search || undefined,
-        }
-      );
-
-      const blob = new Blob([response.data], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      const now = new Date();
-      const fileName = `drawing_notes_${now.toLocaleDateString("en-US", { day: "numeric" })}_${now.toLocaleDateString("en-US", { month: "short" })}_${now.toLocaleDateString("en-US", { year: "numeric" })}_${now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }).replace(":", "")}.xlsx`;
-      FileDownload(blob, fileName);
-    } catch (error) {
-      console.error("Error exporting drawing notes:", error);
-    }
-  };
-
-  // Handle PDF viewer close
-  const handlePdfClose = () => {
+  const handleRowsPerPageChange = (newRowsPerPage) => {
+    setRowsPerPage(newRowsPerPage);
+    setPage(1);
     setSelectedNote(null);
   };
 
+  const handleExport = async (format) => {
+    if (format === 'excel') {
+      try {
+        const response = await exportDrawingNotesToExcel(projectId, projectVersionId, {
+          category: columnFilters.category || undefined,
+          drawingFileId: columnFilters.drawing_file_id || undefined,
+          search: debouncedSearch || undefined,
+        });
+
+        const blob = new Blob([response.data], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'drawing_notes.xlsx';
+        link.click();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Export failed:', error);
+        toast.error('Failed to export drawing notes');
+      }
+    }
+  };
+
+  const handleClosePdf = () => {
+    setSelectedNote(null);
+    setPdfData({ url: null });
+  };
+
+  // Navigation handlers
+  const handleNavigateUp = () => {
+    if (!selectedNote) return;
+    const currentIndex = drawingNotes.findIndex((n) => n.id === selectedNote.id);
+    if (currentIndex > 0) {
+      handleRowSelect(drawingNotes[currentIndex - 1]);
+    }
+  };
+
+  const handleNavigateDown = () => {
+    if (!selectedNote) return;
+    const currentIndex = drawingNotes.findIndex((n) => n.id === selectedNote.id);
+    if (currentIndex < drawingNotes.length - 1) {
+      handleRowSelect(drawingNotes[currentIndex + 1]);
+    }
+  };
+
+  const canNavigateUp = selectedNote
+    ? drawingNotes.findIndex((n) => n.id === selectedNote.id) > 0
+    : false;
+
+  const canNavigateDown = selectedNote
+    ? drawingNotes.findIndex((n) => n.id === selectedNote.id) < drawingNotes.length - 1
+    : false;
+
+  // Count display data
+  const counts = [
+    {
+      label: 'drawing file',
+      labelPlural: 'drawing files',
+      count: allFilterVals.drawing_files?.length || 0,
+      onClick: () => {
+        // Could open a modal showing all drawing files
+      },
+    },
+    {
+      label: 'category',
+      labelPlural: 'categories',
+      count: allFilterVals.category?.length || 0,
+      onClick: () => {
+        // Could open a modal showing all categories
+      },
+    },
+  ];
+
+  // Filter options for columns
+  const filterOptions = {
+    drawing_file_name: allFilterVals.drawing_files || [],
+    category: allFilterVals.category || [],
+  };
+
+  // Map column filters for DataTable (convert drawing_file_id back to drawing_file_name)
+  const tableColumnFilters = {
+    drawing_file_name: columnFilters.drawing_file_id,
+    category: columnFilters.category,
+  };
+
+  const hasActiveFilters =
+    columnFilters.drawing_file_id || columnFilters.category || searchQuery;
+
+  const showPdfViewer = selectedNote && pdfData.url;
+
   return (
-    <div className={`drawings-container ${selectedNote ? "side-by-side" : ""}`}>
+    <div className={`drawings-container ${showPdfViewer ? 'side-by-side' : ''}`}>
       <div className="drawings-left-pane">
-        <div className="drawings-header">
-          <DrawingsFilters
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            allFilterVals={allFilterVals}
-          />
-          <div className="drawings-header-actions">
-            <button
-              className="drawings-export-btn"
-              onClick={handleExportExcel}
-              disabled={totalCount === 0}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <polyline points="7,10 12,15 17,10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              Export to Excel
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => setUploadModalOpen(true)}
-            >
-              Upload Drawings
-            </button>
-          </div>
-        </div>
+        {processingStatus?.is_processing && (
+          <DrawingsProcessingIndicator processingStatus={processingStatus} />
+        )}
 
-        <DrawingsProcessingIndicator processingStatus={processingStatus} />
+        <DataTableToolbar
+          leftContent={
+            <>
+              <ExportDropdown
+                options={[{ label: 'Excel', value: 'excel' }]}
+                onExport={handleExport}
+                disabled={totalCount === 0}
+              />
+              {hasActiveFilters && (
+                <button className="dt-clear-filters-btn" onClick={handleClearFilters}>
+                  Clear Filters
+                </button>
+              )}
+              <CountDisplay counts={counts} totalCount={totalCount} totalLabel="notes" />
+            </>
+          }
+          rightContent={
+            <>
+              <SearchInput
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="Search drawings..."
+                alwaysExpanded={true}
+              />
+              <button
+                className="dt-upload-btn"
+                onClick={() => setUploadModalOpen(true)}
+              >
+                Upload Drawings
+              </button>
+            </>
+          }
+        />
 
-        <DrawingsTable
-          drawingNotes={drawingNotes}
-          selectedNote={selectedNote}
+        <DataTable
+          columns={columns}
+          data={drawingNotes}
+          rowKey="id"
+          selectedId={selectedNote?.id}
           onRowSelect={handleRowSelect}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+          columnFilters={tableColumnFilters}
+          filterOptions={filterOptions}
+          onFilter={handleFilter}
           isLoading={isLoading}
+          emptyMessage="No drawing notes found"
+        />
+
+        <DataTablePagination
           page={page}
-          pageSize={pageSize}
+          rowsPerPage={rowsPerPage}
           totalCount={totalCount}
           onPageChange={handlePageChange}
+          onRowsPerPageChange={handleRowsPerPageChange}
         />
       </div>
 
-      {selectedNote && pdfData.url && (
+      {showPdfViewer && (
         <div className="drawings-right-pane">
-          <div className="drawings-pdf-header">
-            <span className="drawings-pdf-title">
-              {selectedNote.drawing_file_name || "Drawing"}
-            </span>
-            <button
-              className="drawings-pdf-close-btn"
-              onClick={handlePdfClose}
-              title="Close viewer"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M18 6l-12 12" />
-                <path d="M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div className="drawings-pdf-content">
-            <PdfWrapper
-              pdfData={pdfData}
-              setPdfData={setPdfData}
-              loading={pdfLoading}
-              setLoading={setPdfLoading}
-              onClose={handlePdfClose}
-            />
-          </div>
+          <PdfViewerPane
+            pdfData={pdfData}
+            title={selectedNote.drawing_file_name}
+            onClose={handleClosePdf}
+            onNavigateUp={handleNavigateUp}
+            onNavigateDown={handleNavigateDown}
+            canNavigateUp={canNavigateUp}
+            canNavigateDown={canNavigateDown}
+            isLoading={pdfLoading}
+          />
         </div>
       )}
 
@@ -273,7 +376,10 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
         toggle={() => setUploadModalOpen(false)}
         projectId={projectId}
         projectVersionId={projectVersionId}
-        onSuccess={handleUploadSuccess}
+        onSuccess={() => {
+          setUploadModalOpen(false);
+          fetchDrawingNotes();
+        }}
       />
     </div>
   );

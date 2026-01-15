@@ -145,17 +145,18 @@ describe('DrawingsTab Integration', () => {
     });
 
     it('highlights selected row', async () => {
-      render(<DrawingsTab {...defaultProps} />);
+      const { container } = render(<DrawingsTab {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByText('Floor Plan.pdf')).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByText('Floor Plan.pdf'));
+      // Click on the row in the table
+      const tableRow = container.querySelector('tbody tr');
+      fireEvent.click(tableRow);
 
       await waitFor(() => {
-        const selectedRow = screen.getByText('Floor Plan.pdf').closest('tr');
-        expect(selectedRow).toHaveClass('dt-row-selected');
+        expect(tableRow).toHaveClass('dt-row-selected');
       });
     });
   });
@@ -170,7 +171,6 @@ describe('DrawingsTab Integration', () => {
     });
 
     it('searches when search input is used', async () => {
-      jest.useFakeTimers();
       render(<DrawingsTab {...defaultProps} />);
 
       await waitFor(() => {
@@ -181,18 +181,18 @@ describe('DrawingsTab Integration', () => {
         target: { value: 'floor' },
       });
 
-      // Fast-forward debounce timer
-      jest.advanceTimersByTime(300);
+      // Wait for debounce (300ms) + state updates + re-render + API call
+      // The component has a 300ms debounce, then React state updates trigger a new fetch
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       await waitFor(() => {
-        expect(api.getDrawingNotes).toHaveBeenCalledWith(
-          1,
-          1,
-          expect.objectContaining({ search: 'floor' })
+        // Check if any call included the search term
+        const calls = api.getDrawingNotes.mock.calls;
+        const hasSearchCall = calls.some(
+          call => call[2]?.search === 'floor'
         );
+        expect(hasSearchCall).toBe(true);
       });
-
-      jest.useRealTimers();
     });
   });
 
