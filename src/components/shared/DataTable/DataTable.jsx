@@ -85,13 +85,19 @@ const DataTable = ({
             {columns.map((column) => (
               <th key={column.key} style={{ width: column.width }}>
                 <div className="dt-header-cell">
-                  <span>{column.header}</span>
+                  <span
+                    className={column.sortable ? 'dt-header-sortable' : ''}
+                    onClick={column.sortable ? () => handleSort(column.key) : undefined}
+                  >
+                    {column.header}
+                  </span>
 
                   {column.sortable && (
                     <span
-                      className="dt-sort-icon"
+                      className={`dt-sort-icon ${sortColumn === column.key ? 'active' : ''}`}
                       data-testid="sort-icon"
                       onClick={() => handleSort(column.key)}
+                      title={`Sort by ${column.header}`}
                     >
                       <SortIcon />
                     </span>

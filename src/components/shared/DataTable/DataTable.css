@@ -81,8 +81,17 @@
   opacity: 1;
 }
 
-.dt-header-cell .dt-filter-icon.active {
+.dt-header-cell .dt-filter-icon.active,
+.dt-header-cell .dt-sort-icon.active {
   opacity: 1;
+  color: var(--dt-primary);
+}
+
+.dt-header-sortable {
+  cursor: pointer;
+}
+
+.dt-header-sortable:hover {
   color: var(--dt-primary);
 }
 
