@@ -100,7 +100,7 @@ describe('DrawingsTab Integration', () => {
       render(<DrawingsTab {...defaultProps} />);
 
       await waitFor(() => {
-        expect(screen.getByText(/upload/i)).toBeInTheDocument();
+        expect(screen.getByText('Upload Drawings')).toBeInTheDocument();
       });
     });
 
@@ -275,10 +275,10 @@ describe('DrawingsTab Integration', () => {
       render(<DrawingsTab {...defaultProps} />);
 
       await waitFor(() => {
-        expect(screen.getByText(/upload/i)).toBeInTheDocument();
+        expect(screen.getByText('Upload Drawings')).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByText(/upload drawings/i));
+      fireEvent.click(screen.getByText('Upload Drawings'));
 
       await waitFor(() => {
         expect(screen.getByTestId('upload-modal')).toBeInTheDocument();

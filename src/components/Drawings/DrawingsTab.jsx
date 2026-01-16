@@ -14,6 +14,7 @@ import {
 import { getDrawingNotes, exportDrawingNotesToExcel } from '../../api/Drawings/api';
 import DrawingsUploadModal from './DrawingsUploadModal';
 import DrawingsProcessingIndicator from './DrawingsProcessingIndicator';
+import { ReactComponent as PlusUploadIcon } from '../../assets/images/plus-upload.svg';
 import './DrawingsTab.css';
 
 const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
@@ -316,22 +317,28 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
                   Clear Filters
                 </button>
               )}
-              <CountDisplay counts={counts} totalCount={totalCount} totalLabel="notes" />
+              {showPdfViewer && (
+                <button className="dt-close-pdf-btn" onClick={handleClosePdf}>
+                  Close PDF Viewer
+                </button>
+              )}
             </>
           }
           rightContent={
             <>
+              <CountDisplay counts={counts} totalCount={totalCount} totalLabel="notes" />
               <SearchInput
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Search drawings..."
-                alwaysExpanded={true}
+                alwaysExpanded={false}
               />
               <button
-                className="dt-upload-btn"
+                className="dt-upload-btn-yellow"
                 onClick={() => setUploadModalOpen(true)}
               >
-                Upload Drawings
+                <PlusUploadIcon />
+                <span>Upload Drawings</span>
               </button>
             </>
           }

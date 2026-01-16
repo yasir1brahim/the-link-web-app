@@ -120,11 +120,14 @@
 
 /* Export Dropdown */
 .dt-export-btn {
-  background: #fff;
-  border: 1px solid var(--dt-border-color);
+  background: #dadee6;
+  border: none;
   border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 14px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #231F20;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -132,21 +135,44 @@
 }
 
 .dt-export-btn:hover {
-  background: #f5f5f5;
+  background: #e0eaf7;
+}
+
+/* Close PDF Button */
+.dt-close-pdf-btn {
+  background: #dadee6;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #231F20;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dt-close-pdf-btn:hover {
+  background: #e0eaf7;
 }
 
 /* Clear Filters Button */
 .dt-clear-filters-btn {
-  background: transparent;
+  background: #dadee6;
   border: none;
-  color: var(--dt-primary);
+  border-radius: 4px;
+  padding: 5px 10px;
   font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #231F20;
   cursor: pointer;
-  padding: 4px 8px;
 }
 
 .dt-clear-filters-btn:hover {
-  text-decoration: underline;
+  background: #e0eaf7;
 }
 
 /* Count Display */
@@ -222,7 +248,7 @@
   cursor: pointer;
 }
 
-/* Upload Button */
+/* Upload Button - Blue variant */
 .dt-upload-btn {
   background: var(--dt-primary);
   color: #fff;
@@ -238,6 +264,32 @@
 
 .dt-upload-btn:hover {
   background: #1565c0;
+}
+
+/* Upload Button - Yellow variant (matches Submittal Log) */
+.dt-upload-btn-yellow {
+  background: #d5e73e;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #231F20;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.dt-upload-btn-yellow:hover {
+  background: #c9db32;
+}
+
+.dt-upload-btn-yellow svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* Pagination */
