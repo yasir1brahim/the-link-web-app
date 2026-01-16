@@ -14,7 +14,9 @@ import {
 import { getDrawingNotes, exportDrawingNotesToExcel } from '../../api/Drawings/api';
 import DrawingsUploadModal from './DrawingsUploadModal';
 import DrawingsProcessingIndicator from './DrawingsProcessingIndicator';
+import DrawingFilesModal from './DrawingFilesModal';
 import { ReactComponent as PlusUploadIcon } from '../../assets/images/plus-upload.svg';
+import { ReactComponent as ExcelLogo } from '../../assets/images/microsoft-excel-symbol.svg';
 import './DrawingsTab.css';
 
 const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
@@ -53,6 +55,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [drawingFilesModalOpen, setDrawingFilesModalOpen] = useState(false);
 
   // Debounce search
   useEffect(() => {
@@ -266,17 +269,13 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
       label: 'drawing file',
       labelPlural: 'drawing files',
       count: allFilterVals.drawing_files?.length || 0,
-      onClick: () => {
-        // Could open a modal showing all drawing files
-      },
+      onClick: () => setDrawingFilesModalOpen(true),
     },
     {
       label: 'category',
       labelPlural: 'categories',
       count: allFilterVals.category?.length || 0,
-      onClick: () => {
-        // Could open a modal showing all categories
-      },
+      // No onClick - categories modal not implemented yet
     },
   ];
 
@@ -308,7 +307,11 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
           leftContent={
             <>
               <ExportDropdown
-                options={[{ label: 'Excel', value: 'excel' }]}
+                options={[{
+                  label: 'Excel',
+                  value: 'excel',
+                  icon: <ExcelLogo style={{ height: '24px', width: '24px' }} />
+                }]}
                 onExport={handleExport}
                 disabled={totalCount === 0}
               />
@@ -411,6 +414,12 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
           setUploadModalOpen(false);
           fetchDrawingNotes();
         }}
+      />
+
+      <DrawingFilesModal
+        isOpen={drawingFilesModalOpen}
+        toggle={() => setDrawingFilesModalOpen(false)}
+        drawingFiles={allFilterVals.drawing_files || []}
       />
     </div>
   );

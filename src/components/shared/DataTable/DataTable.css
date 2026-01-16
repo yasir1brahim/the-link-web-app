@@ -185,11 +185,15 @@
 }
 
 .dt-count-item {
+  color: #676f74;
+}
+
+.dt-count-item.clickable {
   cursor: pointer;
   color: var(--dt-primary);
 }
 
-.dt-count-item:hover {
+.dt-count-item.clickable:hover {
   text-decoration: underline;
 }
 

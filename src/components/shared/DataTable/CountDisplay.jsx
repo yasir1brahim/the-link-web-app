@@ -29,7 +29,7 @@ const CountDisplay = ({
         <React.Fragment key={item.label}>
           {index > 0 && <span className="dt-count-separator">|</span>}
           <span
-            className="dt-count-item"
+            className={`dt-count-item ${item.onClick ? 'clickable' : ''}`}
             onClick={item.onClick}
           >
             {item.count} {formatLabel(item)}
