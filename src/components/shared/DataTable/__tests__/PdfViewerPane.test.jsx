@@ -3,9 +3,13 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import PdfViewerPane from '../PdfViewerPane';
 
 // Mock PdfWrapper since it's complex
-jest.mock('../../../../pdfWrapper', () => ({ children, ...props }) => (
-  <div data-testid="pdf-wrapper" data-url={props.pdfData?.url}>
-    {children}
+jest.mock('../../../../pdfWrapper', () => ({ pdfData, setPdfData, loading, setLoading, onClose }) => (
+  <div
+    data-testid="pdf-wrapper"
+    data-url={pdfData?.url}
+    data-loading={loading?.toString()}
+  >
+    PDF Content
   </div>
 ));
 
@@ -15,12 +19,11 @@ jest.mock('../../Loader/Loader', () => () => <div data-testid="loader">Loading..
 describe('PdfViewerPane', () => {
   const defaultProps = {
     pdfData: { url: 'https://example.com/test.pdf' },
+    setPdfData: jest.fn(),
     title: 'Test Document.pdf',
     onClose: jest.fn(),
-    onNavigateUp: jest.fn(),
-    onNavigateDown: jest.fn(),
-    canNavigateUp: true,
-    canNavigateDown: true,
+    isLoading: false,
+    setLoading: jest.fn(),
   };
 
   beforeEach(() => {
@@ -48,43 +51,6 @@ describe('PdfViewerPane', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('renders navigation buttons', () => {
-    render(<PdfViewerPane {...defaultProps} />);
-
-    expect(screen.getByTestId('pdf-nav-up')).toBeInTheDocument();
-    expect(screen.getByTestId('pdf-nav-down')).toBeInTheDocument();
-  });
-
-  it('calls onNavigateUp when up button is clicked', () => {
-    const onNavigateUp = jest.fn();
-    render(<PdfViewerPane {...defaultProps} onNavigateUp={onNavigateUp} />);
-
-    fireEvent.click(screen.getByTestId('pdf-nav-up'));
-
-    expect(onNavigateUp).toHaveBeenCalled();
-  });
-
-  it('calls onNavigateDown when down button is clicked', () => {
-    const onNavigateDown = jest.fn();
-    render(<PdfViewerPane {...defaultProps} onNavigateDown={onNavigateDown} />);
-
-    fireEvent.click(screen.getByTestId('pdf-nav-down'));
-
-    expect(onNavigateDown).toHaveBeenCalled();
-  });
-
-  it('disables up button when canNavigateUp is false', () => {
-    render(<PdfViewerPane {...defaultProps} canNavigateUp={false} />);
-
-    expect(screen.getByTestId('pdf-nav-up')).toBeDisabled();
-  });
-
-  it('disables down button when canNavigateDown is false', () => {
-    render(<PdfViewerPane {...defaultProps} canNavigateDown={false} />);
-
-    expect(screen.getByTestId('pdf-nav-down')).toBeDisabled();
-  });
-
   it('renders PDF wrapper with correct url', () => {
     render(<PdfViewerPane {...defaultProps} />);
 
@@ -96,5 +62,19 @@ describe('PdfViewerPane', () => {
     render(<PdfViewerPane {...defaultProps} isLoading={true} />);
 
     expect(screen.getByTestId('pdf-loading')).toBeInTheDocument();
+  });
+
+  it('passes loading state to PdfWrapper', () => {
+    render(<PdfViewerPane {...defaultProps} isLoading={true} />);
+
+    const pdfWrapper = screen.getByTestId('pdf-wrapper');
+    expect(pdfWrapper).toHaveAttribute('data-loading', 'true');
+  });
+
+  it('displays title with ellipsis overflow', () => {
+    render(<PdfViewerPane {...defaultProps} title="Very Long Document Name That Should Be Truncated.pdf" />);
+
+    const titleElement = screen.getByText('Very Long Document Name That Should Be Truncated.pdf');
+    expect(titleElement).toHaveAttribute('title', 'Very Long Document Name That Should Be Truncated.pdf');
   });
 });

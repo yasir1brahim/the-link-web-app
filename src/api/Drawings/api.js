@@ -11,12 +11,14 @@ import handleError from "../../config/errorHandler";
  * @param {string} options.search - Search text
  * @param {number} options.page - Page number (1-indexed)
  * @param {number} options.limit - Items per page
+ * @param {string} options.sortColumn - Column to sort by
+ * @param {string} options.sortDirection - Sort direction ('asc' or 'desc')
  * @returns {Promise} API response
  */
 export const getDrawingNotes = async (
   projectId,
   projectVersionId,
-  { category, drawingFileId, search, page = 1, limit = 25 } = {}
+  { category, drawingFileId, search, page = 1, limit = 25, sortColumn, sortDirection } = {}
 ) => {
   try {
     return await axiosInstance({
@@ -29,6 +31,8 @@ export const getDrawingNotes = async (
         ...(search && { search }),
         page,
         limit,
+        ...(sortColumn && { sort_column: sortColumn }),
+        ...(sortColumn && sortDirection && { sort_direction: sortDirection }),
       },
     });
   } catch (error) {

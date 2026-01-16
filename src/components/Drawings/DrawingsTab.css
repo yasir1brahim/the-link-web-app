@@ -1,415 +1,76 @@
+/* DrawingsTab - Layout-specific styles */
+/* Base table styles are in DataTable.css */
+
 .drawings-container {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 20px;
+  padding: 16px;
 }
 
 .drawings-container.side-by-side {
   flex-direction: row;
-  gap: 20px;
-  align-items: flex-start;
 }
 
 .drawings-left-pane {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  overflow: hidden;
 }
 
-.side-by-side .drawings-left-pane {
-  flex: 0 0 50%;
-  max-width: 50%;
+.drawings-container.side-by-side .drawings-left-pane {
+  flex: 0 0 calc(50% - 24px);
+  max-width: calc(50% - 24px);
+}
+
+/* Navigation column between panes */
+.drawings-nav-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+
+.drawings-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.15s ease;
+}
+
+.drawings-nav-btn:hover:not(:disabled) {
+  background: #f5f5f5;
+  color: #333;
+  border-color: #ccc;
+}
+
+.drawings-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.drawings-nav-btn svg {
+  font-size: 24px;
 }
 
 .drawings-right-pane {
-  flex: 0 0 50%;
-  max-width: 50%;
-  height: calc(100vh - 200px);
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  overflow: hidden;
-  position: sticky;
-  top: 20px;
-  display: flex;
-  flex-direction: column;
+  flex: 0 0 calc(50% - 24px);
+  max-width: calc(50% - 24px);
 }
 
-.drawings-pdf-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
-  flex-shrink: 0;
-}
-
-.drawings-pdf-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.drawings-pdf-close-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background: none;
-  border: none;
-  border-radius: 4px;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.drawings-pdf-close-btn:hover {
-  background-color: #e0e0e0;
-  color: #333;
-}
-
-.drawings-pdf-content {
-  flex: 1;
-  overflow: hidden;
-}
-
-.drawings-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
-  gap: 16px;
-}
-
-.drawings-header .btn-primary {
-  white-space: nowrap;
-}
-
-.drawings-header-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.drawings-export-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background-color: #2f5aa3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-
-.drawings-export-btn:hover:not(:disabled) {
-  background-color: #254a8a;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.drawings-export-btn:active:not(:disabled) {
-  background-color: #1e3a6f;
-  transform: translateY(0);
-}
-
-.drawings-export-btn:focus {
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(47, 90, 163, 0.25);
-}
-
-.drawings-export-btn:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-  opacity: 0.6;
-  transform: none;
-  box-shadow: none;
-}
-
-.drawings-export-btn:disabled:hover {
-  background-color: #6c757d;
-  transform: none;
-  box-shadow: none;
-}
-
-.drawings-export-btn svg {
-  flex-shrink: 0;
-}
-
-/* Table styles */
-.drawings-table-container {
-  flex: 1;
-  overflow: auto;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-}
-
-.drawings-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.drawings-table th,
-.drawings-table td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.drawings-table th {
-  background-color: #f5f5f5;
-  font-weight: 600;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.drawings-table tbody tr {
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.drawings-table tbody tr:hover {
-  background-color: #f9f9f9;
-}
-
-.drawings-table tbody tr.selected {
-  background-color: #e3f2fd;
-}
-
-.drawings-table tbody tr.selected:hover {
-  background-color: #bbdefb;
-}
-
-/* Text truncation */
-.drawings-text-cell {
-  max-width: 400px;
-}
-
-.drawings-text-full {
-  white-space: pre-wrap;
-}
-
-/* Filters */
-.drawings-filters {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  flex: 1;
-}
-
-.drawings-filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.drawings-filter-group label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #666;
-}
-
-.drawings-filter-group select,
-.drawings-filter-group input {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-  min-width: 180px;
-}
-
-.drawings-filter-group select:focus,
-.drawings-filter-group input:focus {
-  outline: none;
-  border-color: #007bff;
-}
-
-.drawings-clear-filters {
-  align-self: flex-end;
-  padding: 8px 16px;
-  background: none;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.drawings-clear-filters:hover {
-  background-color: #f5f5f5;
-}
-
-/* Pagination */
-.drawings-pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border-top: 1px solid #e0e0e0;
-  background-color: #fff;
-}
-
-.drawings-pagination-info {
-  color: #666;
-  font-size: 14px;
-}
-
-.drawings-pagination-controls {
-  display: flex;
-  gap: 8px;
-}
-
-.drawings-pagination-controls button {
-  padding: 8px 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
-  cursor: pointer;
-}
-
-.drawings-pagination-controls button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.drawings-pagination-controls button:not(:disabled):hover {
-  background-color: #f5f5f5;
-}
-
-/* Processing indicator */
-.drawings-processing-indicator {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  background-color: #fff3cd;
-  border: 1px solid #ffc107;
-  border-radius: 4px;
-  color: #856404;
-}
-
-.drawings-processing-indicator.error {
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
-  color: #721c24;
-}
-
-.drawings-processing-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #ffc107;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Loading state */
-.drawings-loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 48px;
-  color: #666;
-}
-
-/* Empty state */
-.drawings-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px;
-  color: #666;
-  text-align: center;
-}
-
-.drawings-empty h3 {
-  margin-bottom: 8px;
-  color: #333;
-}
-
-/* Upload Modal */
-.drawings-upload-dropzone {
-  border: 2px dashed #ccc;
-  border-radius: 8px;
-  padding: 48px;
-  text-align: center;
-  transition: all 0.2s ease;
-}
-
-.drawings-upload-dropzone.drag-over {
-  border-color: #007bff;
-  background-color: #f0f7ff;
-}
-
-.drawings-upload-dropzone p {
-  margin-bottom: 16px;
-  color: #666;
-}
-
-.drawings-upload-file-list {
-  margin-top: 24px;
-}
-
-.drawings-upload-file-list h4 {
+/* Processing indicator spacing */
+.drawings-left-pane > .drawings-processing-indicator {
   margin-bottom: 12px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.drawings-upload-file-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.drawings-upload-file-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  margin-bottom: 8px;
-}
-
-.drawings-upload-remove-btn {
-  background: none;
-  border: none;
-  color: #dc3545;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.drawings-upload-remove-btn:hover {
-  text-decoration: underline;
-}
-
-.drawings-upload-error {
-  margin-top: 16px;
-  padding: 12px;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
-  color: #721c24;
 }

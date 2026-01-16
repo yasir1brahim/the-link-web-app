@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import {
   DataTable,
   DataTableToolbar,
@@ -357,18 +359,36 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
       </div>
 
       {showPdfViewer && (
-        <div className="drawings-right-pane">
-          <PdfViewerPane
-            pdfData={pdfData}
-            title={selectedNote.drawing_file_name}
-            onClose={handleClosePdf}
-            onNavigateUp={handleNavigateUp}
-            onNavigateDown={handleNavigateDown}
-            canNavigateUp={canNavigateUp}
-            canNavigateDown={canNavigateDown}
-            isLoading={pdfLoading}
-          />
-        </div>
+        <>
+          <div className="drawings-nav-column">
+            <button
+              className="drawings-nav-btn"
+              onClick={handleNavigateUp}
+              disabled={!canNavigateUp || pdfLoading}
+              title="Previous note"
+            >
+              <ArrowDropUpIcon />
+            </button>
+            <button
+              className="drawings-nav-btn"
+              onClick={handleNavigateDown}
+              disabled={!canNavigateDown || pdfLoading}
+              title="Next note"
+            >
+              <ArrowDropDownIcon />
+            </button>
+          </div>
+          <div className="drawings-right-pane">
+            <PdfViewerPane
+              pdfData={pdfData}
+              setPdfData={setPdfData}
+              title={selectedNote.drawing_file_name}
+              onClose={handleClosePdf}
+              isLoading={pdfLoading}
+              setLoading={setPdfLoading}
+            />
+          </div>
+        </>
       )}
 
       <DrawingsUploadModal
