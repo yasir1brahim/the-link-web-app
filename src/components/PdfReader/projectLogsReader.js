@@ -156,6 +156,7 @@ const ProjectLogsReader = ({
   loading,
   setLoading,
   onError,
+  onClose,
   activeFilters = new Set(),
   useFiltering = false,
   isSpecViewMode = false,
@@ -713,7 +714,9 @@ const ProjectLogsReader = ({
   }, [webViewer, lastUsedHighlightType, isSpecViewMode, documentLoaded, buildSelectionPayload]);
 
   const handleClose = () => {
-    setLogInViewer(null);
+    if (typeof setLogInViewer === 'function') {
+      setLogInViewer(null);
+    }
     setPdfData({
       url: "",
       textLoc: {},
@@ -722,7 +725,12 @@ const ProjectLogsReader = ({
       submittalId: null,
       additionalTextLocations: [],
     });
-    setSubmittalIdParam(null);
+    if (typeof setSubmittalIdParam === 'function') {
+      setSubmittalIdParam(null);
+    }
+    if (typeof onClose === 'function') {
+      onClose();
+    }
   };
 
   const handleDocumentLoaded = async (annotationManager) => {
@@ -1028,6 +1036,7 @@ const ProjectLogsReader = ({
           Height: loc?.height ?? 30,
           Color: annotationColor,
           FillColor: annotationColor,
+          ReadOnly: true,
         });
         rectangleAnnot.Subject = 'Submittal Highlight';
         rectangleAnnot.CustomData = {
@@ -1062,6 +1071,7 @@ const ProjectLogsReader = ({
           Height: location?.height ?? 30,
           Color: color,
           FillColor: color,
+          ReadOnly: true,
         });
         rectangleAnnot.Subject = `AI Log Highlight - ${location?.item_type || location?.extraction_type || 'Unknown'}`;
         rectangleAnnot.CustomData = {
