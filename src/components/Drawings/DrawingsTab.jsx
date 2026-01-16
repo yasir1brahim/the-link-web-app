@@ -105,7 +105,11 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
       });
 
       setDrawingNotes(response?.data?.results || []);
-      setAllFilterVals(response?.data?.all_filter_vals || { category: [], drawing_files: [] });
+      // Only update filter options when no filters are applied (preserves full list)
+      const hasFilters = columnFilters.category || columnFilters.drawing_file_id || debouncedSearch;
+      if (!hasFilters && response?.data?.all_filter_vals) {
+        setAllFilterVals(response.data.all_filter_vals);
+      }
       setTotalCount(response?.data?.total_count ?? response?.data?.count ?? 0);
       setProcessingStatus(response?.data?.processing_status || null);
     } catch (error) {
