@@ -85,8 +85,6 @@ function createNotesForExtractedData(extractedData, webViewer, currentUserId) {
     return;
   }
 
-  console.log('[NOTE_DEBUG] Creating sticky notes for ExtractedData:', extractedData.id, 'with', extractedData.notes.length, 'notes');
-
   const firstLocation = extractedData.pdf_locations[0];
   const position = calculateStickyPosition(firstLocation);
 
@@ -158,6 +156,7 @@ const ProjectLogsReader = ({
   loading,
   setLoading,
   onError,
+  onClose,
   activeFilters = new Set(),
   useFiltering = false,
   isSpecViewMode = false,
@@ -169,6 +168,9 @@ const ProjectLogsReader = ({
   currentUserId = null,
   projectId = null,
 }) => {
+  const drawingScrollDebug =
+    typeof window !== 'undefined' &&
+    window.localStorage.getItem('drawingsScrollDebug') === '1';
   const [webViewer, setWebViewer] = useState(null);
   const [currentUrl, setCurrentUrl] = useState(null);
   const [annotations, setAnnotations] = useState([]);
@@ -179,6 +181,8 @@ const ProjectLogsReader = ({
   const annotationsRef = useRef([]);
   const onQuickHighlightRef = useRef(onQuickHighlight);
   const lastUsedHighlightTypeRef = useRef(lastUsedHighlightType);
+  const currentUserIdRef = useRef(currentUserId);
+  const getExtractedDataByIdRef = useRef(getExtractedDataById);
 
   useEffect(() => {
     onQuickHighlightRef.current = onQuickHighlight;
@@ -187,7 +191,15 @@ const ProjectLogsReader = ({
   useEffect(() => {
     lastUsedHighlightTypeRef.current = lastUsedHighlightType;
   }, [lastUsedHighlightType]);
-  
+
+  useEffect(() => {
+    currentUserIdRef.current = currentUserId;
+  }, [currentUserId]);
+
+  useEffect(() => {
+    getExtractedDataByIdRef.current = getExtractedDataById;
+  }, [getExtractedDataById]);
+
   // Convert activeFilters Set to a stable string representation for dependency tracking
   const activeFiltersString = React.useMemo(() => {
     return Array.from(activeFilters).sort().join(',');
@@ -284,7 +296,7 @@ const ProjectLogsReader = ({
         // Handle modify action (editing existing note)
         if (action === 'modify' && noteId) {
           // Permission check (safety net - ReadOnly should prevent this)
-          if (!canEditAnnotation(annot, currentUserId)) {
+          if (!canEditAnnotation(annot, currentUserIdRef.current)) {
             console.error('Unauthorized note modification attempt');
             const previousText = annot._originalContents;
             if (previousText) {
@@ -332,7 +344,7 @@ const ProjectLogsReader = ({
             annot.setCustomData('extraction_note_id', note.id);
             annot.setCustomData('created_by_id', note.created_by_id);
             // Lock the annotation after saving
-            annot.ReadOnly = note.created_by_id !== currentUserId;
+            annot.ReadOnly = note.created_by_id !== currentUserIdRef.current;
             annotationManager.redrawAnnotation(annot);
           } catch (error) {
             handleError(error, 'Failed to create note');
@@ -365,7 +377,7 @@ const ProjectLogsReader = ({
       }
 
       // Create new sticky note - user will type directly into this
-      const extractedData = getExtractedDataById ? getExtractedDataById(extractedDataId) : null;
+      const extractedData = getExtractedDataByIdRef.current ? getExtractedDataByIdRef.current(extractedDataId) : null;
 
       if (!extractedData || !extractedData.pdf_locations || extractedData.pdf_locations.length === 0) {
         console.warn(`Cannot create sticky note: ExtractedData ${extractedDataId} has no PDF locations`);
@@ -525,121 +537,6 @@ const ProjectLogsReader = ({
     };
   }, [webViewer, projectId]);
 
-  // Update text popup buttons when lastUsedHighlightType changes
-  useEffect(() => {
-    if (!webViewer || !isSpecViewMode || !documentLoaded) {
-      return;
-    }
-
-    const updateRepeatButton = () => {
-      const currentLastUsedType = lastUsedHighlightTypeRef.current;
-      const currentOnQuickHighlight = onQuickHighlightRef.current;
-
-      try {
-        const contextMenuItems = webViewer.UI.textPopup.getItems();
-
-        // Check if repeat button already exists
-        const existingRepeatButtonIndex = contextMenuItems.findIndex(
-          item => item.dataElement === 'specViewRepeatHighlightButton'
-        );
-
-        const hasRepeatButton = existingRepeatButtonIndex !== -1;
-
-        // If we have a last used type, we need a button
-        if (currentLastUsedType && typeof currentOnQuickHighlight === "function") {
-          const repeatIconSvg = ReactDOMServer.renderToStaticMarkup(<RepeatIcon />);
-
-          const buttonConfig = {
-            type: "actionButton",
-            label: `Mark as ${currentLastUsedType.type_display_name}`,
-            dataElement: "specViewRepeatHighlightButton",
-            img: repeatIconSvg,
-            onClick: () => {
-              const documentViewer = webViewer.Core?.documentViewer;
-              const selectionPayload = buildSelectionPayload(documentViewer);
-              if (!selectionPayload) {
-                console.warn("[SPEC_VIEWER_DEBUG] No valid selection for quick highlight");
-                return;
-              }
-              const currentCallback = onQuickHighlightRef.current;
-              if (currentCallback) {
-                currentCallback(selectionPayload);
-              }
-            },
-          };
-
-          if (hasRepeatButton) {
-            // Update existing button by replacing it in the array
-            const updatedItems = [...contextMenuItems];
-            updatedItems[existingRepeatButtonIndex] = buttonConfig;
-            webViewer.UI.textPopup.update(updatedItems);
-          } else {
-            // Add new button before "Add New Highlight"
-            const addHighlightIndex = contextMenuItems.findIndex(
-              item => item.dataElement === 'specViewAddHighlightButton'
-            );
-
-            const insertionReference = addHighlightIndex >= 0
-              ? contextMenuItems[addHighlightIndex].dataElement
-              : null;
-
-            webViewer.UI.textPopup.add(buttonConfig, insertionReference);
-          }
-        } else if (hasRepeatButton) {
-          // No last used type, but button exists - remove it
-          const filteredItems = contextMenuItems.filter(
-            item => item.dataElement !== 'specViewRepeatHighlightButton'
-          );
-          webViewer.UI.textPopup.update(filteredItems);
-        }
-      } catch (error) {
-        console.error('[REPEAT_BUTTON_ERROR] Failed to update repeat button:', error);
-      }
-    };
-
-    updateRepeatButton();
-  }, [webViewer, lastUsedHighlightType, isSpecViewMode, documentLoaded, buildSelectionPayload]);
-
-  const handleClose = () => {
-    setLogInViewer(null);
-    setPdfData({
-      url: "",
-      textLoc: {},
-      index: "",
-      docId: null,
-      submittalId: null,
-      additionalTextLocations: [],
-    });
-    setSubmittalIdParam(null);
-  };
-
-  const handleDocumentLoaded = async (annotationManager) => {
-    const fetchData = async () => {
-      const response = await axiosInstance({
-        method: "post",
-        url: `/pdf/v2/getMetadata`,
-        data: {
-          doc_id: docId,
-        },
-      });
-      if (response.status === 200) {
-        console.log('[SPEC_VIEWER_DEBUG] Loading server annotations:', response.data.data?.length || 0);
-        response.data.data?.map(async (item) => {
-          const annotations = await annotationManager.importAnnotationCommand(
-            item.xfdf_string
-          );
-          console.log('[SPEC_VIEWER_DEBUG] Imported server annotations:', annotations.length);
-          annotations.forEach((annotation) => {
-            annotationManager.redrawAnnotation(annotation);
-          });
-        });
-      }
-    };
-    fetchData().catch((error) => {
-      console.log(error);
-    });
-  };
-
   const buildSelectionPayload = React.useCallback((documentViewer) => {
     if (!documentViewer || typeof documentViewer.getSelectedText !== "function") {
       return null;
@@ -741,6 +638,128 @@ const ProjectLogsReader = ({
     };
   }, []);
 
+  // Update text popup buttons when lastUsedHighlightType changes
+  useEffect(() => {
+    if (!webViewer || !isSpecViewMode || !documentLoaded) {
+      return;
+    }
+
+    const updateRepeatButton = () => {
+      const currentLastUsedType = lastUsedHighlightTypeRef.current;
+      const currentOnQuickHighlight = onQuickHighlightRef.current;
+
+      try {
+        const contextMenuItems = webViewer.UI.textPopup.getItems();
+
+        // Check if repeat button already exists
+        const existingRepeatButtonIndex = contextMenuItems.findIndex(
+          item => item.dataElement === 'specViewRepeatHighlightButton'
+        );
+
+        const hasRepeatButton = existingRepeatButtonIndex !== -1;
+
+        // If we have a last used type, we need a button
+        if (currentLastUsedType && typeof currentOnQuickHighlight === "function") {
+          const repeatIconSvg = ReactDOMServer.renderToStaticMarkup(<RepeatIcon />);
+
+          const buttonConfig = {
+            type: "actionButton",
+            label: `Mark as ${currentLastUsedType.type_display_name}`,
+            dataElement: "specViewRepeatHighlightButton",
+            img: repeatIconSvg,
+            onClick: () => {
+              const documentViewer = webViewer.Core?.documentViewer;
+              const selectionPayload = buildSelectionPayload(documentViewer);
+              if (!selectionPayload) {
+                console.warn("[SPEC_VIEWER_DEBUG] No valid selection for quick highlight");
+                return;
+              }
+              const currentCallback = onQuickHighlightRef.current;
+              if (currentCallback) {
+                currentCallback(selectionPayload);
+              }
+            },
+          };
+
+          if (hasRepeatButton) {
+            // Update existing button by replacing it in the array
+            const updatedItems = [...contextMenuItems];
+            updatedItems[existingRepeatButtonIndex] = buttonConfig;
+            webViewer.UI.textPopup.update(updatedItems);
+          } else {
+            // Add new button before "Add New Highlight"
+            const addHighlightIndex = contextMenuItems.findIndex(
+              item => item.dataElement === 'specViewAddHighlightButton'
+            );
+
+            const insertionReference = addHighlightIndex >= 0
+              ? contextMenuItems[addHighlightIndex].dataElement
+              : null;
+
+            webViewer.UI.textPopup.add(buttonConfig, insertionReference);
+          }
+        } else if (hasRepeatButton) {
+          // No last used type, but button exists - remove it
+          const filteredItems = contextMenuItems.filter(
+            item => item.dataElement !== 'specViewRepeatHighlightButton'
+          );
+          webViewer.UI.textPopup.update(filteredItems);
+        }
+      } catch (error) {
+        console.error('[REPEAT_BUTTON_ERROR] Failed to update repeat button:', error);
+      }
+    };
+
+    updateRepeatButton();
+  }, [webViewer, lastUsedHighlightType, isSpecViewMode, documentLoaded, buildSelectionPayload]);
+
+  const handleClose = () => {
+    if (typeof setLogInViewer === 'function') {
+      setLogInViewer(null);
+    }
+    setPdfData({
+      url: "",
+      textLoc: {},
+      index: "",
+      docId: null,
+      submittalId: null,
+      additionalTextLocations: [],
+    });
+    if (typeof setSubmittalIdParam === 'function') {
+      setSubmittalIdParam(null);
+    }
+    if (typeof onClose === 'function') {
+      onClose();
+    }
+  };
+
+  const handleDocumentLoaded = async (annotationManager) => {
+    const fetchData = async () => {
+      const response = await axiosInstance({
+        method: "post",
+        url: `/pdf/v2/getMetadata`,
+        data: {
+          doc_id: docId,
+        },
+      });
+      if (response.status === 200) {
+        console.log('[SPEC_VIEWER_DEBUG] Loading server annotations:', response.data.data?.length || 0);
+        response.data.data?.map(async (item) => {
+          const annotations = await annotationManager.importAnnotationCommand(
+            item.xfdf_string
+          );
+          console.log('[SPEC_VIEWER_DEBUG] Imported server annotations:', annotations.length);
+          annotations.forEach((annotation) => {
+            annotationManager.redrawAnnotation(annotation);
+          });
+        });
+      }
+    };
+    fetchData().catch((error) => {
+      console.log(error);
+    });
+  };
+
   const getInitialPageLocation = (highlightLocations, aiLogHighlightLocations) => {
     // Combine both arrays, filtering out any null/undefined items and invalid page numbers
     const allLocations = [
@@ -761,9 +780,20 @@ const ProjectLogsReader = ({
     const lowestPageObject = allLocations.reduce((lowest, current) => {
       return (current.page_no < lowest.page_no) ? current : lowest;
     });
-    
+
+    const focusX = typeof lowestPageObject.focus_x === 'number'
+      ? lowestPageObject.focus_x
+      : lowestPageObject.x;
+    const focusY = typeof lowestPageObject.focus_y === 'number'
+      ? lowestPageObject.focus_y
+      : lowestPageObject.y;
+
     console.log('[SPEC_VIEWER_DEBUG] Found valid initial location with page_no:', lowestPageObject.page_no);
-    return lowestPageObject;
+    return {
+      ...lowestPageObject,
+      x: focusX,
+      y: focusY,
+    };
   };
 
   const updateTxtView = (_webViewer) => {
@@ -865,26 +895,105 @@ const ProjectLogsReader = ({
 
     if (tmpViewer && (highlightsAreAvailable || aiLogHighlightsAreAvailable)) {
       const initialLocation = getInitialPageLocation(stableHighlightLocations, stableAiLogHighlightLocations);
+      const jumpIndex = Array.isArray(stableHighlightLocations)
+        ? stableHighlightLocations.findIndex((location) => location?.jump_to_annotation)
+        : -1;
+      const jumpLocation = jumpIndex >= 0 ? stableHighlightLocations[jumpIndex] : null;
+      const focusLocation = jumpLocation || initialLocation;
+      let locationHasChanged = false;
+      let useJumpToAnnotation = false;
 
       // Check if document is loaded before trying to access it
       if (tmpViewer.Core.documentViewer && tmpViewer.Core.documentViewer.getDocument() && tmpViewer.Core.documentViewer.getPageCount() > 0) {
         // Check if the highlight location has changed
         const prevLocation = previousHighlightLocation.current;
-        const locationHasChanged = !prevLocation ||
-          prevLocation.page_no !== initialLocation.page_no ||
-          prevLocation.x !== initialLocation.x ||
-          prevLocation.y !== initialLocation.y;
+        locationHasChanged = Boolean(
+          focusLocation &&
+          (!prevLocation ||
+            prevLocation.page_no !== focusLocation.page_no ||
+            prevLocation.x !== focusLocation.x ||
+            prevLocation.y !== focusLocation.y)
+        );
+        useJumpToAnnotation = Boolean(
+          jumpLocation &&
+          annotationManager &&
+          typeof annotationManager.jumpToAnnotation === 'function'
+        );
 
-        if (locationHasChanged && initialLocation && initialLocation.page_no > 0) {
+        if (locationHasChanged && focusLocation && focusLocation.page_no > 0 && !useJumpToAnnotation) {
+          if (drawingScrollDebug) {
+            const pageCount = tmpViewer.Core.documentViewer.getPageCount();
+            const doc = tmpViewer.Core.documentViewer.getDocument();
+            const pageInfo = doc ? doc.getPageInfo(focusLocation.page_no) : null;
+            const pageRotation = doc && typeof doc.getPageRotation === 'function'
+              ? doc.getPageRotation(focusLocation.page_no)
+              : null;
+            const boundsCheck = pageInfo
+              ? {
+                  xInBounds: focusLocation.x >= 0 && focusLocation.x <= pageInfo.width,
+                  yInBounds: focusLocation.y >= 0 && focusLocation.y <= pageInfo.height,
+                }
+              : null;
+
+            console.groupCollapsed('[DRAWINGS_SCROLL_DEBUG] displayPageLocation');
+            console.log('location', {
+              page_no: focusLocation.page_no,
+              x: focusLocation.x,
+              y: focusLocation.y,
+              width: focusLocation.width,
+              height: focusLocation.height,
+            });
+            const zoom =
+              tmpViewer.Core.documentViewer &&
+              typeof tmpViewer.Core.documentViewer.getZoom === 'function'
+                ? tmpViewer.Core.documentViewer.getZoom()
+                : null;
+
+            console.log('document', {
+              pageCount,
+              targetPageInfo: pageInfo ? { width: pageInfo.width, height: pageInfo.height } : 'unavailable',
+              rotation: pageRotation,
+              zoom,
+            });
+            if (boundsCheck) {
+              console.log('bounds', boundsCheck);
+            }
+            console.log('useJumpToAnnotation', useJumpToAnnotation);
+            console.groupEnd();
+          }
+
+          const scrollX = typeof focusLocation.scroll_to_x === 'number'
+            ? focusLocation.scroll_to_x
+            : focusLocation.x;
+          const scrollY = typeof focusLocation.scroll_to_y === 'number'
+            ? focusLocation.scroll_to_y
+            : focusLocation.y;
+
+          if (drawingScrollDebug) {
+            console.log('scrollOverride', {
+              scroll_to_x: focusLocation.scroll_to_x,
+              scroll_to_y: focusLocation.scroll_to_y,
+              scrollX,
+              scrollY,
+              scroll_to_x_type: typeof focusLocation.scroll_to_x,
+              scroll_to_y_type: typeof focusLocation.scroll_to_y,
+            });
+            console.log('displayTarget', {
+              page_no: focusLocation.page_no,
+              x: scrollX,
+              y: scrollY,
+            });
+          }
+
           tmpViewer.Core.documentViewer.displayPageLocation(
-            initialLocation.page_no,
-            initialLocation.x,
-            initialLocation.y
+            focusLocation.page_no,
+            scrollX,
+            scrollY
           );
           previousHighlightLocation.current = {
-            page_no: initialLocation.page_no,
-            x: initialLocation.x,
-            y: initialLocation.y
+            page_no: focusLocation.page_no,
+            x: focusLocation.x,
+            y: focusLocation.y
           };
         }
       } else {
@@ -905,15 +1014,29 @@ const ProjectLogsReader = ({
       // Create all annotations, set Hidden based on active filters (if filtering is enabled)
       const shouldShowSubmittals = !useFiltering || activeFilters.has('submittal');
       for (let i = 0; i < stableHighlightLocations?.length; i++) {
+        const loc = stableHighlightLocations[i];
+        const pageNumber = loc?.page_no;
+        if (!pageNumber) continue;
+
+        // DEBUG: Log each annotation being created
+        console.log(`[VIEWER_DEBUG] Creating RectangleAnnotation[${i}]:`, {
+          PageNumber: pageNumber,
+          X: loc?.x,
+          Y: loc?.y,
+          Width: loc?.width ?? 10000,
+          Height: loc?.height ?? 30,
+        });
+
         const annotationColor = createAnnotationColor(SUBMITTAL_COLOR);
         const rectangleAnnot = new Annotations.RectangleAnnotation({
-          PageNumber: stableHighlightLocations[i]?.page_no,
-          X: stableHighlightLocations[i]?.x,
-          Y: stableHighlightLocations[i]?.y,
-          Width: stableHighlightLocations[i]?.width ?? 10000,
-          Height: stableHighlightLocations[i]?.height ?? 30,
+          PageNumber: pageNumber,
+          X: loc?.x,
+          Y: loc?.y,
+          Width: loc?.width ?? 10000,
+          Height: loc?.height ?? 30,
           Color: annotationColor,
           FillColor: annotationColor,
+          ReadOnly: true,
         });
         rectangleAnnot.Subject = 'Submittal Highlight';
         rectangleAnnot.CustomData = {
@@ -931,21 +1054,24 @@ const ProjectLogsReader = ({
       // Create all annotations, set Hidden based on active filters (if filtering is enabled)
       for (let i = 0; i < stableAiLogHighlightLocations?.length; i++) {
         const location = stableAiLogHighlightLocations[i];
-        const itemType = location?.item_type;
+        const pageNumber = location?.page_no;
+        if (!pageNumber) continue;
 
+        const itemType = location?.item_type;
         const shouldShow = !useFiltering || activeFilters.has(itemType);
 
         const colorData = location?.color || getColorDataForHighlight(location?.item_type, location?.extraction_type);
         const color = createAnnotationColor(colorData);
         
         const rectangleAnnot = new Annotations.RectangleAnnotation({
-          PageNumber: location?.page_no,
+          PageNumber: pageNumber,
           X: location?.x,
           Y: location?.y,
           Width: location?.width ?? 10000,
           Height: location?.height ?? 30,
           Color: color,
           FillColor: color,
+          ReadOnly: true,
         });
         rectangleAnnot.Subject = `AI Log Highlight - ${location?.item_type || location?.extraction_type || 'Unknown'}`;
         rectangleAnnot.CustomData = {
@@ -964,6 +1090,23 @@ const ProjectLogsReader = ({
       // Add all annotations in batch for better performance
       annotationManager.addAnnotations(_annotations);
       annotationManager.drawAnnotationsFromList(_annotations);
+
+      if (useJumpToAnnotation && locationHasChanged && jumpIndex >= 0 && _annotations[jumpIndex]) {
+        if (drawingScrollDebug) {
+          console.log('jumpToAnnotation', {
+            page_no: focusLocation?.page_no,
+            jumpIndex,
+          });
+        }
+        annotationManager.jumpToAnnotation(_annotations[jumpIndex]);
+        if (focusLocation) {
+          previousHighlightLocation.current = {
+            page_no: focusLocation.page_no,
+            x: focusLocation.x,
+            y: focusLocation.y,
+          };
+        }
+      }
 
       // Keep ref in sync with state to avoid closure issues
       annotationsRef.current = _annotations;

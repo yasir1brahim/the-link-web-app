@@ -14,7 +14,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   const [specData, setSpecData] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [sectionContent, setSectionContent] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tooltip, setTooltip] = useState({ visible: false, highlight: null, position: { x: 0, y: 0 } });
   // Initialize with all filter types to prevent empty filters from hiding annotations on mount
@@ -40,7 +40,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
   useEffect(() => {
     const loadSpecData = async () => {
       try {
-        setLoading(true);
+        setInitialLoading(true);
         setError(null);
         const response = await getSpecCentricData(projectId, projectVersionId);
         setSpecData(response.data);
@@ -62,7 +62,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
         console.error('Error loading spec data:', err);
         setError('Failed to load spec data. Please try again.');
       } finally {
-        setLoading(false);
+        setInitialLoading(false);
       }
     };
 
@@ -78,7 +78,6 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
     }
 
     try {
-      setLoading(true);
       const response = await getSpecSectionContent(
         projectId,
         selectedSection.id,
@@ -95,8 +94,6 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
     } catch (err) {
       console.error('Error loading section content:', err);
       setError('Failed to load section content. Please try again.');
-    } finally {
-      setLoading(false);
     }
   }, [projectId, projectVersionId, selectedSection]);
 
@@ -208,7 +205,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
     }
   }, [projectId, projectVersionId, activeFilters, customItemTypes, selectedSection]);
 
-  if (loading && !specData) {
+  if (initialLoading && !specData) {
     return (
       <div className="spec-viewer-loading">
         <div className="loading-spinner"></div>
@@ -248,7 +245,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
           specSections={specData.spec_sections}
           selectedSection={selectedSection}
           onSectionChange={handleSectionChange}
-          loading={loading}
+          loading={initialLoading}
         />
       </div>
       
@@ -296,7 +293,7 @@ const SpecViewer = ({ projectId, projectVersionId, teamId }) => {
             </div>
           ) : (
             <div className="spec-viewer-placeholder">
-              <p>Select a spec section to view its content</p>
+              <p>{selectedSection ? 'Loading section content...' : 'Select a spec section to view its content'}</p>
             </div>
           )}
         </div>
