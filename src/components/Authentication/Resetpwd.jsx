@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ReactComponent as Keys } from '../../assets/images/keys.svg';
 import { ReactComponent as Eyeshow } from '../../assets/images/eye-show.svg';
 import { ReactComponent as Eyehide } from '../../assets/images/eye-hide.svg';
@@ -6,10 +6,9 @@ import { ReactComponent as ArrowLeft } from '../../assets/images/arrow-left.svg'
 import { ReactComponent as ReactLogo } from '../../assets/images/the-link-ai-header-logo-new.svg';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import axiosInstance from '../../config/axios';
 import handleError from '../../config/errorHandler';
-import { useParams } from 'react-router-dom';
-import { resetPassword } from '../../api/Authentication/api';
+import { useParams, useNavigate } from 'react-router-dom';
+import { resetPassword, validateResetToken } from '../../api/Authentication/api';
 
 const Resetpwd = () => {
   const [showNPwd, setShowNPwd] = useState(false);
@@ -17,9 +16,37 @@ const Resetpwd = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
   const [error, setError] = useState('');
+  const [isValidating, setIsValidating] = useState(true);
 
   const { uidb64, token } = useParams();
-  console.log(uidb64, token);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const validateToken = async () => {
+      try {
+        await validateResetToken(uidb64, token);
+        if (isMounted) {
+          setIsValidating(false);
+        }
+      } catch (error) {
+        if (isMounted) {
+          navigate('/link-expired');
+        }
+      }
+    };
+
+    if (uidb64 && token) {
+      validateToken();
+    } else {
+      navigate('/link-expired');
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [uidb64, token, navigate]);
 
   const toggleNType = () => setShowNPwd(!showNPwd);
   const toggleCType = () => setShowCPwd(!showCPwd);
@@ -69,6 +96,24 @@ const Resetpwd = () => {
       }
     }
   };
+
+  if (isValidating) {
+    return (
+      <section className="authentication-content-wrapper">
+        <div className="ac-left">
+          <a href="/" className="company-branding">
+            <ReactLogo />
+          </a>
+        </div>
+        <div className="ac-right">
+          <div className="resetpwd-form">
+            <p>Validating reset link...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="authentication-content-wrapper">
       <div className="ac-left">
