@@ -6,7 +6,6 @@ import { ReactComponent as ArrowLeft } from '../../assets/images/arrow-left.svg'
 import { ReactComponent as ReactLogo } from '../../assets/images/the-link-ai-header-logo-new.svg';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import axiosInstance from '../../config/axios';
 import handleError from '../../config/errorHandler';
 import { useParams, useNavigate } from 'react-router-dom';
 import { resetPassword, validateResetToken } from '../../api/Authentication/api';
@@ -21,22 +20,32 @@ const Resetpwd = () => {
 
   const { uidb64, token } = useParams();
   const navigate = useNavigate();
-  console.log(uidb64, token);
 
   useEffect(() => {
+    let isMounted = true;
+
     const validateToken = async () => {
       try {
         await validateResetToken(uidb64, token);
-        setIsValidating(false);
+        if (isMounted) {
+          setIsValidating(false);
+        }
       } catch (error) {
-        console.error('Token validation failed:', error);
-        navigate('/link-expired');
+        if (isMounted) {
+          navigate('/link-expired');
+        }
       }
     };
 
     if (uidb64 && token) {
       validateToken();
+    } else {
+      navigate('/link-expired');
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [uidb64, token, navigate]);
 
   const toggleNType = () => setShowNPwd(!showNPwd);

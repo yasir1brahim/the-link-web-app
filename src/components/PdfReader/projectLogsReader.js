@@ -957,6 +957,10 @@ const ProjectLogsReader = ({
 
       // Remove only previously created highlight annotations before adding new ones
       if (annotationsRef.current.length > 0) {
+        // Must set ReadOnly to false before deletion or annotations won't be removed
+        annotationsRef.current.forEach(annot => {
+          annot.ReadOnly = false;
+        });
         annotationManager.deleteAnnotations(annotationsRef.current);
         annotationsRef.current = [];
       }

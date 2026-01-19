@@ -12,6 +12,7 @@ const DocumentsTab = ({
   documents, 
   onAfterReprocess, 
   onAfterDelete, 
+  onSpecSectionsRefresh,
   isProduction = false 
 }) => {
   const [isReprocessing, setIsReprocessing] = useState(false);
@@ -137,6 +138,11 @@ const DocumentsTab = ({
       // Call parent callback to refresh data before showing success
       if (onAfterDelete) {
         await onAfterDelete();
+      }
+
+      // Trigger spec sections refresh
+      if (onSpecSectionsRefresh) {
+        onSpecSectionsRefresh();
       }
 
       toast.success(`${count} document${count > 1 ? 's' : ''} deleted successfully`);
