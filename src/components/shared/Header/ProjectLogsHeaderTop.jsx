@@ -1,10 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {AuthContext} from '../../../auth/authcontext'
-import { getUserTeams } from '../../../api/Authentication/api';
-import { getHomeUrl } from '../../../utils/navigation';
-import { Button } from 'reactstrap';
+import { AuthContext } from '../../../auth/authcontext';
 import VersionDropdown from '../../ProjectLogs/versionDropdown';
 
 // @ts-ignore
@@ -12,16 +9,12 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useContext(AuthContext);
 
-  console.log("props.projectVersionId", props.projectVersionId)
-  console.log("props.projectVersions", props.projectVersions)
-
-  const hasOtherActiveFlags = props.isSpecGptFlagActive || props.isSpecCenteredViewFlagActive;
-  const shouldShowTabs = props.isInspectionLogFeatureFlagActive && hasOtherActiveFlags;
+  const hasOtherActiveFlags = props.isSpecGptFlagActive || props.isSpecCenteredViewFlagActive || props.isDrawingsFlagActive || props.isInspectionLogFeatureFlagActive;
   
   return (
     <div className="header-wrapper-swap row mx-0 my-2" style={{ borderBottom: '1px solid #e0e0e0' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-        {shouldShowTabs && (
+        {hasOtherActiveFlags && (
           <div className="tab-container" style={{ display: 'flex', gap: '0' }}>
             <button
               className={`tab-button ${props.activeTab === 'submittal' ? 'active' : ''}`}
@@ -41,23 +34,23 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
               Submittal Log
             </button>
             {props.isSpecGptFlagActive && (
-            <button
-              className={`tab-button ${props.activeTab === 'assistant' ? 'active' : ''}`}
-              onClick={() => props.setActiveTab('assistant')}
-              style={{
-                padding: '12px 24px',
-                border: 'none',
-                backgroundColor: props.activeTab === 'assistant' ? '#fff' : '#f5f5f5',
-                borderBottom: props.activeTab === 'assistant' ? '2px solid #007bff' : '2px solid transparent',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: props.activeTab === 'assistant' ? '600' : '400',
-                color: props.activeTab === 'assistant' ? '#007bff' : '#666',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              Assistant
-            </button>
+              <button
+                className={`tab-button ${props.activeTab === 'assistant' ? 'active' : ''}`}
+                onClick={() => props.setActiveTab('assistant')}
+                style={{
+                  padding: '12px 24px',
+                  border: 'none',
+                  backgroundColor: props.activeTab === 'assistant' ? '#fff' : '#f5f5f5',
+                  borderBottom: props.activeTab === 'assistant' ? '2px solid #007bff' : '2px solid transparent',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: props.activeTab === 'assistant' ? '600' : '400',
+                  color: props.activeTab === 'assistant' ? '#007bff' : '#666',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Assistant
+              </button>
             )}
             {props.useQaTabbedLayout && (props.isInspectionLogFeatureFlagActive || props.isQaPlannerFlagActive) && (
               <button
