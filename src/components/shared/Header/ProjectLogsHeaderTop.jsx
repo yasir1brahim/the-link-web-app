@@ -9,13 +9,12 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useContext(AuthContext);
 
-  const hasOtherActiveFlags = props.isSpecGptFlagActive || props.isSpecCenteredViewFlagActive || props.isDrawingsFlagActive;
-  const shouldShowTabs = props.isInspectionLogFeatureFlagActive && hasOtherActiveFlags;
+  const hasOtherActiveFlags = props.isSpecGptFlagActive || props.isSpecCenteredViewFlagActive || props.isDrawingsFlagActive || props.isInspectionLogFeatureFlagActive;
   
   return (
     <div className="header-wrapper-swap row mx-0 my-2" style={{ borderBottom: '1px solid #e0e0e0' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-        {shouldShowTabs && (
+        {hasOtherActiveFlags && (
           <div className="tab-container" style={{ display: 'flex', gap: '0' }}>
             <button
               className={`tab-button ${props.activeTab === 'submittal' ? 'active' : ''}`}
