@@ -315,13 +315,23 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   ];
 
   // Filter options for columns (include "Unknown" options if null values exist)
+  // Derive from API response, or fall back to extracting from current data
+  const sheetNumbers = allFilterVals.sheet_numbers?.length
+    ? allFilterVals.sheet_numbers
+    : [...new Set(drawingNotes.map((n) => n.sheet_number).filter(Boolean))];
+  const sheetTitles = allFilterVals.sheet_titles?.length
+    ? allFilterVals.sheet_titles
+    : [...new Set(drawingNotes.map((n) => n.sheet_title).filter(Boolean))];
+  const hasNullSheetNumber = allFilterVals.has_null_sheet_number ?? drawingNotes.some((n) => !n.sheet_number);
+  const hasNullSheetTitle = allFilterVals.has_null_sheet_title ?? drawingNotes.some((n) => !n.sheet_title);
+
   const sheetNumberOptions = [
-    ...(allFilterVals.has_null_sheet_number ? [{ value: UNKNOWN_FILTER_VALUE, label: 'Unknown Number' }] : []),
-    ...(allFilterVals.sheet_numbers || []).map((val) => ({ value: val, label: val })),
+    ...(hasNullSheetNumber ? [{ value: UNKNOWN_FILTER_VALUE, label: 'Unknown Number' }] : []),
+    ...sheetNumbers.map((val) => ({ value: val, label: val })),
   ];
   const sheetTitleOptions = [
-    ...(allFilterVals.has_null_sheet_title ? [{ value: UNKNOWN_FILTER_VALUE, label: 'Unknown Title' }] : []),
-    ...(allFilterVals.sheet_titles || []).map((val) => ({ value: val, label: val })),
+    ...(hasNullSheetTitle ? [{ value: UNKNOWN_FILTER_VALUE, label: 'Unknown Title' }] : []),
+    ...sheetTitles.map((val) => ({ value: val, label: val })),
   ];
 
   const filterOptions = {
