@@ -76,6 +76,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
       sortable: true,
       filterable: true,
       width: '15%',
+      render: (value) => value || 'Unknown Number',
     },
     {
       key: 'sheet_title',
@@ -83,6 +84,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
       sortable: true,
       filterable: true,
       width: '25%',
+      render: (value) => value || 'Unknown Title',
     },
     {
       key: 'category',
