@@ -16,14 +16,14 @@ const ImpersonationBanner = ({ userName }) => {
     localStorage.removeItem('userTeamRoles');
     localStorage.removeItem('isImpersonating');
 
-    // Redirect to login page
-    navigate('/login');
+    // Redirect to Django admin login page
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+    window.location.href = `${backendUrl}/admin/login/`;
   };
 
   return (
     <div className="impersonation-banner">
       <div className="impersonation-banner__content">
-        <span className="impersonation-banner__icon">👤</span>
         <span className="impersonation-banner__text">
           You are impersonating <strong>{userName || 'a user'}</strong>
         </span>

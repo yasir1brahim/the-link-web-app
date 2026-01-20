@@ -96,6 +96,8 @@ const router = createBrowserRouter([
   {
     path: "/link-expired",
     element: <ErrorBoundary><LinkExpired /></ErrorBoundary>,
+  },
+  {
     path: "/auth/impersonate",
     element: <ErrorBoundary><ImpersonateHandler /></ErrorBoundary>,
   },
