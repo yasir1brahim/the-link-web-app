@@ -19,6 +19,9 @@ import { ReactComponent as PlusUploadIcon } from '../../assets/images/plus-uploa
 import { ReactComponent as ExcelLogo } from '../../assets/images/microsoft-excel-symbol.svg';
 import './DrawingsTab.css';
 
+// Sentinel value for filtering records with null sheet_number or sheet_title
+const UNKNOWN_FILTER_VALUE = '__null__';
+
 const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   // Data state
   const [drawingNotes, setDrawingNotes] = useState([]);
@@ -27,6 +30,8 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     drawing_files: [],
     sheet_numbers: [],
     sheet_titles: [],
+    has_null_sheet_number: false,
+    has_null_sheet_title: false,
   });
   const [processingStatus, setProcessingStatus] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
@@ -75,6 +80,8 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
       header: 'Sheet Number',
       sortable: true,
       filterable: true,
+      filterValueKey: 'value',
+      filterLabelKey: 'label',
       width: '15%',
       render: (value) => value || 'Unknown Number',
     },
@@ -83,6 +90,8 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
       header: 'Sheet Title',
       sortable: true,
       filterable: true,
+      filterValueKey: 'value',
+      filterLabelKey: 'label',
       width: '25%',
       render: (value) => value || 'Unknown Title',
     },
@@ -108,10 +117,18 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
 
     setIsLoading(true);
     try {
+      // Handle special "unknown" filter values for null filtering
+      const sheetNumberFilter = columnFilters.sheet_number === UNKNOWN_FILTER_VALUE ? undefined : columnFilters.sheet_number;
+      const sheetTitleFilter = columnFilters.sheet_title === UNKNOWN_FILTER_VALUE ? undefined : columnFilters.sheet_title;
+      const sheetNumberIsNull = columnFilters.sheet_number === UNKNOWN_FILTER_VALUE;
+      const sheetTitleIsNull = columnFilters.sheet_title === UNKNOWN_FILTER_VALUE;
+
       const response = await getDrawingNotes(projectId, projectVersionId, {
         category: columnFilters.category || undefined,
-        sheetNumber: columnFilters.sheet_number || undefined,
-        sheetTitle: columnFilters.sheet_title || undefined,
+        sheetNumber: sheetNumberFilter || undefined,
+        sheetTitle: sheetTitleFilter || undefined,
+        sheetNumberIsNull: sheetNumberIsNull || undefined,
+        sheetTitleIsNull: sheetTitleIsNull || undefined,
         search: debouncedSearch || undefined,
         page,
         limit: rowsPerPage,
@@ -220,10 +237,18 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   const handleExport = async (format) => {
     if (format === 'excel') {
       try {
+        // Handle special "unknown" filter values for null filtering
+        const sheetNumberFilter = columnFilters.sheet_number === UNKNOWN_FILTER_VALUE ? undefined : columnFilters.sheet_number;
+        const sheetTitleFilter = columnFilters.sheet_title === UNKNOWN_FILTER_VALUE ? undefined : columnFilters.sheet_title;
+        const sheetNumberIsNull = columnFilters.sheet_number === UNKNOWN_FILTER_VALUE;
+        const sheetTitleIsNull = columnFilters.sheet_title === UNKNOWN_FILTER_VALUE;
+
         const response = await exportDrawingNotesToExcel(projectId, projectVersionId, {
           category: columnFilters.category || undefined,
-          sheetNumber: columnFilters.sheet_number || undefined,
-          sheetTitle: columnFilters.sheet_title || undefined,
+          sheetNumber: sheetNumberFilter || undefined,
+          sheetTitle: sheetTitleFilter || undefined,
+          sheetNumberIsNull: sheetNumberIsNull || undefined,
+          sheetTitleIsNull: sheetTitleIsNull || undefined,
           search: debouncedSearch || undefined,
         });
 
@@ -289,10 +314,19 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     },
   ];
 
-  // Filter options for columns
+  // Filter options for columns (include "Unknown" options if null values exist)
+  const sheetNumberOptions = [
+    ...(allFilterVals.has_null_sheet_number ? [{ value: UNKNOWN_FILTER_VALUE, label: 'Unknown Number' }] : []),
+    ...(allFilterVals.sheet_numbers || []).map((val) => ({ value: val, label: val })),
+  ];
+  const sheetTitleOptions = [
+    ...(allFilterVals.has_null_sheet_title ? [{ value: UNKNOWN_FILTER_VALUE, label: 'Unknown Title' }] : []),
+    ...(allFilterVals.sheet_titles || []).map((val) => ({ value: val, label: val })),
+  ];
+
   const filterOptions = {
-    sheet_number: allFilterVals.sheet_numbers || [],
-    sheet_title: allFilterVals.sheet_titles || [],
+    sheet_number: sheetNumberOptions,
+    sheet_title: sheetTitleOptions,
     category: allFilterVals.category || [],
   };
 

@@ -65,6 +65,8 @@ describe('DrawingsTab Integration', () => {
         ],
         sheet_numbers: ['A101', 'E201'],
         sheet_titles: ['Floor Plan - Level 1', 'Electrical Layout'],
+        has_null_sheet_number: false,
+        has_null_sheet_title: false,
       },
       total_count: 2,
       processing_status: null,
@@ -313,7 +315,14 @@ describe('DrawingsTab Integration', () => {
       api.getDrawingNotes.mockResolvedValue({
         data: {
           results: [],
-          all_filter_vals: { category: [], drawing_files: [], sheet_numbers: [], sheet_titles: [] },
+          all_filter_vals: {
+            category: [],
+            drawing_files: [],
+            sheet_numbers: [],
+            sheet_titles: [],
+            has_null_sheet_number: false,
+            has_null_sheet_title: false,
+          },
           total_count: 0,
           processing_status: null,
         },
