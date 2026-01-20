@@ -346,4 +346,373 @@ describe('DrawingsTab Integration', () => {
       expect(screen.getByTestId('table-loading')).toBeInTheDocument();
     });
   });
+
+  describe('Sheet Number and Title Filtering', () => {
+    const mockDataWithNulls = [
+      {
+        id: 1,
+        sheet_number: 'A101',
+        sheet_title: 'Floor Plan',
+        drawing_file_url: 'https://example.com/floor.pdf',
+        drawing_file_id: 101,
+        category: 'Architectural',
+        text: 'Note 1',
+        bounding_box: [100, 200, 300, 400],
+        page_number: 1,
+      },
+      {
+        id: 2,
+        sheet_number: null,
+        sheet_title: null,
+        drawing_file_url: 'https://example.com/other.pdf',
+        drawing_file_id: 102,
+        category: 'General',
+        text: 'Note 2',
+        bounding_box: [50, 100, 150, 200],
+        page_number: 1,
+      },
+    ];
+
+    const mockResponseWithNulls = {
+      data: {
+        results: mockDataWithNulls,
+        all_filter_vals: {
+          category: ['Architectural', 'General'],
+          drawing_files: [
+            { id: 101, name: 'Floor Plan.pdf' },
+            { id: 102, name: 'Other.pdf' },
+          ],
+          sheet_numbers: ['A101'],
+          sheet_titles: ['Floor Plan'],
+          has_null_sheet_number: true,
+          has_null_sheet_title: true,
+        },
+        total_count: 2,
+        processing_status: null,
+      },
+    };
+
+    // Helper to get filter icon by column index (0-based)
+    const getFilterIconByColumnIndex = (container, index) => {
+      const filterIcons = container.querySelectorAll('[data-testid="filter-icon"]');
+      return filterIcons[index];
+    };
+
+    it('shows Unknown Number option when has_null_sheet_number is true', async () => {
+      api.getDrawingNotes.mockResolvedValue(mockResponseWithNulls);
+
+      const { container } = render(<DrawingsTab {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(container.querySelector('tbody tr')).toBeInTheDocument();
+      });
+
+      // Click the filter icon for Sheet Number column (first filterable column, index 0)
+      const filterIcon = getFilterIconByColumnIndex(container, 0);
+      fireEvent.click(filterIcon);
+
+      await waitFor(() => {
+        const popover = document.querySelector('.dt-filter-popover');
+        expect(popover).toBeInTheDocument();
+        expect(popover.textContent).toContain('Unknown Number');
+      });
+    });
+
+    it('shows Unknown Title option when has_null_sheet_title is true', async () => {
+      api.getDrawingNotes.mockResolvedValue(mockResponseWithNulls);
+
+      const { container } = render(<DrawingsTab {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(container.querySelector('tbody tr')).toBeInTheDocument();
+      });
+
+      // Click the filter icon for Sheet Title column (second filterable column, index 1)
+      const filterIcon = getFilterIconByColumnIndex(container, 1);
+      fireEvent.click(filterIcon);
+
+      await waitFor(() => {
+        const popover = document.querySelector('.dt-filter-popover');
+        expect(popover).toBeInTheDocument();
+        expect(popover.textContent).toContain('Unknown Title');
+      });
+    });
+
+    it('filters by unknown sheet number when selected', async () => {
+      api.getDrawingNotes.mockResolvedValue(mockResponseWithNulls);
+
+      const { container } = render(<DrawingsTab {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(container.querySelector('tbody tr')).toBeInTheDocument();
+      });
+
+      // Click the filter icon for Sheet Number column
+      const filterIcon = getFilterIconByColumnIndex(container, 0);
+      fireEvent.click(filterIcon);
+
+      await waitFor(() => {
+        const popover = document.querySelector('.dt-filter-popover');
+        expect(popover).toBeInTheDocument();
+      });
+
+      // Select "Unknown Number" from the popover
+      const popover = document.querySelector('.dt-filter-popover');
+      const unknownNumberOption = Array.from(popover.querySelectorAll('.dt-filter-option'))
+        .find(el => el.textContent === 'Unknown Number');
+      fireEvent.click(unknownNumberOption);
+
+      await waitFor(() => {
+        expect(api.getDrawingNotes).toHaveBeenCalledWith(
+          1,
+          1,
+          expect.objectContaining({
+            sheetNumberIsNull: true,
+          })
+        );
+      });
+    });
+
+    it('filters by unknown sheet title when selected', async () => {
+      api.getDrawingNotes.mockResolvedValue(mockResponseWithNulls);
+
+      const { container } = render(<DrawingsTab {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(container.querySelector('tbody tr')).toBeInTheDocument();
+      });
+
+      // Click the filter icon for Sheet Title column
+      const filterIcon = getFilterIconByColumnIndex(container, 1);
+      fireEvent.click(filterIcon);
+
+      await waitFor(() => {
+        const popover = document.querySelector('.dt-filter-popover');
+        expect(popover).toBeInTheDocument();
+      });
+
+      // Select "Unknown Title" from the popover
+      const popover = document.querySelector('.dt-filter-popover');
+      const unknownTitleOption = Array.from(popover.querySelectorAll('.dt-filter-option'))
+        .find(el => el.textContent === 'Unknown Title');
+      fireEvent.click(unknownTitleOption);
+
+      await waitFor(() => {
+        expect(api.getDrawingNotes).toHaveBeenCalledWith(
+          1,
+          1,
+          expect.objectContaining({
+            sheetTitleIsNull: true,
+          })
+        );
+      });
+    });
+
+    it('derives filter options from data when API does not provide them', async () => {
+      // API response without sheet_numbers/sheet_titles in all_filter_vals
+      const mockResponseWithoutFilterVals = {
+        data: {
+          results: mockDataWithNulls,
+          all_filter_vals: {
+            category: ['Architectural', 'General'],
+            drawing_files: [],
+            // No sheet_numbers or sheet_titles provided
+          },
+          total_count: 2,
+          processing_status: null,
+        },
+      };
+
+      api.getDrawingNotes.mockResolvedValue(mockResponseWithoutFilterVals);
+
+      const { container } = render(<DrawingsTab {...defaultProps} />);
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(container.querySelector('tbody tr')).toBeInTheDocument();
+      });
+
+      // Wait a bit for the filter icons to render
+      await waitFor(() => {
+        expect(container.querySelectorAll('[data-testid="filter-icon"]').length).toBeGreaterThan(0);
+      });
+
+      // Click the filter icon for Sheet Number column
+      const filterIcons = container.querySelectorAll('[data-testid="filter-icon"]');
+      fireEvent.click(filterIcons[0]);
+
+      // Should show "Unknown Number" (derived from null in data)
+      await waitFor(() => {
+        const popover = document.querySelector('.dt-filter-popover');
+        expect(popover).toBeInTheDocument();
+        expect(popover.textContent).toContain('Unknown Number');
+      });
+    });
+  });
+
+  describe('Filter Clearing', () => {
+    it('clears all filters when Clear Filters is clicked', async () => {
+      api.getDrawingNotes.mockResolvedValue(mockApiResponse);
+
+      const { container } = render(<DrawingsTab {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('A101')).toBeInTheDocument();
+      });
+
+      // Apply a category filter first (third filterable column, index 2)
+      const filterIcons = container.querySelectorAll('[data-testid="filter-icon"]');
+      fireEvent.click(filterIcons[2]); // Category column
+
+      await waitFor(() => {
+        expect(document.querySelector('.dt-filter-popover')).toBeInTheDocument();
+      });
+
+      // Find "Architectural" in the filter popover
+      const filterPopover = document.querySelector('.dt-filter-popover');
+      const architecturalOption = Array.from(filterPopover.querySelectorAll('.dt-filter-option'))
+        .find(el => el.textContent === 'Architectural');
+      fireEvent.click(architecturalOption);
+
+      // Clear filters button should appear
+      await waitFor(() => {
+        expect(screen.getByText('Clear Filters')).toBeInTheDocument();
+      });
+
+      // Clear the mock calls to track new calls
+      api.getDrawingNotes.mockClear();
+
+      fireEvent.click(screen.getByText('Clear Filters'));
+
+      // Verify API is called without any filters
+      await waitFor(() => {
+        expect(api.getDrawingNotes).toHaveBeenCalledWith(
+          1,
+          1,
+          expect.objectContaining({
+            category: undefined,
+            sheetNumber: undefined,
+            sheetTitle: undefined,
+            sheetNumberIsNull: undefined,
+            sheetTitleIsNull: undefined,
+          })
+        );
+      });
+    });
+  });
+
+  describe('Export with Filters', () => {
+    it('exports with sheet number filter applied', async () => {
+      api.getDrawingNotes.mockResolvedValue(mockApiResponse);
+      api.exportDrawingNotesToExcel.mockResolvedValue({
+        data: new ArrayBuffer(8),
+      });
+
+      global.URL.createObjectURL = jest.fn(() => 'blob:test');
+      global.URL.revokeObjectURL = jest.fn();
+
+      const { container } = render(<DrawingsTab {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('A101')).toBeInTheDocument();
+      });
+
+      // Apply sheet number filter (first filterable column, index 0)
+      const filterIcons = container.querySelectorAll('[data-testid="filter-icon"]');
+      fireEvent.click(filterIcons[0]);
+
+      await waitFor(() => {
+        expect(document.querySelector('.dt-filter-popover')).toBeInTheDocument();
+      });
+
+      // Find A101 option in the filter popover (skip "All" which is first)
+      const filterOptions = document.querySelectorAll('.dt-filter-option');
+      // filterOptions[0] is "All", filterOptions[1] is "A101"
+      fireEvent.click(filterOptions[1]);
+
+      // Export
+      await waitFor(() => {
+        expect(screen.getByText('Export')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('Export'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Excel')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('Excel'));
+
+      await waitFor(() => {
+        expect(api.exportDrawingNotesToExcel).toHaveBeenCalledWith(
+          1,
+          1,
+          expect.objectContaining({
+            sheetNumber: 'A101',
+          })
+        );
+      });
+    });
+
+    it('exports with unknown sheet number filter applied', async () => {
+      const mockResponseWithNulls = {
+        data: {
+          results: mockDrawingNotes,
+          all_filter_vals: {
+            ...mockApiResponse.data.all_filter_vals,
+            has_null_sheet_number: true,
+          },
+          total_count: 2,
+          processing_status: null,
+        },
+      };
+
+      api.getDrawingNotes.mockResolvedValue(mockResponseWithNulls);
+      api.exportDrawingNotesToExcel.mockResolvedValue({
+        data: new ArrayBuffer(8),
+      });
+
+      global.URL.createObjectURL = jest.fn(() => 'blob:test');
+      global.URL.revokeObjectURL = jest.fn();
+
+      const { container } = render(<DrawingsTab {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('A101')).toBeInTheDocument();
+      });
+
+      // Apply unknown sheet number filter
+      const filterIcons = container.querySelectorAll('[data-testid="filter-icon"]');
+      fireEvent.click(filterIcons[0]);
+
+      await waitFor(() => {
+        expect(screen.getByText('Unknown Number')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('Unknown Number'));
+
+      // Export
+      await waitFor(() => {
+        expect(screen.getByText('Export')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('Export'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Excel')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('Excel'));
+
+      await waitFor(() => {
+        expect(api.exportDrawingNotesToExcel).toHaveBeenCalledWith(
+          1,
+          1,
+          expect.objectContaining({
+            sheetNumberIsNull: true,
+          })
+        );
+      });
+    });
+  });
 });
