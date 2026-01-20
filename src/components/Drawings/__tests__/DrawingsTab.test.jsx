@@ -32,7 +32,8 @@ describe('DrawingsTab Integration', () => {
   const mockDrawingNotes = [
     {
       id: 1,
-      drawing_file_name: 'Floor Plan.pdf',
+      sheet_number: 'A101',
+      sheet_title: 'Floor Plan - Level 1',
       drawing_file_url: 'https://example.com/floor.pdf',
       drawing_file_id: 101,
       category: 'Architectural',
@@ -42,7 +43,8 @@ describe('DrawingsTab Integration', () => {
     },
     {
       id: 2,
-      drawing_file_name: 'Electrical.pdf',
+      sheet_number: 'E201',
+      sheet_title: 'Electrical Layout',
       drawing_file_url: 'https://example.com/electrical.pdf',
       drawing_file_id: 102,
       category: 'Electrical',
@@ -61,6 +63,8 @@ describe('DrawingsTab Integration', () => {
           { id: 101, name: 'Floor Plan.pdf' },
           { id: 102, name: 'Electrical.pdf' },
         ],
+        sheet_numbers: ['A101', 'E201'],
+        sheet_titles: ['Floor Plan - Level 1', 'Electrical Layout'],
       },
       total_count: 2,
       processing_status: null,
@@ -83,8 +87,8 @@ describe('DrawingsTab Integration', () => {
       render(<DrawingsTab {...defaultProps} />);
 
       await waitFor(() => {
-        expect(screen.getByText('Floor Plan.pdf')).toBeInTheDocument();
-        expect(screen.getByText('Electrical.pdf')).toBeInTheDocument();
+        expect(screen.getByText('A101')).toBeInTheDocument();
+        expect(screen.getByText('E201')).toBeInTheDocument();
       });
     });
 
@@ -134,10 +138,10 @@ describe('DrawingsTab Integration', () => {
       render(<DrawingsTab {...defaultProps} />);
 
       await waitFor(() => {
-        expect(screen.getByText('Floor Plan.pdf')).toBeInTheDocument();
+        expect(screen.getByText('A101')).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByText('Floor Plan.pdf'));
+      fireEvent.click(screen.getByText('A101'));
 
       await waitFor(() => {
         expect(screen.getByTestId('pdf-wrapper')).toBeInTheDocument();
@@ -148,7 +152,7 @@ describe('DrawingsTab Integration', () => {
       const { container } = render(<DrawingsTab {...defaultProps} />);
 
       await waitFor(() => {
-        expect(screen.getByText('Floor Plan.pdf')).toBeInTheDocument();
+        expect(screen.getByText('A101')).toBeInTheDocument();
       });
 
       // Click on the row in the table
@@ -309,7 +313,7 @@ describe('DrawingsTab Integration', () => {
       api.getDrawingNotes.mockResolvedValue({
         data: {
           results: [],
-          all_filter_vals: { category: [], drawing_files: [] },
+          all_filter_vals: { category: [], drawing_files: [], sheet_numbers: [], sheet_titles: [] },
           total_count: 0,
           processing_status: null,
         },

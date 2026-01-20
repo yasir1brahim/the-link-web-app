@@ -25,6 +25,8 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   const [allFilterVals, setAllFilterVals] = useState({
     category: [],
     drawing_files: [],
+    sheet_numbers: [],
+    sheet_titles: [],
   });
   const [processingStatus, setProcessingStatus] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
@@ -38,7 +40,8 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
 
   // Filter state (column-based)
   const [columnFilters, setColumnFilters] = useState({
-    drawing_file_id: null,
+    sheet_number: null,
+    sheet_title: null,
     category: null,
   });
   const [searchQuery, setSearchQuery] = useState('');
@@ -68,27 +71,32 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   // Column configuration
   const columns = [
     {
-      key: 'drawing_file_name',
-      header: 'Drawing File',
+      key: 'sheet_number',
+      header: 'Sheet Number',
       sortable: true,
       filterable: true,
-      filterValueKey: 'id',
-      filterLabelKey: 'name',
-      width: '30%',
+      width: '15%',
+    },
+    {
+      key: 'sheet_title',
+      header: 'Sheet Title',
+      sortable: true,
+      filterable: true,
+      width: '25%',
     },
     {
       key: 'category',
       header: 'Category',
       sortable: true,
       filterable: true,
-      width: '20%',
+      width: '15%',
     },
     {
       key: 'text',
       header: 'Text',
       sortable: true,
       filterable: false,
-      width: '50%',
+      width: '45%',
     },
   ];
 
@@ -100,7 +108,8 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     try {
       const response = await getDrawingNotes(projectId, projectVersionId, {
         category: columnFilters.category || undefined,
-        drawingFileId: columnFilters.drawing_file_id || undefined,
+        sheetNumber: columnFilters.sheet_number || undefined,
+        sheetTitle: columnFilters.sheet_title || undefined,
         search: debouncedSearch || undefined,
         page,
         limit: rowsPerPage,
@@ -110,7 +119,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
 
       setDrawingNotes(response?.data?.results || []);
       // Only update filter options when no filters are applied (preserves full list)
-      const hasFilters = columnFilters.category || columnFilters.drawing_file_id || debouncedSearch;
+      const hasFilters = columnFilters.category || columnFilters.sheet_number || columnFilters.sheet_title || debouncedSearch;
       if (!hasFilters && response?.data?.all_filter_vals) {
         setAllFilterVals(response.data.all_filter_vals);
       }
@@ -174,11 +183,9 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   };
 
   const handleFilter = (columnKey, value) => {
-    // Map column key to filter key
-    const filterKey = columnKey === 'drawing_file_name' ? 'drawing_file_id' : columnKey;
     setColumnFilters((prev) => ({
       ...prev,
-      [filterKey]: value,
+      [columnKey]: value,
     }));
     setPage(1);
     setSelectedNote(null);
@@ -191,7 +198,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   };
 
   const handleClearFilters = () => {
-    setColumnFilters({ drawing_file_id: null, category: null });
+    setColumnFilters({ sheet_number: null, sheet_title: null, category: null });
     setSearchQuery('');
     setPage(1);
     setSelectedNote(null);
@@ -213,7 +220,8 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
       try {
         const response = await exportDrawingNotesToExcel(projectId, projectVersionId, {
           category: columnFilters.category || undefined,
-          drawingFileId: columnFilters.drawing_file_id || undefined,
+          sheetNumber: columnFilters.sheet_number || undefined,
+          sheetTitle: columnFilters.sheet_title || undefined,
           search: debouncedSearch || undefined,
         });
 
@@ -281,18 +289,20 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
 
   // Filter options for columns
   const filterOptions = {
-    drawing_file_name: allFilterVals.drawing_files || [],
+    sheet_number: allFilterVals.sheet_numbers || [],
+    sheet_title: allFilterVals.sheet_titles || [],
     category: allFilterVals.category || [],
   };
 
-  // Map column filters for DataTable (convert drawing_file_id back to drawing_file_name)
+  // Map column filters for DataTable
   const tableColumnFilters = {
-    drawing_file_name: columnFilters.drawing_file_id,
+    sheet_number: columnFilters.sheet_number,
+    sheet_title: columnFilters.sheet_title,
     category: columnFilters.category,
   };
 
   const hasActiveFilters =
-    columnFilters.drawing_file_id || columnFilters.category || searchQuery;
+    columnFilters.sheet_number || columnFilters.sheet_title || columnFilters.category || searchQuery;
 
   const showPdfViewer = selectedNote && pdfData.url;
 
@@ -396,7 +406,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
             <PdfViewerPane
               pdfData={pdfData}
               setPdfData={setPdfData}
-              title={selectedNote.drawing_file_name}
+              title={[selectedNote.sheet_number, selectedNote.sheet_title].filter(Boolean).join(' - ') || 'Unknown Drawing'}
               onClose={handleClosePdf}
               isLoading={pdfLoading}
               setLoading={setPdfLoading}

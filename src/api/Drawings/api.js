@@ -7,7 +7,8 @@ import handleError from "../../config/errorHandler";
  * @param {number} projectVersionId - Project version ID
  * @param {Object} options - Query options
  * @param {string} options.category - Category filter
- * @param {number} options.drawingFileId - Drawing file ID filter
+ * @param {string} options.sheetNumber - Sheet number filter (exact match)
+ * @param {string} options.sheetTitle - Sheet title filter (case-insensitive substring)
  * @param {string} options.search - Search text
  * @param {number} options.page - Page number (1-indexed)
  * @param {number} options.limit - Items per page
@@ -18,7 +19,7 @@ import handleError from "../../config/errorHandler";
 export const getDrawingNotes = async (
   projectId,
   projectVersionId,
-  { category, drawingFileId, search, page = 1, limit = 25, sortColumn, sortDirection } = {}
+  { category, sheetNumber, sheetTitle, search, page = 1, limit = 25, sortColumn, sortDirection } = {}
 ) => {
   try {
     return await axiosInstance({
@@ -27,7 +28,8 @@ export const getDrawingNotes = async (
       params: {
         project_version_id: projectVersionId,
         ...(category && { category }),
-        ...(drawingFileId && { drawing_file_id: drawingFileId }),
+        ...(sheetNumber && { sheet_number: sheetNumber }),
+        ...(sheetTitle && { sheet_title: sheetTitle }),
         ...(search && { search }),
         page,
         limit,
@@ -47,14 +49,15 @@ export const getDrawingNotes = async (
  * @param {number} projectVersionId - Project version ID
  * @param {Object} options - Query options (same filters as list endpoint)
  * @param {string} options.category - Category filter
- * @param {number} options.drawingFileId - Drawing file ID filter
+ * @param {string} options.sheetNumber - Sheet number filter (exact match)
+ * @param {string} options.sheetTitle - Sheet title filter (case-insensitive substring)
  * @param {string} options.search - Search text
  * @returns {Promise} API response with arraybuffer data
  */
 export const exportDrawingNotesToExcel = async (
   projectId,
   projectVersionId,
-  { category, drawingFileId, search } = {}
+  { category, sheetNumber, sheetTitle, search } = {}
 ) => {
   try {
     return await axiosInstance({
@@ -64,7 +67,8 @@ export const exportDrawingNotesToExcel = async (
       params: {
         project_version_id: projectVersionId,
         ...(category && { category }),
-        ...(drawingFileId && { drawing_file_id: drawingFileId }),
+        ...(sheetNumber && { sheet_number: sheetNumber }),
+        ...(sheetTitle && { sheet_title: sheetTitle }),
         ...(search && { search }),
       },
     });
