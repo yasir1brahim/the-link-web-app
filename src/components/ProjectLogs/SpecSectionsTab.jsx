@@ -6,7 +6,7 @@ import { ReactComponent as DownloadIcon } from "../../assets/images/file-downloa
 import StyledTooltip from "../shared/StyledTooltip/StyledTooltip";
 import { getSpecSections, bulkDownloadSpecSections } from "../../api/ProjectLogs/api";
 
-const SpecSectionsTab = ({ projectId, projectVersionId }) => {
+const SpecSectionsTab = ({ projectId, projectVersionId, refreshTrigger }) => {
   const [specSections, setSpecSections] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -16,7 +16,7 @@ const SpecSectionsTab = ({ projectId, projectVersionId }) => {
     if (projectId) {
       fetchSpecSections();
     }
-  }, [projectId, projectVersionId]);
+  }, [projectId, projectVersionId, refreshTrigger]);
 
   const fetchSpecSections = async () => {
     setIsLoading(true);

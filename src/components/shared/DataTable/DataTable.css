@@ -1,0 +1,406 @@
+/* DataTable Shared Component Styles */
+
+/* CSS Variables */
+:root {
+  --dt-row-hover: #f5f5f5;
+  --dt-row-selected: #e3f2fd;
+  --dt-row-alt: #fafafa;
+  --dt-border-color: #e0e0e0;
+  --dt-header-bg: #fff;
+  --dt-primary: #1976d2;
+}
+
+/* Table Wrapper */
+.dt-wrapper {
+  border: 1px solid rgba(229, 231, 235, 1);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.06),
+              0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  max-height: calc(100vh - 280px);
+  margin-bottom: 10px;
+  overflow: auto;
+}
+
+/* Table Base */
+.dt-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dt-table th {
+  background: var(--dt-header-bg);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 5px;
+  text-align: left;
+  border-bottom: 1px solid var(--dt-border-color);
+}
+
+.dt-table td {
+  font-size: 13px;
+  padding: 4px 5px;
+  color: rgba(14, 35, 50, 1);
+  line-height: 1.3;
+}
+
+.dt-table tbody tr {
+  background: #fff;
+  cursor: pointer;
+}
+
+.dt-table tbody tr:nth-child(even) {
+  background: var(--dt-row-alt);
+}
+
+.dt-table tbody tr:hover {
+  background: var(--dt-row-hover);
+}
+
+.dt-table tbody tr.dt-row-selected {
+  background: var(--dt-row-selected);
+}
+
+/* Header Cell with Icons */
+.dt-header-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dt-header-cell .dt-sort-icon,
+.dt-header-cell .dt-filter-icon {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.dt-header-cell .dt-sort-icon:hover,
+.dt-header-cell .dt-filter-icon:hover {
+  opacity: 1;
+}
+
+.dt-header-cell .dt-filter-icon.active,
+.dt-header-cell .dt-sort-icon.active {
+  opacity: 1;
+  color: var(--dt-primary);
+}
+
+.dt-header-sortable {
+  cursor: pointer;
+}
+
+.dt-header-sortable:hover {
+  color: var(--dt-primary);
+}
+
+/* Toolbar */
+.dt-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dt-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dt-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Export Dropdown */
+.dt-export-btn {
+  background: #dadee6;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #231F20;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dt-export-btn:hover {
+  background: #e0eaf7;
+}
+
+/* Close PDF Button */
+.dt-close-pdf-btn {
+  background: #dadee6;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #231F20;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dt-close-pdf-btn:hover {
+  background: #e0eaf7;
+}
+
+/* Clear Filters Button */
+.dt-clear-filters-btn {
+  background: #dadee6;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #231F20;
+  cursor: pointer;
+}
+
+.dt-clear-filters-btn:hover {
+  background: #e0eaf7;
+}
+
+/* Count Display */
+.dt-count-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.dt-count-item {
+  color: #676f74;
+}
+
+.dt-count-item.clickable {
+  cursor: pointer;
+  color: var(--dt-primary);
+}
+
+.dt-count-item.clickable:hover {
+  text-decoration: underline;
+}
+
+.dt-count-separator {
+  color: #ccc;
+}
+
+/* Search Input */
+.dt-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dt-search-input {
+  height: 32px;
+  border: none;
+  border-bottom: 2px solid #e2e2e2;
+  outline: none;
+  border-radius: 3px 3px 0 0;
+  font-size: 14px;
+  color: #676f74;
+  background-color: #ffffff;
+  padding: 8px 8px 8px 36px;
+  transition: border-color 0.3s ease;
+  width: 200px;
+}
+
+.dt-search-input:focus {
+  border-color: var(--dt-primary);
+}
+
+.dt-search-icon {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.dt-search-clear {
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 4px;
+}
+
+.dt-search-collapsed {
+  width: 32px;
+  height: 32px;
+  background: #f4f7fb;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Upload Button - Blue variant */
+.dt-upload-btn {
+  background: var(--dt-primary);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dt-upload-btn:hover {
+  background: #1565c0;
+}
+
+/* Upload Button - Yellow variant (matches Submittal Log) */
+.dt-upload-btn-yellow {
+  background: #d5e73e;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #231F20;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.dt-upload-btn-yellow:hover {
+  background: #c9db32;
+}
+
+.dt-upload-btn-yellow svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Pagination */
+.dt-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 12px 0;
+  gap: 16px;
+}
+
+/* Filter Popover */
+.dt-filter-popover {
+  position: absolute;
+  background: #fff;
+  border: 1px solid var(--dt-border-color);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  min-width: 150px;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.dt-filter-option {
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.dt-filter-option:hover {
+  background: #f5f5f5;
+}
+
+.dt-filter-option.selected {
+  background: var(--dt-row-selected);
+}
+
+/* Loading & Empty States */
+.dt-loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.dt-empty {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+/* PDF Viewer Pane */
+.dt-pdf-pane {
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 200px);
+  border-left: 1px solid var(--dt-border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.dt-pdf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--dt-border-color);
+  background: #f5f5f5;
+}
+
+.dt-pdf-title {
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  margin-right: 8px;
+}
+
+.dt-pdf-nav {
+  display: flex;
+  gap: 4px;
+}
+
+.dt-pdf-nav button {
+  background: #fff;
+  border: 1px solid var(--dt-border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.dt-pdf-nav button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dt-pdf-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.dt-pdf-content {
+  flex: 1;
+  overflow: hidden;
+}

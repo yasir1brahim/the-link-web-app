@@ -597,15 +597,33 @@ const ProjectLogs = () => {
   // Handle activeTab changes from URL parameters
   useEffect(() => {
     const tabFromUrl = searchParams.get("tab");
-    if (tabFromUrl) {
-      // Support 'compass' for backwards compatibility, map it to 'assistant'
-      if (tabFromUrl === 'compass') {
-        setActiveTab('assistant');
-      } else if (tabFromUrl === 'submittal' || tabFromUrl === 'assistant' || tabFromUrl === 'spec-view' || tabFromUrl === 'drawings') {
-        setActiveTab(tabFromUrl);
-      }
+
+    if (!tabFromUrl || !teamId) {
+      return;
     }
-  }, [searchParams]);
+
+    const targetTab = tabFromUrl === 'compass' ? 'assistant' : tabFromUrl;
+
+    const tabAccessRules = {
+      'submittal': () => true,
+      'assistant': () => isSpecGptFlagActive(teamId),
+      'spec-view': () => isSpecCenteredViewFlagActive(teamId),
+      'drawings': () => isDrawingsFlagActive(teamId),
+      'inspection-qa': () => USE_TABBED_QA_LAYOUT && (isInspectionLogFlagActive(teamId) || isQaPlannerFlagActive(teamId))
+    };
+
+    const hasAccess = tabAccessRules[targetTab]?.() || false;
+
+    if (hasAccess) {
+      setActiveTab(targetTab);
+    } else {
+      console.log(`Access denied or invalid tab: ${targetTab}. Redirecting to submittal tab.`);
+      setActiveTab('submittal');
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.set("tab", "submittal");
+      navigate(`/project-logs?${newSearchParams.toString()}`, { replace: true });
+    }
+  }, [searchParams, teamId, isSpecGptFlagActive, isSpecCenteredViewFlagActive, isDrawingsFlagActive, isInspectionLogFlagActive, isQaPlannerFlagActive]);
 
   // Update URL when activeTab changes manually
   useEffect(() => {
@@ -2008,7 +2026,7 @@ const ProjectLogs = () => {
               </div>
             </div>
           </div>}
-          {activeTab == 'assistant' &&
+          {activeTab === 'assistant' && isSpecGptFlagActive(teamId) &&
             <>
             <div className="compass-chat-viewport">
               <ProcessingIndicator
@@ -2043,7 +2061,7 @@ const ProjectLogs = () => {
               </div>
             </>
           }
-          {activeTab == 'inspection-qa' && USE_TABBED_QA_LAYOUT &&
+          {activeTab === 'inspection-qa' && USE_TABBED_QA_LAYOUT && (isInspectionLogFlagActive(teamId) || isQaPlannerFlagActive(teamId)) &&
             <>
             <div className="compass-chat-viewport">
               <ProcessingIndicator
@@ -2064,7 +2082,7 @@ const ProjectLogs = () => {
               </div>
             </>
           }
-          {activeTab == 'spec-view' &&
+          {activeTab === 'spec-view' && isSpecCenteredViewFlagActive(teamId) &&
             <>
             <SpecViewer
               projectId={projectId}
@@ -2073,7 +2091,7 @@ const ProjectLogs = () => {
             />
             </>
           }
-          {activeTab === 'drawings' &&
+          {activeTab === 'drawings' && isDrawingsFlagActive(teamId) &&
             <ErrorBoundary>
               <DrawingsTab
                 projectId={projectId}
