@@ -2032,7 +2032,7 @@ const ProjectLogs = () => {
               </div>
             </div>
           </div>}
-          {activeTab == 'assistant' && isSpecGptFlagActive(teamId) &&
+          {activeTab === 'assistant' && isSpecGptFlagActive(teamId) &&
             <>
             <div className="compass-chat-viewport">
               <AssistantReprocessBanner
@@ -2072,7 +2072,7 @@ const ProjectLogs = () => {
               </div>
             </>
           }
-          {activeTab == 'inspection-qa' && USE_TABBED_QA_LAYOUT && (isInspectionLogFlagActive(teamId) || isQaPlannerFlagActive(teamId)) &&
+          {activeTab === 'inspection-qa' && USE_TABBED_QA_LAYOUT && (isInspectionLogFlagActive(teamId) || isQaPlannerFlagActive(teamId)) &&
             <>
             <div className="compass-chat-viewport">
               <ProcessingIndicator
@@ -2093,7 +2093,7 @@ const ProjectLogs = () => {
               </div>
             </>
           }
-          {activeTab == 'spec-view' && isSpecCenteredViewFlagActive(teamId) &&
+          {activeTab === 'spec-view' && isSpecCenteredViewFlagActive(teamId) &&
             <>
             <SpecViewer
               projectId={projectId}
