@@ -109,10 +109,197 @@ const getSpecSectionSubmittals = async (projectId, sectionId, projectVersionId =
     }
 };
 
+/**
+ * Create a manual highlight (ExtractedData) entry
+ * @param {number} projectId - The project ID
+ * @param {object} payload - Highlight payload matching ExtractedDataCreateSerializer
+ * @returns {Promise} API response
+ */
+const createManualHighlight = async (projectId, payload) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/${projectId}/extracted-data/`,
+            data: payload,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+/**
+ * Create a new note on an ExtractedData
+ * @param {number} projectId - The project ID
+ * @param {number} extractedDataId - The extracted data ID
+ * @param {object} noteData - Note data (text, etc.)
+ * @returns {Promise} API response
+ */
+const createExtractionNote = async (projectId, extractedDataId, noteData) => {
+    try {
+        const { data } = await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/${projectId}/extracted-data/${extractedDataId}/notes/`,
+            data: noteData,
+        });
+
+        return data;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+/**
+ * Update an existing note
+ * @param {number} projectId - The project ID
+ * @param {number} extractedDataId - The extracted data ID
+ * @param {number} noteId - The note ID
+ * @param {object} noteData - Updated note data
+ * @returns {Promise} API response
+ */
+const updateExtractionNote = async (projectId, extractedDataId, noteId, noteData) => {
+    try {
+        const { data } = await axiosInstance({
+            method: 'patch',
+            url: `/api/deliverables/${projectId}/extracted-data/${extractedDataId}/notes/${noteId}/`,
+            data: noteData,
+        });
+
+        return data;
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+/**
+ * Delete a note
+ * @param {number} projectId - The project ID
+ * @param {number} extractedDataId - The extracted data ID
+ * @param {number} noteId - The note ID
+ * @returns {Promise} API response
+ */
+const deleteExtractionNote = async (projectId, extractedDataId, noteId) => {
+    try {
+        await axiosInstance({
+            method: 'delete',
+            url: `/api/deliverables/${projectId}/extracted-data/${extractedDataId}/notes/${noteId}/`,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+// Custom item type helpers
+const getCustomItemTypes = async (projectId) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/projects/${projectId}/custom-item-types/`,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+const createCustomItemType = async (projectId, payload) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/projects/${projectId}/custom-item-types/`,
+            data: payload,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+const updateCustomItemType = async (projectId, typeId, payload) => {
+    try {
+        return await axiosInstance({
+            method: 'patch',
+            url: `/api/deliverables/projects/${projectId}/custom-item-types/${typeId}/`,
+            data: payload,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+const deleteCustomItemType = async (projectId, typeId) => {
+    try {
+        return await axiosInstance({
+            method: 'delete',
+            url: `/api/deliverables/projects/${projectId}/custom-item-types/${typeId}/`,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+const getCustomTypeColorPalette = async (projectId) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/projects/${projectId}/custom-item-types/color-palette/`,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
+// User highlight preference helpers
+const getUserHighlightPreference = async (projectId) => {
+    try {
+        return await axiosInstance({
+            method: 'get',
+            url: `/api/deliverables/projects/${projectId}/highlight-preference/`,
+        });
+    } catch (error) {
+        // Return null if no preference exists (404)
+        if (error.response && error.response.status === 404) {
+            return null;
+        }
+        handleError(error);
+        throw error;
+    }
+};
+
+const setUserHighlightPreference = async (projectId, payload) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/projects/${projectId}/highlight-preference/`,
+            data: payload,
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
+    }
+};
+
 export {
     getSpecSections,
     getSpecSectionContent,
     getSubmittalHighlights,
     getSpecCentricData,
-    getSpecSectionSubmittals
+    getSpecSectionSubmittals,
+    createManualHighlight,
+    createExtractionNote,
+    updateExtractionNote,
+    deleteExtractionNote,
+    getCustomItemTypes,
+    createCustomItemType,
+    updateCustomItemType,
+    deleteCustomItemType,
+    getCustomTypeColorPalette,
+    getUserHighlightPreference,
+    setUserHighlightPreference
 };

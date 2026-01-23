@@ -198,3 +198,245 @@
 .spec-viewer-pdf-wrapper #pdf-div > div {
   height: calc(100vh - 180px) !important;
 }
+
+/* Manual Highlight Picker */
+.highlight-picker-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(17, 24, 39, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 30;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.highlight-picker-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.15);
+  padding: 28px;
+  max-width: 440px;
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.highlight-picker-modal h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  color: #0f172a;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.highlight-picker-context {
+  margin: 0 0 16px 0;
+  font-size: 0.95rem;
+  color: #334155;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(59, 130, 246, 0.08));
+  border-left: 4px solid #3b82f6;
+  padding: 12px 14px;
+  border-radius: 6px;
+  max-height: 140px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.highlight-picker-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+  overflow-y: auto;
+  flex-shrink: 1;
+  min-height: 0;
+  padding-right: 4px;
+}
+
+.highlight-picker-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #b3d9e8;
+  background-color: #e8f4f8;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s, border-color 0.2s;
+}
+
+.highlight-picker-option:hover:not(:disabled) {
+  background-color: #d1e7f0;
+  border: 1px solid #9ac9dd;
+}
+
+.highlight-picker-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.highlight-picker-option .highlight-picker-swatch {
+  width: 24px;
+  height: 20px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  background: var(--highlight-swatch, rgba(59, 130, 246, 0.9));
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.highlight-picker-error {
+  margin-top: -6px;
+  margin-bottom: 16px;
+  color: #dc2626;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.highlight-picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.highlight-picker-manage {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #2563eb;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.highlight-picker-manage:hover:not(:disabled) {
+  color: #1e3a8a;
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.highlight-picker-manage:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.highlight-picker-cancel {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #cbd5f5;
+  background: #f8fafc;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #1e3a8a;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.highlight-picker-cancel:hover:not(:disabled) {
+  border-color: #2563eb;
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.highlight-picker-cancel:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.highlight-picker-empty {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+/* Note input in highlight creation modal */
+.note-input-section {
+  margin: 16px 0;
+  width: 100%;
+}
+
+.note-input-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.note-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.note-textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+.note-textarea::placeholder {
+  color: #999;
+}
+
+/* Responsive styles for highlight picker on small screens */
+@media (max-width: 768px) {
+  .highlight-picker-modal {
+    max-height: 90vh;
+    padding: 20px;
+    margin: 8px 0;
+  }
+
+  .highlight-picker-context {
+    max-height: 80px;
+    font-size: 0.9rem;
+    padding: 10px 12px;
+  }
+
+  .note-input-section {
+    margin: 12px 0;
+  }
+
+  .note-textarea {
+    min-height: 50px;
+  }
+
+  .highlight-picker-options {
+    min-height: 120px;
+  }
+
+  .highlight-picker-option {
+    padding: 8px 10px;
+  }
+}
+
+@media (max-height: 600px) {
+  .highlight-picker-modal {
+    max-height: 95vh;
+  }
+
+  .highlight-picker-context {
+    max-height: 60px;
+  }
+
+  .note-textarea {
+    min-height: 40px;
+  }
+
+  .highlight-picker-options {
+    min-height: 100px;
+  }
+}

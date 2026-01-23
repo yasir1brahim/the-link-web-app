@@ -13,6 +13,7 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState(null);
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const [specSectionsRefreshTrigger, setSpecSectionsRefreshTrigger] = useState(0);
 
   useEffect(() => {
     if (isOpen) {
@@ -44,6 +45,8 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
           console.error('Error in onAfterDelete callback:', callbackError);
         }
       }
+
+      setSpecSectionsRefreshTrigger(prev => prev + 1);
 
       setDeleteConfirmationModal(false);
       setDocumentToDelete(null);
@@ -93,6 +96,7 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
                   documents={documents}
                   onAfterReprocess={onAfterReprocess}
                   onAfterDelete={onAfterDelete}
+                  onSpecSectionsRefresh={() => setSpecSectionsRefreshTrigger(prev => prev + 1)}
                   isProduction={isProduction}
                 />
               </div>
@@ -102,6 +106,7 @@ const DocumentListModal = ({ isOpen, toggle, documents, onAfterReprocess, onAfte
                 <SpecSectionsTab 
                   projectId={projectId} 
                   projectVersionId={projectVersionId} 
+                  refreshTrigger={specSectionsRefreshTrigger}
                 />
               </div>
             </TabPane>

@@ -1,0 +1,76 @@
+/* DrawingsTab - Layout-specific styles */
+/* Base table styles are in DataTable.css */
+
+.drawings-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+}
+
+.drawings-container.side-by-side {
+  flex-direction: row;
+}
+
+.drawings-left-pane {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawings-container.side-by-side .drawings-left-pane {
+  flex: 0 0 calc(50% - 24px);
+  max-width: calc(50% - 24px);
+}
+
+/* Navigation column between panes */
+.drawings-nav-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+
+.drawings-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.15s ease;
+}
+
+.drawings-nav-btn:hover:not(:disabled) {
+  background: #f5f5f5;
+  color: #333;
+  border-color: #ccc;
+}
+
+.drawings-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.drawings-nav-btn svg {
+  font-size: 24px;
+}
+
+.drawings-right-pane {
+  flex: 0 0 calc(50% - 24px);
+  max-width: calc(50% - 24px);
+}
+
+/* Processing indicator spacing */
+.drawings-left-pane > .drawings-processing-indicator {
+  margin-bottom: 12px;
+}

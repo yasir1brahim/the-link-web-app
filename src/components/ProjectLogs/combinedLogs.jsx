@@ -18,6 +18,7 @@ import handleError from "../../config/errorHandler";
 import { SortIcon } from "../shared/icons/sortIcon";
 import { FilterIcon } from "../shared/icons/filterIcon";
 import { updateSubmittalItem, addSubmittalItem } from "../../api/ProjectLogs/api";
+import { getNextParaNo } from "./paraNoUtils";
 
 export default function CombinedLogs(props) {
   const {
@@ -40,6 +41,7 @@ export default function CombinedLogs(props) {
     combiningResult,
     setCombiningResult,
     areSameValues,
+    isProcessingBannerVisible,
   } = props;
   // const [dateIssued, setDateIssued] = useState('');
   // const [dateApproved, setDateApproved] = useState('');
@@ -249,45 +251,29 @@ export default function CombinedLogs(props) {
 
   const handleAddRow = async (log) => {
     try {
-      let index = props.logData?.findIndex((item) => item === log);
-      const dashIndex = log.para_no.search("-");
-      // Below we are making an array of para_nos then filtering them like if log.para_no = 1.04, paraNos will have all entries of 1.04 i.e. 1.04-a, 1.04-b etc.
-      const paraNos = props.logData
-        ?.map((log) => log.para_no)
-        .filter((paraNo) =>
-          paraNo.includes(
-            dashIndex !== -1 ? log.para_no.slice(0, dashIndex) : log.para_no
-          )
-        );
-      //Now we are making an array containing the ascii character values of elements after '-' in paraNos
-      const charArray = paraNos.map((paraNo) =>
-        paraNo.search("-") !== -1
-          ? paraNo.codePointAt(paraNo.search("-") + 1)
-          : 96
-      );
+      const currentLogData = props.logData;
+      const index = currentLogData?.findIndex((item) => item === log);
+
+      // Get all existing para_nos for the utility function
+      const existingParaNos = currentLogData?.map((item) => item.para_no) || [];
+
+      // Use the utility function to generate the next para_no
+      // This handles both sibling and child rows, and supports multi-character suffixes (aa, ab, ..., ba, ...)
+      const newParaNo = getNextParaNo(log.para_no, existingParaNos);
+
       const logObj = {
         ...log,
-        //Here we are checking if para_no already contains a character after '-'.
-        // If yes, we are increasing the ascii value of the character by 1 for ex.- if it's a it will make it b.
-        // If No, it will add '-a' to para_no
-        para_no:
-          dashIndex !== -1
-            ? log.para_no.slice(0, dashIndex + 1) +
-              String.fromCharCode(Math.max(...charArray) + 1)
-            : `${log.para_no}-${String.fromCharCode(
-                Math.max(...charArray) + 1
-              )}`,
-        // customer_id: props.customerId, user_id: localStorage.getItem('userId'), para_context: ''
+        para_no: newParaNo,
         submittal_number: null,
-
-        // Only used to help BE determine what to do when inserted
         added_under_submittal_id: log.id,
+        manually_added: true,
       };
-      const result = insertElement(props.logData, index + 1, logObj);
+      const result = insertElement(currentLogData, index + 1, logObj);
       props.setFilteredLogData(result);
+      props.setLogData(result);
 
       setNewRowIndex(index + 1);
-      handleEditToggle(logObj, index + 1)
+      handleEditToggle(logObj, index + 1);
     } catch (error) {
       toast.error(error?.response?.data?.message || error?.message, {
         position: 'bottom-center',
@@ -300,6 +286,7 @@ export default function CombinedLogs(props) {
       });
     }
   };
+
   useEffect(() => {
     setEditRow("");
   }, [props.searchValue]);
@@ -436,7 +423,7 @@ export default function CombinedLogs(props) {
     <div
       className="l-table-wrapper"
       style={{
-        maxHeight: "calc(100vh - 240px)",
+        maxHeight: isProcessingBannerVisible ? "calc(100vh - 350px)" : "calc(100vh - 240px)",
       }}
       ref={parentRef}
     >

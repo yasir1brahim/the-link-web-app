@@ -13,6 +13,7 @@ import Forgotpwd from './components/Authentication/Forgotpwd';
 import Resetpwd from './components/Authentication/Resetpwd';
 import Resetsuccess from './components/Authentication/Resetsuccess';
 import Checkemail from './components/Authentication/Checkemail';
+import LinkExpired from './components/Authentication/LinkExpired';
 import PdfWrapper from './pdfWrapper';
 import SubmittalMappings from './components/ProjectLogs/submittalMappings';
 import ProjectsPage from './components/Projects/ProjectsPage';
@@ -90,6 +91,10 @@ const router = createBrowserRouter([
   {
     path: "/check-email",
     element: <ErrorBoundary><Checkemail /></ErrorBoundary>,
+  },
+  {
+    path: "/link-expired",
+    element: <ErrorBoundary><LinkExpired /></ErrorBoundary>,
   },
   {
     path: "/pdf-view",

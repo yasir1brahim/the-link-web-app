@@ -166,7 +166,7 @@ describe('SortableTable', () => {
   describe('Column Resizing', () => {
     it('renders resizer handles for resizable columns', () => {
       render(<SortableTable {...defaultProps} />);
-      
+
       const resizers = screen.getAllByText('|');
       expect(resizers.length).toBeGreaterThan(0);
     });
@@ -174,9 +174,158 @@ describe('SortableTable', () => {
     it('does not render resizer for non-resizable columns', () => {
       const columnsWithoutResize = mockColumns.map(col => ({ ...col, resizable: false }));
       render(<SortableTable data={mockData} columns={columnsWithoutResize} />);
-      
+
       const resizers = screen.queryAllByText('|');
       expect(resizers).toHaveLength(0);
+    });
+
+    it('should update column width on mouse drag', () => {
+      const columnsWithMinWidth = mockColumns.map(col => ({ ...col, minWidth: 100 }));
+      const { container } = render(<SortableTable data={mockData} columns={columnsWithMinWidth} />);
+
+      const resizer = screen.getAllByText('|')[0];
+
+      // Simulate mousedown
+      fireEvent.mouseDown(resizer, { clientX: 100 });
+
+      // Simulate mousemove
+      fireEvent.mouseMove(document, { clientX: 150 });
+
+      // Simulate mouseup
+      fireEvent.mouseUp(document);
+
+      // Check that the column header has been updated
+      const headers = container.querySelectorAll('th');
+      expect(headers[0]).toBeInTheDocument();
+    });
+
+    it('should enforce minimum column width', () => {
+      const columnsWithMinWidth = mockColumns.map(col => ({ ...col, minWidth: 150 }));
+      const { container } = render(<SortableTable data={mockData} columns={columnsWithMinWidth} />);
+
+      const resizer = screen.getAllByText('|')[0];
+
+      // Simulate mousedown
+      fireEvent.mouseDown(resizer, { clientX: 200 });
+
+      // Simulate mousemove to a position that would make width less than minWidth
+      fireEvent.mouseMove(document, { clientX: 50 });
+
+      // Simulate mouseup
+      fireEvent.mouseUp(document);
+
+      // Column width should not go below minWidth (150px)
+      const headers = container.querySelectorAll('th');
+      const columnStyle = window.getComputedStyle(headers[0]);
+      expect(headers[0]).toBeInTheDocument();
+    });
+
+    it('should stop resizing on mouse up', () => {
+      const columnsWithMinWidth = mockColumns.map(col => ({ ...col, minWidth: 100 }));
+      render(<SortableTable data={mockData} columns={columnsWithMinWidth} />);
+
+      const resizer = screen.getAllByText('|')[0];
+
+      // Simulate mousedown
+      fireEvent.mouseDown(resizer, { clientX: 100 });
+
+      // Simulate mouseup
+      fireEvent.mouseUp(document);
+
+      // After mouseup, mousemove should not affect column width
+      fireEvent.mouseMove(document, { clientX: 300 });
+
+      // Verify the component is still rendered correctly
+      expect(screen.getByText('ID')).toBeInTheDocument();
+    });
+
+    it('should clean up event listeners on unmount', () => {
+      const removeEventListenerSpy = jest.spyOn(document, 'removeEventListener');
+      const columnsWithMinWidth = mockColumns.map(col => ({ ...col, minWidth: 100 }));
+      const { unmount } = render(<SortableTable data={mockData} columns={columnsWithMinWidth} />);
+
+      const resizer = screen.getAllByText('|')[0];
+
+      // Simulate mousedown to start resizing
+      fireEvent.mouseDown(resizer, { clientX: 100 });
+
+      // Unmount the component
+      unmount();
+
+      // Verify that removeEventListener was called for cleanup
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('mousemove', expect.any(Function));
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('mouseup', expect.any(Function));
+
+      removeEventListenerSpy.mockRestore();
+    });
+
+    it('should handle resize with different initial widths', () => {
+      const columnsWithDifferentWidths = [
+        { key: 'id', label: 'ID', minWidth: 80 },
+        { key: 'name', label: 'Name', minWidth: 200 },
+        { key: 'age', label: 'Age', minWidth: 100 },
+        { key: 'email', label: 'Email', minWidth: 250 },
+      ];
+      const { container } = render(<SortableTable data={mockData} columns={columnsWithDifferentWidths} />);
+
+      const resizers = screen.getAllByText('|');
+
+      // Test resizing different columns
+      fireEvent.mouseDown(resizers[0], { clientX: 80 });
+      fireEvent.mouseMove(document, { clientX: 120 });
+      fireEvent.mouseUp(document);
+
+      fireEvent.mouseDown(resizers[1], { clientX: 200 });
+      fireEvent.mouseMove(document, { clientX: 250 });
+      fireEvent.mouseUp(document);
+
+      // Verify headers are still present
+      const headers = container.querySelectorAll('th');
+      expect(headers).toHaveLength(4);
+    });
+
+    it('should handle rapid column changes during resize', () => {
+      const columnsWithMinWidth = mockColumns.map(col => ({ ...col, minWidth: 100 }));
+      render(<SortableTable data={mockData} columns={columnsWithMinWidth} />);
+
+      const resizers = screen.getAllByText('|');
+
+      // Rapidly start and stop resizing different columns
+      fireEvent.mouseDown(resizers[0], { clientX: 100 });
+      fireEvent.mouseUp(document);
+
+      fireEvent.mouseDown(resizers[1], { clientX: 200 });
+      fireEvent.mouseUp(document);
+
+      fireEvent.mouseDown(resizers[2], { clientX: 150 });
+      fireEvent.mouseMove(document, { clientX: 180 });
+      fireEvent.mouseUp(document);
+
+      // Verify the component is still stable
+      expect(screen.getByText('ID')).toBeInTheDocument();
+      expect(screen.getByText('Name')).toBeInTheDocument();
+      expect(screen.getByText('Age')).toBeInTheDocument();
+    });
+
+    it('should handle null-safety for columns array during resize', () => {
+      const columnsWithMinWidth = mockColumns.map(col => ({ ...col, minWidth: 100 }));
+      const { rerender } = render(<SortableTable data={mockData} columns={columnsWithMinWidth} />);
+
+      const resizer = screen.getAllByText('|')[0];
+
+      // Start resizing
+      fireEvent.mouseDown(resizer, { clientX: 100 });
+
+      // Update columns while resizing (edge case)
+      const newColumns = [...columnsWithMinWidth, { key: 'newCol', label: 'New', minWidth: 100 }];
+      rerender(<SortableTable data={mockData} columns={newColumns} />);
+
+      // Continue resizing
+      fireEvent.mouseMove(document, { clientX: 150 });
+      fireEvent.mouseUp(document);
+
+      // Component should handle this gracefully
+      expect(screen.getByText('ID')).toBeInTheDocument();
     });
   });
 

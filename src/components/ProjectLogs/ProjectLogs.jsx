@@ -23,7 +23,6 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { AuthContext } from '../../auth/authcontext';
 import { getProjectDetails, createProjectVersion, updateProjectVersion, archiveProjectVersion , getArchivedVersions} from "../../api/Projects/api";
-import { getUserRoleInTeam } from "../../api/Authentication/api";
 import { getSubmittalItems, getProjectLists, createSubmittalList, deleteSubmittalItems, uploadFiles, getExportExcelData, addSubmittalItem, updateSubmittalItem, getSpecSections } from "../../api/ProjectLogs/api";
 import ManageExcelExport from "./manageExcelExport";
 import ManageVersionModal from "./manageVersionModal";
@@ -32,26 +31,34 @@ import { getCurrentUserData } from "../../api/Authentication/api";
 import ArchiveConfirmationModal from "./archiveConfirmationModal";
 import VersionComparisonModal from "./versionComparisonModal";
 import Chat from "../SpecGpt/components/Chat";
+import InspectionQA from "../SpecGpt/components/InspectionQA";
 import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
 import ArchivedVersionsModal from "./archivedVersionModal";
-import useCompanyDetails from "../../hooks/useCompanyDetails";
+import { isLogEligibleForChildEntry } from "./projectLogsUtils";
 import useDocumentRefresh from "../../hooks/useDocumentRefresh";
 import DocumentListModal from "./DocumentListModal";
 import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
 import SpecViewer from "../SpecCentricView/SpecViewer";
+import { useInspectionQA } from '../SpecGpt/hooks/useInspectionQA';
+import { DrawingsTab } from "../Drawings";
+import ErrorBoundary from "../ErrorBoundary/ErrorBoundary";
 
+// Toggle between tabbed layout (true) and sidebar layout (false)
+// Set to false to show QA features in Compass sidebar instead of separate tab
+const USE_TABBED_QA_LAYOUT = false;
 
 const ProjectLogs = () => {
-  const { 
-    isVersioningFlagActive, 
-    isVersionComparisonFlagActive, 
+  const {
+    isVersioningFlagActive,
+    isVersionComparisonFlagActive,
     isVersionComparisonSearchFlagActive,
-    isSpecGptFlagActive, 
+    isSpecGptFlagActive,
     isInspectionLogFlagActive,
     isQaPlannerFlagActive,
-    isSpecCenteredViewFlagActive
+    isSpecCenteredViewFlagActive,
+    isDrawingsFlagActive,
   } = useFeatureFlags();
   const [defaultTab, setDefaultTab] = useState("documents"); 
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
@@ -231,6 +238,9 @@ const ProjectLogs = () => {
   const [isSpecGptChatEnabled, setIsSpecGptChatEnabled] = useState(true);
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || 'submittal');
 
+  // Shared QA state for both tabbed and sidebar modes
+  const inspectionQA = useInspectionQA(projectId, projectVersionId);
+
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
   const navigate = useNavigate();
@@ -239,8 +249,8 @@ const ProjectLogs = () => {
   const [userRole, setUserRole] = useState('');
   const [userRoleInCompany, setUserRoleInCompany] = useState('member');
   const [teamId, setTeamId] = useState(state?.teamId);
-
-  const { companyLogoUrl, companyName, isLoading:headerLoading } = useCompanyDetails(teamId);
+  const [companyLogoUrl, setCompanyLogoUrl] = useState('');
+  const [companyName, setCompanyName] = useState('');
 
   const [hasPlaceholderSubmittals, setHasPlaceholderSubmittals] = useState(false);
 
@@ -305,17 +315,11 @@ const ProjectLogs = () => {
     }
   };
 
-  const getUserRoleInProject = async (projectData, userArgument) => {
-    console.log('user', userArgument);
-    console.log('projectData', projectData);
-    if (userArgument.is_superuser) {
-      return 'Admin';
-    } 
-    const membership = projectData.members.find((member) => member.user_id === userArgument.id);
-    if (membership) {
-      return membership.role === 'admin' ? 'Admin' : 'Member';
+  const getUserRoleInProject = (projectData) => {
+    if (!projectData.current_user_role) {
+      return 'Unauthorized';
     }
-    return 'Unauthorized';
+    return projectData.current_user_role === 'project_admin' ? 'Admin' : 'Member';
   }
 
   const handleGetProjectId = async (submittalId) => {
@@ -381,14 +385,19 @@ const ProjectLogs = () => {
     orderCol = "",
     order = "",
     projectVersionId = null,
+    resetViewer = true,
   ) => {
-    if (projectId === null) return;
+    if (projectId === null) return [];
     
     if (!isInitialLoading) {
       setIsDataLoading(true);
     }
     setLoadingView(true);
-    setLogInViewer(null);
+    if (resetViewer) {
+      setLogInViewer(null);
+    }
+
+    let submittalLogs = [];
 
     try {
       const submittalItems = await getSubmittalItems(
@@ -406,7 +415,7 @@ const ProjectLogs = () => {
       console.log("responseData", submittalItems.data);
       setSelectedFilterValue(submittalItems.data.all_filter_vals);
       setAvailableMasterformatNumbers(submittalItems.data.all_masterformat_numbers_for_project || []);
-      const submittalLogs = submittalItems.data.message;
+      submittalLogs = submittalItems.data.message;
       setLogData(submittalLogs);
       setFilteredLogData(submittalLogs); 
       setHasPlaceholderSubmittals(submittalItems.data.has_placeholder_submittals || false);
@@ -443,29 +452,32 @@ const ProjectLogs = () => {
       );
       setLogIdList(submittalItems.data.log_id_list);
       setErrorMessage("");
-      
+      setTotalCount(submittalItems?.data?.total_count);
+
       if (submittalItems.data.message?.length === 0) {
         const filterHasValues = Object.values(filterValues).some(arr => arr.length > 0);
         if (documentData?.length > 0 && !filterHasValues) {
           setErrorMessage("No submittals were detected in the uploaded document(s)");
-          return;
+          return [];
         }
         if (search || filterHasValues) {
           setErrorMessage("Sorry, no results found for your search query.");
-          return;
+          return [];
         }
         if (documentData?.length === 0) {
           setErrorMessage("Upload spec documents to generate submittal log");
-          return;
+          return [];
         }
         if (documentIsProcessing(documentData)) {
           setErrorMessage("Documents are being processed...");
-          return;
+          return [];
         }
       }
       setTotalCount(submittalItems?.data?.total_count);
+      return submittalLogs;
     } catch (error) {
       handleError(error);
+      return [];
     } finally {
       setIsDataLoading(false);
       setLoadingView(false);
@@ -498,11 +510,14 @@ const ProjectLogs = () => {
           setCurrentUser(updatedUser);
         }
         
-        // Determine the active version first
-        const tempResponse = await getProjectDetails(projectId);
-        const activeVersion = projectVersionId || tempResponse.data.project_versions[tempResponse.data.project_versions.length - 1].id;
-        setProjectVersionId(activeVersion);
-        
+        // Determine the active version - only fetch if we don't have a version yet
+        let activeVersion = projectVersionId;
+        if (!activeVersion) {
+          const tempResponse = await getProjectDetails(projectId);
+          activeVersion = tempResponse.data.project_versions[tempResponse.data.project_versions.length - 1].id;
+          setProjectVersionId(activeVersion);
+        }
+
         // Fetch project details with version-specific document filtering
         const response = await getProjectDetails(projectId, activeVersion);
         console.log('projectData', response.data);
@@ -512,21 +527,51 @@ const ProjectLogs = () => {
         }
         
         setProjectName(response.data.name);
-        
+
+        setCompanyName(response.data.team_name || '');
+        setCompanyLogoUrl(response.data.team_logo_url || '');
+
         // Documents are already filtered by version from the backend
         setDocumentData(response.data.document_details);
         setDocParsed(response.data.doc_parsed);
-        
-        setUserRole(getUserRoleInProject(response.data, updatedUser));
-        setUserRoleInCompany(await getUserRoleInTeam(updatedUser.id, response.data.team));
+
+        setUserRole(getUserRoleInProject(response.data));
+
+        // Check if user is actually a team member
+        // If current_user_team_role is null/undefined, user is not part of the team
+        if (!response.data.current_user_team_role) {
+          setIsInitialLoading(false);
+          setIsDataLoading(false);
+          setLoading(false);
+          navigate('/not-found', {
+            state: {
+              statusCode: 403,
+              message: 'Team Access Required'
+            }
+          });
+          return;
+        }
+
+        setUserRoleInCompany(response.data.current_user_team_role);
         console.log("response.data.project_versions", response.data.project_versions);
 
         setAvailableVersions(response.data.project_versions);
-        
-        // Fetch log data with the correct version
-        await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
-        // Fetch spec section count
-        await fetchSpecSectionCount();
+
+        // Fetch tab-specific data in parallel where possible
+        // Spec View and Drawings tabs don't need submittal log data upfront
+        const currentTab = searchParams.get("tab") || 'submittal';
+        const needsSubmittalData = currentTab !== 'spec-view' && currentTab !== 'drawings';
+
+        if (needsSubmittalData) {
+          // Fetch both in parallel for tabs that need submittal data
+          await Promise.all([
+            fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion),
+            fetchSpecSectionCount()
+          ]);
+        } else {
+          // Only fetch spec section count for spec-view/drawings tabs
+          await fetchSpecSectionCount();
+        }
         
       } catch (error) {
         console.log("error", error);
@@ -552,10 +597,33 @@ const ProjectLogs = () => {
   // Handle activeTab changes from URL parameters
   useEffect(() => {
     const tabFromUrl = searchParams.get("tab");
-    if (tabFromUrl && (tabFromUrl === 'submittal' || tabFromUrl === 'compass' || tabFromUrl === 'spec-view')) {
-      setActiveTab(tabFromUrl);
+
+    if (!tabFromUrl || !teamId) {
+      return;
     }
-  }, [searchParams]);
+
+    const targetTab = tabFromUrl === 'compass' ? 'assistant' : tabFromUrl;
+
+    const tabAccessRules = {
+      'submittal': () => true,
+      'assistant': () => isSpecGptFlagActive(teamId),
+      'spec-view': () => isSpecCenteredViewFlagActive(teamId),
+      'drawings': () => isDrawingsFlagActive(teamId),
+      'inspection-qa': () => USE_TABBED_QA_LAYOUT && (isInspectionLogFlagActive(teamId) || isQaPlannerFlagActive(teamId))
+    };
+
+    const hasAccess = tabAccessRules[targetTab]?.() || false;
+
+    if (hasAccess) {
+      setActiveTab(targetTab);
+    } else {
+      console.log(`Access denied or invalid tab: ${targetTab}. Redirecting to submittal tab.`);
+      setActiveTab('submittal');
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.set("tab", "submittal");
+      navigate(`/project-logs?${newSearchParams.toString()}`, { replace: true });
+    }
+  }, [searchParams, teamId, isSpecGptFlagActive, isSpecCenteredViewFlagActive, isDrawingsFlagActive, isInspectionLogFlagActive, isQaPlannerFlagActive]);
 
   // Update URL when activeTab changes manually
   useEffect(() => {
@@ -568,6 +636,16 @@ const ProjectLogs = () => {
       }
     }
   }, [activeTab, projectId, projectVersionId]);
+
+  // Lazy load submittal data when switching to tabs that need it
+  useEffect(() => {
+    const needsSubmittalData = activeTab === 'submittal' || activeTab === 'assistant';
+    const hasSubmittalData = logData && logData.length > 0;
+
+    if (needsSubmittalData && !hasSubmittalData && projectId && projectVersionId && !isInitialLoading) {
+      fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+    }
+  }, [activeTab, projectId, projectVersionId, isInitialLoading]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -922,6 +1000,26 @@ const ProjectLogs = () => {
     if (selected?.length !== 0) {
       try {
         await deleteSubmittalItems(state?.projectId || projectId, selected);
+        // Calculate the new total count after deletion
+        const newTotalCount = totalCount - selected.length;
+        const lastValidPage = Math.max(1, Math.ceil(newTotalCount / rowsPerPage)); // Calculate the last valid page
+        // If current page is greater than the last valid page, navigate to the last valid page
+        const targetPage = page > lastValidPage ? lastValidPage : page;
+
+        if (targetPage !== page) {
+          setPage(targetPage);
+        }
+
+        await fetchLogData(
+          targetPage,
+          rowsPerPage,
+          searchValue,
+          listId,
+          appliedFilters,
+          null, // orderCol (default to null if no sorting active)
+          null, // order (default to null if no sorting active)
+          projectVersionId
+        );
         setPageRefresh(!pageRefresh);
         setSelected([]);
         ToastService.success("Successfully Deleted Logs!");
@@ -1295,36 +1393,49 @@ const ProjectLogs = () => {
 
   const handleAddNewRow = async (content) => {
     try {
-      let index = logData?.findIndex((item) => item === logInViewer);
+      if (!isLogEligibleForChildEntry(logInViewer)) {
+        ToastService.error("Select a log entry before adding a new row.");
+        return;
+      }
+
       const dashIndex = logInViewer.para_no.search("-");
+      const baseParaNoPrefix =
+        dashIndex !== -1
+          ? logInViewer.para_no.slice(0, dashIndex)
+          : logInViewer.para_no;
       // Below we are making an array of para_nos then filtering them like if log.para_no = 1.04, paraNos will have all entries of 1.04 i.e. 1.04-a, 1.04-b etc.
-      const paraNos = logData
-        ?.map((log) => log.para_no)
-        .filter((paraNo) =>
-          paraNo.includes(
-            dashIndex !== -1
-              ? logInViewer.para_no.slice(0, dashIndex)
-              : logInViewer.para_no
-          )
-        );
+      const paraNos = Array.isArray(logData)
+        ? logData
+            .map((log) => log?.para_no)
+            .filter(
+              (paraNo) =>
+                typeof paraNo === "string" && paraNo.startsWith(baseParaNoPrefix)
+            )
+        : [];
       //Now we are making an array containing the ascii character values of elements after '-' in paraNos
-      const charArray = paraNos.map((paraNo) =>
-        paraNo.search("-") !== -1
-          ? paraNo.codePointAt(paraNo.search("-") + 1)
-          : 96
-      );
+      const charArray =
+        paraNos.length > 0
+          ? paraNos.map((paraNo) =>
+              paraNo.search("-") !== -1
+                ? paraNo.codePointAt(paraNo.search("-") + 1)
+                : 96
+            )
+          : [96];
+      const highestCharCode = Math.max(...charArray);
       
       // Get the full URL from pdfData instead of logInViewer.doc_link
       // This ensures we get the complete URL with the correct path and parameters
-      const fullDocLink = pdfData.url;
+      const fullDocLink = pdfData?.url || logInViewer.doc_link || "";
       
       // Generate new para_no
-      const newParaNo = dashIndex !== -1
-        ? logInViewer.para_no.slice(0, dashIndex + 1) +
-          String.fromCharCode(Math.max(...charArray) + 1)
-        : `${logInViewer.para_no}-${String.fromCharCode(
-            Math.max(...charArray) + 1
-          )}`;
+      const newParaNo =
+        dashIndex !== -1
+          ? `${logInViewer.para_no.slice(0, dashIndex + 1)}${String.fromCharCode(
+              highestCharCode + 1
+            )}`
+          : `${logInViewer.para_no}-${String.fromCharCode(
+              highestCharCode + 1
+            )}`;
       
       // Create a new log entry in the backend
       try {
@@ -1341,33 +1452,57 @@ const ProjectLogs = () => {
           logInViewer.section_title
         );
         
-        console.log("Created new log in backend:", response.data);
-        
+        const createdLog = response?.data;
+
         // Refresh the log data to get the newly created log
-        await fetchLogData(page, rowsPerPage, searchValue, listId, null, null, null, projectVersionId);
-        
-        // Find the newly created log in the refreshed data
-        const newLogIndex = logData.findIndex(log => 
-          log.para_no === newParaNo && 
-          log.para_context === content
+        const refreshedLogs = await fetchLogData(
+          page,
+          rowsPerPage,
+          searchValue,
+          listId,
+          null,
+          null,
+          null,
+          projectVersionId,
+          false
         );
-        
-        if (newLogIndex !== -1) {
-          // Select the newly created log
-          const newLog = logData[newLogIndex];
-          
-          // Set the PDF data to show the newly created log
+
+        const logsAfterInsert = Array.isArray(refreshedLogs) ? refreshedLogs : [];
+        const matchedLogById =
+          createdLog?.id != null
+            ? logsAfterInsert.find((log) => log.id === createdLog.id)
+            : null;
+        const matchedLog =
+          matchedLogById ||
+          logsAfterInsert.find((log) => log.para_no === newParaNo) ||
+          null;
+
+        if (matchedLog) {
+          const matchedLogIndex = logsAfterInsert.findIndex(
+            (log) => log.id === matchedLog.id
+          );
+
           setPdfData({
-            url: fullDocLink, // Use the full document URL
-            textLoc: logInViewer.text_loc,
-            index: newLogIndex,
-            docId: logInViewer.doc_id,
-            submittalId: newLog.id,
-            additionalTextLocations: [],
+            url: matchedLog.doc_link || fullDocLink,
+            textLoc: matchedLog.text_loc || logInViewer.text_loc,
+            index: matchedLogIndex !== -1 ? matchedLogIndex : pdfData.index,
+            docId: matchedLog.doc_id || logInViewer.doc_id,
+            submittalId: matchedLog.id,
+            additionalTextLocations: matchedLog.additional_text_locations || [],
           });
-          
-          // Set the log in viewer
-          setLogInViewer(newLog);
+
+          setLogInViewer(matchedLog);
+        } else if (createdLog) {
+          setPdfData({
+            url: createdLog.doc_link || fullDocLink,
+            textLoc: createdLog.text_loc || logInViewer.text_loc,
+            index: pdfData.index,
+            docId: createdLog.doc_id || logInViewer.doc_id,
+            submittalId: createdLog.id,
+            additionalTextLocations: createdLog.additional_text_locations || [],
+          });
+
+          setLogInViewer(createdLog);
         }
         
         ToastService.success("New log entry created successfully");
@@ -1683,8 +1818,12 @@ const ProjectLogs = () => {
             onViewArchivedVersions={handleViewArchivedVersions}
             isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
             isSpecCenteredViewFlagActive={isSpecCenteredViewFlagActive(teamId)}
+            isDrawingsFlagActive={isDrawingsFlagActive(teamId)}
+            isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+            isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
+            useQaTabbedLayout={USE_TABBED_QA_LAYOUT}
           />
           {activeTab === 'submittal' && (
             <ProjectLogsActionPanel
@@ -1793,6 +1932,7 @@ const ProjectLogs = () => {
                   handleCombineRows={handleCombineRows}
                   areSameValues={areSameValues}
                   projectVersionId={projectVersionId}
+                  isProcessingBannerVisible={documentIsProcessing(documentData)}
                 />
                 {pdfData.url && (
                   <div style={{ display: "flex", gap: 10 }}>
@@ -1886,23 +2026,21 @@ const ProjectLogs = () => {
               </div>
             </div>
           </div>}
-          {activeTab == 'compass' && 
+          {activeTab === 'assistant' && isSpecGptFlagActive(teamId) &&
             <>
             <div className="compass-chat-viewport">
               <ProcessingIndicator
                 documentIsProcessing={documentIsBeingEmbedded}
                 documentData={documentData}
                 toggleDocumentStatusModal={toggleSpecGptProcessingModal}
-                indicatorText={"Compass is processing your documents..."}
+                indicatorText={"Assistant is processing your documents..."}
               />
               <ChakraProvider>
-                <Chat 
-                  projectId={projectId} 
-                  projectVersionId={projectVersionId} 
-                  chatSessionId={chatId} 
+                <Chat
+                  projectId={projectId}
+                  projectVersionId={projectVersionId}
+                  chatSessionId={chatId}
                   setChatSessionId={setChatId}
-                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
-                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
                   messages={chatMessages}
                   setMessages={setChatMessages}
                   chatHistory={chatHistory}
@@ -1911,17 +2049,40 @@ const ProjectLogs = () => {
                   setIsLoadingMessage={setIsSpecGptLoadingMessage}
                   userInput={specGptUserInput}
                   setUserInput={setSpecGptUserInput}
-                  isGeneratingLog={isSpecGptGeneratingLog}
-                  setIsGeneratingLog={setIsSpecGptGeneratingLog}
                   isChatEnabled={isSpecGptChatEnabled}
                   setIsChatEnabled={setIsSpecGptChatEnabled}
                   teamId={teamId}
+                  useQaTabbedLayout={USE_TABBED_QA_LAYOUT}
+                  inspectionQA={inspectionQA}
+                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
                 />
               </ChakraProvider>
               </div>
             </>
           }
-          {activeTab == 'spec-view' &&
+          {activeTab === 'inspection-qa' && USE_TABBED_QA_LAYOUT && (isInspectionLogFlagActive(teamId) || isQaPlannerFlagActive(teamId)) &&
+            <>
+            <div className="compass-chat-viewport">
+              <ProcessingIndicator
+                documentIsProcessing={documentIsBeingEmbedded}
+                documentData={documentData}
+                toggleDocumentStatusModal={toggleSpecGptProcessingModal}
+                indicatorText={"Assistant is processing your documents..."}
+              />
+              <ChakraProvider>
+                <InspectionQA
+                  projectId={projectId}
+                  projectVersionId={projectVersionId}
+                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
+                  inspectionQA={inspectionQA}
+                />
+              </ChakraProvider>
+              </div>
+            </>
+          }
+          {activeTab === 'spec-view' && isSpecCenteredViewFlagActive(teamId) &&
             <>
             <SpecViewer
               projectId={projectId}
@@ -1930,6 +2091,15 @@ const ProjectLogs = () => {
               onNavigateToDocuments={() => setActiveTab('submittal')}
             />
             </>
+          }
+          {activeTab === 'drawings' && isDrawingsFlagActive(teamId) &&
+            <ErrorBoundary>
+              <DrawingsTab
+                projectId={projectId}
+                projectVersionId={projectVersionId}
+                teamId={teamId}
+              />
+            </ErrorBoundary>
           }
         </div>
       )}
@@ -2117,7 +2287,7 @@ const ProjectLogs = () => {
         className="new-customer modal-xl"
       >
         <ModalHeader toggle={toggleSpecGptProcessingModal}>
-          Compass Processing Status
+          Assistant Processing Status
         </ModalHeader>
         <ModalBody>
           <DocumentStatus documentData={documentData} isSpecGptStatus={true} />
@@ -2262,7 +2432,7 @@ const ProjectLogs = () => {
         manageExcelExportModal={manageExcelExportModal}
         toggleManageExcelExportModal={toggleManageExcelExportModal}
       />}
-      <Loader showComponentLoader={isInitialLoading || isDataLoading || headerLoading} />
+      <Loader showComponentLoader={isInitialLoading || isDataLoading} />
       
       <DuplicateFileConfirmationModal
         isOpen={showDuplicateFilesModal}

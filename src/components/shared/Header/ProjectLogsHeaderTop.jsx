@@ -1,10 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {AuthContext} from '../../../auth/authcontext'
-import { getUserTeams } from '../../../api/Authentication/api';
-import { getHomeUrl } from '../../../utils/navigation';
-import { Button } from 'reactstrap';
+import { AuthContext } from '../../../auth/authcontext';
 import VersionDropdown from '../../ProjectLogs/versionDropdown';
 
 // @ts-ignore
@@ -12,12 +9,12 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useContext(AuthContext);
 
-  console.log("props.projectVersionId", props.projectVersionId)
-  console.log("props.projectVersions", props.projectVersions)
+  const hasOtherActiveFlags = props.isSpecGptFlagActive || props.isSpecCenteredViewFlagActive || props.isDrawingsFlagActive || props.isInspectionLogFeatureFlagActive;
+  
   return (
     <div className="header-wrapper-swap row mx-0 my-2" style={{ borderBottom: '1px solid #e0e0e0' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-        {props.isSpecGptFlagActive && (
+        {hasOtherActiveFlags && (
           <div className="tab-container" style={{ display: 'flex', gap: '0' }}>
             <button
               className={`tab-button ${props.activeTab === 'submittal' ? 'active' : ''}`}
@@ -36,23 +33,44 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
             >
               Submittal Log
             </button>
-            <button
-              className={`tab-button ${props.activeTab === 'compass' ? 'active' : ''}`}
-              onClick={() => props.setActiveTab('compass')}
-              style={{
-                padding: '12px 24px',
-                border: 'none',
-                backgroundColor: props.activeTab === 'compass' ? '#fff' : '#f5f5f5',
-                borderBottom: props.activeTab === 'compass' ? '2px solid #007bff' : '2px solid transparent',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: props.activeTab === 'compass' ? '600' : '400',
-                color: props.activeTab === 'compass' ? '#007bff' : '#666',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              Compass
-            </button>
+            {props.isSpecGptFlagActive && (
+              <button
+                className={`tab-button ${props.activeTab === 'assistant' ? 'active' : ''}`}
+                onClick={() => props.setActiveTab('assistant')}
+                style={{
+                  padding: '12px 24px',
+                  border: 'none',
+                  backgroundColor: props.activeTab === 'assistant' ? '#fff' : '#f5f5f5',
+                  borderBottom: props.activeTab === 'assistant' ? '2px solid #007bff' : '2px solid transparent',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: props.activeTab === 'assistant' ? '600' : '400',
+                  color: props.activeTab === 'assistant' ? '#007bff' : '#666',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Assistant
+              </button>
+            )}
+            {props.useQaTabbedLayout && (props.isInspectionLogFeatureFlagActive || props.isQaPlannerFlagActive) && (
+              <button
+                className={`tab-button ${props.activeTab === 'inspection-qa' ? 'active' : ''}`}
+                onClick={() => props.setActiveTab('inspection-qa')}
+                style={{
+                  padding: '12px 24px',
+                  border: 'none',
+                  backgroundColor: props.activeTab === 'inspection-qa' ? '#fff' : '#f5f5f5',
+                  borderBottom: props.activeTab === 'inspection-qa' ? '2px solid #007bff' : '2px solid transparent',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: props.activeTab === 'inspection-qa' ? '600' : '400',
+                  color: props.activeTab === 'inspection-qa' ? '#007bff' : '#666',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Inspection & QA
+              </button>
+            )}
             {props.isSpecCenteredViewFlagActive && (
               <button
                 className={`tab-button ${props.activeTab === 'spec-view' ? 'active' : ''}`}
@@ -72,11 +90,30 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
                 Spec View
               </button>
             )}
+            {props.isDrawingsFlagActive && (
+              <button
+                className={`tab-button ${props.activeTab === 'drawings' ? 'active' : ''}`}
+                onClick={() => props.setActiveTab('drawings')}
+                style={{
+                  padding: '12px 24px',
+                  border: 'none',
+                  backgroundColor: props.activeTab === 'drawings' ? '#fff' : '#f5f5f5',
+                  borderBottom: props.activeTab === 'drawings' ? '2px solid #007bff' : '2px solid transparent',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: props.activeTab === 'drawings' ? '600' : '400',
+                  color: props.activeTab === 'drawings' ? '#007bff' : '#666',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Drawings
+              </button>
+            )}
           </div>
         )}
       </div>
       <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '0px' }}>
-        {props.isVersioningEnabled && (props.activeTab === 'submittal' || props.activeTab === 'compass' || props.activeTab === 'spec-view') && (
+        {props.isVersioningEnabled && (props.activeTab === 'submittal' || props.activeTab === 'assistant' || props.activeTab === 'inspection-qa' || props.activeTab === 'spec-view' || props.activeTab === 'drawings') && (
           <>
             {props.isVersionComparisonEnabled && props.activeTab === 'submittal' && (
               <button

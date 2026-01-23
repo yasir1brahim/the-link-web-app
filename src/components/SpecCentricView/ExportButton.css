@@ -1,0 +1,37 @@
+/* Export Button Styles - matches SortableTable export button */
+.export-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #2f5aa3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.export-button:hover:not(:disabled) {
+  background-color: #254a8a;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.export-button:active:not(:disabled) {
+  background-color: #1e3a6f;
+  transform: translateY(0);
+}
+
+.export-button:focus {
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(47, 90, 163, 0.25);
+}
+
+.export-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
