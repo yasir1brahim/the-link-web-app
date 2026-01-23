@@ -41,17 +41,24 @@ import useDocumentRefresh from "../../hooks/useDocumentRefresh";
 import DocumentListModal from "./DocumentListModal";
 import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
 import SpecViewer from "../SpecCentricView/SpecViewer";
+import { useInspectionQA } from '../SpecGpt/hooks/useInspectionQA';
+import { DrawingsTab } from "../Drawings";
+import ErrorBoundary from "../ErrorBoundary/ErrorBoundary";
 
+// Toggle between tabbed layout (true) and sidebar layout (false)
+// Set to false to show QA features in Compass sidebar instead of separate tab
+const USE_TABBED_QA_LAYOUT = false;
 
 const ProjectLogs = () => {
-  const { 
-    isVersioningFlagActive, 
-    isVersionComparisonFlagActive, 
+  const {
+    isVersioningFlagActive,
+    isVersionComparisonFlagActive,
     isVersionComparisonSearchFlagActive,
-    isSpecGptFlagActive, 
+    isSpecGptFlagActive,
     isInspectionLogFlagActive,
     isQaPlannerFlagActive,
-    isSpecCenteredViewFlagActive
+    isSpecCenteredViewFlagActive,
+    isDrawingsFlagActive,
   } = useFeatureFlags();
   const [defaultTab, setDefaultTab] = useState("documents"); 
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
@@ -230,6 +237,9 @@ const ProjectLogs = () => {
   const [isSpecGptGeneratingLog, setIsSpecGptGeneratingLog] = useState(false);
   const [isSpecGptChatEnabled, setIsSpecGptChatEnabled] = useState(true);
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") || 'submittal');
+
+  // Shared QA state for both tabbed and sidebar modes
+  const inspectionQA = useInspectionQA(projectId, projectVersionId);
 
   const [logIdList, setLogIdList] = React.useState([]);
   const [isSelectAll, setIsSelectAll] = React.useState(false);
@@ -500,11 +510,14 @@ const ProjectLogs = () => {
           setCurrentUser(updatedUser);
         }
         
-        // Determine the active version first
-        const tempResponse = await getProjectDetails(projectId);
-        const activeVersion = projectVersionId || tempResponse.data.project_versions[tempResponse.data.project_versions.length - 1].id;
-        setProjectVersionId(activeVersion);
-        
+        // Determine the active version - only fetch if we don't have a version yet
+        let activeVersion = projectVersionId;
+        if (!activeVersion) {
+          const tempResponse = await getProjectDetails(projectId);
+          activeVersion = tempResponse.data.project_versions[tempResponse.data.project_versions.length - 1].id;
+          setProjectVersionId(activeVersion);
+        }
+
         // Fetch project details with version-specific document filtering
         const response = await getProjectDetails(projectId, activeVersion);
         console.log('projectData', response.data);
@@ -523,15 +536,42 @@ const ProjectLogs = () => {
         setDocParsed(response.data.doc_parsed);
 
         setUserRole(getUserRoleInProject(response.data));
-        setUserRoleInCompany(response.data.current_user_team_role || 'member');
+
+        // Check if user is actually a team member
+        // If current_user_team_role is null/undefined, user is not part of the team
+        if (!response.data.current_user_team_role) {
+          setIsInitialLoading(false);
+          setIsDataLoading(false);
+          setLoading(false);
+          navigate('/not-found', {
+            state: {
+              statusCode: 403,
+              message: 'Team Access Required'
+            }
+          });
+          return;
+        }
+
+        setUserRoleInCompany(response.data.current_user_team_role);
         console.log("response.data.project_versions", response.data.project_versions);
 
         setAvailableVersions(response.data.project_versions);
-        
-        // Fetch log data with the correct version
-        await fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion);
-        // Fetch spec section count
-        await fetchSpecSectionCount();
+
+        // Fetch tab-specific data in parallel where possible
+        // Spec View and Drawings tabs don't need submittal log data upfront
+        const currentTab = searchParams.get("tab") || 'submittal';
+        const needsSubmittalData = currentTab !== 'spec-view' && currentTab !== 'drawings';
+
+        if (needsSubmittalData) {
+          // Fetch both in parallel for tabs that need submittal data
+          await Promise.all([
+            fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion),
+            fetchSpecSectionCount()
+          ]);
+        } else {
+          // Only fetch spec section count for spec-view/drawings tabs
+          await fetchSpecSectionCount();
+        }
         
       } catch (error) {
         console.log("error", error);
@@ -557,10 +597,33 @@ const ProjectLogs = () => {
   // Handle activeTab changes from URL parameters
   useEffect(() => {
     const tabFromUrl = searchParams.get("tab");
-    if (tabFromUrl && (tabFromUrl === 'submittal' || tabFromUrl === 'compass' || tabFromUrl === 'spec-view')) {
-      setActiveTab(tabFromUrl);
+
+    if (!tabFromUrl || !teamId) {
+      return;
     }
-  }, [searchParams]);
+
+    const targetTab = tabFromUrl === 'compass' ? 'assistant' : tabFromUrl;
+
+    const tabAccessRules = {
+      'submittal': () => true,
+      'assistant': () => isSpecGptFlagActive(teamId),
+      'spec-view': () => isSpecCenteredViewFlagActive(teamId),
+      'drawings': () => isDrawingsFlagActive(teamId),
+      'inspection-qa': () => USE_TABBED_QA_LAYOUT && (isInspectionLogFlagActive(teamId) || isQaPlannerFlagActive(teamId))
+    };
+
+    const hasAccess = tabAccessRules[targetTab]?.() || false;
+
+    if (hasAccess) {
+      setActiveTab(targetTab);
+    } else {
+      console.log(`Access denied or invalid tab: ${targetTab}. Redirecting to submittal tab.`);
+      setActiveTab('submittal');
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.set("tab", "submittal");
+      navigate(`/project-logs?${newSearchParams.toString()}`, { replace: true });
+    }
+  }, [searchParams, teamId, isSpecGptFlagActive, isSpecCenteredViewFlagActive, isDrawingsFlagActive, isInspectionLogFlagActive, isQaPlannerFlagActive]);
 
   // Update URL when activeTab changes manually
   useEffect(() => {
@@ -573,6 +636,16 @@ const ProjectLogs = () => {
       }
     }
   }, [activeTab, projectId, projectVersionId]);
+
+  // Lazy load submittal data when switching to tabs that need it
+  useEffect(() => {
+    const needsSubmittalData = activeTab === 'submittal' || activeTab === 'assistant';
+    const hasSubmittalData = logData && logData.length > 0;
+
+    if (needsSubmittalData && !hasSubmittalData && projectId && projectVersionId && !isInitialLoading) {
+      fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
+    }
+  }, [activeTab, projectId, projectVersionId, isInitialLoading]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -1745,10 +1818,12 @@ const ProjectLogs = () => {
             onViewArchivedVersions={handleViewArchivedVersions}
             isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
             isSpecCenteredViewFlagActive={isSpecCenteredViewFlagActive(teamId)}
+            isDrawingsFlagActive={isDrawingsFlagActive(teamId)}
             isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
             isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
+            useQaTabbedLayout={USE_TABBED_QA_LAYOUT}
           />
           {activeTab === 'submittal' && (
             <ProjectLogsActionPanel
@@ -1857,6 +1932,7 @@ const ProjectLogs = () => {
                   handleCombineRows={handleCombineRows}
                   areSameValues={areSameValues}
                   projectVersionId={projectVersionId}
+                  isProcessingBannerVisible={documentIsProcessing(documentData)}
                 />
                 {pdfData.url && (
                   <div style={{ display: "flex", gap: 10 }}>
@@ -1950,20 +2026,20 @@ const ProjectLogs = () => {
               </div>
             </div>
           </div>}
-          {activeTab == 'compass' && 
+          {activeTab === 'assistant' && isSpecGptFlagActive(teamId) &&
             <>
             <div className="compass-chat-viewport">
               <ProcessingIndicator
                 documentIsProcessing={documentIsBeingEmbedded}
                 documentData={documentData}
                 toggleDocumentStatusModal={toggleSpecGptProcessingModal}
-                indicatorText={"Compass is processing your documents..."}
+                indicatorText={"Assistant is processing your documents..."}
               />
               <ChakraProvider>
-                <Chat 
-                  projectId={projectId} 
-                  projectVersionId={projectVersionId} 
-                  chatSessionId={chatId} 
+                <Chat
+                  projectId={projectId}
+                  projectVersionId={projectVersionId}
+                  chatSessionId={chatId}
                   setChatSessionId={setChatId}
                   messages={chatMessages}
                   setMessages={setChatMessages}
@@ -1976,24 +2052,8 @@ const ProjectLogs = () => {
                   isChatEnabled={isSpecGptChatEnabled}
                   setIsChatEnabled={setIsSpecGptChatEnabled}
                   teamId={teamId}
-                />
-              </ChakraProvider>
-              </div>
-            </>
-          }
-          {activeTab == 'inspection-qa' &&
-            <>
-            <div className="compass-chat-viewport">
-              <ProcessingIndicator
-                documentIsProcessing={documentIsBeingEmbedded}
-                documentData={documentData}
-                toggleDocumentStatusModal={toggleSpecGptProcessingModal}
-                indicatorText={"Compass is processing your documents..."}
-              />
-              <ChakraProvider>
-                <InspectionQA
-                  projectId={projectId}
-                  projectVersionId={projectVersionId}
+                  useQaTabbedLayout={USE_TABBED_QA_LAYOUT}
+                  inspectionQA={inspectionQA}
                   isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
                   isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
                 />
@@ -2001,14 +2061,44 @@ const ProjectLogs = () => {
               </div>
             </>
           }
-          {activeTab == 'spec-view' && 
+          {activeTab === 'inspection-qa' && USE_TABBED_QA_LAYOUT && (isInspectionLogFlagActive(teamId) || isQaPlannerFlagActive(teamId)) &&
             <>
-            <SpecViewer 
+            <div className="compass-chat-viewport">
+              <ProcessingIndicator
+                documentIsProcessing={documentIsBeingEmbedded}
+                documentData={documentData}
+                toggleDocumentStatusModal={toggleSpecGptProcessingModal}
+                indicatorText={"Assistant is processing your documents..."}
+              />
+              <ChakraProvider>
+                <InspectionQA
+                  projectId={projectId}
+                  projectVersionId={projectVersionId}
+                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
+                  inspectionQA={inspectionQA}
+                />
+              </ChakraProvider>
+              </div>
+            </>
+          }
+          {activeTab === 'spec-view' && isSpecCenteredViewFlagActive(teamId) &&
+            <>
+            <SpecViewer
               projectId={projectId}
               projectVersionId={projectVersionId}
               teamId={teamId}
             />
             </>
+          }
+          {activeTab === 'drawings' && isDrawingsFlagActive(teamId) &&
+            <ErrorBoundary>
+              <DrawingsTab
+                projectId={projectId}
+                projectVersionId={projectVersionId}
+                teamId={teamId}
+              />
+            </ErrorBoundary>
           }
         </div>
       )}
@@ -2196,7 +2286,7 @@ const ProjectLogs = () => {
         className="new-customer modal-xl"
       >
         <ModalHeader toggle={toggleSpecGptProcessingModal}>
-          Compass Processing Status
+          Assistant Processing Status
         </ModalHeader>
         <ModalBody>
           <DocumentStatus documentData={documentData} isSpecGptStatus={true} />

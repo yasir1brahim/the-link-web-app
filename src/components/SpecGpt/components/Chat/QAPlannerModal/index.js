@@ -10,13 +10,15 @@ import {
     Checkbox,
     VStack,
     Text,
+    Icon,
     useToast
 } from '@chakra-ui/react';
+import { CheckCircleIcon } from '@chakra-ui/icons';
 import { getQAOptionsWithLabels } from '../../../utils/qaUtils';
 
 const QA_OPTIONS = getQAOptionsWithLabels();
 
-const QAPlannerModal = ({ isOpen, onClose, onSubmit, isLoading = false }) => {
+const QAPlannerModal = ({ isOpen, onClose, onSubmit, onSuccessClose, isLoading = false, isSuccess = false }) => {
     const [selectedOptions, setSelectedOptions] = useState([]);
     const toast = useToast();
 
@@ -47,6 +49,46 @@ const QAPlannerModal = ({ isOpen, onClose, onSubmit, isLoading = false }) => {
         setSelectedOptions([]);
         onClose();
     };
+
+    const handleSuccessClose = () => {
+        setSelectedOptions([]);
+        if (onSuccessClose) {
+            onSuccessClose();
+        }
+    };
+
+    // Success view
+    if (isSuccess) {
+        return (
+            <Modal isOpen={isOpen} onClose={handleSuccessClose} isCentered closeOnOverlayClick={false}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader textAlign="center">QA Planner</ModalHeader>
+                    <ModalBody textAlign="center" py={6}>
+                        <Icon as={CheckCircleIcon} w={12} h={12} color="green.500" mb={4} />
+                        <Text fontSize="lg" fontWeight="medium" mb={2}>
+                            QA Planner generation started!
+                        </Text>
+                        <Text color="gray.600">
+                            This process may take a few minutes to complete. You can monitor the progress on the next screen.
+                        </Text>
+                    </ModalBody>
+                    <ModalFooter justifyContent="center">
+                        <Button
+                            bg="#d5e73e"
+                            color="black"
+                            variant="solid"
+                            onClick={handleSuccessClose}
+                            _hover={{ bg: "#c4d535" }}
+                            _active={{ bg: "#b3c42c" }}
+                        >
+                            View Progress
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        );
+    }
 
     return (
         <Modal isOpen={isOpen} onClose={handleClose} isCentered>

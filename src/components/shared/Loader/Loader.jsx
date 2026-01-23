@@ -28,7 +28,7 @@ const Loader = (props) => {
             ''
           )}
           {props.specGptLoader ? (
-            <p className="dot-processing">Documents are being processed, Compass will be available shortly.</p>
+            <p className="dot-processing">Documents are being processed, Assistant will be available shortly.</p>
           ) : (
             ''
           )}
