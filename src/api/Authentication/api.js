@@ -147,20 +147,28 @@ const getUserRoleInTeam = async (userId, teamId) => {
 };
 
 const getUserTeams = async (accessToken) => {
-    if (accessToken) {
-        return await axiosInstance({
+    let allResults = [];
+    let url = '/teams/api/teams/';
+    const headers = accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {};
+
+    while (url) {
+        const response = await axiosInstance({
             method: 'get',
-            url: '/teams/api/teams/',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
+            url,
+            headers
         });
-    } else {
-        return await axiosInstance({
-            method: 'get',
-            url: '/teams/api/teams/',
-        });
+
+        allResults = [...allResults, ...response.data.results];
+
+        if (response.data.next) {
+            const nextUrl = new URL(response.data.next);
+            url = nextUrl.pathname + nextUrl.search;
+        } else {
+            url = null;
+        }
     }
+
+    return { data: { results: allResults } };
 }
 
 const updateUserTeamMembership = async (membershipId, role, firstName, lastName) => {
