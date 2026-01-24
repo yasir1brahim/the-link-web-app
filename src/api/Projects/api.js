@@ -17,13 +17,30 @@ const listProjects = async (teamId) => {
 
 const listProjectsOverview = async (teamId) => {
     try {
-        return await axiosInstance({
-            method: 'get',
-            url: `/api/deliverables/projects/overview/`,
-            params: {
-                team_id: teamId
+        let allResults = [];
+        let url = `/api/deliverables/projects/overview/`;
+        let params = { team_id: teamId };
+
+        while (url) {
+            const response = await axiosInstance({
+                method: 'get',
+                url,
+                params
+            });
+
+            allResults = [...allResults, ...response.data.results];
+
+            if (response.data.next) {
+                // Extract path and query from next URL for subsequent requests
+                const nextUrl = new URL(response.data.next);
+                url = nextUrl.pathname + nextUrl.search;
+                params = {}; // params are already included in the URL
+            } else {
+                url = null;
             }
-        });
+        }
+
+        return { data: { results: allResults } };
     } catch (error) {
         handleError(error);
     }
