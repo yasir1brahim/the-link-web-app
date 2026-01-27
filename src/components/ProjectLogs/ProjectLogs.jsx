@@ -2103,6 +2103,7 @@ const ProjectLogs = () => {
               projectId={projectId}
               projectVersionId={projectVersionId}
               teamId={teamId}
+              onNavigateToDocuments={() => setActiveTab('submittal')}
             />
             </>
           }
