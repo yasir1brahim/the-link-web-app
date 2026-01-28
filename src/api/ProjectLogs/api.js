@@ -14,13 +14,31 @@ const getSavedLogs = async (listId) => {
 
 const getProjectLists = async (projectId, projectVersionId) => {
     try {
-        return await axiosInstance({
-            method: 'get',
-            url: `/api/deliverables/${projectId}/submittal-lists/`,
-            params: {
-                ...(projectVersionId && { project_version_id: projectVersionId }),
+        let allResults = [];
+        let url = `/api/deliverables/${projectId}/submittal-lists/`;
+        let params = {
+            ...(projectVersionId && { project_version_id: projectVersionId }),
+        };
+
+        while (url) {
+            const response = await axiosInstance({
+                method: 'get',
+                url,
+                params
+            });
+
+            allResults = [...allResults, ...response.data.results];
+
+            if (response.data.next) {
+                const nextUrl = new URL(response.data.next);
+                url = nextUrl.pathname + nextUrl.search;
+                params = {};
+            } else {
+                url = null;
             }
-        });
+        }
+
+        return { data: { results: allResults } };
     } catch (error) {
         handleError(error);
     }

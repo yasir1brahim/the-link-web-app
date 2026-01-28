@@ -1721,8 +1721,9 @@ const ProjectLogs = () => {
     try {
       setIsDataLoading(true);
       const projectResponse = await getProjectDetails(projectId, projectVersionId);
-      
+
       setDocumentData(projectResponse.data.document_details);
+      setPage(1);
       await fetchLogData(1, rowsPerPage, null, null, null, null, null, projectVersionId);
       await fetchSpecSectionCount();
     } catch (e) {
@@ -2099,6 +2100,7 @@ const ProjectLogs = () => {
               projectId={projectId}
               projectVersionId={projectVersionId}
               teamId={teamId}
+              onNavigateToDocuments={() => setActiveTab('submittal')}
             />
             </>
           }
