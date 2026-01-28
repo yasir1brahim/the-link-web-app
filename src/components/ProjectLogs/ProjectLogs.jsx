@@ -1056,16 +1056,11 @@ const ProjectLogs = () => {
   }
 
   const documentIsBeingEmbedded = (documents = []) => {
-    return documents.some((doc) => {
-      // Exclude documents that are stuck
-      if ( (doc.document_status === "FAILED" || doc.document_status === "SECTION_PROCESSING_FAILED") && doc.specgpt_processing_status === "IN_QUEUE") {
-        return false;
-      }
-      
-      return ["UPLOADING", "IN_QUEUE", "PROCESSING", "SUBSECTIONS_EXTRACTED"].includes(
+    return documents.some((doc) =>
+      ["UPLOADING", "IN_QUEUE", "PROCESSING", "SUBSECTIONS_EXTRACTED"].includes(
         doc.specgpt_processing_status
-      );
-    });
+      )
+    );
   }
 
   const onClickVersion = (versionId) => {
