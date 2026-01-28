@@ -34,6 +34,7 @@ import Chat from "../SpecGpt/components/Chat";
 import InspectionQA from "../SpecGpt/components/InspectionQA";
 import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
+import CompassProcessingBanner from "./CompassProcessingBanner";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
 import ArchivedVersionsModal from "./archivedVersionModal";
 import { isLogEligibleForChildEntry } from "./projectLogsUtils";
@@ -2030,41 +2031,49 @@ const ProjectLogs = () => {
           </div>}
           {activeTab === 'assistant' && isSpecGptFlagActive(teamId) &&
             <>
-            <div className="compass-chat-viewport">
-              <AssistantReprocessBanner
-                documentData={documentData}
-                onReprocessComplete={refreshDocuments}
-                isSpecGptEnabled={isSpecGptFlagActive(teamId)}
-              />
-              <ProcessingIndicator
-                documentIsProcessing={documentIsBeingEmbedded}
-                documentData={documentData}
-                toggleDocumentStatusModal={toggleSpecGptProcessingModal}
-                indicatorText={"Assistant is processing your documents..."}
-              />
-              <ChakraProvider>
-                <Chat
-                  projectId={projectId}
-                  projectVersionId={projectVersionId}
-                  chatSessionId={chatId}
-                  setChatSessionId={setChatId}
-                  messages={chatMessages}
-                  setMessages={setChatMessages}
-                  chatHistory={chatHistory}
-                  setChatHistory={setChatHistory}
-                  isLoadingMessage={isSpecGptLoadingMessage}
-                  setIsLoadingMessage={setIsSpecGptLoadingMessage}
-                  userInput={specGptUserInput}
-                  setUserInput={setSpecGptUserInput}
-                  isChatEnabled={isSpecGptChatEnabled}
-                  setIsChatEnabled={setIsSpecGptChatEnabled}
-                  teamId={teamId}
-                  useQaTabbedLayout={USE_TABBED_QA_LAYOUT}
-                  inspectionQA={inspectionQA}
-                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
-                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
+              <div className="compass-chat-viewport">
+                <ProcessingIndicator
+                  documentIsProcessing={documentIsBeingEmbedded}
+                  documentData={documentData}
+                  toggleDocumentStatusModal={toggleSpecGptProcessingModal}
+                  indicatorText={"Assistant is processing your documents..."}
                 />
-              </ChakraProvider>
+                <CompassProcessingBanner
+                  projectId={projectId}
+                  onProcessingTriggered={async () => {
+                    // Refresh document data after processing is triggered
+                    try {
+                      const response = await getProjectDetails(projectId, projectVersionId);
+                      setDocumentData(response.data.document_details);
+                      ToastService.info('Documents are being processed. This may take a few minutes.');
+                    } catch (error) {
+                      console.error('Error refreshing document data:', error);
+                    }
+                  }}
+                />
+                <ChakraProvider>
+                  <Chat
+                    projectId={projectId}
+                    projectVersionId={projectVersionId}
+                    chatSessionId={chatId}
+                    setChatSessionId={setChatId}
+                    messages={chatMessages}
+                    setMessages={setChatMessages}
+                    chatHistory={chatHistory}
+                    setChatHistory={setChatHistory}
+                    isLoadingMessage={isSpecGptLoadingMessage}
+                    setIsLoadingMessage={setIsSpecGptLoadingMessage}
+                    userInput={specGptUserInput}
+                    setUserInput={setSpecGptUserInput}
+                    isChatEnabled={isSpecGptChatEnabled}
+                    setIsChatEnabled={setIsSpecGptChatEnabled}
+                    teamId={teamId}
+                    useQaTabbedLayout={USE_TABBED_QA_LAYOUT}
+                    inspectionQA={inspectionQA}
+                    isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+                    isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
+                  />
+                </ChakraProvider>
               </div>
             </>
           }
