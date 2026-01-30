@@ -17,6 +17,7 @@ import DrawingsProcessingIndicator from './DrawingsProcessingIndicator';
 import DrawingFilesModal from './DrawingFilesModal';
 import { ReactComponent as PlusUploadIcon } from '../../assets/images/plus-upload.svg';
 import { ReactComponent as ExcelLogo } from '../../assets/images/microsoft-excel-symbol.svg';
+import { getDisciplineDisplayName } from '../../constants/disciplines';
 import './DrawingsTab.css';
 
 // Sentinel value for filtering records with null sheet_number or sheet_title
@@ -30,6 +31,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     drawing_files: [],
     sheet_numbers: [],
     sheet_titles: [],
+    disciplines: [],
     has_null_sheet_number: false,
     has_null_sheet_title: false,
   });
@@ -48,6 +50,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     sheet_number: null,
     sheet_title: null,
     category: null,
+    disciplines: null,
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -92,7 +95,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
       filterable: true,
       filterValueKey: 'value',
       filterLabelKey: 'label',
-      width: '25%',
+      width: '22%',
       render: (value) => value || 'Unknown Title',
     },
     {
@@ -100,14 +103,27 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
       header: 'Category',
       sortable: true,
       filterable: true,
-      width: '15%',
+      width: '12%',
+    },
+    {
+      key: 'disciplines',
+      header: 'Discipline',
+      sortable: false,
+      filterable: true,
+      filterValueKey: 'value',
+      filterLabelKey: 'label',
+      width: '13%',
+      render: (value) => {
+        if (!value || value.length === 0) return '—';
+        return value.map(getDisciplineDisplayName).join(', ');
+      },
     },
     {
       key: 'text',
       header: 'Text',
       sortable: true,
       filterable: false,
-      width: '45%',
+      width: '38%',
     },
   ];
 
@@ -129,6 +145,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
         sheetTitle: sheetTitleFilter || undefined,
         sheetNumberIsNull: sheetNumberIsNull || undefined,
         sheetTitleIsNull: sheetTitleIsNull || undefined,
+        disciplines: columnFilters.disciplines || undefined,
         search: debouncedSearch || undefined,
         page,
         limit: rowsPerPage,
@@ -138,7 +155,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
 
       setDrawingNotes(response?.data?.results || []);
       // Only update filter options when no filters are applied (preserves full list)
-      const hasFilters = columnFilters.category || columnFilters.sheet_number || columnFilters.sheet_title || debouncedSearch;
+      const hasFilters = columnFilters.category || columnFilters.sheet_number || columnFilters.sheet_title || columnFilters.disciplines || debouncedSearch;
       if (!hasFilters && response?.data?.all_filter_vals) {
         setAllFilterVals(response.data.all_filter_vals);
       }
@@ -217,7 +234,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   };
 
   const handleClearFilters = () => {
-    setColumnFilters({ sheet_number: null, sheet_title: null, category: null });
+    setColumnFilters({ sheet_number: null, sheet_title: null, category: null, disciplines: null });
     setSearchQuery('');
     setPage(1);
     setSelectedNote(null);
@@ -249,6 +266,7 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
           sheetTitle: sheetTitleFilter || undefined,
           sheetNumberIsNull: sheetNumberIsNull || undefined,
           sheetTitleIsNull: sheetTitleIsNull || undefined,
+          disciplines: columnFilters.disciplines || undefined,
           search: debouncedSearch || undefined,
         });
 
@@ -333,11 +351,16 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     ...(hasNullSheetTitle ? [{ value: UNKNOWN_FILTER_VALUE, label: 'Unknown Title' }] : []),
     ...sheetTitles.map((val) => ({ value: val, label: val })),
   ];
+  const disciplinesOptions = (allFilterVals.disciplines || []).map((val) => ({
+    value: val,
+    label: getDisciplineDisplayName(val),
+  }));
 
   const filterOptions = {
     sheet_number: sheetNumberOptions,
     sheet_title: sheetTitleOptions,
     category: allFilterVals.category || [],
+    disciplines: disciplinesOptions,
   };
 
   // Map column filters for DataTable
@@ -345,10 +368,11 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     sheet_number: columnFilters.sheet_number,
     sheet_title: columnFilters.sheet_title,
     category: columnFilters.category,
+    disciplines: columnFilters.disciplines,
   };
 
   const hasActiveFilters =
-    columnFilters.sheet_number || columnFilters.sheet_title || columnFilters.category || searchQuery;
+    columnFilters.sheet_number || columnFilters.sheet_title || columnFilters.category || columnFilters.disciplines || searchQuery;
 
   const showPdfViewer = selectedNote && pdfData.url;
 
