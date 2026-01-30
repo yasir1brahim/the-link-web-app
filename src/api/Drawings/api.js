@@ -7,6 +7,7 @@ import handleError from "../../config/errorHandler";
  * @param {number} projectVersionId - Project version ID
  * @param {Object} options - Query options
  * @param {string} options.category - Category filter
+ * @param {string} options.disciplines - Disciplines filter (filters notes where disciplines array contains this value)
  * @param {string} options.sheetNumber - Sheet number filter (exact match)
  * @param {string} options.sheetTitle - Sheet title filter (case-insensitive substring)
  * @param {boolean} options.sheetNumberIsNull - Filter for records with null sheet_number
@@ -21,7 +22,7 @@ import handleError from "../../config/errorHandler";
 export const getDrawingNotes = async (
   projectId,
   projectVersionId,
-  { category, sheetNumber, sheetTitle, sheetNumberIsNull, sheetTitleIsNull, search, page = 1, limit = 25, sortColumn, sortDirection } = {}
+  { category, disciplines, sheetNumber, sheetTitle, sheetNumberIsNull, sheetTitleIsNull, search, page = 1, limit = 25, sortColumn, sortDirection } = {}
 ) => {
   try {
     return await axiosInstance({
@@ -30,6 +31,7 @@ export const getDrawingNotes = async (
       params: {
         project_version_id: projectVersionId,
         ...(category && { category }),
+        ...(disciplines && { disciplines }),
         ...(sheetNumber && { sheet_number: sheetNumber }),
         ...(sheetTitle && { sheet_title: sheetTitle }),
         ...(sheetNumberIsNull && { sheet_number_is_null: true }),
@@ -53,6 +55,7 @@ export const getDrawingNotes = async (
  * @param {number} projectVersionId - Project version ID
  * @param {Object} options - Query options (same filters as list endpoint)
  * @param {string} options.category - Category filter
+ * @param {string} options.disciplines - Disciplines filter (filters notes where disciplines array contains this value)
  * @param {string} options.sheetNumber - Sheet number filter (exact match)
  * @param {string} options.sheetTitle - Sheet title filter (case-insensitive substring)
  * @param {boolean} options.sheetNumberIsNull - Filter for records with null sheet_number
@@ -63,7 +66,7 @@ export const getDrawingNotes = async (
 export const exportDrawingNotesToExcel = async (
   projectId,
   projectVersionId,
-  { category, sheetNumber, sheetTitle, sheetNumberIsNull, sheetTitleIsNull, search } = {}
+  { category, disciplines, sheetNumber, sheetTitle, sheetNumberIsNull, sheetTitleIsNull, search } = {}
 ) => {
   try {
     return await axiosInstance({
@@ -73,6 +76,7 @@ export const exportDrawingNotesToExcel = async (
       params: {
         project_version_id: projectVersionId,
         ...(category && { category }),
+        ...(disciplines && { disciplines }),
         ...(sheetNumber && { sheet_number: sheetNumber }),
         ...(sheetTitle && { sheet_title: sheetTitle }),
         ...(sheetNumberIsNull && { sheet_number_is_null: true }),
