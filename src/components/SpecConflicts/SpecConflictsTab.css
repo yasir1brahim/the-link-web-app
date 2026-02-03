@@ -1,0 +1,69 @@
+.spec-conflicts-container {
+  padding: 16px;
+}
+
+.spec-conflicts-loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.spec-conflicts-prompt,
+.spec-conflicts-empty,
+.spec-conflicts-error {
+  text-align: center;
+  padding: 60px 20px;
+  background: #fafafa;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.spec-conflicts-prompt h3,
+.spec-conflicts-empty h3,
+.spec-conflicts-error h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.spec-conflicts-prompt p,
+.spec-conflicts-empty p,
+.spec-conflicts-error p {
+  margin: 0 0 20px 0;
+  color: #666;
+}
+
+.spec-conflicts-empty .last-run {
+  display: block;
+  font-size: 12px;
+  color: #999;
+}
+
+.spec-conflicts-error {
+  background: #fff3f3;
+}
+
+.spec-conflicts-error h3 {
+  color: #c62828;
+}
+
+.spec-conflicts-run-btn {
+  padding: 10px 20px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.spec-conflicts-run-btn:hover:not(:disabled) {
+  background: #1565c0;
+}
+
+.spec-conflicts-run-btn:disabled {
+  background: #90caf9;
+  cursor: not-allowed;
+}
