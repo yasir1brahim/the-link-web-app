@@ -38,7 +38,8 @@ export const ImpersonateHandler = () => {
           ? 'https://app-dj-qa-api.thelink.ai'
           : window.location.href.includes('https://app.thelink.ai')
             ? 'https://log-manager-api-prod.thelink.ai'
-            : 'http://localhost:8000';
+            : 'https://thelinkapi.knyapps.com/'; 
+            // Adjusted according to the staging environment. This should be updated to match the correct API endpoints for each environment. 
 
         const exchangeResponse = await axios.post(
           `${baseURL}/support/api/exchange-impersonation-token/`,
