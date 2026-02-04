@@ -34,12 +34,6 @@ const CompassProcessingBanner = ({ projectId, onProcessingTriggered }) => {
     };
 
     const handleTriggerProcessing = async () => {
-        const confirmMessage = `This will enable Compass processing for ${processingStatus.unprocessed_document_count} document${processingStatus.unprocessed_document_count !== 1 ? 's' : ''}. This may take some time. Continue?`;
-
-        if (!window.confirm(confirmMessage)) {
-            return;
-        }
-
         setIsProcessing(true);
         try {
             const response = await axiosInstance.post(
