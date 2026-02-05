@@ -14,6 +14,7 @@ import {
     QA_PLANNER_FEATURE_FLAG_NAME,
     SPEC_CENTERED_VIEW_FEATURE_FLAG_NAME,
     DRAWINGS_FEATURE_FLAG_NAME,
+    SPEC_CONFLICTS_FEATURE_FLAG_NAME,
 } from '../constants';
 
 const FeatureFlagsContext = createContext();
@@ -159,6 +160,7 @@ export const FeatureFlagsProvider = ({ children }) => {
     const isQaPlannerFlagActive = (teamId) => isFlagActive(QA_PLANNER_FEATURE_FLAG_NAME, teamId);
     const isSpecCenteredViewFlagActive = (teamId) => isFlagActive(SPEC_CENTERED_VIEW_FEATURE_FLAG_NAME, teamId);
     const isDrawingsFlagActive = (teamId) => isFlagActive(DRAWINGS_FEATURE_FLAG_NAME, teamId);
+    const isSpecConflictsFlagActive = (teamId) => isFlagActive(SPEC_CONFLICTS_FEATURE_FLAG_NAME, teamId);
 
     // Refresh flags (useful when flags might have changed)
     const refreshFlags = async () => {
@@ -198,6 +200,7 @@ export const FeatureFlagsProvider = ({ children }) => {
         isQaPlannerFlagActive,
         isSpecCenteredViewFlagActive,
         isDrawingsFlagActive,
+        isSpecConflictsFlagActive,
         refreshFlags
     };
 

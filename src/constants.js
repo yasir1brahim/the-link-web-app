@@ -74,3 +74,5 @@ export const INSPECTION_LOG_USE_DATA_TABLES_FEATURE_FLAG_NAME = "inspection_log_
 export const QA_PLANNER_FEATURE_FLAG_NAME = "qa_planner";
 export const SPEC_CENTERED_VIEW_FEATURE_FLAG_NAME = "spec_centered_view";
 export const DRAWINGS_FEATURE_FLAG_NAME = "drawings";
+export const SPEC_CONFLICTS_FEATURE_FLAG_NAME = "drawing_spec_comparison";
+export const SPEC_CONFLICTS_TAB_NAME = "Spec Conflicts";
