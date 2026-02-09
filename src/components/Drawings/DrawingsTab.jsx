@@ -11,8 +11,8 @@ import {
   CountDisplay,
   PdfViewerPane,
 } from '../shared/DataTable';
-import { getDrawingNotes, exportDrawingNotesToExcel } from '../../api/Drawings/api';
-import DrawingsUploadModal from './DrawingsUploadModal';
+import { getDrawingNotes, exportDrawingNotesToExcel, uploadDrawingFiles } from '../../api/Drawings/api';
+import { FileUploadModal } from '../shared/FileUploadModal';
 import DrawingsProcessingIndicator from './DrawingsProcessingIndicator';
 import DrawingFilesModal from './DrawingFilesModal';
 import { ReactComponent as PlusUploadIcon } from '../../assets/images/plus-upload.svg';
@@ -67,6 +67,12 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [drawingFilesModalOpen, setDrawingFilesModalOpen] = useState(false);
+
+  // Upload state
+  const [uploadFiles, setUploadFiles] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   // Debounce search
   useEffect(() => {
@@ -291,6 +297,44 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
     setPdfData({ url: null });
   };
 
+  // Upload handlers
+  const handleUpload = async () => {
+    if (uploadFiles.length === 0) {
+      setUploadError("Please select at least one PDF file to upload.");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("project_id", projectId);
+      formData.append("project_version_id", projectVersionId);
+      formData.append("file_type", "drawing");
+      uploadFiles.forEach((file) => formData.append("files", file));
+
+      await uploadDrawingFiles(formData);
+      setUploadFiles([]);
+      setUploadSuccess(true);
+      setUploadModalOpen(false);
+      fetchDrawingNotes();
+    } catch (err) {
+      setUploadError("Failed to upload files. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleUploadErrorClose = () => {
+    setUploadError(null);
+    setUploadModalOpen(true);
+  };
+
+  const handleUploadSuccessClose = () => {
+    setUploadSuccess(false);
+  };
+
   // Navigation handlers
   const handleNavigateUp = () => {
     if (!selectedNote) return;
@@ -485,15 +529,27 @@ const DrawingsTab = ({ projectId, projectVersionId, teamId }) => {
         </>
       )}
 
-      <DrawingsUploadModal
+      <FileUploadModal
         isOpen={uploadModalOpen}
         toggle={() => setUploadModalOpen(false)}
-        projectId={projectId}
-        projectVersionId={projectVersionId}
-        onSuccess={() => {
-          setUploadModalOpen(false);
-          fetchDrawingNotes();
-        }}
+        title="Upload Drawing Files"
+        acceptedFileTypes="application/pdf"
+        uploadButtonText="Upload"
+        guidelines={[
+          "All drawing files must be in PDF format",
+          "Maximum individual file size is 150 MB",
+          "Maximum number of files in one upload is 250"
+        ]}
+        files={uploadFiles}
+        onFilesChange={setUploadFiles}
+        onUpload={handleUpload}
+        isUploading={isUploading}
+        uploadError={uploadError}
+        onErrorClose={handleUploadErrorClose}
+        uploadSuccess={uploadSuccess}
+        onSuccessClose={handleUploadSuccessClose}
+        successMessage="Your drawing files have been successfully uploaded and are being processed."
+        successSubMessage="This may take a few minutes to complete."
       />
 
       <DrawingFilesModal

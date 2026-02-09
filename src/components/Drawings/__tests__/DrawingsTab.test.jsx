@@ -16,10 +16,12 @@ jest.mock('../../../pdfWrapper', () => ({ pdfData }) => (
 // Mock Loader
 jest.mock('../../shared/Loader/Loader', () => () => <div data-testid="loader">Loading...</div>);
 
-// Mock DrawingsUploadModal
-jest.mock('../DrawingsUploadModal', () => ({ isOpen, toggle }) => (
-  isOpen ? <div data-testid="upload-modal">Upload Modal</div> : null
-));
+// Mock FileUploadModal
+jest.mock('../../shared/FileUploadModal', () => ({
+  FileUploadModal: ({ isOpen, toggle }) => (
+    isOpen ? <div data-testid="upload-modal">Upload Modal</div> : null
+  )
+}));
 
 // Mock DrawingsProcessingIndicator
 jest.mock('../DrawingsProcessingIndicator', () => ({ processingStatus }) => (
