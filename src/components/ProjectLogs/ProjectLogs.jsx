@@ -44,7 +44,9 @@ import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
 import SpecViewer from "../SpecCentricView/SpecViewer";
 import { useInspectionQA } from '../SpecGpt/hooks/useInspectionQA';
 import { DrawingsTab } from "../Drawings";
+import { SpecConflictsTab } from '../SpecConflicts';
 import ErrorBoundary from "../ErrorBoundary/ErrorBoundary";
+import { SPEC_CONFLICTS_TAB_NAME } from '../../constants';
 
 // Toggle between tabbed layout (true) and sidebar layout (false)
 // Set to false to show QA features in Compass sidebar instead of separate tab
@@ -60,6 +62,7 @@ const ProjectLogs = () => {
     isQaPlannerFlagActive,
     isSpecCenteredViewFlagActive,
     isDrawingsFlagActive,
+    isSpecConflictsFlagActive,
   } = useFeatureFlags();
   const [defaultTab, setDefaultTab] = useState("documents"); 
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
@@ -559,9 +562,9 @@ const ProjectLogs = () => {
         setAvailableVersions(response.data.project_versions);
 
         // Fetch tab-specific data in parallel where possible
-        // Spec View and Drawings tabs don't need submittal log data upfront
+        // Spec View, Drawings, and Spec Conflicts tabs don't need submittal log data upfront
         const currentTab = searchParams.get("tab") || 'submittal';
-        const needsSubmittalData = currentTab !== 'spec-view' && currentTab !== 'drawings';
+        const needsSubmittalData = currentTab !== 'spec-view' && currentTab !== 'drawings' && currentTab !== 'spec-conflicts';
 
         if (needsSubmittalData) {
           // Fetch both in parallel for tabs that need submittal data
@@ -610,6 +613,7 @@ const ProjectLogs = () => {
       'assistant': () => isSpecGptFlagActive(teamId),
       'spec-view': () => isSpecCenteredViewFlagActive(teamId),
       'drawings': () => isDrawingsFlagActive(teamId),
+      'spec-conflicts': () => isSpecConflictsFlagActive(teamId),
       'inspection-qa': () => USE_TABBED_QA_LAYOUT && (isInspectionLogFlagActive(teamId) || isQaPlannerFlagActive(teamId))
     };
 
@@ -624,7 +628,7 @@ const ProjectLogs = () => {
       newSearchParams.set("tab", "submittal");
       navigate(`/project-logs?${newSearchParams.toString()}`, { replace: true });
     }
-  }, [searchParams, teamId, isSpecGptFlagActive, isSpecCenteredViewFlagActive, isDrawingsFlagActive, isInspectionLogFlagActive, isQaPlannerFlagActive]);
+  }, [searchParams, teamId, isSpecGptFlagActive, isSpecCenteredViewFlagActive, isDrawingsFlagActive, isSpecConflictsFlagActive, isInspectionLogFlagActive, isQaPlannerFlagActive]);
 
   // Update URL when activeTab changes manually
   useEffect(() => {
@@ -1821,6 +1825,8 @@ const ProjectLogs = () => {
             isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
             isSpecCenteredViewFlagActive={isSpecCenteredViewFlagActive(teamId)}
             isDrawingsFlagActive={isDrawingsFlagActive(teamId)}
+            isSpecConflictsFlagActive={isSpecConflictsFlagActive(teamId)}
+            specConflictsTabName={SPEC_CONFLICTS_TAB_NAME}
             isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
             isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
             activeTab={activeTab}
@@ -2116,6 +2122,15 @@ const ProjectLogs = () => {
               />
             </ErrorBoundary>
           }
+          {activeTab === 'spec-conflicts' && isSpecConflictsFlagActive(teamId) && (
+            <ErrorBoundary>
+              <SpecConflictsTab
+                projectId={projectId}
+                projectVersionId={projectVersionId}
+                teamId={teamId}
+              />
+            </ErrorBoundary>
+          )}
         </div>
       )}
       <Toast />

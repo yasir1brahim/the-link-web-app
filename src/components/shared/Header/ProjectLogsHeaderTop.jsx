@@ -9,7 +9,7 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useContext(AuthContext);
 
-  const hasOtherActiveFlags = props.isSpecGptFlagActive || props.isSpecCenteredViewFlagActive || props.isDrawingsFlagActive || props.isInspectionLogFeatureFlagActive;
+  const hasOtherActiveFlags = props.isSpecGptFlagActive || props.isSpecCenteredViewFlagActive || props.isDrawingsFlagActive || props.isInspectionLogFeatureFlagActive || props.isSpecConflictsFlagActive;
   
   return (
     <div className="header-wrapper-swap row mx-0 my-2" style={{ borderBottom: '1px solid #e0e0e0' }}>
@@ -109,11 +109,30 @@ const ProjectLogsHeaderTop = ({ teamId, ...props }) => {
                 Drawings
               </button>
             )}
+            {props.isSpecConflictsFlagActive && (
+              <button
+                className={`tab-button ${props.activeTab === 'spec-conflicts' ? 'active' : ''}`}
+                onClick={() => props.setActiveTab('spec-conflicts')}
+                style={{
+                  padding: '12px 24px',
+                  border: 'none',
+                  backgroundColor: props.activeTab === 'spec-conflicts' ? '#fff' : '#f5f5f5',
+                  borderBottom: props.activeTab === 'spec-conflicts' ? '2px solid #007bff' : '2px solid transparent',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: props.activeTab === 'spec-conflicts' ? '600' : '400',
+                  color: props.activeTab === 'spec-conflicts' ? '#007bff' : '#666',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {props.specConflictsTabName || 'Spec Conflicts'}
+              </button>
+            )}
           </div>
         )}
       </div>
       <div className="col-4" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '0px' }}>
-        {props.isVersioningEnabled && (props.activeTab === 'submittal' || props.activeTab === 'assistant' || props.activeTab === 'inspection-qa' || props.activeTab === 'spec-view' || props.activeTab === 'drawings') && (
+        {props.isVersioningEnabled && (props.activeTab === 'submittal' || props.activeTab === 'assistant' || props.activeTab === 'inspection-qa' || props.activeTab === 'spec-view' || props.activeTab === 'drawings' || props.activeTab === 'spec-conflicts') && (
           <>
             {props.isVersionComparisonEnabled && props.activeTab === 'submittal' && (
               <button
