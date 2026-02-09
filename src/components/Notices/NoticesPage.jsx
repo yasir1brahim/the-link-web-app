@@ -14,7 +14,7 @@ import { debounce, get } from "lodash";
 import Loader from "../shared/Loader/Loader";
 import PdfWrapper from "../../pdfWrapper";
 import FileDownload from "js-file-download";
-import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
+import { FileUploadModal } from "../shared/FileUploadModal";
 import { useSearchParams } from "react-router-dom";
 import { ReactComponent as Sparkles } from "../../assets/images/sparkles.svg";
 import handleError from "../../config/errorHandler";
@@ -44,7 +44,7 @@ const NoticesPage = () => {
   const toggleDocumentStatusModal = () =>
     setShowDocumentStatusModal(!showDocumentStatusModal);
   const toggleModal = () => setModal(!modal);
-  const [pdfFile, setPdfFile] = useState({});
+  const [pdfFile, setPdfFile] = useState([]);
   const [logInViewer, setLogInViewer] = useState(null);
   const [fileData, setFileData] = useState({});
   const [alreadyExistingFiles, setAlreadyExistingFiles] = useState([]);
@@ -193,7 +193,7 @@ const NoticesPage = () => {
 
   useEffect(() => {
     if (!modal) {
-      setPdfFile({});
+      setPdfFile([]);
     }
   }, [modal]);
 
@@ -210,7 +210,7 @@ const NoticesPage = () => {
       const data = new FormData();
       data.append("project_id", projectId || state.project?.project_id);
       data.append('extract_notices', true);
-      Object.values(pdfFile)?.forEach((file) => data.append("files", file));
+      pdfFile.forEach((file) => data.append("files", file));
       const response = await uploadFiles(data)
       if (response.data) {
         const check_response = await getProjectDetails(projectId);
@@ -642,18 +642,28 @@ const NoticesPage = () => {
         draggable
         pauseOnHover
       />
-      <UploadDocuments
-        modal={modal}
-        toggleModal={toggleModal}
-        setPdfFile={setPdfFile}
-        pdfFile={pdfFile}
-        handleSubmit={handleSubmit}
-        isUploadLoading={isUploadLoading}
-        errorModal={errorModal}
-        toggleErrorModal={toggleErrorModal}
-        backToUpload={backToUpload}
-        successModal={successModal}
-        toggleSuccessModal={toggleSuccessModal}
+      <FileUploadModal
+        isOpen={modal}
+        toggle={toggleModal}
+        title="Upload Document"
+        acceptedFileTypes="application/pdf"
+        uploadButtonText="Upload"
+        guidelines={[
+          "All specifications must be a native PDF (i.e., not a flat, scanned file)",
+          "For best results, specifications should be in standard CSI SectionFormat",
+          "Maximum individual file size is 150 MB",
+          "Maximum number of files in one upload is 250"
+        ]}
+        files={pdfFile}
+        onFilesChange={setPdfFile}
+        onUpload={handleSubmit}
+        isUploading={isUploadLoading}
+        uploadError={errorModal ? "Upload failed. Please try again." : null}
+        onErrorClose={backToUpload}
+        uploadSuccess={successModal}
+        onSuccessClose={() => toggleSuccessModal(false)}
+        successMessage="Your files have been successfully uploaded and are being processed."
+        successSubMessage="This may take up to 10 minutes to complete."
         alreadyExistingFiles={alreadyExistingFiles}
       />
 

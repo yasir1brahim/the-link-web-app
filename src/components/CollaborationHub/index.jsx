@@ -3,7 +3,7 @@ import { useLocation } from 'react-router';
 import Header from '../shared/Header/Header';
 import NavbarTop from '../shared/NavbarTop/NavbarTop';
 import { useSearchParams } from 'react-router-dom';
-import { UploadDocuments } from '../ProjectDetails/UploadDocuments';
+import { FileUploadModal } from '../shared/FileUploadModal';
 import axiosInstance from '../../config/axios';
 import handleError from '../../config/errorHandler';
 import CollaborationPdfReader from '../PdfReader/collaborationPdfReader';
@@ -30,7 +30,7 @@ const CollaborationHub = () => {
   const [modal, setModal] = useState(false);
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
   const toggleModal = () => setModal(!modal);
-  const [pdfFile, setPdfFile] = useState({});
+  const [pdfFile, setPdfFile] = useState([]);
   const [fileData, setFileData] = useState({});
   const [docParsed, setDocParsed] = useState(0);
   const [documentData, setDocumentData] = useState([]);
@@ -100,7 +100,7 @@ const CollaborationHub = () => {
       const data = new FormData();
       data.append('project_id', projectId || state.project?.project_id);
       // projectType === 'ufgs' && data.append('project_type', projectType);
-      Object.values(pdfFile)?.forEach((file) => data.append('files', file));
+      pdfFile.forEach((file) => data.append('files', file));
       const response = await axiosInstance({
         method: 'post',
         url: '/upload_file',
@@ -208,19 +208,28 @@ const CollaborationHub = () => {
           </div>
         </div>
       </div>
-      <UploadDocuments
-        modal={modal}
-        toggleModal={toggleModal}
-        setPdfFile={setPdfFile}
-        pdfFile={pdfFile}
-        handleSubmit={handleSubmit}
-        isUploadLoading={isUploadLoading}
-        errorModal={errorModal}
-        toggleErrorModal={toggleErrorModal}
-        backToUpload={backToUpload}
-        successModal={successModal}
-        toggleSuccessModal={toggleSuccessModal}
-        fileData={fileData}
+      <FileUploadModal
+        isOpen={modal}
+        toggle={toggleModal}
+        title="Upload Document"
+        acceptedFileTypes="application/pdf"
+        uploadButtonText="Upload"
+        guidelines={[
+          "All specifications must be a native PDF (i.e., not a flat, scanned file)",
+          "For best results, specifications should be in standard CSI SectionFormat",
+          "Maximum individual file size is 150 MB",
+          "Maximum number of files in one upload is 250"
+        ]}
+        files={pdfFile}
+        onFilesChange={setPdfFile}
+        onUpload={handleSubmit}
+        isUploading={isUploadLoading}
+        uploadError={errorModal ? "Upload failed. Please try again." : null}
+        onErrorClose={backToUpload}
+        uploadSuccess={successModal}
+        onSuccessClose={() => toggleSuccessModal(false)}
+        successMessage="Your files have been successfully uploaded and are being processed."
+        successSubMessage="This may take up to 10 minutes to complete."
       />
       <DocumentListModal
         isOpen={showDocumentListModal}
