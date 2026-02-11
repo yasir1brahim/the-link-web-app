@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useRef, useEffect } from 'react';
+import React, { Fragment, useState, useRef, useEffect, useLayoutEffect } from 'react';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -23,6 +23,16 @@ const SpecConflictsTable = ({
   const [openFilter, setOpenFilter] = useState(null);
   const filterRef = useRef(null);
 
+  // Overlay positioning — keeps ExpandedConflictRow in a stable DOM position
+  // while visually appearing inline with the expanded table row.
+  const containerRef = useRef(null);
+  const spacerRef = useRef(null);
+  const [overlayPos, setOverlayPos] = useState(null);
+
+  const selectedConflict = expandedRowId
+    ? conflicts.find((c) => c.id === expandedRowId)
+    : null;
+
   // Close filter on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -33,6 +43,38 @@ const SpecConflictsTable = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Position the persistent viewer overlay to cover the spacer row
+  useLayoutEffect(() => {
+    if (!spacerRef.current || !containerRef.current) {
+      setOverlayPos(null);
+      return;
+    }
+
+    const recalc = () => {
+      const spacer = spacerRef.current;
+      const container = containerRef.current;
+      if (!spacer || !container) return;
+
+      const spacerRect = spacer.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      setOverlayPos({
+        top: spacerRect.top - containerRect.top + container.scrollTop,
+        left: spacerRect.left - containerRect.left + container.scrollLeft,
+        width: spacerRect.width,
+        height: spacerRect.height,
+      });
+    };
+
+    recalc();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(recalc);
+      ro.observe(containerRef.current);
+      return () => ro.disconnect();
+    }
+  }, [expandedRowId, conflicts]);
 
   const handleFilterClick = (e, columnKey) => {
     e.stopPropagation(); // Prevent sort from triggering
@@ -134,7 +176,7 @@ const SpecConflictsTable = ({
   }
 
   return (
-    <div className="spec-conflicts-table-container">
+    <div className="spec-conflicts-table-container" ref={containerRef} style={{ position: 'relative' }}>
       <table className="spec-conflicts-table">
         <thead>
           <tr>
@@ -191,8 +233,9 @@ const SpecConflictsTable = ({
               </tr>
               {expandedRowId === conflict.id && (
                 <tr className="expanded-row">
-                  <td colSpan={columns.length + 1}>
-                    <ExpandedConflictRow conflict={conflict} />
+                  <td colSpan={columns.length + 1} ref={spacerRef}>
+                    {/* Height spacer — the real viewer lives in the overlay below */}
+                    <div style={{ height: 500 }} />
                   </td>
                 </tr>
               )}
@@ -200,6 +243,23 @@ const SpecConflictsTable = ({
           ))}
         </tbody>
       </table>
+
+      {/* Persistent viewer overlay — stays mounted across conflict switches so
+          WebViewer instances aren't destroyed/recreated when the file hasn't changed. */}
+      {selectedConflict && overlayPos && (
+        <div
+          style={{
+            position: 'absolute',
+            top: overlayPos.top,
+            left: overlayPos.left,
+            width: overlayPos.width,
+            height: overlayPos.height,
+            zIndex: 1,
+          }}
+        >
+          <ExpandedConflictRow conflict={selectedConflict} />
+        </div>
+      )}
     </div>
   );
 };
