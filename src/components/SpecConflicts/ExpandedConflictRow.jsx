@@ -25,9 +25,12 @@ const ExpandedConflictRow = ({ conflict }) => {
   const [drawingLoading, setDrawingLoading] = useState(true);
   const [specLoading, setSpecLoading] = useState(true);
 
-  // Track loaded document base URLs to detect when a new file needs loading
+  // Track loaded documents to detect when a new file needs loading.
+  // Drawing uses the base URL (path without query params).
+  // Spec uses spec_file_s3_key — a stable identifier the API provides that
+  // doesn't vary with pre-signed URL format differences.
   const loadedDrawingUrlRef = useRef(null);
-  const loadedSpecUrlRef = useRef(null);
+  const loadedSpecKeyRef = useRef(null);
 
   // Keep latest conflict in a ref for use inside async event handlers
   const conflictRef = useRef(conflict);
@@ -106,7 +109,8 @@ const ExpandedConflictRow = ({ conflict }) => {
         const instance = await WebViewer(
           {
             path: '/webviewer/lib',
-            licenseKey: process.env.REACT_APP_PDFTRON_LICENSE,
+            licenseKey:
+              'Thelinkai  Inc :PWS:Thelinkai  Inc ::B+2:9D34C842CB60BB40A8EF77436A7DEE579B3C140AD8EFE6EE4ED826BD',
             initialDoc: conflictRef.current.drawing_file_url,
           },
           drawingContainerRef.current
@@ -161,7 +165,8 @@ const ExpandedConflictRow = ({ conflict }) => {
         const instance = await WebViewer(
           {
             path: '/webviewer/lib',
-            licenseKey: process.env.REACT_APP_PDFTRON_LICENSE,
+            licenseKey:
+              'Thelinkai  Inc :PWS:Thelinkai  Inc ::B+2:9D34C842CB60BB40A8EF77436A7DEE579B3C140AD8EFE6EE4ED826BD',
             initialDoc: conflictRef.current.spec_file_url,
           },
           specContainerRef.current
@@ -173,13 +178,13 @@ const ExpandedConflictRow = ({ conflict }) => {
         }
 
         specViewerRef.current = instance;
-        loadedSpecUrlRef.current = getBaseUrl(conflictRef.current.spec_file_url);
+        loadedSpecKeyRef.current = conflictRef.current.spec_file_s3_key;
 
         instance.Core.documentViewer.addEventListener('documentLoaded', () => {
           if (!mountedRef.current) return;
-          const currentBase = getBaseUrl(conflictRef.current.spec_file_url);
-          if (loadedSpecUrlRef.current !== currentBase) {
-            loadedSpecUrlRef.current = currentBase;
+          const currentKey = conflictRef.current.spec_file_s3_key;
+          if (loadedSpecKeyRef.current !== currentKey) {
+            loadedSpecKeyRef.current = currentKey;
             instance.Core.documentViewer.loadDocument(conflictRef.current.spec_file_url);
             return;
           }
@@ -226,14 +231,14 @@ const ExpandedConflictRow = ({ conflict }) => {
     const instance = specViewerRef.current;
     if (!instance || !conflict.spec_file_url) return;
 
-    const newBase = getBaseUrl(conflict.spec_file_url);
-    if (loadedSpecUrlRef.current === newBase) {
+    const newKey = conflict.spec_file_s3_key;
+    if (loadedSpecKeyRef.current === newKey) {
       // Same file — just update annotations and navigation
       applySpecAnnotations(instance);
     } else {
       // Different file — load it; documentLoaded handler applies annotations
       setSpecLoading(true);
-      loadedSpecUrlRef.current = newBase;
+      loadedSpecKeyRef.current = newKey;
       instance.Core.documentViewer.loadDocument(conflict.spec_file_url);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
