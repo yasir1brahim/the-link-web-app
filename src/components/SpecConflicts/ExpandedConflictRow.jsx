@@ -61,6 +61,7 @@ const ExpandedConflictRow = ({ conflict }) => {
               StrokeColor: new Annotations.Color(255, 193, 7, 1),
               StrokeThickness: 2,
               FillColor: new Annotations.Color(255, 193, 7, 0.3),
+              ReadOnly: true,
             });
             annotationManager.addAnnotation(rect);
             annotationManager.redrawAnnotation(rect);
@@ -129,6 +130,7 @@ const ExpandedConflictRow = ({ conflict }) => {
               StrokeColor: new Annotations.Color(255, 193, 7, 1),
               StrokeThickness: 2,
               FillColor: new Annotations.Color(255, 193, 7, 0.3),
+              ReadOnly: true,
             });
             annotationManager.addAnnotation(rect);
             annotationManager.redrawAnnotation(rect);
