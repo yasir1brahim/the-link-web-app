@@ -10,7 +10,7 @@ import { debounce, get } from "lodash";
 import Loader from "../shared/Loader/Loader";
 import PdfWrapper from "../../pdfWrapper";
 import FileDownload from "js-file-download";
-import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
+import { FileUploadModal } from "../shared/FileUploadModal";
 import { useSearchParams } from "react-router-dom";
 import Procore from "./procore";
 import ManageProcore from "./manageProcore";
@@ -77,7 +77,7 @@ const ProjectLogs = () => {
   const toggleSpecGptProcessingModal = () =>
     setShowSpecGptProcessingModal(!showSpecGptProcessingModal);
   const toggleModal = () => setModal(!modal);
-  const [pdfFile, setPdfFile] = useState({});
+  const [pdfFile, setPdfFile] = useState([]);
   const [logInViewer, setLogInViewer] = useState(null);
   const [fileData, setFileData] = useState({});
   const [alreadyExistingFiles, setAlreadyExistingFiles] = useState([]);
@@ -682,7 +682,7 @@ const ProjectLogs = () => {
 
   useEffect(() => {
     if (!modal) {
-      setPdfFile({});
+      setPdfFile([]);
     }
   }, [modal]);
   
@@ -728,7 +728,7 @@ const ProjectLogs = () => {
       const data = new FormData();
       data.append("project_id", projectId || state.project?.project_id);
       data.append("project_version_id", projectVersionId);
-      Object.values(pdfFile)?.forEach((file) => data.append("files", file));
+      pdfFile.forEach((file) => data.append("files", file));
       const response = await uploadFiles(data, (error) => {
         setUploadLoading(false);
         toggleErrorModal(true);
@@ -1646,7 +1646,7 @@ const ProjectLogs = () => {
           ? logIdList.length
           : JSON.parse(selectedRows).length
       } submittals to ${procoreProjectName} project in Procore...`,
-      {autoClose: false}
+      { autoClose: false }
     );
     console.log("toastId", toastId);
     setExportToProcoreToastId(toastId);
@@ -2120,20 +2120,33 @@ const ProjectLogs = () => {
         </div>
       )}
       <Toast />
-      <UploadDocuments
-        modal={modal}
-        toggleModal={toggleModal}
-        setPdfFile={setPdfFile}
-        pdfFile={pdfFile}
-        handleSubmit={handleSubmit}
-        isUploadLoading={isUploadLoading}
-        errorModal={errorModal}
-        toggleErrorModal={toggleErrorModal}
-        backToUpload={backToUpload}
-        successModal={successModal}
-        toggleSuccessModal={toggleSuccessModal}
+      <FileUploadModal
+        isOpen={modal}
+        toggle={toggleModal}
+        title="Upload Document"
+        acceptedFileTypes="application/pdf"
+        uploadButtonText="Create Log"
+        guidelines={[
+          "All specifications must be a native PDF (i.e., not a flat, scanned file)",
+          "For best results, specifications should be in standard CSI SectionFormat",
+          "Maximum individual file size is 150 MB",
+          "Maximum number of files in one upload is 250"
+        ]}
+        files={pdfFile}
+        onFilesChange={setPdfFile}
+        onUpload={handleSubmit}
+        isUploading={isUploadLoading}
+        uploadError={errorModal ? uploadErrorMessage : null}
+        onErrorClose={backToUpload}
+        uploadSuccess={successModal}
+        onSuccessClose={() => toggleSuccessModal(false)}
+        successMessage="Your files have been successfully uploaded and are being processed."
+        successSubMessage="This may take up to 10 minutes to complete."
         alreadyExistingFiles={alreadyExistingFiles}
-        uploadErrorMessage={uploadErrorMessage}
+        duplicateFiles={duplicateFiles}
+        onDuplicateSkip={handleDuplicateFilesSkipAll}
+        onDuplicateConfirm={handleDuplicateFilesConfirmAll}
+        showDuplicateModal={showDuplicateFilesModal}
       />
       <ManageProcore
         procoreAuthUserInfo={procoreAuthUserInfo}
