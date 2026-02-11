@@ -1,6 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import WebViewer from '@pdftron/webviewer';
 import './ExpandedConflictRow.css';
+
+/**
+ * Strip query parameters from a URL to get the base file path.
+ * Pre-signed S3 URLs for the same file share the same path but differ in
+ * signature query params — comparing base URLs detects same-file references.
+ */
+const getBaseUrl = (url) => {
+  if (!url) return null;
+  try {
+    const { origin, pathname } = new URL(url);
+    return origin + pathname;
+  } catch {
+    return url;
+  }
+};
 
 const ExpandedConflictRow = ({ conflict }) => {
   const drawingContainerRef = useRef(null);
@@ -10,154 +25,219 @@ const ExpandedConflictRow = ({ conflict }) => {
   const [drawingLoading, setDrawingLoading] = useState(true);
   const [specLoading, setSpecLoading] = useState(true);
 
-  // Race condition guards
-  const drawingInitializingRef = useRef(false);
-  const specInitializingRef = useRef(false);
-  const mountedRef = useRef(true);
+  // Track loaded document base URLs to detect when a new file needs loading
+  const loadedDrawingUrlRef = useRef(null);
+  const loadedSpecUrlRef = useRef(null);
 
-  // Track mounted state for async operations
+  // Keep latest conflict in a ref for use inside async event handlers
+  const conflictRef = useRef(conflict);
+  useEffect(() => { conflictRef.current = conflict; }, [conflict]);
+
+  const mountedRef = useRef(true);
   useEffect(() => {
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
 
-  // Initialize drawing PDF viewer
+  // Reapply drawing annotations using latest conflict data
+  const applyDrawingAnnotations = useCallback((instance) => {
+    const c = conflictRef.current;
+    const { documentViewer, annotationManager, Annotations } = instance.Core;
+
+    const existing = annotationManager.getAnnotationsList();
+    if (existing.length > 0) annotationManager.deleteAnnotations(existing);
+
+    if (c.drawing_bounding_box && c.drawing_page_number) {
+      const [x1, y1, x2, y2] = c.drawing_bounding_box;
+      const rect = new Annotations.RectangleAnnotation({
+        PageNumber: c.drawing_page_number,
+        X: x1,
+        Y: y1,
+        Width: x2 - x1,
+        Height: y2 - y1,
+        StrokeColor: new Annotations.Color(255, 193, 7, 1),
+        StrokeThickness: 2,
+        FillColor: new Annotations.Color(255, 193, 7, 0.3),
+        ReadOnly: true,
+      });
+      annotationManager.addAnnotation(rect);
+      annotationManager.redrawAnnotation(rect);
+      documentViewer.setCurrentPage(c.drawing_page_number);
+      annotationManager.jumpToAnnotation(rect);
+    }
+  }, []);
+
+  // Reapply spec annotations using latest conflict data
+  const applySpecAnnotations = useCallback((instance) => {
+    const c = conflictRef.current;
+    const { documentViewer, annotationManager, Annotations } = instance.Core;
+
+    const existing = annotationManager.getAnnotationsList();
+    if (existing.length > 0) annotationManager.deleteAnnotations(existing);
+
+    if (c.pdf_locations && c.pdf_locations.length > 0) {
+      const loc = c.pdf_locations[0];
+      const rect = new Annotations.RectangleAnnotation({
+        PageNumber: loc.page_no,
+        X: loc.x,
+        Y: loc.y,
+        Width: loc.width,
+        Height: loc.height,
+        StrokeColor: new Annotations.Color(255, 193, 7, 1),
+        StrokeThickness: 2,
+        FillColor: new Annotations.Color(255, 193, 7, 0.3),
+        ReadOnly: true,
+      });
+      annotationManager.addAnnotation(rect);
+      annotationManager.redrawAnnotation(rect);
+      documentViewer.setCurrentPage(loc.page_no);
+      annotationManager.jumpToAnnotation(rect);
+    }
+  }, []);
+
+  // Initialize drawing viewer once on mount
   useEffect(() => {
-    if (!drawingContainerRef.current || !conflict.drawing_file_url) return;
-    if (drawingInitializingRef.current) return; // Prevent duplicate init
+    if (!drawingContainerRef.current) return;
+    let disposed = false;
 
-    let instance = null;
-    drawingInitializingRef.current = true;
-
-    const initDrawingViewer = async () => {
+    const init = async () => {
       try {
-        if (!mountedRef.current) return; // Check if still mounted
-        instance = await WebViewer(
+        if (!mountedRef.current) return;
+        const instance = await WebViewer(
           {
             path: '/webviewer/lib',
             licenseKey: process.env.REACT_APP_PDFTRON_LICENSE,
-            initialDoc: conflict.drawing_file_url,
+            initialDoc: conflictRef.current.drawing_file_url,
           },
           drawingContainerRef.current
         );
 
+        if (disposed || !mountedRef.current) {
+          instance.UI.dispose();
+          return;
+        }
+
         drawingViewerRef.current = instance;
+        loadedDrawingUrlRef.current = getBaseUrl(conflictRef.current.drawing_file_url);
 
-        const { documentViewer, annotationManager, Annotations } = instance.Core;
-
-        documentViewer.addEventListener('documentLoaded', () => {
-          if (!mountedRef.current) return; // Exit early if unmounted
-          setDrawingLoading(false);
-
-          // Add highlight annotation if bounding box exists
-          if (conflict.drawing_bounding_box && conflict.drawing_page_number) {
-            const [x1, y1, x2, y2] = conflict.drawing_bounding_box;
-            const rect = new Annotations.RectangleAnnotation({
-              PageNumber: conflict.drawing_page_number,
-              X: x1,
-              Y: y1,
-              Width: x2 - x1,
-              Height: y2 - y1,
-              StrokeColor: new Annotations.Color(255, 193, 7, 1),
-              StrokeThickness: 2,
-              FillColor: new Annotations.Color(255, 193, 7, 0.3),
-              ReadOnly: true,
-            });
-            annotationManager.addAnnotation(rect);
-            annotationManager.redrawAnnotation(rect);
-
-            // Jump to annotation
-            documentViewer.setCurrentPage(conflict.drawing_page_number);
-            annotationManager.jumpToAnnotation(rect);
+        instance.Core.documentViewer.addEventListener('documentLoaded', () => {
+          if (!mountedRef.current) return;
+          // Verify the loaded document still matches the current conflict —
+          // the user may have switched conflicts while a document was loading.
+          const currentBase = getBaseUrl(conflictRef.current.drawing_file_url);
+          if (loadedDrawingUrlRef.current !== currentBase) {
+            loadedDrawingUrlRef.current = currentBase;
+            instance.Core.documentViewer.loadDocument(conflictRef.current.drawing_file_url);
+            return;
           }
+          setDrawingLoading(false);
+          applyDrawingAnnotations(instance);
         });
       } catch (error) {
         console.error('Failed to initialize drawing viewer:', error);
         if (mountedRef.current) setDrawingLoading(false);
-      } finally {
-        drawingInitializingRef.current = false;
       }
     };
 
-    initDrawingViewer();
+    init();
 
     return () => {
+      disposed = true;
       if (drawingViewerRef.current) {
         drawingViewerRef.current.UI.dispose();
         drawingViewerRef.current = null;
       }
-      drawingInitializingRef.current = false;
     };
-  }, [conflict.drawing_file_url, conflict.drawing_bounding_box, conflict.drawing_page_number]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Initialize spec PDF viewer
+  // Initialize spec viewer once on mount
   useEffect(() => {
-    if (!specContainerRef.current || !conflict.spec_file_url) return;
-    if (specInitializingRef.current) return; // Prevent duplicate init
+    if (!specContainerRef.current) return;
+    let disposed = false;
 
-    let instance = null;
-    specInitializingRef.current = true;
-
-    const initSpecViewer = async () => {
+    const init = async () => {
       try {
-        if (!mountedRef.current) return; // Check if still mounted
-        instance = await WebViewer(
+        if (!mountedRef.current) return;
+        const instance = await WebViewer(
           {
             path: '/webviewer/lib',
             licenseKey: process.env.REACT_APP_PDFTRON_LICENSE,
-            initialDoc: conflict.spec_file_url,
+            initialDoc: conflictRef.current.spec_file_url,
           },
           specContainerRef.current
         );
 
+        if (disposed || !mountedRef.current) {
+          instance.UI.dispose();
+          return;
+        }
+
         specViewerRef.current = instance;
+        loadedSpecUrlRef.current = getBaseUrl(conflictRef.current.spec_file_url);
 
-        const { documentViewer, annotationManager, Annotations } = instance.Core;
-
-        documentViewer.addEventListener('documentLoaded', () => {
-          if (!mountedRef.current) return; // Exit early if unmounted
-          setSpecLoading(false);
-
-          // Add highlight annotation if pdf_locations exists
-          if (conflict.pdf_locations && conflict.pdf_locations.length > 0) {
-            const loc = conflict.pdf_locations[0];
-            const rect = new Annotations.RectangleAnnotation({
-              PageNumber: loc.page_no,
-              X: loc.x,
-              Y: loc.y,
-              Width: loc.width,
-              Height: loc.height,
-              StrokeColor: new Annotations.Color(255, 193, 7, 1),
-              StrokeThickness: 2,
-              FillColor: new Annotations.Color(255, 193, 7, 0.3),
-              ReadOnly: true,
-            });
-            annotationManager.addAnnotation(rect);
-            annotationManager.redrawAnnotation(rect);
-
-            // Jump to annotation
-            documentViewer.setCurrentPage(loc.page_no);
-            annotationManager.jumpToAnnotation(rect);
+        instance.Core.documentViewer.addEventListener('documentLoaded', () => {
+          if (!mountedRef.current) return;
+          const currentBase = getBaseUrl(conflictRef.current.spec_file_url);
+          if (loadedSpecUrlRef.current !== currentBase) {
+            loadedSpecUrlRef.current = currentBase;
+            instance.Core.documentViewer.loadDocument(conflictRef.current.spec_file_url);
+            return;
           }
+          setSpecLoading(false);
+          applySpecAnnotations(instance);
         });
       } catch (error) {
         console.error('Failed to initialize spec viewer:', error);
         if (mountedRef.current) setSpecLoading(false);
-      } finally {
-        specInitializingRef.current = false;
       }
     };
 
-    initSpecViewer();
+    init();
 
     return () => {
+      disposed = true;
       if (specViewerRef.current) {
         specViewerRef.current.UI.dispose();
         specViewerRef.current = null;
       }
-      specInitializingRef.current = false;
     };
-  }, [conflict.spec_file_url, conflict.pdf_locations]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Handle conflict changes — drawing viewer
+  useEffect(() => {
+    const instance = drawingViewerRef.current;
+    if (!instance || !conflict.drawing_file_url) return;
+
+    const newBase = getBaseUrl(conflict.drawing_file_url);
+    if (loadedDrawingUrlRef.current === newBase) {
+      // Same file — just update annotations and navigation
+      applyDrawingAnnotations(instance);
+    } else {
+      // Different file — load it; documentLoaded handler applies annotations
+      setDrawingLoading(true);
+      loadedDrawingUrlRef.current = newBase;
+      instance.Core.documentViewer.loadDocument(conflict.drawing_file_url);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conflict.id]);
+
+  // Handle conflict changes — spec viewer
+  useEffect(() => {
+    const instance = specViewerRef.current;
+    if (!instance || !conflict.spec_file_url) return;
+
+    const newBase = getBaseUrl(conflict.spec_file_url);
+    if (loadedSpecUrlRef.current === newBase) {
+      // Same file — just update annotations and navigation
+      applySpecAnnotations(instance);
+    } else {
+      // Different file — load it; documentLoaded handler applies annotations
+      setSpecLoading(true);
+      loadedSpecUrlRef.current = newBase;
+      instance.Core.documentViewer.loadDocument(conflict.spec_file_url);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conflict.id]);
 
   const drawingTitle = [conflict.sheet_number, conflict.sheet_title]
     .filter(Boolean)
