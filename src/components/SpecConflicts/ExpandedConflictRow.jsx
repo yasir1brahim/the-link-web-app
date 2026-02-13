@@ -42,13 +42,21 @@ const ExpandedConflictRow = ({ conflict }) => {
     return () => { mountedRef.current = false; };
   }, []);
 
+  // Track annotations we create so we can reliably clear them
+  const drawingAnnotationsRef = useRef([]);
+  const specAnnotationsRef = useRef([]);
+
   // Reapply drawing annotations using latest conflict data
   const applyDrawingAnnotations = useCallback((instance) => {
     const c = conflictRef.current;
     const { documentViewer, annotationManager, Annotations } = instance.Core;
 
-    const existing = annotationManager.getAnnotationsList();
-    if (existing.length > 0) annotationManager.deleteAnnotations(existing);
+    // Must set ReadOnly to false before deletion or annotations won't be removed
+    if (drawingAnnotationsRef.current.length > 0) {
+      drawingAnnotationsRef.current.forEach(annot => { annot.ReadOnly = false; });
+      annotationManager.deleteAnnotations(drawingAnnotationsRef.current);
+      drawingAnnotationsRef.current = [];
+    }
 
     if (c.drawing_bounding_box && c.drawing_page_number) {
       const [x1, y1, x2, y2] = c.drawing_bounding_box;
@@ -67,6 +75,7 @@ const ExpandedConflictRow = ({ conflict }) => {
       annotationManager.redrawAnnotation(rect);
       documentViewer.setCurrentPage(c.drawing_page_number);
       annotationManager.jumpToAnnotation(rect);
+      drawingAnnotationsRef.current = [rect];
     }
   }, []);
 
@@ -75,8 +84,12 @@ const ExpandedConflictRow = ({ conflict }) => {
     const c = conflictRef.current;
     const { documentViewer, annotationManager, Annotations } = instance.Core;
 
-    const existing = annotationManager.getAnnotationsList();
-    if (existing.length > 0) annotationManager.deleteAnnotations(existing);
+    // Must set ReadOnly to false before deletion or annotations won't be removed
+    if (specAnnotationsRef.current.length > 0) {
+      specAnnotationsRef.current.forEach(annot => { annot.ReadOnly = false; });
+      annotationManager.deleteAnnotations(specAnnotationsRef.current);
+      specAnnotationsRef.current = [];
+    }
 
     if (c.pdf_locations && c.pdf_locations.length > 0) {
       const loc = c.pdf_locations[0];
@@ -95,6 +108,7 @@ const ExpandedConflictRow = ({ conflict }) => {
       annotationManager.redrawAnnotation(rect);
       documentViewer.setCurrentPage(loc.page_no);
       annotationManager.jumpToAnnotation(rect);
+      specAnnotationsRef.current = [rect];
     }
   }, []);
 
