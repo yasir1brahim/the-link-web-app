@@ -10,7 +10,7 @@ import { debounce, get } from "lodash";
 import Loader from "../shared/Loader/Loader";
 import PdfWrapper from "../../pdfWrapper";
 import FileDownload from "js-file-download";
-import { UploadDocuments } from "../ProjectDetails/UploadDocuments";
+import { FileUploadModal } from "../shared/FileUploadModal";
 import { useSearchParams } from "react-router-dom";
 import Procore from "./procore";
 import ManageProcore from "./manageProcore";
@@ -34,6 +34,7 @@ import Chat from "../SpecGpt/components/Chat";
 import InspectionQA from "../SpecGpt/components/InspectionQA";
 import { ChakraProvider } from "@chakra-ui/react";
 import ProcessingIndicator from "./processingIndicator";
+import CompassProcessingBanner from "./CompassProcessingBanner";
 import { useFeatureFlags } from '../../contexts/FeatureFlagsContext';
 import ArchivedVersionsModal from "./archivedVersionModal";
 import { isLogEligibleForChildEntry } from "./projectLogsUtils";
@@ -43,7 +44,9 @@ import DuplicateFileConfirmationModal from "./DuplicateFileConfirmationModal";
 import SpecViewer from "../SpecCentricView/SpecViewer";
 import { useInspectionQA } from '../SpecGpt/hooks/useInspectionQA';
 import { DrawingsTab } from "../Drawings";
+import { SpecConflictsTab } from '../SpecConflicts';
 import ErrorBoundary from "../ErrorBoundary/ErrorBoundary";
+import { SPEC_CONFLICTS_TAB_NAME } from '../../constants';
 
 // Toggle between tabbed layout (true) and sidebar layout (false)
 // Set to false to show QA features in Compass sidebar instead of separate tab
@@ -59,6 +62,7 @@ const ProjectLogs = () => {
     isQaPlannerFlagActive,
     isSpecCenteredViewFlagActive,
     isDrawingsFlagActive,
+    isSpecConflictsFlagActive,
   } = useFeatureFlags();
   const [defaultTab, setDefaultTab] = useState("documents"); 
   const [showDocumentListModal, setShowDocumentListModal] = useState(false);
@@ -74,7 +78,7 @@ const ProjectLogs = () => {
   const toggleSpecGptProcessingModal = () =>
     setShowSpecGptProcessingModal(!showSpecGptProcessingModal);
   const toggleModal = () => setModal(!modal);
-  const [pdfFile, setPdfFile] = useState({});
+  const [pdfFile, setPdfFile] = useState([]);
   const [logInViewer, setLogInViewer] = useState(null);
   const [fileData, setFileData] = useState({});
   const [alreadyExistingFiles, setAlreadyExistingFiles] = useState([]);
@@ -558,9 +562,9 @@ const ProjectLogs = () => {
         setAvailableVersions(response.data.project_versions);
 
         // Fetch tab-specific data in parallel where possible
-        // Spec View and Drawings tabs don't need submittal log data upfront
+        // Spec View, Drawings, and Spec Conflicts tabs don't need submittal log data upfront
         const currentTab = searchParams.get("tab") || 'submittal';
-        const needsSubmittalData = currentTab !== 'spec-view' && currentTab !== 'drawings';
+        const needsSubmittalData = currentTab !== 'spec-view' && currentTab !== 'drawings' && currentTab !== 'spec-conflicts';
 
         if (needsSubmittalData) {
           // Fetch both in parallel for tabs that need submittal data
@@ -609,6 +613,7 @@ const ProjectLogs = () => {
       'assistant': () => isSpecGptFlagActive(teamId),
       'spec-view': () => isSpecCenteredViewFlagActive(teamId),
       'drawings': () => isDrawingsFlagActive(teamId),
+      'spec-conflicts': () => isSpecConflictsFlagActive(teamId),
       'inspection-qa': () => USE_TABBED_QA_LAYOUT && (isInspectionLogFlagActive(teamId) || isQaPlannerFlagActive(teamId))
     };
 
@@ -623,7 +628,7 @@ const ProjectLogs = () => {
       newSearchParams.set("tab", "submittal");
       navigate(`/project-logs?${newSearchParams.toString()}`, { replace: true });
     }
-  }, [searchParams, teamId, isSpecGptFlagActive, isSpecCenteredViewFlagActive, isDrawingsFlagActive, isInspectionLogFlagActive, isQaPlannerFlagActive]);
+  }, [searchParams, teamId, isSpecGptFlagActive, isSpecCenteredViewFlagActive, isDrawingsFlagActive, isSpecConflictsFlagActive, isInspectionLogFlagActive, isQaPlannerFlagActive]);
 
   // Update URL when activeTab changes manually
   useEffect(() => {
@@ -678,7 +683,7 @@ const ProjectLogs = () => {
 
   useEffect(() => {
     if (!modal) {
-      setPdfFile({});
+      setPdfFile([]);
     }
   }, [modal]);
   
@@ -724,7 +729,7 @@ const ProjectLogs = () => {
       const data = new FormData();
       data.append("project_id", projectId || state.project?.project_id);
       data.append("project_version_id", projectVersionId);
-      Object.values(pdfFile)?.forEach((file) => data.append("files", file));
+      pdfFile.forEach((file) => data.append("files", file));
       const response = await uploadFiles(data, (error) => {
         setUploadLoading(false);
         toggleErrorModal(true);
@@ -1642,7 +1647,7 @@ const ProjectLogs = () => {
           ? logIdList.length
           : JSON.parse(selectedRows).length
       } submittals to ${procoreProjectName} project in Procore...`,
-      {autoClose: false}
+      { autoClose: false }
     );
     console.log("toastId", toastId);
     setExportToProcoreToastId(toastId);
@@ -1820,6 +1825,8 @@ const ProjectLogs = () => {
             isSpecGptFlagActive={isSpecGptFlagActive(teamId)}
             isSpecCenteredViewFlagActive={isSpecCenteredViewFlagActive(teamId)}
             isDrawingsFlagActive={isDrawingsFlagActive(teamId)}
+            isSpecConflictsFlagActive={isSpecConflictsFlagActive(teamId)}
+            specConflictsTabName={SPEC_CONFLICTS_TAB_NAME}
             isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
             isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
             activeTab={activeTab}
@@ -2029,36 +2036,49 @@ const ProjectLogs = () => {
           </div>}
           {activeTab === 'assistant' && isSpecGptFlagActive(teamId) &&
             <>
-            <div className="compass-chat-viewport">
-              <ProcessingIndicator
-                documentIsProcessing={documentIsBeingEmbedded}
-                documentData={documentData}
-                toggleDocumentStatusModal={toggleSpecGptProcessingModal}
-                indicatorText={"Assistant is processing your documents..."}
-              />
-              <ChakraProvider>
-                <Chat
-                  projectId={projectId}
-                  projectVersionId={projectVersionId}
-                  chatSessionId={chatId}
-                  setChatSessionId={setChatId}
-                  messages={chatMessages}
-                  setMessages={setChatMessages}
-                  chatHistory={chatHistory}
-                  setChatHistory={setChatHistory}
-                  isLoadingMessage={isSpecGptLoadingMessage}
-                  setIsLoadingMessage={setIsSpecGptLoadingMessage}
-                  userInput={specGptUserInput}
-                  setUserInput={setSpecGptUserInput}
-                  isChatEnabled={isSpecGptChatEnabled}
-                  setIsChatEnabled={setIsSpecGptChatEnabled}
-                  teamId={teamId}
-                  useQaTabbedLayout={USE_TABBED_QA_LAYOUT}
-                  inspectionQA={inspectionQA}
-                  isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
-                  isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
+              <div className="compass-chat-viewport">
+                <ProcessingIndicator
+                  documentIsProcessing={documentIsBeingEmbedded}
+                  documentData={documentData}
+                  toggleDocumentStatusModal={toggleSpecGptProcessingModal}
+                  indicatorText={"Assistant is processing your documents..."}
                 />
-              </ChakraProvider>
+                <CompassProcessingBanner
+                  projectId={projectId}
+                  onProcessingTriggered={async () => {
+                    // Refresh document data after processing is triggered
+                    try {
+                      const response = await getProjectDetails(projectId, projectVersionId);
+                      setDocumentData(response.data.document_details);
+                      ToastService.info('Documents are being processed. This may take a few minutes.');
+                    } catch (error) {
+                      console.error('Error refreshing document data:', error);
+                    }
+                  }}
+                />
+                <ChakraProvider>
+                  <Chat
+                    projectId={projectId}
+                    projectVersionId={projectVersionId}
+                    chatSessionId={chatId}
+                    setChatSessionId={setChatId}
+                    messages={chatMessages}
+                    setMessages={setChatMessages}
+                    chatHistory={chatHistory}
+                    setChatHistory={setChatHistory}
+                    isLoadingMessage={isSpecGptLoadingMessage}
+                    setIsLoadingMessage={setIsSpecGptLoadingMessage}
+                    userInput={specGptUserInput}
+                    setUserInput={setSpecGptUserInput}
+                    isChatEnabled={isSpecGptChatEnabled}
+                    setIsChatEnabled={setIsSpecGptChatEnabled}
+                    teamId={teamId}
+                    useQaTabbedLayout={USE_TABBED_QA_LAYOUT}
+                    inspectionQA={inspectionQA}
+                    isInspectionLogFeatureFlagActive={isInspectionLogFlagActive(teamId)}
+                    isQaPlannerFlagActive={isQaPlannerFlagActive(teamId)}
+                  />
+                </ChakraProvider>
               </div>
             </>
           }
@@ -2102,23 +2122,45 @@ const ProjectLogs = () => {
               />
             </ErrorBoundary>
           }
+          {activeTab === 'spec-conflicts' && isSpecConflictsFlagActive(teamId) && (
+            <ErrorBoundary>
+              <SpecConflictsTab
+                projectId={projectId}
+                projectVersionId={projectVersionId}
+                teamId={teamId}
+              />
+            </ErrorBoundary>
+          )}
         </div>
       )}
       <Toast />
-      <UploadDocuments
-        modal={modal}
-        toggleModal={toggleModal}
-        setPdfFile={setPdfFile}
-        pdfFile={pdfFile}
-        handleSubmit={handleSubmit}
-        isUploadLoading={isUploadLoading}
-        errorModal={errorModal}
-        toggleErrorModal={toggleErrorModal}
-        backToUpload={backToUpload}
-        successModal={successModal}
-        toggleSuccessModal={toggleSuccessModal}
+      <FileUploadModal
+        isOpen={modal}
+        toggle={toggleModal}
+        title="Upload Document"
+        acceptedFileTypes="application/pdf"
+        uploadButtonText="Create Log"
+        guidelines={[
+          "All specifications must be a native PDF (i.e., not a flat, scanned file)",
+          "For best results, specifications should be in standard CSI SectionFormat",
+          "Maximum individual file size is 150 MB",
+          "Maximum number of files in one upload is 250"
+        ]}
+        files={pdfFile}
+        onFilesChange={setPdfFile}
+        onUpload={handleSubmit}
+        isUploading={isUploadLoading}
+        uploadError={errorModal ? uploadErrorMessage : null}
+        onErrorClose={backToUpload}
+        uploadSuccess={successModal}
+        onSuccessClose={() => toggleSuccessModal(false)}
+        successMessage="Your files have been successfully uploaded and are being processed."
+        successSubMessage="This may take up to 10 minutes to complete."
         alreadyExistingFiles={alreadyExistingFiles}
-        uploadErrorMessage={uploadErrorMessage}
+        duplicateFiles={duplicateFiles}
+        onDuplicateSkip={handleDuplicateFilesSkipAll}
+        onDuplicateConfirm={handleDuplicateFilesConfirmAll}
+        showDuplicateModal={showDuplicateFilesModal}
       />
       <ManageProcore
         procoreAuthUserInfo={procoreAuthUserInfo}

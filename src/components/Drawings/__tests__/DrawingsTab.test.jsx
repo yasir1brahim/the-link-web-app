@@ -16,10 +16,12 @@ jest.mock('../../../pdfWrapper', () => ({ pdfData }) => (
 // Mock Loader
 jest.mock('../../shared/Loader/Loader', () => () => <div data-testid="loader">Loading...</div>);
 
-// Mock DrawingsUploadModal
-jest.mock('../DrawingsUploadModal', () => ({ isOpen, toggle }) => (
-  isOpen ? <div data-testid="upload-modal">Upload Modal</div> : null
-));
+// Mock FileUploadModal
+jest.mock('../../shared/FileUploadModal', () => ({
+  FileUploadModal: ({ isOpen, toggle }) => (
+    isOpen ? <div data-testid="upload-modal">Upload Modal</div> : null
+  )
+}));
 
 // Mock DrawingsProcessingIndicator
 jest.mock('../DrawingsProcessingIndicator', () => ({ processingStatus }) => (
@@ -597,6 +599,128 @@ describe('DrawingsTab Integration', () => {
             sheetTitleIsNull: undefined,
           })
         );
+      });
+    });
+  });
+
+  describe('Discipline Filtering', () => {
+    const mockDataWithDisciplines = [
+      {
+        id: 1,
+        sheet_number: 'M-101',
+        sheet_title: 'Mechanical Floor Plan',
+        drawing_file_url: 'https://example.com/mech.pdf',
+        drawing_file_id: 101,
+        category: 'general',
+        text: 'Mechanical note',
+        bounding_box: [100, 200, 300, 400],
+        page_number: 1,
+        disciplines: ['mechanical', 'general'],
+      },
+      {
+        id: 2,
+        sheet_number: 'E-101',
+        sheet_title: 'Electrical Plan',
+        drawing_file_url: 'https://example.com/elec.pdf',
+        drawing_file_id: 102,
+        category: 'electrical',
+        text: 'Electrical note',
+        bounding_box: [50, 100, 150, 200],
+        page_number: 1,
+        disciplines: ['electrical', 'fire_protection'],
+      },
+    ];
+
+    const mockResponseWithDisciplines = {
+      data: {
+        results: mockDataWithDisciplines,
+        all_filter_vals: {
+          category: ['general', 'electrical'],
+          drawing_files: [
+            { id: 101, name: 'Mechanical.pdf' },
+            { id: 102, name: 'Electrical.pdf' },
+          ],
+          sheet_numbers: ['M-101', 'E-101'],
+          sheet_titles: ['Mechanical Floor Plan', 'Electrical Plan'],
+          disciplines: ['mechanical', 'general', 'electrical', 'fire_protection'],
+          has_null_sheet_number: false,
+          has_null_sheet_title: false,
+        },
+        total_count: 2,
+        processing_status: null,
+      },
+    };
+
+    it('displays discipline column with formatted values', async () => {
+      api.getDrawingNotes.mockResolvedValue(mockResponseWithDisciplines);
+
+      render(<DrawingsTab {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Discipline')).toBeInTheDocument();
+        expect(screen.getByText('Mechanical, General')).toBeInTheDocument();
+        expect(screen.getByText('Electrical, Fire Protection')).toBeInTheDocument();
+      });
+    });
+
+    it('filters by discipline when selected', async () => {
+      api.getDrawingNotes.mockResolvedValue(mockResponseWithDisciplines);
+
+      const { container } = render(<DrawingsTab {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('M-101')).toBeInTheDocument();
+      });
+
+      const filterIcons = container.querySelectorAll('[data-testid="filter-icon"]');
+      const disciplinesFilter = Array.from(filterIcons).find((icon) => {
+        const header = icon.closest('th');
+        return header?.textContent?.includes('Discipline');
+      });
+      fireEvent.click(disciplinesFilter);
+
+      await waitFor(() => {
+        const popover = document.querySelector('.dt-filter-popover');
+        expect(popover).toBeInTheDocument();
+        expect(popover.textContent).toContain('Fire Protection');
+      });
+
+      const popover = document.querySelector('.dt-filter-popover');
+      const fireProtectionOption = Array.from(popover.querySelectorAll('.dt-filter-option'))
+        .find(el => el.textContent === 'Fire Protection');
+      fireEvent.click(fireProtectionOption);
+
+      await waitFor(() => {
+        expect(api.getDrawingNotes).toHaveBeenCalledWith(
+          1,
+          1,
+          expect.objectContaining({
+            disciplines: 'fire_protection',
+          })
+        );
+      });
+    });
+
+    it('displays dash for notes with empty disciplines array', async () => {
+      const mockDataWithEmptyDisciplines = [
+        {
+          ...mockDataWithDisciplines[0],
+          disciplines: [],
+        },
+      ];
+
+      api.getDrawingNotes.mockResolvedValue({
+        ...mockResponseWithDisciplines,
+        data: {
+          ...mockResponseWithDisciplines.data,
+          results: mockDataWithEmptyDisciplines,
+        },
+      });
+
+      render(<DrawingsTab {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('—')).toBeInTheDocument();
       });
     });
   });
