@@ -3,6 +3,7 @@
  */
 
 export const QA_COLOR_MAP = {
+  submittal: { r: 213, g: 231, b: 62 },
   inspections: { r: 255, g: 99, b: 71 },
   warranties: { r: 60, g: 179, b: 113 },
   certificates: { r: 255, g: 165, b: 0 },

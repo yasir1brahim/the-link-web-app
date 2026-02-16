@@ -75,11 +75,11 @@ const createSubmittalList = async (projectId, listName, userId, submittalIds, pr
 }
 
 const addSubmittalItem = async (
-    projectId, 
-    specSection, 
-    paraNo, 
-    paraContext, 
-    submittalHeading, 
+    projectId,
+    specSection,
+    paraNo,
+    paraContext,
+    submittalHeading,
     submittalType,
     addedUnderSubmittalId=null,
     projectVersionId=null,
@@ -102,6 +102,41 @@ const addSubmittalItem = async (
         });
     } catch (error) {
         handleError(error);
+        throw error;
+    }
+}
+
+const addSubmittalItemFromHighlight = async (
+    projectId,
+    specSectionId,
+    paraNo,
+    paraContext,
+    submittalHeading,
+    submittalType,
+    textLocation,
+    additionalTextLocations,
+    projectVersionId=null,
+    addedUnderSubmittalId=null
+) => {
+    try {
+        return await axiosInstance({
+            method: 'post',
+            url: `/api/deliverables/${projectId}/submittal-items/from-highlight/`,
+            data: {
+                spec_section_id: specSectionId,
+                para_no: paraNo,
+                para_context: paraContext,
+                item_desc: submittalHeading,
+                type: submittalType,
+                ...(textLocation && { text_location: textLocation }),
+                ...(additionalTextLocations && additionalTextLocations.length > 0 && { additional_text_locations: additionalTextLocations }),
+                ...(projectVersionId && { project_version: projectVersionId }),
+                ...(addedUnderSubmittalId && { added_under_submittal_id: addedUnderSubmittalId }),
+            },
+        });
+    } catch (error) {
+        handleError(error);
+        throw error;
     }
 }
 
@@ -739,4 +774,5 @@ export {
     bulkDownloadDocuments,
     bulkReprocessDocuments,
     bulkDeleteDocuments,
+    addSubmittalItemFromHighlight,
 }
