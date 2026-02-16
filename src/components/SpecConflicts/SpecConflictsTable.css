@@ -137,14 +137,21 @@
   cursor: pointer;
   color: inherit;
   line-height: 1;
-}
-
-.spec-conflicts-table .sort-arrow {
   display: block;
   width: 100%;
   text-align: center;
+  opacity: 0.5;
+  transition: opacity 0.2s;
 }
 
+.spec-conflicts-table .sort-arrow:hover {
+  opacity: 0.8;
+}
+
+.spec-conflicts-table .sort-arrow.active {
+  color: #90caf9;
+  opacity: 1;
+}
 
 .spec-conflicts-table .sort-arrow.up,
 .spec-conflicts-table .sort-arrow.down {

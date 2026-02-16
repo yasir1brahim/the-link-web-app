@@ -151,12 +151,13 @@ const SpecConflictsTable = ({
   ];
 
   const handleSort = (columnKey) => {
-    return;
+    // Clicking the header triggers ascending sort (or cycles if already sorted)
+    handleSortArrow(columnKey, 'asc', null);
   };
 
   const handleSortArrow = (columnKey, direction, e) => {
     if (e && e.stopPropagation) e.stopPropagation();
-   
+
     if (!cycleRef.current) cycleRef.current = { column: null, count: 0, dir: null };
 
     if (sortColumn !== columnKey) {
@@ -226,21 +227,6 @@ const SpecConflictsTable = ({
         </span>
       );
     }
-
-    return (
-      <span className="sort-arrows" aria-hidden="true">
-        <KeyboardArrowUpIcon
-          className={`sort-arrow up`}
-          onClick={(e) => handleSortArrow(columnKey, 'asc', e)}
-          title="Sort ascending"
-        />
-        <KeyboardArrowDownIcon
-          className={`sort-arrow down`}
-          onClick={(e) => handleSortArrow(columnKey, 'desc', e)}
-          title="Sort descending"
-        />
-      </span>
-    );
   };
 
   const cycleRef = useRef({ column: null, count: 0, dir: null });
@@ -265,7 +251,7 @@ const SpecConflictsTable = ({
   }
 
   if (conflicts.length === 0) {
-    return null; 
+    return null;
   }
 
   return (
