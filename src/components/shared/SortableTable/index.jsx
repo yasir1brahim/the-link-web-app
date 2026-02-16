@@ -49,6 +49,7 @@ const SortableTable = ({
   exportLabel = 'Export', // Label for export button
   exportDisabled = false, // Disable export button
   exportDisabledTooltip = '', // Tooltip for disabled export button
+  onClearFilters = null, // Callback function for clearing filters
   className = '',
   ...props
 }) => {
@@ -423,24 +424,52 @@ const SortableTable = ({
               </div>
             </div>
           )}
-          
-          {enableExport && (
-            <div className={`export-button-wrapper ${exportDisabled && exportDisabledTooltip ? 'has-tooltip' : ''}`}
-                 data-tooltip={exportDisabledTooltip}>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+            {onClearFilters && Object.values(filterValues).some(filter => filter && filter.length > 0) && (
               <button
-                className="export-button"
-                onClick={handleExport}
-                disabled={exportDisabled}
+                className="clear-filters-button"
+                onClick={onClearFilters}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <polyline points="7,10 12,15 17,10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M5 5L15 15"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M15 5L5 15"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
-                {exportLabel}
+                Clear Filters
               </button>
-            </div>
-          )}
+            )}
+
+            {enableExport && (
+              <div className={`export-button-wrapper ${exportDisabled && exportDisabledTooltip ? 'has-tooltip' : ''}`}
+                data-tooltip={exportDisabledTooltip}>
+                <button
+                  className="export-button"
+                  onClick={handleExport}
+                  disabled={exportDisabled}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <polyline points="7,10 12,15 17,10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                  {exportLabel}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -540,6 +569,7 @@ SortableTable.propTypes = {
   exportLabel: PropTypes.string,
   exportDisabled: PropTypes.bool,
   exportDisabledTooltip: PropTypes.string,
+  onClearFilters: PropTypes.func,
   className: PropTypes.string,
 };
 

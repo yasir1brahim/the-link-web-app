@@ -109,7 +109,7 @@ const LogViewer = ({
     // Map frontend column names to backend field names
     const fieldMapping = {
         'Spec Section #': 'spec_section_number',
-        'Spec Section Name': 'spec_section_name', 
+        'Spec Section Name': 'spec_section_name',
         'Inspection Type And Requirements': 'inspection_type_and_requirements',
         'Inspection Frequency': 'inspection_frequency',
         'Responsible Party': 'responsible_party',
@@ -401,6 +401,47 @@ const LogViewer = ({
             }
         } catch (error) {
             console.error('Error fetching searched data:', error);
+        }
+    };
+
+    // Handle clear filters
+    const handleClearFilters = async () => {
+        if (!logMessage?.questionid) {
+            return;
+        }
+
+        const emptyFilters = {
+            'Spec Section #': [],
+            'item_type': [],
+            'Responsible Party': []
+        };
+        setFilterValues(emptyFilters);
+
+        setPagination({ currentPage: 1, pageSize: 50 });
+
+        try {
+            const orderBy = sorting.column ? fieldMapping[sorting.column] : 'created_at';
+
+            const clearedData = await handleFilteredLogData(
+                projectId,
+                logMessage.questionid,
+                emptyFilters,    
+                orderBy,
+                sorting.order,
+                searchValue,     
+                1,
+                50
+            );
+
+            if (clearedData) {
+                setLogMessage(prev => ({
+                    ...prev,
+                    data: clearedData.data,
+                    pagination: clearedData.pagination || null
+                }));
+            }
+        } catch (error) {
+            console.error('Error clearing filters:', error);
         }
     };
 
@@ -800,6 +841,7 @@ const LogViewer = ({
                                         exportLabel="Export to Excel"
                                         exportDisabled={logMessage?.log_status === 'PROCESSING'}
                                         exportDisabledTooltip="Can't export while generating new log"
+                                        onClearFilters={handleClearFilters}
                                         className="log-viewer-table"
                                     />
                                 );
