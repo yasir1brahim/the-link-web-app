@@ -528,7 +528,7 @@ const DocumentHighlighter = ({
             }
           }
 
-          onRefreshSectionContent();
+          await onRefreshSectionContent();
           handleCloseHighlightPicker();
         } else {
           // Handle regular highlights (non-submittal)
@@ -572,7 +572,8 @@ const DocumentHighlighter = ({
         }
       } catch (error) {
         console.error('Failed to create highlight:', error);
-        setHighlightError('Unable to create highlight. Please try again.');
+        const errorMessage = error.response?.data?.message || error.message || "Unable to create highlight. Please try again.";
+        setHighlightError(errorMessage);
       } finally {
         setIsSavingHighlight(false);
       }
@@ -673,6 +674,11 @@ const DocumentHighlighter = ({
       setSubmittalType('');
     } else {
       setSelectedHighlightType(option);
+      if (option.itemType !== "submittal") {
+        setSubmittalParaNo('');
+        setSubmittalDescription('');
+        setSubmittalType('');
+      }
     }
   }, [selectedHighlightType]);
 

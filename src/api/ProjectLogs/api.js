@@ -84,6 +84,7 @@ const addSubmittalItem = async (
         });
     } catch (error) {
         handleError(error);
+        throw error;
     }
 }
 
