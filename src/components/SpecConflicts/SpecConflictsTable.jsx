@@ -268,7 +268,7 @@ const SpecConflictsTable = ({
                 onClick={col.sortable ? () => handleSort(col.key) : undefined}
               >
                 <div className="th-content">
-                  <span>{col.header} {renderSortIcon(col.key)}</span>
+                  <span>{col.header} {col.sortable && renderSortIcon(col.key)}</span>
                   {col.filterable && filterOptions[col.key] && (
                     <span style={{ position: 'relative' }}>
                       <FilterListIcon
