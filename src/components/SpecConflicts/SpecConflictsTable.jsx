@@ -151,17 +151,110 @@ const SpecConflictsTable = ({
   ];
 
   const handleSort = (columnKey) => {
-    if (sortColumn === columnKey) {
-      onSort(columnKey, sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      onSort(columnKey, 'asc');
+    return;
+  };
+
+  const handleSortArrow = (columnKey, direction, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+   
+    if (!cycleRef.current) cycleRef.current = { column: null, count: 0, dir: null };
+
+    if (sortColumn !== columnKey) {
+      onSort(columnKey, direction);
+      cycleRef.current = { column: columnKey, count: 1, dir: direction };
+      return;
     }
+
+    if (sortDirection !== direction) {
+      onSort(columnKey, direction);
+      cycleRef.current = { column: columnKey, count: 1, dir: direction };
+      return;
+    }
+
+    if (cycleRef.current.count === 1) {
+      const opposite = direction === 'asc' ? 'desc' : 'asc';
+      onSort(columnKey, opposite);
+      cycleRef.current = { column: columnKey, count: 2, dir: opposite };
+      return;
+    }
+
+    onSort(null, 'asc');
+    cycleRef.current = { column: null, count: 0, dir: null };
   };
 
   const renderSortIcon = (columnKey) => {
-    if (sortColumn !== columnKey) return null;
-    return sortDirection === 'asc' ? '↑' : '↓';
+    const isActive = sortColumn === columnKey;
+    const upActive = isActive && sortDirection === 'asc';
+    const downActive = isActive && sortDirection === 'desc';
+    if (!isActive) {
+      return (
+        <span className="sort-arrows" aria-hidden="true">
+          <KeyboardArrowUpIcon
+            className={`sort-arrow up`}
+            onClick={(e) => handleSortArrow(columnKey, 'asc', e)}
+            title="Sort ascending"
+          />
+          <KeyboardArrowDownIcon
+            className={`sort-arrow down`}
+            onClick={(e) => handleSortArrow(columnKey, 'desc', e)}
+            title="Sort descending"
+          />
+        </span>
+      );
+    }
+
+    if (upActive) {
+      return (
+        <span className="sort-arrows" aria-hidden="true">
+          <KeyboardArrowUpIcon
+            className={`sort-arrow up active`}
+            onClick={(e) => handleSortArrow(columnKey, 'asc', e)}
+            title="Sort ascending (click again to reset)"
+          />
+        </span>
+      );
+    }
+
+    if (downActive) {
+      return (
+        <span className="sort-arrows" aria-hidden="true">
+          <KeyboardArrowDownIcon
+            className={`sort-arrow down active`}
+            onClick={(e) => handleSortArrow(columnKey, 'desc', e)}
+            title="Sort descending (click again to reset)"
+          />
+        </span>
+      );
+    }
+
+    return (
+      <span className="sort-arrows" aria-hidden="true">
+        <KeyboardArrowUpIcon
+          className={`sort-arrow up`}
+          onClick={(e) => handleSortArrow(columnKey, 'asc', e)}
+          title="Sort ascending"
+        />
+        <KeyboardArrowDownIcon
+          className={`sort-arrow down`}
+          onClick={(e) => handleSortArrow(columnKey, 'desc', e)}
+          title="Sort descending"
+        />
+      </span>
+    );
   };
+
+  const cycleRef = useRef({ column: null, count: 0, dir: null });
+
+  useEffect(() => {
+    if (!sortColumn) {
+      cycleRef.current = { column: null, count: 0, dir: null };
+      return;
+    }
+
+    if (cycleRef.current.column !== sortColumn || cycleRef.current.dir !== sortDirection) {
+      cycleRef.current = { column: sortColumn, count: 1, dir: sortDirection };
+    }
+  }, [sortColumn, sortDirection]);
 
   if (isLoading) {
     return (
@@ -172,7 +265,7 @@ const SpecConflictsTable = ({
   }
 
   if (conflicts.length === 0) {
-    return null; // Empty state handled by parent
+    return null; 
   }
 
   return (
