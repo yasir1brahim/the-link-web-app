@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useRef, useEffect } from 'react';
+import React, { Fragment, useState, useRef, useEffect, useLayoutEffect } from 'react';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -23,6 +23,16 @@ const SpecConflictsTable = ({
   const [openFilter, setOpenFilter] = useState(null);
   const filterRef = useRef(null);
 
+  // Overlay positioning — keeps ExpandedConflictRow in a stable DOM position
+  // while visually appearing inline with the expanded table row.
+  const containerRef = useRef(null);
+  const spacerRef = useRef(null);
+  const [overlayPos, setOverlayPos] = useState(null);
+
+  const selectedConflict = expandedRowId
+    ? conflicts.find((c) => c.id === expandedRowId)
+    : null;
+
   // Close filter on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -33,6 +43,38 @@ const SpecConflictsTable = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Position the persistent viewer overlay to cover the spacer row
+  useLayoutEffect(() => {
+    if (!spacerRef.current || !containerRef.current) {
+      setOverlayPos(null);
+      return;
+    }
+
+    const recalc = () => {
+      const spacer = spacerRef.current;
+      const container = containerRef.current;
+      if (!spacer || !container) return;
+
+      const spacerRect = spacer.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      setOverlayPos({
+        top: spacerRect.top - containerRect.top + container.scrollTop,
+        left: spacerRect.left - containerRect.left + container.scrollLeft,
+        width: spacerRect.width,
+        height: spacerRect.height,
+      });
+    };
+
+    recalc();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(recalc);
+      ro.observe(containerRef.current);
+      return () => ro.disconnect();
+    }
+  }, [expandedRowId, conflicts]);
 
   const handleFilterClick = (e, columnKey) => {
     e.stopPropagation(); // Prevent sort from triggering
@@ -109,17 +151,96 @@ const SpecConflictsTable = ({
   ];
 
   const handleSort = (columnKey) => {
-    if (sortColumn === columnKey) {
-      onSort(columnKey, sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      onSort(columnKey, 'asc');
+    // Clicking the header triggers ascending sort (or cycles if already sorted)
+    handleSortArrow(columnKey, 'asc', null);
+  };
+
+  const handleSortArrow = (columnKey, direction, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+
+    if (!cycleRef.current) cycleRef.current = { column: null, count: 0, dir: null };
+
+    if (sortColumn !== columnKey) {
+      onSort(columnKey, direction);
+      cycleRef.current = { column: columnKey, count: 1, dir: direction };
+      return;
     }
+
+    if (sortDirection !== direction) {
+      onSort(columnKey, direction);
+      cycleRef.current = { column: columnKey, count: 1, dir: direction };
+      return;
+    }
+
+    if (cycleRef.current.count === 1) {
+      const opposite = direction === 'asc' ? 'desc' : 'asc';
+      onSort(columnKey, opposite);
+      cycleRef.current = { column: columnKey, count: 2, dir: opposite };
+      return;
+    }
+
+    onSort(null, 'asc');
+    cycleRef.current = { column: null, count: 0, dir: null };
   };
 
   const renderSortIcon = (columnKey) => {
-    if (sortColumn !== columnKey) return null;
-    return sortDirection === 'asc' ? '↑' : '↓';
+    const isActive = sortColumn === columnKey;
+    const upActive = isActive && sortDirection === 'asc';
+    const downActive = isActive && sortDirection === 'desc';
+    if (!isActive) {
+      return (
+        <span className="sort-arrows" aria-hidden="true">
+          <KeyboardArrowUpIcon
+            className={`sort-arrow up`}
+            onClick={(e) => handleSortArrow(columnKey, 'asc', e)}
+            title="Sort ascending"
+          />
+          <KeyboardArrowDownIcon
+            className={`sort-arrow down`}
+            onClick={(e) => handleSortArrow(columnKey, 'desc', e)}
+            title="Sort descending"
+          />
+        </span>
+      );
+    }
+
+    if (upActive) {
+      return (
+        <span className="sort-arrows" aria-hidden="true">
+          <KeyboardArrowUpIcon
+            className={`sort-arrow up active`}
+            onClick={(e) => handleSortArrow(columnKey, 'asc', e)}
+            title="Sort ascending (click again to reset)"
+          />
+        </span>
+      );
+    }
+
+    if (downActive) {
+      return (
+        <span className="sort-arrows" aria-hidden="true">
+          <KeyboardArrowDownIcon
+            className={`sort-arrow down active`}
+            onClick={(e) => handleSortArrow(columnKey, 'desc', e)}
+            title="Sort descending (click again to reset)"
+          />
+        </span>
+      );
+    }
   };
+
+  const cycleRef = useRef({ column: null, count: 0, dir: null });
+
+  useEffect(() => {
+    if (!sortColumn) {
+      cycleRef.current = { column: null, count: 0, dir: null };
+      return;
+    }
+
+    if (cycleRef.current.column !== sortColumn || cycleRef.current.dir !== sortDirection) {
+      cycleRef.current = { column: sortColumn, count: 1, dir: sortDirection };
+    }
+  }, [sortColumn, sortDirection]);
 
   if (isLoading) {
     return (
@@ -130,11 +251,11 @@ const SpecConflictsTable = ({
   }
 
   if (conflicts.length === 0) {
-    return null; // Empty state handled by parent
+    return null;
   }
 
   return (
-    <div className="spec-conflicts-table-container">
+    <div className="spec-conflicts-table-container" ref={containerRef} style={{ position: 'relative' }}>
       <table className="spec-conflicts-table">
         <thead>
           <tr>
@@ -147,7 +268,7 @@ const SpecConflictsTable = ({
                 onClick={col.sortable ? () => handleSort(col.key) : undefined}
               >
                 <div className="th-content">
-                  <span>{col.header} {renderSortIcon(col.key)}</span>
+                  <span>{col.header} {col.sortable && renderSortIcon(col.key)}</span>
                   {col.filterable && filterOptions[col.key] && (
                     <span style={{ position: 'relative' }}>
                       <FilterListIcon
@@ -191,8 +312,9 @@ const SpecConflictsTable = ({
               </tr>
               {expandedRowId === conflict.id && (
                 <tr className="expanded-row">
-                  <td colSpan={columns.length + 1}>
-                    <ExpandedConflictRow conflict={conflict} />
+                  <td colSpan={columns.length + 1} ref={spacerRef}>
+                    {/* Height spacer — the real viewer lives in the overlay below */}
+                    <div style={{ height: 500 }} />
                   </td>
                 </tr>
               )}
@@ -200,6 +322,23 @@ const SpecConflictsTable = ({
           ))}
         </tbody>
       </table>
+
+      {/* Persistent viewer overlay — stays mounted across conflict switches so
+          WebViewer instances aren't destroyed/recreated when the file hasn't changed. */}
+      {selectedConflict && overlayPos && (
+        <div
+          style={{
+            position: 'absolute',
+            top: overlayPos.top,
+            left: overlayPos.left,
+            width: overlayPos.width,
+            height: overlayPos.height,
+            zIndex: 1,
+          }}
+        >
+          <ExpandedConflictRow conflict={selectedConflict} />
+        </div>
+      )}
     </div>
   );
 };

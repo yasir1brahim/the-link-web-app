@@ -32,6 +32,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  position: relative;
+  padding-right: 8px;
+}
+
+.spec-conflicts-table .th-content > span {
+  display: inline-block;
+  position: relative;
+  padding-right: 36px; 
 }
 
 .spec-conflicts-table .filter-icon {
@@ -103,4 +111,59 @@
   padding: 40px;
   text-align: center;
   color: #666;
+}
+
+
+.spec-conflicts-table .sort-arrows {
+  position: absolute;
+  right: 4px; 
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: center;
+  pointer-events: auto;
+  width: 20px;
+  min-width: 20px;
+  height: 32px; 
+  min-height: 32px;
+  flex-shrink: 0;
+  justify-content: center; 
+}
+
+.spec-conflicts-table .sort-arrow {
+  font-size: 18px;
+  cursor: pointer;
+  color: inherit;
+  line-height: 1;
+  display: block;
+  width: 100%;
+  text-align: center;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.spec-conflicts-table .sort-arrow svg {
+  pointer-events: none;
+}
+
+.spec-conflicts-table .sort-arrow:hover {
+  opacity: 0.8;
+}
+
+.spec-conflicts-table .sort-arrow.active {
+  color: #90caf9;
+  opacity: 1;
+}
+
+.spec-conflicts-table .sort-arrow.up,
+.spec-conflicts-table .sort-arrow.down {
+  transform: none;
+}
+
+.spec-conflicts-table .sort-arrow.down {
+  margin-top: -4px;
 }
