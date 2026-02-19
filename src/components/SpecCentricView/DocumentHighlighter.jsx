@@ -5,6 +5,7 @@ import {
   getUserHighlightPreference,
   setUserHighlightPreference,
 } from '../../api/SpecCentricView/api';
+import { addSubmittalItemFromHighlight } from '../../api/ProjectLogs/api';
 import {
   HIGHLIGHT_TYPES,
   formatCustomTypes,
@@ -159,7 +160,7 @@ const DocumentHighlighter = ({
   projectId = null,
   projectVersionId = null,
   specSection = null,
-  onRefreshSectionContent = () => {},
+  onRefreshSectionContent = () => { },
   customItemTypes = [],
   onCustomTypesUpdate,
 }) => {
@@ -249,12 +250,12 @@ const DocumentHighlighter = ({
   const [highlightError, setHighlightError] = useState(null);
   const [isSavingHighlight, setIsSavingHighlight] = useState(false);
   const [showCustomTypesManager, setShowCustomTypesManager] = useState(false);
-  const [lastUsedHighlightType, setLastUsedHighlightType] = useState(null);
-  const [isLoadingPreference, setIsLoadingPreference] = useState(false);
   const [selectedHighlightType, setSelectedHighlightType] = useState(null);
   const [submittalParaNo, setSubmittalParaNo] = useState('');
   const [submittalDescription, setSubmittalDescription] = useState('');
   const [submittalType, setSubmittalType] = useState('');
+  const [lastUsedHighlightType, setLastUsedHighlightType] = useState(null);
+  const [isLoadingPreference, setIsLoadingPreference] = useState(false);
 
   // Unified cache for ExtractedData items with notes support
   const [extractedDataItems, setExtractedDataItems] = useState([]);
@@ -300,7 +301,7 @@ const DocumentHighlighter = ({
         isCustom: true,
       };
     }),
-  [customItemTypes]
+    [customItemTypes]
   );
 
   useEffect(() => {
@@ -467,33 +468,97 @@ const DocumentHighlighter = ({
         setIsSavingHighlight(true);
         setHighlightError(null);
 
-        const payload = buildHighlightPayload({
-          projectId,
-          projectVersionId,
-          specSection,
-          option,
-          selectedText: pendingHighlight.selectedText,
-          locations: pendingHighlight.locations,
-        });
+        if (option.itemType === 'submittal') {
+          const trimmedDescription = submittalDescription?.trim() || '';
+          const trimmedType = submittalType?.trim() || '';
 
-        // Add note_text if provided
-        if (pendingNoteText.trim()) {
-          payload.note_text = pendingNoteText.trim();
-        }
+          if (!trimmedDescription) {
+            setHighlightError('Submittal Description is required');
+            setIsSavingHighlight(false);
+            return;
+          }
+          if (!trimmedType) {
+            setHighlightError('Submittal Type is required');
+            setIsSavingHighlight(false);
+            return;
+          }
+
+          const textLocation = pendingHighlight.locations[0] || null;
+          const additionalTextLocations = pendingHighlight.locations.length > 1
+            ? pendingHighlight.locations.slice(1)
+            : [];
+
+          const response = await addSubmittalItemFromHighlight(
+            projectId,
+            specSection.id,
+            submittalParaNo?.trim() || null, // para_no 
+            pendingHighlight.selectedText, // para_context 
+            trimmedDescription, // submittal_heading 
+            trimmedType, // submittal_type 
+            textLocation, // text_location for PDF highlighting
+            additionalTextLocations, // additional_text_locations for multi-page highlights
+            projectVersionId, // project_version
+            null // added_under_submittal_id
+          );
+
+          if (response?.data) {
+            const newSubmittal = response.data;
+            if (textLocation) {
+              const newHighlightLocations = [
+                {
+                  page_no: textLocation.page_no,
+                  x: textLocation.x,
+                  y: textLocation.y,
+                  width: textLocation.width,
+                  height: textLocation.height,
+                }
+              ];
+              if (additionalTextLocations && additionalTextLocations.length > 0) {
+                additionalTextLocations.forEach(loc => {
+                  newHighlightLocations.push({
+                    page_no: loc.page_no,
+                    x: loc.x,
+                    y: loc.y,
+                    width: loc.width,
+                    height: loc.height,
+                  });
+                });
+              }
+              setCurrentHighlights(prev => [...prev, ...newHighlightLocations]);
+            }
+          }
+
+          await onRefreshSectionContent();
+          handleCloseHighlightPicker();
+        } else {
+          // Handle regular highlights (non-submittal)
+          const payload = buildHighlightPayload({
+            projectId,
+            projectVersionId,
+            specSection,
+            option,
+            selectedText: pendingHighlight.selectedText,
+            locations: pendingHighlight.locations,
+          });
+
+          // Add note_text if provided
+          if (pendingNoteText.trim()) {
+            payload.note_text = pendingNoteText.trim();
+          }
 
           const response = await createManualHighlight(projectId, payload);
 
-        const createdHighlight = buildCreatedHighlight({
-          responseData: response?.data,
-          payload,
-          option,
-          selectedText: pendingHighlight.selectedText,
-          locations: pendingHighlight.locations,
-          customItemTypes,
-        });
+          const createdHighlight = buildCreatedHighlight({
+            responseData: response?.data,
+            payload,
+            option,
+            selectedText: pendingHighlight.selectedText,
+            locations: pendingHighlight.locations,
+            customItemTypes,
+          });
 
-        // Ensure notes array is included
-        createdHighlight.notes = response?.data?.notes || [];
+          // Ensure notes array is included
+          createdHighlight.notes = response?.data?.notes || [];
 
           // Update extractedDataItems cache with new highlight
           setExtractedDataItems(prev => [...prev, {
@@ -502,11 +567,13 @@ const DocumentHighlighter = ({
             pdf_locations: createdHighlight.pdf_locations || [],
           }]);
 
-        handleHighlightCreationSuccess(createdHighlight);
-        await saveHighlightPreference(option);
+          handleHighlightCreationSuccess(createdHighlight);
+          await saveHighlightPreference(option);
+        }
       } catch (error) {
         console.error('Failed to create highlight:', error);
-        setHighlightError('Unable to create highlight. Please try again.');
+        const errorMessage = error.response?.data?.message || error.message || "Unable to create highlight. Please try again.";
+        setHighlightError(errorMessage);
       } finally {
         setIsSavingHighlight(false);
       }
@@ -521,6 +588,10 @@ const DocumentHighlighter = ({
       projectVersionId,
       specSection,
       customItemTypes,
+      onRefreshSectionContent,
+      submittalDescription,
+      submittalType,
+      submittalParaNo,
       saveHighlightPreference,
     ]
   );
@@ -603,6 +674,11 @@ const DocumentHighlighter = ({
       setSubmittalType('');
     } else {
       setSelectedHighlightType(option);
+      if (option.itemType !== "submittal") {
+        setSubmittalParaNo('');
+        setSubmittalDescription('');
+        setSubmittalType('');
+      }
     }
   }, [selectedHighlightType]);
 
@@ -627,14 +703,14 @@ const DocumentHighlighter = ({
         highlightLocations={currentHighlights}
         aiLogHighlightLocations={currentAiLogHighlights}
         docId={documentId}
-        setPdfData={() => {}}
-        setSubmittalIdParam={() => {}}
-        handleAddNewRow={() => {}}
-        handleAppendToSelectedRow={() => {}}
-        setLogInViewer={() => {}}
+        setPdfData={() => { }}
+        setSubmittalIdParam={() => { }}
+        handleAddNewRow={() => { }}
+        handleAppendToSelectedRow={() => { }}
+        setLogInViewer={() => { }}
         loading={false}
-        setLoading={() => {}}
-        onError={() => {}}
+        setLoading={() => { }}
+        onError={() => { }}
         activeFilters={activeFilters}
         useFiltering={true}
         isSpecViewMode

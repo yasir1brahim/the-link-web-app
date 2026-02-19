@@ -273,9 +273,9 @@ const ProjectLogs = () => {
     setShowDocumentListModal(true);
   };
 
-  const fetchSpecSectionCount = async () => {
+  const fetchSpecSectionCount = async (versionId = projectVersionId) => {
     try {
-      const response = await getSpecSections(projectId, projectVersionId);
+      const response = await getSpecSections(projectId, versionId);
       const count = response.data?.total_sections || 0;
       setSpecSectionCount(count);
     } catch (error) {
@@ -570,11 +570,11 @@ const ProjectLogs = () => {
           // Fetch both in parallel for tabs that need submittal data
           await Promise.all([
             fetchLogData(1, rowsPerPage, null, null, null, null, null, activeVersion),
-            fetchSpecSectionCount()
+            fetchSpecSectionCount(activeVersion)
           ]);
         } else {
           // Only fetch spec section count for spec-view/drawings tabs
-          await fetchSpecSectionCount();
+          await fetchSpecSectionCount(activeVersion);
         }
         
       } catch (error) {

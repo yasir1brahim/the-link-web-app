@@ -68,12 +68,12 @@ const CompassProcessingBanner = ({ projectId, onProcessingTriggered }) => {
                     </svg>
                 </div>
                 <div className="banner-text">
-                    <strong>Compass Feature Now Available!</strong>
+                    <strong>Assistant Feature Now Available!</strong>
                     <p>
                         You have <strong>{processingStatus.unprocessed_document_count}</strong> document
                         {processingStatus.unprocessed_document_count !== 1 ? 's' : ''} that{' '}
                         {processingStatus.unprocessed_document_count !== 1 ? 'haven\'t' : 'hasn\'t'} been
-                        processed with Compass yet. Process them now to enable AI-powered document search
+                        processed yet. Process them now to enable AI-powered document search
                         and analysis in the Assistant tab.
                     </p>
                 </div>
