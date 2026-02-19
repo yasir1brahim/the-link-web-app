@@ -21,6 +21,7 @@ import SortableTable from '../../../../shared/SortableTable';
 import { generateExportFilename } from '../../../../../utils/exportUtils';
 import FileDownload from 'js-file-download';
 import QAPlannerTimeoutModal from '../QAPlannerTimeoutModal';
+import ProcessingBanner from '../../../../shared/ProcessingBanner/ProcessingBanner';
 
 const LogViewer = ({ 
     projectId, 
@@ -773,8 +774,14 @@ const LogViewer = ({
             <Box w="100%" h="100%" bg="white" minW={0} overflow="hidden">
                 {logMessage ? (
                     <Box p={6} h="100%" overflowY="auto">
+                        {/* QA Planner Processing Banner */}
+                        {logType === 'qa_planner' && logMessage?.log_status === 'PROCESSING' && (
+                          <ProcessingBanner message="QA Planner still processing..." />
+                        )}
+
                         {(() => {
                             const shouldShowTable = logMessage.data_format === 'structured';
+                            const isProcessing = logType === 'qa_planner' && logMessage?.log_status === 'PROCESSING';
                             
                             if (shouldShowTable) {
 
