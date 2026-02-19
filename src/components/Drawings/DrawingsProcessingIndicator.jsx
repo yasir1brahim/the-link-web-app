@@ -1,4 +1,5 @@
 import React from "react";
+import ProcessingBanner from "../shared/ProcessingBanner/ProcessingBanner";
 
 const DrawingsProcessingIndicator = ({ processingStatus }) => {
   if (!processingStatus) return null;
@@ -23,15 +24,7 @@ const DrawingsProcessingIndicator = ({ processingStatus }) => {
     );
   }
 
-  return (
-    <div className="drawings-processing-indicator">
-      <div className="drawings-processing-spinner" />
-      <span>
-        Processing {files_completed} of {totalFiles} drawing file
-        {totalFiles > 1 ? "s" : ""}...
-      </span>
-    </div>
-  );
+  return <ProcessingBanner message="Still processing..." />;
 };
 
 export default DrawingsProcessingIndicator;
